@@ -1,3 +1,13 @@
+/*
+ * 项目名: AndroidProject
+ * 类名: LoginActivity.java
+ * 包名: com.intellij.copyright.JavaCopyrightVariablesProvider$1@a563d04,qualifiedClassName
+ * 作者 : Zhs (xiaoyang_02@qq.com)
+ * 当前修改时间 : 2023年07月05日 19:07:17
+ * 上次修改时间: 2023年07月05日 17:23:50
+ * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
+ */
+
 package run.yigou.gxzy.ui.activity;
 
 import android.animation.AnimatorSet;
@@ -171,23 +181,24 @@ public final class LoginActivity extends AppActivity
             // 隐藏软键盘
             hideKeyboard(getCurrentFocus());
 
-            if (true) {
-                mCommitView.showProgress();
-                postDelayed(() -> {
-                    mCommitView.showSucceed();
-                    postDelayed(() -> {
-                        HomeActivity.start(getContext(), MineFragment.class);
-                        finish();
-                    }, 1000);
-                }, 2000);
-                return;
-            }
+//            if (true) {
+//                mCommitView.showProgress();
+//                postDelayed(() -> {
+//                    mCommitView.showSucceed();
+//                    postDelayed(() -> {
+//                        HomeActivity.start(getContext(), MineFragment.class);
+//                        finish();
+//                    }, 1000);
+//                }, 2000);
+//                return;
+//            }
 
             EasyHttp.post(this)
                     .api(new LoginApi()
                             .setPhone(mPhoneView.getText().toString())
                             .setPassword(mPasswordView.getText().toString()))
-                    .request(new HttpCallback<HttpData<LoginApi.Bean>>(this) {
+                    .request(new HttpCallback<HttpData<LoginApi.Bean>>(this)
+                    {
 
                         @Override
                         public void onStart(Call call) {

@@ -1,3 +1,13 @@
+/*
+ * 项目名: AndroidProject
+ * 类名: HomeFragment.java
+ * 包名: run.yigou.gxzy.ui.fragment.HomeFragment
+ * 作者 : Zhs (xiaoyang_02@qq.com)
+ * 当前修改时间 : 2023年07月05日 23:27:44
+ * 上次修改时间: 2023年07月05日 17:23:50
+ * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
+ */
+
 package run.yigou.gxzy.ui.fragment;
 
 import android.annotation.SuppressLint;
@@ -12,18 +22,26 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.FragmentPagerAdapter;
+import com.hjq.http.EasyHttp;
+import com.hjq.http.listener.HttpCallback;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;
+import run.yigou.gxzy.http.api.BookInfoNav;
+import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.adapter.TabAdapter;
 import run.yigou.gxzy.widget.XCollapsingToolbarLayout;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2018/10/18
- *    desc   : 首页 Fragment
+ * author : Android 轮子哥
+ * github : https://github.com/getActivity/AndroidProject
+ * time   : 2018/10/18
+ * desc   : 首页 Fragment
  */
 public final class HomeFragment extends TitleBarFragment<HomeActivity>
         implements TabAdapter.OnTabListener, ViewPager.OnPageChangeListener,
@@ -35,7 +53,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     private TextView mAddressView;
     private TextView mHintView;
     private AppCompatImageView mSearchView;
-
+    private List<BookInfoNav.Bean> bookNavList;
     private RecyclerView mTabView;
     private ViewPager mViewPager;
 
@@ -64,8 +82,9 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mViewPager = findViewById(R.id.vp_home_pager);
 
         mPagerAdapter = new FragmentPagerAdapter<>(this);
-        mPagerAdapter.addFragment(StatusFragment.newInstance(), "列表演示");
-        mPagerAdapter.addFragment(BrowserFragment.newInstance("https://github.com/getActivity"), "网页演示");
+
+
+        //mPagerAdapter.addFragment(BrowserFragment.newInstance("https://github.com/getActivity"), "网页演示");
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.addOnPageChangeListener(this);
 
@@ -81,9 +100,29 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
     @Override
     protected void initData() {
-        mTabAdapter.addItem("列表演示");
-        mTabAdapter.addItem("网页演示");
+        getBookInfoList();
+       // mTabAdapter.addItem("网页演示");
         mTabAdapter.setOnTabListener(this);
+    }
+
+    private void getBookInfoList() {
+        EasyHttp.get(this)
+                .api(new BookInfoNav())
+                .request(new HttpCallback<HttpData<List<BookInfoNav.Bean>>>(this) {
+
+                    @Override
+                    public void onSucceed(HttpData<List<BookInfoNav.Bean>> data) {
+                        if (data.getData().size() > 0){
+                            bookNavList = data.getData();
+                            for (BookInfoNav.Bean nav :bookNavList){
+                                mPagerAdapter.addFragment(BookInfoFragment.newInstance(nav.getNavList()), nav.getName());
+                                mTabAdapter.addItem(nav.getName());
+                            }
+                        }
+                        else
+                            bookNavList = new ArrayList<>();
+                    }
+                });
     }
 
     @Override
@@ -112,7 +151,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
      */
 
     @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+    }
 
     @Override
     public void onPageSelected(int position) {
@@ -123,11 +163,12 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     }
 
     @Override
-    public void onPageScrollStateChanged(int state) {}
+    public void onPageScrollStateChanged(int state) {
+    }
 
     /**
      * CollapsingToolbarLayout 渐变回调
-     *
+     * <p>
      * {@link XCollapsingToolbarLayout.OnScrimsListener}
      */
     @SuppressLint("RestrictedApi")
