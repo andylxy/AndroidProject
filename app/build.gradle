@@ -99,6 +99,10 @@ android {
             }
         }
     }
+    sourceSets.main {
+        jni.srcDirs = []
+        jniLibs.srcDir "libs/"
+    }
 
     packagingOptions {
         // 剔除这个包下的所有文件（不会移除签名信息）

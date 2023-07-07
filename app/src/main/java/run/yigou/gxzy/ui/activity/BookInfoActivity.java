@@ -110,7 +110,7 @@ public final class BookInfoActivity extends AppActivity {
         switch (viewId) {
             case R.id.btn_read_book:
                 toast("开始阅读");
-               // BookReadActivity.start(getActivity(),mNavItem);
+                BookReadActivity.start(getActivity(),mNavItem);
                 break;
             case R.id.btn_add_bookcase:
                 toast( btnAddBookcase.getText());

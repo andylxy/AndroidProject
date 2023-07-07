@@ -55,11 +55,12 @@ import timber.log.Timber;
  *    desc   : 应用入口
  */
 public final class AppApplication extends Application {
-
+    public static AppApplication application;
     @Log("启动耗时")
     @Override
     public void onCreate() {
         super.onCreate();
+        application=this;
         initSdk(this);
     }
 
