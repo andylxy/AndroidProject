@@ -75,6 +75,18 @@
 
         </activity>
 
+        <!-- 书本信息 -->
+        <activity
+            android:name=".ui.activity.BookInfoActivity"
+            android:label="@string/book_data_title"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+        <!-- 阅读内容 -->
+        <activity
+            android:name=".ui.activity.BookReadActivity"
+            android:label="@string/book_data_content"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
         <!-- 引导页 -->
         <activity
             android:name=".ui.activity.GuideActivity"

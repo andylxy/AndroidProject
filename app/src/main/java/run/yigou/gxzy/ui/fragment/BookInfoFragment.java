@@ -21,23 +21,22 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.api.BookInfoNav;
-import run.yigou.gxzy.ui.adapter.StatusAdapter;
+import run.yigou.gxzy.ui.activity.BookInfoActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
 
 /**
- *  作者:  zhs
- *  时间:  2023-07-06 09:57:46
- *  包名:  run.yigou.gxzy.ui.fragment
- *  类名:  BookInfoFragment
- *  版本:  1.0
- *  描述:
+ * 作者:  zhs
+ * 时间:  2023-07-06 09:57:46
+ * 包名:  run.yigou.gxzy.ui.fragment
+ * 类名:  BookInfoFragment
+ * 版本:  1.0
+ * 描述:
  **/
 public final class BookInfoFragment extends TitleBarFragment<AppActivity>
         implements OnRefreshLoadMoreListener,
@@ -46,14 +45,14 @@ public final class BookInfoFragment extends TitleBarFragment<AppActivity>
     public static BookInfoFragment newInstance() {
         return new BookInfoFragment();
     }
-    public static BookInfoFragment newInstance(List<BookInfoNav.Bean.NavList> navList) {
-        //if(navList.size()>0)
-        BookInfoFragment  bookInfoFragment = new BookInfoFragment();
-        bookInfoFragment.mNavList=navList;
-          //  else mNavList= new ArrayList<>();
+
+    public static BookInfoFragment newInstance(List<BookInfoNav.Bean.NavItem> navList) {
+        BookInfoFragment bookInfoFragment = new BookInfoFragment();
+        bookInfoFragment.mNavList = navList;
         return bookInfoFragment;
     }
-    private  List<BookInfoNav.Bean.NavList> mNavList ;
+
+    private List<BookInfoNav.Bean.NavItem> mNavList;
     private SmartRefreshLayout mRefreshLayout;
     private WrapRecyclerView mRecyclerView;
 
@@ -71,7 +70,7 @@ public final class BookInfoFragment extends TitleBarFragment<AppActivity>
         mAdapter = new BookInfoAdapter(getAttachActivity());
         mAdapter.setOnItemClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
-       mRefreshLayout.setOnRefreshLoadMoreListener(this);
+        mRefreshLayout.setOnRefreshLoadMoreListener(this);
         //表示禁用上拉加载更多功能。
         mRefreshLayout.setEnableLoadMore(false);
         // 禁用下拉刷新
@@ -80,14 +79,14 @@ public final class BookInfoFragment extends TitleBarFragment<AppActivity>
 
     @Override
     protected void initData() {
-       // List<BookInfoNav.Bean.NavList> navList =mNavList;
-        mAdapter.setData(analogData() );
+        // List<BookInfoNav.Bean.NavList> navList =mNavList;
+        mAdapter.setData(analogData());
     }
 
     /**
      * 模拟数据
      */
-    private  List<BookInfoNav.Bean.NavList>  analogData() {
+    private List<BookInfoNav.Bean.NavItem> analogData() {
 //        List<String> data = new ArrayList<>();
 //        for (int i = mAdapter.getCount(); i < mAdapter.getCount() + 20; i++) {
 //            data.add("我是第" + i + "条目");
@@ -98,15 +97,16 @@ public final class BookInfoFragment extends TitleBarFragment<AppActivity>
     /**
      * {@link BaseAdapter.OnItemClickListener}
      *
-     * @param recyclerView      RecyclerView对象
-     * @param itemView          被点击的条目对象
-     * @param position          被点击的条目位置
+     * @param recyclerView RecyclerView对象
+     * @param itemView     被点击的条目对象
+     * @param position     被点击的条目位置
      */
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
 
         //启动跳转
-        toast(mAdapter.getItem(position));
+        //toast(mAdapter.getItem(position));
+        BookInfoActivity.start(getAttachActivity(),mAdapter.getItem(position) );
 
     }
 
@@ -126,7 +126,7 @@ public final class BookInfoFragment extends TitleBarFragment<AppActivity>
 
     @Override
     public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-            postDelayed(() -> {
+        postDelayed(() -> {
             mAdapter.addData(analogData());
             mRefreshLayout.finishLoadMore();
 

@@ -34,7 +34,7 @@ import run.yigou.gxzy.other.AppConfig;
  * 版本:  1.0
  * 描述:
  */
-public final class BookInfoAdapter extends AppAdapter<BookInfoNav.Bean.NavList> {
+public final class BookInfoAdapter extends AppAdapter<BookInfoNav.Bean.NavItem> {
 
     public BookInfoAdapter(Context context) {
         super(context);
@@ -45,22 +45,9 @@ public final class BookInfoAdapter extends AppAdapter<BookInfoNav.Bean.NavList> 
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder();
     }
-
-    //    private void initView(final int position, final ViewHolder holder) {
-//        Book book = mDatas.get(position);
-//        holder.binding.tvBookName.setText(book.getName());
-//        holder.binding.tvBookAuthor.setText(book.getAuthor());
-//        holder.binding.tvBookDesc.setText("");
-//        holder.binding.tvBookName.setTag(position);//设置列表书的当前加载位置
-//        if (StringHelper.isEmpty(book.getImgUrl())){
-//            getBookInfo(position,holder,book);
-//        }else{
-//            initImgAndDec(position,holder);
-//        }
-//    }
     private final class ViewHolder extends AppAdapter<?>.ViewHolder {
 
-        List<BookInfoNav.Bean.NavList> mList = getData();
+        List<BookInfoNav.Bean.NavItem> mList = getData();
        // private final TextView mTextView;
         private final TextView tvBookName;
         private final TextView tvBookAuthor;
@@ -82,8 +69,7 @@ public final class BookInfoAdapter extends AppAdapter<BookInfoNav.Bean.NavList> 
         @Override
         public void onBindView(int position) {
             //mTextView.setText(getItem(position));
-
-            BookInfoNav.Bean.NavList item =   mList.get(position);
+            BookInfoNav.Bean.NavItem item =   mList.get(position);
             tvBookName.setText(item.getBookName());
             tvBookAuthor.setText(item.getAuthor());
             tvBookDesc.setText("     " + (item.getDesc() == null ?"":item.getDesc()));

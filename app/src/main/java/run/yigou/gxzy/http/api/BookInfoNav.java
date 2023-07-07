@@ -12,6 +12,7 @@ package run.yigou.gxzy.http.api;
 
 import com.hjq.http.config.IRequestApi;
 
+import java.io.Serializable;
 import java.util.List;
 
 
@@ -36,7 +37,7 @@ public final class BookInfoNav implements IRequestApi {
     public final static class Bean {
        private int Id ;
        private String Name ;
-       private List<NavList> NavList ;
+       private List<NavItem> NavList ;
 
         public int getId() {
             return Id;
@@ -46,11 +47,11 @@ public final class BookInfoNav implements IRequestApi {
             return Name;
         }
 
-        public List<Bean.NavList> getNavList() {
+        public List<NavItem> getNavList() {
             return NavList;
         }
 
-        public final static class  NavList{
+        public final static class NavItem implements Serializable {
         private int   Id ;
         private String   ImageUrl ;
         private String BookName;

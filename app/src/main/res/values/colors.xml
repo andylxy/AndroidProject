@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--    框架自带    start-->
     <!-- App 样式中引用的颜色 -->
     <color name="common_primary_color">@color/white</color>
     <color name="common_primary_dark_color">@color/black</color>
@@ -21,5 +22,220 @@
     <color name="common_confirm_text_color">#007AFF</color>
     <!-- 对话框取消按钮的文本颜色 -->
     <color name="common_cancel_text_color">#F44336</color>
+    <!--    框架自带    end -->
+
+    <!--    自定义-->
+    <color name="colorPrimary">@color/blue_bar</color>
+    <color name="colorPrimaryDark">#3F51B5</color>
+    <color name="colorAccent">#90cbf6</color>
+    <color name="search_origin">#ffef9903</color>
+    <!--界面底色-->
+    <color name="colorBackground">@color/md_grey_100</color>
+    <!--界面前景色-->
+    <color name="colorForeground">@color/md_white_1000</color>
+    <!-- 分割线颜色-->
+    <color name="colorDivider">#ffe0e0e0</color>
+
+    <color name="background_card">#dedede</color>
+    <!--text-->
+    <!--用于重要级文字信息，如标题，子模块功能文字等-->
+    <color name="textPrimary">#d9ffffff</color>
+    <!--用于普通级信息-->
+    <color name="textSecondary">#757575</color>
+    <!--用于普通级信息、引导词,如昵正文、弹层文案、查看更多之类-->
+    <color name="textAssist">#9e9e9e</color>
+    <!--用于辅助、次要的文字信息、普通按钮描边,如时间、来自等补充信息文案-->
+    <color name="textAssistSecondary">#B0B0B0</color>
+    <color name="textPrimaryInverted">#ffffff</color>
+    <color name="textSecondaryInverted">#c8ffffff</color>
+    <color name="textAssistInverted">#8affffff</color>
+
+    <color name="textError">#ffe7492e</color>
+    <color name="textTranslucent">#96ffffff</color>
+    <color name="transparent30">#30000000</color>
+    <!--menu-->
+    <color name="menu_color_default">#383838</color>
+    <color name="background_menu">#fcfcfc</color>
+    <!--list-->
+
+    <!--通用分割线-->
+    <color name="divider">#727272</color>
+    <color name="divider_dash">@color/colorDivider</color>
+    <!--通用分割线细-->
+    <color name="divider_narrow">@color/colorDivider</color>
+    <!--通用分割线粗-->
+    <color name="divider_wide">@color/colorDivider</color>
+
+    <color name="btn_bg_press_2">#80858585</color>
+
+    <!--scroll-->
+    <color name="scroll_refresh_tip">#88303F9F</color>
+
+    <!--downlaod-->
+    <color name="download_loading">#8bd715</color>
+    <color name="download_pause">#f3aa41</color>
+    <color name="download_wait">#afafad</color>
+    <color name="download_error">#e33a35</color>
+    <color name="download_finish">#8bd715</color>
+
+    <!--read-->
+    <color name="read_bg_night">#000000</color>
+    <color name="read_font_night">#99ffffff</color>
+
+    <color name="read_menu_bg">#191919</color>
+    <color name="read_menu_text">#CBCBCB</color>
+    <color name="read_bar_translucent">#88000000</color>
+
+    <!--button-->
+    <color name="widget_button_normal">@color/colorForeground</color>
+    <color name="widget_button_selected">@color/colorBackground</color>
+
+    <!--  书籍更新强调色  -->
+    <color name="highlight">@color/colorAccent</color>
+    <color name="darker_gray">#aaaaaaaa</color>
+
+    <!-- 黑色 -->
+    <color name="black">#000000</color>
+    <color name="gray">#808080</color>
+    <color name="little_gray">#b8b8b8</color>
+    <color name="title_black">#585858</color>
+    <color name="btn_black">#454444</color>
+    <!--    白色-->
+    <color name="md_white_1000">#FFFFFF</color>
+    <!-- 灰色 -->
+
+    <color name="grey">#808080</color>
+    <color name="md_grey_100">#F5F5F5</color>
+    <!-- 灰色 -->
+
+
+    <color name="green">#008000</color>
+
+    <!-- 绿色 -->
+
+    <color name="darkgreen">#006400</color>
+
+    <!-- 暗绿色 -->
+
+    <color name="blue">#0000FF</color>
+
+    <!-- 蓝色 -->
+
+    <color name="white">#FFFFFF</color>
+
+    <color name="little_blue">#9393fe</color>
+
+    <color name="deep_blue">#18188a</color>
+    <color name="blue_bar">#FF2196F3</color>
+
+    <!-- 浅蓝色 -->
+
+    <color name="little_black_white">#bebebe</color>
+
+    <color name="light_blue">#a1b5ff</color>
+
+    <color name="line">#E5E5E5</color>
+
+    <color name="little_grey">#f1f1f1</color>
+
+    <color name="origin">#ff9602</color>
+
+    <!-- 透明 -->
+    <color name="nothing">#00000000</color>
+    <!-- 半透明 -->
+    <color name="translucent">#556495ED</color>
+
+
+    <color name="sys_color">#338fcf</color>
+    <!--<color name="sys_color"> #0056ad</color>-->
+    <color name="sys_word_blue">#004284</color>
+    <color name="sys_blue">#0056ad</color>
+    <color name="sys_blue2">#045ca9</color>
+    <color name="sys_blue3">#023b93</color>
+    <color name="sys_blue4">#338fcf</color>
+    <color name="sys_blue_deep">#002f77</color>
+    <color name="sys_blue_line">#3c75cc</color>
+
+    <color name="sys_lv_driver">#f5f5f5</color>
+    <color name="sys_red">#c30409</color>
+    <color name="sys_red2">#c30409</color>+
+
+    <color name="sys_line">#cccccc</color>
+    <color name="sys_word_little">#666666</color>
+    <color name="sys_word_very_little">#b4b4b4</color>
+    <color name="sys_word_deep">#454545</color>
+    <color name="sys_gray">#f5f5f5</color>
+    <color name="sys_word_edit">#333333</color>
+    <color name="sys_blue_little">#338fcf</color>
+    <color name="sys_blue_little_deep">#0062ff</color>
+    <color name="sys_blue_very_little">#80c0ec</color>
+    <color name="sys_blue_very_little_translucent">#883571a4</color>
+    <color name="sys_origin">#ef9903</color>
+    <color name="sys_word_email_receive">#338ccf</color>
+    <color name="sys_word_noselect">#a3d4f5</color>
+    <color name="menu_item_click_color">#346fc3</color>
+    <color name="sys_bg">#eaeaea</color>
+    <color name="sys_bg2">#f5f5f5</color>
+    <color name="sys_pink">#fe7676</color>
+
+
+    <color name="sys_voice_view">#a0454545</color>
+    <color name="sys_translucent">#33000000</color>
+
+    <color name="sys_window_back">#aab4b4b4</color>
+
+    <color name="sys_translucent_white">#aaffffff</color>
+
+
+    <color name="sys_home_tab_select">#ef7542</color>
+
+
+    <color name="sys_protect_eye_bg">#ceebce</color>
+    <color name="sys_protect_eye_word">#313031</color>
+
+    <color name="sys_common_bg">#f5f4f0</color>
+    <color name="sys_common_word">#313031</color>
+
+    <!--<color name="sys_leather_eye_bg">#ceebce</color>-->
+    <color name="sys_leather_word">#313031</color>
+
+    <color name="sys_blue_deep_bg">#001c29</color>
+    <color name="sys_blue_deep_word">#637079</color>
+
+    <color name="sys_breen_bg">#b5bd9a</color>
+    <color name="sys_breen_word">#313031</color>
+
+    <color name="sys_night_bg">#393431</color>
+    <color name="sys_night_word">#94928c</color>
+
+    <color name="sys_dialog_setting_bg">#292c29</color>
+    <color name="sys_dialog_setting_line">#393839</color>
+    <color name="sys_dialog_setting_word">#636563</color>
+    <color name="sys_dialog_setting_word_red">#e8554d</color>
+    <color name="sys_dialog_setting_word_bright">#d6d7d6</color>
+
+
+    <color name="sys_suggest_line">#d6d7d6</color>
+
+
+    <color name="sys_font_example_word">#9b9a9c</color>
+    <color name="sys_font_example_bg">#adaaad</color>
+
+    <color name="sys_font_using_btn">#9c9a9c</color>
+    <color name="sys_font_use_btn">#31cf4a</color>
+
+    <color name="sys_book_type_bg">#F7F7F7</color>
+
+    <color name="sys_refresh_bg">#E9E9E9</color>
+
+    <color name="sys_refresh_main">#353535</color>
+
+    <!--    Toast颜色   -->
+    <color name="toast_default">#FFABD3EC</color>
+    <color name="toast_green">#FFAFE3B2</color>
+    <color name="toast_blue">#FF87CEFA</color>
+    <color name="toast_yellow">#FFFFE284</color>
+    <color name="toast_red">#FFE75B76</color>
+
 
 </resources>

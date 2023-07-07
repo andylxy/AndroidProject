@@ -255,4 +255,7 @@
     <string name="camera_launch_fail">无法启动相机</string>
     <string name="camera_image_error">目标地址错误</string>
 
+    <!-- 书本信息 -->
+    <string name="book_data_title">书本信息</string>
+    <string name="book_data_content">阅读内容</string>
 </resources>
