@@ -26,15 +26,6 @@ import run.yigou.gxzy.other.AppConfig;
  */
 public final class BookInfoActivity extends AppActivity {
     private static final String Book_KEY_IN = "book";
-
-    public BookInfoNav.Bean.NavItem getNavItem() {
-        return mNavItem;
-    }
-
-    public void setNavItem(BookInfoNav.Bean.NavItem item) {
-        this.mNavItem = item;
-    }
-
     private BookInfoNav.Bean.NavItem mNavItem;
 
     public static void start(Context context, BookInfoNav.Bean.NavItem item) {
@@ -60,7 +51,7 @@ public final class BookInfoActivity extends AppActivity {
 
     @Override
     protected void initData() {
-        setNavItem(getSerializable(Book_KEY_IN));
+       mNavItem= getSerializable(Book_KEY_IN);
         tvBookAuthor.setText(mNavItem.getAuthor());
 
         tvTvBookName.setText(mNavItem.getBookName());

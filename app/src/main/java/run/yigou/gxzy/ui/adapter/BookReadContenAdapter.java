@@ -33,10 +33,10 @@ public final class BookReadContenAdapter extends AppAdapter<String> {
         super(context);
     }
 
-    @Override
-    public int getItemCount() {
-        return 10;
-    }
+//    @Override
+//    public int getItemCount() {
+//        return 1;
+//    }
 
     @NonNull
     @Override
