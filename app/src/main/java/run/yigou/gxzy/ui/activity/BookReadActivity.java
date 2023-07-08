@@ -1,35 +1,41 @@
 package run.yigou.gxzy.ui.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.text.TextUtils;
+import android.os.Handler;
+import android.os.Message;
 import android.util.DisplayMetrics;
-import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.common.APPCONST;
+import run.yigou.gxzy.common.Language;
+import run.yigou.gxzy.common.ReadStyle;
 import run.yigou.gxzy.common.Setting;
 import run.yigou.gxzy.common.SysManager;
+import run.yigou.gxzy.creator.DialogCreator;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.ui.adapter.BookReadContenAdapter;
 import run.yigou.gxzy.ui.adapter.ChapterTitleAdapter;
 import run.yigou.gxzy.utils.BrightUtil;
+import run.yigou.gxzy.utils.DateHelper;
+
 
 /**
  * 作者:  zhs
@@ -61,10 +67,75 @@ public final class BookReadActivity extends AppActivity {
     private LinearLayout mLlChapterListView;
     private BookReadContenAdapter mBookReadContenAdapter;
     private ChapterTitleAdapter mChapterTitleAdapter;
+    private LinearLayoutManager mLinearLayoutManager;
     public float width = 0;
     public float height = 0;
     private float settingOnClickValidFrom;
     private float settingOnClickValidTo;
+    private float pointX;
+    private float pointY;
+    private float scrolledX;
+    private float scrolledY;
+    private boolean autoScrollOpening = false;//是否开启自动滑动
+    private long lastOnClickTime;//上次点击时间
+    private long doubleOnClickConfirmTime = 200;//双击确认时间
+
+    private Dialog mSettingDialog;//设置视图
+    private Dialog mSettingDetailDialog;//详细设置视图
+
+
+    @SuppressLint("HandlerLeak")
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 1:
+                    init();
+                    break;
+                case 2:
+                    mPbLoading.setVisibility(View.GONE);
+                    mSrlContent.finishLoadMore();
+                    break;
+                case 3:
+                    int position = msg.arg1;
+                    mRvContent.scrollToPosition(position);
+//                    if (position >= mChapters.size() - 1) {
+//                        delayTurnToChapter(position);
+//                    }
+                    mPbLoading.setVisibility(View.GONE);
+                    break;
+                case 4:
+                    position = msg.arg1;
+                    mRvContent.scrollToPosition(position);
+//                    if (mBook.getHisttoryChapterNum() < position) {
+//                        delayTurnToChapter(position);
+//                    }
+                    mPbLoading.setVisibility(View.GONE);
+                    break;
+                case 5:
+                    //saveLastChapterReadPosition(msg.arg1);
+                    break;
+                case 6:
+//                    mRvContent.scrollBy(0, mBook.getLastReadPosition());
+//                    mBook.setLastReadPosition(0);
+//                    if (!StringHelper.isEmpty(mBook.getId())) {
+//                        mBookService.updateEntity(mBook);
+//                    }
+                    break;
+                case 7:
+//                    if (mLinearLayoutManager != null) {
+//                        mRvContent.scrollBy(0, 2);
+//                    }
+                    break;
+                case 8:
+                    showSettingView();
+                    break;
+                case 9:
+                    //updateDownloadProgress((TextView) msg.obj);
+                    break;
+            }
+        }
+    };
 
     public static void start(Context context, BookInfoNav.Bean.NavItem item) {
         Intent intent = new Intent(context, BookReadActivity.class);
@@ -212,7 +283,253 @@ public final class BookReadActivity extends AppActivity {
             }
         });
 
+        initReadViewOnClick();
+    }
+    /**
+     * 显示设置视图
+     */
+    private void showSettingView() {
+        autoScrollOpening = false;
+        if (mSettingDialog != null) {
+            mSettingDialog.show();
+        } else {
+            int progress = 100;
+//            if (mChapters.size() != 1) {
+//                progress = mLinearLayoutManager.findLastVisibleItemPosition() * 100 / (mChapters.size() - 1);
+//            }
 
+            //缓存整本
+            mSettingDialog = DialogCreator.createReadSetting(getActivity(), mSetting.isDayStyle(), progress, view -> {//返回
+                        getActivity().finish();
+                    }, view -> {//上一章
+//                            int curPosition = mReadActivity.getLvContent().getLastVisiblePosition();
+                        int curPosition = mLinearLayoutManager.findLastVisibleItemPosition();
+                        if (curPosition > 0) {
+                            mRvContent.scrollToPosition(curPosition - 1);
+                        }
+                    }, view -> {//下一章
+//                            int curPosition = mReadActivity.getLvContent().getLastVisiblePosition();
+                        int curPosition = mLinearLayoutManager.findLastVisibleItemPosition();
+//                        if (curPosition < mChapters.size() - 1) {
+//                            mRvContent.scrollToPosition(curPosition + 1);
+//                            delayTurnToChapter(curPosition + 1);
+//                        }
+                    }, view -> {//目录
+                       // initChapterTitleList();
+                        mDlReadActivity.openDrawer(GravityCompat.START);
+                        mSettingDialog.dismiss();
+
+                    }, (dialog, view, isDayStyle) -> {//日夜切换
+
+                       // changeNightAndDaySetting(isDayStyle);
+                    }, view -> {//设置
+                        showSettingDetailView();
+                    }, new SeekBar.OnSeekBarChangeListener() {//阅读进度
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                            mPbLoading.setVisibility(View.VISIBLE);
+//
+//                            final int chapterNum = (mChapters.size() - 1) * i / 100;
+//                            getChapterContent(mChapters.get(chapterNum), new ResultCallback() {
+//                                @Override
+//                                public void onFinish(Object o, int code) {
+//                                    mChapters.get(chapterNum).setContent((String) o);
+//                                    mChapterService.saveOrUpdateChapter(mChapters.get(chapterNum));
+//                                    mHandler.sendMessage(mHandler.obtainMessage(4, chapterNum, 0));
+//                                }
+//
+//                                @Override
+//                                public void onError(Exception e) {
+//                                    mHandler.sendMessage(mHandler.obtainMessage(1));
+//                                }
+//                            });
+
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+
+                        }
+                    }
+                    , null, (dialog, view, tvDownloadProgress) -> {
+//                        if (StringHelper.isEmpty(mBook.getId())) {
+//                            addBookToCaseAndDownload(tvDownloadProgress);
+//                        } else {
+//                            getAllChapterData(tvDownloadProgress);
+//                        }
+
+                    });
+        }
+
+    }
+    /**
+     * 显示详细设置视图
+     */
+    private void showSettingDetailView() {
+        mSettingDialog.dismiss();
+        if (mSettingDetailDialog != null) {
+            mSettingDetailDialog.show();
+        } else {
+            mSettingDetailDialog = DialogCreator.createReadDetailSetting(getActivity(), mSetting,
+                    readStyle -> changeStyle(readStyle), v -> reduceTextSize(), v -> increaseTextSize(), v -> {
+                        if (mSetting.getLanguage() == Language.simplified) {
+                            mSetting.setLanguage(Language.traditional);
+                        } else {
+                            mSetting.setLanguage(Language.simplified);
+                        }
+                        SysManager.saveSetting(mSetting);
+                        settingChange = true;
+                        init();
+                    }, v -> {
+                        Intent intent = new Intent(getActivity(), FontsActivity.class);
+                        startActivityForResult(intent, APPCONST.REQUEST_FONT);
+                    }, v -> {
+                        autoScroll();
+                        mSettingDetailDialog.dismiss();
+                    });
+        }
+    }
+    /**
+     * 白天夜间改变
+     *
+     * @param isCurDayStyle
+     */
+    private void changeNightAndDaySetting(boolean isCurDayStyle) {
+        mSetting.setDayStyle(!isCurDayStyle);
+        SysManager.saveSetting(mSetting);
+        settingChange = true;
+        init();
+    }
+
+    /**
+     * 缩小字体
+     */
+    private void reduceTextSize() {
+        if (mSetting.getReadWordSize() > 1) {
+            mSetting.setReadWordSize(mSetting.getReadWordSize() - 1);
+            SysManager.saveSetting(mSetting);
+            settingChange = true;
+            initData();
+        }
+    }
+
+    /**
+     * 增大字体
+     */
+    private void increaseTextSize() {
+        if (mSetting.getReadWordSize() < 40) {
+            mSetting.setReadWordSize(mSetting.getReadWordSize() + 1);
+            SysManager.saveSetting(mSetting);
+            settingChange = true;
+            initData();
+        }
+    }
+
+    /**
+     * 改变阅读风格
+     *
+     * @param readStyle
+     */
+    private void changeStyle(ReadStyle readStyle) {
+        settingChange = true;
+        if (!mSetting.isDayStyle()) mSetting.setDayStyle(true);
+        mSetting.setReadStyle(readStyle);
+        switch (readStyle) {
+            case common:
+                mSetting.setReadBgColor(R.color.sys_common_bg);
+                mSetting.setReadWordColor(R.color.sys_common_word);
+                break;
+            case leather:
+                mSetting.setReadBgColor(R.mipmap.theme_leather_bg);
+                mSetting.setReadWordColor(R.color.sys_leather_word);
+                break;
+            case protectedEye:
+                mSetting.setReadBgColor(R.color.sys_protect_eye_bg);
+                mSetting.setReadWordColor(R.color.sys_protect_eye_word);
+                break;
+            case breen:
+                mSetting.setReadBgColor(R.color.sys_breen_bg);
+                mSetting.setReadWordColor(R.color.sys_breen_word);
+                break;
+            case blueDeep:
+                mSetting.setReadBgColor(R.color.sys_blue_deep_bg);
+                mSetting.setReadWordColor(R.color.sys_blue_deep_word);
+                break;
+        }
+        SysManager.saveSetting(mSetting);
+        init();
+    }
+
+    /**
+     * 自动滚动
+     */
+    private void autoScroll() {
+        autoScrollOpening = true;
+        new Thread(() -> {
+            while (autoScrollOpening) {
+                try {
+                    Thread.sleep(mSetting.getAutoScrollSpeed() + 1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mHandler.sendMessage(mHandler.obtainMessage(7));
+
+            }
+        }).start();
+    }
+    /**
+     * 初始化阅读界面点击事件
+     */
+    private void initReadViewOnClick() {
+        mBookReadContenAdapter.setmOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                pointY = event.getRawY();
+                return false;
+            }
+        });
+        mBookReadContenAdapter.setmOnClickItemListener(new BookReadContenAdapter.OnClickItemListener() {
+            @Override
+            public void onClick(View view, final int positon) {
+                if (pointY > settingOnClickValidFrom && pointY < settingOnClickValidTo) {
+                    autoScrollOpening = false;
+
+                    long curOnClickTime = DateHelper.getLongDate();
+                    if (curOnClickTime - lastOnClickTime < doubleOnClickConfirmTime) {
+                        autoScroll();
+                    } else {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Thread.sleep(doubleOnClickConfirmTime);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                if (!autoScrollOpening) {
+                                    mHandler.sendMessage(mHandler.obtainMessage(8));
+                                }
+
+                            }
+                        }).start();
+                    }
+                    lastOnClickTime = curOnClickTime;
+                } else if (pointY > settingOnClickValidTo) {
+
+//                    mReadActivity.getLvContent().scrollListBy(BaseActivity.height);
+                    mRvContent.scrollBy(0, (int) height);
+                } else if (pointY < settingOnClickValidFrom) {
+                    mHandler.sendMessage(mHandler.obtainMessage(8));
+//                    mReadActivity.getLvContent().scrollListBy(-BaseActivity.height);
+                    mRvContent.scrollBy(0, (int) -height);
+                }
+            }
+        });
     }
 
 
@@ -248,7 +565,7 @@ public final class BookReadActivity extends AppActivity {
 
         int selectedPostion, curChapterPosition;
         mChapterTitleAdapter = new ChapterTitleAdapter(getContext());
-        LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(getActivity());
+        mLinearLayoutManager = new LinearLayoutManager(getActivity());
         //设置目录
         if (curSortflag == 0) {
             //findLastVisibleItemPosition 返回 最后一个可见项的位置索引

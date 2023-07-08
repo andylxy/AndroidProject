@@ -16,6 +16,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.os.Build;
+import android.os.Handler;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -56,6 +57,20 @@ import timber.log.Timber;
  */
 public final class AppApplication extends Application {
     public static AppApplication application;
+    /**
+     * 主线程执行
+     *
+     * @param runnable
+     */
+    private static Handler handler = new Handler();
+    public static void runOnUiThread(Runnable runnable) {
+        handler.post(runnable);
+    }
+
+    public static AppApplication getApplication() {
+        return application;
+    }
+
     @Log("启动耗时")
     @Override
     public void onCreate() {

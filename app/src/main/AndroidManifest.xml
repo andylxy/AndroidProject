@@ -69,12 +69,16 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
         </activity>
-
+        <!-- 书本信息 -->
+        <activity
+            android:name=".ui.activity.FontsActivity"
+            android:label="@string/font"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
         <!-- 书本信息 -->
         <activity
             android:name=".ui.activity.BookInfoActivity"
@@ -106,7 +110,6 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
-
         <!-- 注册页 -->
         <activity
             android:name=".ui.activity.RegisterActivity"
@@ -120,7 +123,6 @@
             android:launchMode="singleTop"
             android:process=":crash"
             android:screenOrientation="landscape" />
-
         <!-- 重启应用（必须在独立进程） -->
         <activity
             android:name=".ui.activity.RestartActivity"

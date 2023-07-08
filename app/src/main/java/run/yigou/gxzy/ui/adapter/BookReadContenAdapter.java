@@ -33,15 +33,17 @@ public final class BookReadContenAdapter extends AppAdapter<String> {
         super(context);
     }
 
-//    @Override
-//    public int getItemCount() {
-//        return 1;
-//    }
+    @Override
+    public int getItemCount() {
+        return 1;
+    }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mSetting = SysManager.getSetting();
+
+
         return new ViewHolder();
     }
 
@@ -52,7 +54,6 @@ public final class BookReadContenAdapter extends AppAdapter<String> {
 
         private ViewHolder() {
             super(R.layout.book_chapter_content_item);
-
             tvTitle = findViewById(R.id.tv_title);
             tvContent = findViewById(R.id.tv_content);
             tvErrorTips = findViewById(R.id.tv_loading_error_tips);
@@ -70,12 +71,18 @@ public final class BookReadContenAdapter extends AppAdapter<String> {
                 tvTitle.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
                 tvContent.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
             }
-
             tvTitle.setTextSize(mSetting.getReadWordSize() + 2);
             tvContent.setTextSize(mSetting.getReadWordSize());
             tvContent.setText(contentTest);
             //viewHolderSetTvContent(chapter);
-
+            if (mOnTouchListener != null) {
+                getItemView().setOnTouchListener(mOnTouchListener);
+            }
+            getItemView().setOnClickListener(v -> {
+                if (mOnClickItemListener != null) {
+                    mOnClickItemListener.onClick( getItemView(), position);
+                }
+            });
         }
         /**
          * 设置显示内容
@@ -98,6 +105,18 @@ public final class BookReadContenAdapter extends AppAdapter<String> {
         return content;
 
     }
+    private OnClickItemListener mOnClickItemListener;
+    private View.OnTouchListener mOnTouchListener;
 
+    public void setmOnClickItemListener(OnClickItemListener mOnClickItemListener) {
+        this.mOnClickItemListener = mOnClickItemListener;
+    }
 
+   public void setmOnTouchListener(View.OnTouchListener mOnTouchListener) {
+        this.mOnTouchListener = mOnTouchListener;
+    }
+
+    public interface OnClickItemListener {
+        void onClick(View view, int positon);
+    }
 }

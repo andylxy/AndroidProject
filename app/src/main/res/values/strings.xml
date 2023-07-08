@@ -258,4 +258,24 @@
     <!-- 书本信息 -->
     <string name="book_data_title">书本信息</string>
     <string name="book_data_content">阅读内容</string>
+
+    <string name="day">日间</string>
+    <string name="night">夜间</string>
+    <string name="chapter_list">【目录】</string>
+
+    <string name="positive_sort">正序</string>
+    <string name="inverted_sort">倒序</string>
+
+
+    <string name="font_using">正在使用</string>
+    <string name="font_example">钊</string>
+    <string name="font_use">立即使用</string>
+
+    <string name="font">字体</string>
+
+    <string name="tip">提示</string>
+
+    <string name="download_no_add_tips">缓存书籍需要先加入书架，您确定要添加本书到书架吗？</string>
+
+    <string name="download_already_all_tips">书籍已经缓存整本！</string>
 </resources>

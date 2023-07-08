@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ 项目名: AndroidProject
+  ~ 类名: ids.xml
+  ~ 包名: E:/app/AndroidProject/app/src/main/res/values/ids.xml
+  ~ 作者 : Zhs (xiaoyang_02@qq.com)
+  ~ 当前修改时间 : 2023年07月08日 21:53:25
+  ~ 上次修改时间: 2023年07月08日 21:53:24
+  ~ Copyright (c) 2023 Zhs, Inc. All Rights Reserved
+  -->
+
+<resources>
+    <item name="lv_fonts" type="id" />
+</resources>
