@@ -52,7 +52,7 @@ public final class BookInfoNav implements IRequestApi {
         }
 
         public final static class NavItem implements Serializable {
-        private int   Id ;
+        private int Id ;
         private String   ImageUrl ;
         private String BookName;
         private String ChenɡShu;

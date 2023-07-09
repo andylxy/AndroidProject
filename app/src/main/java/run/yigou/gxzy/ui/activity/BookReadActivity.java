@@ -20,10 +20,14 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.hjq.base.action.HandlerAction;
+import com.hjq.http.EasyHttp;
+import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
@@ -35,9 +39,15 @@ import run.yigou.gxzy.common.SysManager;
 import run.yigou.gxzy.creator.DialogCreator;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.Chapter;
+import run.yigou.gxzy.greendao.service.BookService;
+import run.yigou.gxzy.greendao.service.ChapterService;
+import run.yigou.gxzy.http.api.BookDetailList;
 import run.yigou.gxzy.http.api.BookInfoNav;
+import run.yigou.gxzy.http.entitymodel.ChapterList;
+import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.adapter.BookReadContenAdapter;
 import run.yigou.gxzy.ui.adapter.ChapterTitleAdapter;
+import run.yigou.gxzy.ui.fragment.BookInfoFragment;
 import run.yigou.gxzy.utils.BrightUtil;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.utils.StringHelper;
@@ -74,6 +84,7 @@ public final class BookReadActivity extends AppActivity {
     private BookReadContenAdapter mBookReadContenAdapter;
     private ChapterTitleAdapter mChapterTitleAdapter;
     private LinearLayoutManager mLinearLayoutManager;
+
     public float width = 0;
     public float height = 0;
     private float settingOnClickValidFrom;
@@ -96,11 +107,11 @@ public final class BookReadActivity extends AppActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 1:
-                    init();
+                    initViewData();
                     break;
                 case 2:
                     mPbLoading.setVisibility(View.GONE);
-                    mSrlContent.finishLoadMore();
+                    //mSrlContent.finishLoadMore();
                     break;
                 case 3:
                     int position = msg.arg1;
@@ -154,7 +165,6 @@ public final class BookReadActivity extends AppActivity {
 
     @Override
     protected int getLayoutId() {
-
         return R.layout.book_read_activity;
     }
 
@@ -165,10 +175,8 @@ public final class BookReadActivity extends AppActivity {
 
     @Override
     protected void initData() {
-        mSetting = SysManager.getSetting();
-        mNavItem = getSerializable(Book_KEY_IN);
-        initViewData();
 
+        //initViewData();
         dataSetting();
     }
 
@@ -291,8 +299,6 @@ public final class BookReadActivity extends AppActivity {
 
 
     }
-
-    private ArrayList<Chapter> mChapters = new ArrayList<>();
 
     /**
      * 延迟跳转章节(防止跳到章节尾部)
@@ -573,7 +579,12 @@ public final class BookReadActivity extends AppActivity {
 
     private void initViewData() {
 
+        mSetting = SysManager.getSetting();
 
+        //// 禁用上拉加载更多功能
+        mSrlContent.setEnableLoadMore(false);
+        //// 禁用下拉刷新功能
+        mSrlContent.setEnableRefresh(false);
 //        if (!settingChange) {
 //            mRvContent.scrollToPosition(mBook.getHisttoryChapterNum());
 //            delayTurnToLastChapterReadPosion();
@@ -583,11 +594,13 @@ public final class BookReadActivity extends AppActivity {
 //        }
         mPbLoading.setVisibility(View.GONE);
         //mSrlContent.finishLoadMore();
-
+        //设置目录
         int selectedPostion, curChapterPosition;
         mChapterTitleAdapter = new ChapterTitleAdapter(getContext());
+        //初始化目录数据
+        mChapterTitleAdapter.setData(mChapters);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
-        //设置目录
+
         if (curSortflag == 0) {
             //findLastVisibleItemPosition 返回 最后一个可见项的位置索引
             curChapterPosition = mLinearLayoutManager.findLastVisibleItemPosition();
@@ -615,6 +628,21 @@ public final class BookReadActivity extends AppActivity {
     }
 
     private void SetDayStyle() {
+
+        DisplayMetrics dm = new DisplayMetrics();
+        //获取屏幕宽高
+        if (width == 0 || height == 0) {
+            getWindowManager().getDefaultDisplay().getMetrics(dm);
+            width = dm.widthPixels;
+            height = dm.heightPixels;
+        }
+        if (!mSetting.isBrightFollowSystem()) {
+            BrightUtil.setBrightness(getActivity(), mSetting.getBrightProgress());
+        }
+        //设置点击屏幕范围
+        settingOnClickValidFrom = height / 3;
+        settingOnClickValidTo = height / 3 * 2;
+
         //内容显示
         mBookReadContenAdapter = new BookReadContenAdapter(getActivity());
         mRvContent.setAdapter(mBookReadContenAdapter);
@@ -638,39 +666,91 @@ public final class BookReadActivity extends AppActivity {
     }
 
     private void dataSetting() {
-        DisplayMetrics dm = new DisplayMetrics();
-        //获取屏幕宽高
-        if (width == 0 || height == 0) {
-            getWindowManager().getDefaultDisplay().getMetrics(dm);
-            width = dm.widthPixels;
-            height = dm.heightPixels;
-        }
-        if (!mSetting.isBrightFollowSystem()) {
-            BrightUtil.setBrightness(getActivity(), mSetting.getBrightProgress());
-        }
-//        //接收传入书的信息
-//        mBook = (Book) mReadActivity.getIntent().getSerializableExtra(APPCONST.BOOK);
-//        if (TextUtils.isEmpty(mBook.getSource())) {
-//            //设置书本来源
-//            mBook.setSource(BookSource.ctwh.toString());
-//            //更来源信息
-//            mBookService.updateEntity(mBook);
-//        }
 
-        //设置点击屏幕范围
-        settingOnClickValidFrom = height / 4;
-        settingOnClickValidTo = height / 4 * 3;
-        //// 禁用上拉加载更多功能
-        mSrlContent.setEnableLoadMore(false);
-        //// 禁用下拉刷新功能
-        mSrlContent.setEnableRefresh(false);
-
+        //接收传入书的信息
+        mNavItem = getSerializable(Book_KEY_IN);
+        mBook = new Book();
+        mBook.setAuthor(mNavItem.getAuthor());
+        mBook.setDesc(mNavItem.getDesc());
+        mBook.setChapterUrl(mNavItem.getImageUrl());
+        mBook.setName(mNavItem.getBookName());
+        mBook.setId(mNavItem.getId()+"");
         //显示进度条(不显示使用)
         // mPbLoading.setVisibility(View.VISIBLE);
         //初始化富文本
         //在第一次调用RichText之前先调用RichText.initCacheDir()方法设置缓存目录，不设置会报错
         //RichText.initCacheDir(this.getContext());
-        //getData();
+        mBookService = new BookService();
+        mChapterService = new ChapterService();
+        getBookDetailList();
+
+    }
+    private BookService mBookService;
+    private ChapterService mChapterService;
+    private ArrayList<Chapter> mChapters = new ArrayList<>();
+    private void getBookDetailList() {
+        ArrayList<Chapter> chapters = new ArrayList<>();
+        EasyHttp.get(this)
+                .api(new BookDetailList().setId(mNavItem.getId()))
+                .request(new HttpCallback<HttpData<List<BookDetailList.Bean>>>(this) {
+                    @Override
+                    public void onSucceed(HttpData<List<BookDetailList.Bean>> data) {
+                        if (data !=null && data.getData().size() > 0){
+                            List<BookDetailList.Bean> detailList =  data.getData();
+                            int i = 0;
+                            try {
+                                for (BookDetailList.Bean bean : detailList) {
+                                    for (ChapterList chapt : bean.getChapterList()) {
+                                        Chapter chapter = new Chapter();
+                                        chapter.setNumber(i++);
+                                        chapter.setTitle(chapt.getTitle());
+                                        chapter.setUrl( chapt.getId()+"");
+                                        chapters.add(chapter);
+                                    }
+                                }
+                            } catch (Exception e) {
+
+                                e.printStackTrace();
+                            }
+                            updateAllOldChapterData(chapters);
+                            mHandler.sendMessage(mHandler.obtainMessage(1));
+                        }
+
+                    }
+                });
+    }
+    /**
+     * 更新所有章节
+     *
+     * @param newChapters
+     */
+    private void updateAllOldChapterData(ArrayList<Chapter>  newChapters) {
+        int i;
+        for (i = 0; i < mChapters.size() && i < newChapters.size(); i++) {
+            Chapter oldChapter = mChapters.get(i);
+            Chapter newChapter = newChapters.get(i);
+            if (!oldChapter.getTitle().equals(newChapter.getTitle())) {
+                oldChapter.setTitle(newChapter.getTitle());
+                oldChapter.setUrl(newChapter.getUrl());
+                oldChapter.setContent(null);
+                mChapterService.updateEntity(oldChapter);
+            }
+        }
+        if (mChapters.size() < newChapters.size()) {
+            int start = mChapters.size();
+            for (int j = mChapters.size(); j < newChapters.size(); j++) {
+                newChapters.get(j).setId(StringHelper.getStringRandom(25));
+                newChapters.get(j).setBookId(mBook.getId());
+                mChapters.add(newChapters.get(j));
+//                mChapterService.addChapter(newChapters.get(j));
+            }
+            mChapterService.addChapters(mChapters.subList(start, mChapters.size()));
+        } else if (mChapters.size() > newChapters.size()) {
+            for (int j = newChapters.size(); j < mChapters.size(); j++) {
+                mChapterService.deleteEntity(mChapters.get(j));
+            }
+            mChapters.subList(0, newChapters.size());
+        }
     }
 
 }

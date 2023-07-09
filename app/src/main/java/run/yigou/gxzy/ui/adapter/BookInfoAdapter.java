@@ -47,7 +47,6 @@ public final class BookInfoAdapter extends AppAdapter<BookInfoNav.Bean.NavItem> 
     }
     private final class ViewHolder extends AppAdapter<?>.ViewHolder {
 
-        List<BookInfoNav.Bean.NavItem> mList = getData();
        // private final TextView mTextView;
         private final TextView tvBookName;
         private final TextView tvBookAuthor;
@@ -69,13 +68,18 @@ public final class BookInfoAdapter extends AppAdapter<BookInfoNav.Bean.NavItem> 
         @Override
         public void onBindView(int position) {
             //mTextView.setText(getItem(position));
-            BookInfoNav.Bean.NavItem item =   mList.get(position);
-            tvBookName.setText(item.getBookName());
-            tvBookAuthor.setText(item.getAuthor());
-            tvBookDesc.setText("     " + (item.getDesc() == null ?"":item.getDesc()));
-            GlideApp.with(this.getItemView())
-                    .load(AppConfig.getHostUrl()+item.getImageUrl())
-                    .into(ivBookImg);
+            BookInfoNav.Bean.NavItem item = null;
+            if (getData() != null) {
+                item = getData().get(position);
+            }
+            if (item != null) {
+                tvBookName.setText(item.getBookName());
+                tvBookAuthor.setText(item.getAuthor());
+                tvBookDesc.setText("     " + (item.getDesc() == null ?"":item.getDesc()));
+                GlideApp.with(this.getItemView())
+                        .load(AppConfig.getHostUrl()+item.getImageUrl())
+                        .into(ivBookImg);
+            }
         }
     }
 }
