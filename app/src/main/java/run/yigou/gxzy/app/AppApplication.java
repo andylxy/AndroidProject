@@ -70,7 +70,9 @@ public final class AppApplication extends Application {
     public static AppApplication getApplication() {
         return application;
     }
-
+    public static Context getmContext() {
+        return application;
+    }
     @Log("启动耗时")
     @Override
     public void onCreate() {

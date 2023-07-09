@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <run.yigou.gxzy.creator.MyTextView
+        <TextView
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -22,7 +22,7 @@
             android:textSize="22sp"
             android:textStyle="bold" />
 
-        <run.yigou.gxzy.creator.MyTextView
+        <TextView
             android:id="@+id/tv_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
     </LinearLayout>
 
 
-    <run.yigou.gxzy.creator.MyTextView
+    <TextView
         android:id="@+id/tv_loading_error_tips"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

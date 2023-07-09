@@ -1,6 +1,8 @@
 apply plugin : 'com.android.application'
 apply plugin : 'android-aspectjx'
+apply plugin: 'org.greenrobot.greendao'//greendao插件dependencies
 apply from : '../common.gradle'
+
 
 // Android 代码规范文档：https://github.com/getActivity/AndroidCodeStandard
 android {
@@ -204,6 +206,8 @@ dependencies {
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
     previewImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 
+    implementation 'org.greenrobot:greendao:3.3.0'
+
     // 多语种：https://github.com/getActivity/MultiLanguages
     // 悬浮窗：https://github.com/getActivity/XToast
     // 日志输出：https://github.com/getActivity/Logcat
@@ -217,4 +221,11 @@ dependencies {
     // 设备唯一标识：http://msa-alliance.cn/col.jsp?id=120
     // 嵌套滚动容器：https://github.com/donkingliang/ConsecutiveScroller
     // 隐私调用监控：https://github.com/huage2580/PermissionMonitor
+}
+
+
+greendao {
+    schemaVersion 1
+    daoPackage 'run.yigou.gxzy.greendao.gen'
+    targetGenDir 'src/main/java'
 }

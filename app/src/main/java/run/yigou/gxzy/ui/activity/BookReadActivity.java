@@ -19,8 +19,11 @@ import android.widget.TextView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
+
+import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
@@ -30,11 +33,14 @@ import run.yigou.gxzy.common.ReadStyle;
 import run.yigou.gxzy.common.Setting;
 import run.yigou.gxzy.common.SysManager;
 import run.yigou.gxzy.creator.DialogCreator;
+import run.yigou.gxzy.greendao.entity.Book;
+import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.ui.adapter.BookReadContenAdapter;
 import run.yigou.gxzy.ui.adapter.ChapterTitleAdapter;
 import run.yigou.gxzy.utils.BrightUtil;
 import run.yigou.gxzy.utils.DateHelper;
+import run.yigou.gxzy.utils.StringHelper;
 
 
 /**
@@ -82,7 +88,7 @@ public final class BookReadActivity extends AppActivity {
 
     private Dialog mSettingDialog;//设置视图
     private Dialog mSettingDetailDialog;//详细设置视图
-
+    private Book mBook;
 
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
@@ -107,9 +113,9 @@ public final class BookReadActivity extends AppActivity {
                 case 4:
                     position = msg.arg1;
                     mRvContent.scrollToPosition(position);
-//                    if (mBook.getHisttoryChapterNum() < position) {
-//                        delayTurnToChapter(position);
-//                    }
+                    if (mBook.getHisttoryChapterNum() < position) {
+                        delayTurnToChapter(position);
+                    }
                     mPbLoading.setVisibility(View.GONE);
                     break;
                 case 5:
@@ -162,6 +168,7 @@ public final class BookReadActivity extends AppActivity {
         mSetting = SysManager.getSetting();
         mNavItem = getSerializable(Book_KEY_IN);
         initViewData();
+
         dataSetting();
     }
 
@@ -182,8 +189,7 @@ public final class BookReadActivity extends AppActivity {
         mLlChapterListView = findViewById(R.id.ll_chapter_list_view);
         //内容显示
         mRvContent = findViewById(R.id.rv_content);
-        mBookReadContenAdapter = new BookReadContenAdapter(getActivity());
-        mRvContent.setAdapter(mBookReadContenAdapter);
+
 
         //侧页列表项的点击事件监听器
 //        mLvChapterList.setOnItemClickListener((adapterView, view, i, l) -> {
@@ -283,8 +289,26 @@ public final class BookReadActivity extends AppActivity {
             }
         });
 
-        initReadViewOnClick();
+
     }
+
+    private ArrayList<Chapter> mChapters = new ArrayList<>();
+
+    /**
+     * 延迟跳转章节(防止跳到章节尾部)
+     */
+    private void delayTurnToChapter(final int position) {
+        new Thread(() -> {
+            try {
+                Thread.sleep(50);
+                mHandler.sendMessage(mHandler.obtainMessage(4, position, 0));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+    }
+
     /**
      * 显示设置视图
      */
@@ -293,43 +317,46 @@ public final class BookReadActivity extends AppActivity {
         if (mSettingDialog != null) {
             mSettingDialog.show();
         } else {
-            int progress = 100;
+            int progress =  mChapters.size();
 //            if (mChapters.size() != 1) {
-//                progress = mLinearLayoutManager.findLastVisibleItemPosition() * 100 / (mChapters.size() - 1);
+//                int lastPosition = mLinearLayoutManager.findLastVisibleItemPosition();
+//                int mChapterNum = mChapters.size();
+//                progress = lastPosition * 100 / (mChapterNum - 1);
 //            }
-
             //缓存整本
             mSettingDialog = DialogCreator.createReadSetting(getActivity(), mSetting.isDayStyle(), progress, view -> {//返回
                         getActivity().finish();
                     }, view -> {//上一章
-//                            int curPosition = mReadActivity.getLvContent().getLastVisiblePosition();
+
                         int curPosition = mLinearLayoutManager.findLastVisibleItemPosition();
                         if (curPosition > 0) {
                             mRvContent.scrollToPosition(curPosition - 1);
                         }
                     }, view -> {//下一章
-//                            int curPosition = mReadActivity.getLvContent().getLastVisiblePosition();
+
                         int curPosition = mLinearLayoutManager.findLastVisibleItemPosition();
-//                        if (curPosition < mChapters.size() - 1) {
-//                            mRvContent.scrollToPosition(curPosition + 1);
-//                            delayTurnToChapter(curPosition + 1);
-//                        }
+                        if (curPosition < mChapters.size() - 1) {
+                            mRvContent.scrollToPosition(curPosition + 1);
+                            delayTurnToChapter(curPosition + 1);
+                        }
                     }, view -> {//目录
-                       // initChapterTitleList();
+                        // initData() ;
                         mDlReadActivity.openDrawer(GravityCompat.START);
                         mSettingDialog.dismiss();
 
                     }, (dialog, view, isDayStyle) -> {//日夜切换
 
-                       // changeNightAndDaySetting(isDayStyle);
+                        changeNightAndDaySetting(isDayStyle);
                     }, view -> {//设置
                         showSettingDetailView();
-                    }, new SeekBar.OnSeekBarChangeListener() {//阅读进度
+                    }, new SeekBar.OnSeekBarChangeListener() {
+                        // todo 阅读进度待完善处理
+                        // 当进度值改变时触发
                         @Override
                         public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                             mPbLoading.setVisibility(View.VISIBLE);
-//
-//                            final int chapterNum = (mChapters.size() - 1) * i / 100;
+                            seekBar.setProgress(70);
+                            final int chapterNum = (mChapters.size() - 1) * i / 100;
 //                            getChapterContent(mChapters.get(chapterNum), new ResultCallback() {
 //                                @Override
 //                                public void onFinish(Object o, int code) {
@@ -346,17 +373,20 @@ public final class BookReadActivity extends AppActivity {
 
                         }
 
+                        // 当用户开始拖动 SeekBar 时触发
                         @Override
                         public void onStartTrackingTouch(SeekBar seekBar) {
 
                         }
 
+                        // 当用户停止拖动 SeekBar 时触发
                         @Override
                         public void onStopTrackingTouch(SeekBar seekBar) {
 
                         }
                     }
                     , null, (dialog, view, tvDownloadProgress) -> {
+                        //下载章节缓存-不启用
 //                        if (StringHelper.isEmpty(mBook.getId())) {
 //                            addBookToCaseAndDownload(tvDownloadProgress);
 //                        } else {
@@ -367,6 +397,7 @@ public final class BookReadActivity extends AppActivity {
         }
 
     }
+
     /**
      * 显示详细设置视图
      */
@@ -384,7 +415,8 @@ public final class BookReadActivity extends AppActivity {
                         }
                         SysManager.saveSetting(mSetting);
                         settingChange = true;
-                        init();
+                        //设置阅读窗口的背景色
+                        SetDayStyle();
                     }, v -> {
                         Intent intent = new Intent(getActivity(), FontsActivity.class);
                         startActivityForResult(intent, APPCONST.REQUEST_FONT);
@@ -394,6 +426,7 @@ public final class BookReadActivity extends AppActivity {
                     });
         }
     }
+
     /**
      * 白天夜间改变
      *
@@ -403,7 +436,8 @@ public final class BookReadActivity extends AppActivity {
         mSetting.setDayStyle(!isCurDayStyle);
         SysManager.saveSetting(mSetting);
         settingChange = true;
-        init();
+        //设置阅读窗口的背景色
+        SetDayStyle();
     }
 
     /**
@@ -414,7 +448,9 @@ public final class BookReadActivity extends AppActivity {
             mSetting.setReadWordSize(mSetting.getReadWordSize() - 1);
             SysManager.saveSetting(mSetting);
             settingChange = true;
-            initData();
+            //设置阅读窗口的背景色
+            SetDayStyle();
+            ;
         }
     }
 
@@ -426,7 +462,8 @@ public final class BookReadActivity extends AppActivity {
             mSetting.setReadWordSize(mSetting.getReadWordSize() + 1);
             SysManager.saveSetting(mSetting);
             settingChange = true;
-            initData();
+            //设置阅读窗口的背景色
+            SetDayStyle();
         }
     }
 
@@ -462,7 +499,8 @@ public final class BookReadActivity extends AppActivity {
                 break;
         }
         SysManager.saveSetting(mSetting);
-        init();
+        //设置阅读窗口的背景色
+        SetDayStyle();
     }
 
     /**
@@ -482,6 +520,7 @@ public final class BookReadActivity extends AppActivity {
             }
         }).start();
     }
+
     /**
      * 初始化阅读界面点击事件
      */
@@ -493,12 +532,13 @@ public final class BookReadActivity extends AppActivity {
                 return false;
             }
         });
+
         mBookReadContenAdapter.setmOnClickItemListener(new BookReadContenAdapter.OnClickItemListener() {
             @Override
             public void onClick(View view, final int positon) {
+
                 if (pointY > settingOnClickValidFrom && pointY < settingOnClickValidTo) {
                     autoScrollOpening = false;
-
                     long curOnClickTime = DateHelper.getLongDate();
                     if (curOnClickTime - lastOnClickTime < doubleOnClickConfirmTime) {
                         autoScroll();
@@ -517,15 +557,13 @@ public final class BookReadActivity extends AppActivity {
 
                             }
                         }).start();
+
+
                     }
                     lastOnClickTime = curOnClickTime;
                 } else if (pointY > settingOnClickValidTo) {
-
-//                    mReadActivity.getLvContent().scrollListBy(BaseActivity.height);
                     mRvContent.scrollBy(0, (int) height);
                 } else if (pointY < settingOnClickValidFrom) {
-                    mHandler.sendMessage(mHandler.obtainMessage(8));
-//                    mReadActivity.getLvContent().scrollListBy(-BaseActivity.height);
                     mRvContent.scrollBy(0, (int) -height);
                 }
             }
@@ -534,24 +572,7 @@ public final class BookReadActivity extends AppActivity {
 
 
     private void initViewData() {
-        //设置阅读窗口的背景色
-        if (mSetting.isDayStyle()) {
-            //白天
-            mDlReadActivity.setBackgroundResource(mSetting.getReadBgColor());
-            mTvBookList.setTextColor(getContext().getResources().getColor(mSetting.getReadWordColor()));
-            mTvChapterSort.setTextColor(getContext().getResources().getColor(mSetting.getReadWordColor()));
-            mLlChapterListView.setBackgroundResource(mSetting.getReadBgColor());
 
-        } else {
-            //晚上
-            mDlReadActivity.setBackgroundResource(R.color.sys_night_bg);
-            mTvBookList.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
-            mTvChapterSort.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
-            mLlChapterListView.setBackgroundResource(R.color.sys_night_bg);
-        }
-
-        //加载文章内容
-        //initReadViewOnClick();
 
 //        if (!settingChange) {
 //            mRvContent.scrollToPosition(mBook.getHisttoryChapterNum());
@@ -570,7 +591,7 @@ public final class BookReadActivity extends AppActivity {
         if (curSortflag == 0) {
             //findLastVisibleItemPosition 返回 最后一个可见项的位置索引
             curChapterPosition = mLinearLayoutManager.findLastVisibleItemPosition();
-            //默认显示多少项
+            //默认加载多少项
             selectedPostion = curChapterPosition - 5;
             if (selectedPostion < 0) selectedPostion = 0;
             if (mChapterTitleAdapter.getCount() - 1 - curChapterPosition < 5)
@@ -588,6 +609,32 @@ public final class BookReadActivity extends AppActivity {
         mLvChapterList.setAdapter(mChapterTitleAdapter);
         //指定位置的项到可见区域
         mLvChapterList.scrollToPosition(selectedPostion);
+        //设置阅读窗口的背景色
+        SetDayStyle();
+
+    }
+
+    private void SetDayStyle() {
+        //内容显示
+        mBookReadContenAdapter = new BookReadContenAdapter(getActivity());
+        mRvContent.setAdapter(mBookReadContenAdapter);
+        //初始化内容点击事件
+        initReadViewOnClick();
+        if (mSetting.isDayStyle()) {
+            //白天
+            mDlReadActivity.setBackgroundResource(mSetting.getReadBgColor());
+            mTvBookList.setTextColor(getContext().getResources().getColor(mSetting.getReadWordColor()));
+            mTvChapterSort.setTextColor(getContext().getResources().getColor(mSetting.getReadWordColor()));
+            mLlChapterListView.setBackgroundResource(mSetting.getReadBgColor());
+
+        } else {
+            //晚上
+            mDlReadActivity.setBackgroundResource(R.color.sys_night_bg);
+            mTvBookList.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
+            mTvChapterSort.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
+            mLlChapterListView.setBackgroundResource(R.color.sys_night_bg);
+        }
+
     }
 
     private void dataSetting() {
