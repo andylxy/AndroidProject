@@ -18,11 +18,13 @@ import android.widget.TextView;
 
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.hjq.base.action.HandlerAction;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
+import com.hjq.http.listener.OnHttpListener;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.aop.ResultCallback;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.common.APPCONST;
 import run.yigou.gxzy.common.Language;
@@ -43,6 +46,7 @@ import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.service.ChapterService;
 import run.yigou.gxzy.http.api.BookDetailList;
 import run.yigou.gxzy.http.api.BookInfoNav;
+import run.yigou.gxzy.http.api.GetChapterDetail;
 import run.yigou.gxzy.http.entitymodel.ChapterList;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.adapter.BookReadContenAdapter;
@@ -69,7 +73,7 @@ public final class BookReadActivity extends AppActivity {
      * 0正序  1倒序
      */
     private int curSortflag = 0;
-    private boolean settingChange;//是否是设置改变
+    private boolean settingChange=false;//是否是设置改变
 
     private BookInfoNav.Bean.NavItem mNavItem;
 
@@ -106,7 +110,12 @@ public final class BookReadActivity extends AppActivity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case 0:
+                    //设置背景
+                    SetDayStyle();
+                    break;
                 case 1:
+                    //SetDayStyle();
                     initViewData();
                     break;
                 case 2:
@@ -323,7 +332,7 @@ public final class BookReadActivity extends AppActivity {
         if (mSettingDialog != null) {
             mSettingDialog.show();
         } else {
-            int progress =  mChapters.size();
+            int progress = mChapters.size();
 //            if (mChapters.size() != 1) {
 //                int lastPosition = mLinearLayoutManager.findLastVisibleItemPosition();
 //                int mChapterNum = mChapters.size();
@@ -421,7 +430,6 @@ public final class BookReadActivity extends AppActivity {
                         }
                         SysManager.saveSetting(mSetting);
                         settingChange = true;
-                        //设置阅读窗口的背景色
                         SetDayStyle();
                     }, v -> {
                         Intent intent = new Intent(getActivity(), FontsActivity.class);
@@ -536,6 +544,7 @@ public final class BookReadActivity extends AppActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 pointY = event.getRawY();
                 return false;
+
             }
         });
 
@@ -593,6 +602,10 @@ public final class BookReadActivity extends AppActivity {
 //            settingChange = false;
 //        }
         mPbLoading.setVisibility(View.GONE);
+        //内容显示
+        mBookReadContenAdapter = new BookReadContenAdapter(getActivity());
+        mBookReadContenAdapter.setData(mChapters);
+        mRvContent.setAdapter(mBookReadContenAdapter);
         //mSrlContent.finishLoadMore();
         //设置目录
         int selectedPostion, curChapterPosition;
@@ -624,11 +637,9 @@ public final class BookReadActivity extends AppActivity {
         mLvChapterList.scrollToPosition(selectedPostion);
         //设置阅读窗口的背景色
         SetDayStyle();
-
-    }
-
-    private void SetDayStyle() {
-
+        //设置ReadContenAdapter请求网络数据
+        setGetChapterContent();
+        //初始化内容点击事件
         DisplayMetrics dm = new DisplayMetrics();
         //获取屏幕宽高
         if (width == 0 || height == 0) {
@@ -636,25 +647,53 @@ public final class BookReadActivity extends AppActivity {
             width = dm.widthPixels;
             height = dm.heightPixels;
         }
-        if (!mSetting.isBrightFollowSystem()) {
-            BrightUtil.setBrightness(getActivity(), mSetting.getBrightProgress());
-        }
         //设置点击屏幕范围
         settingOnClickValidFrom = height / 3;
         settingOnClickValidTo = height / 3 * 2;
-
-        //内容显示
-        mBookReadContenAdapter = new BookReadContenAdapter(getActivity());
-        mRvContent.setAdapter(mBookReadContenAdapter);
-        //初始化内容点击事件
         initReadViewOnClick();
+
+    }
+
+    private void setGetChapterContent() {
+        mBookReadContenAdapter.setOnChapterContentListener(new BookReadContenAdapter.OnChapterContentListener() {
+            @Override
+            public void getChapter(int postion, ResultCallback callback) {
+                // getChapterContent( postion,callback);
+                EasyHttp.get((LifecycleOwner) getContext())
+                        .api(new GetChapterDetail().setId(mChapters.get(postion).getUrl()))
+                        .request(new HttpCallback<HttpData<GetChapterDetail.Bean>>((OnHttpListener) getContext()) {
+                            @Override
+                            public void onSucceed(HttpData<GetChapterDetail.Bean> data) {
+                                if (data != null) {
+                                    GetChapterDetail.Bean bean = data.getData();
+                                    mChapters.get(postion).setContent(bean.getSection());
+                                    // updateAllOldChapterData(chapters);
+                                    // mHandler.sendMessage(mHandler.obtainMessage(1));
+                                    callback.onFinish(postion, 200);
+                                }
+
+                            }
+                        });
+            }
+
+
+        });
+
+    }
+
+    private void SetDayStyle() {
+
+
+        if (!mSetting.isBrightFollowSystem()) {
+            BrightUtil.setBrightness(getActivity(), mSetting.getBrightProgress());
+        }
+
         if (mSetting.isDayStyle()) {
             //白天
             mDlReadActivity.setBackgroundResource(mSetting.getReadBgColor());
             mTvBookList.setTextColor(getContext().getResources().getColor(mSetting.getReadWordColor()));
             mTvChapterSort.setTextColor(getContext().getResources().getColor(mSetting.getReadWordColor()));
             mLlChapterListView.setBackgroundResource(mSetting.getReadBgColor());
-
         } else {
             //晚上
             mDlReadActivity.setBackgroundResource(R.color.sys_night_bg);
@@ -662,7 +701,8 @@ public final class BookReadActivity extends AppActivity {
             mTvChapterSort.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
             mLlChapterListView.setBackgroundResource(R.color.sys_night_bg);
         }
-
+        //刷新控件
+        mBookReadContenAdapter.notifyDataSetChanged();
     }
 
     private void dataSetting() {
@@ -674,7 +714,7 @@ public final class BookReadActivity extends AppActivity {
         mBook.setDesc(mNavItem.getDesc());
         mBook.setChapterUrl(mNavItem.getImageUrl());
         mBook.setName(mNavItem.getBookName());
-        mBook.setId(mNavItem.getId()+"");
+        mBook.setId(mNavItem.getId() + "");
         //显示进度条(不显示使用)
         // mPbLoading.setVisibility(View.VISIBLE);
         //初始化富文本
@@ -685,9 +725,11 @@ public final class BookReadActivity extends AppActivity {
         getBookDetailList();
 
     }
+
     private BookService mBookService;
     private ChapterService mChapterService;
     private ArrayList<Chapter> mChapters = new ArrayList<>();
+
     private void getBookDetailList() {
         ArrayList<Chapter> chapters = new ArrayList<>();
         EasyHttp.get(this)
@@ -695,8 +737,8 @@ public final class BookReadActivity extends AppActivity {
                 .request(new HttpCallback<HttpData<List<BookDetailList.Bean>>>(this) {
                     @Override
                     public void onSucceed(HttpData<List<BookDetailList.Bean>> data) {
-                        if (data !=null && data.getData().size() > 0){
-                            List<BookDetailList.Bean> detailList =  data.getData();
+                        if (data != null && data.getData().size() > 0) {
+                            List<BookDetailList.Bean> detailList = data.getData();
                             int i = 0;
                             try {
                                 for (BookDetailList.Bean bean : detailList) {
@@ -704,7 +746,7 @@ public final class BookReadActivity extends AppActivity {
                                         Chapter chapter = new Chapter();
                                         chapter.setNumber(i++);
                                         chapter.setTitle(chapt.getTitle());
-                                        chapter.setUrl( chapt.getId()+"");
+                                        chapter.setUrl(chapt.getId() + "");
                                         chapters.add(chapter);
                                     }
                                 }
@@ -719,12 +761,13 @@ public final class BookReadActivity extends AppActivity {
                     }
                 });
     }
+
     /**
      * 更新所有章节
      *
      * @param newChapters
      */
-    private void updateAllOldChapterData(ArrayList<Chapter>  newChapters) {
+    private void updateAllOldChapterData(ArrayList<Chapter> newChapters) {
         int i;
         for (i = 0; i < mChapters.size() && i < newChapters.size(); i++) {
             Chapter oldChapter = mChapters.get(i);

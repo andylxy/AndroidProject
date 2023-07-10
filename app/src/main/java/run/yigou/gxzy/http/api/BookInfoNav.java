@@ -35,11 +35,11 @@ public final class BookInfoNav implements IRequestApi {
     }
 
     public final static class Bean {
-       private int Id ;
+       private String Id ;
        private String Name ;
        private List<NavItem> NavList ;
 
-        public int getId() {
+        public String getId() {
             return Id;
         }
 
@@ -52,14 +52,14 @@ public final class BookInfoNav implements IRequestApi {
         }
 
         public final static class NavItem implements Serializable {
-        private int Id ;
+        private String Id ;
         private String   ImageUrl ;
         private String BookName;
         private String ChenɡShu;
         private String Author;
         private String Desc;
 
-           public int getId() {
+           public String getId() {
                return Id;
            }
 

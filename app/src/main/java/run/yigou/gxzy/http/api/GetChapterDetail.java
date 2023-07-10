@@ -12,31 +12,32 @@ package run.yigou.gxzy.http.api;
 
 import com.hjq.http.config.IRequestApi;
 
-import run.yigou.gxzy.http.entitymodel.ChapterDirectory;
+import run.yigou.gxzy.http.entitymodel.ChapterInfo;
 
 /**
  *  版本:  1.0
  *  描述:
  *
  */
-public final class BookDetailList implements IRequestApi {
+public final class GetChapterDetail implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "BookInfo/getDetail";
+        return "BookInfo/getChapterDetail";
     }
-    private  String Id ;
 
     public String getId() {
         return Id;
     }
 
-    public BookDetailList setId(String id) {
+    public GetChapterDetail setId(String id) {
         Id = id;
-        return  this;
+        return this;
     }
 
-    public final static class Bean extends ChapterDirectory {
+    private   String Id;
+
+    public final static class Bean extends ChapterInfo {
 
     }
 }
