@@ -37,6 +37,7 @@ import run.yigou.gxzy.aop.ResultCallback;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.common.APPCONST;
+import run.yigou.gxzy.common.Font;
 import run.yigou.gxzy.common.Language;
 import run.yigou.gxzy.common.ReadStyle;
 import run.yigou.gxzy.common.Setting;
@@ -127,7 +128,9 @@ public final class BookReadActivity extends AppActivity {
     private Dialog mSettingDetailDialog;
     private Book mBook;
     private boolean isFirstInit = true;
-
+    private BookService mBookService;
+    private ChapterService mChapterService;
+    private ArrayList<Chapter> mChapters = new ArrayList<>();
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
         @Override
@@ -399,6 +402,7 @@ public final class BookReadActivity extends AppActivity {
                         settingChange = true;
                         SetDayStyle();
                     }, v -> {
+                        //字体页面
                         Intent intent = new Intent(getActivity(), FontsActivity.class);
                         startActivityForResult(intent, APPCONST.REQUEST_FONT);
                     }, v -> {
@@ -553,14 +557,14 @@ public final class BookReadActivity extends AppActivity {
                     lastOnClickTime = curOnClickTime;
                 } else if (pointY > settingOnClickValidTo) {
                     //下一章
-                    if ( firstVisibleItemPosition < lastVisibleItemPosition) {
-                        selectedChapterPosition(lastVisibleItemPosition );
+                    if (firstVisibleItemPosition < lastVisibleItemPosition) {
+                        selectedChapterPosition(lastVisibleItemPosition);
                     }
 
                     mRvContent.scrollBy(0, (int) height);
                 } else if (pointY < settingOnClickValidFrom) {
                     //上一章
-                    if ( firstVisibleItemPosition < lastVisibleItemPosition) {
+                    if (firstVisibleItemPosition < lastVisibleItemPosition) {
 
                         selectedChapterPosition(firstVisibleItemPosition);
                     }
@@ -596,7 +600,6 @@ public final class BookReadActivity extends AppActivity {
         mRvContent.setAdapter(mBookReadContenAdapter);
         //mSrlContent.finishLoadMore();
         //设置目录
-        int selectedPostion, curChapterPosition;
         mChapterTitleAdapter = new ChapterTitleAdapter(getContext());
         //侧页列表项的点击事件监听器
         mChapterTitleAdapter.setOnItemClickListener((adapterView, view, i) -> {
@@ -645,7 +648,7 @@ public final class BookReadActivity extends AppActivity {
         //初始化目录数据
         mChapterTitleAdapter.setData(mChapters);
         //跳到指定目录位置
-       // selectedChapterPosition(0);
+        // selectedChapterPosition(0);
 
         mLvChapterList.setAdapter(mChapterTitleAdapter);
 
@@ -793,10 +796,21 @@ public final class BookReadActivity extends AppActivity {
         getBookDetailList();
 
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case APPCONST.REQUEST_FONT:
+                if (resultCode == RESULT_OK) {
+//                    mSetting.setFont((Font) data.getSerializableExtra(APPCONST.FONT));
+//                    SysManager.saveSetting(mSetting);
+                   settingChange = true;
+                    SetDayStyle();
+                }
+                break;
+        }
+    }
 
-    private BookService mBookService;
-    private ChapterService mChapterService;
-    private ArrayList<Chapter> mChapters = new ArrayList<>();
 
     private void getBookDetailList() {
         ArrayList<Chapter> chapters = new ArrayList<>();
@@ -869,7 +883,7 @@ public final class BookReadActivity extends AppActivity {
         super.onDestroy();
         //结束时清空内容
         //RichText.clear(this.getContext());
-        AppApplication.getApplication().shutdownThreadPool();
+       // AppApplication.getApplication().shutdownThreadPool();
     }
 
 }

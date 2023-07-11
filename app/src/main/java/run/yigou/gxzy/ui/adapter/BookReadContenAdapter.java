@@ -1,6 +1,7 @@
 package run.yigou.gxzy.ui.adapter;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.text.Spanned;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,7 +51,7 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
 //        return 1;
 //    }
 
-
+    private Typeface mTypeFace;
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -64,6 +65,7 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
         private TextView tvErrorTips;
 
         private ViewHolder() {
+
             super(R.layout.book_chapter_content_item);
             tvTitle = findViewById(R.id.tv_title);
             tvContent = findViewById(R.id.tv_content);
@@ -72,7 +74,10 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
 
         @Override
         public void onBindView(int position) {
+            initFont();
             Chapter chapter = getItem(position);
+            tvContent.setTypeface(mTypeFace);
+            tvTitle.setTypeface(mTypeFace);
             tvErrorTips.setVisibility(View.GONE);
             tvTitle.setText("【" + getLanguageContext(chapter.getTitle()) + "】");
             if (SysManager.getSetting().isDayStyle()) {
@@ -207,7 +212,13 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
         return content;
 
     }
-
+    private void initFont() {
+        if (SysManager.getSetting().getFont() == Font.默认字体) {
+            mTypeFace = null;
+        } else {
+            mTypeFace = Typeface.createFromAsset(getContext().getAssets(), SysManager.getSetting().getFont().path);
+        }
+    }
     private OnClickItemListener mOnClickItemListener;
     private View.OnTouchListener mOnTouchListener;
 
