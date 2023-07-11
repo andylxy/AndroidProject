@@ -46,6 +46,10 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.mmkv.MMKV;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
@@ -63,9 +67,27 @@ public final class AppApplication extends Application {
      * @param runnable
      */
     private static Handler handler = new Handler();
+    private ScheduledExecutorService mFixedThreadPool;
+
     public static void runOnUiThread(Runnable runnable) {
         handler.post(runnable);
     }
+    public void newThread(Runnable runnable) {
+
+        try {
+
+            mFixedThreadPool.schedule(runnable,1, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            mFixedThreadPool = Executors.newScheduledThreadPool(Math.min(Runtime.getRuntime().availableProcessors(), 3));//初始化线程池
+            mFixedThreadPool.execute(runnable);
+        }
+    }
+
+    public void shutdownThreadPool(){
+        mFixedThreadPool.shutdownNow();
+    }
+
 
     public static AppApplication getApplication() {
         return application;

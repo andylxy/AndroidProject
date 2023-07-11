@@ -14,17 +14,17 @@ import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.http.api.BookInfoNav;
 
 /**
- *  作者:  zhs
- *  时间:  2023-07-08 10:38:13
- *  包名:  run.yigou.gxzy.ui.adapter
- *  类名:  ChapterTitleAdapter
- *  版本:  1.0
- *  描述:
- *
-*/
+ * 作者:  zhs
+ * 时间:  2023-07-08 10:38:13
+ * 包名:  run.yigou.gxzy.ui.adapter
+ * 类名:  ChapterTitleAdapter
+ * 版本:  1.0
+ * 描述:
+ */
 public final class ChapterTitleAdapter extends AppAdapter<Chapter> {
     private int curChapterPosition = -1;
     private Setting setting;
+
     public void setCurChapterPosition(int curChapterPosition) {
         this.curChapterPosition = curChapterPosition;
     }
@@ -44,6 +44,7 @@ public final class ChapterTitleAdapter extends AppAdapter<Chapter> {
     private final class ViewHolder extends AppAdapter<?>.ViewHolder {
 
         private TextView mTvChapterTitle;
+
         private ViewHolder() {
             super(R.layout.book_chapter_title_item);
             mTvChapterTitle = findViewById(R.id.tv_chapter_title);
@@ -51,7 +52,7 @@ public final class ChapterTitleAdapter extends AppAdapter<Chapter> {
 
         @Override
         public void onBindView(int position) {
-           // mTvChapterTitle.setText();
+            // mTvChapterTitle.setText();
             Chapter chapter = null;
             if (getData() != null) {
                 chapter = getData().get(position);
@@ -60,11 +61,11 @@ public final class ChapterTitleAdapter extends AppAdapter<Chapter> {
                 mTvChapterTitle.setText("【" + chapter.getTitle() + "】");
                 if (setting.isDayStyle()) {
                     mTvChapterTitle.setTextColor(getContext().getResources().getColor(setting.getReadWordColor()));
-                }else {
+                } else {
                     mTvChapterTitle.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
                 }
-
-                if (position == curChapterPosition){
+                //表示当前章节正在阅读
+                if (position == curChapterPosition) {
                     mTvChapterTitle.setTextColor(getContext().getResources().getColor(R.color.sys_dialog_setting_word_red));
                 }
             }

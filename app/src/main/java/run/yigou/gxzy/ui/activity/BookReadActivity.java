@@ -20,6 +20,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.base.action.HandlerAction;
 import com.hjq.http.EasyHttp;
@@ -34,6 +35,7 @@ import java.util.List;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.ResultCallback;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.common.APPCONST;
 import run.yigou.gxzy.common.Language;
 import run.yigou.gxzy.common.ReadStyle;
@@ -73,7 +75,7 @@ public final class BookReadActivity extends AppActivity {
      * 0正序  1倒序
      */
     private int curSortflag = 0;
-    private boolean settingChange=false;//是否是设置改变
+    private boolean settingChange = false;//是否是设置改变
 
     private BookInfoNav.Bean.NavItem mNavItem;
 
@@ -91,19 +93,40 @@ public final class BookReadActivity extends AppActivity {
 
     public float width = 0;
     public float height = 0;
+    /**
+     * 屏幕上部  = 屏幕高度 / 3
+     */
     private float settingOnClickValidFrom;
+    /**
+     * 屏幕下部  = 屏幕高度 / 3  * 2
+     */
     private float settingOnClickValidTo;
     private float pointX;
     private float pointY;
     private float scrolledX;
     private float scrolledY;
-    private boolean autoScrollOpening = false;//是否开启自动滑动
-    private long lastOnClickTime;//上次点击时间
-    private long doubleOnClickConfirmTime = 200;//双击确认时间
-
-    private Dialog mSettingDialog;//设置视图
-    private Dialog mSettingDetailDialog;//详细设置视图
+    /**
+     * 是否开启自动滑动
+     */
+    private boolean autoScrollOpening = false;
+    /**
+     * 上次点击时间
+     */
+    private long lastOnClickTime;
+    /**
+     * 双击确认时间
+     */
+    private long doubleOnClickConfirmTime = 200;
+    /**
+     * 设置视图
+     */
+    private Dialog mSettingDialog;
+    /**
+     * 详细设置视图
+     */
+    private Dialog mSettingDetailDialog;
     private Book mBook;
+    private boolean isFirstInit = true;
 
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
@@ -120,7 +143,7 @@ public final class BookReadActivity extends AppActivity {
                     break;
                 case 2:
                     mPbLoading.setVisibility(View.GONE);
-                    //mSrlContent.finishLoadMore();
+                    mSrlContent.finishLoadMore();
                     break;
                 case 3:
                     int position = msg.arg1;
@@ -139,7 +162,7 @@ public final class BookReadActivity extends AppActivity {
                     mPbLoading.setVisibility(View.GONE);
                     break;
                 case 5:
-                    //saveLastChapterReadPosition(msg.arg1);
+                    saveLastChapterReadPosition(msg.arg1);
                     break;
                 case 6:
 //                    mRvContent.scrollBy(0, mBook.getLastReadPosition());
@@ -149,9 +172,9 @@ public final class BookReadActivity extends AppActivity {
 //                    }
                     break;
                 case 7:
-//                    if (mLinearLayoutManager != null) {
-//                        mRvContent.scrollBy(0, 2);
-//                    }
+                    if (mLinearLayoutManager != null) {
+                        mRvContent.scrollBy(0, 2);
+                    }
                     break;
                 case 8:
                     showSettingView();
@@ -208,65 +231,24 @@ public final class BookReadActivity extends AppActivity {
         mRvContent = findViewById(R.id.rv_content);
 
 
-        //侧页列表项的点击事件监听器
-//        mLvChapterList.setOnItemClickListener((adapterView, view, i, l) -> {
-//            //选中指定Item关闭侧滑菜单
-//            mDlReadActivity.closeDrawer(GravityCompat.START);
-//            final int position;
-//            if (curSortflag == 0) {
-//                //正序
-//                position = i;
-//            } else {
-//                //倒序
-//                position = mChapters.size() - 1 - i;
-//            }
-//            //打开的章节是否为空
-//            if (StringHelper.isEmpty(mChapters.get(position).getContent())) {
-//                mReadActivity.getPbLoading().setVisibility(View.VISIBLE);
-//                //请求当前章节内容
-//                BookStoreApi.getChapterContent(mChapters.get(position).getUrl(), new ResultCallback() {
-//                    @Override
-//                    public void onFinish(Object o, int code) {
-//                        //更新章节内容
-//                        mChapters.get(position).setContent((String) o);
-//                        mChapterService.saveOrUpdateChapter(mChapters.get(position));
-//                        //通知UI刷新画布
-//                        mHandler.sendMessage(mHandler.obtainMessage(4, position, 0));
-//                    }
-//
-//                    @Override
-//                    public void onError(Exception e) {
-//
-//                    }
-//                });
-//            } else {
-//                //显示章节内容
-////                    mReadActivity.getLvContent().setSelection(position);
-//                mReadActivity.getRvContent().scrollToPosition(position);
-//                if (position > mBook.getHisttoryChapterNum()) {
-//                    delayTurnToChapter(position);
-//                }
-//            }
-//
-//        });
-//        mRvContent.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//
-//            @Override
-//            public void onScrolled(RecyclerView recyclerView, int dx, final int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//                //页面初始化的时候不要执行
-//                if (!isFirstInit) {
-//                    MyApplication.getApplication().newThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            saveLastChapterReadPosition(dy);
-//                        }
-//                    });
-//                } else {
-//                    isFirstInit = false;
-//                }
-//            }
-//        });
+        mRvContent.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, final int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                //页面初始化的时候不要执行
+                if (!isFirstInit) {
+                    AppApplication.getApplication().newThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            saveLastChapterReadPosition(dy);
+                        }
+                    });
+                } else {
+                    isFirstInit = false;
+                }
+            }
+        });
 
 //        mTvChapterSort.setOnClickListener(view -> {
 //            if (curSortflag == 0) {//当前正序
@@ -310,21 +292,6 @@ public final class BookReadActivity extends AppActivity {
     }
 
     /**
-     * 延迟跳转章节(防止跳到章节尾部)
-     */
-    private void delayTurnToChapter(final int position) {
-        new Thread(() -> {
-            try {
-                Thread.sleep(50);
-                mHandler.sendMessage(mHandler.obtainMessage(4, position, 0));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
-
-    }
-
-    /**
      * 显示设置视图
      */
     private void showSettingView() {
@@ -342,20 +309,20 @@ public final class BookReadActivity extends AppActivity {
             mSettingDialog = DialogCreator.createReadSetting(getActivity(), mSetting.isDayStyle(), progress, view -> {//返回
                         getActivity().finish();
                     }, view -> {//上一章
-
-                        int curPosition = mLinearLayoutManager.findLastVisibleItemPosition();
+                        int curPosition = mLinearLayoutManager.findFirstVisibleItemPosition();
                         if (curPosition > 0) {
                             mRvContent.scrollToPosition(curPosition - 1);
+                            selectedChapterPosition(curPosition - 1);
                         }
                     }, view -> {//下一章
-
                         int curPosition = mLinearLayoutManager.findLastVisibleItemPosition();
                         if (curPosition < mChapters.size() - 1) {
                             mRvContent.scrollToPosition(curPosition + 1);
                             delayTurnToChapter(curPosition + 1);
+                            selectedChapterPosition(curPosition + 1);
                         }
                     }, view -> {//目录
-                        // initData() ;
+
                         mDlReadActivity.openDrawer(GravityCompat.START);
                         mSettingDialog.dismiss();
 
@@ -542,6 +509,7 @@ public final class BookReadActivity extends AppActivity {
         mBookReadContenAdapter.setmOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                //获取点击坐标(点击屏幕的位置)
                 pointY = event.getRawY();
                 return false;
 
@@ -551,13 +519,19 @@ public final class BookReadActivity extends AppActivity {
         mBookReadContenAdapter.setmOnClickItemListener(new BookReadContenAdapter.OnClickItemListener() {
             @Override
             public void onClick(View view, final int positon) {
-
+                //屏幕可见位置
+                int firstVisibleItemPosition = mLinearLayoutManager.findFirstVisibleItemPosition();
+                int lastVisibleItemPosition = mLinearLayoutManager.findLastVisibleItemPosition();
+                //点击位置为屏幕中间,显示菜单窗口
                 if (pointY > settingOnClickValidFrom && pointY < settingOnClickValidTo) {
                     autoScrollOpening = false;
+                    //首次点击时间
                     long curOnClickTime = DateHelper.getLongDate();
+                    //两次点击间隔时间少于200,侧自动滚屏
                     if (curOnClickTime - lastOnClickTime < doubleOnClickConfirmTime) {
                         autoScroll();
                     } else {
+                        //显示菜单窗口
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -575,10 +549,21 @@ public final class BookReadActivity extends AppActivity {
 
 
                     }
+                    //记录首次击点时间
                     lastOnClickTime = curOnClickTime;
                 } else if (pointY > settingOnClickValidTo) {
+                    //下一章
+                    if ( firstVisibleItemPosition < lastVisibleItemPosition) {
+                        selectedChapterPosition(lastVisibleItemPosition );
+                    }
+
                     mRvContent.scrollBy(0, (int) height);
                 } else if (pointY < settingOnClickValidFrom) {
+                    //上一章
+                    if ( firstVisibleItemPosition < lastVisibleItemPosition) {
+
+                        selectedChapterPosition(firstVisibleItemPosition);
+                    }
                     mRvContent.scrollBy(0, (int) -height);
                 }
             }
@@ -603,6 +588,9 @@ public final class BookReadActivity extends AppActivity {
 //        }
         mPbLoading.setVisibility(View.GONE);
         //内容显示
+        mLinearLayoutManager = new LinearLayoutManager(getActivity());
+        mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        mRvContent.setLayoutManager(mLinearLayoutManager);
         mBookReadContenAdapter = new BookReadContenAdapter(getActivity());
         mBookReadContenAdapter.setData(mChapters);
         mRvContent.setAdapter(mBookReadContenAdapter);
@@ -610,31 +598,57 @@ public final class BookReadActivity extends AppActivity {
         //设置目录
         int selectedPostion, curChapterPosition;
         mChapterTitleAdapter = new ChapterTitleAdapter(getContext());
+        //侧页列表项的点击事件监听器
+        mChapterTitleAdapter.setOnItemClickListener((adapterView, view, i) -> {
+            //选中指定Item关闭侧滑菜单
+            mDlReadActivity.closeDrawer(GravityCompat.START);
+            final int position;
+            if (curSortflag == 0) {
+                //正序
+                position = i;
+            } else {
+                //倒序
+                position = mChapters.size() - 1 - i;
+            }
+            //打开的章节是否为空
+            if (StringHelper.isEmpty(mChapters.get(position).getContent())) {
+                mPbLoading.setVisibility(View.VISIBLE);
+                //请求当前章节内容
+                getChapterContent(position, new ResultCallback() {
+                    @Override
+                    public void onFinish(Object o, int code) {
+                        //更新章节内容
+                        if (position == (int) o) {
+                            // TODO: 2023/7/11 更新内容 
+                            //mChapterService.saveOrUpdateChapter(mChapters.get(position));
+                            //通知UI刷新画布
+                            mHandler.sendMessage(mHandler.obtainMessage(4, position, 0));
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
+            } else {
+                //显示章节内容
+//                    mReadActivity.getLvContent().setSelection(position);
+                mRvContent.scrollToPosition(position);
+                if (position > mBook.getHisttoryChapterNum()) {
+                    delayTurnToChapter(position);
+                }
+            }
+            selectedChapterPosition(position);
+        });
+
         //初始化目录数据
         mChapterTitleAdapter.setData(mChapters);
-        mLinearLayoutManager = new LinearLayoutManager(getActivity());
+        //跳到指定目录位置
+       // selectedChapterPosition(0);
 
-        if (curSortflag == 0) {
-            //findLastVisibleItemPosition 返回 最后一个可见项的位置索引
-            curChapterPosition = mLinearLayoutManager.findLastVisibleItemPosition();
-            //默认加载多少项
-            selectedPostion = curChapterPosition - 5;
-            if (selectedPostion < 0) selectedPostion = 0;
-            if (mChapterTitleAdapter.getCount() - 1 - curChapterPosition < 5)
-                selectedPostion = mChapterTitleAdapter.getCount();
-            mChapterTitleAdapter.setCurChapterPosition(curChapterPosition);
-        } else {
-            // mChapterTitleAdapter = new ChapterTitleAdapter(mReadActivity, R.layout.listview_chapter_title_item, mInvertedOrderChapters);
-            curChapterPosition = mChapterTitleAdapter.getCount() - 1 - mLinearLayoutManager.findLastVisibleItemPosition();
-            selectedPostion = curChapterPosition - 5;
-            if (selectedPostion < 0) selectedPostion = 0;
-            if (mChapterTitleAdapter.getCount() - 1 - curChapterPosition < 5)
-                selectedPostion = mChapterTitleAdapter.getCount();
-            mChapterTitleAdapter.setCurChapterPosition(curChapterPosition);
-        }
         mLvChapterList.setAdapter(mChapterTitleAdapter);
-        //指定位置的项到可见区域
-        mLvChapterList.scrollToPosition(selectedPostion);
+
         //设置阅读窗口的背景色
         SetDayStyle();
         //设置ReadContenAdapter请求网络数据
@@ -648,10 +662,24 @@ public final class BookReadActivity extends AppActivity {
             height = dm.heightPixels;
         }
         //设置点击屏幕范围
+
         settingOnClickValidFrom = height / 3;
+
         settingOnClickValidTo = height / 3 * 2;
         initReadViewOnClick();
 
+    }
+
+    /**
+     * 当前显示在目录标记
+     */
+    private void selectedChapterPosition(int position) {
+
+        mChapterTitleAdapter.setCurChapterPosition(position);
+        //指定位置的项到可见区域
+        mLvChapterList.scrollToPosition(position);
+        //刷新目录
+        mChapterTitleAdapter.notifyDataSetChanged();
     }
 
     private void setGetChapterContent() {
@@ -659,26 +687,65 @@ public final class BookReadActivity extends AppActivity {
             @Override
             public void getChapter(int postion, ResultCallback callback) {
                 // getChapterContent( postion,callback);
-                EasyHttp.get((LifecycleOwner) getContext())
-                        .api(new GetChapterDetail().setId(mChapters.get(postion).getUrl()))
-                        .request(new HttpCallback<HttpData<GetChapterDetail.Bean>>((OnHttpListener) getContext()) {
-                            @Override
-                            public void onSucceed(HttpData<GetChapterDetail.Bean> data) {
-                                if (data != null) {
-                                    GetChapterDetail.Bean bean = data.getData();
-                                    mChapters.get(postion).setContent(bean.getSection());
-                                    // updateAllOldChapterData(chapters);
-                                    // mHandler.sendMessage(mHandler.obtainMessage(1));
-                                    callback.onFinish(postion, 200);
-                                }
-
-                            }
-                        });
+                getChapterContent(postion, callback);
             }
 
 
         });
 
+    }
+
+    /**
+     * 延迟跳转章节(防止跳到章节尾部)
+     */
+    private void delayTurnToChapter(final int position) {
+        new Thread(() -> {
+            try {
+                Thread.sleep(50);
+                mHandler.sendMessage(mHandler.obtainMessage(4, position, 0));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+    }
+
+    /**
+     * 保存最后阅读章节的进度
+     *
+     * @param dy
+     */
+    private void saveLastChapterReadPosition(int dy) {
+        if (mLinearLayoutManager == null) return;
+
+        if (mLinearLayoutManager.findFirstVisibleItemPosition() != mLinearLayoutManager.findLastVisibleItemPosition()
+                || dy == 0) {
+            mBook.setLastReadPosition(0);
+        } else {
+            mBook.setLastReadPosition(mBook.getLastReadPosition() + dy);
+        }
+        mBook.setHisttoryChapterNum(mLinearLayoutManager.findLastVisibleItemPosition());
+        if (!StringHelper.isEmpty(mBook.getId())) {
+            mBookService.updateEntity(mBook);
+        }
+    }
+
+    private void getChapterContent(int postion, ResultCallback callback) {
+        EasyHttp.get(this)
+                .api(new GetChapterDetail().setId(mChapters.get(postion).getUrl()))
+                .request(new HttpCallback<HttpData<GetChapterDetail.Bean>>(this) {
+                    @Override
+                    public void onSucceed(HttpData<GetChapterDetail.Bean> data) {
+                        if (data != null) {
+                            GetChapterDetail.Bean bean = data.getData();
+                            mChapters.get(postion).setContent(bean.getSection());
+                            // updateAllOldChapterData(chapters);
+                            // mHandler.sendMessage(mHandler.obtainMessage(1));
+                            callback.onFinish(postion, 200);
+                        }
+
+                    }
+                });
     }
 
     private void SetDayStyle() {
@@ -702,7 +769,8 @@ public final class BookReadActivity extends AppActivity {
             mLlChapterListView.setBackgroundResource(R.color.sys_night_bg);
         }
         //刷新控件
-        mBookReadContenAdapter.notifyDataSetChanged();
+        if (settingChange)
+            mBookReadContenAdapter.notifyDataSetChanged();
     }
 
     private void dataSetting() {
@@ -794,6 +862,14 @@ public final class BookReadActivity extends AppActivity {
             }
             mChapters.subList(0, newChapters.size());
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //结束时清空内容
+        //RichText.clear(this.getContext());
+        AppApplication.getApplication().shutdownThreadPool();
     }
 
 }
