@@ -16,6 +16,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 
+import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.LifecycleOwner;
@@ -78,7 +79,7 @@ public final class BookReadActivity extends AppActivity {
     private int curSortflag = 0;
     private boolean settingChange = false;//是否是设置改变
 
-    private BookInfoNav.Bean.NavItem mNavItem;
+    // private BookInfoNav.Bean.NavItem mNavItem;
 
     private DrawerLayout mDlReadActivity;
     private SmartRefreshLayout mSrlContent;
@@ -127,6 +128,10 @@ public final class BookReadActivity extends AppActivity {
      */
     private Dialog mSettingDetailDialog;
     private Book mBook;
+    /**
+     * 是否已收藏
+     */
+    private boolean isStoreBook;
     private boolean isFirstInit = true;
     private BookService mBookService;
     private ChapterService mChapterService;
@@ -168,11 +173,11 @@ public final class BookReadActivity extends AppActivity {
                     saveLastChapterReadPosition(msg.arg1);
                     break;
                 case 6:
-//                    mRvContent.scrollBy(0, mBook.getLastReadPosition());
-//                    mBook.setLastReadPosition(0);
-//                    if (!StringHelper.isEmpty(mBook.getId())) {
-//                        mBookService.updateEntity(mBook);
-//                    }
+                    mRvContent.scrollBy(0, mBook.getLastReadPosition());
+                    mBook.setLastReadPosition(0);
+                    if (!StringHelper.isEmpty(mBook.getId())) {
+                        mBookService.updateEntity(mBook);
+                    }
                     break;
                 case 7:
                     if (mLinearLayoutManager != null) {
@@ -189,7 +194,7 @@ public final class BookReadActivity extends AppActivity {
         }
     };
 
-    public static void start(Context context, BookInfoNav.Bean.NavItem item) {
+    public static void start(Context context, Book item) {
         Intent intent = new Intent(context, BookReadActivity.class);
         intent.putExtra(Book_KEY_IN, item);
         if (!(context instanceof Activity)) {
@@ -237,7 +242,7 @@ public final class BookReadActivity extends AppActivity {
         mRvContent.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, final int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, final int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 //页面初始化的时候不要执行
                 if (!isFirstInit) {
@@ -269,18 +274,18 @@ public final class BookReadActivity extends AppActivity {
         mDlReadActivity.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         mDlReadActivity.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
 
             }
 
             @Override
-            public void onDrawerOpened(View drawerView) {
+            public void onDrawerOpened(@NonNull View drawerView) {
                 //打开手势滑动
                 mDlReadActivity.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             }
 
             @Override
-            public void onDrawerClosed(View drawerView) {
+            public void onDrawerClosed(@NonNull View drawerView) {
                 //关闭手势滑动
                 mDlReadActivity.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
             }
@@ -435,7 +440,6 @@ public final class BookReadActivity extends AppActivity {
             settingChange = true;
             //设置阅读窗口的背景色
             SetDayStyle();
-            ;
         }
     }
 
@@ -598,6 +602,14 @@ public final class BookReadActivity extends AppActivity {
         mBookReadContenAdapter = new BookReadContenAdapter(getActivity());
         mBookReadContenAdapter.setData(mChapters);
         mRvContent.setAdapter(mBookReadContenAdapter);
+        if (!settingChange) {
+//            mReadActivity.getLvContent().setSelection(mBook.getHisttoryChapterNum());
+            mRvContent.scrollToPosition(mBook.getHisttoryChapterNum());
+            delayTurnToLastChapterReadPosion();
+
+        } else {
+            settingChange = false;
+        }
         //mSrlContent.finishLoadMore();
         //设置目录
         mChapterTitleAdapter = new ChapterTitleAdapter(getContext());
@@ -631,7 +643,6 @@ public final class BookReadActivity extends AppActivity {
 
                     @Override
                     public void onError(Exception e) {
-
                     }
                 });
             } else {
@@ -644,14 +655,11 @@ public final class BookReadActivity extends AppActivity {
             }
             selectedChapterPosition(position);
         });
-
         //初始化目录数据
         mChapterTitleAdapter.setData(mChapters);
         //跳到指定目录位置
         // selectedChapterPosition(0);
-
         mLvChapterList.setAdapter(mChapterTitleAdapter);
-
         //设置阅读窗口的背景色
         SetDayStyle();
         //设置ReadContenAdapter请求网络数据
@@ -665,12 +673,9 @@ public final class BookReadActivity extends AppActivity {
             height = dm.heightPixels;
         }
         //设置点击屏幕范围
-
         settingOnClickValidFrom = height / 3;
-
         settingOnClickValidTo = height / 3 * 2;
         initReadViewOnClick();
-
     }
 
     /**
@@ -697,6 +702,20 @@ public final class BookReadActivity extends AppActivity {
         });
 
     }
+    /**
+     * 延迟跳转章节位置
+     */
+    private void delayTurnToLastChapterReadPosion() {
+        new Thread(() -> {
+            try {
+                Thread.sleep(100);
+                mHandler.sendMessage(mHandler.obtainMessage(6));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+    }
 
     /**
      * 延迟跳转章节(防止跳到章节尾部)
@@ -715,8 +734,6 @@ public final class BookReadActivity extends AppActivity {
 
     /**
      * 保存最后阅读章节的进度
-     *
-     * @param dy
      */
     private void saveLastChapterReadPosition(int dy) {
         if (mLinearLayoutManager == null) return;
@@ -733,18 +750,19 @@ public final class BookReadActivity extends AppActivity {
         }
     }
 
-    private void getChapterContent(int postion, ResultCallback callback) {
+    private void getChapterContent(int position, ResultCallback callback) {
         EasyHttp.get(this)
-                .api(new GetChapterDetail().setId(mChapters.get(postion).getUrl()))
+                .api(new GetChapterDetail().setId(mChapters.get(position).getUrl()))
                 .request(new HttpCallback<HttpData<GetChapterDetail.Bean>>(this) {
                     @Override
                     public void onSucceed(HttpData<GetChapterDetail.Bean> data) {
                         if (data != null) {
                             GetChapterDetail.Bean bean = data.getData();
-                            mChapters.get(postion).setContent(bean.getSection());
-                            // updateAllOldChapterData(chapters);
-                            // mHandler.sendMessage(mHandler.obtainMessage(1));
-                            callback.onFinish(postion, 200);
+                            mChapters.get(position).setContent(bean.getSection());
+                            //更新章节内容
+                            if (!isStoreBook)
+                             mChapterService.updateChapter(mChapters.get(position));
+                            callback.onFinish(position, 200);
                         }
 
                     }
@@ -753,7 +771,7 @@ public final class BookReadActivity extends AppActivity {
 
     private void SetDayStyle() {
 
-
+        //亮度
         if (!mSetting.isBrightFollowSystem()) {
             BrightUtil.setBrightness(getActivity(), mSetting.getBrightProgress());
         }
@@ -779,13 +797,8 @@ public final class BookReadActivity extends AppActivity {
     private void dataSetting() {
 
         //接收传入书的信息
-        mNavItem = getSerializable(Book_KEY_IN);
-        mBook = new Book();
-        mBook.setAuthor(mNavItem.getAuthor());
-        mBook.setDesc(mNavItem.getDesc());
-        mBook.setChapterUrl(mNavItem.getImageUrl());
-        mBook.setName(mNavItem.getBookName());
-        mBook.setId(mNavItem.getId() + "");
+        mBook = getSerializable(Book_KEY_IN);
+        isStoreBook = StringHelper.isEmpty(mBook.getId());
         //显示进度条(不显示使用)
         // mPbLoading.setVisibility(View.VISIBLE);
         //初始化富文本
@@ -797,14 +810,20 @@ public final class BookReadActivity extends AppActivity {
 
     }
     @Override
+    public void onBackPressed() {
+        // 执行返回操作
+        // ...
+        saveLastChapterReadPosition(0);
+        // 最后调用 super.onBackPressed() 执行默认的返回行为
+        super.onBackPressed();
+    }
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case APPCONST.REQUEST_FONT:
                 if (resultCode == RESULT_OK) {
-//                    mSetting.setFont((Font) data.getSerializableExtra(APPCONST.FONT));
-//                    SysManager.saveSetting(mSetting);
-                   settingChange = true;
+                    settingChange = true;
                     SetDayStyle();
                 }
                 break;
@@ -813,9 +832,10 @@ public final class BookReadActivity extends AppActivity {
 
 
     private void getBookDetailList() {
+        mChapters = (ArrayList<Chapter>) mChapterService.findBookAllChapterByBookId(mBook.getId());
         ArrayList<Chapter> chapters = new ArrayList<>();
         EasyHttp.get(this)
-                .api(new BookDetailList().setId(mNavItem.getId()))
+                .api(new BookDetailList().setId(mBook.getType()))
                 .request(new HttpCallback<HttpData<List<BookDetailList.Bean>>>(this) {
                     @Override
                     public void onSucceed(HttpData<List<BookDetailList.Bean>> data) {
@@ -836,7 +856,13 @@ public final class BookReadActivity extends AppActivity {
 
                                 e.printStackTrace();
                             }
-                            updateAllOldChapterData(chapters);
+                            //是否存储到书架
+                            if (isStoreBook) {
+                                mChapters.addAll(chapters);
+                            } else {
+                                updateAllOldChapterData(chapters);
+                            }
+
                             mHandler.sendMessage(mHandler.obtainMessage(1));
                         }
 
@@ -850,6 +876,7 @@ public final class BookReadActivity extends AppActivity {
      * @param newChapters
      */
     private void updateAllOldChapterData(ArrayList<Chapter> newChapters) {
+
         int i;
         for (i = 0; i < mChapters.size() && i < newChapters.size(); i++) {
             Chapter oldChapter = mChapters.get(i);
@@ -883,7 +910,7 @@ public final class BookReadActivity extends AppActivity {
         super.onDestroy();
         //结束时清空内容
         //RichText.clear(this.getContext());
-       // AppApplication.getApplication().shutdownThreadPool();
+        // AppApplication.getApplication().shutdownThreadPool();
     }
 
 }

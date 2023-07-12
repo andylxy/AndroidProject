@@ -89,12 +89,9 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
             }
             tvTitle.setTextSize(SysManager.getSetting().getReadWordSize() + 2);
             tvContent.setTextSize(SysManager.getSetting().getReadWordSize());
-            // tvContent.setText(contentTest);
-
             if (mOnTouchListener != null) {
                 getItemView().setOnTouchListener(mOnTouchListener);
             }
-
             getItemView().setOnClickListener(v -> {
                 if (mOnClickItemListener != null) {
                     mOnClickItemListener.onClick(getItemView(), position);
@@ -133,77 +130,6 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
         }
     }
 
-//    /**
-//     * 加载章节内容
-//     *
-//     * @param chapter
-//     * @param viewHolder
-//     */
-//    private void getChapterContent(final Chapter chapter) {
-//
-//      BookStoreApi.getChapterContent(chapter.getUrl(), new ResultCallback() {
-//                @Override
-//                public void onFinish(final Object o, int code) {
-//                    chapter.setContent((String) o);
-//                    mChapterService.saveOrUpdateChapter(chapter);
-//                    if (viewHolder != null) {
-//                        mHandler.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                viewHolderSetTvContent(viewHolder, chapter);
-//                                //viewHolder.tvContent.setText(getLanguageContext((String) o));
-////                                RichText.from(getLanguageContext((String) o)).bind(mContext)
-////                                        .showBorder(false)
-////                                        .size(ImageHolder.MATCH_PARENT, ImageHolder.WRAP_CONTENT)
-////                                        .into( viewHolder.tvContent);
-//
-//                                viewHolder.tvErrorTips.setVisibility(View.GONE);
-//                            }
-//                        });
-//                    }
-//                }
-//
-//                @Override
-//                public void onError(Exception e) {
-//                    if (viewHolder != null) {
-//                        mHandler.sendMessage(mHandler.obtainMessage(1, viewHolder));
-//                    }
-//                }
-//
-//            });
-////                EasyHttp.get(this)
-////                        .api(new BookDetailList().setId(mNavItem.getId()))
-////                        .request(new HttpCallback<HttpData<List<BookDetailList.Bean>>>(this) {
-////                            @Override
-////                            public void onSucceed(HttpData<List<BookDetailList.Bean>> data) {
-////                                if (data !=null && data.getData().size() > 0){
-////                                    List<BookDetailList.Bean> detailList =  data.getData();
-////                                    int i = 0;
-////                                    try {
-////                                        for (BookDetailList.Bean bean : detailList) {
-////                                            for (ChapterList chapt : bean.getChapterList()) {
-////                                                Chapter chapter = new Chapter();
-////                                                chapter.setNumber(i++);
-////                                                chapter.setTitle(chapt.getTitle());
-////                                                chapter.setUrl( chapt.getId()+"");
-////                                                chapters.add(chapter);
-////                                            }
-////                                        }
-////                                    } catch (Exception e) {
-////
-////                                        e.printStackTrace();
-////                                    }
-////                                    updateAllOldChapterData(chapters);
-////                                    mHandler.sendMessage(mHandler.obtainMessage(1));
-////                                }
-////
-////                            }
-////                        });
-////            }
-////
-////        });
-//
-//    }
 
     private String getLanguageContext(String content) {
         if (SysManager.getSetting().getLanguage() == Language.traditional && SysManager.getSetting().getFont() == Font.默认字体) {

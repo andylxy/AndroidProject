@@ -2,43 +2,32 @@ package run.yigou.gxzy.greendao.service;
 
 import android.database.Cursor;
 
+import org.greenrobot.greendao.query.QueryBuilder;
+
 import run.yigou.gxzy.greendao.GreenDaoManager;
+import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.gen.DaoSession;
 
-/**
- * Created by zhao on 2017/7/24.
- */
+public abstract class BaseService<T>  {
 
-public class BaseService {
+    public DaoSession daoSession= GreenDaoManager.getInstance().getSession();
+    public abstract void addEntity(T entity) ;
 
-    public void addEntity(Object entity){
-        DaoSession daoSession  = GreenDaoManager.getInstance().getSession();
-        daoSession.insert(entity);
-    }
+    public abstract void updateEntity(T entity);
 
-    public void updateEntity(Object entity){
-
-        DaoSession daoSession  = GreenDaoManager.getInstance().getSession();
-        daoSession.update(entity);
-    }
-
-    public void deleteEntity(Object entity){
-        DaoSession daoSession  = GreenDaoManager.getInstance().getSession();
-        daoSession.delete(entity);
-
-    }
+    public abstract void deleteEntity(T entity);
 
     /**
      * 通过SQL查找
+     *
      * @param sql
      * @param selectionArgs
      * @return
      */
-    public Cursor selectBySql(String sql, String[] selectionArgs){
+    public Cursor selectBySql(String sql, String[] selectionArgs) {
 
         Cursor cursor = null;
         try {
-            DaoSession daoSession  = GreenDaoManager.getInstance().getSession();
             cursor = daoSession.getDatabase().rawQuery(sql, selectionArgs);
         } catch (Exception e) {
             e.printStackTrace();
@@ -49,15 +38,13 @@ public class BaseService {
 
     /**
      * 执行SQL进行增删改
+     *
      * @param sql
      * @param selectionArgs
      */
-    public void  rawQuery(String sql, String[] selectionArgs) {
-        DaoSession daoSession  = GreenDaoManager.getInstance().getSession();
-        Cursor cursor = daoSession.getDatabase().rawQuery(sql,selectionArgs);
+    public void rawQuery(String sql, String[] selectionArgs) {
+        Cursor cursor = daoSession.getDatabase().rawQuery(sql, selectionArgs);
     }
-
-
 
 
 }

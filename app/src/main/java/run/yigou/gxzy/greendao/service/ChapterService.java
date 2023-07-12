@@ -2,12 +2,17 @@ package run.yigou.gxzy.greendao.service;
 
 import android.database.Cursor;
 
+import org.greenrobot.greendao.query.DeleteQuery;
+import org.greenrobot.greendao.query.QueryBuilder;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import run.yigou.gxzy.greendao.GreenDaoManager;
+import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.Chapter;
+import run.yigou.gxzy.greendao.gen.BookDao;
 import run.yigou.gxzy.greendao.gen.ChapterDao;
 import run.yigou.gxzy.utils.StringHelper;
 
@@ -15,9 +20,10 @@ import run.yigou.gxzy.utils.StringHelper;
  * Created by zhao on 2017/7/24.
  */
 
-public class ChapterService extends BaseService {
+public class ChapterService extends BaseService<Chapter> {
 
-
+    public QueryBuilder<Chapter> mChapterQueryBuilder = daoSession.queryBuilder(Chapter.class);
+    ChapterDao daoConn = daoSession.getChapterDao();
     private List<Chapter> findChapters(String sql, String[] selectionArgs) {
         ArrayList<Chapter> chapters = new ArrayList<>();
         try {
@@ -57,13 +63,11 @@ public class ChapterService extends BaseService {
      * @return
      */
     public List<Chapter> findBookAllChapterByBookId(String bookId) {
-
         if (StringHelper.isEmpty(bookId)) return new ArrayList<>();
-
-
-        String sql = "select * from chapter where book_id = ? order by number";
-
-        return findChapters(sql, new String[]{bookId});
+        //String sql = "select * from chapter where book_id = ? order by number";
+        // return findChapters(sql, new String[]{bookId});
+        QueryBuilder<Chapter> where  = mChapterQueryBuilder.where(ChapterDao.Properties.BookId.eq(bookId));
+        return    where.list();
     }
 
     /**
@@ -105,16 +109,21 @@ public class ChapterService extends BaseService {
      * @param bookId
      */
     public void deleteBookALLChapterById(String bookId) {
-        String sel = "delete from chapter where book_id = ?";
-        rawQuery(sel, new String[]{bookId});
+       // String sel = "delete from chapter where book_id = ?";
+       // rawQuery(sel, new String[]{bookId});
+
+        QueryBuilder<Chapter> where  = mChapterQueryBuilder.where(ChapterDao.Properties.BookId.eq(bookId));
+        DeleteQuery<Chapter> deleteQuery = where.buildDelete();
+        deleteQuery.executeDeleteWithoutDetachingEntities();
+
     }
 
     /**
      * 更新章节
      */
     public void updateChapter(Chapter chapter) {
-        ChapterDao chapterDao = GreenDaoManager.getInstance().getSession().getChapterDao();
-        chapterDao.update(chapter);
+       // ChapterDao chapterDao = GreenDaoManager.getInstance().getSession().getChapterDao();
+        daoConn.update(chapter);
     }
 
     /**
@@ -151,9 +160,24 @@ public class ChapterService extends BaseService {
      * 批量添加章节
      */
     public void addChapters(List<Chapter> chapters) {
-        ChapterDao chapterDao = GreenDaoManager.getInstance().getSession().getChapterDao();
-        chapterDao.insertInTx(chapters);
+       // ChapterDao chapterDao = daoSession.getChapterDao();
+        daoConn.insertInTx(chapters);
 
+    }
+
+    @Override
+    public void addEntity(Chapter entity) {
+        daoConn.insert(entity);
+    }
+
+    @Override
+    public void updateEntity(Chapter entity) {
+        daoConn .update(entity);
+    }
+
+    @Override
+    public void deleteEntity(Chapter entity) {
+        daoConn.delete(entity);
     }
 
 }
