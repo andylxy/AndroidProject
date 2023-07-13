@@ -128,7 +128,7 @@ public final class BookInfoActivity extends AppActivity {
             mBook = new Book();
             mBook.setAuthor(mNavItem.getAuthor());
             mBook.setDesc(mNavItem.getDesc());
-            mBook.setChapterUrl(mNavItem.getImageUrl());
+            mBook.setImgUrl(mNavItem.getImageUrl());
             mBook.setName(mNavItem.getBookName());
             mBook.setType(mNavItem.getId());
         }

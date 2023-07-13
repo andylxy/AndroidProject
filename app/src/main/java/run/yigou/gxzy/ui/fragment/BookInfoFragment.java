@@ -60,7 +60,7 @@ public final class BookInfoFragment extends TitleBarFragment<AppActivity>
 
     @Override
     protected int getLayoutId() {
-        return R.layout.status_fragment;
+        return R.layout.book_info_fragment;
     }
 
     @Override

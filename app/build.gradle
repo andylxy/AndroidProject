@@ -33,10 +33,10 @@ android {
     // Apk 签名的那些事：https://www.jianshu.com/p/a1f8e5896aa2
     signingConfigs {
         config {
-            storeFile file(StoreFile)
-            storePassword StorePassword
-            keyAlias KeyAlias
-            keyPassword KeyPassword
+            storeFile file('E:\\app\\jks\\ctwhzy.jks')
+            storePassword 'andyxiaoyang1A'
+            keyAlias 'ctwhzy'
+            keyPassword 'andyxiaoyang1A'
         }
     }
 

@@ -30,29 +30,29 @@ public class BookService extends BaseService<Book> {
     private List<Book> findBooks(String sql, String[] selectionArgs) {
         ArrayList<Book> books = new ArrayList<>();
         try {
-            Cursor cursor = selectBySql(sql, selectionArgs);
-            while (cursor.moveToNext()) {
-                Book book = new Book();
-                book.setId(cursor.getString(0));
-                book.setName(cursor.getString(1));
-                book.setChapterUrl(cursor.getString(2));
-                book.setImgUrl(cursor.getString(3));
-                book.setDesc(cursor.getString(4));
-                book.setAuthor(cursor.getString(5));
-                book.setType(cursor.getString(6));
-                book.setUpdateDate(cursor.getString(7));
-                book.setNewestChapterId(cursor.getString(8));
-                book.setNewestChapterTitle(cursor.getString(9));
-                book.setNewestChapterUrl(cursor.getString(10));
-                book.setHistoryChapterId(cursor.getString(11));
-                book.setHisttoryChapterNum(cursor.getInt(12));
-                book.setSortCode(cursor.getInt(13));
-                book.setNoReadNum(cursor.getInt(14));
-                book.setChapterTotalNum(cursor.getInt(15));
-                book.setLastReadPosition(cursor.getInt(16));
-                book.setSource(cursor.getString(17));
-                books.add(book);
-            }
+//            Cursor cursor = selectBySql(sql, selectionArgs);
+//            while (cursor.moveToNext()) {
+//                Book book = new Book();
+//                book.setId(cursor.getString(0));
+//                book.setName(cursor.getString(1));
+//                book.setChapterUrl(cursor.getString(2));
+//                book.setImgUrl(cursor.getString(3));
+//                book.setDesc(cursor.getString(4));
+//                book.setAuthor(cursor.getString(5));
+//                book.setType(cursor.getString(6));
+//                book.setUpdateDate(cursor.getString(7));
+//                book.setNewestChapterId(cursor.getString(8));
+//                book.setNewestChapterTitle(cursor.getString(9));
+//                book.setNewestChapterUrl(cursor.getString(10));
+//                book.setHistoryChapterId(cursor.getString(11));
+//                book.setHisttoryChapterNum(cursor.getInt(12));
+//                book.setSortCode(cursor.getInt(13));
+//                book.setNoReadNum(cursor.getInt(14));
+//                book.setChapterTotalNum(cursor.getInt(15));
+//                book.setLastReadPosition(cursor.getInt(16));
+//                book.setSource(cursor.getString(17));
+//                books.add(book);
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -66,8 +66,7 @@ public class BookService extends BaseService<Book> {
      * @return
      */
     public Book getBookById(String id) {
-        BookDao bookDao = GreenDaoManager.getInstance().getSession().getBookDao();
-        return bookDao.load(id);
+        return daoConn.load(id);
     }
 
     /**
@@ -76,8 +75,9 @@ public class BookService extends BaseService<Book> {
      * @return
      */
     public List<Book> getAllBooks() {
-        String sql = "select * from book  order by sort_code";
-        return findBooks(sql, null);
+        //查出当前对应的数据
+       // List<Book> bookList = mBookQueryBuilder.list();
+        return mBookQueryBuilder.list();
     }
 
     /**

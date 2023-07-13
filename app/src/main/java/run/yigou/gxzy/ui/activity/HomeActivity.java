@@ -18,6 +18,7 @@ import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.other.DoubleClickHelper;
 import run.yigou.gxzy.ui.adapter.NavigationAdapter;
+import run.yigou.gxzy.ui.fragment.BookCollectCaseFragment;
 import run.yigou.gxzy.ui.fragment.FindFragment;
 import run.yigou.gxzy.ui.fragment.HomeFragment;
 import run.yigou.gxzy.ui.fragment.MessageFragment;
@@ -80,7 +81,7 @@ public final class HomeActivity extends AppActivity
     @Override
     protected void initData() {
         mPagerAdapter = new FragmentPagerAdapter<>(this);
-        mPagerAdapter.addFragment(FindFragment.newInstance());
+        mPagerAdapter.addFragment(BookCollectCaseFragment.newInstance());
         mPagerAdapter.addFragment(HomeFragment.newInstance());
         mPagerAdapter.addFragment(MessageFragment.newInstance());
         mPagerAdapter.addFragment(MineFragment.newInstance());
@@ -138,6 +139,8 @@ public final class HomeActivity extends AppActivity
             case 1:
             case 2:
             case 3:
+              if (position == 0)
+                  ((BookCollectCaseFragment)mPagerAdapter.getItem(0)).RefreshLayout();
                 mViewPager.setCurrentItem(position);
                 return true;
             default:
@@ -177,4 +180,6 @@ public final class HomeActivity extends AppActivity
         mNavigationView.setAdapter(null);
         mNavigationAdapter.setOnNavigationListener(null);
     }
+
+
 }

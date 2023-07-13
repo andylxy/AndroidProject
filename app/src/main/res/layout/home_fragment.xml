@@ -49,7 +49,7 @@
                         android:textColor="@color/white"
                         android:textSize="@dimen/sp_15" />
 
-                    <androidx.appcompat.widget.AppCompatTextView
+                    <com.hjq.widget.view.ClearEditText
                         android:id="@+id/tv_home_hint"
                         android:layout_width="0px"
                         android:layout_height="wrap_content"
