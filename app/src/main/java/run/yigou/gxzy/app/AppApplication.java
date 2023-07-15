@@ -189,6 +189,8 @@ public final class AppApplication extends Application {
                     headers.put("deviceOaid", UmengClient.getDeviceOaid());
                     headers.put("versionName", AppConfig.getVersionName());
                     headers.put("versionCode", String.valueOf(AppConfig.getVersionCode()));
+//                    headers.put("Content-Type", "application/json;charset=UTF-8");
+//                    headers.put("Accept", "application/json, text/plain, */*");
                     // 添加全局请求参数
                     // params.put("6666666", "6666666");
                 })

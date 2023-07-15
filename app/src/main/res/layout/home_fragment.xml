@@ -45,11 +45,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
-                        android:text="广州"
+                        android:text="搜索"
                         android:textColor="@color/white"
                         android:textSize="@dimen/sp_15" />
 
-                    <com.hjq.widget.view.ClearEditText
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/tv_home_hint"
                         android:layout_width="0px"
                         android:layout_height="wrap_content"
@@ -58,7 +58,8 @@
                         android:background="@drawable/home_search_bar_transparent_bg"
                         android:gravity="center"
                         android:paddingVertical="@dimen/dp_5"
-                        android:text="完善细节，追求完美"
+                        android:text="问真 | 寻源"
+                        android:hint=""
                         android:textColor="@color/white60"
                         android:textSize="@dimen/sp_13" />
 

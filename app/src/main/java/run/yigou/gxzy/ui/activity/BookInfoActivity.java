@@ -17,6 +17,7 @@ import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.other.AppConfig;
+import run.yigou.gxzy.ui.fragment.BookCollectCaseFragment;
 import run.yigou.gxzy.utils.StringHelper;
 
 /**
@@ -94,6 +95,7 @@ public final class BookInfoActivity extends AppActivity {
             case R.id.btn_add_bookcase:
                 if (StringHelper.isEmpty(mBook.getId())) {
                     mBookService.addBook(mBook);
+                    BookCollectCaseFragment.mBookCollectCaseFragment.RefreshLayout();
                     toast("成功加入书架");
                     btnAddBookcase.setText("弃书不读了");
                 } else {

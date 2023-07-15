@@ -11,7 +11,9 @@
 package run.yigou.gxzy.ui.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatImageView;
@@ -23,16 +25,18 @@ import androidx.viewpager.widget.ViewPager;
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.FragmentPagerAdapter;
 import com.hjq.http.EasyHttp;
+import com.hjq.http.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.model.HttpData;
+import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.adapter.TabAdapter;
 import run.yigou.gxzy.widget.XCollapsingToolbarLayout;
@@ -80,22 +84,19 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
         mTabView = findViewById(R.id.rv_home_tab);
         mViewPager = findViewById(R.id.vp_home_pager);
-
         mPagerAdapter = new FragmentPagerAdapter<>(this);
-
-
         //mPagerAdapter.addFragment(BrowserFragment.newInstance("https://github.com/getActivity"), "网页演示");
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.addOnPageChangeListener(this);
-
         mTabAdapter = new TabAdapter(getAttachActivity());
         mTabView.setAdapter(mTabAdapter);
-
         // 给这个 ToolBar 设置顶部内边距，才能和 TitleBar 进行对齐
         ImmersionBar.setTitleBar(getAttachActivity(), mToolbar);
 
         //设置渐变监听
         mCollapsingToolbarLayout.setOnScrimsListener(this);
+        setOnClickListener(R.id.tv_home_hint,R.id.iv_home_search);
+
     }
 
     @Override
@@ -103,8 +104,24 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         getBookInfoList();
        // mTabAdapter.addItem("网页演示");
         mTabAdapter.setOnTabListener(this);
+
     }
 
+    @SingleClick
+    @Override
+    public void onClick(View view) {
+        int viewId = view.getId();
+
+        switch (viewId) {
+            case R.id.tv_home_hint:
+            case R.id.iv_home_search:
+                Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
+                startActivity(intent);
+                break;
+            default:
+                EasyLog.print("onClick value: " + viewId);
+        }
+    }
     private void getBookInfoList() {
         EasyHttp.get(this)
                 .api(new BookInfoNav())

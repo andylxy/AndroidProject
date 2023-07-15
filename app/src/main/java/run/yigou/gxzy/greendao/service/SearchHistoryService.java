@@ -3,6 +3,7 @@ package run.yigou.gxzy.greendao.service;
 import android.database.Cursor;
 
 
+import org.greenrobot.greendao.query.DeleteQuery;
 import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.ArrayList;
@@ -18,17 +19,16 @@ import run.yigou.gxzy.utils.DateHelper;
 
 
 /**
- *  作者:  zhs
- *  时间:  2023-07-12 22:30:01
- *  包名:  run.yigou.gxzy.greendao.service
- *  类名:  SearchHistoryService
- *  版本:  1.0
- *  描述:
- *
-*/
+ * 作者:  zhs
+ * 时间:  2023-07-12 22:30:01
+ * 包名:  run.yigou.gxzy.greendao.service
+ * 类名:  SearchHistoryService
+ * 版本:  1.0
+ * 描述:
+ */
 
 public class SearchHistoryService extends BaseService<SearchHistory> {
-    public QueryBuilder<SearchHistory> mChapterQueryBuilder = daoSession.queryBuilder(SearchHistory.class);
+    public QueryBuilder<SearchHistory> mSearchHistoryQueryBuilder = daoSession.queryBuilder(SearchHistory.class);
     SearchHistoryDao daoConn = daoSession.getSearchHistoryDao();
 
     private ArrayList<SearchHistory> findSearchHistorys(String sql, String[] selectionArgs) {
@@ -56,8 +56,10 @@ public class SearchHistoryService extends BaseService<SearchHistory> {
      * @return
      */
     public ArrayList<SearchHistory> findAllSearchHistory() {
-        String sql = "select * from search_history order by create_date desc";
-        return findSearchHistorys(sql, null);
+        //  String sql = "select * from search_history order by create_date desc";
+        // return findSearchHistorys(sql, null);
+        return  (ArrayList<SearchHistory>)mSearchHistoryQueryBuilder.list();
+
     }
 
 
@@ -85,8 +87,7 @@ public class SearchHistoryService extends BaseService<SearchHistory> {
      * 清空历史记录
      */
     public void clearHistory() {
-        SearchHistoryDao searchHistoryDao = GreenDaoManager.getInstance().getSession().getSearchHistoryDao();
-        searchHistoryDao.deleteAll();
+         mSearchHistoryQueryBuilder.buildDelete().executeDeleteWithoutDetachingEntities();
     }
 
     /**

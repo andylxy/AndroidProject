@@ -51,6 +51,7 @@ import run.yigou.gxzy.greendao.service.ChapterService;
 import run.yigou.gxzy.http.api.BookDetailList;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.api.GetChapterDetail;
+import run.yigou.gxzy.http.entitymodel.ChapterInfo;
 import run.yigou.gxzy.http.entitymodel.ChapterList;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.adapter.BookReadContenAdapter;
@@ -132,6 +133,7 @@ public final class BookReadActivity extends AppActivity {
      * 是否已收藏
      */
     private boolean isStoreBook;
+    private boolean isSearch;
     private boolean isFirstInit = true;
     private BookService mBookService;
     private ChapterService mChapterService;
@@ -615,6 +617,7 @@ public final class BookReadActivity extends AppActivity {
         mChapterTitleAdapter = new ChapterTitleAdapter(getContext());
         //侧页列表项的点击事件监听器
         mChapterTitleAdapter.setOnItemClickListener((adapterView, view, i) -> {
+
             //选中指定Item关闭侧滑菜单
             mDlReadActivity.closeDrawer(GravityCompat.START);
             final int position;
@@ -675,7 +678,8 @@ public final class BookReadActivity extends AppActivity {
         //设置点击屏幕范围
         settingOnClickValidFrom = height / 3;
         settingOnClickValidTo = height / 3 * 2;
-        initReadViewOnClick();
+        //搜索时不显示设置页
+        if(!isSearch)initReadViewOnClick();
     }
 
     /**
@@ -702,6 +706,7 @@ public final class BookReadActivity extends AppActivity {
         });
 
     }
+
     /**
      * 延迟跳转章节位置
      */
@@ -736,7 +741,7 @@ public final class BookReadActivity extends AppActivity {
      * 保存最后阅读章节的进度
      */
     private void saveLastChapterReadPosition(int dy) {
-        if (mLinearLayoutManager == null) return;
+        if (mLinearLayoutManager == null || isSearch ) return;
 
         if (mLinearLayoutManager.findFirstVisibleItemPosition() != mLinearLayoutManager.findLastVisibleItemPosition()
                 || dy == 0) {
@@ -761,7 +766,7 @@ public final class BookReadActivity extends AppActivity {
                             mChapters.get(position).setContent(bean.getSection());
                             //更新章节内容
                             if (!isStoreBook)
-                             mChapterService.updateChapter(mChapters.get(position));
+                                mChapterService.updateChapter(mChapters.get(position));
                             callback.onFinish(position, 200);
                         }
 
@@ -799,6 +804,7 @@ public final class BookReadActivity extends AppActivity {
         //接收传入书的信息
         mBook = getSerializable(Book_KEY_IN);
         isStoreBook = StringHelper.isEmpty(mBook.getId());
+        isSearch =  mBook.getSource() !=null && mBook.getSource().equals("Search");
         //显示进度条(不显示使用)
         // mPbLoading.setVisibility(View.VISIBLE);
         //初始化富文本
@@ -809,6 +815,7 @@ public final class BookReadActivity extends AppActivity {
         getBookDetailList();
 
     }
+
     @Override
     public void onBackPressed() {
         // 执行返回操作
@@ -817,6 +824,7 @@ public final class BookReadActivity extends AppActivity {
         // 最后调用 super.onBackPressed() 执行默认的返回行为
         super.onBackPressed();
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -832,42 +840,60 @@ public final class BookReadActivity extends AppActivity {
 
 
     private void getBookDetailList() {
-        mChapters = (ArrayList<Chapter>) mChapterService.findBookAllChapterByBookId(mBook.getId());
-        ArrayList<Chapter> chapters = new ArrayList<>();
-        EasyHttp.get(this)
-                .api(new BookDetailList().setId(mBook.getType()))
-                .request(new HttpCallback<HttpData<List<BookDetailList.Bean>>>(this) {
-                    @Override
-                    public void onSucceed(HttpData<List<BookDetailList.Bean>> data) {
-                        if (data != null && data.getData().size() > 0) {
-                            List<BookDetailList.Bean> detailList = data.getData();
-                            int i = 0;
-                            try {
-                                for (BookDetailList.Bean bean : detailList) {
-                                    for (ChapterList chapt : bean.getChapterList()) {
-                                        Chapter chapter = new Chapter();
-                                        chapter.setNumber(i++);
-                                        chapter.setTitle(chapt.getTitle());
-                                        chapter.setUrl(chapt.getId() + "");
-                                        chapters.add(chapter);
+        if (!isSearch) {
+            mChapters = (ArrayList<Chapter>) mChapterService.findBookAllChapterByBookId(mBook.getId());
+            ArrayList<Chapter> chapters = new ArrayList<>();
+            EasyHttp.get(this)
+                    .api(new BookDetailList().setId(mBook.getType()))
+                    .request(new HttpCallback<HttpData<List<BookDetailList.Bean>>>(this) {
+                        @Override
+                        public void onSucceed(HttpData<List<BookDetailList.Bean>> data) {
+                            if (data != null && data.getData().size() > 0) {
+                                List<BookDetailList.Bean> detailList = data.getData();
+                                int i = 0;
+                                try {
+                                    for (BookDetailList.Bean bean : detailList) {
+                                        for (ChapterList chapt : bean.getChapterList()) {
+                                            Chapter chapter = new Chapter();
+                                            chapter.setNumber(i++);
+                                            chapter.setTitle(chapt.getTitle());
+                                            chapter.setUrl(chapt.getId() + "");
+                                            chapters.add(chapter);
+                                        }
                                     }
+                                } catch (Exception e) {
+
+                                    e.printStackTrace();
                                 }
-                            } catch (Exception e) {
-
-                                e.printStackTrace();
-                            }
-                            //是否存储到书架
-                            if (isStoreBook) {
-                                mChapters.addAll(chapters);
-                            } else {
-                                updateAllOldChapterData(chapters);
+                                //是否存储到书架
+                                if (isStoreBook) {
+                                    mChapters.addAll(chapters);
+                                } else {
+                                    updateAllOldChapterData(chapters);
+                                }
+                                mHandler.sendMessage(mHandler.obtainMessage(1));
                             }
 
-                            mHandler.sendMessage(mHandler.obtainMessage(1));
                         }
+                    });
+        } else {
+            EasyHttp.get(this)
+                    .api(new GetChapterDetail().setId(mBook.getChapterUrl()))
+                    .request(new HttpCallback<HttpData<GetChapterDetail.Bean>>(this) {
+                        @Override
+                        public void onSucceed(HttpData<GetChapterDetail.Bean> data) {
+                            if (data != null) {
+                                GetChapterDetail.Bean bean = data.getData();
+                                mChapters.add(new Chapter(bean.getId() + "", bean.getId() + "", 0, bean.getTitle(), "", bean.getSection()));
+                                postDelayed(()->{
+                                    initViewData();
+                                },1000);
 
-                    }
-                });
+                            }
+
+                        }
+                    });
+        }
     }
 
     /**

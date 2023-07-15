@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">醫典笔记</string>
+    <string name="app_name">知然醫典</string>
 
     <!-- 通用的 -->
     <string name="common_loading">加载中&#8230;</string>
@@ -272,6 +272,8 @@
     <string name="font_use">立即使用</string>
 
     <string name="font">字体</string>
+    <string name="search_content">搜索</string>
+
 
     <string name="tip">提示</string>
 

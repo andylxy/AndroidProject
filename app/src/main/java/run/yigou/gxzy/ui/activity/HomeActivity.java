@@ -35,7 +35,7 @@ public final class HomeActivity extends AppActivity
 
     private static final String INTENT_KEY_IN_FRAGMENT_INDEX = "fragmentIndex";
     private static final String INTENT_KEY_IN_FRAGMENT_CLASS = "fragmentClass";
-
+public  static  HomeActivity mHomeActivity;
     private ViewPager mViewPager;
     private RecyclerView mNavigationView;
 
@@ -86,7 +86,7 @@ public final class HomeActivity extends AppActivity
         mPagerAdapter.addFragment(MessageFragment.newInstance());
         mPagerAdapter.addFragment(MineFragment.newInstance());
         mViewPager.setAdapter(mPagerAdapter);
-
+        mHomeActivity=this;
         onNewIntent(getIntent());
     }
 
@@ -110,7 +110,7 @@ public final class HomeActivity extends AppActivity
         switchFragment(savedInstanceState.getInt(INTENT_KEY_IN_FRAGMENT_INDEX));
     }
 
-    private void switchFragment(int fragmentIndex) {
+    public void switchFragment(int fragmentIndex) {
         if (fragmentIndex == -1) {
             return;
         }
@@ -139,9 +139,7 @@ public final class HomeActivity extends AppActivity
             case 1:
             case 2:
             case 3:
-              if (position == 0)
-                  ((BookCollectCaseFragment)mPagerAdapter.getItem(0)).RefreshLayout();
-                mViewPager.setCurrentItem(position);
+             mViewPager.setCurrentItem(position);
                 return true;
             default:
                 return false;

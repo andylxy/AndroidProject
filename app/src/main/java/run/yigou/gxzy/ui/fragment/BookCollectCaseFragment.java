@@ -3,6 +3,7 @@ package run.yigou.gxzy.ui.fragment;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,13 +46,16 @@ import java.util.List;
  * 描述:
  */
 public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity>
-        implements OnRefreshLoadMoreListener, BaseAdapter.OnItemClickListener, BaseAdapter.OnItemLongClickListener {
+        implements OnRefreshLoadMoreListener, BaseAdapter.OnItemClickListener, BaseAdapter.OnItemLongClickListener, View.OnClickListener {
 
     private LinearLayout mLlNoDataTips;
     private WrapRecyclerView mGvBook;
     private BookCollectCaseAdapter mBookCollectCaseAdapter;
     private BookService mBookService;
     private SmartRefreshLayout mRefreshLayout;
+    public static  BookCollectCaseFragment mBookCollectCaseFragment;
+//    private ImageView mNobookImageView;
+//    private TextView mNoBtnTextView;
 
     public static BookCollectCaseFragment newInstance() {
         return new BookCollectCaseFragment();
@@ -64,6 +68,8 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
 
     @Override
     protected void initView() {
+//        mNobookImageView = findViewById(R.id.ll_no_book);
+//        mNoBtnTextView = findViewById(R.id.ll_no_btn);
         mRefreshLayout = findViewById(R.id.rl_status_refresh);
         mLlNoDataTips = findViewById(R.id.ll_no_data_tips);
         mGvBook = findViewById(R.id.gv_book);
@@ -71,6 +77,17 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
         mBookCollectCaseAdapter.setOnItemClickListener(this);
         mBookCollectCaseAdapter.setOnItemLongClickListener(this);
         mGvBook.setAdapter(mBookCollectCaseAdapter);
+        setOnClickListener(R.id.ll_no_data_tips, R.id.ll_no_book, R.id.ll_no_btn);
+
+    }
+
+    @SingleClick
+    @Override
+    public void onClick(View view) {
+        int index =1;
+       // HomeActivity.start(getContext());
+        HomeActivity.mHomeActivity. switchFragment(index);
+        HomeActivity.mHomeActivity.onNavigationItemSelected(index);
     }
 
     @Override
@@ -78,15 +95,19 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
         setTitle("书架");
         mBookService = new BookService();
         mBookCollectCaseAdapter.setData(loadData());
+        mBookCollectCaseFragment=this;
+
     }
 
     private List<Book> loadData() {
         List<Book> gvLisg = mBookService.getAllBooks();
         if (gvLisg.size() > 0) {
             mLlNoDataTips.setVisibility(View.GONE);
+            mRefreshLayout.setVisibility(View.VISIBLE);
             return gvLisg;
         } else {
             mLlNoDataTips.setVisibility(View.VISIBLE);
+            mRefreshLayout.setVisibility(View.GONE);
             return new ArrayList<>();
         }
     }
@@ -100,7 +121,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
 
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
-       // toast(mBookCollectCaseAdapter.getItem(position));
+        // toast(mBookCollectCaseAdapter.getItem(position));
         BookReadActivity.start(getActivity(), mBookCollectCaseAdapter.getItem(position));
     }
 

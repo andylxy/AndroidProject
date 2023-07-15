@@ -73,6 +73,13 @@
             </intent-filter>
 
         </activity>
+
+        <!-- 书本内容BookContentSearchActivity -->
+        <activity
+            android:name=".ui.activity.BookContentSearchActivity"
+            android:label="@string/search_content"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
         <!-- 书本信息 -->
         <activity
             android:name=".ui.activity.FontsActivity"
