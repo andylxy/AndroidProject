@@ -58,6 +58,7 @@ import run.yigou.gxzy.ui.adapter.BookReadContenAdapter;
 import run.yigou.gxzy.ui.adapter.ChapterTitleAdapter;
 import run.yigou.gxzy.ui.fragment.BookInfoFragment;
 import run.yigou.gxzy.utils.BrightUtil;
+import run.yigou.gxzy.utils.ConvertHtmlColorsHelper;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.utils.StringHelper;
 
@@ -128,7 +129,7 @@ public final class BookReadActivity extends AppActivity {
      * 详细设置视图
      */
     private Dialog mSettingDetailDialog;
-    private Book mBook;
+    public Book mBook;
     /**
      * 是否已收藏
      */
@@ -248,12 +249,11 @@ public final class BookReadActivity extends AppActivity {
                 super.onScrolled(recyclerView, dx, dy);
                 //页面初始化的时候不要执行
                 if (!isFirstInit) {
-                    AppApplication.getApplication().newThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            saveLastChapterReadPosition(dy);
-                        }
-                    });
+
+                    postDelayed(() -> {
+                        saveLastChapterReadPosition(dy);
+                    }, 200);
+
                 } else {
                     isFirstInit = false;
                 }
@@ -542,20 +542,33 @@ public final class BookReadActivity extends AppActivity {
                         autoScroll();
                     } else {
                         //显示菜单窗口
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Thread.sleep(doubleOnClickConfirmTime);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                                if (!autoScrollOpening) {
-                                    mHandler.sendMessage(mHandler.obtainMessage(8));
-                                }
+//                        new Thread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                try {
+//                                    Thread.sleep(doubleOnClickConfirmTime);
+//                                } catch (InterruptedException e) {
+//                                    e.printStackTrace();
+//                                }
+//                                if (!autoScrollOpening) {
+//                                    mHandler.sendMessage(mHandler.obtainMessage(8));
+//                                }
+//
+//                            }
+//                        }).start();
 
+                        postDelayed(() -> {
+                            try {
+                                Thread.sleep(doubleOnClickConfirmTime);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
                             }
-                        }).start();
+                            if (!autoScrollOpening) {
+                                //mHandler.sendMessage(mHandler.obtainMessage(8));
+                                if (!isSearch)
+                                    showSettingView();
+                            }
+                        }, 300);
 
 
                     }
@@ -678,8 +691,7 @@ public final class BookReadActivity extends AppActivity {
         //设置点击屏幕范围
         settingOnClickValidFrom = height / 3;
         settingOnClickValidTo = height / 3 * 2;
-        //搜索时不显示设置页
-        if(!isSearch)initReadViewOnClick();
+        initReadViewOnClick();
     }
 
     /**
@@ -741,7 +753,7 @@ public final class BookReadActivity extends AppActivity {
      * 保存最后阅读章节的进度
      */
     private void saveLastChapterReadPosition(int dy) {
-        if (mLinearLayoutManager == null || isSearch ) return;
+        if (mLinearLayoutManager == null || isSearch) return;
 
         if (mLinearLayoutManager.findFirstVisibleItemPosition() != mLinearLayoutManager.findLastVisibleItemPosition()
                 || dy == 0) {
@@ -763,7 +775,7 @@ public final class BookReadActivity extends AppActivity {
                     public void onSucceed(HttpData<GetChapterDetail.Bean> data) {
                         if (data != null) {
                             GetChapterDetail.Bean bean = data.getData();
-                            mChapters.get(position).setContent(bean.getSection());
+                            mChapters.get(position).setContent(ConvertHtmlColorsHelper.convertHtmlColors(bean.getSection()));
                             //更新章节内容
                             if (!isStoreBook)
                                 mChapterService.updateChapter(mChapters.get(position));
@@ -804,7 +816,7 @@ public final class BookReadActivity extends AppActivity {
         //接收传入书的信息
         mBook = getSerializable(Book_KEY_IN);
         isStoreBook = StringHelper.isEmpty(mBook.getId());
-        isSearch =  mBook.getSource() !=null && mBook.getSource().equals("Search");
+        isSearch = mBook.getSource() != null && mBook.getSource().equals("Search");
         //显示进度条(不显示使用)
         // mPbLoading.setVisibility(View.VISIBLE);
         //初始化富文本
@@ -884,10 +896,10 @@ public final class BookReadActivity extends AppActivity {
                         public void onSucceed(HttpData<GetChapterDetail.Bean> data) {
                             if (data != null) {
                                 GetChapterDetail.Bean bean = data.getData();
-                                mChapters.add(new Chapter(bean.getId() + "", bean.getId() + "", 0, bean.getTitle(), "", bean.getSection()));
-                                postDelayed(()->{
+                                mChapters.add(new Chapter(bean.getId() + "", bean.getId() + "", 0, bean.getTitle(), "", ConvertHtmlColorsHelper.convertHtmlColors(bean.getSection())));
+                                postDelayed(() -> {
                                     initViewData();
-                                },1000);
+                                }, 1000);
 
                             }
 

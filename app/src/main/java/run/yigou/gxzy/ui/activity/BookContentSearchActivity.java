@@ -64,6 +64,10 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     private List<String> mSuggestions;
     private SearchBookAdapter mSearchBookAdapter;
 
+    public String getSearchKey() {
+        return searchKey;
+    }
+
     private String searchKey;//搜索关键字
     private ArrayList<Book> mBooks;
     private ArrayList<SearchHistory> mSearchHistories;

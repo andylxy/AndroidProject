@@ -1,33 +1,21 @@
 package run.yigou.gxzy.ui.adapter;
-
 import android.content.Context;
 import android.graphics.Typeface;
 import android.text.Spanned;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
-import androidx.lifecycle.LifecycleOwner;
-
-import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
 import com.spreada.utils.chinese.ZHConverter;
-
-import java.util.List;
-
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.ResultCallback;
 import run.yigou.gxzy.app.AppAdapter;
 import run.yigou.gxzy.common.Font;
 import run.yigou.gxzy.common.Language;
-import run.yigou.gxzy.common.Setting;
 import run.yigou.gxzy.common.SysManager;
 import run.yigou.gxzy.greendao.entity.Chapter;
-import run.yigou.gxzy.http.api.BookDetailList;
-import run.yigou.gxzy.http.entitymodel.ChapterList;
-import run.yigou.gxzy.http.model.HttpData;
+import run.yigou.gxzy.ui.activity.BookReadActivity;
 import run.yigou.gxzy.utils.SpannableStringHelper;
 import run.yigou.gxzy.utils.StringHelper;
 
@@ -41,9 +29,11 @@ import run.yigou.gxzy.utils.StringHelper;
  */
 public final class BookReadContenAdapter extends AppAdapter<Chapter> {
 
+    private BookReadActivity mBookReadActivity;
 
     public BookReadContenAdapter(Context context) {
         super(context);
+        mBookReadActivity = (BookReadActivity) context;
     }
 
 //    @Override
@@ -52,6 +42,7 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
 //    }
 
     private Typeface mTypeFace;
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -121,13 +112,18 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
          * 设置显示内容
          */
         public void viewHolderSetTvContent(Chapter chapter) {
-            Spanned content = HtmlCompat.fromHtml(getLanguageContext(chapter.getContent()), HtmlCompat.FROM_HTML_MODE_COMPACT);
-//            if (mBook.getSource() != null && mBook.getSource().equals("search")) {
-//                ///updateDate字段在搜索上不使用,,显示时标记搜索关键字的颜色
-//                content=  SpannableStringHelper.getSpannableString(mBook.getUpdateDate(),content.toString(),/*mContext.getColor(R.color.colorPrimaryDark)*/0);
-//            }
-            tvContent.setText(content);
+
+            String content =getLanguageContext(chapter.getContent());
+
+            if (mBookReadActivity.mBook.getSource() != null && mBookReadActivity.mBook.getSource().equals("Search")) {
+                ///updateDate字段在搜索上不使用,,显示时标记搜索关键字的颜色
+                Spanned content2 = SpannableStringHelper.getSpannableString(mBookReadActivity.mBook.getUpdateDate(), content,/*mContext.getColor(R.color.colorPrimaryDark)*/null);
+                tvContent.setText(content2);
+            } else{
+
+                tvContent.setText(HtmlCompat.fromHtml(content, HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_PARAGRAPH));}
         }
+
     }
 
 
@@ -138,6 +134,7 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
         return content;
 
     }
+
     private void initFont() {
         if (SysManager.getSetting().getFont() == Font.默认字体) {
             mTypeFace = null;
@@ -145,6 +142,7 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
             mTypeFace = Typeface.createFromAsset(getContext().getAssets(), SysManager.getSetting().getFont().path);
         }
     }
+
     private OnClickItemListener mOnClickItemListener;
     private View.OnTouchListener mOnTouchListener;
 

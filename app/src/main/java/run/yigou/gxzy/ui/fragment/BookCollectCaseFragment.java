@@ -122,7 +122,14 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
         // toast(mBookCollectCaseAdapter.getItem(position));
-        BookReadActivity.start(getActivity(), mBookCollectCaseAdapter.getItem(position));
+
+        Book book = mBookService.getBookById( mBookCollectCaseAdapter.getItem(position).getId());
+        if (book == null) {
+            toast("书本异常.请删除后,重新加入书架");
+        } else {
+            BookReadActivity.start(getActivity(), book);
+
+        }
     }
 
     public void RefreshLayout() {

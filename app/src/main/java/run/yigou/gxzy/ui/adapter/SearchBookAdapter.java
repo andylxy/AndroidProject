@@ -1,17 +1,16 @@
 package run.yigou.gxzy.ui.adapter;
 
 import android.content.Context;
+
+import android.text.Spanned;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-
-import java.lang.reflect.Type;
-
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
 import run.yigou.gxzy.greendao.entity.Book;
+import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
+import run.yigou.gxzy.utils.SpannableStringHelper;
 
 /**
  *  作者:  zhs
@@ -24,8 +23,10 @@ import run.yigou.gxzy.greendao.entity.Book;
 */
 public final class SearchBookAdapter extends AppAdapter<Book> {
 
+    private BookContentSearchActivity mBookContentSearchActivity;
     public SearchBookAdapter(Context context) {
         super(context);
+        mBookContentSearchActivity = (BookContentSearchActivity) context;
     }
 
 //    @Override
@@ -58,9 +59,14 @@ public final class SearchBookAdapter extends AppAdapter<Book> {
         @Override
         public void onBindView(int position) {
             tvBookName.setText( getItem(position).getName());
-            tvDesc.setText( getItem(position).getDesc());
+
             tvAuthor.setText( getItem(position).getAuthor());
             tvType.setText( getItem(position).getType());
+
+            Spanned content= SpannableStringHelper.getSpannableString(mBookContentSearchActivity.getSearchKey()
+                    ,getItem(position).getDesc(),/*mContext.getColor(R.color.colorPrimaryDark)*/null);
+
+            tvDesc.setText(content );
         }
     }
 }
