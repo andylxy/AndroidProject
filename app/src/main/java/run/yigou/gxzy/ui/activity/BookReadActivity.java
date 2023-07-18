@@ -499,17 +499,31 @@ public final class BookReadActivity extends AppActivity {
      */
     private void autoScroll() {
         autoScrollOpening = true;
-        new Thread(() -> {
+//        new Thread(() -> {
+//            while (autoScrollOpening) {
+//                try {
+//                    Thread.sleep(mSetting.getAutoScrollSpeed() + 1);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                mHandler.sendMessage(mHandler.obtainMessage(7));
+//
+//            }
+//        }).start();
+
+        postDelayed(() -> {
             while (autoScrollOpening) {
                 try {
                     Thread.sleep(mSetting.getAutoScrollSpeed() + 1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                mHandler.sendMessage(mHandler.obtainMessage(7));
-
+                // mHandler.sendMessage(mHandler.obtainMessage(7));
+                if (mLinearLayoutManager != null) {
+                    mRvContent.scrollBy(0, 2);
+                }
             }
-        }).start();
+        }, 50);
     }
 
     /**
@@ -602,23 +616,18 @@ public final class BookReadActivity extends AppActivity {
         mSrlContent.setEnableLoadMore(false);
         //// 禁用下拉刷新功能
         mSrlContent.setEnableRefresh(false);
-//        if (!settingChange) {
-//            mRvContent.scrollToPosition(mBook.getHisttoryChapterNum());
-//            delayTurnToLastChapterReadPosion();
-//
-//        } else {
-//            settingChange = false;
-//        }
         mPbLoading.setVisibility(View.GONE);
         //内容显示
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        //mLinearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+
         mRvContent.setLayoutManager(mLinearLayoutManager);
+
         mBookReadContenAdapter = new BookReadContenAdapter(getActivity());
         mBookReadContenAdapter.setData(mChapters);
         mRvContent.setAdapter(mBookReadContenAdapter);
         if (!settingChange) {
-//            mReadActivity.getLvContent().setSelection(mBook.getHisttoryChapterNum());
             mRvContent.scrollToPosition(mBook.getHisttoryChapterNum());
             delayTurnToLastChapterReadPosion();
 
@@ -650,10 +659,15 @@ public final class BookReadActivity extends AppActivity {
                     public void onFinish(Object o, int code) {
                         //更新章节内容
                         if (position == (int) o) {
-                            // TODO: 2023/7/11 更新内容 
-                            //mChapterService.saveOrUpdateChapter(mChapters.get(position));
                             //通知UI刷新画布
-                            mHandler.sendMessage(mHandler.obtainMessage(4, position, 0));
+                            // mHandler.sendMessage(mHandler.obtainMessage(4, position, 0));
+                            postDelayed(() -> {
+                                mRvContent.scrollToPosition(position);
+                                if (mBook.getHisttoryChapterNum() < position) {
+                                    delayTurnToChapter(position);
+                                }
+                                mPbLoading.setVisibility(View.GONE);
+                            }, 50);
                         }
                     }
 
@@ -667,6 +681,13 @@ public final class BookReadActivity extends AppActivity {
                 mRvContent.scrollToPosition(position);
                 if (position > mBook.getHisttoryChapterNum()) {
                     delayTurnToChapter(position);
+                    postDelayed(() -> {
+                        mRvContent.scrollToPosition(position);
+                        if (mBook.getHisttoryChapterNum() < position) {
+                            delayTurnToChapter(position);
+                        }
+                        mPbLoading.setVisibility(View.GONE);
+                    }, 50);
                 }
             }
             selectedChapterPosition(position);
@@ -689,8 +710,8 @@ public final class BookReadActivity extends AppActivity {
             height = dm.heightPixels;
         }
         //设置点击屏幕范围
-        settingOnClickValidFrom = height / 3;
-        settingOnClickValidTo = height / 3 * 2;
+        settingOnClickValidFrom = height / 3 + 200;
+        settingOnClickValidTo = height / 3 * 2 - 100;
         initReadViewOnClick();
     }
 
@@ -713,8 +734,6 @@ public final class BookReadActivity extends AppActivity {
                 // getChapterContent( postion,callback);
                 getChapterContent(postion, callback);
             }
-
-
         });
 
     }
@@ -723,14 +742,22 @@ public final class BookReadActivity extends AppActivity {
      * 延迟跳转章节位置
      */
     private void delayTurnToLastChapterReadPosion() {
-        new Thread(() -> {
-            try {
-                Thread.sleep(100);
-                mHandler.sendMessage(mHandler.obtainMessage(6));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+//        new Thread(() -> {
+//            try {
+//                Thread.sleep(100);
+//                mHandler.sendMessage(mHandler.obtainMessage(6));
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }).start();
+
+        postDelayed(() -> {
+            mRvContent.scrollBy(0, mBook.getLastReadPosition());
+            mBook.setLastReadPosition(0);
+            if (!StringHelper.isEmpty(mBook.getId())) {
+                mBookService.updateEntity(mBook);
             }
-        }).start();
+        }, 50);
 
     }
 
@@ -738,14 +765,22 @@ public final class BookReadActivity extends AppActivity {
      * 延迟跳转章节(防止跳到章节尾部)
      */
     private void delayTurnToChapter(final int position) {
-        new Thread(() -> {
-            try {
-                Thread.sleep(50);
-                mHandler.sendMessage(mHandler.obtainMessage(4, position, 0));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+//        new Thread(() -> {
+//            try {
+//                Thread.sleep(50);
+//                mHandler.sendMessage(mHandler.obtainMessage(4, position, 0));
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }).start();
+
+        postDelayed(() -> {
+            mRvContent.scrollToPosition(position);
+            if (mBook.getHisttoryChapterNum() < position) {
+                delayTurnToChapter(position);
             }
-        }).start();
+            mPbLoading.setVisibility(View.GONE);
+        }, 50);
 
     }
 
@@ -754,7 +789,6 @@ public final class BookReadActivity extends AppActivity {
      */
     private void saveLastChapterReadPosition(int dy) {
         if (mLinearLayoutManager == null || isSearch) return;
-
         if (mLinearLayoutManager.findFirstVisibleItemPosition() != mLinearLayoutManager.findLastVisibleItemPosition()
                 || dy == 0) {
             mBook.setLastReadPosition(0);
@@ -828,14 +862,14 @@ public final class BookReadActivity extends AppActivity {
 
     }
 
-    @Override
-    public void onBackPressed() {
-        // 执行返回操作
-        // ...
-        saveLastChapterReadPosition(0);
-        // 最后调用 super.onBackPressed() 执行默认的返回行为
-        super.onBackPressed();
-    }
+//    @Override
+//    public void onBackPressed() {
+//        // 执行返回操作
+//        // ...
+//        saveLastChapterReadPosition(0);
+//        // 最后调用 super.onBackPressed() 执行默认的返回行为
+//        super.onBackPressed();
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -883,7 +917,10 @@ public final class BookReadActivity extends AppActivity {
                                 } else {
                                     updateAllOldChapterData(chapters);
                                 }
-                                mHandler.sendMessage(mHandler.obtainMessage(1));
+                                //   mHandler.sendMessage(mHandler.obtainMessage(1));
+                                postDelayed(() -> {
+                                    initViewData();
+                                }, 50);
                             }
 
                         }

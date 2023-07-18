@@ -20,6 +20,7 @@
                 android:layout_height="match_parent"
                 android:divider="@color/nothing"
                 android:dividerHeight="30dp"
+
                 android:fadingEdge="none"
                 android:listSelector="@color/nothing"
                 android:overScrollMode="never" />
