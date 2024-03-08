@@ -30,11 +30,15 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.common.APPCONST;
 import run.yigou.gxzy.common.URLCONST;
 import run.yigou.gxzy.greendao.entity.Book;
+import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.service.SearchHistoryService;
+import run.yigou.gxzy.http.api.BookDetailList;
 import run.yigou.gxzy.http.api.HotBook;
 import run.yigou.gxzy.http.api.PageDataOptions;
+import run.yigou.gxzy.http.entitymodel.ChapterList;
+import run.yigou.gxzy.http.entitymodel.SearchKeyText;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.adapter.SearchBookAdapter;
 import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;
@@ -69,7 +73,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     }
 
     private String searchKey;//搜索关键字
-    private ArrayList<Book> mBooks;
+    private ArrayList<SearchKeyText> mBooks;
     private ArrayList<SearchHistory> mSearchHistories;
 
     @Override
@@ -162,9 +166,9 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     private void search() {
 
         if (StringHelper.isEmpty(searchKey)) {
-          //  lvSearchBooksList.setVisibility(View.GONE);
+            //  lvSearchBooksList.setVisibility(View.GONE);
         } else {
-           // lvSearchBooksList.setVisibility(View.VISIBLE);
+            // lvSearchBooksList.setVisibility(View.VISIBLE);
             llHistoryView.setVisibility(View.GONE);
             getData();
 
@@ -232,10 +236,10 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         EasyHttp.post(this)
                 .api(new PageDataOptions().setUrl(URLCONST.SearchUrl)
                         .setFilter(new PageDataOptions.SearchParameters("Section", searchKey)))
-                .request(new HttpCallback<HttpData<List<Book>>>(this) {
+                .request(new HttpCallback<HttpData<List<SearchKeyText>>>(this) {
                     @Override
-                    public void onSucceed(HttpData<List<Book>> data) {
-                        if (data != null) {
+                    public void onSucceed(HttpData<List<SearchKeyText>> data) {
+                        if (data.getData().size() > 0) {
                             postDelayed(() -> {
                                 mBooks.clear();
                                 mBooks.addAll(data.getData());
@@ -261,11 +265,15 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
 
         if (recyclerView.getId() == R.id.lv_search_books_list) {
-
             Intent intent = new Intent(getActivity(), BookReadActivity.class);
-            //传搜索字符过去/updateDate字段在搜索上不使用,暂时用于搜索关键字传递
-            mBooks.get(position).setUpdateDate(searchKey);
-            intent.putExtra(APPCONST.BOOK, mBooks.get(position));
+            Book book = new Book();
+            book.setDesc(getSearchKey());
+            book.setId(mBooks.get(position).getId() + "");
+            book.setName(mBooks.get(position).getBookName());
+            book.setType(mBooks.get(position).getType());
+            book.setChapterUrl(mBooks.get(position).getId() + "");
+            book.setSource("Search");
+            intent.putExtra(APPCONST.BOOK, book);
             startActivity(intent);
         }
         if (recyclerView.getId() == R.id.lv_history_list) {

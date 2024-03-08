@@ -927,7 +927,7 @@ public final class BookReadActivity extends AppActivity {
                     });
         } else {
             EasyHttp.get(this)
-                    .api(new GetChapterDetail().setId(mBook.getChapterUrl()))
+                    .api(new GetChapterDetail().setId(mBook.getChapterUrl()).setKeywords(mBook.getDesc()))
                     .request(new HttpCallback<HttpData<GetChapterDetail.Bean>>(this) {
                         @Override
                         public void onSucceed(HttpData<GetChapterDetail.Bean> data) {

@@ -37,6 +37,17 @@ public final class GetChapterDetail implements IRequestApi {
 
     private   String Id;
 
+    public String getKeywords() {
+        return Keywords;
+    }
+
+    public GetChapterDetail setKeywords(String keywords) {
+        Keywords = keywords;
+        return this;
+    }
+
+    private   String Keywords;
+
     public final static class Bean extends ChapterInfo {
 
     }

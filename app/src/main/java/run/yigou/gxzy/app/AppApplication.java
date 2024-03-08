@@ -186,11 +186,12 @@ public final class AppApplication extends Application {
                 .setInterceptor((api, params, headers) -> {
                     // 添加全局请求头
                     headers.put("token", "66666666666");
+                    headers.put("app", "2");
                     headers.put("deviceOaid", UmengClient.getDeviceOaid());
                     headers.put("versionName", AppConfig.getVersionName());
                     headers.put("versionCode", String.valueOf(AppConfig.getVersionCode()));
-//                    headers.put("Content-Type", "application/json;charset=UTF-8");
-//                    headers.put("Accept", "application/json, text/plain, */*");
+                    headers.put("Content-Type", "application/json;charset=UTF-8");
+                    headers.put("Accept", "application/json, text/plain, */*");
                     // 添加全局请求参数
                     // params.put("6666666", "6666666");
                 })

@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
 import run.yigou.gxzy.greendao.entity.Book;
+import run.yigou.gxzy.http.entitymodel.SearchKeyText;
 import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.utils.SpannableStringHelper;
 
@@ -21,7 +22,7 @@ import run.yigou.gxzy.utils.SpannableStringHelper;
  *  描述:
  *
 */
-public final class SearchBookAdapter extends AppAdapter<Book> {
+public final class SearchBookAdapter extends AppAdapter<SearchKeyText> {
 
     private BookContentSearchActivity mBookContentSearchActivity;
     public SearchBookAdapter(Context context) {
@@ -58,14 +59,11 @@ public final class SearchBookAdapter extends AppAdapter<Book> {
 
         @Override
         public void onBindView(int position) {
-            tvBookName.setText( getItem(position).getName());
-
+            tvBookName.setText( getItem(position).getBookName());
             tvAuthor.setText( getItem(position).getAuthor());
             tvType.setText( getItem(position).getType());
-
             Spanned content= SpannableStringHelper.getSpannableString(mBookContentSearchActivity.getSearchKey()
-                    ,getItem(position).getDesc(),/*mContext.getColor(R.color.colorPrimaryDark)*/null);
-
+                    ,getItem(position).getData(),/*mContext.getColor(R.color.colorPrimaryDark)*/null);
             tvDesc.setText(content );
         }
     }

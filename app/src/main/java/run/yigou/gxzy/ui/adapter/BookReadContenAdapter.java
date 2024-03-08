@@ -116,8 +116,8 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
             String content =getLanguageContext(chapter.getContent());
 
             if (mBookReadActivity.mBook.getSource() != null && mBookReadActivity.mBook.getSource().equals("Search")) {
-                ///updateDate字段在搜索上不使用,,显示时标记搜索关键字的颜色
-                Spanned content2 = SpannableStringHelper.getSpannableString(mBookReadActivity.mBook.getUpdateDate(), content,/*mContext.getColor(R.color.colorPrimaryDark)*/null);
+                //Book .Desc字段在搜索上不使用,,显示时标记搜索关键字的颜色
+                Spanned content2 = SpannableStringHelper.getSpannableString(mBookReadActivity.mBook.getDesc(), content,/*mContext.getColor(R.color.colorPrimaryDark)*/null);
                 tvContent.setText(content2);
             } else{
 
