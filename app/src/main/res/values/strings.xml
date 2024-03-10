@@ -162,6 +162,7 @@
     <string name="login_text">登录</string>
 
     <string name="login_other">其他登录方式</string>
+    <string name="login_account">账号登陆</string>
 
     <!-- 注册 -->
     <string name="register_title">注册</string>
@@ -182,7 +183,7 @@
 
     <string name="setting_auto">自动登录</string>
     <string name="setting_cache">清空缓存</string>
-
+    <string name="setting_permission">应用详情页</string>
     <string name="setting_agreement">隐私协议</string>
     <string name="setting_about">关于我们</string>
 

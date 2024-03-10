@@ -99,7 +99,12 @@
                     android:layout_marginHorizontal="@dimen/dp_15" />
 
             </com.hjq.widget.layout.SettingBar>
-
+            <com.hjq.widget.layout.SettingBar
+                android:id="@+id/sb_permission_setting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:bar_leftText="@string/setting_permission"
+                app:bar_rightDrawable="@drawable/arrows_right_ic" />
             <com.hjq.widget.layout.SettingBar
                 android:id="@+id/sb_setting_cache"
                 android:layout_width="match_parent"

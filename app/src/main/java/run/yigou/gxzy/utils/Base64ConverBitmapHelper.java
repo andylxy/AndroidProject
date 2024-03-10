@@ -22,9 +22,9 @@ import android.widget.ImageView;
 public class Base64ConverBitmapHelper {
 
     // 假设你已经在布局文件中定义了一个ImageView，并且有一个Base64编码的字符串
-    public static Bitmap displayBase64Image(String base64String) {
+    public static Bitmap getBase64ToImage(String base64String) {
         // 首先检查可能存在的Data URI前缀
-        if (!containsImageDataUri(base64String)) return null;
+        if (containsImageDataUri(base64String)) return null;
         // 移除可能存在的Data URI前缀
         String baseString = removeDataUriScheme(base64String);
         // 接下来，转换为字节数组
@@ -33,11 +33,11 @@ public class Base64ConverBitmapHelper {
         return byteArrayToBitmap(imageBytes);
     }
 
-    public static boolean containsImageDataUri(String text) {
+    private static boolean containsImageDataUri(String text) {
         return text != null && text.startsWith("data:image");
     }
 
-    public static String removeDataUriScheme(String base64String) {
+    private static String removeDataUriScheme(String base64String) {
         if (base64String == null) {
             return null;
         }
@@ -62,11 +62,11 @@ public class Base64ConverBitmapHelper {
         return base64String;
     }
 
-    public static byte[] base64ToByteArray(String base64String) {
+    private static byte[] base64ToByteArray(String base64String) {
         return Base64.decode(base64String, Base64.DEFAULT);
     }
 
-    public static Bitmap byteArrayToBitmap(byte[] byteArray) {
+    private static Bitmap byteArrayToBitmap(byte[] byteArray) {
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
     }
 }

@@ -23,6 +23,7 @@ import run.yigou.gxzy.ui.fragment.FindFragment;
 import run.yigou.gxzy.ui.fragment.HomeFragment;
 import run.yigou.gxzy.ui.fragment.MessageFragment;
 import run.yigou.gxzy.ui.fragment.MineFragment;
+import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
 
 /**
  *    author : Android 轮子哥
@@ -84,6 +85,7 @@ public  static  HomeActivity mHomeActivity;
         mPagerAdapter.addFragment(BookCollectCaseFragment.newInstance());
         mPagerAdapter.addFragment(HomeFragment.newInstance());
         mPagerAdapter.addFragment(MessageFragment.newInstance());
+        //mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());
         mPagerAdapter.addFragment(MineFragment.newInstance());
         mViewPager.setAdapter(mPagerAdapter);
         mHomeActivity=this;

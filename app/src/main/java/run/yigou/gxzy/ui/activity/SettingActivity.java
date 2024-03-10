@@ -19,6 +19,7 @@ import run.yigou.gxzy.ui.dialog.SafeDialog;
 import run.yigou.gxzy.ui.dialog.UpdateDialog;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
+import com.hjq.permissions.XXPermissions;
 import com.hjq.widget.layout.SettingBar;
 import com.hjq.widget.view.SwitchButton;
 
@@ -55,7 +56,7 @@ public final class SettingActivity extends AppActivity
 
         setOnClickListener(R.id.sb_setting_language, R.id.sb_setting_update, R.id.sb_setting_phone,
                 R.id.sb_setting_password, R.id.sb_setting_agreement, R.id.sb_setting_about,
-                R.id.sb_setting_cache, R.id.sb_setting_auto, R.id.sb_setting_exit);
+                R.id.sb_setting_cache, R.id.sb_setting_auto, R.id.sb_setting_exit, R.id.sb_permission_setting);
     }
 
     @Override
@@ -118,11 +119,19 @@ public final class SettingActivity extends AppActivity
 
             BrowserActivity.start(this, "https://github.com/getActivity/Donate");
 
-        } else if (viewId == R.id.sb_setting_about) {
+        }
+        else if (viewId == R.id.sb_setting_about) {
 
             startActivity(AboutActivity.class);
 
-        } else if (viewId == R.id.sb_setting_auto) {
+        }
+        else if (viewId ==  R.id.sb_permission_setting) {
+
+            XXPermissions.startPermissionActivity(this);
+
+        }
+
+        else if (viewId == R.id.sb_setting_auto) {
 
             // 自动登录
             mAutoSwitchView.setChecked(!mAutoSwitchView.isChecked());

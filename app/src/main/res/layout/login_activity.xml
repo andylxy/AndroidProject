@@ -57,11 +57,78 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dp_40"
-            android:layout_marginTop="@dimen/dp_15"
+            android:layout_marginTop="@dimen/dp_10"
+            android:drawablePadding="@dimen/dp_15"
             android:hint="@string/common_password_input_error"
             android:imeOptions="actionDone"
-            android:maxLength="20"
             android:singleLine="true" />
+
+        <View
+            style="@style/HorizontalLineStyle"
+            android:layout_marginHorizontal="@dimen/dp_40" />
+
+        <LinearLayout
+            android:id="@+id/et_login_vcode_linear"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dp_40"
+            android:layout_marginTop="@dimen/dp_10"
+            android:background="@color/white"
+            >
+
+            <com.hjq.widget.view.ClearEditText
+                android:id="@+id/et_login_text_code"
+                style="@style/EditTextStyle"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+
+                android:hint="@string/common_code_input_hint"
+                android:imeOptions="actionDone"
+                android:maxLength="20"
+
+                android:layout_margin="@dimen/dp_5"
+                android:singleLine="true" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/et_login_vcode"
+                android:layout_width="@dimen/dp_110"
+                android:layout_height="@dimen/dp_40"
+                android:layout_margin="@dimen/dp_5"
+                android:layout_gravity="end|center_vertical"
+                android:scaleType="centerCrop"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ll_login_sms_code_linear"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dp_40"
+            android:layout_marginTop="@dimen/dp_10"
+            android:background="@color/white"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/et_login_sms_code"
+                style="@style/EditTextStyle"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:drawablePadding="@dimen/dp_15"
+                android:hint="@string/common_code_input_hint"
+                android:imeOptions="actionDone"
+                android:inputType="number"
+                android:maxLength="@integer/sms_code_length"
+
+
+                android:singleLine="true" />
+
+            <com.hjq.widget.view.CountdownView
+                android:id="@+id/cv_login_sms_countdown"
+                style="@style/CountdownViewStyle" />
+        </LinearLayout>
+
 
         <View
             style="@style/HorizontalLineStyle"
@@ -124,7 +191,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-
+        <com.hjq.widget.view.ScaleImageView
+            android:id="@+id/iv_login_account"
+            android:layout_width="@dimen/dp_35"
+            android:layout_height="@dimen/dp_35"
+            android:layout_marginHorizontal="@dimen/dp_30"
+            android:layout_marginVertical="@dimen/dp_20"
+            android:layout_weight="1"
+            app:scaleRatio="1.2"
+            app:srcCompat="@drawable/home_me_off_ic" />
+        <com.hjq.widget.view.ScaleImageView
+            android:id="@+id/iv_login_phone"
+            android:layout_width="@dimen/dp_35"
+            android:layout_height="@dimen/dp_35"
+            android:layout_marginHorizontal="@dimen/dp_30"
+            android:layout_marginVertical="@dimen/dp_20"
+            android:layout_weight="1"
+            app:scaleRatio="1.2"
+            app:srcCompat="@drawable/phone_ic" />
         <com.hjq.widget.view.ScaleImageView
             android:id="@+id/iv_login_qq"
             android:layout_width="@dimen/dp_35"

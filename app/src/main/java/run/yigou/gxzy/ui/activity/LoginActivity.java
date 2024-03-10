@@ -15,6 +15,7 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,37 +30,40 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.gyf.immersionbar.ImmersionBar;
+
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.http.api.LoginApi;
+import run.yigou.gxzy.http.api.VierCode;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
 import run.yigou.gxzy.other.KeyboardWatcher;
 import run.yigou.gxzy.ui.fragment.MineFragment;
+import run.yigou.gxzy.utils.Base64ConverBitmapHelper;
+import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.wxapi.WXEntryActivity;
+
 import com.hjq.http.EasyConfig;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.umeng.Platform;
 import com.hjq.umeng.UmengClient;
 import com.hjq.umeng.UmengLogin;
+import com.hjq.widget.view.CountdownView;
 import com.hjq.widget.view.SubmitButton;
 
 import okhttp3.Call;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2018/10/18
- *    desc   : 登录界面
+ * author : Android 轮子哥
+ * github : https://github.com/getActivity/AndroidProject
+ * time   : 2018/10/18
+ * desc   : 登录界面
  */
-public final class LoginActivity extends AppActivity
-        implements UmengLogin.OnLoginListener,
-        KeyboardWatcher.SoftKeyboardStateListener,
-        TextView.OnEditorActionListener {
+public final class LoginActivity extends AppActivity implements UmengLogin.OnLoginListener, KeyboardWatcher.SoftKeyboardStateListener, TextView.OnEditorActionListener {
 
     private static final String INTENT_KEY_IN_PHONE = "phone";
     private static final String INTENT_KEY_IN_PASSWORD = "password";
@@ -79,6 +83,7 @@ public final class LoginActivity extends AppActivity
 
     private ViewGroup mBodyLayout;
     private EditText mPhoneView;
+    private EditText mEt_login_sms_code;
     private EditText mPasswordView;
 
     private View mForgetView;
@@ -88,10 +93,24 @@ public final class LoginActivity extends AppActivity
     private View mQQView;
     private View mWeChatView;
 
-    /** logo 缩放比例 */
+    private View mIvLoginAccount;
+    private View mIvLoginPhone;
+    private View mLlLoginSmsCodeLinear;
+    private View mEtLoginVcodeLinear;
+
+    /**
+     * logo 缩放比例
+     */
     private final float mLogoScale = 0.8f;
-    /** 动画时间 */
+    /**
+     * 动画时间
+     */
     private final int mAnimTime = 300;
+    private CountdownView mCountdownView;
+    private ImageView mEtLoginVcode;
+    private EditText mEtLoginTextCode;
+
+
 
     @Override
     protected int getLayoutId() {
@@ -109,25 +128,33 @@ public final class LoginActivity extends AppActivity
         mOtherView = findViewById(R.id.ll_login_other);
         mQQView = findViewById(R.id.iv_login_qq);
         mWeChatView = findViewById(R.id.iv_login_wechat);
-
-        setOnClickListener(mForgetView, mCommitView, mQQView, mWeChatView);
+        mIvLoginAccount = findViewById(R.id.iv_login_account);
+        mIvLoginPhone = findViewById(R.id.iv_login_phone);
+        mLlLoginSmsCodeLinear = findViewById(R.id.ll_login_sms_code_linear);
+        mEtLoginVcodeLinear = findViewById(R.id.et_login_vcode_linear);
+        mCountdownView = findViewById(R.id.cv_login_sms_countdown);
+        mEt_login_sms_code = findViewById(R.id.et_login_sms_code);
+        mEtLoginVcode = findViewById(R.id.et_login_vcode);
+        mEtLoginTextCode = findViewById(R.id.et_login_text_code);
+        setOnClickListener(mForgetView, mCommitView, mQQView, mWeChatView, mIvLoginAccount, mIvLoginPhone, mCountdownView,mEtLoginVcode);
 
         mPasswordView.setOnEditorActionListener(this);
-
-        InputTextManager.with(this)
-                .addView(mPhoneView)
-                .addView(mPasswordView)
-                .setMain(mCommitView)
-                .build();
+        setViewShow(mIvLoginAccount);
+        getLoginVcode();
     }
+
 
     @Override
     protected void initData() {
         postDelayed(() -> {
-            KeyboardWatcher.with(LoginActivity.this)
-                    .setListener(LoginActivity.this);
+            KeyboardWatcher.with(LoginActivity.this).setListener(LoginActivity.this);
         }, 500);
 
+
+        // 默认使用账号密码登陆
+        mIvLoginAccount.setVisibility(View.GONE);
+        mLlLoginSmsCodeLinear.setVisibility(View.GONE);
+        // mPasswordView.setHint("请输入您的姓名");
         // 判断用户当前有没有安装 QQ
         if (!UmengClient.isAppInstalled(this, Platform.QQ)) {
             mQQView.setVisibility(View.GONE);
@@ -151,8 +178,7 @@ public final class LoginActivity extends AppActivity
     @Override
     public void onRightClick(View view) {
         // 跳转到注册界面
-        RegisterActivity.start(this, mPhoneView.getText().toString(),
-                mPasswordView.getText().toString(), (phone, password) -> {
+        RegisterActivity.start(this, mPhoneView.getText().toString(), mPasswordView.getText().toString(), (phone, password) -> {
             // 如果已经注册成功，就执行登录操作
             mPhoneView.setText(phone);
             mPasswordView.setText(password);
@@ -169,7 +195,47 @@ public final class LoginActivity extends AppActivity
             startActivity(PasswordForgetActivity.class);
             return;
         }
+        if (view == mCountdownView) {
+            if (mPhoneView.getText().toString().length() != 11) {
+                mPhoneView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.shake_anim));
+                toast(R.string.common_phone_input_error);
+                return;
+            }
 
+            if (true) {
+                toast(R.string.common_code_send_hint);
+                mCountdownView.start();
+                return;
+            }
+
+            // 隐藏软键盘
+            hideKeyboard(getCurrentFocus());
+
+//            // 获取验证码
+//            EasyHttp.post(this)
+//                    .api(new GetCodeApi()
+//                            .setPhone(mPhoneView.getText().toString()))
+//                    .request(new HttpCallback<HttpData<Void>>(this) {
+//
+//                        @Override
+//                        public void onSucceed(HttpData<Void> data) {
+//                            toast(R.string.common_code_send_hint);
+//                            mCountdownView.start();
+//                        }
+//                    });
+        }
+        if (view == mIvLoginAccount) {
+            setViewShow(mIvLoginAccount);
+            return;
+        }
+        if (view == mIvLoginPhone) {
+            setViewShow(mIvLoginPhone);
+            return;
+        }
+        if (view == mEtLoginVcode) {
+            getLoginVcode();
+            return;
+        }
         if (view == mCommitView) {
             if (mPhoneView.getText().toString().length() != 11) {
                 mPhoneView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.shake_anim));
@@ -193,44 +259,39 @@ public final class LoginActivity extends AppActivity
 //                return;
 //            }
 
-            EasyHttp.post(this)
-                    .api(new LoginApi()
-                            .setPhone(mPhoneView.getText().toString())
-                            .setPassword(mPasswordView.getText().toString()))
-                    .request(new HttpCallback<HttpData<LoginApi.Bean>>(this)
-                    {
+            EasyHttp.post(this).api(new LoginApi().setPhone(mPhoneView.getText().toString()).setPassword(mPasswordView.getText().toString())).request(new HttpCallback<HttpData<LoginApi.Bean>>(this) {
 
-                        @Override
-                        public void onStart(Call call) {
-                            mCommitView.showProgress();
-                        }
+                @Override
+                public void onStart(Call call) {
+                    mCommitView.showProgress();
+                }
 
-                        @Override
-                        public void onEnd(Call call) {}
+                @Override
+                public void onEnd(Call call) {
+                }
 
-                        @Override
-                        public void onSucceed(HttpData<LoginApi.Bean> data) {
-                            // 更新 Token
-                            EasyConfig.getInstance()
-                                    .addParam("token", data.getData().getToken());
-                            postDelayed(() -> {
-                                mCommitView.showSucceed();
-                                postDelayed(() -> {
-                                    // 跳转到首页
-                                    HomeActivity.start(getContext(), MineFragment.class);
-                                    finish();
-                                }, 1000);
-                            }, 1000);
-                        }
+                @Override
+                public void onSucceed(HttpData<LoginApi.Bean> data) {
+                    // 更新 Token
+                    EasyConfig.getInstance().addParam("token", data.getData().getToken());
+                    postDelayed(() -> {
+                        mCommitView.showSucceed();
+                        postDelayed(() -> {
+                            // 跳转到首页
+                            HomeActivity.start(getContext(), MineFragment.class);
+                            finish();
+                        }, 1000);
+                    }, 1000);
+                }
 
-                        @Override
-                        public void onFail(Exception e) {
-                            super.onFail(e);
-                            postDelayed(() -> {
-                                mCommitView.showError(3000);
-                            }, 1000);
-                        }
-                    });
+                @Override
+                public void onFail(Exception e) {
+                    super.onFail(e);
+                    postDelayed(() -> {
+                        mCommitView.showError(3000);
+                    }, 1000);
+                }
+            });
             return;
         }
 
@@ -248,6 +309,62 @@ public final class LoginActivity extends AppActivity
             UmengClient.login(this, platform, this);
         }
     }
+    private  void getLoginVcode() {
+
+        EasyHttp.get(this)
+                .api(new VierCode() )
+                .request(new HttpCallback<HttpData<VierCode>>(this) {
+            @Override
+            public void onSucceed(HttpData<VierCode> data) {
+                if (data.getData()!=null) {
+                    String img =data.getData().getImg();
+                   if(!StringHelper.isEmpty(img)){
+                       Bitmap bitmap = Base64ConverBitmapHelper.getBase64ToImage(img);
+                       setLoginVcode(bitmap);
+                   }
+                }
+            }
+        });
+    }
+
+    private  void setLoginVcode(Bitmap bitmap) {
+        GlideApp.with(this)
+            .load(bitmap)
+            .into(mEtLoginVcode);
+    }
+
+    private  void setViewShow(View view) {
+        if (view == mIvLoginAccount) {
+            mIvLoginAccount.setVisibility(View.GONE);
+            mIvLoginPhone.setVisibility(View.VISIBLE);
+            mLlLoginSmsCodeLinear.setVisibility(View.GONE);
+            mPasswordView.setVisibility(View.VISIBLE);
+            mForgetView.setVisibility(View.VISIBLE);
+            mEtLoginVcodeLinear.setVisibility(View.VISIBLE);
+            mEtLoginTextCode.setVisibility(View.VISIBLE);
+            mEt_login_sms_code.setText("");
+            InputTextManager.with(this)
+                    .addView(mPhoneView)
+                    .addView(mPasswordView)
+                    .addView(mEtLoginTextCode)
+                    .setMain(mCommitView).build();
+        }
+        else if (view == mIvLoginPhone) {
+            mIvLoginPhone.setVisibility(View.GONE);
+            mIvLoginAccount.setVisibility(View.VISIBLE);
+            mLlLoginSmsCodeLinear.setVisibility(View.VISIBLE);
+            mPasswordView.setVisibility(View.GONE);
+            mForgetView.setVisibility(View.GONE);
+            mPasswordView.setText("");
+            mEtLoginVcodeLinear.setVisibility(View.GONE);
+            mEtLoginTextCode.setVisibility(View.GONE);
+            InputTextManager.with(this)
+                    .addView(mPhoneView)
+                    .addView(mEt_login_sms_code)
+                    .setMain(mCommitView).build();
+        }
+
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -263,8 +380,8 @@ public final class LoginActivity extends AppActivity
     /**
      * 授权成功的回调
      *
-     * @param platform      平台名称
-     * @param data          用户资料返回
+     * @param platform 平台名称
+     * @param data     用户资料返回
      */
     @Override
     public void onSucceed(Platform platform, UmengLogin.LoginData data) {
@@ -283,22 +400,16 @@ public final class LoginActivity extends AppActivity
                 break;
         }
 
-        GlideApp.with(this)
-                .load(data.getAvatar())
-                .circleCrop()
-                .into(mLogoView);
+        GlideApp.with(this).load(data.getAvatar()).circleCrop().into(mLogoView);
 
-        toast("昵称：" + data.getName() + "\n" +
-                "性别：" + data.getSex() + "\n" +
-                "id：" + data.getId() + "\n" +
-                "token：" + data.getToken());
+        toast("昵称：" + data.getName() + "\n" + "性别：" + data.getSex() + "\n" + "id：" + data.getId() + "\n" + "token：" + data.getToken());
     }
 
     /**
      * 授权失败的回调
      *
-     * @param platform      平台名称
-     * @param t             错误原因
+     * @param platform 平台名称
+     * @param t        错误原因
      */
     @Override
     public void onError(Platform platform, Throwable t) {

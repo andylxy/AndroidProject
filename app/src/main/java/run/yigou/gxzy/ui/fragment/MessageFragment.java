@@ -10,6 +10,8 @@ import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.ui.activity.HomeActivity;
+import run.yigou.gxzy.ui.activity.LoginActivity;
+
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 
@@ -37,7 +39,7 @@ public final class MessageFragment extends TitleBarFragment<HomeActivity> {
         mImageView = findViewById(R.id.iv_message_image);
         setOnClickListener(R.id.btn_message_image1, R.id.btn_message_image2, R.id.btn_message_image3,
                 R.id.btn_message_toast, R.id.btn_message_permission, R.id.btn_message_setting,
-                R.id.btn_message_black, R.id.btn_message_white, R.id.btn_message_tab);
+                R.id.btn_message_black, R.id.btn_message_white, R.id.btn_message_tab, R.id.btn_message_login);
     }
 
     @Override
@@ -82,7 +84,13 @@ public final class MessageFragment extends TitleBarFragment<HomeActivity> {
 
             toast("我是吐司");
 
-        } else if (viewId == R.id.btn_message_permission) {
+        }
+        else if (viewId == R.id.btn_message_login) {
+
+            startActivity(LoginActivity.class);
+
+        }
+        else if (viewId == R.id.btn_message_permission) {
 
             requestPermission();
 

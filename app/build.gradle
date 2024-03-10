@@ -143,7 +143,8 @@ dependencies {
     implementation project(':library:widget')
     // 友盟封装
     implementation project(':library:umeng')
-
+    //安卓设备唯一标识解决方案 https://github.com/gzu-liyujiang/Android_CN_OAID
+    //implementation 'com.github.gzu-liyujiang:Android_CN_OAID:4.2.5'
     // 权限请求框架：https://github.com/getActivity/XXPermissions
     implementation 'com.github.getActivity:XXPermissions:12.3'
 
