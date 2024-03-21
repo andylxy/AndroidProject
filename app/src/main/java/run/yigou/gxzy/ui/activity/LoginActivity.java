@@ -35,19 +35,25 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.app.AppApplication;
+import run.yigou.gxzy.common.LoginType;
+import run.yigou.gxzy.greendao.entity.UserInfo;
+import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.LoginApi;
 import run.yigou.gxzy.http.api.VierCode;
+import run.yigou.gxzy.http.entitymodel.WebResponseContent;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
 import run.yigou.gxzy.other.KeyboardWatcher;
-import run.yigou.gxzy.ui.fragment.MineFragment;
+import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
 import run.yigou.gxzy.utils.Base64ConverBitmapHelper;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.wxapi.WXEntryActivity;
 
 import com.hjq.http.EasyConfig;
 import com.hjq.http.EasyHttp;
+import com.hjq.http.config.IRequestApi;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.umeng.Platform;
 import com.hjq.umeng.UmengClient;
@@ -109,9 +115,14 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     private CountdownView mCountdownView;
     private ImageView mEtLoginVcode;
     private EditText mEtLoginTextCode;
-
-
-
+    /**
+     * 验证验
+     */
+    private  VierCode.Bean mVierificationCode;
+    /**
+     * 默认为 账号登陆
+     */
+    private int mLongInType = LoginType.mLoginAccount;
     @Override
     protected int getLayoutId() {
         return R.layout.login_activity;
@@ -136,8 +147,8 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         mEt_login_sms_code = findViewById(R.id.et_login_sms_code);
         mEtLoginVcode = findViewById(R.id.et_login_vcode);
         mEtLoginTextCode = findViewById(R.id.et_login_text_code);
+        if (inLoginOrNoLogin()) return;
         setOnClickListener(mForgetView, mCommitView, mQQView, mWeChatView, mIvLoginAccount, mIvLoginPhone, mCountdownView,mEtLoginVcode);
-
         mPasswordView.setOnEditorActionListener(this);
         setViewShow(mIvLoginAccount);
         getLoginVcode();
@@ -146,11 +157,10 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
 
     @Override
     protected void initData() {
+       // if (inLoginOrNoLogin()) return;
         postDelayed(() -> {
             KeyboardWatcher.with(LoginActivity.this).setListener(LoginActivity.this);
         }, 500);
-
-
         // 默认使用账号密码登陆
         mIvLoginAccount.setVisibility(View.GONE);
         mLlLoginSmsCodeLinear.setVisibility(View.GONE);
@@ -173,6 +183,19 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         // 自动填充手机号和密码
         mPhoneView.setText(getString(INTENT_KEY_IN_PHONE));
         mPasswordView.setText(getString(INTENT_KEY_IN_PASSWORD));
+    }
+
+    /**
+     * 检查是否已经登陆
+     * @return true 已登陆,false 未登陆
+     */
+    private boolean inLoginOrNoLogin() {
+        //如果已登陆,侧跳转到我的
+        if(AppApplication.getApplication().mUserInfoToken !=null){
+            HomeActivityStart();
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -226,10 +249,12 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         }
         if (view == mIvLoginAccount) {
             setViewShow(mIvLoginAccount);
+            mLongInType=1;
             return;
         }
         if (view == mIvLoginPhone) {
             setViewShow(mIvLoginPhone);
+            mLongInType=2;
             return;
         }
         if (view == mEtLoginVcode) {
@@ -247,51 +272,22 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             // 隐藏软键盘
             hideKeyboard(getCurrentFocus());
 
-//            if (true) {
-//                mCommitView.showProgress();
-//                postDelayed(() -> {
-//                    mCommitView.showSucceed();
-//                    postDelayed(() -> {
-//                        HomeActivity.start(getContext(), MineFragment.class);
-//                        finish();
-//                    }, 1000);
-//                }, 2000);
-//                return;
-//            }
+            //登陆逻辑处理
+            IRequestApi requestApi = null;
+            if(mLongInType== LoginType.mLoginAccount){
+                requestApi=  new LoginApi()
+                        .setUserName(mPhoneView.getText().toString())
+                        .setPassword(mPasswordView.getText().toString())
+                        .setVerificationCode(mEtLoginTextCode.getText().toString())
+                        .setUUID(mVierificationCode.getUuid());
+            }else if (mLongInType== LoginType.mLoginPhone){
+                requestApi= new LoginApi()
+                        .setUserName(mPhoneView.getText().toString())
+                        .setPassword(mPasswordView.getText().toString());
+            }
 
-            EasyHttp.post(this).api(new LoginApi().setPhone(mPhoneView.getText().toString()).setPassword(mPasswordView.getText().toString())).request(new HttpCallback<HttpData<LoginApi.Bean>>(this) {
-
-                @Override
-                public void onStart(Call call) {
-                    mCommitView.showProgress();
-                }
-
-                @Override
-                public void onEnd(Call call) {
-                }
-
-                @Override
-                public void onSucceed(HttpData<LoginApi.Bean> data) {
-                    // 更新 Token
-                    EasyConfig.getInstance().addParam("token", data.getData().getToken());
-                    postDelayed(() -> {
-                        mCommitView.showSucceed();
-                        postDelayed(() -> {
-                            // 跳转到首页
-                            HomeActivity.start(getContext(), MineFragment.class);
-                            finish();
-                        }, 1000);
-                    }, 1000);
-                }
-
-                @Override
-                public void onFail(Exception e) {
-                    super.onFail(e);
-                    postDelayed(() -> {
-                        mCommitView.showError(3000);
-                    }, 1000);
-                }
-            });
+            if (requestApi!=null)
+                login(requestApi);
             return;
         }
 
@@ -309,18 +305,77 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             UmengClient.login(this, platform, this);
         }
     }
+
+    private  void login(IRequestApi requestApi) {
+        EasyHttp.post(this)
+                .api(requestApi)
+                .request(new HttpCallback<HttpData<WebResponseContent<UserInfo>>>(this) {
+
+            @Override
+            public void onStart(Call call) {
+                mCommitView.showProgress();
+            }
+
+            @Override
+            public void onEnd(Call call) {
+            }
+
+            @Override
+            public void onSucceed(HttpData<WebResponseContent<UserInfo>> data) {
+
+                if (data!=null){
+                    if (data.getData() !=null )
+                        //保存登陆信息
+                        AppApplication.getApplication().mUserInfoToken = data.getData().getData();
+
+                    if(data.getData().getData()!=null) {
+                        // 更新 Token
+                        EasyConfig.getInstance().addHeader("Authorization", data.getData().getData().getToken());
+                        //保存登陆信息到数据库
+                        UserInfo userInfo =  DbService.getInstance().mUserInfoService.findUserInfoByLoginAccount(data.getData().getData().getUserLoginAccount());
+                        if (userInfo ==null)
+                            DbService.getInstance().mUserInfoService.addEntity(data.getData().getData());
+                        else
+                            DbService.getInstance().mUserInfoService.deleteEntity(data.getData().getData());
+
+                    }
+
+
+                }
+                HomeActivityStart();
+            }
+
+            @Override
+            public void onFail(Exception e) {
+                super.onFail(e);
+                postDelayed(() -> {
+                    mCommitView.showError(3000);
+                }, 1000);
+            }
+        });
+    }
+
+    private void HomeActivityStart() {
+            postDelayed(() -> {
+                // 跳转到首页
+                HomeActivity.start(getContext(), MyFragmentPersonal.class);
+                finish();
+            }, 50);
+    }
+
     private  void getLoginVcode() {
 
         EasyHttp.get(this)
                 .api(new VierCode() )
-                .request(new HttpCallback<HttpData<VierCode>>(this) {
+                .request(new HttpCallback<HttpData<VierCode.Bean>>(this) {
             @Override
-            public void onSucceed(HttpData<VierCode> data) {
+            public void onSucceed(HttpData<VierCode.Bean> data) {
                 if (data.getData()!=null) {
                     String img =data.getData().getImg();
                    if(!StringHelper.isEmpty(img)){
                        Bitmap bitmap = Base64ConverBitmapHelper.getBase64ToImage(img);
                        setLoginVcode(bitmap);
+                       mVierificationCode = data.getData();
                    }
                 }
             }

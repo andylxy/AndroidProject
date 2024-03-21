@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.api.UpdateImageApi;
 import run.yigou.gxzy.http.glide.GlideApp;
@@ -29,6 +30,7 @@ import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.activity.ImageCropActivity;
 import run.yigou.gxzy.ui.activity.ImagePreviewActivity;
 import run.yigou.gxzy.ui.activity.ImageSelectActivity;
+import run.yigou.gxzy.ui.activity.LoginActivity;
 import run.yigou.gxzy.ui.activity.SettingActivity;
 import run.yigou.gxzy.ui.dialog.AddressDialog;
 import run.yigou.gxzy.ui.dialog.InputDialog;
@@ -53,11 +55,11 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
 
 
     /** 省 */
-    private String mProvince = "广东省";
+    private String mProvince = "...";
     /** 市 */
-    private String mCity = "广州市";
+    private String mCity = "...";
     /** 区 */
-    private String mArea = "天河区";
+    private String mArea = "...";
 
     /** 头像地址 */
     private Uri mAvatarUrl;
@@ -86,17 +88,33 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
                 .error(R.drawable.avatar_placeholder_ic)
                 .transform(new MultiTransformation<>(new CenterCrop(), new CircleCrop()))
                 .into(mAvatarView);
-
-        mIdView.setRightText("880634");
-        mNameView.setRightText("Android 轮子哥");
-
         String address = mProvince + mCity + mArea;
+        mIdView.setRightText("...");
+        mNameView.setRightText("...");
         mAddressView.setRightText(address);
+        mPersonDataSetting.setVisibility(View.GONE);
+        if (AppApplication.application.mUserInfoToken !=null){
+            mIdView.setRightText(AppApplication.application.mUserInfoToken.getUserLoginAccount());
+            mNameView.setRightText(AppApplication.application.mUserInfoToken.getUserName());
+            //mAddressView.setRightText(address);
+            mPersonDataSetting.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    /**
+     * 重新激活时调用
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        initData();
     }
 
     @SingleClick
     @Override
     public void onClick(View view) {
+        if (isLogin()) return;
         if (view == mAvatarLayout) {
             ImageSelectActivity.start(getAttachActivity(), data -> {
                 // 裁剪头像
@@ -150,6 +168,16 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         else if (view == mPersonDataSetting) {
             startActivity(SettingActivity.class);
         }
+    }
+    /**
+     *     登陆
+     */
+    private boolean isLogin() {
+        if (AppApplication.application.mUserInfoToken ==null){
+            startActivity(LoginActivity.class);
+            return true;
+        }
+        return false;
     }
 
     /**

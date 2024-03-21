@@ -7,6 +7,8 @@ import com.hjq.base.BaseDialog;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.app.AppApplication;
+import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.LogoutApi;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.HttpData;
@@ -17,6 +19,9 @@ import run.yigou.gxzy.other.AppConfig;
 import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.dialog.SafeDialog;
 import run.yigou.gxzy.ui.dialog.UpdateDialog;
+import run.yigou.gxzy.ui.fragment.HomeFragment;
+import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
+
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.permissions.XXPermissions;
@@ -63,7 +68,8 @@ public final class SettingActivity extends AppActivity
     protected void initData() {
         // 获取应用缓存大小
         mCleanCacheView.setRightText(CacheDataManager.getTotalCacheSize(this));
-
+        //隐藏自动登陆
+        mAutoSwitchView.setVisibility(View.GONE);
         mLanguageView.setRightText("简体中文");
         mPhoneView.setRightText("181****1413");
         mPasswordView.setRightText("密码强度较低");
@@ -153,24 +159,28 @@ public final class SettingActivity extends AppActivity
         } else if (viewId == R.id.sb_setting_exit) {
 
             if (true) {
-                startActivity(LoginActivity.class);
+
+                DbService.getInstance().mUserInfoService.deleteEntity(AppApplication.application.mUserInfoToken);
+                AppApplication.application.mUserInfoToken =null;
+               // startActivity(LoginActivity.class);
+                HomeActivity.start(getContext(), HomeFragment.class);
                 // 进行内存优化，销毁除登录页之外的所有界面
-                ActivityManager.getInstance().finishAllActivities(LoginActivity.class);
+                //ActivityManager.getInstance().finishAllActivities(LoginActivity.class);
                 return;
             }
 
-            // 退出登录
-            EasyHttp.post(this)
-                    .api(new LogoutApi())
-                    .request(new HttpCallback<HttpData<Void>>(this) {
-
-                        @Override
-                        public void onSucceed(HttpData<Void> data) {
-                            startActivity(LoginActivity.class);
-                            // 进行内存优化，销毁除登录页之外的所有界面
-                            ActivityManager.getInstance().finishAllActivities(LoginActivity.class);
-                        }
-                    });
+//            // 退出登录
+//            EasyHttp.post(this)
+//                    .api(new LogoutApi())
+//                    .request(new HttpCallback<HttpData<Void>>(this) {
+//
+//                        @Override
+//                        public void onSucceed(HttpData<Void> data) {
+//                            startActivity(LoginActivity.class);
+//                            // 进行内存优化，销毁除登录页之外的所有界面
+//                            ActivityManager.getInstance().finishAllActivities(LoginActivity.class);
+//                        }
+//                    });
 
         }
     }

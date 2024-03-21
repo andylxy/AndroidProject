@@ -24,14 +24,15 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
 
-import com.github.gzuliyujiang.oaid.DeviceID;
 import com.github.gzuliyujiang.oaid.DeviceIdentifier;
-import com.github.gzuliyujiang.oaid.IGetter;
 import com.github.gzuliyujiang.oaid.IRegisterCallback;
-import com.github.gzuliyujiang.oaid.OAIDLog;
 import com.hjq.bar.TitleBar;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
+import run.yigou.gxzy.greendao.entity.UserInfo;
+import run.yigou.gxzy.greendao.service.UserInfoService;
+import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.http.entitymodel.UserInfoToken;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.RequestHandler;
 import run.yigou.gxzy.http.model.RequestServer;
@@ -66,6 +67,7 @@ import timber.log.Timber;
  *    desc   : 应用入口
  */
 public final class AppApplication extends Application {
+
     public static AppApplication application;
     /**
      * 主线程执行
@@ -73,6 +75,7 @@ public final class AppApplication extends Application {
      * @param runnable
      */
     private static Handler handler = new Handler();
+
     private ScheduledExecutorService mFixedThreadPool;
     private boolean privacyPolicyAgreed = false;
     public static void runOnUiThread(Runnable runnable) {
@@ -91,9 +94,7 @@ public final class AppApplication extends Application {
 //       OAIDLog.enable();
 //    }
     public void newThread(Runnable runnable) {
-
         try {
-
             mFixedThreadPool.schedule(runnable,1, TimeUnit.SECONDS);
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,8 +106,10 @@ public final class AppApplication extends Application {
     public void shutdownThreadPool(){
         mFixedThreadPool.shutdownNow();
     }
+    //登陆信息
 
-
+    private UserInfoService mUserInfoService;
+    public  UserInfo mUserInfoToken ;
     public static AppApplication getApplication() {
         return application;
     }
@@ -118,7 +121,23 @@ public final class AppApplication extends Application {
     public void onCreate() {
         super.onCreate();
         application=this;
+        mUserInfoService = DbService.getInstance().mUserInfoService;
         initSdk(this);
+        initUserLogin();
+        getDeviceId();
+    }
+
+    private void initUserLogin() {
+        UserInfo userInfo =mUserInfoService.getLoginUserInfo();
+        if (userInfo!=null){
+            mUserInfoToken = mUserInfoService.getLoginUserInfo();//new UserInfoToken(userInfo.getToken(),userInfo.getUserName(),userInfo.getImg(),userInfo.getUserLoginAccount());
+            //添加http请求Token
+            if (mUserInfoToken !=null)
+                EasyConfig.getInstance().addHeader("Authorization", mUserInfoToken.getToken());
+        }
+    }
+
+    private void getDeviceId() {
         //注意APP合规性，若最终用户未同意隐私政策则不要调用
         if (privacyPolicyAgreed) {
             //DeviceIdentifier.register(this);
@@ -241,7 +260,7 @@ public final class AppApplication extends Application {
                 .setRetryCount(1)
                 .setInterceptor((api, params, headers) -> {
                     // 添加全局请求头
-                    headers.put("token", "66666666666");
+                   // headers.put("Authorization", mUserInfoToken.getToken());
                     headers.put("app", "2");
                     headers.put("ClientId", DeviceIdentifier.getClientId());
                     headers.put("versionName", AppConfig.getVersionName());

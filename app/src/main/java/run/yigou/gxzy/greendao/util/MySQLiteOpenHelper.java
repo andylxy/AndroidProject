@@ -10,6 +10,7 @@ import run.yigou.gxzy.greendao.gen.BookDao;
 import run.yigou.gxzy.greendao.gen.ChapterDao;
 import run.yigou.gxzy.greendao.gen.DaoMaster;
 import run.yigou.gxzy.greendao.gen.SearchHistoryDao;
+import run.yigou.gxzy.greendao.gen.UserInfoDao;
 
 /**
  * Created by zhao on 2017/3/15.
@@ -28,7 +29,7 @@ public class MySQLiteOpenHelper extends DaoMaster.OpenHelper {
     @Override
     public void onUpgrade(Database db, int oldVersion, int newVersion) {
         //加入你要新建的或者修改的表的信息
-        GreenDaoUpgrade.getInstance().migrate(db, BookDao.class, ChapterDao.class, SearchHistoryDao.class);
+        GreenDaoUpgrade.getInstance().migrate(db, BookDao.class, ChapterDao.class, SearchHistoryDao.class, UserInfoDao.class);
 
     }
 

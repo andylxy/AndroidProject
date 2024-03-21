@@ -2,6 +2,8 @@ package run.yigou.gxzy.http.api;
 
 import com.hjq.http.config.IRequestApi;
 
+import run.yigou.gxzy.http.entitymodel.UserInfoToken;
+
 /**
  *    author : Android 轮子哥
  *    github : https://github.com/getActivity/AndroidProject
@@ -16,26 +18,30 @@ public final class LoginApi implements IRequestApi {
     }
 
     /** 手机号 */
-    private String phone;
+    private String userName;
     /** 登录密码 */
-    private String password;
+    private String passWord;
+    public String verificationCode;
+    public String uUID;
 
-    public LoginApi setPhone(String phone) {
-        this.phone = phone;
+    public LoginApi setUserName(String user) {
+        this.userName = user;
         return this;
     }
 
-    public LoginApi setPassword(String password) {
-        this.password = password;
+    public LoginApi setPassword(String pass) {
+        this.passWord = pass;
         return this;
     }
 
-    public final static class Bean {
-
-        private String token;
-
-        public String getToken() {
-            return token;
-        }
+    public LoginApi setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+        return this;
     }
+
+    public LoginApi setUUID(String uUID) {
+        this.uUID = uUID;
+        return this;
+    }
+
 }

@@ -11,7 +11,16 @@ import java.io.Serializable;
 public class ChapterList implements Serializable {
    private int Id ;
    private String Title;
+    private String ParentId;
 
+    public ChapterList setParentId(String parentId) {
+        ParentId = parentId;
+        return this;
+    }
+
+    public String getParentId() {
+        return ParentId;
+    }
     public int getId() {
         return Id;
     }

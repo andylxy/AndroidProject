@@ -32,6 +32,7 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.ResultCallback;
@@ -902,7 +903,10 @@ public final class BookReadActivity extends AppActivity {
                                         for (ChapterList chapt : bean.getChapterList()) {
                                             Chapter chapter = new Chapter();
                                             chapter.setNumber(i++);
-                                            chapter.setTitle(chapt.getTitle());
+//                                            if (Objects.equals(chapt.getParentId(), "0")){
+//                                            chapter.setTitle(chapt.getTitle());
+//                                            }else
+                                            chapter.setTitle(""+chapt.getTitle());
                                             chapter.setUrl(chapt.getId() + "");
                                             chapters.add(chapter);
                                         }
@@ -923,6 +927,10 @@ public final class BookReadActivity extends AppActivity {
                                 }, 50);
                             }
 
+                        }
+                        @Override
+                        public  void  onFail(Exception e){
+                            initViewData();
                         }
                     });
         } else {

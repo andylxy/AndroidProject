@@ -15,18 +15,18 @@ public final class VierCode implements IRequestApi {
         return "User/getVierificationCode";
     }
 
+    public final static class Bean {
+        private String img;
 
-    private String img;
+        public String getImg() {
+            return img;
+        }
 
-    public String getImg() {
-        return img;
+        public String getUuid() {
+            return uuid;
+        }
+
+        private String uuid;
     }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    private String uuid;
-
 
 }

@@ -20,10 +20,10 @@ import run.yigou.gxzy.utils.StringHelper;
  * Created by zhao on 2017/7/24.
  */
 
-public class ChapterService extends BaseService<Chapter> {
+public class ChapterService extends BaseService<Chapter,ChapterDao> {
 
-    public QueryBuilder<Chapter> mChapterQueryBuilder = daoSession.queryBuilder(Chapter.class);
-    ChapterDao daoConn = daoSession.getChapterDao();
+//    public QueryBuilder<Chapter> mChapterQueryBuilder = daoSession.queryBuilder(Chapter.class);
+//    ChapterDao daoConn = daoSession.getChapterDao();
     private List<Chapter> findChapters(String sql, String[] selectionArgs) {
         ArrayList<Chapter> chapters = new ArrayList<>();
         try {
@@ -66,7 +66,7 @@ public class ChapterService extends BaseService<Chapter> {
         if (StringHelper.isEmpty(bookId)) return new ArrayList<>();
         //String sql = "select * from chapter where book_id = ? order by number";
         // return findChapters(sql, new String[]{bookId});
-        QueryBuilder<Chapter> where  = mChapterQueryBuilder.where(ChapterDao.Properties.BookId.eq(bookId));
+        QueryBuilder<Chapter> where  = mQueryBuilder.where(ChapterDao.Properties.BookId.eq(bookId));
         return    where.list();
     }
 
@@ -76,7 +76,7 @@ public class ChapterService extends BaseService<Chapter> {
      * @param chapter
      */
     public void addChapter(Chapter chapter) {
-        chapter.setId(UUID.randomUUID().toString());
+        chapter.setId(getUuid);
         addEntity(chapter);
     }
 
@@ -112,7 +112,7 @@ public class ChapterService extends BaseService<Chapter> {
        // String sel = "delete from chapter where book_id = ?";
        // rawQuery(sel, new String[]{bookId});
 
-        QueryBuilder<Chapter> where  = mChapterQueryBuilder.where(ChapterDao.Properties.BookId.eq(bookId));
+        QueryBuilder<Chapter> where  = mQueryBuilder.where(ChapterDao.Properties.BookId.eq(bookId));
         DeleteQuery<Chapter> deleteQuery = where.buildDelete();
         deleteQuery.executeDeleteWithoutDetachingEntities();
 
@@ -166,18 +166,36 @@ public class ChapterService extends BaseService<Chapter> {
     }
 
     @Override
-    public void addEntity(Chapter entity) {
-        daoConn.insert(entity);
+    protected Class<Chapter> getEntityClass() {
+        return Chapter.class;
+    }
+    @Override
+    protected ChapterDao getDao() {
+        tableName =ChapterDao.TABLENAME;
+        return daoSession.getChapterDao();
     }
 
+    /**
+     *
+     */
     @Override
-    public void updateEntity(Chapter entity) {
-        daoConn .update(entity);
+    protected void createTable() {
+        ChapterDao.createTable(mDatabase,true);
     }
 
-    @Override
-    public void deleteEntity(Chapter entity) {
-        daoConn.delete(entity);
-    }
+//    @Override
+//    public void addEntity(Chapter entity) {
+//        daoConn.insert(entity);
+//    }
+//
+//    @Override
+//    public void updateEntity(Chapter entity) {
+//        daoConn .update(entity);
+//    }
+//
+//    @Override
+//    public void deleteEntity(Chapter entity) {
+//        daoConn.delete(entity);
+//    }
 
 }

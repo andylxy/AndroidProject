@@ -3,6 +3,7 @@ package run.yigou.gxzy.greendao.service;
 import android.database.Cursor;
 
 
+import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.ArrayList;
@@ -12,15 +13,16 @@ import java.util.UUID;
 import run.yigou.gxzy.greendao.GreenDaoManager;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.gen.BookDao;
+import run.yigou.gxzy.utils.StringHelper;
 
 /**
  * Created by zhao on 2017/7/24.
  */
 
-public class BookService extends BaseService<Book> {
+public class BookService extends BaseService<Book,BookDao> {
 
-    public QueryBuilder<Book> mBookQueryBuilder = daoSession.queryBuilder(Book.class);
-    BookDao daoConn = daoSession.getBookDao();
+    //public QueryBuilder<Book> mBookQueryBuilder = daoSession.queryBuilder(Book.class);
+    //BookDao daoConn = daoSession.getBookDao();
     private ChapterService mChapterService;
 
     public BookService() {
@@ -77,7 +79,7 @@ public class BookService extends BaseService<Book> {
     public List<Book> getAllBooks() {
         //查出当前对应的数据
        // List<Book> bookList = mBookQueryBuilder.list();
-        return mBookQueryBuilder.list();
+        return mQueryBuilder.list();
     }
 
     /**
@@ -87,7 +89,7 @@ public class BookService extends BaseService<Book> {
      */
     public void addBook(Book book) {
         book.setSortCode(countBookTotalNum() + 1);
-        book.setId(UUID.randomUUID().toString());
+        book.setId(getUuid);
         addEntity(book);
     }
 
@@ -122,7 +124,7 @@ public class BookService extends BaseService<Book> {
     public Book findBookByAuthorAndName(String bookName, String author) {
         Book book = null;
         try {
-            QueryBuilder<Book> bookQueryBuilder = mBookQueryBuilder.where(BookDao.Properties.Name.eq(bookName), BookDao.Properties.Author.eq(author)).orderAsc(BookDao.Properties.Name);
+            QueryBuilder<Book> bookQueryBuilder = mQueryBuilder.whereOr(BookDao.Properties.Name.eq(bookName), BookDao.Properties.Author.eq(author)).orderAsc(BookDao.Properties.Name);
             List<Book> bookList = bookQueryBuilder.list(); //查出当前对应的数据
             if (bookList.size() == 1) {
                 book = bookList.get(0);
@@ -140,8 +142,10 @@ public class BookService extends BaseService<Book> {
      */
     public void deleteBookById(String id) {
        // BookDao bookDao = GreenDaoManager.getInstance().getSession().getBookDao();
-        daoConn.deleteByKey(id);
-        mChapterService.deleteBookALLChapterById(id);
+       if(!StringHelper.isEmpty(id)) {
+           daoConn.deleteByKey(id);
+           mChapterService.deleteBookALLChapterById(id);
+       }
     }
 
     /**
@@ -163,7 +167,7 @@ public class BookService extends BaseService<Book> {
         int num = 0;
         try {
             // 查出所有的数据
-            List<Book> bookList = mBookQueryBuilder.list();
+            List<Book> bookList = mQueryBuilder.list();
             num = bookList.size();
         } catch (Exception e) {
             e.printStackTrace();
@@ -182,19 +186,35 @@ public class BookService extends BaseService<Book> {
     }
 
     @Override
-    public void addEntity(Book entity) {
-        daoConn.insert(entity);
+    protected Class<Book> getEntityClass() {
+        return Book.class;
     }
 
     @Override
-    public void updateEntity(Book entity) {
-        daoConn .update(entity);
+    protected BookDao getDao() {
+        tableName =BookDao.TABLENAME;
+        return daoSession.getBookDao();
     }
 
     @Override
-    public void deleteEntity(Book entity) {
-        daoConn.delete(entity);
+    protected void createTable() {
+        BookDao.createTable(mDatabase,true);
     }
+
+//    @Override
+//    public void addEntity(Book entity) {
+//        daoConn.insert(entity);
+//    }
+//
+//    @Override
+//    public void updateEntity(Book entity) {
+//        daoConn .update(entity);
+//    }
+//
+//    @Override
+//    public void deleteEntity(Book entity) {
+//        daoConn.delete(entity);
+//    }
 
 
 }

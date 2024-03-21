@@ -6,9 +6,7 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by zhao on 2016/9/9.
- */
+
 public class StringHelper {
 
     public static boolean isEmpty(CharSequence str) {
@@ -88,7 +86,11 @@ public class StringHelper {
         return res;
     }
 
-    //生成随机数字和字母,
+    /**
+     * 生成随机数字和字母
+     * @param length 生成指定长度随机数
+     * @return 返回随机数
+     */
     public static String getStringRandom(int length) {
 
         String val = "";
@@ -121,6 +123,11 @@ public class StringHelper {
         return "";
     }
 
+    /**
+     * 检查传入的字符串是否为空
+     * @param str 待检查字符串
+     * @return true 为空,false 不为空
+     */
     public static boolean isEmpty(String str){
         if (str != null){
             str = str.replace(" ","");
@@ -128,9 +135,6 @@ public class StringHelper {
         return str == null || str.equals("");
     }
 
-    public static boolean isNotEmpty(String str){
-       return !isEmpty(str);
-    }
 
     /**
      * 缩减字符串
@@ -154,23 +158,14 @@ public class StringHelper {
 
     /**
      * 两字符串是否相等或者都为空
-     * @param str1
-     * @param str2
-     * @return
+     * @param str1 字符串1
+     * @param str2 字符串2
+     * @return true 相等 ,false 不相等
      */
     public static boolean isEquals(String str1, String str2){
         if(isEmpty(str1) && isEmpty(str2)){
             return true;
         }else return !isEmpty(str1) && !isEmpty(str2) && str1.equals(str2);
     }
-
-
-    public static String formatText(String text){
-        if (isEmpty(text)) return "";
-        else return text;
-    }
-
-
-
 
 }

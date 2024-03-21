@@ -27,9 +27,9 @@ import run.yigou.gxzy.utils.DateHelper;
  * 描述:
  */
 
-public class SearchHistoryService extends BaseService<SearchHistory> {
-    public QueryBuilder<SearchHistory> mSearchHistoryQueryBuilder = daoSession.queryBuilder(SearchHistory.class);
-    SearchHistoryDao daoConn = daoSession.getSearchHistoryDao();
+public class SearchHistoryService extends BaseService<SearchHistory,SearchHistoryDao> {
+//    public QueryBuilder<SearchHistory> mSearchHistoryQueryBuilder = daoSession.queryBuilder(SearchHistory.class);
+//    SearchHistoryDao daoConn = daoSession.getSearchHistoryDao();
 
     private ArrayList<SearchHistory> findSearchHistorys(String sql, String[] selectionArgs) {
         ArrayList<SearchHistory> searchHistories = new ArrayList<>();
@@ -58,7 +58,7 @@ public class SearchHistoryService extends BaseService<SearchHistory> {
     public ArrayList<SearchHistory> findAllSearchHistory() {
         //  String sql = "select * from search_history order by create_date desc";
         // return findSearchHistorys(sql, null);
-        return  (ArrayList<SearchHistory>)mSearchHistoryQueryBuilder.list();
+        return  (ArrayList<SearchHistory>)mQueryBuilder.list();
 
     }
 
@@ -69,7 +69,7 @@ public class SearchHistoryService extends BaseService<SearchHistory> {
      * @param searchHistory
      */
     public void addSearchHistory(SearchHistory searchHistory) {
-        searchHistory.setId(UUID.randomUUID().toString());
+        searchHistory.setId(getUuid);
         searchHistory.setCreateDate(DateHelper.longToTime(new Date().getTime()));
         addEntity(searchHistory);
     }
@@ -87,7 +87,7 @@ public class SearchHistoryService extends BaseService<SearchHistory> {
      * 清空历史记录
      */
     public void clearHistory() {
-         mSearchHistoryQueryBuilder.buildDelete().executeDeleteWithoutDetachingEntities();
+         mQueryBuilder.buildDelete().executeDeleteWithoutDetachingEntities();
     }
 
     /**
@@ -128,17 +128,36 @@ public class SearchHistoryService extends BaseService<SearchHistory> {
     }
 
     @Override
-    public void addEntity(SearchHistory entity) {
-        daoConn.insert(entity);
+    protected Class<SearchHistory> getEntityClass() {
+        return SearchHistory.class;
     }
 
     @Override
-    public void updateEntity(SearchHistory entity) {
-        daoConn.update(entity);
+    protected SearchHistoryDao getDao() {
+        tableName=SearchHistoryDao.TABLENAME;
+        return daoSession.getSearchHistoryDao();
     }
 
+    /**
+     *
+     */
     @Override
-    public void deleteEntity(SearchHistory entity) {
-        daoConn.delete(entity);
+    protected void createTable() {
+        SearchHistoryDao.createTable(mDatabase,true);
     }
+
+//    @Override
+//    public void addEntity(SearchHistory entity) {
+//        daoConn.insert(entity);
+//    }
+//
+//    @Override
+//    public void updateEntity(SearchHistory entity) {
+//        daoConn.update(entity);
+//    }
+//
+//    @Override
+//    public void deleteEntity(SearchHistory entity) {
+//        daoConn.delete(entity);
+//    }
 }
