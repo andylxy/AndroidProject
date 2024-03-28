@@ -9,24 +9,45 @@ import java.util.List;
  * Desc:
  */
 public class ChapterDirectory extends ChapterList {
-  private  int  BookId;
-  private String  Comment ;
+  private  int  mBookId;
+  private String  mComment ;
+    private String mParentId;
+    private String mTitleColor;
+
+
+    public String getTitleColor() {
+        return mTitleColor;
+    }
+
+    public ChapterDirectory setTitleColor(String titleColor) {
+        mTitleColor = titleColor;
+        return this;
+    }
+
+    public ChapterList setParentId(String parentId) {
+        mParentId = parentId;
+        return this;
+    }
+
+    public String getParentId() {
+        return mParentId;
+    }
   private List<ChapterList>  ChapterList;
 
     public int getBookId() {
-        return BookId;
+        return mBookId;
     }
 
     public void setBookId(int bookId) {
-        BookId = bookId;
+        mBookId = bookId;
     }
 
     public String getComment() {
-        return Comment;
+        return mComment;
     }
 
     public void setComment(String comment) {
-        Comment = comment;
+        mComment = comment;
     }
 
     public List<ChapterList> getChapterList() {

@@ -7,16 +7,29 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.hjq.http.EasyHttp;
 import com.hjq.http.EasyLog;
+import com.hjq.http.listener.HttpCallback;
+import com.hjq.widget.layout.WrapRecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.common.APPCONST;
 import run.yigou.gxzy.greendao.entity.Book;
+import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.service.BookService;
+import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.http.api.BookDetailList;
 import run.yigou.gxzy.http.api.BookInfoNav;
+import run.yigou.gxzy.http.entitymodel.TitelInfo;
 import run.yigou.gxzy.http.glide.GlideApp;
+import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.other.AppConfig;
+import run.yigou.gxzy.ui.adapter.ChapterDicAdapter;
 import run.yigou.gxzy.ui.fragment.BookCollectCaseFragment;
 import run.yigou.gxzy.utils.StringHelper;
 
@@ -40,10 +53,13 @@ public final class BookInfoActivity extends AppActivity {
     private ImageView ivBookImg;
     private TextView btnReadBook;
     private TextView btnAddBookcase;
-
+    private WrapRecyclerView mLvChapterDic;
+    private ChapterDicAdapter mChapterDicAdapter;
+    private ArrayList<TitelInfo> mTitelInfos = new ArrayList<>();
+    private  List<BookDetailList.Bean> detailList;
     public static void start(Context context, BookInfoNav.Bean.NavItem item) {
         Intent intent = new Intent(context, BookInfoActivity.class);
-        intent.putExtra(Book_KEY_IN, item);
+        intent.putExtra(APPCONST.BOOK, item);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
@@ -62,9 +78,20 @@ public final class BookInfoActivity extends AppActivity {
         setOnClickListener(R.id.btn_read_book, R.id.btn_add_bookcase);
     }
 
+    private void init() {
+        tvBookAuthor = findViewById(R.id.tv_book_author);
+        tvBookDesc = findViewById(R.id.tv_book_desc);
+//        tvBookType = findViewById(R.id.tv_book_type);
+        tvTvBookName = findViewById(R.id.tv_book_name);
+        btnReadBook = findViewById(R.id.btn_read_book);
+        btnAddBookcase = findViewById(R.id.btn_add_bookcase);
+        ivBookImg = findViewById(R.id.iv_book_img);
+        mLvChapterDic = findViewById(R.id.lv_chapter_dic);
+
+    }
     @Override
     protected void initData() {
-        mBookService = new BookService();
+        mBookService = DbService.getInstance().mBookService;// new BookService();
         if (BookCollected(true)) {
             btnAddBookcase.setText("弃书不读了");
         } else {
@@ -79,8 +106,51 @@ public final class BookInfoActivity extends AppActivity {
         GlideApp.with(this.getContext())
                 .load(AppConfig.getHostUrl() + mNavItem.getImageUrl())
                 .into(ivBookImg);
-    }
+        EasyHttp.get(this)
+                .api(new BookDetailList().setId(mBook.getBookId()))
+                .request(new HttpCallback<HttpData<List<BookDetailList.Bean>>>(this) {
+                    @Override
+                    public void onSucceed(HttpData<List<BookDetailList.Bean>> data) {
+                        if (data != null && data.getData().size() > 0) {
+                             detailList = data.getData();
+                            try {
+                                for (BookDetailList.Bean bean : detailList) {
 
+                                    TitelInfo titelInfo = new TitelInfo();
+                                    titelInfo.setId(bean.getId() + "");
+                                    titelInfo.setParentId(bean.getParentId());
+                                    titelInfo.setTitleColor(bean.getTitleColor());
+                                    titelInfo.setTitle(bean.getTitle());
+                                    titelInfo.setComment(bean.getComment());
+                                    titelInfo.setBookId(bean.getBookId()+"");
+                                    mTitelInfos.add(titelInfo);
+
+                                }
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }finally {
+                                initViewData();
+                            }
+                        }
+                    }
+                });
+
+    }
+    private void initViewData() {
+
+
+        mChapterDicAdapter = new ChapterDicAdapter(getContext());
+        mChapterDicAdapter.setOnItemClickListener((adapterView, view, i) -> {
+            BookDetailList.Bean  chapter =   detailList.get(i);
+            Intent intent = new Intent(getActivity(), TitleDicActivity.class);
+            intent.putExtra(APPCONST.CHAPTER, chapter);
+            startActivity(intent);
+        });
+        mLvChapterDic.setAdapter(mChapterDicAdapter);
+        mChapterDicAdapter.setData(mTitelInfos);
+
+    }
 
     @SingleClick
     @Override
@@ -111,28 +181,17 @@ public final class BookInfoActivity extends AppActivity {
     }
 
 
-    private void init() {
-        tvBookAuthor = findViewById(R.id.tv_book_author);
-        tvBookDesc = findViewById(R.id.tv_book_desc);
-//        tvBookType = findViewById(R.id.tv_book_type);
-        tvTvBookName = findViewById(R.id.tv_book_name);
-        btnReadBook = findViewById(R.id.btn_read_book);
-        btnAddBookcase = findViewById(R.id.btn_add_bookcase);
-        ivBookImg = findViewById(R.id.iv_book_img);
-
-
-    }
 
     private boolean BookCollected(boolean start) {
 
         if (start) {
-            mNavItem = getSerializable(Book_KEY_IN);
+            mNavItem = getSerializable(APPCONST.BOOK);
             mBook = new Book();
             mBook.setAuthor(mNavItem.getAuthor());
             mBook.setDesc(mNavItem.getDesc());
             mBook.setImgUrl(mNavItem.getImageUrl());
             mBook.setName(mNavItem.getBookName());
-            mBook.setType(mNavItem.getId());
+            mBook.setBookId(mNavItem.getId());
         }
 
         Book book = mBookService.findBookByAuthorAndName(mBook.getName(), mBook.getAuthor());

@@ -19,27 +19,22 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.hjq.base.action.HandlerAction;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
-import com.hjq.http.listener.OnHttpListener;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.UUID;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.ResultCallback;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.common.APPCONST;
-import run.yigou.gxzy.common.Font;
 import run.yigou.gxzy.common.Language;
 import run.yigou.gxzy.common.ReadStyle;
 import run.yigou.gxzy.common.Setting;
@@ -49,15 +44,14 @@ import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.service.ChapterService;
+import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookDetailList;
-import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.api.GetChapterDetail;
-import run.yigou.gxzy.http.entitymodel.ChapterInfo;
+import run.yigou.gxzy.http.entitymodel.ChapterInfoBody;
 import run.yigou.gxzy.http.entitymodel.ChapterList;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.adapter.BookReadContenAdapter;
 import run.yigou.gxzy.ui.adapter.ChapterTitleAdapter;
-import run.yigou.gxzy.ui.fragment.BookInfoFragment;
 import run.yigou.gxzy.utils.BrightUtil;
 import run.yigou.gxzy.utils.ConvertHtmlColorsHelper;
 import run.yigou.gxzy.utils.DateHelper;
@@ -200,7 +194,7 @@ public final class BookReadActivity extends AppActivity {
 
     public static void start(Context context, Book item) {
         Intent intent = new Intent(context, BookReadActivity.class);
-        intent.putExtra(Book_KEY_IN, item);
+        intent.putExtra(APPCONST.BOOK, item);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
@@ -652,7 +646,7 @@ public final class BookReadActivity extends AppActivity {
                 position = mChapters.size() - 1 - i;
             }
             //打开的章节是否为空
-            if (StringHelper.isEmpty(mChapters.get(position).getContent())) {
+            if (StringHelper.isEmpty(mChapters.get(position).getMSection())) {
                 mPbLoading.setVisibility(View.VISIBLE);
                 //请求当前章节内容
                 getChapterContent(position, new ResultCallback() {
@@ -693,6 +687,8 @@ public final class BookReadActivity extends AppActivity {
             }
             selectedChapterPosition(position);
         });
+
+
         //初始化目录数据
         mChapterTitleAdapter.setData(mChapters);
         //跳到指定目录位置
@@ -808,9 +804,35 @@ public final class BookReadActivity extends AppActivity {
                 .request(new HttpCallback<HttpData<GetChapterDetail.Bean>>(this) {
                     @Override
                     public void onSucceed(HttpData<GetChapterDetail.Bean> data) {
-                        if (data != null) {
+                        if (data.getData() != null) {
                             GetChapterDetail.Bean bean = data.getData();
-                            mChapters.get(position).setContent(ConvertHtmlColorsHelper.convertHtmlColors(bean.getSection()));
+                            Chapter chapter = mChapters.get(position);
+                            chapter.setId(UUID.randomUUID().toString());
+                            chapter.setBookId(bean.getId() + "");
+                            chapter.setTitle(bean.getTitle());
+                            chapter.setParentId(bean.getParentId());
+                            chapter.setMTitleColor(bean.getTitleColor());
+                            chapter.setParentId(bean.getParentId());
+                            //  mChapters.get(position).;
+                            for (ChapterInfoBody body : bean.getChapterInfoBody()) {
+                                chapter.setMSection(ConvertHtmlColorsHelper.convertHtmlColors(body.getSection()));
+                                chapter.setMSectionNote(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionNote()));
+                                chapter.setMSectionVideoMemo(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionVideoMemo()));
+                                chapter.setMFangJi(ConvertHtmlColorsHelper.convertHtmlColors(body.getFangJi()));
+                                chapter.setMFangJiZhujie(ConvertHtmlColorsHelper.convertHtmlColors(body.getFangJiZhujie()));
+                                chapter.setAiJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getAiJiu()));
+                                chapter.setBieMing(ConvertHtmlColorsHelper.convertHtmlColors(body.getBieMing()));
+                                chapter.setShiCi(ConvertHtmlColorsHelper.convertHtmlColors(body.getShiCi()));
+                                chapter.setTeDian(ConvertHtmlColorsHelper.convertHtmlColors(body.getTeDian()));
+                                chapter.setShiYi(ConvertHtmlColorsHelper.convertHtmlColors(body.getShiYi()));
+                                chapter.setNotes(ConvertHtmlColorsHelper.convertHtmlColors(body.getNotes()));
+                                chapter.setZhuZhi(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhuZhi()));
+                                chapter.setZhenJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhenJiu()));
+                                chapter.setPeiWu(ConvertHtmlColorsHelper.convertHtmlColors(body.getPeiWu()));
+                            }
+
+                            // convertChapterDetail(bean, position);
+
                             //更新章节内容
                             if (!isStoreBook)
                                 mChapterService.updateChapter(mChapters.get(position));
@@ -820,6 +842,43 @@ public final class BookReadActivity extends AppActivity {
                     }
                 });
     }
+
+//    /**
+//     * 获取章节内容转换为Chapter对象
+//     *
+//     * @param bean
+//     * @param position
+//     */
+//    private void convertChapterDetail(GetChapterDetail.Bean bean, int position) {
+//        mChapters.get(position).getMChapterBodyList().addAll(convertChapterBody(bean));
+//    }
+
+//    private List<ChapterBody> convertChapterBody(GetChapterDetail.Bean bean) {
+//        List<ChapterBody> chapterBodyArrayList = new ArrayList<>();
+//        if (bean.getChapterInfoBody() != null && bean.getChapterInfoBody().size() >= 1) {
+//            for (ChapterInfoBody body : bean.getChapterInfoBody()) {
+//                ChapterBody chapterbody = new ChapterBody();
+//                chapterbody.setMSection(ConvertHtmlColorsHelper.convertHtmlColors(body.getSection()));
+//                chapterbody.setMSectionNote(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionNote()));
+//                chapterbody.setMSectionVideoMemo(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionVideoMemo()));
+//                chapterbody.setMFangJi(ConvertHtmlColorsHelper.convertHtmlColors(body.getFangJi()));
+//                chapterbody.setMFangJiZhujie(ConvertHtmlColorsHelper.convertHtmlColors(body.getFangJiZhujie()));
+//                chapterbody.setAiJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getAiJiu()));
+//                chapterbody.setBieMing(ConvertHtmlColorsHelper.convertHtmlColors(body.getBieMing()));
+//                chapterbody.setShiCi(ConvertHtmlColorsHelper.convertHtmlColors(body.getShiCi()));
+//                chapterbody.setTeDian(ConvertHtmlColorsHelper.convertHtmlColors(body.getTeDian()));
+//                chapterbody.setShiYi(ConvertHtmlColorsHelper.convertHtmlColors(body.getShiYi()));
+//                chapterbody.setNotes(ConvertHtmlColorsHelper.convertHtmlColors(body.getNotes()));
+//                chapterbody.setZhuZhi(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhuZhi()));
+//                chapterbody.setZhenJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhenJiu()));
+//                chapterbody.setPeiWu(ConvertHtmlColorsHelper.convertHtmlColors(body.getPeiWu()));
+//                //mChapters.get(position).getMChapterBodyList().add(chapterbody);
+//                chapterBodyArrayList.add(chapterbody);
+//            }
+//
+//        }
+//        return chapterBodyArrayList;
+//    }
 
     private void SetDayStyle() {
 
@@ -849,7 +908,7 @@ public final class BookReadActivity extends AppActivity {
     private void dataSetting() {
 
         //接收传入书的信息
-        mBook = getSerializable(Book_KEY_IN);
+        mBook = getSerializable(APPCONST.BOOK);
         isStoreBook = StringHelper.isEmpty(mBook.getId());
         isSearch = mBook.getSource() != null && mBook.getSource().equals("Search");
         //显示进度条(不显示使用)
@@ -857,8 +916,8 @@ public final class BookReadActivity extends AppActivity {
         //初始化富文本
         //在第一次调用RichText之前先调用RichText.initCacheDir()方法设置缓存目录，不设置会报错
         //RichText.initCacheDir(this.getContext());
-        mBookService = new BookService();
-        mChapterService = new ChapterService();
+        mBookService = DbService.getInstance().mBookService;//new BookService();
+        mChapterService = DbService.getInstance().mChapterService;// new ChapterService();
         getBookDetailList();
 
     }
@@ -891,7 +950,7 @@ public final class BookReadActivity extends AppActivity {
             mChapters = (ArrayList<Chapter>) mChapterService.findBookAllChapterByBookId(mBook.getId());
             ArrayList<Chapter> chapters = new ArrayList<>();
             EasyHttp.get(this)
-                    .api(new BookDetailList().setId(mBook.getType()))
+                    .api(new BookDetailList().setId(mBook.getBookId()))
                     .request(new HttpCallback<HttpData<List<BookDetailList.Bean>>>(this) {
                         @Override
                         public void onSucceed(HttpData<List<BookDetailList.Bean>> data) {
@@ -906,7 +965,8 @@ public final class BookReadActivity extends AppActivity {
 //                                            if (Objects.equals(chapt.getParentId(), "0")){
 //                                            chapter.setTitle(chapt.getTitle());
 //                                            }else
-                                            chapter.setTitle(""+chapt.getTitle());
+                                            chapter.setParentId(bean.getParentId());
+                                            chapter.setTitle("" + chapt.getTitle());
                                             chapter.setUrl(chapt.getId() + "");
                                             chapters.add(chapter);
                                         }
@@ -928,8 +988,9 @@ public final class BookReadActivity extends AppActivity {
                             }
 
                         }
+
                         @Override
-                        public  void  onFail(Exception e){
+                        public void onFail(Exception e) {
                             initViewData();
                         }
                     });
@@ -941,7 +1002,30 @@ public final class BookReadActivity extends AppActivity {
                         public void onSucceed(HttpData<GetChapterDetail.Bean> data) {
                             if (data != null) {
                                 GetChapterDetail.Bean bean = data.getData();
-                                mChapters.add(new Chapter(bean.getId() + "", bean.getId() + "", 0, bean.getTitle(), "", ConvertHtmlColorsHelper.convertHtmlColors(bean.getSection())));
+                                for (ChapterInfoBody body : bean.getChapterInfoBody()) {
+                                    Chapter chapter = new Chapter();
+                                    chapter.setId(UUID.randomUUID().toString());
+                                    chapter.setBookId(bean.getId() + "");
+                                    chapter.setTitle(bean.getTitle());
+                                    chapter.setMTitleColor(bean.getTitleColor());
+                                    chapter.setParentId(bean.getParentId());
+                                    chapter.setMSection(ConvertHtmlColorsHelper.convertHtmlColors(body.getSection()));
+                                    chapter.setMSectionNote(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionNote()));
+                                    chapter.setMSectionVideoMemo(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionVideoMemo()));
+                                    chapter.setMFangJi(ConvertHtmlColorsHelper.convertHtmlColors(body.getFangJi()));
+                                    chapter.setMFangJiZhujie(ConvertHtmlColorsHelper.convertHtmlColors(body.getFangJiZhujie()));
+                                    chapter.setAiJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getAiJiu()));
+                                    chapter.setBieMing(ConvertHtmlColorsHelper.convertHtmlColors(body.getBieMing()));
+                                    chapter.setShiCi(ConvertHtmlColorsHelper.convertHtmlColors(body.getShiCi()));
+                                    chapter.setTeDian(ConvertHtmlColorsHelper.convertHtmlColors(body.getTeDian()));
+                                    chapter.setShiYi(ConvertHtmlColorsHelper.convertHtmlColors(body.getShiYi()));
+                                    chapter.setNotes(ConvertHtmlColorsHelper.convertHtmlColors(body.getNotes()));
+                                    chapter.setZhuZhi(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhuZhi()));
+                                    chapter.setZhenJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhenJiu()));
+                                    chapter.setPeiWu(ConvertHtmlColorsHelper.convertHtmlColors(body.getPeiWu()));
+                                    mChapters.add(chapter);
+                                }
+
                                 postDelayed(() -> {
                                     initViewData();
                                 }, 1000);
@@ -967,14 +1051,14 @@ public final class BookReadActivity extends AppActivity {
             if (!oldChapter.getTitle().equals(newChapter.getTitle())) {
                 oldChapter.setTitle(newChapter.getTitle());
                 oldChapter.setUrl(newChapter.getUrl());
-                oldChapter.setContent(null);
+                oldChapter.setMSection(null);
                 mChapterService.updateEntity(oldChapter);
             }
         }
         if (mChapters.size() < newChapters.size()) {
             int start = mChapters.size();
             for (int j = mChapters.size(); j < newChapters.size(); j++) {
-                newChapters.get(j).setId(StringHelper.getStringRandom(25));
+                newChapters.get(j).setId(UUID.randomUUID().toString());
                 newChapters.get(j).setBookId(mBook.getId());
                 mChapters.add(newChapters.get(j));
 //                mChapterService.addChapter(newChapters.get(j));
@@ -996,4 +1080,9 @@ public final class BookReadActivity extends AppActivity {
         // AppApplication.getApplication().shutdownThreadPool();
     }
 
+    @Override
+    public boolean isStatusBarEnabled() {
+        // 使用沉浸式状态栏
+        return !super.isStatusBarEnabled();
+    }
 }

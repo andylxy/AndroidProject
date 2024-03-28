@@ -23,16 +23,12 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
-
-import com.github.gzuliyujiang.oaid.DeviceIdentifier;
-import com.github.gzuliyujiang.oaid.IRegisterCallback;
 import com.hjq.bar.TitleBar;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.greendao.entity.UserInfo;
 import run.yigou.gxzy.greendao.service.UserInfoService;
 import run.yigou.gxzy.greendao.util.DbService;
-import run.yigou.gxzy.http.entitymodel.UserInfoToken;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.RequestHandler;
 import run.yigou.gxzy.http.model.RequestServer;
@@ -77,22 +73,11 @@ public final class AppApplication extends Application {
     private static Handler handler = new Handler();
 
     private ScheduledExecutorService mFixedThreadPool;
-    private boolean privacyPolicyAgreed = false;
+
     public static void runOnUiThread(Runnable runnable) {
         handler.post(runnable);
     }
-//    static {
-//        // 开启日志打印，默认是关闭的，启动本应用会打印如下类似的日志：
-//        // IMEI/MEID not allowed on Android 10+
-//        // android.content.pm.PackageManager$NameNotFoundException: com.mdid.msa
-//        // Google Play Service has been found: com.github.gzuliyujiang.oaid.impl.GmsImpl
-//        // Service has been bound: Intent { act=com.google.android.gms.ads.identifier.service.START pkg=com.google.android.gms }
-//        // Service has been connected: com.google.android.gms.ads.identifier.service.AdvertisingIdService
-//        // OAID/AAID acquire success: 3f398576-c70a-455c-95ab-1fe35a9ae175
-//        // Client id is OAID/AAID: 3f398576-c70a-455c-95ab-1fe35a9ae175
-//        // Service has been unbound: com.google.android.gms.ads.identifier.service.AdvertisingIdService
-//       OAIDLog.enable();
-//    }
+
     public void newThread(Runnable runnable) {
         try {
             mFixedThreadPool.schedule(runnable,1, TimeUnit.SECONDS);
@@ -120,67 +105,28 @@ public final class AppApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        // 初始化 TitleBar 默认样式
+       // TitleBar.setDefaultStyle(new ITitleBarStyle());
         application=this;
         mUserInfoService = DbService.getInstance().mUserInfoService;
         initSdk(this);
         initUserLogin();
-        getDeviceId();
     }
 
     private void initUserLogin() {
         UserInfo userInfo =mUserInfoService.getLoginUserInfo();
         if (userInfo!=null){
-            mUserInfoToken = mUserInfoService.getLoginUserInfo();//new UserInfoToken(userInfo.getToken(),userInfo.getUserName(),userInfo.getImg(),userInfo.getUserLoginAccount());
+            mUserInfoToken = mUserInfoService.getLoginUserInfo();
             //添加http请求Token
             if (mUserInfoToken !=null)
                 EasyConfig.getInstance().addHeader("Authorization", mUserInfoToken.getToken());
-        }
-    }
 
-    private void getDeviceId() {
-        //注意APP合规性，若最终用户未同意隐私政策则不要调用
-        if (privacyPolicyAgreed) {
-            //DeviceIdentifier.register(this);
-            //getClientId/getClientIdMd5/getClientIdSha1获取客户端唯一标识
-            DeviceIdentifier.register(this, false, new IRegisterCallback() {
-                @Override
-                public void onComplete(String clientId, Exception error) {
-                    // do something
-
-                }
-            });
-//            // 获取IMEI，只支持Android 10之前的系统，需要READ_PHONE_STATE权限，可能为空
-//            DeviceIdentifier.getIMEI(this);
-//            // 获取安卓ID，可能为空
-//            // 获取数字版权管理ID，可能为空。很鸡肋，在某些手机上还可能造成卡死或闪退，自4.2.7版本后已弃用
-//            DeviceIdentifier.getWidevineID();
-//            // 获取伪造ID，根据硬件信息生成，不会为空，有大概率会重复
-//           DeviceIdentifier.getPseudoID();
-//            // 获取GUID，随机生成，不会为空
-//            DeviceIdentifier.getGUID(this);
-//            // 是否支持OAID/AAID
-//            DeviceID.supportedOAID(this);
-//            // 获取OAID/AAID，同步调用
-//            DeviceIdentifier.getOAID(this);
-//            // 获取OAID/AAID，异步回调
-//            DeviceID.getOAID(this, new IGetter() {
-//                @Override
-//                public void onOAIDGetComplete(String result) {
-//                    // 不同厂商的OAID/AAID格式是不一样的，可进行MD5、SHA1之类的哈希运算统一
-//                }
-//
-//                @Override
-//                public void onOAIDGetError(Exception error) {
-//                    // 获取OAID/AAID失败
-//                }
-//            });
         }
     }
 
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        privacyPolicyAgreed = true;
     }
 
     @Override
@@ -262,7 +208,7 @@ public final class AppApplication extends Application {
                     // 添加全局请求头
                    // headers.put("Authorization", mUserInfoToken.getToken());
                     headers.put("app", "2");
-                    headers.put("ClientId", DeviceIdentifier.getClientId());
+                   // headers.put("ClientId", DeviceIdentifier.getAndroidID(this));
                     headers.put("versionName", AppConfig.getVersionName());
                     headers.put("versionCode", String.valueOf(AppConfig.getVersionCode()));
                     headers.put("Content-Type", "application/json;charset=UTF-8");

@@ -1,8 +1,6 @@
 package run.yigou.gxzy.greendao.entity;
 
 
-import androidx.annotation.Nullable;
-
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
@@ -21,19 +19,58 @@ public class Chapter {
     private int number;//章节序号
     private String title;//章节标题
     private String url;//章节链接
-    @Nullable
-    private String content;//章节正文
+    private String parentId; //卷章
+    private String mTitleColor;
+    private String mSection;//原文
 
+    private String mSectionNote;//原文注解
 
-    @Generated(hash = 1019441369)
+    private String mSectionVideoMemo;//视频原文讲解
+    private String mFangJi;//方剂
+
+    private String mFangJiZhujie;//方剂注解
+
+    private String mSectionVideoUrl;//原文视频地址
+    private String BieMing;
+    private String JingMai;
+    private String ZhuZhi;
+    private String ZhenJiu;
+    private String AiJiu;
+    private String PeiWu;
+    private String TeDian;
+    private String ShiCi;
+    private String ShiYi;
+    private String Notes;
+    @Generated(hash = 1663283554)
     public Chapter(String id, String bookId, int number, String title, String url,
-                   String content) {
+            String parentId, String mTitleColor, String mSection,
+            String mSectionNote, String mSectionVideoMemo, String mFangJi,
+            String mFangJiZhujie, String mSectionVideoUrl, String BieMing,
+            String JingMai, String ZhuZhi, String ZhenJiu, String AiJiu,
+            String PeiWu, String TeDian, String ShiCi, String ShiYi, String Notes) {
         this.id = id;
         this.bookId = bookId;
         this.number = number;
         this.title = title;
         this.url = url;
-        this.content = content;
+        this.parentId = parentId;
+        this.mTitleColor = mTitleColor;
+        this.mSection = mSection;
+        this.mSectionNote = mSectionNote;
+        this.mSectionVideoMemo = mSectionVideoMemo;
+        this.mFangJi = mFangJi;
+        this.mFangJiZhujie = mFangJiZhujie;
+        this.mSectionVideoUrl = mSectionVideoUrl;
+        this.BieMing = BieMing;
+        this.JingMai = JingMai;
+        this.ZhuZhi = ZhuZhi;
+        this.ZhenJiu = ZhenJiu;
+        this.AiJiu = AiJiu;
+        this.PeiWu = PeiWu;
+        this.TeDian = TeDian;
+        this.ShiCi = ShiCi;
+        this.ShiYi = ShiYi;
+        this.Notes = Notes;
     }
     @Generated(hash = 393170288)
     public Chapter() {
@@ -68,11 +105,113 @@ public class Chapter {
     public void setUrl(String url) {
         this.url = url;
     }
-    public String getContent() {
-        return this.content;
+    public String getParentId() {
+        return this.parentId;
     }
-    public void setContent(String content) {
-        this.content = content;
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
+    }
+    public String getMTitleColor() {
+        return this.mTitleColor;
+    }
+    public void setMTitleColor(String mTitleColor) {
+        this.mTitleColor = mTitleColor;
+    }
+    public String getMSection() {
+        return this.mSection;
+    }
+    public void setMSection(String mSection) {
+        this.mSection = mSection;
+    }
+    public String getMSectionNote() {
+        return this.mSectionNote;
+    }
+    public void setMSectionNote(String mSectionNote) {
+        this.mSectionNote = mSectionNote;
+    }
+    public String getMSectionVideoMemo() {
+        return this.mSectionVideoMemo;
+    }
+    public void setMSectionVideoMemo(String mSectionVideoMemo) {
+        this.mSectionVideoMemo = mSectionVideoMemo;
+    }
+    public String getMFangJi() {
+        return this.mFangJi;
+    }
+    public void setMFangJi(String mFangJi) {
+        this.mFangJi = mFangJi;
+    }
+    public String getMFangJiZhujie() {
+        return this.mFangJiZhujie;
+    }
+    public void setMFangJiZhujie(String mFangJiZhujie) {
+        this.mFangJiZhujie = mFangJiZhujie;
+    }
+    public String getMSectionVideoUrl() {
+        return this.mSectionVideoUrl;
+    }
+    public void setMSectionVideoUrl(String mSectionVideoUrl) {
+        this.mSectionVideoUrl = mSectionVideoUrl;
+    }
+    public String getBieMing() {
+        return this.BieMing;
+    }
+    public void setBieMing(String BieMing) {
+        this.BieMing = BieMing;
+    }
+    public String getJingMai() {
+        return this.JingMai;
+    }
+    public void setJingMai(String JingMai) {
+        this.JingMai = JingMai;
+    }
+    public String getZhuZhi() {
+        return this.ZhuZhi;
+    }
+    public void setZhuZhi(String ZhuZhi) {
+        this.ZhuZhi = ZhuZhi;
+    }
+    public String getZhenJiu() {
+        return this.ZhenJiu;
+    }
+    public void setZhenJiu(String ZhenJiu) {
+        this.ZhenJiu = ZhenJiu;
+    }
+    public String getAiJiu() {
+        return this.AiJiu;
+    }
+    public void setAiJiu(String AiJiu) {
+        this.AiJiu = AiJiu;
+    }
+    public String getPeiWu() {
+        return this.PeiWu;
+    }
+    public void setPeiWu(String PeiWu) {
+        this.PeiWu = PeiWu;
+    }
+    public String getTeDian() {
+        return this.TeDian;
+    }
+    public void setTeDian(String TeDian) {
+        this.TeDian = TeDian;
+    }
+    public String getShiCi() {
+        return this.ShiCi;
+    }
+    public void setShiCi(String ShiCi) {
+        this.ShiCi = ShiCi;
+    }
+    public String getShiYi() {
+        return this.ShiYi;
+    }
+    public void setShiYi(String ShiYi) {
+        this.ShiYi = ShiYi;
+    }
+    public String getNotes() {
+        return this.Notes;
+    }
+    public void setNotes(String Notes) {
+        this.Notes = Notes;
     }
 
 

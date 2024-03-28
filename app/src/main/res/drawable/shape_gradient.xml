@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ 项目名: AndroidProject
+  ~ 类名: shape_gradient.xml
+  ~ 包名: E:/app/AndroidProject/app/src/main/res/drawable/shape_gradient.xml
+  ~ 作者 : Zhs (xiaoyang_02@qq.com)
+  ~ 当前修改时间 : 2024年03月22日 08:12:25
+  ~ 上次修改时间: 2024年03月22日 08:11:53
+  ~ Copyright (c) 2024 Zhs, Inc. All Rights Reserved
+  -->
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="180"
+        android:endColor="#387cfd"
+        android:startColor="#26c4fd"
+        android:type="linear" />
+</shape>

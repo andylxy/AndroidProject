@@ -3,12 +3,12 @@
     android:id="@+id/dl_read_activity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    >
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
+        android:layout_height="match_parent"
+        >
         <com.scwang.smart.refresh.layout.SmartRefreshLayout
             android:id="@+id/srl_content"
             android:layout_width="match_parent"
@@ -20,7 +20,6 @@
                 android:layout_height="match_parent"
                 android:divider="@color/nothing"
                 android:dividerHeight="30dp"
-
                 android:fadingEdge="none"
                 android:listSelector="@color/nothing"
                 android:overScrollMode="never" />

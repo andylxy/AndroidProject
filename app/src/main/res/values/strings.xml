@@ -258,6 +258,7 @@
 
     <!-- 书本信息 -->
     <string name="book_data_title">书本信息</string>
+    <string name="book_data_title_dic">章节目录</string>
     <string name="book_data_content">阅读内容</string>
 
     <string name="day">白天</string>

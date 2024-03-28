@@ -272,6 +272,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             book.setName(mBooks.get(position).getBookName());
             book.setType(mBooks.get(position).getType());
             book.setChapterUrl(mBooks.get(position).getId() + "");
+            book.setBookId(mBooks.get(position).getId() + "");
             book.setSource("Search");
             intent.putExtra(APPCONST.BOOK, book);
             startActivity(intent);

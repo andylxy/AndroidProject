@@ -236,6 +236,20 @@
     <color name="toast_blue">#FF87CEFA</color>
     <color name="toast_yellow">#FFFFE284</color>
     <color name="toast_red">#FFE75B76</color>
+    <!--阅读书面颜色-->
+    <!--   原文字体颜色 -->
+    <color name="read_section">#F78029</color>
+    <!--   原文背景色颜色 -->
+    <color name="read_section_background"> #FAFAFA</color>
+    <!--    分隔线 -->
+    <color name="read_section_divider_line"> #60B7E0</color>
+    <!--  章节标题背景色  -->
+    <color name="read_section_title_background"> #60B7E0</color>
+    <!--   获取到焦点背景色     -->
+    <color name="read_cursor_background">#F78029</color>
+    <!--   点击原文注解字体颜色     -->
+    <color name="read_cursor_textColor">#F78029</color>
 
-
+    <!--    方剂注解背景-->
+    <color name="read_fangjizhujie_background">#F2EBDB</color>
 </resources>

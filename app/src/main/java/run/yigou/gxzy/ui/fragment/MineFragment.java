@@ -47,7 +47,7 @@ public final class MineFragment extends TitleBarFragment<HomeActivity> {
 
     @Override
     protected int getLayoutId() {
-        return R.layout.mine_fragment;
+        return R.layout.mine_fragment_bak;
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
 
+import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 
 /**
@@ -17,14 +18,21 @@ import androidx.core.text.HtmlCompat;
  * 描述:
  */
 public class SpannableStringHelper {
+
+    public static Spanned  getSpannableString(String contentText) {
+        if (StringHelper.isEmpty(contentText)) return null;
+        return HtmlCompat.fromHtml(contentText, HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_PARAGRAPH);
+    }
+
+
     /**
      * searchKey 搜索关键字
      * contentText 搜索结果
      * colorResId  颜色参数
      */
     public static Spanned getSpannableString(String searchKey, String contentText, String colorResId) {
-
-
+        if (StringHelper.isEmpty(contentText))return null;
+        if (StringHelper.isEmpty(searchKey))return  HtmlCompat.fromHtml(contentText, HtmlCompat.FROM_HTML_MODE_COMPACT);
         // 构造带有背景色的 HTML 标签
         String highlightedText = createBackgroundColorSpan(colorResId, searchKey);
         // 将所有子串替换为带有背景色的 HTML 标签

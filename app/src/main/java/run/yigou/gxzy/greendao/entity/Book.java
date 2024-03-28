@@ -23,7 +23,7 @@ public class Book implements Serializable {
 
     @Id
     private String id;
-
+    private  String bookId;
     private String name;//书名
     private String chapterUrl;//书目Url
     private String imgUrl;//封面图片url
@@ -58,14 +58,15 @@ public class Book implements Serializable {
 
 
 
-    @Generated(hash = 1392889320)
-    public Book(String id, String name, String chapterUrl, String imgUrl,
-            String desc, String author, String type, String updateDate,
-            String newestChapterId, String newestChapterTitle,
+    @Generated(hash = 2009405574)
+    public Book(String id, String bookId, String name, String chapterUrl,
+            String imgUrl, String desc, String author, String type,
+            String updateDate, String newestChapterId, String newestChapterTitle,
             String newestChapterUrl, String historyChapterId,
             int histtoryChapterNum, int sortCode, int noReadNum,
             int chapterTotalNum, int lastReadPosition, String source) {
         this.id = id;
+        this.bookId = bookId;
         this.name = name;
         this.chapterUrl = chapterUrl;
         this.imgUrl = imgUrl;
@@ -194,6 +195,12 @@ public class Book implements Serializable {
     }
     public void setSource(String source) {
         this.source = source;
+    }
+    public String getBookId() {
+        return this.bookId;
+    }
+    public void setBookId(String bookId) {
+        this.bookId = bookId;
     }
 
 

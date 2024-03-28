@@ -7,12 +7,9 @@ import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import run.yigou.gxzy.greendao.GreenDaoManager;
-import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.Chapter;
-import run.yigou.gxzy.greendao.gen.BookDao;
 import run.yigou.gxzy.greendao.gen.ChapterDao;
 import run.yigou.gxzy.utils.StringHelper;
 
@@ -36,7 +33,7 @@ public class ChapterService extends BaseService<Chapter,ChapterDao> {
                 chapter.setNumber(cursor.getInt(2));
                 chapter.setTitle(cursor.getString(3));
                 chapter.setUrl(cursor.getString(4));
-                chapter.setContent(cursor.getString(5));
+                chapter.setMSection(cursor.getString(5));
                 chapters.add(chapter);
             }
         } catch (Exception e) {
@@ -183,11 +180,12 @@ public class ChapterService extends BaseService<Chapter,ChapterDao> {
         ChapterDao.createTable(mDatabase,true);
     }
 
-//    @Override
-//    public void addEntity(Chapter entity) {
-//        daoConn.insert(entity);
-//    }
-//
+    @Override
+    public long addEntity(Chapter entity) {
+        entity.setId(getUuid);
+        return super.addEntity(entity);
+    }
+    //
 //    @Override
 //    public void updateEntity(Chapter entity) {
 //        daoConn .update(entity);

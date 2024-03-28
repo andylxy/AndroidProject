@@ -63,7 +63,11 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
 
     /** 头像地址 */
     private Uri mAvatarUrl;
-
+    @Override
+    public boolean isStatusBarEnabled() {
+        // 使用沉浸式状态栏
+        return !super.isStatusBarEnabled();
+    }
     @Override
     protected int getLayoutId() {
         return R.layout.personal_data_activity;

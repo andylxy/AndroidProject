@@ -10,17 +10,8 @@ import java.io.Serializable;
  */
 public class ChapterList implements Serializable {
    private int Id ;
-   private String Title;
-    private String ParentId;
+   private String mTitle;
 
-    public ChapterList setParentId(String parentId) {
-        ParentId = parentId;
-        return this;
-    }
-
-    public String getParentId() {
-        return ParentId;
-    }
     public int getId() {
         return Id;
     }
@@ -30,10 +21,10 @@ public class ChapterList implements Serializable {
     }
 
     public String getTitle() {
-        return Title;
+        return mTitle;
     }
 
     public void setTitle(String title) {
-        Title = title;
+        mTitle = title;
     }
 }

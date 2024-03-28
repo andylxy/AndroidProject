@@ -34,6 +34,7 @@ public class APPCONST {
 //    public static final int exitConfirmTime = 2000;
 
     public static final String BOOK = "book";
+    public static final String CHAPTER = "chapter";
     public static final String FONT = "font";
 
 

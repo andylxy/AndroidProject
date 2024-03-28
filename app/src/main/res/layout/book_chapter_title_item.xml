@@ -1,19 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="15dp">
-
-
-
     <TextView
         android:id="@+id/tv_chapter_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/dp_10"
+        android:padding="@dimen/dp_5"
         android:textColor="@color/sys_protect_eye_word"
-        android:text="chapter" />
+        />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ll_chapter"
+        android:layout_marginRight="@dimen/dp_10"
+        android:orientation="vertical" >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+
+            <TextView
+                android:id="@+id/tv_title_chapter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:padding="@dimen/dp_5"
+                android:text="条辨"
+                android:layout_marginStart="@dimen/dp_2"
+                android:textColor="@color/sys_protect_eye_word" />
+
+            <TextView
+                android:id="@+id/tv_title_section"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/tv_title_chapter"
+                android:padding="@dimen/dp_5"
+                android:text="阳明"
+                android:layout_marginStart="@dimen/dp_10"
+                android:textColor="@color/sys_protect_eye_word" />
+            <TextView
+                android:id="@+id/tv_chapter_video_url"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="@dimen/dp_5"
+                android:padding="@dimen/dp_5"
+                android:text="视频地址"
+                android:textColor="@color/sys_protect_eye_word"
+                 />
+        </RelativeLayout>
+        <TextView
+            android:id="@+id/tv_chapter_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:padding="@dimen/dp_5"
+            android:textColor="@color/sys_protect_eye_word"
+             />
+    </LinearLayout>
 
 </LinearLayout>

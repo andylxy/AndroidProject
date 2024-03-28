@@ -4,14 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".ui.activity.PersonalDataActivity">
+    android:orientation="vertical">
 
     <com.hjq.bar.TitleBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:leftIcon="@null"
         app:title="@string/personal_data_title" />
-
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:scrollbars="none">
     <com.hjq.widget.layout.SettingBar
         android:id="@+id/fl_person_data_avatar"
         android:layout_width="match_parent"
@@ -21,8 +25,8 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/iv_person_data_avatar"
-            android:layout_width="@dimen/dp_110"
-            android:layout_height="@dimen/dp_110"
+            android:layout_width="@dimen/dp_50"
+            android:layout_height="@dimen/dp_50"
             android:layout_gravity="end|center_vertical"
             android:layout_margin="@dimen/dp_20"
             android:scaleType="centerCrop"
@@ -62,5 +66,5 @@
         app:bar_leftText="@string/setting_title"
         app:bar_rightDrawable="@drawable/arrows_right_ic"
         />
-
+    </LinearLayout>
 </LinearLayout>

@@ -4,20 +4,37 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- *  作者:  zhs
- *  时间:  2023-07-10 11:47:39
- *  包名:  run.yigou.gxzy.http.entitymodel
- *  类名:  ChapterInfo
- *  版本:  1.0
- *  描述:
- *
-*/
-public class ChapterInfo  implements Serializable {
-  private  int  Id ;
-  private  String  Title ;
-  private  String  Section ;
-  private List<ChapterInfoBody> ChapterInfoBody;
-  private  String  Creator;
+ * 作者:  zhs
+ * 时间:  2023-07-10 11:47:39
+ * 包名:  run.yigou.gxzy.http.entitymodel
+ * 类名:  ChapterInfo
+ * 版本:  1.0
+ * 描述:
+ */
+public class ChapterInfo implements Serializable {
+    private int Id;
+    private String mTitle;
+
+    private String mTitleColor;
+
+    public String getTitleColor() {
+        return mTitleColor;
+    }
+
+    private String mParentId;
+
+    public String getParentId() {
+        return mParentId;
+    }
+
+    public ChapterInfo setParentId(String parentId) {
+        mParentId = parentId;
+        return this;
+    }
+
+
+    private List<ChapterInfoBody> ChapterInfoBody;
+    private String Creator;
 
     public int getId() {
         return Id;
@@ -28,20 +45,13 @@ public class ChapterInfo  implements Serializable {
     }
 
     public String getTitle() {
-        return Title;
+        return mTitle;
     }
 
     public void setTitle(String title) {
-        Title = title;
+        mTitle = title;
     }
 
-    public String getSection() {
-        return Section;
-    }
-
-    public void setSection(String section) {
-        Section = section;
-    }
 
     public List<ChapterInfoBody> getChapterInfoBody() {
         return ChapterInfoBody;
