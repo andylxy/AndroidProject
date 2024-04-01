@@ -829,6 +829,7 @@ public final class BookReadActivity extends AppActivity {
                                 chapter.setZhuZhi(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhuZhi()));
                                 chapter.setZhenJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhenJiu()));
                                 chapter.setPeiWu(ConvertHtmlColorsHelper.convertHtmlColors(body.getPeiWu()));
+
                             }
 
                             // convertChapterDetail(bean, position);
@@ -836,6 +837,7 @@ public final class BookReadActivity extends AppActivity {
                             //更新章节内容
                             if (!isStoreBook)
                                 mChapterService.updateChapter(mChapters.get(position));
+                            if (chapter.getMSection() ==null)chapter.setMSection("内容走失,稍后再试");
                             callback.onFinish(position, 200);
                         }
 
@@ -959,12 +961,9 @@ public final class BookReadActivity extends AppActivity {
                                 int i = 0;
                                 try {
                                     for (BookDetailList.Bean bean : detailList) {
-                                        for (ChapterList chapt : bean.getChapterList()) {
+                                        for (ChapterList chapt : bean.getChapterLists()) {
                                             Chapter chapter = new Chapter();
                                             chapter.setNumber(i++);
-//                                            if (Objects.equals(chapt.getParentId(), "0")){
-//                                            chapter.setTitle(chapt.getTitle());
-//                                            }else
                                             chapter.setParentId(bean.getParentId());
                                             chapter.setTitle("" + chapt.getTitle());
                                             chapter.setUrl(chapt.getId() + "");

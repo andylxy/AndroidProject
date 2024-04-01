@@ -32,7 +32,7 @@ public class ChapterDirectory extends ChapterList {
     public String getParentId() {
         return mParentId;
     }
-  private List<ChapterList>  ChapterList;
+  private List<ChapterList> mChapterLists;
 
     public int getBookId() {
         return mBookId;
@@ -50,11 +50,11 @@ public class ChapterDirectory extends ChapterList {
         mComment = comment;
     }
 
-    public List<ChapterList> getChapterList() {
-        return ChapterList;
+    public List<ChapterList> getChapterLists() {
+        return mChapterLists;
     }
 
-    public void setChapterList(List<ChapterList> chapterList) {
-        ChapterList = chapterList;
+    public void setChapterLists(List<ChapterList> chapterLists) {
+        mChapterLists = chapterLists;
     }
 }

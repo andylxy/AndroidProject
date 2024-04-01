@@ -115,16 +115,13 @@ public final class BookInfoActivity extends AppActivity {
                              detailList = data.getData();
                             try {
                                 for (BookDetailList.Bean bean : detailList) {
-
                                     TitelInfo titelInfo = new TitelInfo();
                                     titelInfo.setId(bean.getId() + "");
                                     titelInfo.setParentId(bean.getParentId());
                                     titelInfo.setTitleColor(bean.getTitleColor());
                                     titelInfo.setTitle(bean.getTitle());
-                                    titelInfo.setComment(bean.getComment());
                                     titelInfo.setBookId(bean.getBookId()+"");
                                     mTitelInfos.add(titelInfo);
-
                                 }
 
                             } catch (Exception e) {

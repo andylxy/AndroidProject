@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/white"
+    android:padding="@dimen/dp_10"
+    android:gravity="center_horizontal">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_search_avatar"
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:layout_gravity="end|center_vertical"
+            android:scaleType="centerCrop"
+            tools:src="@drawable/avatar_placeholder_ic" />
+
+    <TextView
+        android:id="@+id/tv_search_book_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dp_40"
+        android:ellipsize="end"
+        android:padding="2dp"
+        android:text="bookname"
+        android:textColor="@color/search_res_key_book_font"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tv_search_key_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:padding="2dp"
+        android:text="10"
+        android:layout_marginRight="@dimen/dp_25"
+        android:layout_alignParentRight="true"
+        android:textColor="@color/search_res_key_book"
+        android:textSize="16sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:padding="2dp"
+            android:text=">"
+            android:layout_marginRight="@dimen/dp_10"
+            android:layout_alignParentRight="true"
+            android:textColor="@color/search_res_key_book_back"
+            android:textSize="16sp" />
+
+    </RelativeLayout>
+</LinearLayout>

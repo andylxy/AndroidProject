@@ -5,6 +5,8 @@ import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 
+import run.yigou.gxzy.http.entitymodel.ChapterList;
+
 /**
  * 章节
  * Created by zhao on 2017/7/24.
@@ -22,6 +24,7 @@ public class Chapter {
     private String parentId; //卷章
     private String mTitleColor;
     private String mSection;//原文
+    private String mNo ;
 
     private String mSectionNote;//原文注解
 
@@ -41,9 +44,9 @@ public class Chapter {
     private String ShiCi;
     private String ShiYi;
     private String Notes;
-    @Generated(hash = 1663283554)
+    @Generated(hash = 235744334)
     public Chapter(String id, String bookId, int number, String title, String url,
-            String parentId, String mTitleColor, String mSection,
+            String parentId, String mTitleColor, String mSection, String mNo,
             String mSectionNote, String mSectionVideoMemo, String mFangJi,
             String mFangJiZhujie, String mSectionVideoUrl, String BieMing,
             String JingMai, String ZhuZhi, String ZhenJiu, String AiJiu,
@@ -56,6 +59,7 @@ public class Chapter {
         this.parentId = parentId;
         this.mTitleColor = mTitleColor;
         this.mSection = mSection;
+        this.mNo = mNo;
         this.mSectionNote = mSectionNote;
         this.mSectionVideoMemo = mSectionVideoMemo;
         this.mFangJi = mFangJi;
@@ -212,6 +216,12 @@ public class Chapter {
     }
     public void setNotes(String Notes) {
         this.Notes = Notes;
+    }
+    public String getMNo() {
+        return this.mNo;
+    }
+    public void setMNo(String mNo) {
+        this.mNo = mNo;
     }
 
 

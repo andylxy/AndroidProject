@@ -16,8 +16,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
@@ -56,7 +54,6 @@
 
 
         </LinearLayout>
-
         <LinearLayout
             android:id="@+id/ll_suggest_books_view"
             android:layout_width="match_parent"
@@ -102,7 +99,6 @@
 
 
         </LinearLayout>
-
         <LinearLayout
             android:id="@+id/ll_history_view"
             android:layout_width="match_parent"
@@ -150,12 +146,20 @@
 
 
         </LinearLayout>
-
+        <com.hjq.widget.layout.WrapRecyclerView
+            android:id="@+id/lv_search_books"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fadingEdge="none"
+            android:overScrollMode="never"
+            android:scrollbars="none">
+        </com.hjq.widget.layout.WrapRecyclerView>
         <com.hjq.widget.layout.WrapRecyclerView
             android:id="@+id/lv_search_books_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fadingEdge="none"
+            android:visibility="gone"
             android:overScrollMode="never"
             android:scrollbars="none">
 

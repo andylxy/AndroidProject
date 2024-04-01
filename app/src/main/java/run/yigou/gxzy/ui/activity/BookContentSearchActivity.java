@@ -6,15 +6,11 @@ import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.hjq.bar.TitleBar;
 import com.hjq.base.BaseAdapter;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
@@ -30,17 +26,16 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.common.APPCONST;
 import run.yigou.gxzy.common.URLCONST;
 import run.yigou.gxzy.greendao.entity.Book;
-import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.service.SearchHistoryService;
-import run.yigou.gxzy.http.api.BookDetailList;
 import run.yigou.gxzy.http.api.HotBook;
 import run.yigou.gxzy.http.api.PageDataOptions;
-import run.yigou.gxzy.http.entitymodel.ChapterList;
+import run.yigou.gxzy.http.entitymodel.ChapterSearchRes;
 import run.yigou.gxzy.http.entitymodel.SearchKeyText;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.adapter.SearchBookAdapter;
+import run.yigou.gxzy.ui.adapter.SearchBookDetailAdapter;
 import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;
 import run.yigou.gxzy.utils.StringHelper;
 
@@ -66,15 +61,22 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 
     private SearchHistoryAdapter mSearchHistoryAdapter;
     private List<String> mSuggestions;
+    private SearchBookDetailAdapter mSearchBookDetailAdapter;
     private SearchBookAdapter mSearchBookAdapter;
-
     public String getSearchKey() {
         return searchKey;
     }
 
     private String searchKey;//搜索关键字
-    private ArrayList<SearchKeyText> mBooks;
+    private ArrayList<ChapterSearchRes> mSearchRes;
+    private List<SearchKeyText> mSearchKeyTextList;
     private ArrayList<SearchHistory> mSearchHistories;
+    private WrapRecyclerView mLvSearchBooks;
+
+    private LinearLayout mLlSuggestBooksView;
+
+
+
 
     @Override
     protected int getLayoutId() {
@@ -90,7 +92,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     protected void initData() {
         mSearchHistoryService = new SearchHistoryService();
         mSuggestions = new ArrayList<>();
-        mBooks = new ArrayList<>();
+        mSearchRes = new ArrayList<>();
+        mSearchKeyTextList = new ArrayList<>();
         setTitle("内容搜索");
         // getData();
         initHistoryList();
@@ -158,6 +161,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         llClearHistory = findViewById(R.id.ll_clear_history);
         llHistoryView = findViewById(R.id.ll_history_view);
         tgSuggestBook = findViewById(R.id.tg_suggest_book);
+        mLvSearchBooks = findViewById(R.id.lv_search_books);
+        mLlSuggestBooksView = findViewById(R.id.ll_suggest_books_view);
     }
 
     /**
@@ -170,7 +175,9 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         } else {
             // lvSearchBooksList.setVisibility(View.VISIBLE);
             llHistoryView.setVisibility(View.GONE);
+            setTitle(searchKey);
             getData();
+
 
         }
     }
@@ -212,19 +219,26 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             lvHistoryList.setAdapter(mSearchHistoryAdapter);
             llClearHistory.setVisibility(View.VISIBLE);
             llHistoryView.setVisibility(View.VISIBLE);
-
         }
+
     }
 
     /**
      * 初始化搜索列表
      */
     private void initSearchList() {
+
+        mSearchBookDetailAdapter = new SearchBookDetailAdapter(getActivity());
+      //  mSearchBookDetailAdapter.setData(mSearchRes);
+        mSearchBookDetailAdapter.setOnItemClickListener(this);
+        lvSearchBooksList.setAdapter(mSearchBookDetailAdapter);
+        lvSearchBooksList.setVisibility(View.GONE);
         mSearchBookAdapter = new SearchBookAdapter(getActivity());
-        mSearchBookAdapter.setData(mBooks);
+        mSearchBookAdapter.setData(mSearchKeyTextList);
         mSearchBookAdapter.setOnItemClickListener(this);
-        lvSearchBooksList.setAdapter(mSearchBookAdapter);
-        //lvSearchBooksList.setVisibility(View.GONE);
+        mLvSearchBooks.setAdapter(mSearchBookAdapter);
+        mLvSearchBooks.setVisibility(View.VISIBLE);
+        mLlSuggestBooksView.setVisibility(View.GONE);
 
     }
 
@@ -232,7 +246,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      * 获取搜索数据
      */
     private void getData() {
-        mBooks.clear();
+        mSearchRes.clear();
         EasyHttp.post(this)
                 .api(new PageDataOptions().setUrl(URLCONST.SearchUrl)
                         .setFilter(new PageDataOptions.SearchParameters("Section", searchKey)))
@@ -241,10 +255,14 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                     public void onSucceed(HttpData<List<SearchKeyText>> data) {
                         if (data.getData().size() > 0) {
                             postDelayed(() -> {
-                                mBooks.clear();
-                                mBooks.addAll(data.getData());
-                                initSearchList();
+                                mSearchKeyTextList.clear();
+                                mSearchKeyTextList = data.getData();
+                                mSearchRes.clear();
+                                for ( SearchKeyText search: data.getData()){
+                                    mSearchRes.addAll(search.getChapterList());
+                                }
                                 mSearchHistoryService.addOrUpadteHistory(searchKey);
+                                initSearchList();
                             }, 1000);
 
                         }
@@ -256,7 +274,11 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     @Override
     public void onBackPressed() {
         if (!StringHelper.isEmpty(searchKey)) {
-            etSearchKey.setText("");
+            if (lvSearchBooksList.getVisibility() == View.GONE)
+                super.onBackPressed();
+            mLvSearchBooks.setVisibility(View.VISIBLE);
+            lvSearchBooksList.setVisibility(View.GONE);
+             return;
         }
         super.onBackPressed();
     }
@@ -268,11 +290,11 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             Intent intent = new Intent(getActivity(), BookReadActivity.class);
             Book book = new Book();
             book.setDesc(getSearchKey());
-            book.setId(mBooks.get(position).getId() + "");
-            book.setName(mBooks.get(position).getBookName());
-            book.setType(mBooks.get(position).getType());
-            book.setChapterUrl(mBooks.get(position).getId() + "");
-            book.setBookId(mBooks.get(position).getId() + "");
+            book.setId(mSearchRes.get(position).getId() + "");
+            book.setName(mSearchRes.get(position).getBookName());
+            book.setType(mSearchRes.get(position).getType());
+            book.setChapterUrl(mSearchRes.get(position).getId() + "");
+            book.setBookId(mSearchRes.get(position).getId() + "");
             book.setSource("Search");
             intent.putExtra(APPCONST.BOOK, book);
             startActivity(intent);
@@ -280,6 +302,13 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         if (recyclerView.getId() == R.id.lv_history_list) {
             etSearchKey.setText(mSearchHistories.get(position).getContent());
             search();
+        }
+        if (recyclerView.getId() == R.id.lv_search_books) {
+            SearchKeyText searchKeyText = mSearchKeyTextList.get(position);
+            mSearchBookDetailAdapter.setData(searchKeyText.getChapterList());
+            mLvSearchBooks.setVisibility(View.GONE);
+            lvSearchBooksList.setVisibility(View.VISIBLE);
+
         }
     }
 }

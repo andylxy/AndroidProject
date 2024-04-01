@@ -31,7 +31,7 @@
                 android:layout_height="wrap_content"
 
                 android:padding="@dimen/dp_5"
-                android:text="条辨"
+                android:text=""
                 android:layout_marginStart="@dimen/dp_2"
                 android:textColor="@color/sys_protect_eye_word" />
 
@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:layout_toEndOf="@id/tv_title_chapter"
                 android:padding="@dimen/dp_5"
-                android:text="阳明"
+                android:text=""
                 android:layout_marginStart="@dimen/dp_10"
                 android:textColor="@color/sys_protect_eye_word" />
             <TextView
@@ -51,7 +51,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="@dimen/dp_5"
                 android:padding="@dimen/dp_5"
-                android:text="视频地址"
+                android:text=""
                 android:textColor="@color/sys_protect_eye_word"
                  />
         </RelativeLayout>

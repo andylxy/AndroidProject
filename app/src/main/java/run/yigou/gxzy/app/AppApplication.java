@@ -177,13 +177,13 @@ public final class AppApplication extends Application {
         ToastUtils.setInterceptor(new ToastLogInterceptor());
 
         // 本地异常捕捉
-        CrashHandler.register(application);
+       // CrashHandler.register(application);
 
         // 友盟统计、登录、分享 SDK
-        UmengClient.init(application, AppConfig.isLogEnable());
+       // UmengClient.init(application, AppConfig.isLogEnable());
 
         // Bugly 异常捕捉
-        CrashReport.initCrashReport(application, AppConfig.getBuglyId(), AppConfig.isDebug());
+      //  CrashReport.initCrashReport(application, AppConfig.getBuglyId(), AppConfig.isDebug());
 
         // Activity 栈管理初始化
         ActivityManager.getInstance().init(application);
@@ -221,8 +221,8 @@ public final class AppApplication extends Application {
         // 设置 Json 解析容错监听
         GsonFactory.setJsonCallback((typeToken, fieldName, jsonToken) -> {
             // 上报到 Bugly 错误列表
-            CrashReport.postCatchedException(new IllegalArgumentException(
-                    "类型解析异常：" + typeToken + "#" + fieldName + "，后台返回的类型为：" + jsonToken));
+//            CrashReport.postCatchedException(new IllegalArgumentException(
+//                    "类型解析异常：" + typeToken + "#" + fieldName + "，后台返回的类型为：" + jsonToken));
         });
 
         // 初始化日志打印

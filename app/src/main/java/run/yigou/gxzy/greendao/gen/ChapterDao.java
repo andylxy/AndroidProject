@@ -32,21 +32,22 @@ public class ChapterDao extends AbstractDao<Chapter, String> {
         public final static Property ParentId = new Property(5, String.class, "parentId", false, "PARENT_ID");
         public final static Property MTitleColor = new Property(6, String.class, "mTitleColor", false, "M_TITLE_COLOR");
         public final static Property MSection = new Property(7, String.class, "mSection", false, "M_SECTION");
-        public final static Property MSectionNote = new Property(8, String.class, "mSectionNote", false, "M_SECTION_NOTE");
-        public final static Property MSectionVideoMemo = new Property(9, String.class, "mSectionVideoMemo", false, "M_SECTION_VIDEO_MEMO");
-        public final static Property MFangJi = new Property(10, String.class, "mFangJi", false, "M_FANG_JI");
-        public final static Property MFangJiZhujie = new Property(11, String.class, "mFangJiZhujie", false, "M_FANG_JI_ZHUJIE");
-        public final static Property MSectionVideoUrl = new Property(12, String.class, "mSectionVideoUrl", false, "M_SECTION_VIDEO_URL");
-        public final static Property BieMing = new Property(13, String.class, "BieMing", false, "BIE_MING");
-        public final static Property JingMai = new Property(14, String.class, "JingMai", false, "JING_MAI");
-        public final static Property ZhuZhi = new Property(15, String.class, "ZhuZhi", false, "ZHU_ZHI");
-        public final static Property ZhenJiu = new Property(16, String.class, "ZhenJiu", false, "ZHEN_JIU");
-        public final static Property AiJiu = new Property(17, String.class, "AiJiu", false, "AI_JIU");
-        public final static Property PeiWu = new Property(18, String.class, "PeiWu", false, "PEI_WU");
-        public final static Property TeDian = new Property(19, String.class, "TeDian", false, "TE_DIAN");
-        public final static Property ShiCi = new Property(20, String.class, "ShiCi", false, "SHI_CI");
-        public final static Property ShiYi = new Property(21, String.class, "ShiYi", false, "SHI_YI");
-        public final static Property Notes = new Property(22, String.class, "Notes", false, "NOTES");
+        public final static Property MNo = new Property(8, String.class, "mNo", false, "M_NO");
+        public final static Property MSectionNote = new Property(9, String.class, "mSectionNote", false, "M_SECTION_NOTE");
+        public final static Property MSectionVideoMemo = new Property(10, String.class, "mSectionVideoMemo", false, "M_SECTION_VIDEO_MEMO");
+        public final static Property MFangJi = new Property(11, String.class, "mFangJi", false, "M_FANG_JI");
+        public final static Property MFangJiZhujie = new Property(12, String.class, "mFangJiZhujie", false, "M_FANG_JI_ZHUJIE");
+        public final static Property MSectionVideoUrl = new Property(13, String.class, "mSectionVideoUrl", false, "M_SECTION_VIDEO_URL");
+        public final static Property BieMing = new Property(14, String.class, "BieMing", false, "BIE_MING");
+        public final static Property JingMai = new Property(15, String.class, "JingMai", false, "JING_MAI");
+        public final static Property ZhuZhi = new Property(16, String.class, "ZhuZhi", false, "ZHU_ZHI");
+        public final static Property ZhenJiu = new Property(17, String.class, "ZhenJiu", false, "ZHEN_JIU");
+        public final static Property AiJiu = new Property(18, String.class, "AiJiu", false, "AI_JIU");
+        public final static Property PeiWu = new Property(19, String.class, "PeiWu", false, "PEI_WU");
+        public final static Property TeDian = new Property(20, String.class, "TeDian", false, "TE_DIAN");
+        public final static Property ShiCi = new Property(21, String.class, "ShiCi", false, "SHI_CI");
+        public final static Property ShiYi = new Property(22, String.class, "ShiYi", false, "SHI_YI");
+        public final static Property Notes = new Property(23, String.class, "Notes", false, "NOTES");
     }
 
 
@@ -70,21 +71,22 @@ public class ChapterDao extends AbstractDao<Chapter, String> {
                 "\"PARENT_ID\" TEXT," + // 5: parentId
                 "\"M_TITLE_COLOR\" TEXT," + // 6: mTitleColor
                 "\"M_SECTION\" TEXT," + // 7: mSection
-                "\"M_SECTION_NOTE\" TEXT," + // 8: mSectionNote
-                "\"M_SECTION_VIDEO_MEMO\" TEXT," + // 9: mSectionVideoMemo
-                "\"M_FANG_JI\" TEXT," + // 10: mFangJi
-                "\"M_FANG_JI_ZHUJIE\" TEXT," + // 11: mFangJiZhujie
-                "\"M_SECTION_VIDEO_URL\" TEXT," + // 12: mSectionVideoUrl
-                "\"BIE_MING\" TEXT," + // 13: BieMing
-                "\"JING_MAI\" TEXT," + // 14: JingMai
-                "\"ZHU_ZHI\" TEXT," + // 15: ZhuZhi
-                "\"ZHEN_JIU\" TEXT," + // 16: ZhenJiu
-                "\"AI_JIU\" TEXT," + // 17: AiJiu
-                "\"PEI_WU\" TEXT," + // 18: PeiWu
-                "\"TE_DIAN\" TEXT," + // 19: TeDian
-                "\"SHI_CI\" TEXT," + // 20: ShiCi
-                "\"SHI_YI\" TEXT," + // 21: ShiYi
-                "\"NOTES\" TEXT);"); // 22: Notes
+                "\"M_NO\" TEXT," + // 8: mNo
+                "\"M_SECTION_NOTE\" TEXT," + // 9: mSectionNote
+                "\"M_SECTION_VIDEO_MEMO\" TEXT," + // 10: mSectionVideoMemo
+                "\"M_FANG_JI\" TEXT," + // 11: mFangJi
+                "\"M_FANG_JI_ZHUJIE\" TEXT," + // 12: mFangJiZhujie
+                "\"M_SECTION_VIDEO_URL\" TEXT," + // 13: mSectionVideoUrl
+                "\"BIE_MING\" TEXT," + // 14: BieMing
+                "\"JING_MAI\" TEXT," + // 15: JingMai
+                "\"ZHU_ZHI\" TEXT," + // 16: ZhuZhi
+                "\"ZHEN_JIU\" TEXT," + // 17: ZhenJiu
+                "\"AI_JIU\" TEXT," + // 18: AiJiu
+                "\"PEI_WU\" TEXT," + // 19: PeiWu
+                "\"TE_DIAN\" TEXT," + // 20: TeDian
+                "\"SHI_CI\" TEXT," + // 21: ShiCi
+                "\"SHI_YI\" TEXT," + // 22: ShiYi
+                "\"NOTES\" TEXT);"); // 23: Notes
     }
 
     /** Drops the underlying database table. */
@@ -133,79 +135,84 @@ public class ChapterDao extends AbstractDao<Chapter, String> {
             stmt.bindString(8, mSection);
         }
  
+        String mNo = entity.getMNo();
+        if (mNo != null) {
+            stmt.bindString(9, mNo);
+        }
+ 
         String mSectionNote = entity.getMSectionNote();
         if (mSectionNote != null) {
-            stmt.bindString(9, mSectionNote);
+            stmt.bindString(10, mSectionNote);
         }
  
         String mSectionVideoMemo = entity.getMSectionVideoMemo();
         if (mSectionVideoMemo != null) {
-            stmt.bindString(10, mSectionVideoMemo);
+            stmt.bindString(11, mSectionVideoMemo);
         }
  
         String mFangJi = entity.getMFangJi();
         if (mFangJi != null) {
-            stmt.bindString(11, mFangJi);
+            stmt.bindString(12, mFangJi);
         }
  
         String mFangJiZhujie = entity.getMFangJiZhujie();
         if (mFangJiZhujie != null) {
-            stmt.bindString(12, mFangJiZhujie);
+            stmt.bindString(13, mFangJiZhujie);
         }
  
         String mSectionVideoUrl = entity.getMSectionVideoUrl();
         if (mSectionVideoUrl != null) {
-            stmt.bindString(13, mSectionVideoUrl);
+            stmt.bindString(14, mSectionVideoUrl);
         }
  
         String BieMing = entity.getBieMing();
         if (BieMing != null) {
-            stmt.bindString(14, BieMing);
+            stmt.bindString(15, BieMing);
         }
  
         String JingMai = entity.getJingMai();
         if (JingMai != null) {
-            stmt.bindString(15, JingMai);
+            stmt.bindString(16, JingMai);
         }
  
         String ZhuZhi = entity.getZhuZhi();
         if (ZhuZhi != null) {
-            stmt.bindString(16, ZhuZhi);
+            stmt.bindString(17, ZhuZhi);
         }
  
         String ZhenJiu = entity.getZhenJiu();
         if (ZhenJiu != null) {
-            stmt.bindString(17, ZhenJiu);
+            stmt.bindString(18, ZhenJiu);
         }
  
         String AiJiu = entity.getAiJiu();
         if (AiJiu != null) {
-            stmt.bindString(18, AiJiu);
+            stmt.bindString(19, AiJiu);
         }
  
         String PeiWu = entity.getPeiWu();
         if (PeiWu != null) {
-            stmt.bindString(19, PeiWu);
+            stmt.bindString(20, PeiWu);
         }
  
         String TeDian = entity.getTeDian();
         if (TeDian != null) {
-            stmt.bindString(20, TeDian);
+            stmt.bindString(21, TeDian);
         }
  
         String ShiCi = entity.getShiCi();
         if (ShiCi != null) {
-            stmt.bindString(21, ShiCi);
+            stmt.bindString(22, ShiCi);
         }
  
         String ShiYi = entity.getShiYi();
         if (ShiYi != null) {
-            stmt.bindString(22, ShiYi);
+            stmt.bindString(23, ShiYi);
         }
  
         String Notes = entity.getNotes();
         if (Notes != null) {
-            stmt.bindString(23, Notes);
+            stmt.bindString(24, Notes);
         }
     }
 
@@ -249,79 +256,84 @@ public class ChapterDao extends AbstractDao<Chapter, String> {
             stmt.bindString(8, mSection);
         }
  
+        String mNo = entity.getMNo();
+        if (mNo != null) {
+            stmt.bindString(9, mNo);
+        }
+ 
         String mSectionNote = entity.getMSectionNote();
         if (mSectionNote != null) {
-            stmt.bindString(9, mSectionNote);
+            stmt.bindString(10, mSectionNote);
         }
  
         String mSectionVideoMemo = entity.getMSectionVideoMemo();
         if (mSectionVideoMemo != null) {
-            stmt.bindString(10, mSectionVideoMemo);
+            stmt.bindString(11, mSectionVideoMemo);
         }
  
         String mFangJi = entity.getMFangJi();
         if (mFangJi != null) {
-            stmt.bindString(11, mFangJi);
+            stmt.bindString(12, mFangJi);
         }
  
         String mFangJiZhujie = entity.getMFangJiZhujie();
         if (mFangJiZhujie != null) {
-            stmt.bindString(12, mFangJiZhujie);
+            stmt.bindString(13, mFangJiZhujie);
         }
  
         String mSectionVideoUrl = entity.getMSectionVideoUrl();
         if (mSectionVideoUrl != null) {
-            stmt.bindString(13, mSectionVideoUrl);
+            stmt.bindString(14, mSectionVideoUrl);
         }
  
         String BieMing = entity.getBieMing();
         if (BieMing != null) {
-            stmt.bindString(14, BieMing);
+            stmt.bindString(15, BieMing);
         }
  
         String JingMai = entity.getJingMai();
         if (JingMai != null) {
-            stmt.bindString(15, JingMai);
+            stmt.bindString(16, JingMai);
         }
  
         String ZhuZhi = entity.getZhuZhi();
         if (ZhuZhi != null) {
-            stmt.bindString(16, ZhuZhi);
+            stmt.bindString(17, ZhuZhi);
         }
  
         String ZhenJiu = entity.getZhenJiu();
         if (ZhenJiu != null) {
-            stmt.bindString(17, ZhenJiu);
+            stmt.bindString(18, ZhenJiu);
         }
  
         String AiJiu = entity.getAiJiu();
         if (AiJiu != null) {
-            stmt.bindString(18, AiJiu);
+            stmt.bindString(19, AiJiu);
         }
  
         String PeiWu = entity.getPeiWu();
         if (PeiWu != null) {
-            stmt.bindString(19, PeiWu);
+            stmt.bindString(20, PeiWu);
         }
  
         String TeDian = entity.getTeDian();
         if (TeDian != null) {
-            stmt.bindString(20, TeDian);
+            stmt.bindString(21, TeDian);
         }
  
         String ShiCi = entity.getShiCi();
         if (ShiCi != null) {
-            stmt.bindString(21, ShiCi);
+            stmt.bindString(22, ShiCi);
         }
  
         String ShiYi = entity.getShiYi();
         if (ShiYi != null) {
-            stmt.bindString(22, ShiYi);
+            stmt.bindString(23, ShiYi);
         }
  
         String Notes = entity.getNotes();
         if (Notes != null) {
-            stmt.bindString(23, Notes);
+            stmt.bindString(24, Notes);
         }
     }
 
@@ -341,21 +353,22 @@ public class ChapterDao extends AbstractDao<Chapter, String> {
             cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // parentId
             cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // mTitleColor
             cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // mSection
-            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // mSectionNote
-            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // mSectionVideoMemo
-            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // mFangJi
-            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // mFangJiZhujie
-            cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12), // mSectionVideoUrl
-            cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13), // BieMing
-            cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14), // JingMai
-            cursor.isNull(offset + 15) ? null : cursor.getString(offset + 15), // ZhuZhi
-            cursor.isNull(offset + 16) ? null : cursor.getString(offset + 16), // ZhenJiu
-            cursor.isNull(offset + 17) ? null : cursor.getString(offset + 17), // AiJiu
-            cursor.isNull(offset + 18) ? null : cursor.getString(offset + 18), // PeiWu
-            cursor.isNull(offset + 19) ? null : cursor.getString(offset + 19), // TeDian
-            cursor.isNull(offset + 20) ? null : cursor.getString(offset + 20), // ShiCi
-            cursor.isNull(offset + 21) ? null : cursor.getString(offset + 21), // ShiYi
-            cursor.isNull(offset + 22) ? null : cursor.getString(offset + 22) // Notes
+            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // mNo
+            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // mSectionNote
+            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // mSectionVideoMemo
+            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // mFangJi
+            cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12), // mFangJiZhujie
+            cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13), // mSectionVideoUrl
+            cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14), // BieMing
+            cursor.isNull(offset + 15) ? null : cursor.getString(offset + 15), // JingMai
+            cursor.isNull(offset + 16) ? null : cursor.getString(offset + 16), // ZhuZhi
+            cursor.isNull(offset + 17) ? null : cursor.getString(offset + 17), // ZhenJiu
+            cursor.isNull(offset + 18) ? null : cursor.getString(offset + 18), // AiJiu
+            cursor.isNull(offset + 19) ? null : cursor.getString(offset + 19), // PeiWu
+            cursor.isNull(offset + 20) ? null : cursor.getString(offset + 20), // TeDian
+            cursor.isNull(offset + 21) ? null : cursor.getString(offset + 21), // ShiCi
+            cursor.isNull(offset + 22) ? null : cursor.getString(offset + 22), // ShiYi
+            cursor.isNull(offset + 23) ? null : cursor.getString(offset + 23) // Notes
         );
         return entity;
     }
@@ -370,21 +383,22 @@ public class ChapterDao extends AbstractDao<Chapter, String> {
         entity.setParentId(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
         entity.setMTitleColor(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
         entity.setMSection(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
-        entity.setMSectionNote(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
-        entity.setMSectionVideoMemo(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
-        entity.setMFangJi(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
-        entity.setMFangJiZhujie(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
-        entity.setMSectionVideoUrl(cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12));
-        entity.setBieMing(cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13));
-        entity.setJingMai(cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14));
-        entity.setZhuZhi(cursor.isNull(offset + 15) ? null : cursor.getString(offset + 15));
-        entity.setZhenJiu(cursor.isNull(offset + 16) ? null : cursor.getString(offset + 16));
-        entity.setAiJiu(cursor.isNull(offset + 17) ? null : cursor.getString(offset + 17));
-        entity.setPeiWu(cursor.isNull(offset + 18) ? null : cursor.getString(offset + 18));
-        entity.setTeDian(cursor.isNull(offset + 19) ? null : cursor.getString(offset + 19));
-        entity.setShiCi(cursor.isNull(offset + 20) ? null : cursor.getString(offset + 20));
-        entity.setShiYi(cursor.isNull(offset + 21) ? null : cursor.getString(offset + 21));
-        entity.setNotes(cursor.isNull(offset + 22) ? null : cursor.getString(offset + 22));
+        entity.setMNo(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
+        entity.setMSectionNote(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
+        entity.setMSectionVideoMemo(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
+        entity.setMFangJi(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
+        entity.setMFangJiZhujie(cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12));
+        entity.setMSectionVideoUrl(cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13));
+        entity.setBieMing(cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14));
+        entity.setJingMai(cursor.isNull(offset + 15) ? null : cursor.getString(offset + 15));
+        entity.setZhuZhi(cursor.isNull(offset + 16) ? null : cursor.getString(offset + 16));
+        entity.setZhenJiu(cursor.isNull(offset + 17) ? null : cursor.getString(offset + 17));
+        entity.setAiJiu(cursor.isNull(offset + 18) ? null : cursor.getString(offset + 18));
+        entity.setPeiWu(cursor.isNull(offset + 19) ? null : cursor.getString(offset + 19));
+        entity.setTeDian(cursor.isNull(offset + 20) ? null : cursor.getString(offset + 20));
+        entity.setShiCi(cursor.isNull(offset + 21) ? null : cursor.getString(offset + 21));
+        entity.setShiYi(cursor.isNull(offset + 22) ? null : cursor.getString(offset + 22));
+        entity.setNotes(cursor.isNull(offset + 23) ? null : cursor.getString(offset + 23));
      }
     
     @Override

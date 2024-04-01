@@ -22,6 +22,16 @@ public class TitelInfo {
     private String mBookId ;
     private String mParentId;
     private String mComment;
+    private String mNo ;
+
+    public String getNo() {
+        return mNo;
+    }
+
+    public TitelInfo setNo(String no) {
+        mNo = no;
+        return this;
+    }
 
     public String getId() {
         return Id;

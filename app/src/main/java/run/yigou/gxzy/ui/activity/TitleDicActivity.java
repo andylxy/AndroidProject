@@ -11,11 +11,12 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.common.APPCONST;
 import run.yigou.gxzy.greendao.entity.Book;
-import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.http.api.BookDetailList;
 import run.yigou.gxzy.http.entitymodel.ChapterList;
 import run.yigou.gxzy.http.entitymodel.TitelInfo;
 import run.yigou.gxzy.ui.adapter.ChapterDicAdapter;
+import run.yigou.gxzy.utils.ConvertHtmlColorsHelper;
+import run.yigou.gxzy.utils.StringHelper;
 
 /**
  * author : Android 轮子哥
@@ -57,14 +58,18 @@ public final class TitleDicActivity extends AppActivity {
 //                    chapter.setId(bean.getId() + "");
 //                    chapters.add(chapter);
 
-                    for (ChapterList chapter:  bean.getChapterList()){
+                    for (ChapterList chapter:  bean.getChapterLists()){
                         TitelInfo titelInfo = new TitelInfo();
                         titelInfo.setId(chapter.getId() + "");
                         titelInfo.setParentId(bean.getParentId());
                         titelInfo.setTitleColor(bean.getTitleColor());
-                        titelInfo.setTitle(chapter.getTitle());
-                        titelInfo.setComment(bean.getComment());
+                        if (Objects.equals(bean.getParentId(), "0"))
+                            titelInfo.setTitle(chapter.getTitle());
+                        else
+                            titelInfo.setTitle(bean.getTitle());
+                        titelInfo.setComment(chapter.getTitle());
                         titelInfo.setBookId(bean.getBookId()+"");
+                        titelInfo.setNo(chapter.getNo());
                         mTitelInfos.add(titelInfo);
                     }
 

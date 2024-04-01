@@ -96,6 +96,7 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
         public void onBindView(int position) {
             Chapter chapter = getItem(position);
             showViewType = chapter.getParentId() ==null?"0":chapter.getParentId() ;
+
             //初始化字体
             initFont();
             initActivity();
@@ -303,6 +304,12 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
                     mSectionNote2 = SpannableStringHelper.getSpannableString(mSectionNote);
                 }
 
+                mTvSectionContentTitle .setText(chapter.getTitle());
+
+                if (chapter.getMNo() ==null) mTvSectionTitleNo .setVisibility(View.GONE);
+                else {
+                    mTvSectionTitleNo .setVisibility(View.VISIBLE);
+                    mTvSectionTitleNo .setText(chapter.getMNo());}
                 //原文
                 if (StringHelper.isEmpty(mSection)) {
                     mTvSectionContent.setVisibility(View.GONE);
@@ -310,7 +317,7 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
                 } else {
                     mTvSectionContent.setVisibility(View.VISIBLE);
                     mTvSectionContent.setText(mSection2);
-                    mTvSectionContentNote.setText(mSection2);
+                    mTvSectionContentNote.setText(mSectionNote2);
                 }
 //                //原文注解
 //                if (StringHelper.isEmpty(mSection)) {

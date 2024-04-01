@@ -10,46 +10,44 @@
 
 package run.yigou.gxzy.http.entitymodel;
 
+import java.util.List;
+
+import run.yigou.gxzy.greendao.entity.Chapter;
+
 /**
  * 版本:  1.0
  * 描述:
  */
-public class SearchKeyText {
-
-    private int Id;
-
-    public int getId() {
-        return Id;
+public class SearchKeyText   {
+    public String getBookCaseName() {
+        return mBookCaseName;
     }
 
-    public String getChapterId() {
-        return ChapterId;
+    public SearchKeyText setBookCaseName(String bookCaseName) {
+        mBookCaseName = bookCaseName;
+        return this;
     }
 
-    public String getTitle() {
-        return Title;
+    public int getSearcTextResCount() {
+        return mSearcTextResCount;
     }
 
-    public String getAuthor() {
-        return Author;
+    public SearchKeyText setSearcTextResCount(int searcTextResCount) {
+        mSearcTextResCount = searcTextResCount;
+        return this;
     }
 
-    public String getBookName() {
-        return BookName;
+    public List<ChapterSearchRes> getChapterList() {
+        return mChapterList;
     }
 
-    public String getType() {
-        return Type;
+    public SearchKeyText setChapterList(List<ChapterSearchRes> chapterList) {
+        mChapterList = chapterList;
+        return this;
     }
 
-    public String getData() {
-        return Data;
-    }
+    private String mBookCaseName ;
+    private int mSearcTextResCount ;
 
-    private String ChapterId;
-    private String Title;
-    private String Author;
-    private String BookName;
-    private String Type ;
-    private String Data ;
+   private List<ChapterSearchRes> mChapterList;
 }

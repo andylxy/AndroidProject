@@ -240,11 +240,11 @@
     <!--   原文字体颜色 -->
     <color name="read_section">#F78029</color>
     <!--   原文背景色颜色 -->
-    <color name="read_section_background"> #FAFAFA</color>
+    <color name="read_section_background">#FAFAFA</color>
     <!--    分隔线 -->
-    <color name="read_section_divider_line"> #60B7E0</color>
+    <color name="read_section_divider_line">#60B7E0</color>
     <!--  章节标题背景色  -->
-    <color name="read_section_title_background"> #60B7E0</color>
+    <color name="read_section_title_background">#60B7E0</color>
     <!--   获取到焦点背景色     -->
     <color name="read_cursor_background">#F78029</color>
     <!--   点击原文注解字体颜色     -->
@@ -252,4 +252,8 @@
 
     <!--    方剂注解背景-->
     <color name="read_fangjizhujie_background">#F2EBDB</color>
+    <!--    搜索-->
+    <color name="search_res_key_book">#F278AC</color>
+    <color name="search_res_key_book_back">#DFDFDF</color>
+    <color name="search_res_key_book_font">#797979</color>
 </resources>

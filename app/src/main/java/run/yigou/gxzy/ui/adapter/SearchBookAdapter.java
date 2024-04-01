@@ -6,9 +6,12 @@ import android.text.Spanned;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageView;
+
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
 import run.yigou.gxzy.greendao.entity.Book;
+import run.yigou.gxzy.http.entitymodel.ChapterSearchRes;
 import run.yigou.gxzy.http.entitymodel.SearchKeyText;
 import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.utils.SpannableStringHelper;
@@ -43,28 +46,33 @@ public final class SearchBookAdapter extends AppAdapter<SearchKeyText> {
 
     private final class ViewHolder extends AppAdapter<?>.ViewHolder {
 
-        TextView tvBookName;
-        TextView tvDesc;
-        TextView tvAuthor;
-        TextView tvType;
+
+        private AppCompatImageView mIvSearchAvatar;
+        private TextView mTvSearchBookName;
+        private TextView mTvSearchKeyCount;
+
+
 
         private ViewHolder() {
-            super(R.layout.book_search_book_item);
-            tvBookName = findViewById(R.id.tv_book_name);
-            tvDesc = findViewById(R.id.tv_book_desc);
-            tvAuthor = findViewById(R.id.tv_book_author);
-            tvType = findViewById(R.id.tv_book_type);
+            super(R.layout.book_search_book);
+            mIvSearchAvatar = findViewById(R.id.iv_search_avatar);
+            mTvSearchBookName = findViewById(R.id.tv_search_book_name);
+            mTvSearchKeyCount = findViewById(R.id.tv_search_key_count);
 
         }
 
         @Override
         public void onBindView(int position) {
-            tvBookName.setText( getItem(position).getBookName());
-            tvAuthor.setText( getItem(position).getAuthor());
-            tvType.setText( getItem(position).getType());
-            Spanned content= SpannableStringHelper.getSpannableString(mBookContentSearchActivity.getSearchKey()
-                    ,getItem(position).getData(),/*mContext.getColor(R.color.colorPrimaryDark)*/null);
-            tvDesc.setText(content );
+          SearchKeyText keyText =  getItem(position);
+            mTvSearchBookName.setText( getItem(position).getBookCaseName());
+            mTvSearchKeyCount.setText( getItem(position).getSearcTextResCount()+"");
+            if ( getItem(position).getSearcTextResCount()>0)
+            {
+                // 加载 drawable 中的图片资源
+                mIvSearchAvatar.setImageResource(R.drawable.success);
+            }else {
+                mIvSearchAvatar.setImageResource(R.drawable.failed);
+            }
         }
     }
 }

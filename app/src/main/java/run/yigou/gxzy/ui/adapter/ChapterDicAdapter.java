@@ -1,5 +1,6 @@
 package run.yigou.gxzy.ui.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -18,6 +19,8 @@ import run.yigou.gxzy.common.Setting;
 import run.yigou.gxzy.common.SysManager;
 import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.http.entitymodel.TitelInfo;
+import run.yigou.gxzy.utils.ConvertHtmlColorsHelper;
+import run.yigou.gxzy.utils.SpannableStringHelper;
 import run.yigou.gxzy.utils.StringHelper;
 
 /**
@@ -67,6 +70,7 @@ public final class ChapterDicAdapter extends AppAdapter<TitelInfo> {
             mTvChapterContent = findViewById(R.id.tv_chapter_content);
         }
 
+        @SuppressLint("SetTextI18n")
         @Override
         public void onBindView(int position) {
             // mTvChapterTitle.setText();
@@ -82,15 +86,21 @@ public final class ChapterDicAdapter extends AppAdapter<TitelInfo> {
             } else {
                 mLlChapter.setVisibility(View.VISIBLE);
                 mTvChapterTitle.setVisibility(View.GONE);
-                mTvTitleChapter .setText("条辨1");
+                String mNo =titelInfo.getNo()==null?"":titelInfo.getNo();
+                mTvTitleChapter .setText("条辨"+mNo);
                 mTvTitleChapter .setTextColor(Color.parseColor("#F1E5E6"));
                 mTvTitleChapter.setBackground(new ColorDrawable(Color.parseColor("#464648")));
-                mTvTitleSection .setText("太阳症");
+                mTvTitleSection .setText(titelInfo.getTitle().substring(0,2)+ "症");
                 mTvTitleSection .setTextColor(Color.parseColor("#F1E5E6"));
-                mTvTitleSection.setBackground(new ColorDrawable(Color.parseColor("#830227")));
-//                if (StringHelper.isEmpty(chapter.getMSectionVideoUrl()))
+                String parseColor =null;
+                if (StringHelper.isEmpty(titelInfo.getTitleColor())) parseColor = "#8E8ED7";
+                else parseColor =titelInfo.getTitleColor();
+                mTvTitleSection.setBackground(new ColorDrawable(Color.parseColor(parseColor)));
+                //mTvTitleSection.setBackground(new ColorDrawable(Color.parseColor("#830227")));
+//                if (StringHelper.isEmpty(titelInfo.get()))
 //                    mTvChapterVideoUrl.setText("视频地址");
-                mTvChapterContent .setText("条辨内容......");
+                mTvChapterVideoUrl.setVisibility(View.GONE);
+                mTvChapterContent .setText( SpannableStringHelper.getSpannableString(titelInfo.getComment()));
             }
 
 
