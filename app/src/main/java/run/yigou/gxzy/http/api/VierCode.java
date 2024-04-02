@@ -18,6 +18,11 @@ public final class VierCode implements IRequestApi {
     public final static class Bean {
         private String img;
 
+        public boolean isCode() {
+            return isCode;
+        }
+
+        private boolean isCode;
         public String getImg() {
             return img;
         }

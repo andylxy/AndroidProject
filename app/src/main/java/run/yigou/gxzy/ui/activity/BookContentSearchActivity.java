@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.base.BaseAdapter;
 import com.hjq.http.EasyHttp;
+import com.hjq.http.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
@@ -68,9 +69,9 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     }
 
     private String searchKey;//搜索关键字
-    private ArrayList<ChapterSearchRes> mSearchRes;
+    private List<ChapterSearchRes> mSearchRes;
     private List<SearchKeyText> mSearchKeyTextList;
-    private ArrayList<SearchHistory> mSearchHistories;
+    private List<SearchHistory> mSearchHistories;
     private WrapRecyclerView mLvSearchBooks;
 
     private LinearLayout mLlSuggestBooksView;
@@ -91,8 +92,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     @Override
     protected void initData() {
         mSearchHistoryService = new SearchHistoryService();
-        mSuggestions = new ArrayList<>();
-        mSearchRes = new ArrayList<>();
+        mSuggestions =  new ArrayList<>();
+        mSearchRes =  new ArrayList<>();
         mSearchKeyTextList = new ArrayList<>();
         setTitle("内容搜索");
         // getData();
@@ -254,17 +255,14 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                     @Override
                     public void onSucceed(HttpData<List<SearchKeyText>> data) {
                         if (data.getData().size() > 0) {
-                            postDelayed(() -> {
                                 mSearchKeyTextList.clear();
                                 mSearchKeyTextList = data.getData();
-                                mSearchRes.clear();
-                                for ( SearchKeyText search: data.getData()){
-                                    mSearchRes.addAll(search.getChapterList());
+                                mSearchRes .clear();
+                                for ( SearchKeyText search: mSearchKeyTextList){
+                                   mSearchRes.addAll(search.getChapterList());
                                 }
                                 mSearchHistoryService.addOrUpadteHistory(searchKey);
                                 initSearchList();
-                            }, 1000);
-
                         }
 
                     }

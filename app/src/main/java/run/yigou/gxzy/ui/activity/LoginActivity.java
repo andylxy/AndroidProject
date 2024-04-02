@@ -116,7 +116,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     private ImageView mEtLoginVcode;
     private EditText mEtLoginTextCode;
     /**
-     * 验证验
+     * 验证码
      */
     private  VierCode.Bean mVierificationCode;
     /**
@@ -150,7 +150,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         if (inLoginOrNoLogin()) return;
         setOnClickListener(mForgetView, mCommitView, mQQView, mWeChatView, mIvLoginAccount, mIvLoginPhone, mCountdownView,mEtLoginVcode);
         mPasswordView.setOnEditorActionListener(this);
-        setViewShow(mIvLoginAccount);
+        //setViewShow(mIvLoginAccount);
         getLoginVcode();
     }
 
@@ -249,12 +249,12 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         }
         if (view == mIvLoginAccount) {
             setViewShow(mIvLoginAccount);
-            mLongInType=1;
+            mLongInType=LoginType.mLoginAccount;
             return;
         }
         if (view == mIvLoginPhone) {
             setViewShow(mIvLoginPhone);
-            mLongInType=2;
+            mLongInType=LoginType.mLoginPhone;
             return;
         }
         if (view == mEtLoginVcode) {
@@ -273,13 +273,19 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             hideKeyboard(getCurrentFocus());
 
             //登陆逻辑处理
-            IRequestApi requestApi = null;
+            LoginApi requestApi = null;
             if(mLongInType== LoginType.mLoginAccount){
                 requestApi=  new LoginApi()
                         .setUserName(mPhoneView.getText().toString())
-                        .setPassword(mPasswordView.getText().toString())
-                        .setVerificationCode(mEtLoginTextCode.getText().toString())
-                        .setUUID(mVierificationCode.getUuid());
+                        .setPassword(mPasswordView.getText().toString());
+
+                if (mVierificationCode.isCode()){
+                    requestApi .setVerificationCode(mEtLoginTextCode.getText().toString())
+                            .setUUID(mVierificationCode.getUuid());
+                }else {
+                    requestApi .setVerificationCode("E6Y4D6")
+                            .setUUID(mVierificationCode.getUuid());
+                }
             }else if (mLongInType== LoginType.mLoginPhone){
                 requestApi= new LoginApi()
                         .setUserName(mPhoneView.getText().toString())
@@ -370,14 +376,15 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                 .request(new HttpCallback<HttpData<VierCode.Bean>>(this) {
             @Override
             public void onSucceed(HttpData<VierCode.Bean> data) {
-                if (data.getData()!=null) {
+                if (data.getData()!=null&&data.getData().isCode()) {
                     String img =data.getData().getImg();
                    if(!StringHelper.isEmpty(img)){
                        Bitmap bitmap = Base64ConverBitmapHelper.getBase64ToImage(img);
                        setLoginVcode(bitmap);
-                       mVierificationCode = data.getData();
                    }
                 }
+                mVierificationCode = data.getData();
+                setViewShow(mIvLoginAccount);
             }
         });
     }
@@ -395,14 +402,26 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             mLlLoginSmsCodeLinear.setVisibility(View.GONE);
             mPasswordView.setVisibility(View.VISIBLE);
             mForgetView.setVisibility(View.VISIBLE);
-            mEtLoginVcodeLinear.setVisibility(View.VISIBLE);
             mEtLoginTextCode.setVisibility(View.VISIBLE);
             mEt_login_sms_code.setText("");
-            InputTextManager.with(this)
-                    .addView(mPhoneView)
-                    .addView(mPasswordView)
-                    .addView(mEtLoginTextCode)
-                    .setMain(mCommitView).build();
+            //是否开启验证码登陆
+            if (mVierificationCode.isCode()){
+                mEtLoginVcodeLinear.setVisibility(View.VISIBLE);
+                InputTextManager.with(this)
+                        .addView(mPhoneView)
+                        .addView(mPasswordView)
+                        .addView(mEtLoginTextCode)
+                        .setMain(mCommitView).build();
+            }
+            else
+            {
+                mEtLoginVcodeLinear.setVisibility(View.GONE);
+                InputTextManager.with(this)
+                        .addView(mPhoneView)
+                        .addView(mPasswordView)
+                        .setMain(mCommitView).build();
+            }
+
         }
         else if (view == mIvLoginPhone) {
             mIvLoginPhone.setVisibility(View.GONE);

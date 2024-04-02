@@ -1,5 +1,6 @@
 package run.yigou.gxzy.ui.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import android.text.Spanned;
@@ -61,12 +62,13 @@ public final class SearchBookAdapter extends AppAdapter<SearchKeyText> {
 
         }
 
+        @SuppressLint("SetTextI18n")
         @Override
         public void onBindView(int position) {
           SearchKeyText keyText =  getItem(position);
-            mTvSearchBookName.setText( getItem(position).getBookCaseName());
-            mTvSearchKeyCount.setText( getItem(position).getSearcTextResCount()+"");
-            if ( getItem(position).getSearcTextResCount()>0)
+            mTvSearchBookName.setText( keyText.getBookCaseName());
+            mTvSearchKeyCount.setText( keyText.getSearcTextResCount()+"");
+            if ( keyText.getSearcTextResCount()>0)
             {
                 // 加载 drawable 中的图片资源
                 mIvSearchAvatar.setImageResource(R.drawable.success);

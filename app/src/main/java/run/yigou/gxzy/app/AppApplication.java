@@ -177,13 +177,13 @@ public final class AppApplication extends Application {
         ToastUtils.setInterceptor(new ToastLogInterceptor());
 
         // 本地异常捕捉
-       // CrashHandler.register(application);
+       CrashHandler.register(application);
 
         // 友盟统计、登录、分享 SDK
        // UmengClient.init(application, AppConfig.isLogEnable());
 
         // Bugly 异常捕捉
-      //  CrashReport.initCrashReport(application, AppConfig.getBuglyId(), AppConfig.isDebug());
+        CrashReport.initCrashReport(application, AppConfig.getBuglyId(), AppConfig.isDebug());
 
         // Activity 栈管理初始化
         ActivityManager.getInstance().init(application);
@@ -198,6 +198,7 @@ public final class AppApplication extends Application {
         EasyConfig.with(okHttpClient)
                 // 是否打印日志
                 .setLogEnabled(AppConfig.isLogEnable())
+                //  .setLogEnabled(true)
                 // 设置服务器配置
                 .setServer(new RequestServer())
                 // 设置请求处理策略
@@ -221,13 +222,13 @@ public final class AppApplication extends Application {
         // 设置 Json 解析容错监听
         GsonFactory.setJsonCallback((typeToken, fieldName, jsonToken) -> {
             // 上报到 Bugly 错误列表
-//            CrashReport.postCatchedException(new IllegalArgumentException(
+ //          CrashReport.postCatchedException(new IllegalArgumentException(
 //                    "类型解析异常：" + typeToken + "#" + fieldName + "，后台返回的类型为：" + jsonToken));
         });
 
         // 初始化日志打印
         if (AppConfig.isLogEnable()) {
-            Timber.plant(new DebugLoggerTree());
+        Timber.plant(new DebugLoggerTree());
         }
 
         // 注册网络状态变化监听
