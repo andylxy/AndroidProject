@@ -10,6 +10,7 @@
 
 package run.yigou.gxzy.http.entitymodel;
 
+import java.io.Serializable;
 import java.util.List;
 
 import run.yigou.gxzy.greendao.entity.Chapter;
@@ -18,7 +19,7 @@ import run.yigou.gxzy.greendao.entity.Chapter;
  * 版本:  1.0
  * 描述:
  */
-public class SearchKeyText   {
+public class SearchKeyText implements Serializable {
     public String getBookCaseName() {
         return mBookCaseName;
     }
@@ -28,14 +29,7 @@ public class SearchKeyText   {
         return this;
     }
 
-    public int getSearcTextResCount() {
-        return mSearcTextResCount;
-    }
 
-    public SearchKeyText setSearcTextResCount(int searcTextResCount) {
-        mSearcTextResCount = searcTextResCount;
-        return this;
-    }
 
     public List<ChapterSearchRes> getChapterList() {
         return mChapterList;
@@ -47,6 +41,16 @@ public class SearchKeyText   {
     }
 
     private String mBookCaseName ;
+
+    public int getSearchTextResCount() {
+        return mSearcTextResCount;
+    }
+
+    public SearchKeyText setSearchTextResCount(int searchTextResCount) {
+        mSearcTextResCount = searchTextResCount;
+        return this;
+    }
+
     private int mSearcTextResCount ;
 
    private List<ChapterSearchRes> mChapterList;

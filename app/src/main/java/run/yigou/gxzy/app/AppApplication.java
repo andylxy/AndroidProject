@@ -23,6 +23,8 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonToken;
 import com.hjq.bar.TitleBar;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
@@ -42,6 +44,7 @@ import run.yigou.gxzy.other.TitleBarStyle;
 import run.yigou.gxzy.other.ToastLogInterceptor;
 import run.yigou.gxzy.other.ToastStyle;
 import com.hjq.gson.factory.GsonFactory;
+import com.hjq.gson.factory.ParseExceptionCallback;
 import com.hjq.http.EasyConfig;
 import com.hjq.toast.ToastUtils;
 import com.hjq.umeng.UmengClient;
@@ -197,8 +200,8 @@ public final class AppApplication extends Application {
 
         EasyConfig.with(okHttpClient)
                 // 是否打印日志
-                .setLogEnabled(AppConfig.isLogEnable())
-                //  .setLogEnabled(true)
+                //.setLogEnabled(AppConfig.isLogEnable())
+                  .setLogEnabled(true)
                 // 设置服务器配置
                 .setServer(new RequestServer())
                 // 设置请求处理策略
@@ -219,11 +222,38 @@ public final class AppApplication extends Application {
                 })
                 .into();
 
+//        // 设置 Json 解析容错监听
+//        GsonFactory.setJsonCallback((typeToken, fieldName, jsonToken) -> {
+//            // 上报到 Bugly 错误列表
+// //          CrashReport.postCatchedException(new IllegalArgumentException(
+////                    "类型解析异常：" + typeToken + "#" + fieldName + "，后台返回的类型为：" + jsonToken));
+//        });
         // 设置 Json 解析容错监听
-        GsonFactory.setJsonCallback((typeToken, fieldName, jsonToken) -> {
-            // 上报到 Bugly 错误列表
- //          CrashReport.postCatchedException(new IllegalArgumentException(
-//                    "类型解析异常：" + typeToken + "#" + fieldName + "，后台返回的类型为：" + jsonToken));
+        GsonFactory.setParseExceptionCallback(new ParseExceptionCallback() {
+
+            @Override
+            public void onParseObjectException(TypeToken<?> typeToken, String fieldName, JsonToken jsonToken) {
+                handlerGsonParseException("解析对象析异常：" + typeToken + "#" + fieldName + "，后台返回的类型为：" + jsonToken);
+            }
+
+            @Override
+            public void onParseListItemException(TypeToken<?> typeToken, String fieldName, JsonToken listItemJsonToken) {
+                handlerGsonParseException("解析 List 异常：" + typeToken + "#" + fieldName + "，后台返回的条目类型为：" + listItemJsonToken);
+            }
+
+            @Override
+            public void onParseMapItemException(TypeToken<?> typeToken, String fieldName, String mapItemKey, JsonToken mapItemJsonToken) {
+                handlerGsonParseException("解析 Map 异常：" + typeToken + "#" + fieldName + "，mapItemKey = " + mapItemKey + "，后台返回的条目类型为：" + mapItemJsonToken);
+            }
+
+            private void handlerGsonParseException(String message) {
+                if (AppConfig.isLogEnable()) {
+                    throw new IllegalArgumentException(message);
+                } else {
+                    // 上报到 Bugly 错误列表中
+                    CrashReport.postCatchedException(new IllegalArgumentException(message));
+                }
+            }
         });
 
         // 初始化日志打印

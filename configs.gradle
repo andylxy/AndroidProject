@@ -44,7 +44,7 @@ ext {
         case SERVER_TYPE_TEST:
         case SERVER_TYPE_PREVIEW:
             LOG_ENABLE = true
-            BUGLY_ID = ""
+            BUGLY_ID = "4b99ab25ef"
             if (serverType == SERVER_TYPE_PREVIEW) {
                 HOST_URL = "http://192.168.2.158:8991/"
             } else {
@@ -55,7 +55,7 @@ ext {
             break
         case SERVER_TYPE_PRODUCT:
             LOG_ENABLE = false
-            BUGLY_ID = ""
+            BUGLY_ID = "4b99ab25ef"
             HOST_URL = "http://106.52.175.122:8991/"
             //HOST_URL = "http://192.168.2.158:8991/"
             break

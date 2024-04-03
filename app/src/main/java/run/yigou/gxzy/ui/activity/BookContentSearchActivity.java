@@ -23,6 +23,7 @@ import java.util.List;
 
 import me.gujun.android.taggroup.TagGroup;
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.common.APPCONST;
 import run.yigou.gxzy.common.URLCONST;
@@ -176,7 +177,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         } else {
             // lvSearchBooksList.setVisibility(View.VISIBLE);
             llHistoryView.setVisibility(View.GONE);
-            setTitle(searchKey);
+            setTitle("搜索内容: "+ searchKey);
             getData();
 
 
@@ -254,6 +255,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                 .request(new HttpCallback<HttpData<List<SearchKeyText>>>(this) {
                     @Override
                     public void onSucceed(HttpData<List<SearchKeyText>> data) {
+
                         if (data.getData().size() > 0) {
                                 mSearchKeyTextList.clear();
                                 mSearchKeyTextList = data.getData();

@@ -9,6 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
 
+import com.hjq.http.EasyHttp;
+import com.hjq.http.EasyLog;
+
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
 import run.yigou.gxzy.greendao.entity.Book;
@@ -66,9 +69,10 @@ public final class SearchBookAdapter extends AppAdapter<SearchKeyText> {
         @Override
         public void onBindView(int position) {
           SearchKeyText keyText =  getItem(position);
+            EasyLog.print("ResCount:"+keyText.getSearchTextResCount());
             mTvSearchBookName.setText( keyText.getBookCaseName());
-            mTvSearchKeyCount.setText( keyText.getSearcTextResCount()+"");
-            if ( keyText.getSearcTextResCount()>0)
+            mTvSearchKeyCount.setText( keyText.getSearchTextResCount()+"");
+            if ( keyText.getSearchTextResCount()>0)
             {
                 // 加载 drawable 中的图片资源
                 mIvSearchAvatar.setImageResource(R.drawable.success);

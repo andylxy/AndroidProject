@@ -10,11 +10,13 @@
 
 package run.yigou.gxzy.http.entitymodel;
 
+import java.io.Serializable;
+
 /**
  * 版本:  1.0
  * 描述:
  */
-public class ChapterSearchRes {
+public class ChapterSearchRes implements Serializable {
 
         private int Id;
 
