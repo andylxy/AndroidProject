@@ -845,42 +845,6 @@ public final class BookReadActivity extends AppActivity {
                 });
     }
 
-//    /**
-//     * 获取章节内容转换为Chapter对象
-//     *
-//     * @param bean
-//     * @param position
-//     */
-//    private void convertChapterDetail(GetChapterDetail.Bean bean, int position) {
-//        mChapters.get(position).getMChapterBodyList().addAll(convertChapterBody(bean));
-//    }
-
-//    private List<ChapterBody> convertChapterBody(GetChapterDetail.Bean bean) {
-//        List<ChapterBody> chapterBodyArrayList = new ArrayList<>();
-//        if (bean.getChapterInfoBody() != null && bean.getChapterInfoBody().size() >= 1) {
-//            for (ChapterInfoBody body : bean.getChapterInfoBody()) {
-//                ChapterBody chapterbody = new ChapterBody();
-//                chapterbody.setMSection(ConvertHtmlColorsHelper.convertHtmlColors(body.getSection()));
-//                chapterbody.setMSectionNote(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionNote()));
-//                chapterbody.setMSectionVideoMemo(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionVideoMemo()));
-//                chapterbody.setMFangJi(ConvertHtmlColorsHelper.convertHtmlColors(body.getFangJi()));
-//                chapterbody.setMFangJiZhujie(ConvertHtmlColorsHelper.convertHtmlColors(body.getFangJiZhujie()));
-//                chapterbody.setAiJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getAiJiu()));
-//                chapterbody.setBieMing(ConvertHtmlColorsHelper.convertHtmlColors(body.getBieMing()));
-//                chapterbody.setShiCi(ConvertHtmlColorsHelper.convertHtmlColors(body.getShiCi()));
-//                chapterbody.setTeDian(ConvertHtmlColorsHelper.convertHtmlColors(body.getTeDian()));
-//                chapterbody.setShiYi(ConvertHtmlColorsHelper.convertHtmlColors(body.getShiYi()));
-//                chapterbody.setNotes(ConvertHtmlColorsHelper.convertHtmlColors(body.getNotes()));
-//                chapterbody.setZhuZhi(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhuZhi()));
-//                chapterbody.setZhenJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhenJiu()));
-//                chapterbody.setPeiWu(ConvertHtmlColorsHelper.convertHtmlColors(body.getPeiWu()));
-//                //mChapters.get(position).getMChapterBodyList().add(chapterbody);
-//                chapterBodyArrayList.add(chapterbody);
-//            }
-//
-//        }
-//        return chapterBodyArrayList;
-//    }
 
     private void SetDayStyle() {
 

@@ -26,6 +26,7 @@ import androidx.lifecycle.LifecycleOwner;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonToken;
 import com.hjq.bar.TitleBar;
+
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.greendao.entity.UserInfo;
@@ -43,6 +44,7 @@ import run.yigou.gxzy.other.SmartBallPulseFooter;
 import run.yigou.gxzy.other.TitleBarStyle;
 import run.yigou.gxzy.other.ToastLogInterceptor;
 import run.yigou.gxzy.other.ToastStyle;
+
 import com.hjq.gson.factory.GsonFactory;
 import com.hjq.gson.factory.ParseExceptionCallback;
 import com.hjq.http.EasyConfig;
@@ -60,10 +62,10 @@ import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2018/10/18
- *    desc   : 应用入口
+ * author : Android 轮子哥
+ * github : https://github.com/getActivity/AndroidProject
+ * time   : 2018/10/18
+ * desc   : 应用入口
  */
 public final class AppApplication extends Application {
 
@@ -83,7 +85,7 @@ public final class AppApplication extends Application {
 
     public void newThread(Runnable runnable) {
         try {
-            mFixedThreadPool.schedule(runnable,1, TimeUnit.SECONDS);
+            mFixedThreadPool.schedule(runnable, 1, TimeUnit.SECONDS);
         } catch (Exception e) {
             e.printStackTrace();
             mFixedThreadPool = Executors.newScheduledThreadPool(Math.min(Runtime.getRuntime().availableProcessors(), 3));//初始化线程池
@@ -91,37 +93,39 @@ public final class AppApplication extends Application {
         }
     }
 
-    public void shutdownThreadPool(){
+    public void shutdownThreadPool() {
         mFixedThreadPool.shutdownNow();
     }
     //登陆信息
-
     private UserInfoService mUserInfoService;
-    public  UserInfo mUserInfoToken ;
+    public UserInfo mUserInfoToken;
+
     public static AppApplication getApplication() {
         return application;
     }
+
     public static Context getmContext() {
         return application;
     }
+
     @Log("启动耗时")
     @Override
     public void onCreate() {
         super.onCreate();
         // 初始化 TitleBar 默认样式
-       // TitleBar.setDefaultStyle(new ITitleBarStyle());
-        application=this;
+        // TitleBar.setDefaultStyle(new ITitleBarStyle());
+        application = this;
         mUserInfoService = DbService.getInstance().mUserInfoService;
         initSdk(this);
         initUserLogin();
     }
 
     private void initUserLogin() {
-        UserInfo userInfo =mUserInfoService.getLoginUserInfo();
-        if (userInfo!=null){
+        UserInfo userInfo = mUserInfoService.getLoginUserInfo();
+        if (userInfo != null) {
             mUserInfoToken = mUserInfoService.getLoginUserInfo();
             //添加http请求Token
-            if (mUserInfoToken !=null)
+            if (mUserInfoToken != null)
                 EasyConfig.getInstance().addHeader("Authorization", mUserInfoToken.getToken());
 
         }
@@ -180,10 +184,10 @@ public final class AppApplication extends Application {
         ToastUtils.setInterceptor(new ToastLogInterceptor());
 
         // 本地异常捕捉
-       CrashHandler.register(application);
+        CrashHandler.register(application);
 
         // 友盟统计、登录、分享 SDK
-       // UmengClient.init(application, AppConfig.isLogEnable());
+        // UmengClient.init(application, AppConfig.isLogEnable());
 
         // Bugly 异常捕捉
         CrashReport.initCrashReport(application, AppConfig.getBuglyId(), AppConfig.isDebug());
@@ -201,7 +205,7 @@ public final class AppApplication extends Application {
         EasyConfig.with(okHttpClient)
                 // 是否打印日志
                 //.setLogEnabled(AppConfig.isLogEnable())
-                  .setLogEnabled(true)
+                .setLogEnabled(true)
                 // 设置服务器配置
                 .setServer(new RequestServer())
                 // 设置请求处理策略
@@ -210,9 +214,9 @@ public final class AppApplication extends Application {
                 .setRetryCount(1)
                 .setInterceptor((api, params, headers) -> {
                     // 添加全局请求头
-                   // headers.put("Authorization", mUserInfoToken.getToken());
+                    // headers.put("Authorization", mUserInfoToken.getToken());
                     headers.put("app", "2");
-                   // headers.put("ClientId", DeviceIdentifier.getAndroidID(this));
+                    // headers.put("ClientId", DeviceIdentifier.getAndroidID(this));
                     headers.put("versionName", AppConfig.getVersionName());
                     headers.put("versionCode", String.valueOf(AppConfig.getVersionCode()));
                     headers.put("Content-Type", "application/json;charset=UTF-8");
@@ -258,7 +262,7 @@ public final class AppApplication extends Application {
 
         // 初始化日志打印
         if (AppConfig.isLogEnable()) {
-        Timber.plant(new DebugLoggerTree());
+            Timber.plant(new DebugLoggerTree());
         }
 
         // 注册网络状态变化监听

@@ -46,8 +46,8 @@ public final class ChapterTitleAdapter extends AppAdapter<Chapter> {
         private TextView mTvChapterTitle;
 
         private ViewHolder() {
-            super(R.layout.book_chapter_title_item);
-            mTvChapterTitle = findViewById(R.id.tv_chapter_title);
+            super(R.layout.book_chapter_title);
+            mTvChapterTitle = findViewById(R.id.tv_chapter_title_dic);
         }
 
         @Override

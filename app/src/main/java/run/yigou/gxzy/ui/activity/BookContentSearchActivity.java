@@ -248,14 +248,13 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      * 获取搜索数据
      */
     private void getData() {
-        mSearchRes.clear();
+
         EasyHttp.post(this)
                 .api(new PageDataOptions().setUrl(URLCONST.SearchUrl)
                         .setFilter(new PageDataOptions.SearchParameters("Section", searchKey)))
                 .request(new HttpCallback<HttpData<List<SearchKeyText>>>(this) {
                     @Override
                     public void onSucceed(HttpData<List<SearchKeyText>> data) {
-
                         if (data.getData().size() > 0) {
                                 mSearchKeyTextList.clear();
                                 mSearchKeyTextList = data.getData();
