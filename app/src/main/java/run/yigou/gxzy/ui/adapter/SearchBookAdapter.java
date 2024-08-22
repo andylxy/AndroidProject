@@ -69,7 +69,7 @@ public final class SearchBookAdapter extends AppAdapter<SearchKeyText> {
         @Override
         public void onBindView(int position) {
           SearchKeyText keyText =  getItem(position);
-            EasyLog.print("ResCount:"+keyText.getSearchTextResCount());
+          //  EasyLog.print("ResCount:"+keyText.getSearchTextResCount());
             mTvSearchBookName.setText( keyText.getBookCaseName());
             mTvSearchKeyCount.setText( keyText.getSearchTextResCount()+"");
             if ( keyText.getSearchTextResCount()>0)

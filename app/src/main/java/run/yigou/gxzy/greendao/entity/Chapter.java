@@ -127,6 +127,12 @@ public class Chapter {
     public void setMSection(String mSection) {
         this.mSection = mSection;
     }
+    public String getMNo() {
+        return this.mNo;
+    }
+    public void setMNo(String mNo) {
+        this.mNo = mNo;
+    }
     public String getMSectionNote() {
         return this.mSectionNote;
     }
@@ -217,17 +223,5 @@ public class Chapter {
     public void setNotes(String Notes) {
         this.Notes = Notes;
     }
-    public String getMNo() {
-        return this.mNo;
-    }
-    public void setMNo(String mNo) {
-        this.mNo = mNo;
-    }
-
-
-
-
-
-  
 
 }

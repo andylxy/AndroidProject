@@ -807,33 +807,29 @@ public final class BookReadActivity extends AppActivity {
                         if (data.getData() != null) {
                             GetChapterDetail.Bean bean = data.getData();
                             Chapter chapter = mChapters.get(position);
-                            chapter.setId(UUID.randomUUID().toString());
-                            chapter.setBookId(bean.getId() + "");
-                            chapter.setTitle(bean.getTitle());
-                            chapter.setParentId(bean.getParentId());
-                            chapter.setMTitleColor(bean.getTitleColor());
-                            chapter.setParentId(bean.getParentId());
-                            //  mChapters.get(position).;
-                            for (ChapterInfoBody body : bean.getChapterInfoBody()) {
-                                chapter.setMSection(ConvertHtmlColorsHelper.convertHtmlColors(body.getSection()));
-                                chapter.setMSectionNote(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionNote()));
-                                chapter.setMSectionVideoMemo(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionVideoMemo()));
-                                chapter.setMFangJi(ConvertHtmlColorsHelper.convertHtmlColors(body.getFangJi()));
-                                chapter.setMFangJiZhujie(ConvertHtmlColorsHelper.convertHtmlColors(body.getFangJiZhujie()));
-                                chapter.setAiJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getAiJiu()));
-                                chapter.setBieMing(ConvertHtmlColorsHelper.convertHtmlColors(body.getBieMing()));
-                                chapter.setShiCi(ConvertHtmlColorsHelper.convertHtmlColors(body.getShiCi()));
-                                chapter.setTeDian(ConvertHtmlColorsHelper.convertHtmlColors(body.getTeDian()));
-                                chapter.setShiYi(ConvertHtmlColorsHelper.convertHtmlColors(body.getShiYi()));
-                                chapter.setNotes(ConvertHtmlColorsHelper.convertHtmlColors(body.getNotes()));
-                                chapter.setZhuZhi(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhuZhi()));
-                                chapter.setZhenJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhenJiu()));
-                                chapter.setPeiWu(ConvertHtmlColorsHelper.convertHtmlColors(body.getPeiWu()));
-
-                            }
-
-                            // convertChapterDetail(bean, position);
-
+                                chapter.setId(UUID.randomUUID().toString());
+                                chapter.setBookId(bean.getId() + "");
+                                chapter.setTitle(bean.getTitle());
+                                chapter.setParentId(bean.getParentId());
+                                chapter.setMTitleColor(bean.getTitleColor());
+                                chapter.setParentId(bean.getParentId());
+                                //  mChapters.get(position).;
+                                for (ChapterInfoBody body : bean.getChapterInfoBody()) {
+                                    chapter.setMSection(ConvertHtmlColorsHelper.convertHtmlColors(body.getSection()));
+                                    chapter.setMSectionNote(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionNote()));
+                                    chapter.setMSectionVideoMemo(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionVideoMemo()));
+                                    chapter.setMFangJi(ConvertHtmlColorsHelper.convertHtmlColors(body.getFangJi()));
+                                    chapter.setMFangJiZhujie(ConvertHtmlColorsHelper.convertHtmlColors(body.getFangJiZhujie()));
+                                    chapter.setAiJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getAiJiu()));
+                                    chapter.setBieMing(ConvertHtmlColorsHelper.convertHtmlColors(body.getBieMing()));
+                                    chapter.setShiCi(ConvertHtmlColorsHelper.convertHtmlColors(body.getShiCi()));
+                                    chapter.setTeDian(ConvertHtmlColorsHelper.convertHtmlColors(body.getTeDian()));
+                                    chapter.setShiYi(ConvertHtmlColorsHelper.convertHtmlColors(body.getShiYi()));
+                                    chapter.setNotes(ConvertHtmlColorsHelper.convertHtmlColors(body.getNotes()));
+                                    chapter.setZhuZhi(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhuZhi()));
+                                    chapter.setZhenJiu(ConvertHtmlColorsHelper.convertHtmlColors(body.getZhenJiu()));
+                                    chapter.setPeiWu(ConvertHtmlColorsHelper.convertHtmlColors(body.getPeiWu()));
+                                }
                             //更新章节内容
                             if (!isStoreBook)
                                 mChapterService.updateChapter(mChapters.get(position));
@@ -842,6 +838,8 @@ public final class BookReadActivity extends AppActivity {
                         }
 
                     }
+
+
                 });
     }
 
@@ -972,6 +970,7 @@ public final class BookReadActivity extends AppActivity {
                                     chapter.setTitle(bean.getTitle());
                                     chapter.setMTitleColor(bean.getTitleColor());
                                     chapter.setParentId(bean.getParentId());
+                                    chapter.setMNo(body.getNo()+"");
                                     chapter.setMSection(ConvertHtmlColorsHelper.convertHtmlColors(body.getSection()));
                                     chapter.setMSectionNote(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionNote()));
                                     chapter.setMSectionVideoMemo(ConvertHtmlColorsHelper.convertHtmlColors(body.getSectionVideoMemo()));
@@ -988,10 +987,7 @@ public final class BookReadActivity extends AppActivity {
                                     chapter.setPeiWu(ConvertHtmlColorsHelper.convertHtmlColors(body.getPeiWu()));
                                     mChapters.add(chapter);
                                 }
-
-                                postDelayed(() -> {
-                                    initViewData();
-                                }, 1000);
+                                initViewData();
 
                             }
 

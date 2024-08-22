@@ -70,7 +70,10 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     }
 
     private String searchKey;//搜索关键字
+    //搜索结果
     private List<ChapterSearchRes> mSearchRes;
+    //搜索结果分类
+    private List<ChapterSearchRes> mSearchResorc;
     private List<SearchKeyText> mSearchKeyTextList;
     private List<SearchHistory> mSearchHistories;
     private WrapRecyclerView mLvSearchBooks;
@@ -95,6 +98,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         mSearchHistoryService = new SearchHistoryService();
         mSuggestions =  new ArrayList<>();
         mSearchRes =  new ArrayList<>();
+        mSearchResorc =  new ArrayList<>();
         mSearchKeyTextList = new ArrayList<>();
         setTitle("内容搜索");
         // getData();
@@ -232,7 +236,19 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 
         mSearchBookDetailAdapter = new SearchBookDetailAdapter(getActivity());
       //  mSearchBookDetailAdapter.setData(mSearchRes);
-        mSearchBookDetailAdapter.setOnItemClickListener(this);
+        mSearchBookDetailAdapter.setOnItemClickListener((adapterView, view, i) -> {
+                Intent intent = new Intent(getActivity(), BookReadActivity.class);
+                Book book = new Book();
+                book.setDesc(getSearchKey());
+                book.setId(mSearchResorc.get(i).getId() + "");
+                book.setName(mSearchResorc.get(i).getBookName());
+                book.setType(mSearchResorc.get(i).getType());
+                book.setChapterUrl(mSearchResorc.get(i).getId() + "");
+                book.setBookId(mSearchResorc.get(i).getId() + "");
+                book.setSource("Search");
+                intent.putExtra(APPCONST.BOOK, book);
+                startActivity(intent);
+        });
         lvSearchBooksList.setAdapter(mSearchBookDetailAdapter);
         lvSearchBooksList.setVisibility(View.GONE);
         mSearchBookAdapter = new SearchBookAdapter(getActivity());
@@ -285,26 +301,14 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
 
-        if (recyclerView.getId() == R.id.lv_search_books_list) {
-            Intent intent = new Intent(getActivity(), BookReadActivity.class);
-            Book book = new Book();
-            book.setDesc(getSearchKey());
-            book.setId(mSearchRes.get(position).getId() + "");
-            book.setName(mSearchRes.get(position).getBookName());
-            book.setType(mSearchRes.get(position).getType());
-            book.setChapterUrl(mSearchRes.get(position).getId() + "");
-            book.setBookId(mSearchRes.get(position).getId() + "");
-            book.setSource("Search");
-            intent.putExtra(APPCONST.BOOK, book);
-            startActivity(intent);
-        }
         if (recyclerView.getId() == R.id.lv_history_list) {
             etSearchKey.setText(mSearchHistories.get(position).getContent());
             search();
         }
         if (recyclerView.getId() == R.id.lv_search_books) {
-            SearchKeyText searchKeyText = mSearchKeyTextList.get(position);
-            mSearchBookDetailAdapter.setData(searchKeyText.getChapterList());
+           // SearchKeyText searchKeyText = mSearchKeyTextList.get(position);
+            mSearchResorc = mSearchKeyTextList.get(position).getChapterList();
+            mSearchBookDetailAdapter.setData(mSearchResorc);
             mLvSearchBooks.setVisibility(View.GONE);
             lvSearchBooksList.setVisibility(View.VISIBLE);
 

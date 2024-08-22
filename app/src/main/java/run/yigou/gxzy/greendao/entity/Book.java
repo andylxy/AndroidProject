@@ -23,25 +23,25 @@ public class Book implements Serializable {
 
     @Id
     private String id;
-    private  String bookId;
+    private String bookId;
     private String name;//书名
     private String chapterUrl;//书目Url
     private String imgUrl;//封面图片url
     private String desc;//简介
     private String author;//作者
-    @Nullable
+
     private String type;//类型
 
     private String updateDate;//更新时间
-    @Nullable
+
     private String newestChapterId;//最新章节id
-    @Nullable
+
     private String newestChapterTitle;//最新章节标题
-    @Nullable
+
     private String newestChapterUrl;//最新章节url
-    @Nullable
+
     private String historyChapterId;//上次关闭时的章节ID
-    @Nullable
+
     private int histtoryChapterNum;//上次关闭时的章节数
 
     private int sortCode;//排序编码
@@ -52,7 +52,7 @@ public class Book implements Serializable {
 
     private int lastReadPosition;//上次阅读到的章节的位置
 
-    @Nullable
+
     private String source;
 
 

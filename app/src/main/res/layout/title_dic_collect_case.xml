@@ -52,10 +52,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:divider="@color/nothing"
-                android:dividerHeight="10dp"
+                android:dividerHeight="2dp"
                 android:listSelector="@color/nothing"
                 android:overScrollMode="never"
-                android:padding="10dp" />
+                android:padding="2dp" />
         </com.scwang.smart.refresh.layout.SmartRefreshLayout>
     </RelativeLayout>
 </LinearLayout>

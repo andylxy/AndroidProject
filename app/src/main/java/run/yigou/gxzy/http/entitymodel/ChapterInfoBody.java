@@ -23,6 +23,12 @@ public class ChapterInfoBody implements Serializable {
     private String ShiCi;
     private String ShiYi;
     private String Notes;
+    private int mNo;
+
+    public int getNo() {
+        return mNo;
+    }
+
     private String mSection;
     private String mSectionNote;//原文注解
 

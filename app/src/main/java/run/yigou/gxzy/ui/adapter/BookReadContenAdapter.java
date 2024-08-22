@@ -9,9 +9,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.text.HtmlCompat;
 
 import com.spreada.utils.chinese.ZHConverter;
+
+import java.util.Objects;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.ResultCallback;
@@ -42,7 +43,7 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
     }
 
     private Typeface mTypeFace;
-    private  String showViewType = null;
+    private String showViewType = null;
 
     @NonNull
     @Override
@@ -69,25 +70,31 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
         private TextView mTvSectionContentNote;
         private View mVwSectionDividerLine;
 
+        private View mHorizontalline;
+
 
         private ViewHolder() {
             super(R.layout.book_chapter_content_item);
 
-                tvTitle = findViewById(R.id.tv_title);
-                tvContent = findViewById(R.id.tv_content);
-                tvErrorTips = findViewById(R.id.tv_loading_error_tips);
-                mTvFangJi = findViewById(R.id.tv_FangJi);
-                mTvFangJiZhujie = findViewById(R.id.tv_FangJiZhujie);
-                mTvVideoTitle = findViewById(R.id.tv_video_title);
-                mTvVideoContent = findViewById(R.id.tv_video_content);
-                mTvTitleContent = findViewById(R.id.tv_title_content);
+            tvTitle = findViewById(R.id.tv_title);
+            mTvTitleContent = findViewById(R.id.tv_title_content);
+            tvContent = findViewById(R.id.tv_content);
 
-                mTvSectionContentTitle = findViewById(R.id.tv_section_content_title);
-                mTvSectionTitleNo = findViewById(R.id.tv_section_title_no);
-                mTvSectionContent = findViewById(R.id.tv_section_content);
-                mTvSectionContentNote = findViewById(R.id.tv_section_content_note);
-                mVwSectionDividerLine = findViewById(R.id.vw_section_divider_line);
+            tvErrorTips = findViewById(R.id.tv_loading_error_tips);
 
+            mTvFangJi = findViewById(R.id.tv_FangJi);
+            mTvFangJiZhujie = findViewById(R.id.tv_FangJiZhujie);
+
+            mTvVideoTitle = findViewById(R.id.tv_video_title);
+            mTvVideoContent = findViewById(R.id.tv_video_content);
+
+
+            mTvSectionContentTitle = findViewById(R.id.tv_section_content_title);
+            mTvSectionTitleNo = findViewById(R.id.tv_section_title_no);
+            mTvSectionContent = findViewById(R.id.tv_section_content);
+            mTvSectionContentNote = findViewById(R.id.tv_section_content_note);
+            mVwSectionDividerLine = findViewById(R.id.vw_section_divider_line);
+            mHorizontalline = findViewById(R.id.horizontalline);
             mLlShowItemOne = findViewById(R.id.ll_show_item_one);
             mLlShowItemTwo = findViewById(R.id.ll_show_item_two);
         }
@@ -95,7 +102,7 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
         @Override
         public void onBindView(int position) {
             Chapter chapter = getItem(position);
-            showViewType = chapter.getParentId() ==null?"0":chapter.getParentId() ;
+            showViewType = chapter.getParentId() == null ? "0" : chapter.getParentId();
 
             //初始化字体
             initFont();
@@ -202,9 +209,6 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
          */
         public void viewHolderSetTvContent(Chapter chapter) {
 
-
-
-
             if (showViewType.equals("0")) {
 
                 String mSection = getLanguageContext(chapter.getMSection());
@@ -214,13 +218,15 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
                 String mFangJiZhujie = getLanguageContext(chapter.getMFangJiZhujie());
                 tvTitle.setText("【" + getLanguageContext(chapter.getTitle()) + "】");
 
-                if (!StringHelper.isEmpty(mSection)) mSection = "[原文]\n" + mSection;
-                if (!StringHelper.isEmpty(mSectionNote))
-                    mSectionNote = "[原文注解]\n" + mSectionNote;
-                if (!StringHelper.isEmpty(mFangJi)) mFangJi = "[方剂原文]\n" + mFangJi;
-                if (!StringHelper.isEmpty(mFangJiZhujie))
-                    mFangJiZhujie = "[方剂注解]\n" + mFangJiZhujie;
-                if (!StringHelper.isEmpty(mSectionVideoMemo))
+                if (!StringHelper.isEmpty(mSection) && StringHelper.isNotEquals(mSection))
+                    mSection = "[原文]\n" + mSection;
+                if (!StringHelper.isEmpty(mSectionNote) && StringHelper.isNotEquals(mSectionNote))
+                    mSectionNote = "[注解]\n" + mSectionNote;
+                if (!StringHelper.isEmpty(mFangJi) && StringHelper.isNotEquals(mFangJi))
+                    mFangJi = "[方剂原文]\n" + mFangJi;
+                if (!StringHelper.isEmpty(mFangJiZhujie) && StringHelper.isNotEquals(mFangJiZhujie))
+                    mFangJiZhujie = "[注解]\n" + mFangJiZhujie;
+                if (!StringHelper.isEmpty(mSectionVideoMemo) && StringHelper.isNotEquals(mSectionVideoMemo))
                     mSectionVideoMemo = "[视频实录]\n" + mSectionVideoMemo;
 
                 Spanned mSection2;
@@ -250,47 +256,71 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
                     mTvTitleContent.setVisibility(View.GONE);
 
                 } else {
-                    mTvTitleContent.setVisibility(View.VISIBLE);
-                    mTvTitleContent.setText(mSection2);
+                    if (StringHelper.isNotEquals(mSection)) {
+                        mTvTitleContent.setVisibility(View.VISIBLE);
+                        mTvTitleContent.setText(mSection2);
+                    } else {
+                        mTvTitleContent.setVisibility(View.GONE);
+                    }
+
                 }
                 //原文注解
                 if (StringHelper.isEmpty(mSectionNote)) {
                     tvContent.setVisibility(View.GONE);
                 } else {
-                    tvContent.setVisibility(View.VISIBLE);
-                    tvContent.setText(mSectionNote2);
+                    if (StringHelper.isNotEquals(mSectionNote)) {
+                        tvContent.setVisibility(View.VISIBLE);
+                        tvContent.setText(mSectionNote2);
+                    } else {
+                        tvContent.setVisibility(View.GONE);
+                    }
+
                 }
                 //方剂
                 if (StringHelper.isEmpty(mFangJi)) {
                     mTvFangJi.setVisibility(View.GONE);
                 } else {
-                    mTvFangJi.setVisibility(View.VISIBLE);
-                    mTvFangJi.setText(mFangJi2);
+                    if (StringHelper.isNotEquals(mFangJi)) {
+                        mTvFangJi.setVisibility(View.VISIBLE);
+                        mTvFangJi.setText(mFangJi2);
+                    } else {
+                        mTvFangJi.setVisibility(View.GONE);
+                    }
                 }
                 //方剂注解
                 if (StringHelper.isEmpty(mFangJiZhujie)) {
                     mTvFangJiZhujie.setVisibility(View.GONE);
                 } else {
-                    mTvFangJiZhujie.setVisibility(View.VISIBLE);
-                    mTvFangJiZhujie.setText(mFangJiZhujie2);
+                    if (StringHelper.isNotEquals(mFangJiZhujie)) {
+                        mTvFangJiZhujie.setVisibility(View.VISIBLE);
+                        mTvFangJiZhujie.setText(mFangJiZhujie2);
+                    } else {
+                        mTvFangJiZhujie.setVisibility(View.GONE);
+                    }
                 }
                 // 视频实录
                 if (StringHelper.isEmpty(mSectionVideoMemo)) {
                     mTvVideoContent.setVisibility(View.GONE);
                     mTvVideoTitle.setVisibility(View.GONE);
                 } else {
-                    mTvVideoContent.setVisibility(View.VISIBLE);
-                    mTvVideoTitle.setVisibility(View.VISIBLE);
-                    mTvVideoTitle.setText("视频文字实录");
-                    mTvVideoContent.setText(mSectionVideoMemo2);
+                    if (StringHelper.isNotEquals(mSectionVideoMemo)) {
+                        mTvVideoContent.setVisibility(View.VISIBLE);
+                        mTvVideoTitle.setVisibility(View.VISIBLE);
+                        mTvVideoTitle.setText("视频文字实录");
+                        mTvVideoContent.setText(mSectionVideoMemo2);
+                    } else {
+                        mTvVideoContent.setVisibility(View.GONE);
+                        mTvVideoTitle.setVisibility(View.GONE);
+                    }
                 }
 
             } else {
                 String mSection = getLanguageContext(chapter.getMSection());
                 String mSectionNote = getLanguageContext(chapter.getMSectionNote());
-                if (!StringHelper.isEmpty(mSection)) mSection = "[原文]\n" + mSection;
-                if (!StringHelper.isEmpty(mSectionNote))
-                    mSectionNote = "[原文注解]\n" + mSectionNote;
+                if (!StringHelper.isEmpty(mSection) && StringHelper.isNotEquals(mSection))
+                    mSection = "[原文]\n" + mSection;
+                if (!StringHelper.isEmpty(mSectionNote) && StringHelper.isNotEquals(mSectionNote))
+                    mSectionNote = "[注解]\n" + mSectionNote;
                 Spanned mSection2;
                 Spanned mSectionNote2;
                 if (mBookReadActivity.mBook.getSource() != null && mBookReadActivity.mBook.getSource().equals("Search")) {
@@ -304,12 +334,18 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
                     mSectionNote2 = SpannableStringHelper.getSpannableString(mSectionNote);
                 }
 
-                mTvSectionContentTitle .setText(chapter.getTitle());
+                mTvSectionContentTitle.setText(StringHelper.substring(chapter.getTitle(), "."));
 
-                if (chapter.getMNo() ==null) mTvSectionTitleNo .setVisibility(View.GONE);
-                else {
-                    mTvSectionTitleNo .setVisibility(View.VISIBLE);
-                    mTvSectionTitleNo .setText(chapter.getMNo());}
+                if (chapter.getMNo() == null || Objects.equals(chapter.getMNo(), "0")) {
+                    mTvSectionTitleNo.setVisibility(View.GONE);
+                    mTvSectionContentTitle.setVisibility(View.GONE);
+                    mHorizontalline.setVisibility(View.GONE);
+                } else {
+                    mTvSectionContentTitle.setVisibility(View.VISIBLE);
+                    mTvSectionTitleNo.setVisibility(View.VISIBLE);
+                    mHorizontalline.setVisibility(View.VISIBLE);
+                    mTvSectionTitleNo.setText(chapter.getMNo());
+                }
                 //原文
                 if (StringHelper.isEmpty(mSection)) {
                     mTvSectionContent.setVisibility(View.GONE);

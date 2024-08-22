@@ -10,12 +10,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:id="@+id/ll_show_item_one"
-        android:visibility="gone"
         >
 
         <TextView
             android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/nothing"
             android:cursorVisible="false"
@@ -26,7 +25,7 @@
             android:textStyle="bold" />
         <TextView
             android:id="@+id/tv_title_content"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/read_section_background"
             android:cursorVisible="false"
@@ -38,7 +37,7 @@
 
         <TextView
             android:id="@+id/tv_FangJi"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/nothing"
             android:cursorVisible="false"
@@ -50,7 +49,7 @@
 
         <TextView
             android:id="@+id/tv_FangJiZhujie"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/dp_5"
             android:background="@color/read_fangjizhujie_background"
@@ -61,7 +60,7 @@
             android:textSize="18sp" />
         <TextView
             android:id="@+id/tv_content"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/dp_5"
             android:background="@color/nothing"
@@ -84,7 +83,7 @@
 
         <TextView
             android:id="@+id/tv_video_content"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/dp_5"
             android:background="@color/nothing"
@@ -100,6 +99,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:id="@+id/ll_show_item_two"
+
         >
         <LinearLayout
             android:layout_width="match_parent"
@@ -109,33 +109,34 @@
             android:layout_marginTop="@dimen/dp_5"
             android:layout_marginLeft="@dimen/dp_10"
             >
+
             <TextView
                 android:id="@+id/tv_section_content_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/dp_2"
                 android:background="@color/read_section_title_background"
                 android:cursorVisible="false"
                 android:inputType="none"
                 android:lineSpacingMultiplier="1.5"
+                android:padding="@dimen/dp_2"
                 android:text="章节标题"
-                android:textColor="@color/white"
-                 />
+                android:textColor="#DDF8FE" />
+
             <TextView
                 android:id="@+id/tv_section_title_no"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_1"
                 android:background="@color/read_section_title_background"
                 android:cursorVisible="false"
                 android:inputType="none"
                 android:lineSpacingMultiplier="1.5"
-                android:layout_marginLeft="@dimen/dp_5"
-                android:text="15"
                 android:padding="@dimen/dp_2"
-                android:textColor="@color/white"
-                />
+                android:text="15"
+                android:textColor="#DDF8FE" />
         </LinearLayout>
         <View style="@style/HorizontalLineStyle"
+            android:id="@+id/horizontalline"
             android:layout_height="@dimen/dp_2"
             android:background="@color/read_section_divider_line"/>
         <TextView

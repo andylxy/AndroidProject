@@ -14,6 +14,7 @@ import com.hjq.widget.layout.WrapRecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
@@ -25,6 +26,7 @@ import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookDetailList;
 import run.yigou.gxzy.http.api.BookInfoNav;
+import run.yigou.gxzy.http.entitymodel.ChapterList;
 import run.yigou.gxzy.http.entitymodel.TitelInfo;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.HttpData;
@@ -56,7 +58,8 @@ public final class BookInfoActivity extends AppActivity {
     private WrapRecyclerView mLvChapterDic;
     private ChapterDicAdapter mChapterDicAdapter;
     private ArrayList<TitelInfo> mTitelInfos = new ArrayList<>();
-    private  List<BookDetailList.Bean> detailList;
+    private List<BookDetailList.Bean> detailList;
+
     public static void start(Context context, BookInfoNav.Bean.NavItem item) {
         Intent intent = new Intent(context, BookInfoActivity.class);
         intent.putExtra(APPCONST.BOOK, item);
@@ -89,6 +92,7 @@ public final class BookInfoActivity extends AppActivity {
         mLvChapterDic = findViewById(R.id.lv_chapter_dic);
 
     }
+
     @Override
     protected void initData() {
         mBookService = DbService.getInstance().mBookService;// new BookService();
@@ -102,6 +106,11 @@ public final class BookInfoActivity extends AppActivity {
         tvBookAuthor.setText(mBook.getAuthor());
         tvBookDesc.setText("        " + mBook.getDesc());
         setTitle(mBook.getName());
+        if (Objects.equals(mBook.getName(), "黄帝内经")){
+            btnAddBookcase.setVisibility(View.GONE);
+            btnReadBook.setVisibility(View.GONE);
+
+        }
         //图片
         GlideApp.with(this.getContext())
                 .load(AppConfig.getHostUrl() + mNavItem.getImageUrl())
@@ -112,7 +121,7 @@ public final class BookInfoActivity extends AppActivity {
                     @Override
                     public void onSucceed(HttpData<List<BookDetailList.Bean>> data) {
                         if (data != null && data.getData().size() > 0) {
-                             detailList = data.getData();
+                            detailList = data.getData();
                             try {
                                 for (BookDetailList.Bean bean : detailList) {
                                     TitelInfo titelInfo = new TitelInfo();
@@ -120,13 +129,13 @@ public final class BookInfoActivity extends AppActivity {
                                     titelInfo.setParentId(bean.getParentId());
                                     titelInfo.setTitleColor(bean.getTitleColor());
                                     titelInfo.setTitle(bean.getTitle());
-                                    titelInfo.setBookId(bean.getBookId()+"");
+                                    titelInfo.setBookId(bean.getBookId() + "");
                                     mTitelInfos.add(titelInfo);
                                 }
 
                             } catch (Exception e) {
                                 e.printStackTrace();
-                            }finally {
+                            } finally {
                                 initViewData();
                             }
                         }
@@ -134,12 +143,26 @@ public final class BookInfoActivity extends AppActivity {
                 });
 
     }
+
     private void initViewData() {
 
 
         mChapterDicAdapter = new ChapterDicAdapter(getContext());
         mChapterDicAdapter.setOnItemClickListener((adapterView, view, i) -> {
-            BookDetailList.Bean  chapter =   detailList.get(i);
+            BookDetailList.Bean chapter = detailList.get(i);
+            //处理序言,自序单页面
+            if (chapter.getChapterLists().size() == 1 && Objects.equals(chapter.getChapterLists().get(0).getNo(), "0")) {
+                    Intent intent = new Intent(getActivity(), BookReadActivity.class);
+                    Book book = new Book();
+                    book.setId(chapter.getChapterLists().get(0).getId() + "");
+                    book.setBookId(chapter.getBookId()+ "");
+                    book.setChapterUrl(chapter.getChapterLists().get(0).getId() + "");
+                    book.setSource("Search");
+                    intent.putExtra(APPCONST.BOOK, book);
+                    startActivity(intent);
+                    return;
+            }
+            //标准点击处理方式
             Intent intent = new Intent(getActivity(), TitleDicActivity.class);
             intent.putExtra(APPCONST.CHAPTER, chapter);
             startActivity(intent);
@@ -173,10 +196,9 @@ public final class BookInfoActivity extends AppActivity {
                 }
                 break;
             default:
-                EasyLog.print("onClick value: " + viewId);
+              //  EasyLog.print("onClick value: " + viewId);
         }
     }
-
 
 
     private boolean BookCollected(boolean start) {

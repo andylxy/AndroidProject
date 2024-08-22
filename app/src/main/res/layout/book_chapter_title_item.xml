@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="15dp">
+    android:padding="@dimen/dp_3">
     <TextView
         android:id="@+id/tv_chapter_title"
         android:layout_width="wrap_content"
@@ -29,8 +29,7 @@
                 android:id="@+id/tv_title_chapter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-                android:padding="@dimen/dp_5"
+                android:padding="@dimen/dp_2"
                 android:text=""
                 android:layout_marginStart="@dimen/dp_2"
                 android:textColor="@color/sys_protect_eye_word" />
@@ -40,7 +39,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toEndOf="@id/tv_title_chapter"
-                android:padding="@dimen/dp_5"
+                android:padding="@dimen/dp_2"
                 android:text=""
                 android:layout_marginStart="@dimen/dp_10"
                 android:textColor="@color/sys_protect_eye_word" />
@@ -50,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="@dimen/dp_5"
-                android:padding="@dimen/dp_5"
+                android:padding="@dimen/dp_2"
                 android:text=""
                 android:textColor="@color/sys_protect_eye_word"
                  />
@@ -60,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:padding="@dimen/dp_5"
+            android:padding="@dimen/dp_2"
             android:textColor="@color/sys_protect_eye_word"
              />
     </LinearLayout>

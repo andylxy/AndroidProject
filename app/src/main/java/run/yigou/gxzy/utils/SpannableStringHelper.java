@@ -1,12 +1,6 @@
 package run.yigou.gxzy.utils;
 
-import android.graphics.Color;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.style.BackgroundColorSpan;
-
-import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 
 /**

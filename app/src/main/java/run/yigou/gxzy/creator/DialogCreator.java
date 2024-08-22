@@ -300,7 +300,6 @@ public class DialogCreator {
         final ImageView ivNightAndDay = (ImageView) view.findViewById(R.id.iv_night_and_day);
         final TextView tvNightAndDay = (TextView) view.findViewById(R.id.tv_night_and_day);
         ImageView ivVoice  = (ImageView)view.findViewById(R.id.iv_voice_read);
-
         view.findViewById(R.id.rl_title_view).setOnClickListener(null);
         view.findViewById(R.id.ll_bottom_view).setOnClickListener(null);
 

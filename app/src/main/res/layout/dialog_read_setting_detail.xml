@@ -37,7 +37,7 @@
                 android:layout_marginRight="5dp"
                 android:progress="50"
                 android:layout_weight="1"
-                android:maxHeight="1dp"
+                android:maxHeight="10dp"
                 android:minHeight="1dp"
                 android:progressDrawable="@drawable/seekbar_bg"
                 android:thumb="@mipmap/thumb" />
@@ -227,8 +227,8 @@
                 android:layout_height="wrap_content"
                 android:progress="50"
                 android:layout_weight="1"
-                android:maxHeight="1dp"
-                android:minHeight="1dp"
+                android:maxHeight="10dp"
+                android:minHeight="10dp"
                 android:progressDrawable="@drawable/seekbar_bg"
                 android:thumb="@mipmap/thumb"/>
 

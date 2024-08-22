@@ -79,6 +79,20 @@ public final class TitleDicActivity extends AppActivity {
                 e.printStackTrace();
             }
         }
+//        //处理序言,自序页面
+//        if (bean != null && bean.getChapterLists().size() ==1  && Objects.equals( bean.getChapterLists().get(0).getNo(), "0")) {
+//
+//                Intent intent = new Intent(getActivity(), BookReadActivity.class);
+//                Book book = new Book();
+//                book.setId(mTitelInfos.get(0).getBookId() + "");
+//                book.setBookId(mTitelInfos.get(0).getBookId());
+//                book.setChapterUrl(mTitelInfos.get(0).getId() + "");
+//                book.setSource("Search");
+//                intent.putExtra(APPCONST.BOOK, book);
+//                startActivity(intent);
+//
+//        }
+        //标准点击处理方式
         mChapterDicAdapter = new ChapterDicAdapter(getContext(),bean.getParentId());
         mChapterDicAdapter.setOnItemClickListener((adapterView, view, i) -> {
             Intent intent = new Intent(getActivity(), BookReadActivity.class);

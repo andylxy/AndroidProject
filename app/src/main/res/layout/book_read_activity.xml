@@ -1,38 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/dl_read_activity"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
-        <com.scwang.smart.refresh.layout.SmartRefreshLayout
-            android:id="@+id/srl_content"
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:orientation="vertical">-->
+
+<!--        <com.hjq.bar.TitleBar-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:id="@+id/srl_content_title_bar"-->
+<!--            android:visibility="gone"-->
+<!--            app:title="标题" />-->
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.hjq.widget.layout.WrapRecyclerView
-                android:id="@+id/rv_content"
+            <com.scwang.smart.refresh.layout.SmartRefreshLayout
+                android:id="@+id/srl_content"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:divider="@color/nothing"
-                android:dividerHeight="30dp"
-                android:fadingEdge="none"
-                android:listSelector="@color/nothing"
-                android:overScrollMode="never" />
-        </com.scwang.smart.refresh.layout.SmartRefreshLayout>
+                android:layout_height="match_parent">
 
-        <ProgressBar
-            android:id="@+id/pb_loading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="gone" />
+                <com.hjq.widget.layout.WrapRecyclerView
+                    android:id="@+id/rv_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:divider="@color/nothing"
+                    android:dividerHeight="30dp"
+                    android:fadingEdge="none"
+                    android:listSelector="@color/nothing"
+                    android:overScrollMode="never" />
+            </com.scwang.smart.refresh.layout.SmartRefreshLayout>
 
-    </RelativeLayout>
+            <ProgressBar
+                android:id="@+id/pb_loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone" />
+
+        </RelativeLayout>
+<!--    </LinearLayout>-->
 
     <LinearLayout
         android:id="@+id/ll_chapter_list_view"
@@ -78,7 +91,7 @@
             android:fadingEdge="none"
             android:listSelector="@color/nothing"
             android:overScrollMode="never"
-            android:scrollbars="none"/>
+            android:scrollbars="none" />
 
     </LinearLayout>
 

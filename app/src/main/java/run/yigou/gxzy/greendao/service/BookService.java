@@ -125,9 +125,10 @@ public class BookService extends BaseService<Book,BookDao> {
         Book book = null;
         try {
             QueryBuilder<Book> bookQueryBuilder = mQueryBuilder.whereOr(BookDao.Properties.Name.eq(bookName), BookDao.Properties.Author.eq(author)).orderAsc(BookDao.Properties.Name);
-            List<Book> bookList = bookQueryBuilder.list(); //查出当前对应的数据
-            if (bookList.size() == 1) {
-                book = bookList.get(0);
+            //List<Book> bookList = bookQueryBuilder.list();
+            // 查出当前对应的数据
+            if (bookQueryBuilder.count()>0 ) {
+                book = bookQueryBuilder.list().get(0);
             }
         } catch (Exception e) {
             e.printStackTrace();

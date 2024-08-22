@@ -138,6 +138,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                         }
                         else
                             bookNavList = new ArrayList<>();
+
                     }
                 });
     }

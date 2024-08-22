@@ -2,6 +2,7 @@ package run.yigou.gxzy.utils;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Objects;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,11 +10,22 @@ import java.util.regex.Pattern;
 
 public class StringHelper {
 
+    public static String substring(String str,String sub) {
+
+        int commaIndex = str.indexOf(sub);
+        if (commaIndex != -1) { // 检查逗号是否存在
+            return str.substring(commaIndex + 2); // 从逗号后面的位置开始截取字符串
+        }
+        return null;
+    }
+
     public static boolean isEmpty(CharSequence str) {
         return str == null || str.length() == 0;
     }
+
     /**
      * 是否是Emoji表情符
+     *
      * @param string
      * @return
      */
@@ -26,14 +38,15 @@ public class StringHelper {
 
     /**
      * 字符集编码
+     *
      * @param encoded
      * @return
      */
-    public static String encode(String encoded){
+    public static String encode(String encoded) {
         String res = encoded;
         try {
-            res = URLEncoder.encode(encoded,"UTF-8");
-        }catch (Exception e){
+            res = URLEncoder.encode(encoded, "UTF-8");
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return res;
@@ -41,14 +54,15 @@ public class StringHelper {
 
     /**
      * 字符集编码
+     *
      * @param encoded
      * @return
      */
-    public static String encode(String encoded, String charsetName){
+    public static String encode(String encoded, String charsetName) {
         String res = encoded;
         try {
-            res = URLEncoder.encode(encoded,charsetName);
-        }catch (Exception e){
+            res = URLEncoder.encode(encoded, charsetName);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return res;
@@ -56,15 +70,16 @@ public class StringHelper {
 
     /**
      * 字符集解码
+     *
      * @param decoded
      * @return
      */
 
-    public static String decode(String decoded, String charsetName){
+    public static String decode(String decoded, String charsetName) {
         String res = decoded;
         try {
-            res = URLDecoder.decode(decoded,charsetName);
-        }catch (Exception e){
+            res = URLDecoder.decode(decoded, charsetName);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return res;
@@ -72,15 +87,16 @@ public class StringHelper {
 
     /**
      * 字符集解码
+     *
      * @param decoded
      * @return
      */
 
-    public static String decode(String decoded){
+    public static String decode(String decoded) {
         String res = decoded;
         try {
-            res = URLDecoder.decode(decoded,"UTF-8");
-        }catch (Exception e){
+            res = URLDecoder.decode(decoded, "UTF-8");
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return res;
@@ -88,6 +104,7 @@ public class StringHelper {
 
     /**
      * 生成随机数字和字母
+     *
      * @param length 生成指定长度随机数
      * @return 返回随机数
      */
@@ -97,26 +114,26 @@ public class StringHelper {
         Random random = new Random();
 
         //参数length，表示生成几位随机数
-        for(int i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             String charOrNum = random.nextInt(2) % 2 == 0 ? "char" : "num";
             //输出字母还是数字
-            if( "char".equalsIgnoreCase(charOrNum) ) {
+            if ("char".equalsIgnoreCase(charOrNum)) {
                 //输出是大写字母还是小写字母
                 int temp = random.nextInt(2) % 2 == 0 ? 65 : 97;
-                val += (char)(random.nextInt(26) + temp);
-            } else if( "num".equalsIgnoreCase(charOrNum) ) {
+                val += (char) (random.nextInt(26) + temp);
+            } else if ("num".equalsIgnoreCase(charOrNum)) {
                 val += String.valueOf(random.nextInt(10));
             }
         }
         return val;
     }
 
-    public static String jidToUsername(String jid){
-        if(jid != null){
-            if(jid.contains("@")){
-                return  jid.substring(0,jid.indexOf("@"));
+    public static String jidToUsername(String jid) {
+        if (jid != null) {
+            if (jid.contains("@")) {
+                return jid.substring(0, jid.indexOf("@"));
 
-            }else {
+            } else {
                 return jid;
             }
         }
@@ -125,25 +142,33 @@ public class StringHelper {
 
     /**
      * 检查传入的字符串是否为空
+     *
      * @param str 待检查字符串
      * @return true 为空,false 不为空
      */
-    public static boolean isEmpty(String str){
-        if (str != null){
-            str = str.replace(" ","");
+    public static boolean isEmpty(String str) {
+        if (str != null) {
+            str = str.replace(" ", "");
         }
         return str == null || str.equals("");
     }
 
+    public static boolean isNotEquals(String str) {
+        if (str != null) {
+            str = str.replace(" ", "");
+        }
+        return !Objects.equals(str, "<p><br></p>");
+    }
 
     /**
      * 缩减字符串
+     *
      * @param strlocation
      * @param maxLength
      * @return
      */
-    public static String reduceString(String strlocation, int maxLength){
-        if(strlocation != null) {
+    public static String reduceString(String strlocation, int maxLength) {
+        if (strlocation != null) {
             String res = strlocation;
             if (strlocation.length() > maxLength) {
                 char[] tem = res.toCharArray();
@@ -151,21 +176,22 @@ public class StringHelper {
                 res += "...";
             }
             return res;
-        }else {
+        } else {
             return null;
         }
     }
 
     /**
      * 两字符串是否相等或者都为空
+     *
      * @param str1 字符串1
      * @param str2 字符串2
      * @return true 相等 ,false 不相等
      */
-    public static boolean isEquals(String str1, String str2){
-        if(isEmpty(str1) && isEmpty(str2)){
+    public static boolean isNotEquals(String str1, String str2) {
+        if (isEmpty(str1) && isEmpty(str2)) {
             return true;
-        }else return !isEmpty(str1) && !isEmpty(str2) && str1.equals(str2);
+        } else return !isEmpty(str1) && !isEmpty(str2) && str1.equals(str2);
     }
 
 }
