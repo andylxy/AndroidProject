@@ -707,8 +707,8 @@ public final class BookReadActivity extends AppActivity {
             height = dm.heightPixels;
         }
         //设置点击屏幕范围
-        settingOnClickValidFrom = height / 3 + 200;
-        settingOnClickValidTo = height / 3 * 2 - 100;
+        settingOnClickValidFrom = height / 5 * 2;
+        settingOnClickValidTo = height / 5 * 3;
         initReadViewOnClick();
     }
 

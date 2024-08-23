@@ -71,24 +71,16 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
         private View mVwSectionDividerLine;
 
         private View mHorizontalline;
-
-
         private ViewHolder() {
             super(R.layout.book_chapter_content_item);
-
             tvTitle = findViewById(R.id.tv_title);
             mTvTitleContent = findViewById(R.id.tv_title_content);
             tvContent = findViewById(R.id.tv_content);
-
             tvErrorTips = findViewById(R.id.tv_loading_error_tips);
-
             mTvFangJi = findViewById(R.id.tv_FangJi);
             mTvFangJiZhujie = findViewById(R.id.tv_FangJiZhujie);
-
             mTvVideoTitle = findViewById(R.id.tv_video_title);
             mTvVideoContent = findViewById(R.id.tv_video_content);
-
-
             mTvSectionContentTitle = findViewById(R.id.tv_section_content_title);
             mTvSectionTitleNo = findViewById(R.id.tv_section_title_no);
             mTvSectionContent = findViewById(R.id.tv_section_content);
@@ -144,7 +136,7 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
                 tvTitle.setTypeface(mTypeFace);
                 mTvFangJi.setTypeface(mTypeFace);
                 mTvFangJiZhujie.setTypeface(mTypeFace);
-                // mTvVideoTitle.setTypeface(mTypeFace);
+                 mTvVideoTitle.setTypeface(mTypeFace);
                 mTvVideoContent.setTypeface(mTypeFace);
                 mTvTitleContent.setTypeface(mTypeFace);
                 tvErrorTips.setVisibility(View.GONE);
@@ -155,15 +147,15 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
                     tvContent.setTextColor(getContext().getResources().getColor(SysManager.getSetting().getReadWordColor()));
                     mTvFangJi.setTextColor(getContext().getResources().getColor(SysManager.getSetting().getReadWordColor()));
                     mTvFangJiZhujie.setTextColor(getContext().getResources().getColor(SysManager.getSetting().getReadWordColor()));
-                    //  mTvVideoTitle.setTextColor(getContext().getResources().getColor(SysManager.getSetting().getReadWordColor()));
+                      mTvVideoTitle.setTextColor(getContext().getResources().getColor(SysManager.getSetting().getReadWordColor()));
                     mTvVideoContent.setTextColor(getContext().getResources().getColor(SysManager.getSetting().getReadWordColor()));
-                    //  mTvTitleContent.setTextColor(getContext().getResources().getColor(SysManager.getSetting().getReadWordColor()));
+                    // mTvTitleContent.setTextColor(getContext().getResources().getColor(SysManager.getSetting().getReadWordColor()));
                 } else {
                     tvTitle.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
                     tvContent.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
                     mTvFangJi.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
                     mTvFangJiZhujie.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
-                    //  mTvVideoTitle.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
+                     mTvVideoTitle.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
                     mTvVideoContent.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
                     //  mTvTitleContent.setTextColor(getContext().getResources().getColor(R.color.sys_night_word));
                 }
@@ -171,7 +163,7 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
                 tvContent.setTextSize(SysManager.getSetting().getReadWordSize());
                 mTvFangJi.setTextSize(SysManager.getSetting().getReadWordSize());
                 mTvFangJiZhujie.setTextSize(SysManager.getSetting().getReadWordSize());
-                //mTvVideoTitle.setTextSize(SysManager.getSetting().getReadWordSize() );
+                mTvVideoTitle.setTextSize(SysManager.getSetting().getReadWordSize() +1);
                 mTvVideoContent.setTextSize(SysManager.getSetting().getReadWordSize());
                 mTvTitleContent.setTextSize(SysManager.getSetting().getReadWordSize());
             } else {
@@ -312,6 +304,7 @@ public final class BookReadContenAdapter extends AppAdapter<Chapter> {
                         mTvVideoContent.setVisibility(View.GONE);
                         mTvVideoTitle.setVisibility(View.GONE);
                     }
+                    mTvVideoTitle.setVisibility(View.GONE);
                 }
 
             } else {
