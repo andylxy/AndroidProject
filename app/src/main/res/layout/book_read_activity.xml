@@ -31,7 +31,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:divider="@color/nothing"
-                    android:dividerHeight="30dp"
+                    android:dividerHeight="@dimen/dp_2"
                     android:fadingEdge="none"
                     android:listSelector="@color/nothing"
                     android:overScrollMode="never" />

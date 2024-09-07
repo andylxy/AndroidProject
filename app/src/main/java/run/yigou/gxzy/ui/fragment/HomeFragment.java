@@ -30,6 +30,8 @@ import com.hjq.http.listener.HttpCallback;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppFragment;
@@ -132,7 +134,10 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                         if (data.getData().size() > 0){
                             bookNavList = data.getData();
                             for (BookInfoNav.Bean nav :bookNavList){
-                                mPagerAdapter.addFragment(BookInfoFragment.newInstance(nav.getNavList()), nav.getName());
+//                                if (Objects.equals(nav.getName(), "伤寒"))
+//                                    mPagerAdapter.addFragment(TipsWindowFragment.newInstance());
+//                                else
+                                    mPagerAdapter.addFragment(BookInfoFragment.newInstance(nav.getNavList()), nav.getName());
                                 mTabAdapter.addItem(nav.getName());
                             }
                         }

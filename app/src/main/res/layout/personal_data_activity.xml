@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         app:leftIcon="@null"
         app:title="@string/personal_data_title" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -66,5 +67,17 @@
         app:bar_leftText="@string/setting_title"
         app:bar_rightDrawable="@drawable/arrows_right_ic"
         />
+
+        <TextView
+            android:id="@+id/test_btn"
+            android:layout_margin="@dimen/sp_8"
+            android:padding="@dimen/dp_1"
+            android:textSize="@dimen/sp_18"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_10"
+            android:background="@color/white"
+            android:text="测试弹窗" />
     </LinearLayout>
+
 </LinearLayout>

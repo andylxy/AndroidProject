@@ -5,6 +5,7 @@ import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
@@ -13,6 +14,7 @@ import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.http.model.FileContentResolver;
 import com.hjq.widget.layout.SettingBar;
+import com.lxj.xpopup.XPopup;
 
 import java.io.File;
 import java.net.URI;
@@ -34,6 +36,8 @@ import run.yigou.gxzy.ui.activity.LoginActivity;
 import run.yigou.gxzy.ui.activity.SettingActivity;
 import run.yigou.gxzy.ui.dialog.AddressDialog;
 import run.yigou.gxzy.ui.dialog.InputDialog;
+import run.yigou.gxzy.ui.tips.CustomBubbleAttachPopup;
+import run.yigou.gxzy.ui.tips.TipsWindow;
 
 /**
  *    author : Android 轮子哥
@@ -52,6 +56,8 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
     private SettingBar mNameView;
     private SettingBar mAddressView;
     private SettingBar mPersonDataSetting;
+
+    private TextView mTest_btn;
 
 
     /** 省 */
@@ -81,7 +87,8 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         mNameView = findViewById(R.id.sb_person_data_name);
         mAddressView = findViewById(R.id.sb_person_data_address);
         mPersonDataSetting = findViewById(R.id.sb_person_data_setting);
-        setOnClickListener(mAvatarLayout, mAvatarView, mNameView, mAddressView,mPersonDataSetting);
+        mTest_btn = findViewById(R.id.test_btn);
+        setOnClickListener(mAvatarLayout, mAvatarView, mNameView, mAddressView,mPersonDataSetting,mTest_btn);
     }
 
     @Override
@@ -118,7 +125,7 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
     @SingleClick
     @Override
     public void onClick(View view) {
-        if (isLogin()) return;
+      //  if (isLogin()) return;
         if (view == mAvatarLayout) {
             ImageSelectActivity.start(getAttachActivity(), data -> {
                 // 裁剪头像
@@ -172,6 +179,15 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         else if (view == mPersonDataSetting) {
             startActivity(SettingActivity.class);
         }
+//        else if (view == mTest_btn) {
+//            new XPopup.Builder(getContext())
+//                    .isTouchThrough(true)
+//                    .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
+//                    .atView(mTest_btn)
+//                    .hasShadowBg(false) // 去掉半透明背景
+//                    .asCustom(new CustomBubbleAttachPopup(getContext()))
+//                    .show();
+//        }
     }
     /**
      *     登陆

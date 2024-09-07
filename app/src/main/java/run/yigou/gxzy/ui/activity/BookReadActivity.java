@@ -67,7 +67,7 @@ import run.yigou.gxzy.utils.StringHelper;
  * 描述:
  */
 public final class BookReadActivity extends AppActivity {
-    private static final String Book_KEY_IN = "book";
+  //  private static final String Book_KEY_IN = "book";
     private Setting mSetting;
 
     /**
@@ -134,63 +134,63 @@ public final class BookReadActivity extends AppActivity {
     private BookService mBookService;
     private ChapterService mChapterService;
     private ArrayList<Chapter> mChapters = new ArrayList<>();
-    @SuppressLint("HandlerLeak")
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 0:
-                    //设置背景
-                    SetDayStyle();
-                    break;
-                case 1:
-                    //SetDayStyle();
-                    initViewData();
-                    break;
-                case 2:
-                    mPbLoading.setVisibility(View.GONE);
-                    mSrlContent.finishLoadMore();
-                    break;
-                case 3:
-                    int position = msg.arg1;
-                    mRvContent.scrollToPosition(position);
-//                    if (position >= mChapters.size() - 1) {
+    //   @SuppressLint("HandlerLeak")
+//    private Handler mHandler = new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            switch (msg.what) {
+//                case 0:
+//                    //设置背景
+//                    SetDayStyle();
+//                    break;
+//                case 1:
+//                    //SetDayStyle();
+//                    initViewData();
+//                    break;
+//                case 2:
+//                    mPbLoading.setVisibility(View.GONE);
+//                    mSrlContent.finishLoadMore();
+//                    break;
+//                case 3:
+//                    int position = msg.arg1;
+//                    mRvContent.scrollToPosition(position);
+////                    if (position >= mChapters.size() - 1) {
+////                        delayTurnToChapter(position);
+////                    }
+//                    mPbLoading.setVisibility(View.GONE);
+//                    break;
+//                case 4:
+//                    position = msg.arg1;
+//                    mRvContent.scrollToPosition(position);
+//                    if (mBook.getHisttoryChapterNum() < position) {
 //                        delayTurnToChapter(position);
 //                    }
-                    mPbLoading.setVisibility(View.GONE);
-                    break;
-                case 4:
-                    position = msg.arg1;
-                    mRvContent.scrollToPosition(position);
-                    if (mBook.getHisttoryChapterNum() < position) {
-                        delayTurnToChapter(position);
-                    }
-                    mPbLoading.setVisibility(View.GONE);
-                    break;
-                case 5:
-                    saveLastChapterReadPosition(msg.arg1);
-                    break;
-                case 6:
-                    mRvContent.scrollBy(0, mBook.getLastReadPosition());
-                    mBook.setLastReadPosition(0);
-                    if (!StringHelper.isEmpty(mBook.getId())) {
-                        mBookService.updateEntity(mBook);
-                    }
-                    break;
-                case 7:
-                    if (mLinearLayoutManager != null) {
-                        mRvContent.scrollBy(0, 2);
-                    }
-                    break;
-                case 8:
-                    showSettingView();
-                    break;
-                case 9:
-                    //updateDownloadProgress((TextView) msg.obj);
-                    break;
-            }
-        }
-    };
+//                    mPbLoading.setVisibility(View.GONE);
+//                    break;
+//                case 5:
+//                    saveLastChapterReadPosition(msg.arg1);
+//                    break;
+//                case 6:
+//                    mRvContent.scrollBy(0, mBook.getLastReadPosition());
+//                    mBook.setLastReadPosition(0);
+//                    if (!StringHelper.isEmpty(mBook.getId())) {
+//                        mBookService.updateEntity(mBook);
+//                    }
+//                    break;
+//                case 7:
+//                    if (mLinearLayoutManager != null) {
+//                        mRvContent.scrollBy(0, 2);
+//                    }
+//                    break;
+//                case 8:
+//                    showSettingView();
+//                    break;
+//                case 9:
+//                    //updateDownloadProgress((TextView) msg.obj);
+//                    break;
+//            }
+//        }
+//    };
 
     public static void start(Context context, Book item) {
         Intent intent = new Intent(context, BookReadActivity.class);
@@ -408,7 +408,7 @@ public final class BookReadActivity extends AppActivity {
                         Intent intent = new Intent(getActivity(), FontsActivity.class);
                         startActivityForResult(intent, APPCONST.REQUEST_FONT);
                     }, v -> {
-                        autoScroll();
+                        //autoScroll();
                         mSettingDetailDialog.dismiss();
                     });
         }
@@ -489,37 +489,37 @@ public final class BookReadActivity extends AppActivity {
         SetDayStyle();
     }
 
-    /**
-     * 自动滚动
-     */
-    private void autoScroll() {
-        autoScrollOpening = true;
-//        new Thread(() -> {
+//    /**
+//     * 自动滚动
+//     */
+//    private void autoScroll() {
+//        autoScrollOpening = true;
+////        new Thread(() -> {
+////            while (autoScrollOpening) {
+////                try {
+////                    Thread.sleep(mSetting.getAutoScrollSpeed() + 1);
+////                } catch (InterruptedException e) {
+////                    e.printStackTrace();
+////                }
+////                mHandler.sendMessage(mHandler.obtainMessage(7));
+////
+////            }
+////        }).start();
+//
+//        postDelayed(() -> {
 //            while (autoScrollOpening) {
 //                try {
 //                    Thread.sleep(mSetting.getAutoScrollSpeed() + 1);
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
 //                }
-//                mHandler.sendMessage(mHandler.obtainMessage(7));
-//
+//                // mHandler.sendMessage(mHandler.obtainMessage(7));
+//                if (mLinearLayoutManager != null) {
+//                    mRvContent.scrollBy(0, 2);
+//                }
 //            }
-//        }).start();
-
-        postDelayed(() -> {
-            while (autoScrollOpening) {
-                try {
-                    Thread.sleep(mSetting.getAutoScrollSpeed() + 1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                // mHandler.sendMessage(mHandler.obtainMessage(7));
-                if (mLinearLayoutManager != null) {
-                    mRvContent.scrollBy(0, 2);
-                }
-            }
-        }, 50);
-    }
+//        }, 50);
+//    }
 
     /**
      * 初始化阅读界面点击事件
@@ -544,45 +544,31 @@ public final class BookReadActivity extends AppActivity {
                 //点击位置为屏幕中间,显示菜单窗口
                 if (pointY > settingOnClickValidFrom && pointY < settingOnClickValidTo) {
                     autoScrollOpening = false;
-                    //首次点击时间
-                    long curOnClickTime = DateHelper.getLongDate();
-                    //两次点击间隔时间少于200,侧自动滚屏
-                    if (curOnClickTime - lastOnClickTime < doubleOnClickConfirmTime) {
-                        autoScroll();
-                    } else {
-                        //显示菜单窗口
-//                        new Thread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                try {
-//                                    Thread.sleep(doubleOnClickConfirmTime);
-//                                } catch (InterruptedException e) {
-//                                    e.printStackTrace();
-//                                }
-//                                if (!autoScrollOpening) {
-//                                    mHandler.sendMessage(mHandler.obtainMessage(8));
-//                                }
-//
+//                    //首次点击时间
+//                    long curOnClickTime = DateHelper.getLongDate();
+//                    //两次点击间隔时间少于200,侧自动滚屏
+//                    if (curOnClickTime - lastOnClickTime < doubleOnClickConfirmTime) {
+//                        autoScroll();
+//                    } else {
+//                        //显示菜单窗口
+//                        postDelayed(() -> {
+//                            try {
+//                                Thread.sleep(doubleOnClickConfirmTime);
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
 //                            }
-//                        }).start();
+//                            if (!autoScrollOpening) {
+//                                //mHandler.sendMessage(mHandler.obtainMessage(8));
+//                                if (!isSearch)
+//                                    showSettingView();}
+//                        }, 300);
+//                    }
+//                    //记录首次击点时间
+//                    lastOnClickTime = curOnClickTime;
+                    postDelayed(() -> {
+                            if (!isSearch)  showSettingView();},
+                            300);
 
-                        postDelayed(() -> {
-                            try {
-                                Thread.sleep(doubleOnClickConfirmTime);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            if (!autoScrollOpening) {
-                                //mHandler.sendMessage(mHandler.obtainMessage(8));
-                                if (!isSearch)
-                                    showSettingView();
-                            }
-                        }, 300);
-
-
-                    }
-                    //记录首次击点时间
-                    lastOnClickTime = curOnClickTime;
                 } else if (pointY > settingOnClickValidTo) {
                     //下一章
                     if (firstVisibleItemPosition < lastVisibleItemPosition) {
