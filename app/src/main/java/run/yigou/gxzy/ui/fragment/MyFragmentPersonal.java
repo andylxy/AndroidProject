@@ -16,6 +16,7 @@ import com.hjq.http.model.FileContentResolver;
 import com.hjq.widget.layout.SettingBar;
 import com.lxj.xpopup.XPopup;
 
+
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -179,15 +180,15 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         else if (view == mPersonDataSetting) {
             startActivity(SettingActivity.class);
         }
-//        else if (view == mTest_btn) {
-//            new XPopup.Builder(getContext())
-//                    .isTouchThrough(true)
-//                    .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
-//                    .atView(mTest_btn)
-//                    .hasShadowBg(false) // 去掉半透明背景
-//                    .asCustom(new CustomBubbleAttachPopup(getContext()))
-//                    .show();
-//        }
+        else if (view == mTest_btn) {
+            new XPopup.Builder(getContext())
+                    .isTouchThrough(true)
+                    .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
+                    .atView(mTest_btn)
+                    .hasShadowBg(false) // 去掉半透明背景
+                    .asCustom(new CustomBubbleAttachPopup(getContext()))
+                    .show();
+        }
     }
     /**
      *     登陆

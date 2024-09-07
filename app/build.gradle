@@ -174,6 +174,7 @@ dependencies {
     // 图片加载框架：https://github.com/bumptech/glide
     // 官方使用文档：https://github.com/Muyangmin/glide-docs-cn
     implementation 'com.github.bumptech.glide:glide:4.12.0'
+    implementation project(':library:xpopup')
 
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
 
@@ -212,7 +213,7 @@ dependencies {
 //    标签
     implementation 'me.gujun.android.taggroup:library:1.4@aar'
 
-    implementation 'com.github.li-xiaojun:XPopup:2.10.0'
+   // implementation 'com.github.li-xiaojun:XPopup:2.10.0'
 
     // 多语种：https://github.com/getActivity/MultiLanguages
     // 悬浮窗：https://github.com/getActivity/XToast
