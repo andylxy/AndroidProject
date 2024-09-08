@@ -134,9 +134,9 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                         if (data.getData().size() > 0){
                             bookNavList = data.getData();
                             for (BookInfoNav.Bean nav :bookNavList){
-//                                if (Objects.equals(nav.getName(), "伤寒"))
-//                                    mPagerAdapter.addFragment(TipsWindowFragment.newInstance());
-//                                else
+                                if (Objects.equals(nav.getName(), "伤寒"))
+                                    mPagerAdapter.addFragment(TipsWindowFragment.newInstance());
+                                else
                                     mPagerAdapter.addFragment(BookInfoFragment.newInstance(nav.getNavList()), nav.getName());
                                 mTabAdapter.addItem(nav.getName());
                             }

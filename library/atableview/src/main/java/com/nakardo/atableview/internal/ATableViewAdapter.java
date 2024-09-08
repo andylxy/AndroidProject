@@ -3,6 +3,7 @@ package com.nakardo.atableview.internal;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
@@ -223,7 +224,7 @@ public class ATableViewAdapter extends BaseAdapter {
 		
 		// closes #12, use table width instead cell since sometimes returns zero for WRAP_CONTENT height cells.
 		int widthMeasureSpec = MeasureSpec.makeMeasureSpec(mTableView.getWidth(), MeasureSpec.EXACTLY);
-		int heightMeasureSpec = MeasureSpec.makeMeasureSpec(AbsListView.LayoutParams.WRAP_CONTENT, MeasureSpec.EXACTLY);
+		@SuppressLint("Range") int heightMeasureSpec = MeasureSpec.makeMeasureSpec(AbsListView.LayoutParams.WRAP_CONTENT, MeasureSpec.EXACTLY);
 		cell.measure(widthMeasureSpec, heightMeasureSpec);
 		
 		// add measured height to cache, so we don't have to recalculate every time.

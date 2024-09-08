@@ -38,7 +38,6 @@ import run.yigou.gxzy.ui.activity.SettingActivity;
 import run.yigou.gxzy.ui.dialog.AddressDialog;
 import run.yigou.gxzy.ui.dialog.InputDialog;
 import run.yigou.gxzy.ui.tips.CustomBubbleAttachPopup;
-import run.yigou.gxzy.ui.tips.TipsWindow;
 
 /**
  *    author : Android 轮子哥
@@ -126,7 +125,7 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
     @SingleClick
     @Override
     public void onClick(View view) {
-      //  if (isLogin()) return;
+        //if (isLogin()) return;
         if (view == mAvatarLayout) {
             ImageSelectActivity.start(getAttachActivity(), data -> {
                 // 裁剪头像
@@ -180,15 +179,17 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         else if (view == mPersonDataSetting) {
             startActivity(SettingActivity.class);
         }
+
         else if (view == mTest_btn) {
             new XPopup.Builder(getContext())
-                    .isTouchThrough(true)
+                    //.isTouchThrough(true)
                     .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
                     .atView(mTest_btn)
                     .hasShadowBg(false) // 去掉半透明背景
                     .asCustom(new CustomBubbleAttachPopup(getContext()))
                     .show();
         }
+
     }
     /**
      *     登陆

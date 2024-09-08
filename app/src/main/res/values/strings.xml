@@ -261,6 +261,10 @@
     <string name="book_data_title_dic">章节目录</string>
     <string name="book_data_content">阅读内容</string>
 
+    <string name="tips_book_data_title">提示书本信息</string>
+    <string name="tips_book_data_title_dic">章节目录</string>
+    <string name="tips_book_data_content">提示阅读内容</string>
+
     <string name="day">白天</string>
     <string name="night">夜间</string>
     <string name="chapter_list">【目录】</string>

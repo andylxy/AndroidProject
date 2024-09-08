@@ -29,6 +29,7 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.ui.activity.BookInfoActivity;
+import run.yigou.gxzy.ui.activity.TipsBookInfoActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
 
 /**
@@ -116,7 +117,7 @@ public final class TipsWindowFragment extends TitleBarFragment<AppActivity>
 
         //启动跳转
         //toast(mAdapter.getItem(position));
-        BookInfoActivity.start(getAttachActivity(),mAdapter.getItem(position) );
+        TipsBookInfoActivity.start(getAttachActivity(),mAdapter.getItem(position) );
 
     }
 

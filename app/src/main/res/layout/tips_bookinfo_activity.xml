@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true">
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:id="@+id/titlebarwrapper"
+        android:layout_width="match_parent"
+        android:layout_height="44dp">
+        <Button
+            android:textSize="16sp"
+            android:textColor="#ffffff"
+            android:id="@+id/selectbtn"
+            android:background="#000000"
+            android:layout_width="42dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="-4dp"
+            android:text="选择"
+            android:layout_alignParentRight="true"/>
+        <FrameLayout
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal"
+            android:id="@+id/titlebar"
+            android:background="#000000"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:layout_toLeftOf="@+id/selectbtn"
+            android:layout_alignParentLeft="true">
+
+            <com.hjq.widget.view.ClearEditText
+                android:id="@+id/et_search_key"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/dp_8"
+                android:background="@drawable/search_et_backcolor"
+                android:hint="输入搜索词或数字以定位到该条"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:paddingLeft="0dp"
+                android:paddingRight="9dp"
+                android:textSize="15sp"
+                tools:ignore="TouchTargetSizeCheck" />
+        </FrameLayout>
+    </RelativeLayout>
+
+
+</RelativeLayout>
