@@ -48,7 +48,7 @@ public class TipsWindow_BubbleAttachPopup extends BubbleAttachPopupView {
     protected void onCreate() {
         super.onCreate();
         setBubbleShadowSize(XPopupUtils.dp2px(getContext(), 2));
-        setBubbleShadowColor(Color.RED);
+        //setBubbleShadowColor(Color.RED);
         setArrowWidth(XPopupUtils.dp2px(getContext(), 5f));
         setArrowHeight(XPopupUtils.dp2px(getContext(), 8f));
 //                                .setBubbleRadius(100)
@@ -66,9 +66,9 @@ public class TipsWindow_BubbleAttachPopup extends BubbleAttachPopupView {
             @Override
             public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
                                       int groupPosition) {
-                Toast.makeText(mContext, "组头：groupPosition = " + groupPosition,
-                        Toast.LENGTH_LONG).show();
-                Log.e("eee", adapter.toString() + "  " + holder.toString());
+//                Toast.makeText(mContext, "组头：groupPosition = " + groupPosition,
+//                        Toast.LENGTH_LONG).show();
+//                Log.e("eee", adapter.toString() + "  " + holder.toString());
             }
         });
 
@@ -76,9 +76,9 @@ public class TipsWindow_BubbleAttachPopup extends BubbleAttachPopupView {
             @Override
             public void onChildClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
                                      int groupPosition, int childPosition) {
-                Toast.makeText(mContext, "子项：groupPosition = " + groupPosition
-                                + ", childPosition = " + childPosition,
-                        Toast.LENGTH_LONG).show();
+//                Toast.makeText(mContext, "子项：groupPosition = " + groupPosition
+//                                + ", childPosition = " + childPosition,
+//                        Toast.LENGTH_LONG).show();
             }
         });
         rvList.setAdapter(adapter);

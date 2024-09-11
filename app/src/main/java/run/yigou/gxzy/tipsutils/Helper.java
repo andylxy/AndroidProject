@@ -232,9 +232,9 @@ public class Helper {
 //                }
                 new XPopup.Builder(textView.getContext())
                         .isTouchThrough(true)
-                         .positionByWindowCenter(true)
+                        .positionByWindowCenter(true)
                         .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
-                         .isViewMode(true)
+                        .isViewMode(true)
                         .atView(textView)
                         //.offsetX((int) org_event.getRawX())
                        // .offsetY((int) org_event.getRawY())

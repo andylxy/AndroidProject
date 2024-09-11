@@ -196,7 +196,7 @@
     <color name="sys_common_bg">#f5f4f0</color>
     <color name="sys_common_word">#313031</color>
 
-    <!--<color name="sys_leather_eye_bg">#ceebce</color>-->
+    <color name="sys_leather_eye_bg">#ceebce</color>
     <color name="sys_leather_word">#313031</color>
 
     <color name="sys_blue_deep_bg">#001c29</color>
