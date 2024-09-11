@@ -9,7 +9,6 @@ import run.yigou.gxzy.tipsutils.Helper;
 import run.yigou.gxzy.tipsutils.SingletonData;
 
 
-/* loaded from: classes.dex */
 public class Fang extends DataItem {
     float drinkNum;
     List<YaoUse> extraYaoList;
@@ -29,9 +28,9 @@ public class Fang extends DataItem {
         if (this.helpYaoList == null) {
             this.helpYaoList = new LinkedList();
         }
-        Helper.IBool<YaoUse> iBool = new Helper.IBool<YaoUse>() { // from class: DataBeans.Fang.1
-            @Override // me.huanghai.searchController.Helper.IBool
-            public boolean isOK(YaoUse yaoUse) {
+        Helper.Condition<YaoUse> iBool = new Helper.Condition<YaoUse>() {
+            @Override
+            public boolean test(YaoUse yaoUse) {
                 return Fang.this.isYaoEqual(yaoUse.showName, str);
             }
         };
@@ -118,8 +117,7 @@ public class Fang extends DataItem {
         return str2 == null ? str : str2;
     }
 
-    /* JADX INFO: Access modifiers changed from: package-private */
-    /* loaded from: classes.dex */
+
     public class YaoUse {
         int YaoID;
         String amount;

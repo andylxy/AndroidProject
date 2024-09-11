@@ -3,6 +3,7 @@ package run.yigou.gxzy.tipsutils;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.View;
@@ -233,21 +234,27 @@ public class SingletonData {
     }
 
     private SingletonData() {
+        // 默认初始化设置
         this.showShanghan = 1;
         this.showJinkui = 1;
-        SharedPreferences sharedPreferences =AppApplication.application.getSharedPreferences("shanghan3.1", 0);
+
+        // 从 SharedPreferences 中读取设置值
+        SharedPreferences sharedPreferences = AppApplication.application.getSharedPreferences("shanghan3.1", Context.MODE_PRIVATE);
         this.showShanghan = sharedPreferences.getInt("showShanghan", 1);
         this.showJinkui = sharedPreferences.getInt("showJinkui", 1);
+
+        // 初始化别名映射
         initAlias();
+
+        // 重新读取数据
         reReadData();
-        this.allFang = new ArrayList();
-        Iterator<HH2SectionData> it = this.fang.iterator();
-        while (it.hasNext()) {
-            List<? extends DataItem> data2 = it.next().getData();
-            Log.e("-d->", data2.get(0).toString());
-            Iterator<? extends DataItem> it2 = data2.iterator();
-            while (it2.hasNext()) {
-                String str = it2.next().getFangList().get(0);
+
+        // 初始化并填充 allFang 列表
+        this.allFang = new ArrayList<>();
+        for (HH2SectionData section : this.fang) {
+            for (DataItem item : section.getData()) {
+                String str = item.getFangList().get(0);
+                // 如果有别名映射，则替换
                 String str2 = this.fangAliasDict.get(str);
                 if (str2 != null) {
                     str = str2;
@@ -255,16 +262,19 @@ public class SingletonData {
                 this.allFang.add(str);
             }
         }
+
+        // 读取药物数据文件并解析
         String readFile = FucUtil.readFile(AppApplication.application, "yao.json");
         this.yaoData = new ArrayList<>();
-        this.yaoData.add(new HH2SectionData((List) this.gson.fromJson(readFile, new TypeToken<List<Yao>>() { // from class: me.huanghai.searchController.SingletonData.3
-        }.getType()), 0, "伤寒金匮所有药物"));
-        this.allYao = new ArrayList();
-        Iterator<HH2SectionData> it3 = this.yaoData.iterator();
-        while (it3.hasNext()) {
-            Iterator<? extends DataItem> it4 = it3.next().getData().iterator();
-            while (it4.hasNext()) {
-                String str3 = it4.next().getYaoList().get(0);
+        List<Yao> yaos = this.gson.fromJson(readFile, new TypeToken<List<Yao>>() {}.getType());
+        this.yaoData.add(new HH2SectionData(yaos, 0, "伤寒金匮所有药物"));
+
+        // 初始化并填充 allYao 列表
+        this.allYao = new ArrayList<>();
+        for (HH2SectionData section : this.yaoData) {
+            for (DataItem item : section.getData()) {
+                String str3 = item.getYaoList().get(0);
+                // 如果有别名映射，则替换
                 String str4 = this.yaoAliasDict.get(str3);
                 if (str4 != null) {
                     str3 = str4;
@@ -279,70 +289,66 @@ public class SingletonData {
         reReadFang();
     }
 
-//    public void reReadData(final Activity activity) {
-//        final ProgressBar showProgressBar = Helper.showProgressBar(activity);
-//        new Thread(new Runnable() { // from class: me.huanghai.searchController.SingletonData.4
-//            @Override // java.lang.Runnable
-//            public void run() {
-//                SingletonData.this.reReadData();
-//                activity.runOnUiThread(new Runnable() { // from class: me.huanghai.searchController.SingletonData.4.1
-//                    @Override // java.lang.Runnable
-//                    public void run() {
-//                        Helper.removeFormWindow(activity, showProgressBar);
-//                        for (Fragment fragment : TabController.fragments) {
-//                            if (fragment instanceof MainFragment) {
-//                                ((MainFragment) fragment).resetData(SingletonData.getInstance().getContent());
-//                            } else if (fragment instanceof FangFragment) {
-//                                ((FangFragment) fragment).resetData(SingletonData.getInstance().getFang());
-//                            }
-//                        }
-//                    }
-//                });
-//            }
-//        }).start();
-//    }
-
     public void reReadContent() {
+        // 清空当前内容
         this.content = null;
-        String readFile = FucUtil.readFile(AppApplication.application, "shangHan_data.json");
+
+        // 读取伤寒数据文件
+        String shangHanFile = FucUtil.readFile(AppApplication.application, "shangHan_data.json");
         this.content = new ArrayList<>();
+
+        // 处理伤寒数据
         if (this.showShanghan != 0) {
-            List list = (List) this.gson.fromJson(readFile, new TypeToken<List<HH2SectionData>>() { // from class: me.huanghai.searchController.SingletonData.5
-            }.getType());
-            if (this.showShanghan == 1) {
-                list = list.subList(8, 18);
-            }
-            this.content.addAll(list);
+            List<HH2SectionData> shangHanList = this.gson.fromJson(shangHanFile, new TypeToken<List<HH2SectionData>>() {}.getType());
+            //todo 是否要显示伤害全部内容
+//            if (this.showShanghan == 1) {
+//                shangHanList = shangHanList.subList(8, 18); // 根据显示设置截取列表
+//            }
+            this.content.addAll(shangHanList);
         }
+
+        // 读取金匮数据文件
         if (this.showJinkui != 0) {
-            this.content.addAll((List) this.gson.fromJson(FucUtil.readFile(AppApplication.application, "jinKui_data.json"), new TypeToken<List<HH2SectionData>>() { // from class: me.huanghai.searchController.SingletonData.6
-            }.getType()));
+            String jinKuiFile = FucUtil.readFile(AppApplication.application, "jinKui_data.json");
+            List<HH2SectionData> jinKuiList = this.gson.fromJson(jinKuiFile, new TypeToken<List<HH2SectionData>>() {}.getType());
+            this.content.addAll(jinKuiList);
         }
-        Iterator<HH2SectionData> it = this.content.iterator();
-        while (it.hasNext()) {
-            HH2SectionData next = it.next();
-            List<? extends DataItem> data2 = next.getData();
-            for (int i = 0; i < data2.size(); i++) {
-                data2.get(i).setIndexPath(NSIndexPath.indexPathForRowInSection(i, next.getSection()));
-            }
-        }
+
+//        // 设置每个数据项的索引路径
+//        for (HH2SectionData sectionData : this.content) {
+//            List<? extends DataItem> dataItems = sectionData.getData();
+//            for (int i = 0; i < dataItems.size(); i++) {
+//                dataItems.get(i).setIndexPath(NSIndexPath.indexPathForRowInSection(i, sectionData.getSection()));
+//            }
+//        }
     }
+
 
     public void reReadFang() {
+        // 初始化fang列表
         this.fang = new ArrayList<>();
-        this.fang.add(new HH2SectionData((List) this.gson.fromJson(FucUtil.readFile(AppApplication.application, "shangHan_fang.json"), new TypeToken<List<Fang>>() { // from class: me.huanghai.searchController.SingletonData.7
-        }.getType()), 0, "伤寒论方"));
+
+        // 读取伤寒方数据并添加到fang列表
+        String shangHanFangFile = FucUtil.readFile(AppApplication.application, "shangHan_fang.json");
+        List<Fang> shangHanFangList = this.gson.fromJson(shangHanFangFile, new TypeToken<List<Fang>>() {}.getType());
+        this.fang.add(new HH2SectionData(shangHanFangList, 0, "伤寒论方"));
+
+        // 根据设置读取金匮方数据并添加到fang列表
         if (this.showJinkui != 0) {
-            this.fang.add(new HH2SectionData((List) this.gson.fromJson(FucUtil.readFile(AppApplication.application, "jinKui_fang.json"), new TypeToken<List<Fang>>() { // from class: me.huanghai.searchController.SingletonData.8
-            }.getType()), 1, "金匮要略方"));
+            String jinKuiFangFile = FucUtil.readFile(AppApplication.application, "jinKui_fang.json");
+            List<Fang> jinKuiFangList = this.gson.fromJson(jinKuiFangFile, new TypeToken<List<Fang>>() {}.getType());
+            this.fang.add(new HH2SectionData(jinKuiFangList, 1, "金匮要略方"));
         }
-        for (int i = 0; i < this.content.size(); i++) {
-            List<? extends DataItem> data2 = this.content.get(i).getData();
-            for (int i2 = 0; i2 < data2.size(); i2++) {
-                data2.get(i2).setIndexPath(NSIndexPath.indexPathForRowInSection(i2, i));
+
+        // 设置内容中每个数据项的索引路径
+        for (int sectionIndex = 0; sectionIndex < this.content.size(); sectionIndex++) {
+            List<? extends DataItem> dataItems = this.content.get(sectionIndex).getData();
+            for (int itemIndex = 0; itemIndex < dataItems.size(); itemIndex++) {
+                dataItems.get(itemIndex).setIndexPath(NSIndexPath.indexPathForRowInSection(itemIndex, sectionIndex));
             }
         }
     }
+
 
     public static SingletonData getInstance() {
         if (data == null) {

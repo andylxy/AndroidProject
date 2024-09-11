@@ -3,26 +3,18 @@ package run.yigou.gxzy.ui.tips;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.SpannableStringBuilder;
-import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
-import com.lxj.xpopup.XPopup;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.tipsutils.DataBeans.LocalLinkMovementMethod;
 import run.yigou.gxzy.tipsutils.Helper;
-import run.yigou.gxzy.tipsutils.SingletonData;
-import run.yigou.gxzy.ui.tips.widget.BubblePopupView;
 
 /**
  * 可展开收起的Adapter。他跟普通的{/@link GroupedListAdapter}基本是一样的。
@@ -87,7 +79,10 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
     @Override
     public void onBindHeaderViewHolder(BaseViewHolder holder, int groupPosition) {
         ExpandableGroupEntity entity = mGroups.get(groupPosition);
-        holder.setText(R.id.tv_expandable_header, entity.getHeader());
+        //holder.setText(R.id.tv_expandable_header, entity.getHeader());
+        TextView textView = holder.get(R.id.tv_expandable_header);
+        SpannableStringBuilder renderText = Helper.renderText(entity.getHeader());
+        textView.setText(renderText);
         ImageView ivState = holder.get(R.id.iv_state);
         if (entity.isExpand()) {
             ivState.setRotation(90);

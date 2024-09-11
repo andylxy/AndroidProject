@@ -25,9 +25,9 @@ import run.yigou.gxzy.tipsutils.DataBeans.LocalLinkMovementMethod;
 import run.yigou.gxzy.tipsutils.DataBeans.ShowFanYao;
 
 @SuppressLint("ViewConstructor")
-public class TipsWindowYao_BubbleAttachPopup extends BubbleAttachPopupView {
+public class TipsWindow_Yao_BubbleAttachPopup extends BubbleAttachPopupView {
     String mYao ;//charSequence
-    public TipsWindowYao_BubbleAttachPopup(@NonNull Context context, String charSequence) {
+    public TipsWindow_Yao_BubbleAttachPopup(@NonNull Context context, String charSequence) {
         super(context);
         mYao = charSequence;
     }

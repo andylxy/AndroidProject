@@ -64,9 +64,9 @@ public class TipsBookReadActivity extends AppActivity {
             @Override
             public void onChildClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
                                      int groupPosition, int childPosition) {
-                Toast.makeText(getContext(), "子项：groupPosition = " + groupPosition
-                                + ", childPosition = " + childPosition,
-                        Toast.LENGTH_LONG).show();
+//                Toast.makeText(getContext(), "子项：groupPosition = " + groupPosition
+//                                + ", childPosition = " + childPosition,
+//                        Toast.LENGTH_LONG).show();
                 //String text=  ((TextView) holder.get(R.id.tv_child2)).getText().toString();
                 //Toast.makeText(getContext(), text,Toast.LENGTH_LONG).show();
 

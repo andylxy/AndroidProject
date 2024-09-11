@@ -11,9 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/sys_common_word"
-        android:padding="@dimen/dp_8"
         android:background="@color/sys_common_bg"
-        android:textSize="@dimen/sp_16" />
+        android:paddingLeft="@dimen/dp_17"
+        android:paddingTop="@dimen/dp_9"
+        android:paddingRight="@dimen/dp_20"
+        android:paddingBottom="@dimen/dp_9"
+        android:lineSpacingMultiplier="1.1"
+        android:textSize="@dimen/sp_18" />
 <!--    <TextView-->
 <!--        android:id="@+id/tv_child2"-->
 <!--        android:layout_width="match_parent"-->

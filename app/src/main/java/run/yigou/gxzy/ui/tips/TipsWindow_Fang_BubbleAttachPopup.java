@@ -11,9 +11,6 @@
 package run.yigou.gxzy.ui.tips;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,12 +25,12 @@ import com.lxj.xpopup.util.XPopupUtils;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.tipsutils.DataBeans.ShowFanYao;
 
-public class TipsWindow_BubbleAttachPopup extends BubbleAttachPopupView {
+public class TipsWindow_Fang_BubbleAttachPopup extends BubbleAttachPopupView {
     private RecyclerView rvList;
     private StickyHeaderLayout stickyLayout;
     private Context mContext;
     private String  fanyao_name ;
-    public TipsWindow_BubbleAttachPopup(@NonNull Context context, String fanyao) {
+    public TipsWindow_Fang_BubbleAttachPopup(@NonNull Context context, String fanyao) {
         super(context);
         mContext = context;
         fanyao_name = fanyao;

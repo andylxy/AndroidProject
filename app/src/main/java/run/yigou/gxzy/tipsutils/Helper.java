@@ -15,8 +15,7 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
-import android.util.Log;
-import android.view.MotionEvent;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -37,100 +36,102 @@ import java.util.List;
 import java.util.Map;
 
 import run.yigou.gxzy.app.AppApplication;
-import run.yigou.gxzy.ui.tips.TipsWindowYao_BubbleAttachPopup;
-import run.yigou.gxzy.ui.tips.TipsWindow_BubbleAttachPopup;
+import run.yigou.gxzy.ui.tips.TipsWindow_Yao_BubbleAttachPopup;
+import run.yigou.gxzy.ui.tips.TipsWindow_Fang_BubbleAttachPopup;
 
-/* loaded from: classes.dex */
+
 public class Helper {
 
-    /* loaded from: classes.dex */
-    public interface IBool<T> {
-        boolean isOK(T t);
-    }
 
-    /* loaded from: classes.dex */
-    public interface IFilter<T> {
-        boolean filter(T t);
-    }
-
-    /* loaded from: classes.dex */
-    public interface IFilterThenForEach<T> {
-        boolean filter(T t);
-
-        void forEachDo(T t);
-    }
-
-    /* loaded from: classes.dex */
-    public interface IFilterThenMap<T, K> {
-        boolean filter(T t);
-
-        K map(T t);
-    }
-
-    /* loaded from: classes.dex */
-    public interface IForEach<T> {
-        void forEachDo(T t);
-    }
-
-    /* loaded from: classes.dex */
-    public interface IForEachIdx<T> {
-        void forEachDo(T t, int i);
-    }
-
-    /* loaded from: classes.dex */
-    public interface IMap<T, K> {
-        K map(T t);
-    }
-
-    /* loaded from: classes.dex */
-    public interface IReduce<P, T> {
-        P reduce(P p, T t);
-    }
-
-    /* loaded from: classes.dex */
-    public interface IURLExist {
-        void isExist(boolean z);
-    }
-
-    public static <T> T def(T t, T t2) {
-        return t == null ? t2 : t;
-    }
-
+    /**
+     * Finds all starting positions of a substring (str2) within a given string (str).
+     *
+     * @param str  The main string to search within.
+     * @param str2 The substring to find.
+     * @return A list of starting positions of the substring within the main string.
+     */
     public static ArrayList<Integer> getAllSubStringPos(String str, String str2) {
-        ArrayList<Integer> arrayList = new ArrayList<>();
-        int length = str.length();
-        int i = 0;
-        while (i < length && str.substring(i).contains(str2)) {
-            Integer valueOf = Integer.valueOf(i + str.substring(i).indexOf(str2));
-            arrayList.add(valueOf);
-            i = valueOf.intValue() + str2.length();
-        }
-        return arrayList;
-    }
+        // 初始化一个ArrayList来存储所有匹配的位置
+        ArrayList<Integer> positions = new ArrayList<>();
 
-    public static boolean isNumeric(String str) {
-        char charAt;
-        if (str == null || str.length() == 0) {
-            return false;
+        // 确保子串不是空字符串且主字符串不是空字符串
+        if (str == null || str2 == null || str2.isEmpty() || str.isEmpty()) {
+            return positions;
         }
-        int length = str.length();
-        do {
-            length--;
-            if (length < 0) {
-                return true;
-            }
-            charAt = str.charAt(length);
-            if (charAt < '0') {
+
+        // 获取主字符串的长度和子串的长度
+        int strLength = str.length();
+        int str2Length = str2.length();
+
+        // 从主字符串的开始位置进行查找
+        int index = 0;
+        while (index <= strLength - str2Length) {
+            // 查找子串在当前索引位置的出现位置
+            int foundIndex = str.indexOf(str2, index);
+
+            // 如果子串没有找到，则退出循环
+            if (foundIndex == -1) {
                 break;
             }
-        } while (charAt <= '9');
-        return false;
+
+            // 将找到的位置添加到结果列表中
+            positions.add(foundIndex);
+
+            // 移动索引到子串末尾的下一个字符位置，准备进行下一个查找
+            index = foundIndex + str2Length;
+        }
+
+        return positions;
     }
 
+
+    /**
+     * Checks if a given string is numeric (consists only of digits).
+     *
+     * @param str The string to check.
+     * @return true if the string is numeric, false otherwise.
+     */
+    public static boolean isNumeric(String str) {
+        // 检查字符串是否为null或空
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+
+        // 从字符串的末尾开始检查每个字符
+        for (int i = str.length() - 1; i >= 0; i--) {
+            char charAt = str.charAt(i);
+            // 如果字符不是数字，则返回false
+            if (charAt < '0' || charAt > '9') {
+                return false;
+            }
+        }
+
+        // 如果所有字符都是数字，则返回true
+        return true;
+    }
+
+    /**
+     * 在SpannableStringBuilder中渲染项编号，通过对特殊字符（"、"）之前的数字前缀设置颜色跨度。
+     *
+     * @param spannableStringBuilder 要修改的SpannableStringBuilder对象。
+     */
     public static void renderItemNumber(SpannableStringBuilder spannableStringBuilder) {
-        String spannableStringBuilder2 = spannableStringBuilder.toString();
-        if (spannableStringBuilder2.contains("、") && isNumeric(spannableStringBuilder2.substring(0, spannableStringBuilder2.indexOf("、")))) {
-            spannableStringBuilder.setSpan(new ForegroundColorSpan(-16776961), 0, spannableStringBuilder2.indexOf("、"), 33);
+        // 将SpannableStringBuilder转换为String，以便于操作
+        String text = spannableStringBuilder.toString();
+
+        // 定义作为分隔符的特殊字符
+        final String DELIMITER = "、";
+
+        // 检查文本是否包含分隔符，并且分隔符之前的子字符串是否为数字
+        int delimiterIndex = text.indexOf(DELIMITER);
+        if (delimiterIndex != -1 && isNumeric(text.substring(0, delimiterIndex))) {
+            // 对数字前缀设置前景色跨度
+            spannableStringBuilder.setSpan(
+                    new ForegroundColorSpan(0xFF0000FF),  // 颜色为蓝色（十六进制表示）
+                    0,  // Span的起始索引
+                    delimiterIndex,  // Span的结束索引
+                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE  // Span标志，避免影响周围文本
+            );
         }
     }
     public static SpannableStringBuilder renderText(String str, final ClickLink clickLink) {
@@ -217,7 +218,7 @@ public class Helper {
                         .atView(textView)
                         //.atPoint(pointF)
                         //.hasShadowBg(false) // 去掉半透明背景
-                        .asCustom(new TipsWindowYao_BubbleAttachPopup(textView.getContext(),charSequence))
+                        .asCustom(new TipsWindow_Yao_BubbleAttachPopup(textView.getContext(),charSequence))
                         .show();
             }
 
@@ -241,7 +242,7 @@ public class Helper {
                         // .atPoint(pointF)
                         //.hasShadowBg(false) // 去掉半透明背景
                         .asCustom(
-                                new TipsWindow_BubbleAttachPopup(textView.getContext(),charSequence)
+                                new TipsWindow_Fang_BubbleAttachPopup(textView.getContext(),charSequence)
                                        // .setArrowHeight(XPopupUtils.dp2px(textView.getContext(), 6f) )
                         )
                         .show();
@@ -309,175 +310,110 @@ public class Helper {
         return num == null ? ViewCompat.MEASURED_STATE_MASK : num.intValue();
     }
 
-
-    public static int strLengh(String str) {
-        if (str == null) {
-            return 0;
-        }
-        return str.length();
-    }
-
-    public static String getAliasString(Map<String, String> map, String str) {
-        if (map == null || str == null) {
-            return null;
-        }
-        String str2 = map.get(str);
-        return str2 == null ? str : str2;
-    }
-
-    public static void putStringToClipboard(String str) {
-        ((ClipboardManager) AppApplication.application.getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("shangHanLun", str));
-    }
-
+    /**
+     * 根据给定的比较器在数据列表中搜索符合条件的项，并返回一个新的列表，其中包含符合条件的部分数据。
+     *
+     * @param list 要搜索的HH2SectionData列表。
+     * @param dataItemCompare 用于比较的DataItemCompare对象。
+     * @return 包含符合条件数据的HH2SectionData列表。
+     */
     public static List<HH2SectionData> searchText(List<HH2SectionData> list, DataItemCompare dataItemCompare) {
-        ArrayList arrayList = new ArrayList();
-        for (HH2SectionData hH2SectionData : list) {
-            ArrayList arrayList2 = null;
-            for (DataItem dataItem : hH2SectionData.getData()) {
+        // 创建一个新的ArrayList来存储符合条件的HH2SectionData对象
+        List<HH2SectionData> resultList = new ArrayList<>();
+
+        // 遍历输入的HH2SectionData列表
+        for (HH2SectionData sectionData : list) {
+            // 创建一个临时ArrayList用于存储符合条件的DataItem
+            List<DataItem> filteredItems = null;
+
+            // 遍历每个HH2SectionData对象中的DataItem
+            for (DataItem dataItem : sectionData.getData()) {
+                // 使用比较器判断DataItem是否符合条件
                 if (dataItemCompare.useThisItem(dataItem)) {
-                    if (arrayList2 == null) {
-                        arrayList2 = new ArrayList();
+                    // 如果临时列表为空，初始化它
+                    if (filteredItems == null) {
+                        filteredItems = new ArrayList<>();
                     }
-                    arrayList2.add(dataItem);
+                    // 将符合条件的DataItem添加到临时列表中
+                    filteredItems.add(dataItem);
                 }
             }
-            if (arrayList2 != null) {
-                arrayList.add(new HH2SectionData(arrayList2, hH2SectionData.getSection(), hH2SectionData.getHeader()));
+
+            // 如果临时列表中有符合条件的数据，创建新的HH2SectionData对象并添加到结果列表中
+            if (filteredItems != null) {
+                resultList.add(new HH2SectionData(filteredItems, sectionData.getSection(), sectionData.getHeader()));
             }
         }
-        return arrayList;
+
+        // 返回包含符合条件数据的HH2SectionData列表
+        return resultList;
     }
 
-    public static <T> List<T> filter(List<T> list, IFilter<T> iFilter) {
-        ArrayList arrayList = new ArrayList();
-        for (T t : list) {
-            if (iFilter.filter(t)) {
-                arrayList.add(t);
-            }
-        }
-        return arrayList;
+    /**
+     * 表示一个接受类型为 T 的对象并返回布尔值的条件接口。
+     *
+     * @param <T> 要检查的对象的类型。
+     */
+    @FunctionalInterface
+    public interface Condition<T> {
+        /**
+         * 判断给定的对象是否满足条件。
+         *
+         * @param t 要检查的对象。
+         * @return 如果对象满足条件，则返回 true；否则返回 false。
+         */
+        boolean test(T t);
     }
-
-    public static <T, K> List<K> map(List<T> list, IMap<T, K> iMap) {
-        ArrayList arrayList = new ArrayList();
-        Iterator<T> it = list.iterator();
-        while (it.hasNext()) {
-            arrayList.add(iMap.map(it.next()));
-        }
-        return arrayList;
-    }
-
-    public static <T, K> List<K> filterThenMap(List<T> list, IFilterThenMap<T, K> iFilterThenMap) {
-        ArrayList arrayList = new ArrayList();
-        for (T t : list) {
-            if (iFilterThenMap.filter(t)) {
-                arrayList.add(iFilterThenMap.map(t));
-            }
-        }
-        return arrayList;
-    }
-
-    public static <T> void filterThenForEachDo(List<T> list, IFilterThenForEach<T> iFilterThenForEach) {
-        for (T t : list) {
-            if (iFilterThenForEach.filter(t)) {
-                iFilterThenForEach.forEachDo(t);
-            }
-        }
-    }
-
-    public static <P, T> P reduce(List<T> list, P p, IReduce<P, T> iReduce) {
-        Iterator<T> it = list.iterator();
-        while (it.hasNext()) {
-            p = iReduce.reduce(p, it.next());
-        }
-        return p;
-    }
-
-    public static <T> List<T> uniq(List<T> list) {
-        ArrayList arrayList = new ArrayList();
-        for (T t : list) {
-            if (!arrayList.contains(t)) {
-                arrayList.add(t);
-            }
-        }
-        return arrayList;
-    }
-
-    public static <T> void forEachDo(List<T> list, IForEach<T> iForEach) {
-        Iterator<T> it = list.iterator();
-        while (it.hasNext()) {
-            iForEach.forEachDo(it.next());
-        }
-    }
-
-    public static <T> void forEachDo(List<T> list, IForEachIdx<T> iForEachIdx) {
-        Iterator<T> it = list.iterator();
-        int i = 0;
-        while (it.hasNext()) {
-            iForEachIdx.forEachDo(it.next(), i);
-            i++;
-        }
-    }
-
-    public static <T> boolean some(List<T> list, IBool<T> iBool) {
+    /**
+     * 检查列表中是否有至少一个元素满足给定的条件。
+     *
+     * @param list 要检查的列表，包含类型为 T 的元素。
+     * @param condition 判断元素是否满足条件的函数接口。
+     * @param <T> 列表中元素的类型。
+     * @return 如果列表中至少有一个元素满足条件，则返回 true；否则返回 false。
+     */
+    public static <T> boolean some(List<T> list, Condition<T> condition) {
         if (list == null) {
             return false;
         }
-        Iterator<T> it = list.iterator();
-        while (it.hasNext()) {
-            if (iBool.isOK(it.next())) {
+
+        // 遍历列表中的每个元素
+        for (T element : list) {
+            if (condition.test(element)) {
                 return true;
             }
         }
+
         return false;
     }
-
-    public static <T> boolean every(List<T> list, IBool<T> iBool) {
-        if (list == null) {
-            return false;
-        }
-        Iterator<T> it = list.iterator();
-        while (it.hasNext()) {
-            if (!iBool.isOK(it.next())) {
-                return false;
-            }
-        }
-        return true;
+    /**
+     * 将 dp（密度无关像素）值转换为 px（像素）值。
+     *
+     * @param context 用于获取屏幕密度的上下文。
+     * @param dpValue 要转换的dp值。
+     * @return 转换后的像素值。
+     */
+    public static int dip2px(Context context, float dpValue) {
+        // 获取屏幕的显示密度
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        // dp值转换为px值，并四舍五入到最接近的整数
+        return (int) ((dpValue * displayMetrics.density) + 0.5f);
     }
 
-    public static <T> int index(List<T> list, IBool<T> iBool) {
-        for (int i = 0; i < list.size(); i++) {
-            if (iBool.isOK(list.get(i))) {
-                return i;
-            }
-        }
-        return -1;
+    /**
+     * 将 px（像素）值转换为 dp（密度无关像素）值。
+     *
+     * @param context 用于获取屏幕密度的上下文。
+     * @param pxValue 要转换的像素值。
+     * @return 转换后的dp值。
+     */
+    public static int px2dip(Context context, float pxValue) {
+        // 获取屏幕的显示密度
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        // px值转换为dp值，并四舍五入到最接近的整数
+        return (int) ((pxValue / displayMetrics.density) + 0.5f);
     }
 
-    public static List<String> split(String str, String str2) {
-        return Arrays.asList(str.split(str2));
-    }
-
-    public static String join(String[] strArr, String str) {
-        return join((List<String>) Arrays.asList(strArr), str);
-    }
-
-    public static String join(List<String> list, String str) {
-        String str2 = "";
-        Iterator<String> it = list.iterator();
-        while (it.hasNext()) {
-            str2 = str2 + it.next() + str;
-        }
-        return str2.length() < str.length() ? "" : str2.substring(0, str2.length() - str.length());
-    }
-
-    public static int dip2px(Context context, float f) {
-        return (int) ((f * context.getResources().getDisplayMetrics().density) + 0.5f);
-    }
-
-    public static int px2dip(Context context, float f) {
-        return (int) ((f / context.getResources().getDisplayMetrics().density) + 0.5f);
-    }
 
     public static int getScreenWidth(Activity activity) {
         return activity.getWindow().getDecorView().getWidth();
@@ -490,37 +426,5 @@ public class Helper {
     public static String getDateString(int i) {
         return new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis() - (((i * 24) * 3600) * 1000)));
     }
-
-
-
-
-
-
-
-    public static <T extends Activity> ViewGroup getWindow(T t) {
-        return (ViewGroup) t.getWindow().getDecorView();
-    }
-
-
-
-    public static String getPriceInputTitle(String str) {
-        return str.replace(" ", "").replace("：", "");
-    }
-
-    public static <T extends Activity> void closeKeyboard(T t) {
-//        InputMethodManager inputMethodManager = (InputMethodManager) t.getSystemService(Context.INPUT_METHOD_SERVICE);
-//        if (inputMethodManager != null) {
-//            inputMethodManager.hideSoftInputFromWindow(t.getWindow().getDecorView().getWindowToken(), 0);
-//        }
-        InputMethodManager inputMethodManager = (InputMethodManager) t.getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (inputMethodManager != null) {
-            View view = t.getWindow().getDecorView();
-            if (view != null) {
-                // 使用 post 方法确保视图已完全加载
-                view.post(() -> inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0));
-            }
-        }
-    }
-
 
 }
