@@ -14,7 +14,6 @@ import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.http.model.FileContentResolver;
 import com.hjq.widget.layout.SettingBar;
-import com.lxj.xpopup.XPopup;
 
 
 import java.io.File;
@@ -23,7 +22,6 @@ import java.net.URISyntaxException;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
-import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.api.UpdateImageApi;
@@ -37,7 +35,6 @@ import run.yigou.gxzy.ui.activity.LoginActivity;
 import run.yigou.gxzy.ui.activity.SettingActivity;
 import run.yigou.gxzy.ui.dialog.AddressDialog;
 import run.yigou.gxzy.ui.dialog.InputDialog;
-import run.yigou.gxzy.ui.tips.CustomBubbleAttachPopup;
 
 /**
  *    author : Android 轮子哥
@@ -181,13 +178,13 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         }
 
         else if (view == mTest_btn) {
-            new XPopup.Builder(getContext())
-                    //.isTouchThrough(true)
-                    .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
-                    .atView(mTest_btn)
-                    .hasShadowBg(false) // 去掉半透明背景
-                    .asCustom(new CustomBubbleAttachPopup(getContext()))
-                    .show();
+//            new XPopup.Builder(getContext())
+//                    //.isTouchThrough(true)
+//                    .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
+//                    .atView(mTest_btn)
+//                    .hasShadowBg(false) // 去掉半透明背景
+//                    .asCustom(new CustomBubbleAttachPopup(getContext()))
+//                    .show();
         }
 
     }

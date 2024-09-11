@@ -13,7 +13,6 @@ package run.yigou.gxzy.ui.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,13 +20,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
-import com.lxj.xpopup.XPopup;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.common.APPCONST;
-import run.yigou.gxzy.greendao.entity.Book;
-import run.yigou.gxzy.ui.tips.CustomBubbleAttachPopup;
+import run.yigou.gxzy.tipsutils.SingletonData;
 import run.yigou.gxzy.ui.tips.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.GroupModel;
 
@@ -48,7 +44,8 @@ public class TipsBookReadActivity extends AppActivity {
     protected void initView() {
         rvList = findViewById(R.id.tips_book_read_activity_group_list);
         rvList.setLayoutManager(new LinearLayoutManager(this));
-        ExpandableAdapter adapter = new ExpandableAdapter(this, GroupModel.getExpandableGroups(10, 5));
+        ExpandableAdapter adapter = new ExpandableAdapter(this, GroupModel.getExpandableGroups(SingletonData.getInstance(),false));
+
         adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
             @Override
             public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
@@ -85,7 +82,13 @@ public class TipsBookReadActivity extends AppActivity {
     protected void initData() {
 
     }
-
+//    @NonNull
+//    @Override
+//    protected ImmersionBar createStatusBarConfig() {
+//        return super.createStatusBarConfig()
+//                // 指定导航栏背景颜色
+//                .navigationBarColor(R.color.white);
+//    }
     public static void start(Context context) {
         Intent intent = new Intent(context, TipsBookReadActivity.class);
        // intent.putExtra(APPCONST.BOOK, item);

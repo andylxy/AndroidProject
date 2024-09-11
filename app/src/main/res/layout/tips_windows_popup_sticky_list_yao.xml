@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:orientation="vertical"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <Button
+        android:id="@+id/maskbtnYao"
+        android:background="#66000000"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</RelativeLayout>
+<LinearLayout
+    android:orientation="vertical"
+    android:id="@+id/wrapper"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ScrollView
+            android:id="@+id/maskscroll"
+            android:background="@drawable/round_win"
+            android:clipChildren="true"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="34dp">
+            <TextView
+                android:textColor="#000000"
+                android:id="@+id/textview"
+                android:background="@drawable/round_win_inner"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </ScrollView>
+        <LinearLayout
+            android:layout_gravity="bottom"
+            android:orientation="horizontal"
+            android:id="@+id/btns"
+            android:layout_width="match_parent"
+            android:layout_height="34dp">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"/>
+            <Button
+                android:textSize="12dp"
+                android:textColor="#ffffff"
+                android:id="@+id/leftbtn"
+                android:background="@drawable/round_win_black"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="4dp"
+                android:text="拷贝内容"
+                android:layout_weight="0.86"/>
+            <Button
+                android:textSize="12dp"
+                android:textColor="#ffffff"
+                android:id="@+id/rightbtn"
+                android:background="@drawable/round_win_black"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="查看药证条文"
+                android:layout_weight="0.8"/>
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>
+<run.yigou.gxzy.ui.tips.widget.ArrowView
+    android:id="@+id/arrow"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>
+</FrameLayout>

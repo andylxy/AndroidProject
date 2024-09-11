@@ -149,7 +149,7 @@ public abstract class BubbleAttachPopupView extends BasePopupView {
                     }
                     bubbleContainer.setLookPosition(Math.max(0, (int) (popupInfo.touchPoint.x - defaultOffsetX - translationX - bubbleContainer.mLookWidth/2)));
                     bubbleContainer.invalidate();
-                   
+
                     getPopupContentView().setTranslationX(translationX);
                     getPopupContentView().setTranslationY(translationY);
                     initAndStartAnimation();
@@ -261,6 +261,7 @@ public abstract class BubbleAttachPopupView extends BasePopupView {
     protected boolean isShowUpToTarget() {
         if(popupInfo.positionByWindowCenter){
             //目标在屏幕上半方，弹窗显示在下；反之，则在上
+          int h =  XPopupUtils.getAppHeight(getContext());
             return centerY > XPopupUtils.getAppHeight(getContext())/2;
         }
         //默认是根据Material规范定位，优先显示在目标下方，下方距离不足才显示在上方
