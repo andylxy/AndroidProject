@@ -3,16 +3,10 @@ package run.yigou.gxzy.ui.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.RelativeSizeSpan;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
 
 
@@ -30,10 +24,7 @@ import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookDetailList;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.entitymodel.TitelInfo;
-import run.yigou.gxzy.http.glide.GlideApp;
-import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.other.AppConfig;
-import run.yigou.gxzy.tipsutils.Helper;
+import run.yigou.gxzy.ui.tips.tipsutils.Helper;
 import run.yigou.gxzy.ui.adapter.ChapterDicAdapter;
 import run.yigou.gxzy.ui.fragment.BookCollectCaseFragment;
 import run.yigou.gxzy.utils.StringHelper;

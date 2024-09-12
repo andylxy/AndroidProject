@@ -1,14 +1,14 @@
 /*
  * 项目名: AndroidProject
  * 类名: ShowFanYao.java
- * 包名: run.yigou.gxzy.tipsutils.DataBeans.ShowFanYao
+ * 包名: run.yigou.gxzy.ui.tips.tipsutils.DataBeans.ShowFanYao
  * 作者 : Zhs (xiaoyang_02@qq.com)
- * 当前修改时间 : 2024年09月09日 16:18:18
- * 上次修改时间: 2024年09月09日 16:18:18
+ * 当前修改时间 : 2024年09月12日 09:47:06
+ * 上次修改时间: 2024年09月12日 09:44:38
  * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.tipsutils.DataBeans;
+package run.yigou.gxzy.ui.tips.tipsutils.DataBeans;
 
 import android.text.SpannableStringBuilder;
 
@@ -18,16 +18,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import run.yigou.gxzy.tipsutils.DataItem;
-import run.yigou.gxzy.tipsutils.HH2SectionData;
-import run.yigou.gxzy.tipsutils.Helper;
-import run.yigou.gxzy.tipsutils.SingletonData;
-
+import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
+import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
+import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
+import run.yigou.gxzy.ui.tips.tipsutils.Helper;
 
 
 public class ShowFanYao {
 
-    private List< DataItem> data = new ArrayList<>();
+    private List<DataItem> data = new ArrayList<>();
 
     public List< DataItem> getData() {
         return data;

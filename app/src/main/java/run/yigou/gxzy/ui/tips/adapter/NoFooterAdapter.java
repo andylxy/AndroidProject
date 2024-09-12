@@ -1,4 +1,14 @@
-package run.yigou.gxzy.ui.tips;
+/*
+ * 项目名: AndroidProject
+ * 类名: NoFooterAdapter.java
+ * 包名: run.yigou.gxzy.ui.tips.adapter.NoFooterAdapter
+ * 作者 : Zhs (xiaoyang_02@qq.com)
+ * 当前修改时间 : 2024年09月12日 09:24:05
+ * 上次修改时间: 2024年09月11日 08:27:50
+ * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
+ */
+
+package run.yigou.gxzy.ui.tips.adapter;
 
 import android.content.Context;
 import android.text.SpannableStringBuilder;
@@ -10,8 +20,10 @@ import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.tipsutils.DataBeans.LocalLinkMovementMethod;
-import run.yigou.gxzy.tipsutils.Helper;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.LocalLinkMovementMethod;
+import run.yigou.gxzy.ui.tips.tipsutils.Helper;
+import run.yigou.gxzy.ui.tips.entity.ChildEntity;
+import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 
 /**
  * 这是不带组尾的Adapter。

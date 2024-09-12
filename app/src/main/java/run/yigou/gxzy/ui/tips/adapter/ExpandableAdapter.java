@@ -1,4 +1,14 @@
-package run.yigou.gxzy.ui.tips;
+/*
+ * 项目名: AndroidProject
+ * 类名: ExpandableAdapter.java
+ * 包名: run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter
+ * 作者 : Zhs (xiaoyang_02@qq.com)
+ * 当前修改时间 : 2024年09月12日 09:24:05
+ * 上次修改时间: 2024年09月11日 23:04:08
+ * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
+ */
+
+package run.yigou.gxzy.ui.tips.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -13,8 +23,10 @@ import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.tipsutils.DataBeans.LocalLinkMovementMethod;
-import run.yigou.gxzy.tipsutils.Helper;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.LocalLinkMovementMethod;
+import run.yigou.gxzy.ui.tips.tipsutils.Helper;
+import run.yigou.gxzy.ui.tips.entity.ChildEntity;
+import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 
 /**
  * 可展开收起的Adapter。他跟普通的{/@link GroupedListAdapter}基本是一样的。

@@ -13,7 +13,6 @@ package run.yigou.gxzy.ui.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,9 +22,9 @@ import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.tipsutils.SingletonData;
-import run.yigou.gxzy.ui.tips.ExpandableAdapter;
-import run.yigou.gxzy.ui.tips.GroupModel;
+import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
+import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
+import run.yigou.gxzy.ui.tips.entity.GroupModel;
 
 public class TipsBookReadActivity extends AppActivity {
     private RecyclerView rvList;

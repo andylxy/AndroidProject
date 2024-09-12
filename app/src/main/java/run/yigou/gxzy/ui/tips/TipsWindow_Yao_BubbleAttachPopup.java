@@ -21,8 +21,8 @@ import com.lxj.xpopup.core.BubbleAttachPopupView;
 import com.lxj.xpopup.util.XPopupUtils;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.tipsutils.DataBeans.LocalLinkMovementMethod;
-import run.yigou.gxzy.tipsutils.DataBeans.ShowFanYao;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.LocalLinkMovementMethod;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.ShowFanYao;
 
 @SuppressLint("ViewConstructor")
 public class TipsWindow_Yao_BubbleAttachPopup extends BubbleAttachPopupView {

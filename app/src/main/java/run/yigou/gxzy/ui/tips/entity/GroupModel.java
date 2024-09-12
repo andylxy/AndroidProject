@@ -1,13 +1,21 @@
-package run.yigou.gxzy.ui.tips;
+/*
+ * 项目名: AndroidProject
+ * 类名: GroupModel.java
+ * 包名: run.yigou.gxzy.ui.tips.entity.GroupModel
+ * 作者 : Zhs (xiaoyang_02@qq.com)
+ * 当前修改时间 : 2024年09月12日 09:24:18
+ * 上次修改时间: 2024年09月09日 17:32:00
+ * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
+ */
 
-import android.text.SpannableStringBuilder;
+package run.yigou.gxzy.ui.tips.entity;
 
 import java.util.ArrayList;
 
-import run.yigou.gxzy.tipsutils.DataBeans.ShowFanYao;
-import run.yigou.gxzy.tipsutils.DataItem;
-import run.yigou.gxzy.tipsutils.HH2SectionData;
-import run.yigou.gxzy.tipsutils.SingletonData;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.ShowFanYao;
+import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
+import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
+import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
 
 /**
  * Depiction:

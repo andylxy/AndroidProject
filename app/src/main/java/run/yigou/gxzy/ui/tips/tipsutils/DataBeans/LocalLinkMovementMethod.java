@@ -1,7 +1,15 @@
-package run.yigou.gxzy.tipsutils.DataBeans;
+/*
+ * 项目名: AndroidProject
+ * 类名: LocalLinkMovementMethod.java
+ * 包名: run.yigou.gxzy.ui.tips.tipsutils.DataBeans.LocalLinkMovementMethod
+ * 作者 : Zhs (xiaoyang_02@qq.com)
+ * 当前修改时间 : 2024年09月12日 09:47:06
+ * 上次修改时间: 2024年09月12日 09:44:39
+ * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
+ */
 
-import android.graphics.Point;
-import android.graphics.PointF;
+package run.yigou.gxzy.ui.tips.tipsutils.DataBeans;
+
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;

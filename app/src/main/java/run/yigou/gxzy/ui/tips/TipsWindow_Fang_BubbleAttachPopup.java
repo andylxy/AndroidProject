@@ -23,7 +23,9 @@ import com.lxj.xpopup.core.BubbleAttachPopupView;
 import com.lxj.xpopup.util.XPopupUtils;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.tipsutils.DataBeans.ShowFanYao;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.ShowFanYao;
+import run.yigou.gxzy.ui.tips.adapter.NoFooterAdapter;
+import run.yigou.gxzy.ui.tips.entity.GroupModel;
 
 public class TipsWindow_Fang_BubbleAttachPopup extends BubbleAttachPopupView {
     private RecyclerView rvList;

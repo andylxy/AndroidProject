@@ -1,4 +1,14 @@
-package run.yigou.gxzy.ui.tips;
+/*
+ * 项目名: AndroidProject
+ * 类名: GroupedListAdapter.java
+ * 包名: run.yigou.gxzy.ui.tips.adapter.GroupedListAdapter
+ * 作者 : Zhs (xiaoyang_02@qq.com)
+ * 当前修改时间 : 2024年09月12日 09:24:05
+ * 上次修改时间: 2024年09月09日 01:02:49
+ * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
+ */
+
+package run.yigou.gxzy.ui.tips.adapter;
 
 import android.content.Context;
 
@@ -9,6 +19,8 @@ import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.ui.tips.entity.ChildEntity;
+import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 
 /**
  * 这是普通的分组Adapter 每一个组都有头部、尾部和子项。

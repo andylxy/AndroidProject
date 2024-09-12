@@ -1,25 +1,32 @@
-package run.yigou.gxzy.tipsutils;
+/*
+ * 项目名: AndroidProject
+ * 类名: SingletonData.java
+ * 包名: run.yigou.gxzy.ui.tips.tipsutils.SingletonData
+ * 作者 : Zhs (xiaoyang_02@qq.com)
+ * 当前修改时间 : 2024年09月12日 09:47:06
+ * 上次修改时间: 2024年09月12日 09:44:38
+ * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
+ */
+
+package run.yigou.gxzy.ui.tips.tipsutils;
 
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import run.yigou.gxzy.app.AppApplication;
-import run.yigou.gxzy.tipsutils.DataBeans.Fang;
-import run.yigou.gxzy.tipsutils.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Fang;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
 
-/* loaded from: classes.dex */
+
 public class SingletonData {
     private static SingletonData data;
     protected List<String> allFang;
@@ -314,13 +321,13 @@ public class SingletonData {
             this.content.addAll(jinKuiList);
         }
 
-//        // 设置每个数据项的索引路径
-//        for (HH2SectionData sectionData : this.content) {
-//            List<? extends DataItem> dataItems = sectionData.getData();
-//            for (int i = 0; i < dataItems.size(); i++) {
-//                dataItems.get(i).setIndexPath(NSIndexPath.indexPathForRowInSection(i, sectionData.getSection()));
-//            }
-//        }
+        // 设置每个数据项的索引路径
+        for (HH2SectionData sectionData : this.content) {
+            List<? extends DataItem> dataItems = sectionData.getData();
+            for (int i = 0; i < dataItems.size(); i++) {
+                dataItems.get(i).setIndexPath(NSIndexPath.indexPathForRowInSection(i, sectionData.getSection()));
+            }
+        }
     }
 
 

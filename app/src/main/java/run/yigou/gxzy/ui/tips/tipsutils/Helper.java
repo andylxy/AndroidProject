@@ -1,9 +1,17 @@
-package run.yigou.gxzy.tipsutils;
+/*
+ * 项目名: AndroidProject
+ * 类名: Helper.java
+ * 包名: run.yigou.gxzy.ui.tips.tipsutils.Helper
+ * 作者 : Zhs (xiaoyang_02@qq.com)
+ * 当前修改时间 : 2024年09月12日 09:47:06
+ * 上次修改时间: 2024年09月12日 09:44:38
+ * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
+ */
+
+package run.yigou.gxzy.ui.tips.tipsutils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PointF;
@@ -17,8 +25,6 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.util.DisplayMetrics;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import androidx.core.internal.view.SupportMenu;
@@ -28,12 +34,9 @@ import com.lxj.xpopup.XPopup;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.ui.tips.TipsWindow_Yao_BubbleAttachPopup;
@@ -42,34 +45,35 @@ import run.yigou.gxzy.ui.tips.TipsWindow_Fang_BubbleAttachPopup;
 
 public class Helper {
 
-
     /**
-     * Finds all starting positions of a substring (str2) within a given string (str).
+     * 查找给定字符串 (str) 中所有子字符串 (str2) 的起始位置。
      *
-     * @param str  The main string to search within.
-     * @param str2 The substring to find.
-     * @return A list of starting positions of the substring within the main string.
+     * @param str  主字符串。
+     * @param str2 要查找的子字符串。
+     * @return 包含子字符串在主字符串中所有起始位置的列表。
      */
     public static ArrayList<Integer> getAllSubStringPos(String str, String str2) {
         // 初始化一个ArrayList来存储所有匹配的位置
         ArrayList<Integer> positions = new ArrayList<>();
 
-        // 确保子串不是空字符串且主字符串不是空字符串
+        // 确保主字符串和子字符串都不是null，并且子字符串不为空
         if (str == null || str2 == null || str2.isEmpty() || str.isEmpty()) {
             return positions;
         }
 
-        // 获取主字符串的长度和子串的长度
+        // 获取主字符串的长度和子字符串的长度
         int strLength = str.length();
         int str2Length = str2.length();
 
-        // 从主字符串的开始位置进行查找
+        // 初始化搜索索引
         int index = 0;
+
+        // 在主字符串中查找子字符串
         while (index <= strLength - str2Length) {
-            // 查找子串在当前索引位置的出现位置
+            // 从当前索引位置查找子字符串
             int foundIndex = str.indexOf(str2, index);
 
-            // 如果子串没有找到，则退出循环
+            // 如果没有找到子字符串，退出循环
             if (foundIndex == -1) {
                 break;
             }
@@ -77,7 +81,7 @@ public class Helper {
             // 将找到的位置添加到结果列表中
             positions.add(foundIndex);
 
-            // 移动索引到子串末尾的下一个字符位置，准备进行下一个查找
+            // 移动索引到子字符串末尾的下一个位置，继续查找
             index = foundIndex + str2Length;
         }
 
@@ -85,14 +89,15 @@ public class Helper {
     }
 
 
+
     /**
-     * Checks if a given string is numeric (consists only of digits).
+     * 检查给定的字符串是否为数字（仅由数字组成）。
      *
-     * @param str The string to check.
-     * @return true if the string is numeric, false otherwise.
+     * @param str 要检查的字符串。
+     * @return 如果字符串是数字，则返回 true；否则返回 false。
      */
     public static boolean isNumeric(String str) {
-        // 检查字符串是否为null或空
+        // 检查字符串是否为 null 或空字符串
         if (str == null || str.isEmpty()) {
             return false;
         }
@@ -100,15 +105,16 @@ public class Helper {
         // 从字符串的末尾开始检查每个字符
         for (int i = str.length() - 1; i >= 0; i--) {
             char charAt = str.charAt(i);
-            // 如果字符不是数字，则返回false
+            // 如果字符不是数字，则返回 false
             if (charAt < '0' || charAt > '9') {
                 return false;
             }
         }
 
-        // 如果所有字符都是数字，则返回true
+        // 如果所有字符都是数字，则返回 true
         return true;
     }
+
 
     /**
      * 在SpannableStringBuilder中渲染项编号，通过对特殊字符（"、"）之前的数字前缀设置颜色跨度。
