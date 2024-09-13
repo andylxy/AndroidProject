@@ -10,6 +10,8 @@
 
 package run.yigou.gxzy.ui.tips.entity;
 
+import android.text.SpannableStringBuilder;
+
 import java.util.ArrayList;
 
 /**
@@ -17,6 +19,9 @@ import java.util.ArrayList;
  */
 public class ExpandableGroupEntity {
 
+
+
+    private SpannableStringBuilder spannableHeader;
     private String header;
     private String footer;
     private ArrayList<ChildEntity> children;
@@ -25,11 +30,26 @@ public class ExpandableGroupEntity {
     public ExpandableGroupEntity(String header, String footer, boolean isExpand,
                                  ArrayList<ChildEntity> children) {
         this.header = header;
+       // this.spannableHeader = spannableHeader;
         this.footer = footer;
         this.isExpand = isExpand;
         this.children = children;
     }
+    public ExpandableGroupEntity(String header,SpannableStringBuilder spannableHeader, String footer, boolean isExpand,
+                                 ArrayList<ChildEntity> children) {
+        this.header = header;
+        this.spannableHeader = spannableHeader;
+        this.footer = footer;
+        this.isExpand = isExpand;
+        this.children = children;
+    }
+    public SpannableStringBuilder getSpannableHeader() {
+        return spannableHeader;
+    }
 
+    public void setSpannableHeader(SpannableStringBuilder spannableHeader) {
+        this.spannableHeader = spannableHeader;
+    }
     public String getHeader() {
         return header;
     }

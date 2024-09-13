@@ -10,11 +10,14 @@
 
 package run.yigou.gxzy.ui.tips.entity;
 
+import android.text.SpannableStringBuilder;
+
 import java.util.ArrayList;
 
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.ShowFanYao;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
+import run.yigou.gxzy.ui.tips.tipsutils.Helper;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
 
 /**
@@ -113,17 +116,30 @@ public class GroupModel {
         return getExpandableGroups(groupCount, childrenCount, false);
     }
 
-    public static ArrayList<ExpandableGroupEntity> getExpandableGroups(SingletonData singletonData, boolean isExpand) {
+    /**
+     * 显示数据构造
+     * @param hh2SectionData 需要显示的数据
+     * @param isExpand 表头是否展开,false 不展开,true 展开
+     * @param isSearch true为搜索, false 初始数据
+     * @return 返回构造完成数据
+     */
+    public static ArrayList<ExpandableGroupEntity> getExpandableGroups( ArrayList<HH2SectionData>  hh2SectionData, boolean isExpand,boolean isSearch) {
         ArrayList<ExpandableGroupEntity> groups = new ArrayList<>();
-        for (HH2SectionData sectionData : singletonData.getContent()) {
+        if (hh2SectionData ==null) return  groups;
+        for (HH2SectionData sectionData : hh2SectionData) {
             ArrayList<ChildEntity> children = new ArrayList<>();
             for (DataItem dataItem : sectionData.getData()) {
-                children.add(new ChildEntity(dataItem.getText()));
+                children.add(new ChildEntity(dataItem.getText(),dataItem.getAttributedText()));
             }
-            //String header = sectionData.getHeader();
-            groups.add(new ExpandableGroupEntity(sectionData.getHeader(), "第尾部", isExpand, children));
+            SpannableStringBuilder spannableHeader = Helper.renderText(sectionData.getHeader());
+            groups.add(new ExpandableGroupEntity(sectionData.getHeader(), spannableHeader,"", isExpand, children));
         }
         return groups;
+    }
+
+
+    public static SpannableStringBuilder getSpannableChildren(String childrenStr){
+        return Helper.renderText(childrenStr);
     }
 
 }

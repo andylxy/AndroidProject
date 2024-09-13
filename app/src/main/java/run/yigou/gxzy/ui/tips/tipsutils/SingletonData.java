@@ -32,6 +32,10 @@ public class SingletonData {
     protected List<String> allFang;
     protected List<String> allYao;
     private ArrayList<HH2SectionData> content;
+
+
+
+    private ArrayList<HH2SectionData> searchResList;
     public Activity curActivity;
     //public ShowFragment curFragment;
    // public TipsWindow curTipsWindow;
@@ -119,7 +123,17 @@ public class SingletonData {
     public ArrayList<HH2SectionData> getContent() {
         return this.content;
     }
+//    public void setContent(ArrayList<HH2SectionData> hh2SectionDataArrayList) {
+//          if (this.content==null) this.content = new ArrayList<>();
+//          this.content.addAll(hh2SectionDataArrayList);
+//    }
+    public ArrayList<HH2SectionData> getSearchResList() {
+        return searchResList;
+    }
 
+    public void setSearchResList(ArrayList<HH2SectionData> searchResList) {
+        this.searchResList = searchResList;
+    }
     public ArrayList<HH2SectionData> getFang() {
         return this.fang;
     }

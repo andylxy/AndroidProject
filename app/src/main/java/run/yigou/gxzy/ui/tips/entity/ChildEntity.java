@@ -10,15 +10,30 @@
 
 package run.yigou.gxzy.ui.tips.entity;
 
+import android.text.SpannableStringBuilder;
+
 /**
  * 子项数据的实体类
  */
 public class ChildEntity {
 
     private String child;
-
+    private SpannableStringBuilder spannableChild;
     public ChildEntity(String child) {
         this.child = child;
+    }
+
+    public ChildEntity(String child, SpannableStringBuilder spannableChild) {
+        this.child = child;
+        this.spannableChild = spannableChild;
+    }
+
+    public SpannableStringBuilder getSpannableChild() {
+        return spannableChild;
+    }
+
+    public void setSpannableChild(SpannableStringBuilder spannableChild) {
+        this.spannableChild = spannableChild;
     }
 
     public String getChild() {

@@ -39,13 +39,20 @@ import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
  */
 public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
 
+    public ArrayList<ExpandableGroupEntity> getmGroups() {
+        return mGroups;
+    }
+
+    public void setmGroups(ArrayList<ExpandableGroupEntity> mGroups) {
+        this.mGroups = mGroups;
+    }
+
     private ArrayList<ExpandableGroupEntity> mGroups;
     private Context mContext;
 
-    public ExpandableAdapter(Context context, ArrayList<ExpandableGroupEntity> groups) {
+    public ExpandableAdapter(Context context) {
         super(context);
         mContext = context;
-        mGroups = groups;
     }
 
     @Override
@@ -112,8 +119,8 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
     public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {
         ChildEntity entity = mGroups.get(groupPosition).getChildren().get(childPosition);
         TextView textView = holder.get(R.id.tv_child);
-        SpannableStringBuilder renderText = Helper.renderText(entity.getChild());
-        textView.setText(renderText);
+        //SpannableStringBuilder renderText = Helper.renderText(entity.getChild());
+        textView.setText(entity.getSpannableChild());
         textView.setMovementMethod(LocalLinkMovementMethod.getInstance());
 //        textView.setOnTouchListener(new View.OnTouchListener() {
 //            @Override
