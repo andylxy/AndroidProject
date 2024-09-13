@@ -24,7 +24,7 @@ import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookDetailList;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.entitymodel.TitelInfo;
-import run.yigou.gxzy.ui.tips.tipsutils.Helper;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsHelper;
 import run.yigou.gxzy.ui.adapter.ChapterDicAdapter;
 import run.yigou.gxzy.ui.fragment.BookCollectCaseFragment;
 import run.yigou.gxzy.utils.StringHelper;
@@ -99,7 +99,7 @@ public final class TipsBookInfoActivity extends AppActivity {
         tvBookAuthor.setText(mBook.getAuthor());
         tvTvBookName.setText(mBook.getName());
         tvBookAuthor.setText(mBook.getAuthor());
-        tvBookDesc.setText(Helper.renderText(mBook.getDesc()));
+        tvBookDesc.setText(TipsHelper.renderText(mBook.getDesc()));
         setTitle(mBook.getName());
         if (Objects.equals(mBook.getName(), "黄帝内经")){
             btnAddBookcase.setVisibility(View.GONE);

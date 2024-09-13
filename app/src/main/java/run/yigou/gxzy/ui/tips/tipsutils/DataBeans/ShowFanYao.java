@@ -21,7 +21,7 @@ import java.util.Map;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
-import run.yigou.gxzy.ui.tips.tipsutils.Helper;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsHelper;
 
 
 public class ShowFanYao {
@@ -182,7 +182,7 @@ public class ShowFanYao {
                     spannableStringBuilder.append((CharSequence) dataItem.getAttributedText());
                 }
             } else {
-                spannableStringBuilder.append((CharSequence) Helper.renderText("$r{药物未找到资料}"));
+                spannableStringBuilder.append((CharSequence) TipsHelper.renderText("$r{药物未找到资料}"));
             }
             spannableStringBuilder.append((CharSequence) "\n\n");
 
@@ -213,14 +213,14 @@ public class ShowFanYao {
                 if (sectionCount > 0) {
                     spannableStringBuilder.append((CharSequence) "\n\n");
                 }
-                spannableStringBuilder.append((CharSequence) Helper.renderText(
+                spannableStringBuilder.append((CharSequence) TipsHelper.renderText(
                         String.format("$m{%s}-$m{含“$v{%s}”凡%d方：}",
                                 sectionData.getHeader(), str, matchedCount)
                 ));
                 spannableStringBuilder.append((CharSequence) "\n");
 
                 for (DataItem dataItem : filteredItems) {
-                    spannableStringBuilder.append((CharSequence) Helper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
+                    spannableStringBuilder.append((CharSequence) TipsHelper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
                 }
 
                 sectionCount++;

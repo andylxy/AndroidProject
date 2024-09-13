@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.LocalLinkMovementMethod;
-import run.yigou.gxzy.ui.tips.tipsutils.Helper;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsHelper;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 
@@ -38,7 +38,7 @@ public class NoFooterAdapter extends GroupedListAdapter {
     public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {
         ChildEntity entity = mGroups.get(groupPosition).getChildren().get(childPosition);
         TextView textView= holder.get(R.id.tv_child);
-        SpannableStringBuilder renderText =  Helper.renderText(entity.getChild());
+        SpannableStringBuilder renderText =  TipsHelper.renderText(entity.getChild());
         textView.setText(renderText);
         textView.setMovementMethod(LocalLinkMovementMethod.getInstance());
 

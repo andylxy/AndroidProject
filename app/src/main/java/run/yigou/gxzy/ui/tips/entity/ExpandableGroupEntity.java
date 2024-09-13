@@ -30,7 +30,6 @@ public class ExpandableGroupEntity {
     public ExpandableGroupEntity(String header, String footer, boolean isExpand,
                                  ArrayList<ChildEntity> children) {
         this.header = header;
-       // this.spannableHeader = spannableHeader;
         this.footer = footer;
         this.isExpand = isExpand;
         this.children = children;

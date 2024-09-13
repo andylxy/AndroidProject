@@ -16,7 +16,7 @@ import java.util.Locale;
 
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
-import run.yigou.gxzy.ui.tips.tipsutils.Helper;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsHelper;
 
 
 public class Fang extends DataItem {
@@ -38,13 +38,13 @@ public class Fang extends DataItem {
         if (this.helpYaoList == null) {
             this.helpYaoList = new LinkedList();
         }
-        Helper.Condition<YaoUse> iBool = new Helper.Condition<YaoUse>() {
+        TipsHelper.Condition<YaoUse> iBool = new TipsHelper.Condition<YaoUse>() {
             @Override
             public boolean test(YaoUse yaoUse) {
                 return Fang.this.isYaoEqual(yaoUse.showName, str);
             }
         };
-        return Helper.some(this.standardYaoList, iBool) || Helper.some(this.extraYaoList, iBool) || Helper.some(this.helpYaoList, iBool);
+        return TipsHelper.some(this.standardYaoList, iBool) || TipsHelper.some(this.extraYaoList, iBool) || TipsHelper.some(this.helpYaoList, iBool);
     }
 
     public int compare(Fang fang, String str) {

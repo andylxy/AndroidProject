@@ -12,7 +12,6 @@ package run.yigou.gxzy.ui.tips.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.text.SpannableStringBuilder;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,7 +23,6 @@ import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.LocalLinkMovementMethod;
-import run.yigou.gxzy.ui.tips.tipsutils.Helper;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 
@@ -48,11 +46,9 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
     }
 
     private ArrayList<ExpandableGroupEntity> mGroups;
-    private Context mContext;
 
     public ExpandableAdapter(Context context) {
         super(context);
-        mContext = context;
     }
 
     @Override
@@ -100,8 +96,8 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
         ExpandableGroupEntity entity = mGroups.get(groupPosition);
         //holder.setText(R.id.tv_expandable_header, entity.getHeader());
         TextView textView = holder.get(R.id.tv_expandable_header);
-        SpannableStringBuilder renderText = Helper.renderText(entity.getHeader());
-        textView.setText(renderText);
+       // SpannableStringBuilder renderText = TipsHelper.renderText(entity.getHeader());
+        textView.setText(entity.getSpannableHeader());
         ImageView ivState = holder.get(R.id.iv_state);
         if (entity.isExpand()) {
             ivState.setRotation(90);

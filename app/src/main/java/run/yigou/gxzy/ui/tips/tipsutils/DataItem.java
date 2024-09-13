@@ -26,7 +26,7 @@ public class DataItem {
 
    public void setText(String str) {
         this.text = str;
-        this.attributedText = Helper.renderText(this.text);
+        this.attributedText = TipsHelper.renderText(this.text);
     }
 
     public DataItem getCopy() {
@@ -59,7 +59,7 @@ public class DataItem {
         if (this.attributedText != null) {
             return this.attributedText;
         }
-        this.attributedText = Helper.renderText(this.text);
+        this.attributedText = TipsHelper.renderText(this.text);
         return this.attributedText;
     }
 
@@ -89,7 +89,7 @@ public class DataItem {
     }
 
     public static String[] getFangNameList(String str) {
-        ArrayList<Integer> allSubStringPos = Helper.getAllSubStringPos(str, "$f");
+        ArrayList<Integer> allSubStringPos = TipsHelper.getAllSubStringPos(str, "$f");
         String[] strArr = new String[allSubStringPos.size()];
         Iterator<Integer> it = allSubStringPos.iterator();
         int i = 0;
@@ -102,7 +102,7 @@ public class DataItem {
     }
 
     public static String[] getYaoNameList(String str) {
-        ArrayList<Integer> allSubStringPos = Helper.getAllSubStringPos(str, "$u");
+        ArrayList<Integer> allSubStringPos = TipsHelper.getAllSubStringPos(str, "$u");
         String[] strArr = new String[allSubStringPos.size()];
         Iterator<Integer> it = allSubStringPos.iterator();
         int i = 0;

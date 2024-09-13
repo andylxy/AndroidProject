@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.ShowFanYao;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.Helper;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
 
 /**
@@ -123,15 +123,19 @@ public class GroupModel {
      * @param isSearch true为搜索, false 初始数据
      * @return 返回构造完成数据
      */
-    public static ArrayList<ExpandableGroupEntity> getExpandableGroups( ArrayList<HH2SectionData>  hh2SectionData, boolean isExpand,boolean isSearch) {
+    public static ArrayList<ExpandableGroupEntity> getExpandableGroups( ArrayList<HH2SectionData>  hh2SectionData,
+                                                                        boolean isExpand,boolean isSearch) {
         ArrayList<ExpandableGroupEntity> groups = new ArrayList<>();
         if (hh2SectionData ==null) return  groups;
         for (HH2SectionData sectionData : hh2SectionData) {
             ArrayList<ChildEntity> children = new ArrayList<>();
             for (DataItem dataItem : sectionData.getData()) {
-                children.add(new ChildEntity(dataItem.getText(),dataItem.getAttributedText()));
+                if (isSearch)
+                    children.add(new ChildEntity(dataItem.getText(),dataItem.getAttributedText()));
+                else
+                    children.add(new ChildEntity(dataItem.getText(),TipsHelper.renderText(dataItem.getText())));
             }
-            SpannableStringBuilder spannableHeader = Helper.renderText(sectionData.getHeader());
+            SpannableStringBuilder spannableHeader = TipsHelper.renderText(sectionData.getHeader());
             groups.add(new ExpandableGroupEntity(sectionData.getHeader(), spannableHeader,"", isExpand, children));
         }
         return groups;
@@ -139,7 +143,7 @@ public class GroupModel {
 
 
     public static SpannableStringBuilder getSpannableChildren(String childrenStr){
-        return Helper.renderText(childrenStr);
+        return TipsHelper.renderText(childrenStr);
     }
 
 }
