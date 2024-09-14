@@ -20,11 +20,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
 
-/**
- * Depiction:
- * Author: teach
- * Date: 2017/3/20 15:51
- */
+
 public class GroupModel {
 
 
@@ -139,11 +135,6 @@ public class GroupModel {
             groups.add(new ExpandableGroupEntity(sectionData.getHeader(), spannableHeader,"", isExpand, children));
         }
         return groups;
-    }
-
-
-    public static SpannableStringBuilder getSpannableChildren(String childrenStr){
-        return TipsHelper.renderText(childrenStr);
     }
 
 }

@@ -112,6 +112,11 @@
             android:label="@string/tips_book_data_content"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.activity.TipsFragmentActivity"
+            android:label="@string/tips_book_data_content"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
 
         <!-- 引导页 -->
         <activity

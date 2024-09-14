@@ -78,10 +78,10 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     @Override
     protected void initView() {
         mCollapsingToolbarLayout = findViewById(R.id.ctl_home_bar);
-        mToolbar = findViewById(R.id.tb_home_title);
+       mToolbar = findViewById(R.id.tb_home_title);
 
         mAddressView = findViewById(R.id.tv_home_address);
-        mHintView = findViewById(R.id.tv_home_hint);
+       mHintView = findViewById(R.id.tv_home_hint);
         mSearchView = findViewById(R.id.iv_home_search);
 
         mTabView = findViewById(R.id.rv_home_tab);

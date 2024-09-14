@@ -32,9 +32,6 @@ public class SingletonData {
     protected List<String> allFang;
     protected List<String> allYao;
     private ArrayList<HH2SectionData> content;
-
-
-
     private ArrayList<HH2SectionData> searchResList;
     public Activity curActivity;
     //public ShowFragment curFragment;

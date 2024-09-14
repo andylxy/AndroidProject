@@ -175,6 +175,11 @@ public  static  HomeActivity mHomeActivity;
     }
 
     @Override
+    protected boolean isStatusBarEnabled() {
+        return super.isStatusBarEnabled();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         mViewPager.setAdapter(null);
