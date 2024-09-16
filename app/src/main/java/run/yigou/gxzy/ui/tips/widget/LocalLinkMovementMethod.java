@@ -1,14 +1,14 @@
 /*
  * 项目名: AndroidProject
  * 类名: LocalLinkMovementMethod.java
- * 包名: run.yigou.gxzy.ui.tips.tipsutils.DataBeans.LocalLinkMovementMethod
+ * 包名: run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod
  * 作者 : Zhs (xiaoyang_02@qq.com)
- * 当前修改时间 : 2024年09月12日 09:47:06
- * 上次修改时间: 2024年09月12日 09:44:39
+ * 当前修改时间 : 2024年09月14日 09:36:40
+ * 上次修改时间: 2024年09月12日 09:47:26
  * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.tips.tipsutils.DataBeans;
+package run.yigou.gxzy.ui.tips.widget;
 
 import android.text.Layout;
 import android.text.Selection;
@@ -85,10 +85,7 @@ public class LocalLinkMovementMethod extends LinkMovementMethod {
                     Selection.setSelection(spannable, spannable.getSpanStart(clickableSpanArr[0]), spannable.getSpanEnd(clickableSpanArr[0]));
                     this.lastClickTime = System.currentTimeMillis(); // 记录当前点击时间
                 }
-//                MotionEvent org_event =(MotionEvent) textView.getTag();
-//                if (org_event!=null)
-//                    Log.e("LocalLinkMovementMethod", "可点击的文本 (按下或抬起) mRawX : "+org_event.getRawX() +" mRawY: "+org_event.getRawY());
-                // 打印调试日志
+           // 打印调试日志
                 Log.e("--->>", "触摸事件处理完成 (按下或抬起) x : "+x  +" y: "+y +" scrollX :"+scrollX+" scrollY: "+scrollY +" offsetForHorizontal: "+offsetForHorizontal);
                 return true; // 事件被处理
             }

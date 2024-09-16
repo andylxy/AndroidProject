@@ -12,6 +12,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.FragmentPagerAdapter;
+
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppFragment;
@@ -26,17 +27,17 @@ import run.yigou.gxzy.ui.fragment.MineFragment;
 import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2018/10/18
- *    desc   : 首页界面
+ * author : Android 轮子哥
+ * github : https://github.com/getActivity/AndroidProject
+ * time   : 2018/10/18
+ * desc   : 首页界面
  */
 public final class HomeActivity extends AppActivity
         implements NavigationAdapter.OnNavigationListener {
 
     private static final String INTENT_KEY_IN_FRAGMENT_INDEX = "fragmentIndex";
     private static final String INTENT_KEY_IN_FRAGMENT_CLASS = "fragmentClass";
-public  static  HomeActivity mHomeActivity;
+    public static HomeActivity mHomeActivity;
     private ViewPager mViewPager;
     private RecyclerView mNavigationView;
 
@@ -85,11 +86,11 @@ public  static  HomeActivity mHomeActivity;
         mPagerAdapter.addFragment(BookCollectCaseFragment.newInstance());
         mPagerAdapter.addFragment(HomeFragment.newInstance());
         mPagerAdapter.addFragment(MineFragment.newInstance());
-       // mPagerAdapter.addFragment(MessageFragment.newInstance());
+        // mPagerAdapter.addFragment(MessageFragment.newInstance());
         mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());
-       // mPagerAdapter.addFragment(MineFragment.newInstance());
+        // mPagerAdapter.addFragment(MineFragment.newInstance());
         mViewPager.setAdapter(mPagerAdapter);
-        mHomeActivity=this;
+        mHomeActivity = this;
         onNewIntent(getIntent());
     }
 
@@ -142,7 +143,7 @@ public  static  HomeActivity mHomeActivity;
             case 1:
             case 2:
             case 3:
-             mViewPager.setCurrentItem(position);
+                mViewPager.setCurrentItem(position);
                 return true;
             default:
                 return false;

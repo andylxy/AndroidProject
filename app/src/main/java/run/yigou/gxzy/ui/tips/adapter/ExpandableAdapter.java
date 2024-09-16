@@ -22,7 +22,7 @@ import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.LocalLinkMovementMethod;
+import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 

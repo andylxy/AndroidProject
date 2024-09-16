@@ -13,7 +13,7 @@ package run.yigou.gxzy.ui.tips.tipsutils.DataBeans;
 
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 
-/* loaded from: classes.dex */
+
 public class Yao extends DataItem {
     String name;
 }

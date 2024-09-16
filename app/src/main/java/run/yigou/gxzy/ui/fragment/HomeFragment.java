@@ -78,10 +78,10 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     @Override
     protected void initView() {
         mCollapsingToolbarLayout = findViewById(R.id.ctl_home_bar);
-       mToolbar = findViewById(R.id.tb_home_title);
+        mToolbar = findViewById(R.id.tb_home_title);
 
         mAddressView = findViewById(R.id.tv_home_address);
-       mHintView = findViewById(R.id.tv_home_hint);
+        mHintView = findViewById(R.id.tv_home_hint);
         mSearchView = findViewById(R.id.iv_home_search);
 
         mTabView = findViewById(R.id.rv_home_tab);
@@ -97,14 +97,14 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
         //设置渐变监听
         mCollapsingToolbarLayout.setOnScrimsListener(this);
-        setOnClickListener(R.id.tv_home_hint,R.id.iv_home_search);
+        setOnClickListener(R.id.tv_home_hint, R.id.iv_home_search);
 
     }
 
     @Override
     protected void initData() {
         getBookInfoList();
-       // mTabAdapter.addItem("网页演示");
+        // mTabAdapter.addItem("网页演示");
         mTabAdapter.setOnTabListener(this);
 
     }
@@ -117,13 +117,15 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         switch (viewId) {
             case R.id.tv_home_hint:
             case R.id.iv_home_search:
-                Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
-                startActivity(intent);
+                //todo 搜索跳转
+               // Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
+               // startActivity(intent);
                 break;
             default:
                 EasyLog.print("onClick value: " + viewId);
         }
     }
+
     private void getBookInfoList() {
         EasyHttp.get(this)
                 .api(new BookInfoNav())
@@ -131,28 +133,22 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
                     @Override
                     public void onSucceed(HttpData<List<BookInfoNav.Bean>> data) {
-                        if (data.getData().size() > 0){
+                        if (data.getData().size() > 0) {
                             bookNavList = data.getData();
-                            for (BookInfoNav.Bean nav :bookNavList){
+                            for (BookInfoNav.Bean nav : bookNavList) {
                                 if (Objects.equals(nav.getName(), "伤寒"))
                                     mPagerAdapter.addFragment(TipsWindowFragment.newInstance());
                                 else
                                     mPagerAdapter.addFragment(BookInfoFragment.newInstance(nav.getNavList()), nav.getName());
                                 mTabAdapter.addItem(nav.getName());
                             }
-                        }
-                        else
+                        } else
                             bookNavList = new ArrayList<>();
 
                     }
                 });
     }
 
-    @Override
-    public boolean isStatusBarEnabled() {
-        // 使用沉浸式状态栏
-        return !super.isStatusBarEnabled();
-    }
 
     @Override
     public boolean isStatusBarDarkFont() {
