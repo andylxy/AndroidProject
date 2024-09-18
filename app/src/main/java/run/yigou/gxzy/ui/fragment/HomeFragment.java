@@ -11,7 +11,6 @@
 package run.yigou.gxzy.ui.fragment;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.view.View;
 import android.widget.TextView;
@@ -38,7 +37,6 @@ import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.adapter.TabAdapter;
 import run.yigou.gxzy.widget.XCollapsingToolbarLayout;
@@ -137,7 +135,9 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             bookNavList = data.getData();
                             for (BookInfoNav.Bean nav : bookNavList) {
                                 if (Objects.equals(nav.getName(), "伤寒"))
-                                    mPagerAdapter.addFragment(TipsWindowFragment.newInstance());
+                                    mPagerAdapter.addFragment(TipsWindowLocalFragment.newInstance());
+                               else if (Objects.equals(nav.getName(), "金匮"))
+                                    mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
                                 else
                                     mPagerAdapter.addFragment(BookInfoFragment.newInstance(nav.getNavList()), nav.getName());
                                 mTabAdapter.addItem(nav.getName());

@@ -19,6 +19,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 
 
 public class GroupModel {
@@ -129,9 +130,9 @@ public class GroupModel {
                 if (isSearch)
                     children.add(new ChildEntity(dataItem.getText(),dataItem.getAttributedText()));
                 else
-                    children.add(new ChildEntity(dataItem.getText(),TipsHelper.renderText(dataItem.getText())));
+                    children.add(new ChildEntity(dataItem.getText(),TipsNetHelper.renderText(dataItem.getText())));
             }
-            SpannableStringBuilder spannableHeader = TipsHelper.renderText(sectionData.getHeader());
+            SpannableStringBuilder spannableHeader = TipsNetHelper.renderText(sectionData.getHeader());
             groups.add(new ExpandableGroupEntity(sectionData.getHeader(), spannableHeader,"", isExpand, children));
         }
         return groups;

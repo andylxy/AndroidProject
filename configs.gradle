@@ -48,8 +48,8 @@ ext {
             if (serverType == SERVER_TYPE_PREVIEW) {
                 HOST_URL = "http://192.168.2.158:8991/"
             } else {
-               // HOST_URL = "http://192.168.2.158:8991/"
-                HOST_URL = "http://106.52.175.122:8991/"
+                HOST_URL = "http://192.168.2.158:8991/"
+               // HOST_URL = "http://106.52.175.122:8991/"
 
             }
             break

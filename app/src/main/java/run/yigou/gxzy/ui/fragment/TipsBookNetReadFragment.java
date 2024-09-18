@@ -14,6 +14,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -33,25 +34,27 @@ import java.util.ArrayList;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppFragment;
-import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
+import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsHelper;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
+import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
 
-public class TipsBookReadFragment extends AppFragment<AppActivity> {
+public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     private RecyclerView rvList;
     private ClearEditText clearEditText;
     private ExpandableAdapter adapter;
     private TextView numTips;
-   // private int totalNum;
+    private int bookId=0;
     private String searchText = null;
     private Button tipsBtnSearch;
 
-    public TipsBookReadFragment(){}
+    public TipsBookNetReadFragment(){}
     /**
      * @return
      */
@@ -59,7 +62,7 @@ public class TipsBookReadFragment extends AppFragment<AppActivity> {
     protected int getLayoutId() {
         return R.layout.tips_book_read_activity_group_list;
     }
-
+    Singleton_Net_Data singletonNetData;
     /**
      *
      */
@@ -98,7 +101,27 @@ public class TipsBookReadFragment extends AppFragment<AppActivity> {
 
             }
         });
+        // 获取传递的书本编号
+        Bundle args = getArguments();
+        if (args != null) {
+            bookId = args.getInt("bookNo",0);
+        }
+
+
+    }
+
+    /**
+     *
+     */
+    @Override
+    protected void initData() {
+        //获取数据
+        //Tips_Single_Data singleData =Tips_Single_Data.getInstance();
+        //获取指定书籍数据
+        singletonNetData = Tips_Single_Data.getInstance().getBookIdContent(bookId);
+        //加载到UI显示
         adapter = new ExpandableAdapter(getContext());
+
         reListAdapter(true, false);
         adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
             @Override
@@ -129,14 +152,6 @@ public class TipsBookReadFragment extends AppFragment<AppActivity> {
         rvList.setAdapter(adapter);
     }
 
-    /**
-     *
-     */
-    @Override
-    protected void initData() {
-
-    }
-
     @Override
     public void onClick(View view) {
         int viewId = view.getId();
@@ -153,13 +168,16 @@ public class TipsBookReadFragment extends AppFragment<AppActivity> {
      * @param isExpand false 表头不展开, true 展开
      */
     private void reListAdapter(boolean init, boolean isExpand) {
-        if (init) {
-            adapter.setmGroups(GroupModel.getExpandableGroups(SingletonData.getInstance().getContent(), isExpand,false));
-        } else {
-            if (SingletonData.getInstance().getSearchResList() != null)
-                adapter.setmGroups(GroupModel.getExpandableGroups(SingletonData.getInstance().getSearchResList(), isExpand,true));
+        if (bookId != 0) {
+
+            if (init) {
+                adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getContent(), isExpand,false));
+            } else {
+                if (!singletonNetData.getSearchResList().isEmpty())
+                    adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getSearchResList(), isExpand,true));
+            }
+            adapter.notifyDataChanged();
         }
-        adapter.notifyDataChanged();
     }
 
     /**
@@ -184,9 +202,9 @@ public class TipsBookReadFragment extends AppFragment<AppActivity> {
         // 检查搜索文本是否有效（不为 null、不为空且不是数字）
         if (searchText != null && !searchText.isEmpty() /*&& !TipsHelper.isNumeric(searchText)*/) {
             SearchKeyEntity searchKeyEntity  = new SearchKeyEntity(searchText);
-            ArrayList<HH2SectionData> filteredData = TipsHelper.getSearchHh2SectionData(searchKeyEntity);
+            ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity,singletonNetData);
             // 更新展示的数据和结果
-            SingletonData.getInstance().setSearchResList(filteredData);
+            singletonNetData.setSearchResList(filteredData);
             if (this.numTips != null) {
                 this.numTips.setText(String.format("%d个结果", searchKeyEntity.getSearchResTotalNum()));
             }
@@ -210,7 +228,7 @@ public class TipsBookReadFragment extends AppFragment<AppActivity> {
 //                .navigationBarColor(R.color.white);
 //    }
     public static void start(Context context) {
-        Intent intent = new Intent(context, TipsBookReadFragment.class);
+        Intent intent = new Intent(context, TipsBookNetReadFragment.class);
         // intent.putExtra(APPCONST.BOOK, item);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

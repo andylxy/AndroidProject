@@ -28,9 +28,6 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.api.BookInfoNav;
-import run.yigou.gxzy.ui.activity.BookInfoActivity;
-import run.yigou.gxzy.ui.activity.TipsBookInfoActivity;
-import run.yigou.gxzy.ui.activity.TipsBookReadActivity;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
 
@@ -42,16 +39,16 @@ import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
  * 版本:  1.0
  * 描述:
  **/
-public final class TipsWindowFragment extends TitleBarFragment<AppActivity>
+public final class TipsWindowLocalFragment extends TitleBarFragment<AppActivity>
         implements OnRefreshLoadMoreListener,
         BaseAdapter.OnItemClickListener {
 
-    public static TipsWindowFragment newInstance() {
-        return new TipsWindowFragment();
+    public static TipsWindowLocalFragment newInstance() {
+        return new TipsWindowLocalFragment();
     }
 
-    public static TipsWindowFragment newInstance(List<BookInfoNav.Bean.NavItem> navList) {
-        TipsWindowFragment bookInfoFragment = new TipsWindowFragment();
+    public static TipsWindowLocalFragment newInstance(List<BookInfoNav.Bean.NavItem> navList) {
+        TipsWindowLocalFragment bookInfoFragment = new TipsWindowLocalFragment();
         bookInfoFragment.mNavList = navList;
         return bookInfoFragment;
     }

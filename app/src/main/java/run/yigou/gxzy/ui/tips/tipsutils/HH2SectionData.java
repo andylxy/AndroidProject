@@ -10,12 +10,16 @@
 
 package run.yigou.gxzy.ui.tips.tipsutils;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class HH2SectionData {
+public class HH2SectionData implements Serializable {
     private List<? extends DataItem> data;
     private String header;
     private int section;
+
+    public HH2SectionData() {
+    }
 
     public HH2SectionData(List<? extends DataItem> list, int i, String str) {
         this.section = i;

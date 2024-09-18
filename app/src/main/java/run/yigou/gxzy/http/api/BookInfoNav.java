@@ -58,6 +58,16 @@ public final class BookInfoNav implements IRequestApi {
             private String Author;
             private String Desc;
 
+            public int getBookNo() {
+                return BookNo;
+            }
+
+            public void setBookNo(int bookNo) {
+                BookNo = bookNo;
+            }
+
+            private int BookNo;
+
             public NavItem(String desc, String author, String chenɡShu, String bookName, String imageUrl, String id) {
                 Desc = desc;
                 Author = author;
