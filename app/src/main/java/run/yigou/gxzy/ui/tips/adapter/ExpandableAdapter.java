@@ -30,6 +30,7 @@ import java.util.Arrays;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.dialog.MenuDialog;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
@@ -126,18 +127,19 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
         //SpannableStringBuilder renderText = Helper.renderText(entity.getChild());
         textView.setText(entity.getSpannableChild());
         textView.setMovementMethod(LocalLinkMovementMethod.getInstance());
+        //长按弹出复制
         textView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 // 底部选择框
-                initDialog(v.getContext());
-                menuDialogBuilder
+                TipsNetHelper.initDialog(v.getContext());
+                TipsNetHelper.menuDialogBuilder
                         .setListener(new MenuDialog.OnListener<String>() {
                             @Override
                             public void onSelected(BaseDialog dialog, int position, String string) {
                                 //Toast.makeText(v.getContext(), "位置：" + position + "，文本：" + string, Toast.LENGTH_LONG).show();
                                 // 复制到剪贴板
-                                copyToClipboard(v.getContext(), entity.getChild());
+                                TipsNetHelper. copyToClipboard(v.getContext(), entity.getSpannableChild().toString());
                             }
 
                             // @Override
@@ -171,24 +173,6 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
 //                        .show();
 //            }
 //        });
-    }
-    // 复制内容到剪贴板
-    private void copyToClipboard(Context context, String text) {
-        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("label", text);
-        clipboard.setPrimaryClip(clip);
-        Toast.makeText(context, "已复制到剪贴板" , Toast.LENGTH_SHORT).show();
-    }
-    // 创建 MenuDialog 实例
-    private MenuDialog.Builder menuDialogBuilder;
-    // 同时初始化数据
-    private List<String> data = Arrays.asList("拷贝本条"/*, "拷贝本章全部内容", "拷贝全部结果"*/);
-
-    // 初始化方法
-    private void initDialog(Context context) {
-        if (menuDialogBuilder == null) {
-            menuDialogBuilder = new MenuDialog.Builder(context).setList(data);
-        }
     }
 
     /**

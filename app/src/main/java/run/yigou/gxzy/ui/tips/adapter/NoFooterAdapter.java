@@ -12,14 +12,17 @@ package run.yigou.gxzy.ui.tips.adapter;
 
 import android.content.Context;
 import android.text.SpannableStringBuilder;
+import android.view.View;
 import android.widget.TextView;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
+import com.hjq.base.BaseDialog;
 
 import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
@@ -41,7 +44,31 @@ public class NoFooterAdapter extends GroupedListAdapter {
         SpannableStringBuilder renderText =  TipsNetHelper.renderText(entity.getChild());
         textView.setText(renderText);
         textView.setMovementMethod(LocalLinkMovementMethod.getInstance());
+        //长按弹出复制
+        textView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                // 底部选择框
+                TipsNetHelper.initDialog(v.getContext());
+                TipsNetHelper.menuDialogBuilder
+                        .setListener(new MenuDialog.OnListener<String>() {
+                            @Override
+                            public void onSelected(BaseDialog dialog, int position, String string) {
+                                //Toast.makeText(v.getContext(), "位置：" + position + "，文本：" + string, Toast.LENGTH_LONG).show();
+                                // 复制到剪贴板
+                                TipsNetHelper. copyToClipboard(v.getContext(), renderText.toString());
+                            }
 
+                            // @Override
+                            // public void onCancel(BaseDialog dialog) {
+                            //Toast.makeText(v.getContext(), "取消了", Toast.LENGTH_LONG).show();
+                            // }
+                        })
+                        .show();
+                // 返回 true 表示事件已被处理
+                return true;
+            }
+        });
     }
     /**
      * 返回false表示没有组尾

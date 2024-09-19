@@ -12,6 +12,8 @@ package run.yigou.gxzy.ui.tips.tipsutils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PointF;
@@ -26,6 +28,7 @@ import android.text.style.RelativeSizeSpan;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.internal.view.SupportMenu;
@@ -35,6 +38,7 @@ import com.lxj.xpopup.XPopup;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +47,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import run.yigou.gxzy.app.AppApplication;
+import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.tips.TipsWindow_Fang_BubbleAttachPopup;
 import run.yigou.gxzy.ui.tips.TipsWindow_Yao_BubbleAttachPopup;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
@@ -342,6 +347,25 @@ public class TipsNetHelper {
     }
 
 
+    // 复制内容到剪贴板
+    public static void copyToClipboard(Context context, String text) {
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("label", text);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(context, "已复制到剪贴板" , Toast.LENGTH_SHORT).show();
+    }
+    // 创建 MenuDialog 实例
+    public static MenuDialog.Builder menuDialogBuilder;
+    // 同时初始化数据
+    private static List<String> data = Arrays.asList("拷贝本条"/*, "拷贝本章全部内容", "拷贝全部结果"*/);
+
+    // 初始化方法
+    public static void initDialog(Context context) {
+        if (menuDialogBuilder == null) {
+            menuDialogBuilder = new MenuDialog.Builder(context).setList(data);
+        }
+    }
+
     public static SpannableStringBuilder renderText(String str) {
         return renderText(str, new ClickLink() {
             @Override
@@ -393,43 +417,6 @@ public class TipsNetHelper {
     }
 
 
-    private static Rect getTextRect(ClickableSpan clickableSpan, TextView textView) {
-        Rect rect = new Rect(); // 用于存储文本的矩形区域
-        SpannableString spannableString = (SpannableString) textView.getText(); // 获取 TextView 的文本
-        Layout layout = textView.getLayout(); // 获取文本布局
-        int start = spannableString.getSpanStart(clickableSpan); // 获取可点击 span 的起始位置
-        int end = spannableString.getSpanEnd(clickableSpan); // 获取可点击 span 的结束位置
-
-        int startLine = layout.getLineForOffset(start); // 获取起始位置所在的行号
-        int endLine = layout.getLineForOffset(end); // 获取结束位置所在的行号
-        boolean isMultiLine = startLine != endLine; // 判断 span 是否跨越多行
-
-        layout.getLineBounds(startLine, rect); // 获取起始行的边界
-        int[] location = new int[2]; // 存储 TextView 在屏幕上的位置
-        textView.getLocationOnScreen(location); // 获取 TextView 在屏幕上的位置
-        int scrollY = textView.getScrollY(); // 获取 TextView 的垂直滚动量
-        rect.offset(0, location[1] - scrollY + textView.getCompoundPaddingTop()); // 调整矩形区域的顶部位置
-
-        if (isMultiLine) {
-            // 处理 span 跨越多行的情况
-            if (rect.top > AppApplication.getmContext().getResources().getDisplayMetrics().heightPixels - rect.bottom) {
-                // 如果矩形区域的底部超出屏幕高度，使用起始行的右边界
-                rect.right = (int) layout.getLineRight(startLine);
-            } else {
-                // 否则，处理结束行的边界
-                layout.getLineBounds(endLine, rect);
-                rect.offset(0, location[1] - scrollY + textView.getCompoundPaddingTop()); // 调整矩形区域的顶部位置
-                rect.left = (int) layout.getLineLeft(endLine); // 设置矩形区域的左边界
-            }
-        } else {
-            // 处理 span 不跨越多行的情况
-            rect.right = (int) (layout.getPrimaryHorizontal(end) - layout.getPrimaryHorizontal(start)) + rect.left; // 计算右边界
-        }
-
-        rect.left += textView.getCompoundPaddingLeft() - textView.getScrollX(); // 调整矩形区域的左边界
-        return rect; // 返回最终计算的矩形区域
-    }
-
     private static final HashMap<String, Integer> colorMap = new HashMap<>();
 
     static {
@@ -459,26 +446,7 @@ public class TipsNetHelper {
         Integer colorValue = colorMap.get(s);
         return colorValue != null ? colorValue : Color.BLACK;
     }
-//    @SuppressLint("RestrictedApi")
-//    public static int getColoredTextByStrClass(String str) {
-//        HashMap<String, Integer> hashMap = new HashMap<>();
-//        hashMap.put("r", Integer.valueOf(SupportMenu.CATEGORY_MASK));
-//        hashMap.put("n", Color.BLUE); // 蓝色
-//        hashMap.put("f", Color.BLUE); // 蓝色
-//        hashMap.put("a", Color.parseColor("#C0C0C0")); // 浅灰色
-//        hashMap.put("m", Color.rgb(255, 0, 0)); // 红色
-//        hashMap.put("s", Color.argb(128, 0, 0, 255)); // 半透明蓝色
-//        hashMap.put("u", Color.rgb(77, 0, 255)); // 紫色
-//        hashMap.put("v", Color.rgb(77, 0, 255)); // 紫色
-//        hashMap.put("w", Color.rgb(0, 128, 0)); // 绿色
-//        hashMap.put("q", Color.rgb(61, 200, 120)); // 浅绿色
-//        hashMap.put("h", Color.BLACK); // 默认颜色，黑色
-//        hashMap.put("x", Color.parseColor("#EA8E3B")); // 橙色
-//        hashMap.put("y", Color.parseColor("#9A764F")); // 棕色
-//
-//        Integer num = hashMap.get(str);
-//        return num == null ? ViewCompat.MEASURED_STATE_MASK : num.intValue();
-//    }
+
 
     /**
      * 根据给定的比较器在数据列表中搜索符合条件的项，并返回一个新的列表，其中包含符合条件的部分数据。
