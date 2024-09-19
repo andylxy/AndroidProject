@@ -9,14 +9,12 @@ import java.util.Objects;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.common.APPCONST;
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.http.api.BookDetailList;
 import run.yigou.gxzy.http.entitymodel.ChapterList;
 import run.yigou.gxzy.http.entitymodel.TitelInfo;
 import run.yigou.gxzy.ui.adapter.ChapterDicAdapter;
-import run.yigou.gxzy.utils.ConvertHtmlColorsHelper;
-import run.yigou.gxzy.utils.StringHelper;
 
 /**
  * author : Android 轮子哥
@@ -46,7 +44,7 @@ public final class TitleDicActivity extends AppActivity {
     }
 
     protected void initViewData() {
-        bean = getSerializable(APPCONST.CHAPTER);
+        bean = getSerializable(AppConst.CHAPTER);
         if (bean != null) {
             setTitle(bean.getTitle());
             try {
@@ -101,7 +99,7 @@ public final class TitleDicActivity extends AppActivity {
             book.setBookId(mTitelInfos.get(i).getBookId());
             book.setChapterUrl(mTitelInfos.get(i).getId() + "");
             book.setSource("Search");
-            intent.putExtra(APPCONST.BOOK, book);
+            intent.putExtra(AppConst.BOOK, book);
             startActivity(intent);
         });
         mLlTitleListDic.setAdapter(mChapterDicAdapter);

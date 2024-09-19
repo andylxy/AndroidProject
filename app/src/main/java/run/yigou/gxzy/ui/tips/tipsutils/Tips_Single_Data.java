@@ -10,25 +10,25 @@
 
 package run.yigou.gxzy.ui.tips.tipsutils;
 
+
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+
 public class Tips_Single_Data {
     private static Tips_Single_Data tips_Single_Data;
-
-
     private  Map<Integer, Singleton_Net_Data> bookIdContent;
-    //    public void setYaoData(ArrayList<HH2SectionData> yaoData) {
-//        this.yaoData = yaoData;
-//    }
-    protected List<String> allYao;
+    private List<String> allYao;
+
+
     private ArrayList<HH2SectionData> yaoData;
     public ArrayList<HH2SectionData> getYaoData() {
         return yaoData;
     }
-
     public void setYaoData(HH2SectionData yaoData) {
 
         if (this.yaoData ==null) this.yaoData = new ArrayList<>();
@@ -51,22 +51,12 @@ public class Tips_Single_Data {
     private Map<String, String> fangAliasDict;
     private Map<String, String> yaoAliasDict;
 
-
     public Map<String, String> getFangAliasDict() {
         return fangAliasDict;
     }
-
-//    public void setFangAliasDict(Map<String, String> fangAliasDict) {
-//        this.fangAliasDict = fangAliasDict;
-//    }
-
     public Map<String, String> getYaoAliasDict() {
         return yaoAliasDict;
     }
-
-//    public void setYaoAliasDict(Map<String, String> yaoAliasDict) {
-//        this.yaoAliasDict = yaoAliasDict;
-//    }
 
     public  Singleton_Net_Data getBookIdContent(int bookId) {
 
@@ -167,6 +157,7 @@ public class Tips_Single_Data {
     private  Tips_Single_Data(){
         bookIdContent = new HashMap<Integer, Singleton_Net_Data>();
         initAlias();
+
     }
 
     /**

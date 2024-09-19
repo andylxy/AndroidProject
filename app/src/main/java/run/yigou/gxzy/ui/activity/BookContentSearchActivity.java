@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.base.BaseAdapter;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
@@ -23,9 +22,8 @@ import java.util.List;
 
 import me.gujun.android.taggroup.TagGroup;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.common.APPCONST;
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.URLCONST;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
@@ -246,7 +244,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                 book.setChapterUrl(mSearchResorc.get(i).getId() + "");
                 book.setBookId(mSearchResorc.get(i).getId() + "");
                 book.setSource("Search");
-                intent.putExtra(APPCONST.BOOK, book);
+                intent.putExtra(AppConst.BOOK, book);
                 startActivity(intent);
         });
         lvSearchBooksList.setAdapter(mSearchBookDetailAdapter);

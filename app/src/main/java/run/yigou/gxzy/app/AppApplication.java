@@ -59,6 +59,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
+import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 import timber.log.Timber;
 
 /**
@@ -115,9 +116,12 @@ public final class AppApplication extends Application {
         // 初始化 TitleBar 默认样式
         // TitleBar.setDefaultStyle(new ITitleBarStyle());
         application = this;
+        //构造书籍数据
+        Tips_Single_Data.getInstance();
         mUserInfoService = DbService.getInstance().mUserInfoService;
         initSdk(this);
         initUserLogin();
+
     }
 
     private void initUserLogin() {

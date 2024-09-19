@@ -16,7 +16,7 @@ import java.util.Map;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
-import run.yigou.gxzy.common.APPCONST;
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.Font;
 import run.yigou.gxzy.common.Setting;
 import run.yigou.gxzy.common.SysManager;
@@ -90,7 +90,7 @@ public final class FontsAdapter extends AppAdapter<Font> {
                         setting= SysManager.getSetting();
                         notifyDataSetChanged();
                         Intent intent = new Intent();
-                        intent.putExtra(APPCONST.FONT,font);
+                        intent.putExtra(AppConst.FONT,font);
                         ((Activity)getContext()).setResult(Activity.RESULT_OK,intent);
                     }
                 });

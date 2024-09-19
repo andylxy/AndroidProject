@@ -17,7 +17,7 @@ import java.util.Objects;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.common.APPCONST;
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.util.DbService;
@@ -57,7 +57,7 @@ public final class TipsBookInfoActivity extends AppActivity {
 
     public static void start(Context context, BookInfoNav.Bean.NavItem item) {
         Intent intent = new Intent(context, TipsBookInfoActivity.class);
-        intent.putExtra(APPCONST.BOOK, item);
+        intent.putExtra(AppConst.BOOK, item);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
@@ -153,13 +153,13 @@ public final class TipsBookInfoActivity extends AppActivity {
                     book.setBookId(chapter.getBookId()+ "");
                     book.setChapterUrl(chapter.getChapterLists().get(0).getId() + "");
                     book.setSource("Search");
-                    intent.putExtra(APPCONST.BOOK, book);
+                    intent.putExtra(AppConst.BOOK, book);
                     startActivity(intent);
                     return;
             }
             //标准点击处理方式
             Intent intent = new Intent(getActivity(), TitleDicActivity.class);
-            intent.putExtra(APPCONST.CHAPTER, chapter);
+            intent.putExtra(AppConst.CHAPTER, chapter);
             startActivity(intent);
         });
         mLvChapterDic.setAdapter(mChapterDicAdapter);
@@ -199,7 +199,7 @@ public final class TipsBookInfoActivity extends AppActivity {
     private boolean BookCollected(boolean start) {
 
         if (start) {
-            mNavItem = getSerializable(APPCONST.BOOK);
+            mNavItem = getSerializable(AppConst.BOOK);
             mBook = new Book();
             mBook.setAuthor(mNavItem.getAuthor());
             mBook.setDesc( mNavItem.getDesc());

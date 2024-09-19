@@ -8,7 +8,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
 
@@ -19,14 +18,12 @@ import java.util.Objects;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.common.APPCONST;
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.greendao.entity.Book;
-import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookDetailList;
 import run.yigou.gxzy.http.api.BookInfoNav;
-import run.yigou.gxzy.http.entitymodel.ChapterList;
 import run.yigou.gxzy.http.entitymodel.TitelInfo;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.HttpData;
@@ -62,7 +59,7 @@ public final class BookInfoActivity extends AppActivity {
 
     public static void start(Context context, BookInfoNav.Bean.NavItem item) {
         Intent intent = new Intent(context, BookInfoActivity.class);
-        intent.putExtra(APPCONST.BOOK, item);
+        intent.putExtra(AppConst.BOOK, item);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
@@ -158,13 +155,13 @@ public final class BookInfoActivity extends AppActivity {
                     book.setBookId(chapter.getBookId()+ "");
                     book.setChapterUrl(chapter.getChapterLists().get(0).getId() + "");
                     book.setSource("Search");
-                    intent.putExtra(APPCONST.BOOK, book);
+                    intent.putExtra(AppConst.BOOK, book);
                     startActivity(intent);
                     return;
             }
             //标准点击处理方式
             Intent intent = new Intent(getActivity(), TitleDicActivity.class);
-            intent.putExtra(APPCONST.CHAPTER, chapter);
+            intent.putExtra(AppConst.CHAPTER, chapter);
             startActivity(intent);
         });
         mLvChapterDic.setAdapter(mChapterDicAdapter);
@@ -204,7 +201,7 @@ public final class BookInfoActivity extends AppActivity {
     private boolean BookCollected(boolean start) {
 
         if (start) {
-            mNavItem = getSerializable(APPCONST.BOOK);
+            mNavItem = getSerializable(AppConst.BOOK);
             mBook = new Book();
             mBook.setAuthor(mNavItem.getAuthor());
             mBook.setDesc(mNavItem.getDesc());

@@ -14,6 +14,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -33,7 +34,9 @@ import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
@@ -50,11 +53,16 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     private ClearEditText clearEditText;
     private ExpandableAdapter adapter;
     private TextView numTips;
-    private int bookId=0;
+    private int bookId = 0;
     private String searchText = null;
     private Button tipsBtnSearch;
 
-    public TipsBookNetReadFragment(){}
+    private int showShanghan;
+    private int showJinkui ;
+
+    public TipsBookNetReadFragment() {
+    }
+
     /**
      * @return
      */
@@ -62,7 +70,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     protected int getLayoutId() {
         return R.layout.tips_book_read_activity_group_list;
     }
+
     Singleton_Net_Data singletonNetData;
+
     /**
      *
      */
@@ -77,10 +87,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         numTips = findViewById(R.id.include_tips_book_read).findViewById(R.id.numTips);
         clearEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
@@ -95,19 +102,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                     Log.d("clearEditText", "onTextChanged: 2");
                 }
             }
-
             @Override
-            public void afterTextChanged(Editable s) {
-
-            }
+            public void afterTextChanged(Editable s) {}
         });
-        // 获取传递的书本编号
-        Bundle args = getArguments();
-        if (args != null) {
-            bookId = args.getInt("bookNo",0);
-        }
-
-
     }
 
     /**
@@ -115,10 +112,41 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
      */
     @Override
     protected void initData() {
-        //获取数据
-        //Tips_Single_Data singleData =Tips_Single_Data.getInstance();
+        // 获取传递的书本编号
+        Bundle args = getArguments();
+        if (args != null) {
+            bookId = args.getInt("bookNo", 0);
+        }
         //获取指定书籍数据
         singletonNetData = Tips_Single_Data.getInstance().getBookIdContent(bookId);
+        //兼容处理宋版伤寒,
+        if(bookId== AppConst.ShangHanNo) {
+            // 默认初始化设置  宋版伤寒,金匮显示
+            // 从 SharedPreferences 中读取设置值
+            SharedPreferences sharedPreferences = AppApplication.application.getSharedPreferences("shanghan3.1", Context.MODE_PRIVATE);
+            showShanghan = sharedPreferences.getInt(AppConst.Key_Shanghan, 1);
+            showJinkui = sharedPreferences.getInt(AppConst.Key_Jinkui, 1);
+            //加载数据处理监听
+            singletonNetData.setOnContentUpdateListener(new Singleton_Net_Data.OnContentUpdateListener() {
+                @Override
+                public ArrayList<HH2SectionData> contentDateUpdate(ArrayList<HH2SectionData> contentList) {
+                    //如果请求为显示伤寒398条,
+                    if (showShanghan != AppConst.Show_Shanghan_AllSongBan) {
+                        return new ArrayList<>(contentList.subList(8, 18)); // 创建新列表
+                    }
+                    return contentList;
+                }
+            });
+            //宋版显示修改通知
+            singletonNetData.setOnContentShowStatusNotification(new Singleton_Net_Data.OnContentShowStatusNotification() {
+                @Override
+                public void contentShowStatusNotification(int status) {
+                    //刷新数据显示
+                    reListAdapter(true, false);
+                }
+            });
+        }
+
         //加载到UI显示
         adapter = new ExpandableAdapter(getContext());
 
@@ -146,11 +174,18 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 //                        Toast.LENGTH_LONG).show();
                 //String text=  ((TextView) holder.get(R.id.tv_child2)).getText().toString();
                 //Toast.makeText(getContext(), text,Toast.LENGTH_LONG).show();
-
             }
         });
         rvList.setAdapter(adapter);
     }
+
+
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        //刷新数据显示
+//        reListAdapter(true, false);
+//    }
 
     @Override
     public void onClick(View view) {
@@ -158,23 +193,23 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (viewId == R.id.tips_btn_search) {
 
             if (this.searchText == null) {
-                reListAdapter(true,false);
+                reListAdapter(true, false);
             } else setSearchText(this.searchText);
         }
     }
 
     /**
-     * @param init    true  初始化显示 ,false 搜索结果 显示
+     * @param init     true  初始化显示 ,false 搜索结果 显示
      * @param isExpand false 表头不展开, true 展开
      */
     private void reListAdapter(boolean init, boolean isExpand) {
         if (bookId != 0) {
 
             if (init) {
-                adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getContent(), isExpand,false));
+                adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getContent(), isExpand, false));
             } else {
                 if (!singletonNetData.getSearchResList().isEmpty())
-                    adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getSearchResList(), isExpand,true));
+                    adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getSearchResList(), isExpand, true));
             }
             adapter.notifyDataChanged();
         }
@@ -201,15 +236,15 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         // 重置匹配结果数量
         // 检查搜索文本是否有效（不为 null、不为空且不是数字）
         if (searchText != null && !searchText.isEmpty() /*&& !TipsHelper.isNumeric(searchText)*/) {
-            SearchKeyEntity searchKeyEntity  = new SearchKeyEntity(searchText);
-            ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity,singletonNetData);
+            SearchKeyEntity searchKeyEntity = new SearchKeyEntity(searchText);
+            ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity, singletonNetData);
             // 更新展示的数据和结果
             singletonNetData.setSearchResList(filteredData);
             if (this.numTips != null) {
                 this.numTips.setText(String.format("%d个结果", searchKeyEntity.getSearchResTotalNum()));
             }
             if (this.adapter != null) {
-                reListAdapter(false,true);
+                reListAdapter(false, true);
             }
         } else {
             if (this.adapter != null) {
@@ -235,7 +270,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         }
         context.startActivity(intent);
     }
-
 
 
 }

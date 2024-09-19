@@ -303,7 +303,7 @@ public class TipsNetHelper {
                 String substring = str.substring(indexOf + 1, indexOf + 2);
 
                 // 根据标记设置不同的样式
-                if (substring.equals("a") || substring.equals("w")) {
+                if (substring.equals("a") || substring.equals("w")||  substring.equals("r")) {
                     spannableStringBuilder.setSpan(new RelativeSizeSpan(0.7f), indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
                 if (substring.equals("u")) {
@@ -430,26 +430,55 @@ public class TipsNetHelper {
         return rect; // 返回最终计算的矩形区域
     }
 
-    @SuppressLint("RestrictedApi")
-    public static int getColoredTextByStrClass(String str) {
-        HashMap<String, Integer> hashMap = new HashMap<>();
-        hashMap.put("r", Integer.valueOf(SupportMenu.CATEGORY_MASK));
-        hashMap.put("n", Color.BLUE); // 蓝色
-        hashMap.put("f", Color.BLUE); // 蓝色
-        hashMap.put("a", Color.parseColor("#C0C0C0")); // 浅灰色
-        hashMap.put("m", Color.rgb(255, 0, 0)); // 红色
-        hashMap.put("s", Color.argb(128, 0, 0, 255)); // 半透明蓝色
-        hashMap.put("u", Color.rgb(77, 0, 255)); // 紫色
-        hashMap.put("v", Color.rgb(77, 0, 255)); // 紫色
-        hashMap.put("w", Color.rgb(0, 128, 0)); // 绿色
-        hashMap.put("q", Color.rgb(61, 200, 120)); // 浅绿色
-        hashMap.put("h", Color.BLACK); // 默认颜色，黑色
-        hashMap.put("x", Color.parseColor("#EA8E3B")); // 橙色
-        hashMap.put("y", Color.parseColor("#9A764F")); // 棕色
+    private static final HashMap<String, Integer> colorMap = new HashMap<>();
 
-        Integer num = hashMap.get(str);
-        return num == null ? ViewCompat.MEASURED_STATE_MASK : num.intValue();
+    static {
+        // 初始化颜色映射
+        colorMap.put("r", Color.RED);
+        colorMap.put("n", Color.BLUE);
+        colorMap.put("f", Color.BLUE);
+        colorMap.put("a", Color.GRAY);
+        colorMap.put("m", Color.RED);
+        colorMap.put("s", Color.argb(230, 0, 128, 255));
+        colorMap.put("u", Color.BLUE);
+        colorMap.put("v", Color.BLUE);
+        colorMap.put("w", Color.GREEN);
+        colorMap.put("q", Color.rgb(61, 200, 120));
+        colorMap.put("h", Color.BLACK);
+        colorMap.put("x", Color.parseColor("#EA8E3B"));
+        colorMap.put("y", Color.parseColor("#9A764F"));
     }
+
+    /**
+     * 根据输入的字符串获取对应的颜色值。
+     *
+     * @param s 输入的字符串，表示颜色的键
+     * @return 对应的颜色值，如果找不到则返回黑色
+     */
+    public static int getColoredTextByStrClass(String s) {
+        Integer colorValue = colorMap.get(s);
+        return colorValue != null ? colorValue : Color.BLACK;
+    }
+//    @SuppressLint("RestrictedApi")
+//    public static int getColoredTextByStrClass(String str) {
+//        HashMap<String, Integer> hashMap = new HashMap<>();
+//        hashMap.put("r", Integer.valueOf(SupportMenu.CATEGORY_MASK));
+//        hashMap.put("n", Color.BLUE); // 蓝色
+//        hashMap.put("f", Color.BLUE); // 蓝色
+//        hashMap.put("a", Color.parseColor("#C0C0C0")); // 浅灰色
+//        hashMap.put("m", Color.rgb(255, 0, 0)); // 红色
+//        hashMap.put("s", Color.argb(128, 0, 0, 255)); // 半透明蓝色
+//        hashMap.put("u", Color.rgb(77, 0, 255)); // 紫色
+//        hashMap.put("v", Color.rgb(77, 0, 255)); // 紫色
+//        hashMap.put("w", Color.rgb(0, 128, 0)); // 绿色
+//        hashMap.put("q", Color.rgb(61, 200, 120)); // 浅绿色
+//        hashMap.put("h", Color.BLACK); // 默认颜色，黑色
+//        hashMap.put("x", Color.parseColor("#EA8E3B")); // 橙色
+//        hashMap.put("y", Color.parseColor("#9A764F")); // 棕色
+//
+//        Integer num = hashMap.get(str);
+//        return num == null ? ViewCompat.MEASURED_STATE_MASK : num.intValue();
+//    }
 
     /**
      * 根据给定的比较器在数据列表中搜索符合条件的项，并返回一个新的列表，其中包含符合条件的部分数据。

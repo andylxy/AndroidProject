@@ -84,6 +84,7 @@ android:animateLayoutChanges="true">
     android:id="@+id/tips_book_read_activity_group_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#D3D3D3"
     android:layout_below="@+id/include_tips_book_read"/>
 </RelativeLayout>
 

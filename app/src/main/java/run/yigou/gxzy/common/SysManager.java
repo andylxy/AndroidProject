@@ -24,7 +24,7 @@ public class SysManager {
      * @return
      */
     public static Setting getSetting() {
-        Setting setting = (Setting) CacheHelper.readObject(APPCONST.FILE_NAME_SETTING);
+        Setting setting = (Setting) CacheHelper.readObject(AppConst.FILE_NAME_SETTING);
         if (setting == null){
             setting = getDefaultSetting();
             saveSetting(setting);
@@ -37,7 +37,7 @@ public class SysManager {
      * @param setting
      */
     public static void saveSetting(Setting setting) {
-        CacheHelper.saveObject(setting, APPCONST.FILE_NAME_SETTING);
+        CacheHelper.saveObject(setting, AppConst.FILE_NAME_SETTING);
     }
 
 

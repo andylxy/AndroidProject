@@ -1,7 +1,5 @@
 package run.yigou.gxzy.common;
 
-import android.os.Environment;
-
 import run.yigou.gxzy.R;
 
 
@@ -15,7 +13,7 @@ import run.yigou.gxzy.R;
  *
 */
 
-public class APPCONST {
+public class AppConst {
 
 
 
@@ -50,6 +48,34 @@ public class APPCONST {
     public static final String FILE_NAME_UPDATE_INFO = "updateInfo";
 
     public static final int REQUEST_FONT = 1001;
+    /**
+     *  SharedPreferences 伤寒保存的的Key字符串
+     */
+    public static final String  Key_Shanghan = "showShanghan";
+    /**
+     *  伤寒书籍编号
+     */
+    public static final int ShangHanNo =10001;
+    /**
+     * 显示398条辨
+     */
+    public static final int Show_Shanghan_398 = 0;
+    /**
+     * 显示所有条辨
+     */
+    public static final int Show_Shanghan_AllSongBan = 1;
+    /**
+     * 金匮不显示
+     */
+    public static final int Show_Jinkui_None = 0;
+    /**
+     * 显示完整金匮
+     */
+    public static final int Show_Jinkui_Default = 1;
+    /**
+     * SharedPreferences 金匮保存的的Key字符串
+     */
+    public static final String Key_Jinkui = "showJinkui";
 
 
 

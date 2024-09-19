@@ -59,11 +59,12 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
     /**
      * singleData 所有书籍 数据单例
      */
-    Tips_Single_Data singleData =Tips_Single_Data.getInstance();
+    Tips_Single_Data singleData ;
     /**
-     *  当前点击书本数据
+     * 当前点击书本数据
      */
     Singleton_Net_Data singletonNetData;
+
     @Override
     protected int getLayoutId() {
         return R.layout.book_info_fragment;
@@ -85,6 +86,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
 
     @Override
     protected void initData() {
+        singleData = Tips_Single_Data.getInstance();
         // List<BookInfoNav.Bean.NavList> navList =mNavList;
         mAdapter.setData(analogData());
         ThreadPoolManager.getInstance().execute(() -> {
@@ -93,14 +95,6 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
 
     }
 
-
-
-
-
-
-    /**
-     * 模拟数据
-     */
     private List<BookInfoNav.Bean.NavItem> analogData() {
         return mNavList;
     }
@@ -118,42 +112,41 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
         singletonNetData = Tips_Single_Data.getInstance().getBookIdContent(mAdapter.getItem(position).getBookNo());
         singletonNetData.setYaoAliasDict(singleData.getYaoAliasDict());
         singletonNetData.setFangAliasDict(singleData.getFangAliasDict());
-        //启动跳转
         getBookData(mAdapter.getItem(position).getBookNo());
         //等待后台数据获取成功
         ThreadPoolManager.getInstance().execute(() -> {
             try {
-                while (singletonNetData.getContent().isEmpty()){
-                    Thread.sleep(500); // 模拟延迟
+                while (singletonNetData.getContent().isEmpty()) {
+                    Thread.sleep(500); // 延迟数据获取成功
+//                    if (mAdapter.getItem(position).getBookNo() == 10001) {
+//                        //如果宋版的伤寒.则同获取宋版金匮
+//                        getBookData(10002);
+//                    }
                 }
-
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             post(() -> {
-                // 启动UI
-                TipsFragmentActivity.start(getAttachActivity(),true,mAdapter.getItem(position).getBookNo() );
+                // 启动跳转 到阅读窗口
+                TipsFragmentActivity.start(getAttachActivity(), true, mAdapter.getItem(position).getBookNo());
             });
         });
 
-
-        //TipsBookReadActivity.start(getActivity());
-        //startActivity(TipsFragmentActivity.class);
     }
 
     /**
-     *  获取点击项的数据
+     * 获取点击项的数据
+     *
      * @param bookId 获取指定的编号的信息
      */
-    public  void  getBookData(int bookId){
-        singletonNetData = Tips_Single_Data.getInstance().getBookIdContent(bookId);
+    public void getBookData(int bookId) {
         EasyHttp.get(this)
                 .api(new BookContentApi().setBookId(bookId))
                 .request(new HttpCallback<HttpData<List<HH2SectionData>>>(this) {
                     @Override
                     public void onSucceed(HttpData<List<HH2SectionData>> data) {
                         if (data != null && data.getData().size() > 0) {
-                          List<HH2SectionData> detailList = data.getData();
+                            List<HH2SectionData> detailList = data.getData();
                             //加载书本内容
                             singletonNetData.setContent(detailList);
                         }
@@ -163,10 +156,8 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
         EasyHttp.get(this)
                 .api(new BookFangApi().setBookId(bookId))
                 .request(new HttpCallback<HttpData<List<Fang>>>(this) {
-
                     @Override
                     public void onSucceed(HttpData<List<Fang>> data) {
-
                         if (data != null && data.getData().size() > 0) {
                             List<Fang> detailList = data.getData();
                             //加载书本相关的药方
@@ -175,7 +166,8 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                     }
                 });
     }
-    public  void  getAllYaoData(){
+
+    public void getAllYaoData() {
 
         EasyHttp.get(this)
                 .api(new YaoContentApi())
@@ -191,7 +183,6 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                     }
                 });
     }
-
 
 
     /**

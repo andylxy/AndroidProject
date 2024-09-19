@@ -36,19 +36,19 @@
                 android:text="伤寒杂病论"
                 tools:ignore="TextSizeCheck" />
 
-            <RadioButton
-                android:id="@+id/fangYaoTab"
-                style="@style/myTab"
-                android:drawableTop="@drawable/magnify_selector"
-                android:text="伤寒金匮方"
-                tools:ignore="TextSizeCheck" />
+<!--            <RadioButton-->
+<!--                android:id="@+id/fangYaoTab"-->
+<!--                style="@style/myTab"-->
+<!--                android:drawableTop="@drawable/magnify_selector"-->
+<!--                android:text="伤寒金匮方"-->
+<!--                tools:ignore="TextSizeCheck" />-->
 
-            <RadioButton
-                android:id="@+id/yaoTab"
-                style="@style/myTab"
-                android:drawableTop="@drawable/yao_selector"
-                android:text="伤寒金匮药"
-                tools:ignore="TextSizeCheck" />
+<!--            <RadioButton-->
+<!--                android:id="@+id/yaoTab"-->
+<!--                style="@style/myTab"-->
+<!--                android:drawableTop="@drawable/yao_selector"-->
+<!--                android:text="伤寒金匮药"-->
+<!--                tools:ignore="TextSizeCheck" />-->
 
             <RadioButton
                 android:id="@+id/unitTab"

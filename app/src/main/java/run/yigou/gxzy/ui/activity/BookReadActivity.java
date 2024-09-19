@@ -1,12 +1,9 @@
 package run.yigou.gxzy.ui.activity;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
@@ -34,7 +31,7 @@ import java.util.UUID;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.ResultCallback;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.common.APPCONST;
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.Language;
 import run.yigou.gxzy.common.ReadStyle;
 import run.yigou.gxzy.common.Setting;
@@ -54,7 +51,6 @@ import run.yigou.gxzy.ui.adapter.BookReadContenAdapter;
 import run.yigou.gxzy.ui.adapter.ChapterTitleAdapter;
 import run.yigou.gxzy.utils.BrightUtil;
 import run.yigou.gxzy.utils.ConvertHtmlColorsHelper;
-import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.utils.StringHelper;
 
 
@@ -194,7 +190,7 @@ public final class BookReadActivity extends AppActivity {
 
     public static void start(Context context, Book item) {
         Intent intent = new Intent(context, BookReadActivity.class);
-        intent.putExtra(APPCONST.BOOK, item);
+        intent.putExtra(AppConst.BOOK, item);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
@@ -406,7 +402,7 @@ public final class BookReadActivity extends AppActivity {
                     }, v -> {
                         //字体页面
                         Intent intent = new Intent(getActivity(), FontsActivity.class);
-                        startActivityForResult(intent, APPCONST.REQUEST_FONT);
+                        startActivityForResult(intent, AppConst.REQUEST_FONT);
                     }, v -> {
                         //autoScroll();
                         mSettingDetailDialog.dismiss();
@@ -858,7 +854,7 @@ public final class BookReadActivity extends AppActivity {
     private void dataSetting() {
 
         //接收传入书的信息
-        mBook = getSerializable(APPCONST.BOOK);
+        mBook = getSerializable(AppConst.BOOK);
         isStoreBook = StringHelper.isEmpty(mBook.getId());
         isSearch = mBook.getSource() != null && mBook.getSource().equals("Search");
         //显示进度条(不显示使用)
@@ -885,7 +881,7 @@ public final class BookReadActivity extends AppActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case APPCONST.REQUEST_FONT:
+            case AppConst.REQUEST_FONT:
                 if (resultCode == RESULT_OK) {
                     settingChange = true;
                     SetDayStyle();
