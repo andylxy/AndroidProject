@@ -137,7 +137,7 @@ public class Singleton_Net_Data {
     }
 
     private int bookId;
-
+    //todo 获取实例需优化
     public static Singleton_Net_Data getInstance(int bookId) {
         data = new Singleton_Net_Data(bookId);
         return data;

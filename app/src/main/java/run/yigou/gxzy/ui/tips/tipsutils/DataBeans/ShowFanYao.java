@@ -20,8 +20,9 @@ import java.util.Map;
 
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsHelper;
+import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
+import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
 
 public class ShowFanYao {
@@ -41,13 +42,18 @@ public class ShowFanYao {
 
     private String header;
 
+    Tips_Single_Data tipsSingleData ;
+    Singleton_Net_Data singletonData ;
+
+    public ShowFanYao(){
+        tipsSingleData= Tips_Single_Data.getInstance();
+        // 获取 SingletonData 实例和数据结构
+        singletonData = tipsSingleData.getBookIdContent(tipsSingleData.getCurBookId());
+    }
 
     private final ArrayList<ShowFanYao> showFanYaoList  = new ArrayList<>();
 
-
     public  ArrayList<ShowFanYao> showFang(String fanyao) {
-        // 获取 SingletonData 实例和数据结构
-        SingletonData singletonData = SingletonData.getInstance();
 
         // 获取方名别名映射
         Map<String, String> fangAliasDict = singletonData.getFangAliasDict();
@@ -147,7 +153,7 @@ public class ShowFanYao {
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
 
         // 获取单例数据实例
-        SingletonData singletonData = SingletonData.getInstance();
+        //SingletonData singletonData = SingletonData.getInstance();
 
         // 获取药物别名字典
         Map<String, String> yaoAliasDict = singletonData.getYaoAliasDict();
@@ -163,7 +169,7 @@ public class ShowFanYao {
             List<DataItem> dataItems = new ArrayList<>();
 
             // 遍历所有的药物数据
-            for (HH2SectionData sectionData : singletonData.getYaoData()) {
+            for (HH2SectionData sectionData : tipsSingleData.getYaoData()) {
                 for (DataItem dataItem : sectionData.getData()) {
                     String yaoName = dataItem.getYaoList().get(0);
                     String aliasName = yaoAliasDict.get(yaoName);
@@ -182,7 +188,7 @@ public class ShowFanYao {
                     spannableStringBuilder.append((CharSequence) dataItem.getAttributedText());
                 }
             } else {
-                spannableStringBuilder.append((CharSequence) TipsHelper.renderText("$r{药物未找到资料}"));
+                spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText("$r{药物未找到资料}"));
             }
             spannableStringBuilder.append((CharSequence) "\n\n");
 
@@ -213,14 +219,14 @@ public class ShowFanYao {
                 if (sectionCount > 0) {
                     spannableStringBuilder.append((CharSequence) "\n\n");
                 }
-                spannableStringBuilder.append((CharSequence) TipsHelper.renderText(
+                spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText(
                         String.format("$m{%s}-$m{含“$v{%s}”凡%d方：}",
                                 sectionData.getHeader(), str, matchedCount)
                 ));
                 spannableStringBuilder.append((CharSequence) "\n");
 
                 for (DataItem dataItem : filteredItems) {
-                    spannableStringBuilder.append((CharSequence) TipsHelper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
+                    spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
                 }
 
                 sectionCount++;

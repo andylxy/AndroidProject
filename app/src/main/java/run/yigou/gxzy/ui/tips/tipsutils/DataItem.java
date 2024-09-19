@@ -20,20 +20,18 @@ public class DataItem {
     private int ID;
     private SpannableStringBuilder attributedText;
     private List<String> fangList;
-    private NSIndexPath indexPath;
     private String text;
     private List<String> yaoList;
 
    public void setText(String str) {
         this.text = str;
-        this.attributedText = TipsHelper.renderText(this.text);
+        this.attributedText = TipsNetHelper.renderText(this.text);
     }
 
     public DataItem getCopy() {
         DataItem dataItem = new DataItem();
         dataItem.setPureText(this.text);
         dataItem.setAttributedText(new SpannableStringBuilder(this.attributedText));
-        dataItem.setIndexPath(this.indexPath);
         dataItem.setFangList(this.fangList);
         dataItem.setYaoList(this.yaoList);
         return dataItem;
@@ -59,7 +57,7 @@ public class DataItem {
         if (this.attributedText != null) {
             return this.attributedText;
         }
-        this.attributedText = TipsHelper.renderText(this.text);
+        this.attributedText = TipsNetHelper.renderText(this.text);
         return this.attributedText;
     }
 
@@ -67,14 +65,8 @@ public class DataItem {
         this.attributedText = spannableStringBuilder;
     }
 
-    public NSIndexPath getIndexPath() {
-        return this.indexPath;
-    }
 
-    /* JADX INFO: Access modifiers changed from: package-private */
-    public void setIndexPath(NSIndexPath nSIndexPath) {
-        this.indexPath = nSIndexPath;
-    }
+
 
     public List<String> getFangList() {
         return this.fangList == null ? new ArrayList() : this.fangList;
@@ -89,7 +81,7 @@ public class DataItem {
     }
 
     public static String[] getFangNameList(String str) {
-        ArrayList<Integer> allSubStringPos = TipsHelper.getAllSubStringPos(str, "$f");
+        ArrayList<Integer> allSubStringPos = TipsNetHelper.getAllSubStringPos(str, "$f");
         String[] strArr = new String[allSubStringPos.size()];
         Iterator<Integer> it = allSubStringPos.iterator();
         int i = 0;
@@ -102,7 +94,7 @@ public class DataItem {
     }
 
     public static String[] getYaoNameList(String str) {
-        ArrayList<Integer> allSubStringPos = TipsHelper.getAllSubStringPos(str, "$u");
+        ArrayList<Integer> allSubStringPos = TipsNetHelper.getAllSubStringPos(str, "$u");
         String[] strArr = new String[allSubStringPos.size()];
         Iterator<Integer> it = allSubStringPos.iterator();
         int i = 0;

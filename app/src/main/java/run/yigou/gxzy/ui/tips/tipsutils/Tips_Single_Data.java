@@ -23,7 +23,23 @@ public class Tips_Single_Data {
     private static Tips_Single_Data tips_Single_Data;
     private  Map<Integer, Singleton_Net_Data> bookIdContent;
     private List<String> allYao;
+    private int curBookId;
 
+    /**
+     * 获取当前打开书本ID
+     * @return 返回ID
+     */
+    public int getCurBookId() {
+        return curBookId;
+    }
+
+    /**
+     *  记录正在打开的书本的Id
+     * @param curBookId 需保存的Id
+     */
+    public void setCurBookId(int curBookId) {
+        this.curBookId = curBookId;
+    }
 
     private ArrayList<HH2SectionData> yaoData;
     public ArrayList<HH2SectionData> getYaoData() {
@@ -65,7 +81,7 @@ public class Tips_Single_Data {
             singletonNetData= Singleton_Net_Data.getInstance(bookId);
             bookIdContent.put(bookId,singletonNetData);
         }
-
+        setCurBookId(bookId);
         return  singletonNetData;
     }
     private void initAlias() {

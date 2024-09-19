@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.Locale;
 
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
-import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsHelper;
+import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
+import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
 
 public class Fang extends DataItem {
@@ -38,13 +39,13 @@ public class Fang extends DataItem {
         if (this.helpYaoList == null) {
             this.helpYaoList = new LinkedList();
         }
-        TipsHelper.Condition<YaoUse> iBool = new TipsHelper.Condition<YaoUse>() {
+        TipsNetHelper.Condition<YaoUse> iBool = new TipsNetHelper.Condition<YaoUse>() {
             @Override
             public boolean test(YaoUse yaoUse) {
                 return Fang.this.isYaoEqual(yaoUse.showName, str);
             }
         };
-        return TipsHelper.some(this.standardYaoList, iBool) || TipsHelper.some(this.extraYaoList, iBool) || TipsHelper.some(this.helpYaoList, iBool);
+        return TipsNetHelper.some(this.standardYaoList, iBool) || TipsNetHelper.some(this.extraYaoList, iBool) || TipsNetHelper.some(this.helpYaoList, iBool);
     }
 
     public int compare(Fang fang, String str) {
@@ -123,11 +124,18 @@ public class Fang extends DataItem {
     }
 
     public String getStandardYaoName(String str) {
-        String str2 = SingletonData.getInstance().getYaoAliasDict().get(str);
+        String str2 = singletonData.getYaoAliasDict().get(str);
         return str2 == null ? str : str2;
     }
 
+    Tips_Single_Data tipsSingleData ;
+    Singleton_Net_Data singletonData ;
 
+    public Fang(){
+        tipsSingleData= Tips_Single_Data.getInstance();
+        // 获取 SingletonData 实例和数据结构
+        singletonData = tipsSingleData.getBookIdContent(tipsSingleData.getCurBookId());
+    }
     public class YaoUse {
         int YaoID;
         String amount;

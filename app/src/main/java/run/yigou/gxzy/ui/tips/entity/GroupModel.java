@@ -17,8 +17,7 @@ import java.util.ArrayList;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.ShowFanYao;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsHelper;
-import run.yigou.gxzy.ui.tips.tipsutils.SingletonData;
+import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 
 
@@ -48,7 +47,7 @@ public class GroupModel {
     /**
      * 获取组列表数据
      */
-    public static ArrayList<GroupEntity> getGroups(SingletonData singletonData) {
+    public static ArrayList<GroupEntity> getGroups(Singleton_Net_Data singletonData) {
         ArrayList<GroupEntity> groups = new ArrayList<>();
         for (HH2SectionData sectionData : singletonData.getContent()) {
             ArrayList<ChildEntity> children = new ArrayList<>();
