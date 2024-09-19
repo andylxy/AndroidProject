@@ -420,20 +420,21 @@ public class TipsNetHelper {
     private static final HashMap<String, Integer> colorMap = new HashMap<>();
 
     static {
-        // 初始化颜色映射
-        colorMap.put("r", Color.RED);
-        colorMap.put("n", Color.BLUE);
-        colorMap.put("f", Color.BLUE);
-        colorMap.put("a", Color.GRAY);
-        colorMap.put("m", Color.RED);
-        colorMap.put("s", Color.argb(230, 0, 128, 255));
-        colorMap.put("u", Color.BLUE);
-        colorMap.put("v", Color.BLUE);
-        colorMap.put("w", Color.GREEN);
-        colorMap.put("q", Color.rgb(61, 200, 120));
-        colorMap.put("h", Color.BLACK);
-        colorMap.put("x", Color.parseColor("#EA8E3B"));
-        colorMap.put("y", Color.parseColor("#9A764F"));
+// 初始化颜色映射
+        colorMap.put("r", Color.RED); // 红色
+        colorMap.put("n", Color.BLUE); // 蓝色
+        colorMap.put("f", Color.BLUE); // 蓝色
+        colorMap.put("a", Color.GRAY); // 灰色
+        colorMap.put("m", Color.RED); // 红色
+        colorMap.put("s", Color.argb(230, 0, 128, 255)); // 半透明蓝色
+        colorMap.put("u", Color.BLUE); // 蓝色
+        colorMap.put("v", Color.BLUE); // 蓝色
+        colorMap.put("w", Color.GREEN); // 绿色
+        colorMap.put("q", Color.rgb(61, 200, 120)); // 自定义绿色
+        colorMap.put("h", Color.BLACK); // 黑色
+        colorMap.put("x", Color.parseColor("#EA8E3B")); // 自定义橙色
+        colorMap.put("y", Color.parseColor("#9A764F")); // 自定义棕色
+
     }
 
     /**
