@@ -112,19 +112,26 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
         singletonNetData = Tips_Single_Data.getInstance().getBookIdContent(mAdapter.getItem(position).getBookNo());
         singletonNetData.setYaoAliasDict(singleData.getYaoAliasDict());
         singletonNetData.setFangAliasDict(singleData.getFangAliasDict());
+
         getBookData(mAdapter.getItem(position).getBookNo());
         //等待后台数据获取成功
         ThreadPoolManager.getInstance().execute(() -> {
+            int count =0;
             try {
-                while (singletonNetData.getContent().isEmpty()) {
+                while (singletonNetData.getContent().isEmpty() && count < 20) {
                     Thread.sleep(500); // 延迟数据获取成功
 //                    if (mAdapter.getItem(position).getBookNo() == 10001) {
 //                        //如果宋版的伤寒.则同获取宋版金匮
 //                        getBookData(10002);
 //                    }
+                    count++;
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            }
+            if (singletonNetData.getContent().isEmpty()){
+                toast("获取数据失败：" );
+                return;
             }
             post(() -> {
                 // 启动跳转 到阅读窗口

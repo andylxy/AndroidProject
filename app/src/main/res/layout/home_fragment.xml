@@ -84,7 +84,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            tools:itemCount="2"
+            tools:itemCount="1"
             tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             tools:listitem="@layout/tab_item_design"
             tools:spanCount="2" />
