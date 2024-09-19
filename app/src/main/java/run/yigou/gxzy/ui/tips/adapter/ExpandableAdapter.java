@@ -11,17 +11,25 @@
 package run.yigou.gxzy.ui.tips.adapter;
 
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
+import com.hjq.base.BaseDialog;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Arrays;
 
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
@@ -96,7 +104,7 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
         ExpandableGroupEntity entity = mGroups.get(groupPosition);
         //holder.setText(R.id.tv_expandable_header, entity.getHeader());
         TextView textView = holder.get(R.id.tv_expandable_header);
-       // SpannableStringBuilder renderText = TipsHelper.renderText(entity.getHeader());
+        // SpannableStringBuilder renderText = TipsHelper.renderText(entity.getHeader());
         textView.setText(entity.getSpannableHeader());
         ImageView ivState = holder.get(R.id.iv_state);
         if (entity.isExpand()) {
@@ -118,16 +126,69 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
         //SpannableStringBuilder renderText = Helper.renderText(entity.getChild());
         textView.setText(entity.getSpannableChild());
         textView.setMovementMethod(LocalLinkMovementMethod.getInstance());
-//        textView.setOnTouchListener(new View.OnTouchListener() {
+        textView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                // 底部选择框
+                initDialog(v.getContext());
+                menuDialogBuilder
+                        .setListener(new MenuDialog.OnListener<String>() {
+                            @Override
+                            public void onSelected(BaseDialog dialog, int position, String string) {
+                                //Toast.makeText(v.getContext(), "位置：" + position + "，文本：" + string, Toast.LENGTH_LONG).show();
+                                // 复制到剪贴板
+                                copyToClipboard(v.getContext(), entity.getChild());
+                            }
+
+                            // @Override
+                            // public void onCancel(BaseDialog dialog) {
+                            //Toast.makeText(v.getContext(), "取消了", Toast.LENGTH_LONG).show();
+                            // }
+                        })
+                        .show();
+                // 返回 true 表示事件已被处理
+                return true;
+            }
+        });
+//        // 设置点击监听
+//        textView.setOnClickListener(new View.OnClickListener() {
 //            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                mRawX = event.getRawX();
-//                mRawY = event.getRawY();
-//                v.setTag(event);
-//                Log.e("ExpandableAdapter", "可点击的文本 (按下或抬起) mRawX : "+event.getRawX() +" mRawY: "+event.getRawY());
-//                return false;
+//            public void onClick(View v) {
+//                // 底部选择框
+//                initDialog(v.getContext());
+//                menuDialogBuilder
+//                        .setListener(new MenuDialog.OnListener<String>() {
+//                            @Override
+//                            public void onSelected(BaseDialog dialog, int position, String string) {
+//                                Toast.makeText(v.getContext(), "位置：" + position + "，文本：" + string, Toast.LENGTH_LONG).show();
+//                            }
+//
+//                            @Override
+//                            public void onCancel(BaseDialog dialog) {
+//                                Toast.makeText(v.getContext(), "取消了", Toast.LENGTH_LONG).show();
+//                            }
+//                        })
+//                        .show();
 //            }
 //        });
+    }
+    // 复制内容到剪贴板
+    private void copyToClipboard(Context context, String text) {
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("label", text);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(context, "已复制到剪贴板" , Toast.LENGTH_SHORT).show();
+    }
+    // 创建 MenuDialog 实例
+    private MenuDialog.Builder menuDialogBuilder;
+    // 同时初始化数据
+    private List<String> data = Arrays.asList("拷贝本条"/*, "拷贝本章全部内容", "拷贝全部结果"*/);
+
+    // 初始化方法
+    private void initDialog(Context context) {
+        if (menuDialogBuilder == null) {
+            menuDialogBuilder = new MenuDialog.Builder(context).setList(data);
+        }
     }
 
     /**
