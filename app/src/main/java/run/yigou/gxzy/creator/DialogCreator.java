@@ -25,6 +25,7 @@ import run.yigou.gxzy.common.Setting;
 import run.yigou.gxzy.common.SysManager;
 import run.yigou.gxzy.utils.BrightUtil;
 import run.yigou.gxzy.utils.StringHelper;
+import run.yigou.gxzy.utils.ThreadUtil;
 
 
 /**
@@ -391,7 +392,7 @@ public class DialogCreator {
         normalDialog.setNegativeButton("取消", negativeListener);
         // 显示
         final AlertDialog alertDialog = normalDialog.create();
-        AppApplication.runOnUiThread(new Runnable() {
+        ThreadUtil.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -434,7 +435,7 @@ public class DialogCreator {
             normalDialog.setNegativeButton(key2, negativeListener);
             // 显示
 //        final AlertDialog alertDialog = normalDialog.create();
-            AppApplication.runOnUiThread(new Runnable() {
+            ThreadUtil.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -475,7 +476,7 @@ public class DialogCreator {
 
             // 显示
 //        final AlertDialog alertDialog = normalDialog.create();
-            AppApplication.runOnUiThread(new Runnable() {
+            ThreadUtil.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -518,7 +519,7 @@ public class DialogCreator {
       /*  progressDialog.setPositiveButton("确定",positiveListener);
         progressDialog.setNegativeButton("取消",negativeListener);*/
         // 显示
-        AppApplication.runOnUiThread(new Runnable() {
+        ThreadUtil.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 try {

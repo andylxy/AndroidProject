@@ -36,6 +36,7 @@ import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.RequestHandler;
 import run.yigou.gxzy.http.model.RequestServer;
 import run.yigou.gxzy.manager.ActivityManager;
+import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.other.AppConfig;
 import run.yigou.gxzy.other.CrashHandler;
 import run.yigou.gxzy.other.DebugLoggerTree;
@@ -71,32 +72,9 @@ import timber.log.Timber;
 public final class AppApplication extends Application {
 
     public static AppApplication application;
-    /**
-     * 主线程执行
-     *
-     * @param runnable
-     */
-    private static Handler handler = new Handler();
 
-    private ScheduledExecutorService mFixedThreadPool;
 
-    public static void runOnUiThread(Runnable runnable) {
-        handler.post(runnable);
-    }
 
-    public void newThread(Runnable runnable) {
-        try {
-            mFixedThreadPool.schedule(runnable, 1, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            e.printStackTrace();
-            mFixedThreadPool = Executors.newScheduledThreadPool(Math.min(Runtime.getRuntime().availableProcessors(), 3));//初始化线程池
-            mFixedThreadPool.execute(runnable);
-        }
-    }
-
-    public void shutdownThreadPool() {
-        mFixedThreadPool.shutdownNow();
-    }
     //登陆信息
     private UserInfoService mUserInfoService;
     public UserInfo mUserInfoToken;

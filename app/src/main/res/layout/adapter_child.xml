@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/tv_child"
+        android:id="@+id/tv_sectiontext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/sys_common_word"
@@ -18,12 +18,28 @@
         android:paddingBottom="@dimen/dp_9"
         android:lineSpacingMultiplier="1.1"
         android:textSize="@dimen/sp_18" />
-<!--    <TextView-->
-<!--        android:id="@+id/tv_child2"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:textColor="@android:color/black"-->
-<!--        android:padding="8dp"-->
-<!--        android:text="Test_Child"-->
-<!--        android:textSize="16sp" />-->
+    <TextView
+        android:id="@+id/tv_sectionnote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/read_fangjizhujie_background"
+        android:textColor="@color/read_cursor_textColor"
+        android:paddingLeft="@dimen/dp_17"
+        android:paddingTop="@dimen/dp_9"
+        android:paddingRight="@dimen/dp_20"
+        android:paddingBottom="@dimen/dp_9"
+        android:lineSpacingMultiplier="1.1"
+        android:textSize="@dimen/sp_18" />
+    <TextView
+        android:id="@+id/tv_sectionvideo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/sys_common_word"
+        android:background="@color/sys_common_bg"
+        android:paddingLeft="@dimen/dp_17"
+        android:paddingTop="@dimen/dp_9"
+        android:paddingRight="@dimen/dp_20"
+        android:paddingBottom="@dimen/dp_9"
+        android:lineSpacingMultiplier="1.1"
+        android:textSize="@dimen/sp_18" />
 </LinearLayout>

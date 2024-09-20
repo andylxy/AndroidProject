@@ -11,19 +11,77 @@
 package run.yigou.gxzy.ui.tips.tipsutils;
 
 import android.text.SpannableStringBuilder;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/* loaded from: classes.dex */
 public class DataItem {
     private int ID;
     private SpannableStringBuilder attributedText;
     private List<String> fangList;
     private String text;
     private List<String> yaoList;
+    private String note;
+    private String sectionvideo;
+    private SpannableStringBuilder attributedNote;
+    private SpannableStringBuilder attributedSectionVideo;
 
-   public void setText(String str) {
+    public SpannableStringBuilder getAttributedSectionVideo() {
+        if (this.attributedSectionVideo != null) {
+            return this.attributedSectionVideo;
+        }
+        if (this.sectionvideo!=null)
+            this.attributedSectionVideo = TipsNetHelper.renderText(this.sectionvideo);
+        else  return null;
+        return attributedSectionVideo;
+    }
+
+    public void setAttributedSectionVideo(SpannableStringBuilder attributedSectionVideo) {
+        this.attributedSectionVideo = attributedSectionVideo;
+    }
+
+    public SpannableStringBuilder getAttributedNote() {
+        if (this.attributedNote != null) {
+            return this.attributedNote;
+        }
+        if (this.note!=null)
+            this.attributedNote = TipsNetHelper.renderText(this.note);
+        else  return null;
+        return attributedNote;
+    }
+
+    public void setAttributedNote(SpannableStringBuilder attributedNote) {
+        this.attributedNote = attributedNote;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+        this.attributedNote = TipsNetHelper.renderText(this.note);
+    }
+
+    public String getSectionvideo() {
+        return sectionvideo;
+    }
+
+    public void setSectionvideo(String sectionvideo) {
+        this.sectionvideo = sectionvideo;
+        this.attributedSectionVideo = TipsNetHelper.renderText(this.sectionvideo);
+    }
+
+    public int getID() {
+        return ID;
+    }
+
+    public void setID(int ID) {
+        this.ID = ID;
+    }
+
+    public void setText(String str) {
         this.text = str;
         this.attributedText = TipsNetHelper.renderText(this.text);
     }
@@ -34,6 +92,10 @@ public class DataItem {
         dataItem.setAttributedText(new SpannableStringBuilder(this.attributedText));
         dataItem.setFangList(this.fangList);
         dataItem.setYaoList(this.yaoList);
+        if (this.attributedNote != null)
+            dataItem.setAttributedNote(new SpannableStringBuilder(this.attributedNote));
+        if (this.attributedSectionVideo != null)
+            dataItem.setAttributedSectionVideo(new SpannableStringBuilder(this.attributedSectionVideo));
         return dataItem;
     }
 
@@ -64,8 +126,6 @@ public class DataItem {
     public void setAttributedText(SpannableStringBuilder spannableStringBuilder) {
         this.attributedText = spannableStringBuilder;
     }
-
-
 
 
     public List<String> getFangList() {

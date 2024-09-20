@@ -13,5 +13,7 @@ package run.yigou.gxzy.ui.tips.tipsutils.DataBeans;
 
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 
-public class Item extends DataItem {
+public class ShuContent extends DataItem {
+   private String note ;
+    private String  sectionvideo;
 }

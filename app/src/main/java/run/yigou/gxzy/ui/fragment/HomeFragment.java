@@ -36,9 +36,14 @@ import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.api.BookInfoNav;
+import run.yigou.gxzy.http.api.YaoContentApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.adapter.TabAdapter;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
+import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
+import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.widget.XCollapsingToolbarLayout;
 
 /**
@@ -60,7 +65,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     private List<BookInfoNav.Bean> bookNavList;
     private RecyclerView mTabView;
     private ViewPager mViewPager;
-
+    private static boolean isGetYaoData =true;
     private TabAdapter mTabAdapter;
     private FragmentPagerAdapter<AppFragment<?>> mPagerAdapter;
 
@@ -104,6 +109,9 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         getBookInfoList();
         // mTabAdapter.addItem("网页演示");
         mTabAdapter.setOnTabListener(this);
+        if (isGetYaoData)
+            ThreadUtil.runInBackground((this::getAllYaoData));
+
 
     }
 
@@ -148,6 +156,23 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                 });
     }
 
+    public void getAllYaoData() {
+
+        EasyHttp.get(this)
+                .api(new YaoContentApi())
+                .request(new HttpCallback<HttpData<List<Yao>>>(this) {
+                    @Override
+                    public void onSucceed(HttpData<List<Yao>> data) {
+                        if (data != null && data.getData().size() > 0) {
+                            List<Yao> detailList = data.getData();
+                            //加载所有药物的数据
+                            Tips_Single_Data.getInstance().setYaoData(new HH2SectionData(detailList, 0, "伤寒金匮所有药物"));
+                            isGetYaoData = false;
+                        }
+
+                    }
+                });
+    }
 
     @Override
     public boolean isStatusBarDarkFont() {

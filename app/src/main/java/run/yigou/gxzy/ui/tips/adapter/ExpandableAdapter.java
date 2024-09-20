@@ -11,22 +11,18 @@
 package run.yigou.gxzy.ui.tips.adapter;
 
 import android.annotation.SuppressLint;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import com.hjq.base.BaseDialog;
+import com.hjq.http.EasyLog;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.dialog.MenuDialog;
@@ -44,7 +40,9 @@ import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
  * 这种列表类似于{@link ExpandableListView}的效果。
  * 这里我把列表的组尾去掉是为了效果上更像ExpandableListView。
  */
-public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
+public class ExpandableAdapter extends GroupedRecyclerViewAdapter
+        // implements View.OnLongClickListener ,View.OnClickListener
+{
 
     public ArrayList<ExpandableGroupEntity> getmGroups() {
         return mGroups;
@@ -123,12 +121,23 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
     @Override
     public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {
         ChildEntity entity = mGroups.get(groupPosition).getChildren().get(childPosition);
-        TextView textView = holder.get(R.id.tv_child);
+        TextView sectiontext = holder.get(R.id.tv_sectiontext);
+        TextView sectionnote = holder.get(R.id.tv_sectionnote);
+        TextView sectionvideo = holder.get(R.id.tv_sectionvideo);
+        sectionnote.setVisibility(View.GONE);
+        sectionvideo.setVisibility(View.GONE);
+
+        sectionnote.setText(entity.getChild_sectionnote());
+        sectionvideo.setText(entity.getChild_sectionvideo());
+
+        sectionnote.setMovementMethod(LocalLinkMovementMethod.getInstance());
+        sectionvideo.setMovementMethod(LocalLinkMovementMethod.getInstance());
+
         //SpannableStringBuilder renderText = Helper.renderText(entity.getChild());
-        textView.setText(entity.getSpannableChild());
-        textView.setMovementMethod(LocalLinkMovementMethod.getInstance());
+        sectiontext.setText(entity.getSpannableChild());
+        sectiontext.setMovementMethod(LocalLinkMovementMethod.getInstance());
         //长按弹出复制
-        textView.setOnLongClickListener(new View.OnLongClickListener() {
+        sectiontext.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 // 底部选择框
@@ -139,13 +148,8 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
                             public void onSelected(BaseDialog dialog, int position, String string) {
                                 //Toast.makeText(v.getContext(), "位置：" + position + "，文本：" + string, Toast.LENGTH_LONG).show();
                                 // 复制到剪贴板
-                                TipsNetHelper. copyToClipboard(v.getContext(), entity.getSpannableChild().toString());
+                                TipsNetHelper.copyToClipboard(v.getContext(), entity.getSpannableChild().toString());
                             }
-
-                            // @Override
-                            // public void onCancel(BaseDialog dialog) {
-                            //Toast.makeText(v.getContext(), "取消了", Toast.LENGTH_LONG).show();
-                            // }
                         })
                         .show();
                 // 返回 true 表示事件已被处理
@@ -153,27 +157,83 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
             }
         });
 //        // 设置点击监听
-//        textView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                // 底部选择框
-//                initDialog(v.getContext());
-//                menuDialogBuilder
-//                        .setListener(new MenuDialog.OnListener<String>() {
-//                            @Override
-//                            public void onSelected(BaseDialog dialog, int position, String string) {
-//                                Toast.makeText(v.getContext(), "位置：" + position + "，文本：" + string, Toast.LENGTH_LONG).show();
-//                            }
-//
-//                            @Override
-//                            public void onCancel(BaseDialog dialog) {
-//                                Toast.makeText(v.getContext(), "取消了", Toast.LENGTH_LONG).show();
-//                            }
-//                        })
-//                        .show();
-//            }
-//        });
+        sectiontext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Object isClick = v.getTag();
+                if (isClick != null && (boolean) isClick) return;
+                EasyLog.print("条文点击:" + v.getTag());
+                if (sectionnote.getVisibility() == View.VISIBLE) {
+                    sectionnote.setVisibility(View.GONE);
+                } else sectionnote.setVisibility(View.VISIBLE);
+            }
+        });
+        sectionnote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (sectionvideo.getVisibility() == View.VISIBLE)
+                    sectionvideo.setVisibility(View.GONE);
+                else sectionvideo.setVisibility(View.VISIBLE);
+            }
+        });
+        sectionvideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (sectionvideo.getVisibility() == View.VISIBLE)
+                    sectionvideo.setVisibility(View.GONE);
+                else sectionvideo.setVisibility(View.VISIBLE);
+            }
+        });
     }
+//    //TextView sectiontext = holder.get(R.id.tv_sectiontext);
+////    TextView sectionnote = holder.get(R.id.tv_sectionnote);
+////    TextView sectionvideo = holder.get(R.id.tv_sectionvideo);
+//    /**
+//     * @param v The view that was clicked and held.
+//     * @return
+//     */
+//    @Override
+//    public boolean onLongClick(View v) {
+//
+//        int viewId = v.getId();
+//
+//        switch (viewId) {
+//            case  R.id.tv_sectiontext:
+//                break;
+//            case  R.id.tv_sectionnote:
+//                break;
+//            case  R.id.tv_sectionvideo:
+//                break;
+//            default:
+//        }
+//        // 底部选择框
+//        TipsNetHelper.initDialog(v.getContext());
+//        TipsNetHelper.menuDialogBuilder
+//                .setListener(new MenuDialog.OnListener<String>() {
+//                    @Override
+//                    public void onSelected(BaseDialog dialog, int position, String string) {
+//                        //Toast.makeText(v.getContext(), "位置：" + position + "，文本：" + string, Toast.LENGTH_LONG).show();
+//                        // 复制到剪贴板
+//                        TipsNetHelper. copyToClipboard(v.getContext(), entity.getSpannableChild().toString());
+//                    }
+//
+//                    // @Override
+//                    // public void onCancel(BaseDialog dialog) {
+//                    //Toast.makeText(v.getContext(), "取消了", Toast.LENGTH_LONG).show();
+//                    // }
+//                })
+//                .show();
+//        // 返回 true 表示事件已被处理
+//        return true;
+//    }
+//
+//    /**
+//     * @param v The view that was clicked.
+//     */
+//    @Override
+//    public void onClick(View v) {
+//
+//    }
 
     /**
      * 判断当前组是否展开
@@ -235,4 +295,6 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter {
             notifyDataChanged();
         }
     }
+
+
 }

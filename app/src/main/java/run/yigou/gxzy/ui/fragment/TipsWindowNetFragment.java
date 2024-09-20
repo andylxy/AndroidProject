@@ -89,9 +89,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
         singleData = Tips_Single_Data.getInstance();
         // List<BookInfoNav.Bean.NavList> navList =mNavList;
         mAdapter.setData(analogData());
-        ThreadPoolManager.getInstance().execute(() -> {
-            getAllYaoData();
-        });
+
 
     }
 
@@ -173,24 +171,6 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                     }
                 });
     }
-
-    public void getAllYaoData() {
-
-        EasyHttp.get(this)
-                .api(new YaoContentApi())
-                .request(new HttpCallback<HttpData<List<Yao>>>(this) {
-                    @Override
-                    public void onSucceed(HttpData<List<Yao>> data) {
-                        if (data != null && data.getData().size() > 0) {
-                            List<Yao> detailList = data.getData();
-                            //加载所有药物的数据
-                            Tips_Single_Data.getInstance().setYaoData(new HH2SectionData(detailList, 0, "伤寒金匮所有药物"));
-                        }
-
-                    }
-                });
-    }
-
 
     /**
      * {@link OnRefreshLoadMoreListener}

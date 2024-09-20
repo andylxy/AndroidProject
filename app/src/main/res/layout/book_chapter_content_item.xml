@@ -36,18 +36,6 @@
             android:textSize="18sp" />
 
         <TextView
-            android:id="@+id/tv_FangJi"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/nothing"
-            android:cursorVisible="false"
-            android:inputType="none"
-            android:lineSpacingMultiplier="1.5"
-            android:padding="@dimen/dp_5"
-            android:textColor="@color/sys_protect_eye_word"
-            android:textSize="18sp" />
-
-        <TextView
             android:id="@+id/tv_FangJiZhujie"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -98,6 +86,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:visibility="gone"
         android:id="@+id/ll_show_item_two"
 
         >
@@ -151,6 +140,19 @@
             android:text="章节正文"
             android:textColor="@color/sys_protect_eye_word"
              />
+
+        <TextView
+            android:id="@+id/tv_FangJi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/nothing"
+            android:cursorVisible="false"
+            android:inputType="none"
+            android:lineSpacingMultiplier="1.5"
+            android:padding="@dimen/dp_5"
+            android:textColor="@color/sys_protect_eye_word"
+            android:textSize="18sp" />
+
         <View style="@style/HorizontalLineStyle"
             android:layout_height="@dimen/dp_2"
             android:layout_marginTop="@dimen/dp_5"

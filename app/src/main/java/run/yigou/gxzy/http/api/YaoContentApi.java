@@ -14,7 +14,4 @@ public final class YaoContentApi implements IRequestApi {
     public String getApi() {
         return "ZhongYao/GetAllZhongYao";
     }
-    public final static class Bean extends Yao {
-
-    }
 }

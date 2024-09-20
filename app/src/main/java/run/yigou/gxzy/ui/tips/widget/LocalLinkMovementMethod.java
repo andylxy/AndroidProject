@@ -19,6 +19,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
+import com.hjq.http.EasyLog;
+
 
 public class LocalLinkMovementMethod extends LinkMovementMethod {
     private static final long CLICK_DELAY = 1000;
@@ -74,6 +76,8 @@ public class LocalLinkMovementMethod extends LinkMovementMethod {
             ClickableSpan[] clickableSpanArr = (ClickableSpan[]) spannable.getSpans(offsetForHorizontal, offsetForHorizontal, ClickableSpan.class);
 
             if (clickableSpanArr.length != 0) {
+                //标记当前触摸操作是 点击动作 => 点击文本spannable对象
+                textView.setTag(true);
                 // 如果触摸位置存在可点击文本
                 if (action == MotionEvent.ACTION_UP) {
                     // 如果是抬起事件，检查是否在双击时间内处理点击事件
@@ -86,15 +90,16 @@ public class LocalLinkMovementMethod extends LinkMovementMethod {
                     this.lastClickTime = System.currentTimeMillis(); // 记录当前点击时间
                 }
            // 打印调试日志
-                Log.e("--->>", "触摸事件处理完成 (按下或抬起) x : "+x  +" y: "+y +" scrollX :"+scrollX+" scrollY: "+scrollY +" offsetForHorizontal: "+offsetForHorizontal);
+                EasyLog.print("--->>", "触摸事件处理完成 (按下或抬起) x : "+x  +" y: "+y +" scrollX :"+scrollX+" scrollY: "+scrollY +" offsetForHorizontal: "+offsetForHorizontal);
                 return true; // 事件被处理
             }
+            textView.setTag(false);
             // 如果没有点击到可点击的文本，则移除选中状态
-            Log.e("--->>", "未点击到可点击的文本 (按下或抬起) x : "+x  +" y: "+y+" scrollX :"+scrollX+" scrollY: "+scrollY +" offsetForHorizontal: "+offsetForHorizontal);
+            EasyLog.print("--->>", "未点击到可点击的文本 (按下或抬起) x : "+x  +" y: "+y+" scrollX :"+scrollX+" scrollY: "+scrollY +" offsetForHorizontal: "+offsetForHorizontal);
             Selection.removeSelection(spannable);
         }
         // 如果事件未处理，交给父类处理
-        Log.e("--->>", "触摸事件结束");
+        EasyLog.print("--->>", "触摸事件结束");
         return super.onTouchEvent(textView, spannable, motionEvent);
     }
 

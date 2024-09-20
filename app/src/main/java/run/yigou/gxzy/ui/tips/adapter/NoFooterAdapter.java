@@ -40,8 +40,8 @@ public class NoFooterAdapter extends GroupedListAdapter {
     @Override
     public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {
         ChildEntity entity = mGroups.get(groupPosition).getChildren().get(childPosition);
-        TextView textView= holder.get(R.id.tv_child);
-        SpannableStringBuilder renderText =  TipsNetHelper.renderText(entity.getChild());
+        TextView textView= holder.get(R.id.tv_sectiontext);
+        SpannableStringBuilder renderText =  TipsNetHelper.renderText(entity.getChild_sectiontext());
         textView.setText(renderText);
         textView.setMovementMethod(LocalLinkMovementMethod.getInstance());
         //长按弹出复制

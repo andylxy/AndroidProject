@@ -55,9 +55,6 @@ import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 
 public class TipsNetHelper {
 
-
-
-
     public static @NonNull ArrayList<HH2SectionData> getSearchHh2SectionData(SearchKeyEntity searchKeyEntity,Singleton_Net_Data singletonNetData) {
         // 将搜索词拆分并过滤掉空白项
         String[] searchTerms = searchKeyEntity.getSearchKeyText().split(" ");
@@ -151,7 +148,7 @@ public class TipsNetHelper {
         SpannableStringBuilder spannableText = new SpannableStringBuilder(renderText(dataItem.getText()));
         Matcher matcher = pattern.matcher(spannableText);
         //todo 需要更换突出颜色变更位置点 new ForegroundColorSpan(0xFFFF0000)
-        // 在 Spannable 文本中突出显示所有匹配项
+        // 在 Spannable 文本中突出显示所有匹配项 0xFFFF0000 为红色
         while (matcher.find()) {
             spannableText.setSpan(new ForegroundColorSpan(0xFFFF0000), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }

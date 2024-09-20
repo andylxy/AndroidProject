@@ -54,7 +54,7 @@ public class ShowFanYao {
     private final ArrayList<ShowFanYao> showFanYaoList  = new ArrayList<>();
 
     public  ArrayList<ShowFanYao> showFang(String fanyao) {
-
+        showFanYaoList.clear();
         // 获取方名别名映射
         Map<String, String> fangAliasDict = singletonData.getFangAliasDict();
         String aliasName = null;

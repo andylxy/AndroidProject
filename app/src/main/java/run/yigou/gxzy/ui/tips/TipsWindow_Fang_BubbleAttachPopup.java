@@ -29,9 +29,13 @@ import run.yigou.gxzy.ui.tips.entity.GroupModel;
 
 public class TipsWindow_Fang_BubbleAttachPopup extends BubbleAttachPopupView {
     private RecyclerView rvList;
-    private StickyHeaderLayout stickyLayout;
+    //private StickyHeaderLayout stickyLayout;
     private Context mContext;
-    private String  fanyao_name ;
+    private String fanyao_name;
+   // private static ShowFanYao fanYao;
+
+   // private static NoFooterAdapter adapter;
+
     public TipsWindow_Fang_BubbleAttachPopup(@NonNull Context context, String fanyao) {
         super(context);
         mContext = context;
@@ -52,15 +56,21 @@ public class TipsWindow_Fang_BubbleAttachPopup extends BubbleAttachPopupView {
         setArrowHeight(XPopupUtils.dp2px(getContext(), 8f));
 //                                .setBubbleRadius(100)
         setArrowRadius(XPopupUtils.dp2px(getContext(), 2f));
-        rvList = (RecyclerView) findViewById(R.id.sticky_rv_list);
-        stickyLayout = (StickyHeaderLayout) findViewById(R.id.sticky_layout);
+        rvList =  findViewById(R.id.sticky_rv_list);
+        //stickyLayout = (StickyHeaderLayout) findViewById(R.id.sticky_layout);
 
         rvList.setLayoutManager(new LinearLayoutManager(mContext));
+        //加载药方和药物检查实例
+       // if (fanYao == null)
+            ShowFanYao fanYao = new ShowFanYao();
+        //检索所有的相关药方
+        //if (adapter == null){
+            NoFooterAdapter   adapter = new NoFooterAdapter(mContext, GroupModel.getGroups(fanYao.showFang(fanyao_name)));
+        //}else {
+         //   adapter.clear();
+         //   adapter. setGroups(GroupModel.getGroups(fanYao.showFang(fanyao_name)));
+       // }
 
-
-        ShowFanYao fanYao = new ShowFanYao();
-
-        NoFooterAdapter adapter = new NoFooterAdapter(mContext, GroupModel.getGroups(fanYao.showFang(fanyao_name)));
         adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
             @Override
             public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
