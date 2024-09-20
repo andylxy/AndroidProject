@@ -36,11 +36,14 @@ import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.api.BookInfoNav;
+import run.yigou.gxzy.http.api.MingCiContentApi;
 import run.yigou.gxzy.http.api.YaoContentApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.adapter.TabAdapter;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 import run.yigou.gxzy.utils.ThreadUtil;
@@ -65,7 +68,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     private List<BookInfoNav.Bean> bookNavList;
     private RecyclerView mTabView;
     private ViewPager mViewPager;
-    private static boolean isGetYaoData =true;
+    private boolean isGetYaoData = true;
+    private boolean isGetMingCiData = true;
     private TabAdapter mTabAdapter;
     private FragmentPagerAdapter<AppFragment<?>> mPagerAdapter;
 
@@ -109,8 +113,14 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         getBookInfoList();
         // mTabAdapter.addItem("网页演示");
         mTabAdapter.setOnTabListener(this);
+//        if (isGetYaoData)
+//            getAllYaoData();
+//        if (isGetMingCiData)
+//            getAllMingCiData();
         if (isGetYaoData)
             ThreadUtil.runInBackground((this::getAllYaoData));
+        if (isGetMingCiData)
+            ThreadUtil.runInBackground((this::getAllMingCiData));
 
 
     }
@@ -124,8 +134,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
             case R.id.tv_home_hint:
             case R.id.iv_home_search:
                 //todo 搜索跳转
-               // Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
-               // startActivity(intent);
+                // Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
+                // startActivity(intent);
                 break;
             default:
                 EasyLog.print("onClick value: " + viewId);
@@ -168,6 +178,24 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             //加载所有药物的数据
                             Tips_Single_Data.getInstance().setYaoData(new HH2SectionData(detailList, 0, "伤寒金匮所有药物"));
                             isGetYaoData = false;
+                        }
+
+                    }
+                });
+    }
+
+    public void getAllMingCiData() {
+
+        EasyHttp.get(this)
+                .api(new MingCiContentApi())
+                .request(new HttpCallback<HttpData<List<MingCiContent>>>(this) {
+                    @Override
+                    public void onSucceed(HttpData<List<MingCiContent>> data) {
+                        if (data != null && data.getData().size() > 0) {
+                            List<MingCiContent> detailList = data.getData();
+                            //加载所有药物的数据
+                            Tips_Single_Data.getInstance().setMingCiData(new HH2SectionData(detailList, 0, "医书相关的名词说明"));
+                            isGetMingCiData = false;
                         }
 
                     }

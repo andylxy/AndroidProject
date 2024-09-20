@@ -133,7 +133,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
             }
             post(() -> {
                 // 启动跳转 到阅读窗口
-                TipsFragmentActivity.start(getAttachActivity(), true, mAdapter.getItem(position).getBookNo());
+                TipsFragmentActivity.start(getAttachActivity(), /*true, */mAdapter.getItem(position).getBookNo());
             });
         });
 

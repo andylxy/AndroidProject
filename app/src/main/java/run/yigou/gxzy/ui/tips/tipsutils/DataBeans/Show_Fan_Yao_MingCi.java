@@ -25,13 +25,14 @@ import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
 
-public class ShowFanYao {
+public class Show_Fan_Yao_MingCi {
 
     private List<DataItem> data = new ArrayList<>();
 
-    public List< DataItem> getData() {
+    public List<DataItem> getData() {
         return data;
     }
+
     public String getHeader() {
         return header;
     }
@@ -42,48 +43,47 @@ public class ShowFanYao {
 
     private String header;
 
-    Tips_Single_Data tipsSingleData ;
-    Singleton_Net_Data singletonData ;
+    private Tips_Single_Data tipsSingleData;
+    private Singleton_Net_Data singletonData;
 
-    public ShowFanYao(){
-        tipsSingleData= Tips_Single_Data.getInstance();
+    public Show_Fan_Yao_MingCi() {
+        tipsSingleData = Tips_Single_Data.getInstance();
         // 获取 SingletonData 实例和数据结构
         singletonData = tipsSingleData.getBookIdContent(tipsSingleData.getCurBookId());
     }
 
-    private final ArrayList<ShowFanYao> showFanYaoList  = new ArrayList<>();
+    private final ArrayList<Show_Fan_Yao_MingCi> showFanYaoMingCiList = new ArrayList<>();
 
-    public  ArrayList<ShowFanYao> showFang(String fanyao) {
-        showFanYaoList.clear();
+    public ArrayList<Show_Fan_Yao_MingCi> showFang(String fanyao) {
+        showFanYaoMingCiList.clear();
         // 获取方名别名映射
         Map<String, String> fangAliasDict = singletonData.getFangAliasDict();
         String aliasName = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            aliasName = fangAliasDict.getOrDefault(fanyao,fanyao);
-        }
-        else {
+            aliasName = fangAliasDict.getOrDefault(fanyao, fanyao);
+        } else {
             // 兼容 Android 7.0 以下版本
             aliasName = fangAliasDict.containsKey(fanyao) ? fangAliasDict.get(fanyao) : fanyao;
         }
         boolean found = false;
-        ArrayList<HH2SectionData> fangList =singletonData.getFang() ;
+        ArrayList<HH2SectionData> fangList = singletonData.getFang();
         for (HH2SectionData sectionData : fangList) {
             for (DataItem dataItem : sectionData.getData()) {
                 String originalName = dataItem.getFangList().get(0);
                 String actualName = null;
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                     actualName = fangAliasDict.getOrDefault(originalName, originalName);
-                }else {
+                    actualName = fangAliasDict.getOrDefault(originalName, originalName);
+                } else {
                     // 对于 Android 7.0 以下版本使用 get 方法并手动处理默认值
                     actualName = fangAliasDict.containsKey(originalName) ? fangAliasDict.get(originalName) : originalName;
                 }
 
                 if (actualName != null && actualName.equals(aliasName)) {
-                    ShowFanYao showFanYao = new ShowFanYao();
+                    Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();
                     // 找到匹配项，添加到 data 和 headers
-                    showFanYao.setHeader(sectionData.getHeader());
-                    showFanYao.getData().add(dataItem);
-                    showFanYaoList.add(showFanYao);
+                    showFanYaoMingCi.setHeader(sectionData.getHeader());
+                    showFanYaoMingCi.getData().add(dataItem);
+                    showFanYaoMingCiList.add(showFanYaoMingCi);
                     found = true;
                     break;  // 跳出当前循环
                 }
@@ -92,12 +92,12 @@ public class ShowFanYao {
         }
         // 如果未找到匹配项，添加默认的 "伤寒金匮方" 数据
         if (!found) {
-            ShowFanYao showFanYao = new ShowFanYao();
-            showFanYao.setHeader("伤寒金匮方");
+            Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();
+            showFanYaoMingCi.setHeader("伤寒金匮方");
             DataItem dataItem = new DataItem();
             dataItem.setText("$m{未见方。}");
-            showFanYao.getData().add(dataItem);
-            showFanYaoList.add(showFanYao);
+            showFanYaoMingCi.getData().add(dataItem);
+            showFanYaoMingCiList.add(showFanYaoMingCi);
         }
 
         // 处理其他内容
@@ -111,7 +111,7 @@ public class ShowFanYao {
                     String actualName = null;
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                         actualName = fangAliasDict.getOrDefault(fangNameInList, fangNameInList);
-                    }else {
+                    } else {
                         // 对于 Android 7.0 以下版本
                         actualName = fangAliasDict.containsKey(fangNameInList) ? fangAliasDict.get(fangNameInList) : fangNameInList;
                     }
@@ -132,14 +132,14 @@ public class ShowFanYao {
 
             // 如果有数据，则添加到 data 和 headers
             if (sectionDataList != null) {
-                ShowFanYao showFanYao = new ShowFanYao();
-                showFanYao.setHeader(sectionData.getHeader());
-                showFanYao.getData().addAll(sectionDataList);
-                showFanYaoList.add(showFanYao);
+                Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();
+                showFanYaoMingCi.setHeader(sectionData.getHeader());
+                showFanYaoMingCi.getData().addAll(sectionDataList);
+                showFanYaoMingCiList.add(showFanYaoMingCi);
             }
         }
 
-        return  showFanYaoList;
+        return showFanYaoMingCiList;
     }
 
     /**
@@ -152,45 +152,32 @@ public class ShowFanYao {
         // 创建一个用于拼接 spannable 文本的对象
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
 
-        // 获取单例数据实例
-        //SingletonData singletonData = SingletonData.getInstance();
-
         // 获取药物别名字典
         Map<String, String> yaoAliasDict = singletonData.getYaoAliasDict();
-
+        Map<String, Yao> yaoMap = tipsSingleData.getYaoMap();
         // 获取药物的实际名称（考虑别名）
         String actualName = yaoAliasDict.get(str);
         if (actualName != null) {
             str = actualName;
         }
-
+        Yao yao = yaoMap.get(str);
         // 如果不只显示相关方的信息，则开始处理药物数据
 
-            List<DataItem> dataItems = new ArrayList<>();
+        List<DataItem> dataItems = new ArrayList<>();
+        // 遍历所有的药物数据
+        if (yao.getName().equals(str)) {
+            dataItems.add(yao);
+        }
 
-            // 遍历所有的药物数据
-            for (HH2SectionData sectionData : tipsSingleData.getYaoData()) {
-                for (DataItem dataItem : sectionData.getData()) {
-                    String yaoName = dataItem.getYaoList().get(0);
-                    String aliasName = yaoAliasDict.get(yaoName);
-                    if (aliasName != null) {
-                        yaoName = aliasName;
-                    }
-                    if (yaoName.equals(str)) {
-                        dataItems.add(dataItem);
-                    }
-                }
+        // 处理数据项并拼接结果
+        if (!dataItems.isEmpty()) {
+            for (DataItem dataItem : dataItems) {
+                spannableStringBuilder.append((CharSequence) dataItem.getAttributedText());
             }
-
-            // 处理数据项并拼接结果
-            if (!dataItems.isEmpty()) {
-                for (DataItem dataItem : dataItems) {
-                    spannableStringBuilder.append((CharSequence) dataItem.getAttributedText());
-                }
-            } else {
-                spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText("$r{药物未找到资料}"));
-            }
-            spannableStringBuilder.append((CharSequence) "\n\n");
+        } else {
+            spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText("$r{药物未找到资料}"));
+        }
+        spannableStringBuilder.append((CharSequence) "\n\n");
 
         // 遍历所有的方数据
         List<HH2SectionData> fangData = singletonData.getFang();
@@ -236,5 +223,23 @@ public class ShowFanYao {
         return spannableStringBuilder;
     }
 
+    /**
+     * 根据给定的药物名称生成一个 spannable 字符串，其中包含药物相关的信息。
+     *
+     * @param str 药物名称
+     * @return 包含药物信息的 SpannableStringBuilder
+     */
+    public SpannableStringBuilder getShowMingCiSpanString(String str) {
+
+        // 创建一个用于拼接 spannable 文本的对象
+        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
+        if (str == null) return spannableStringBuilder;
+        // 获取药物别名字典
+        Map<String, MingCiContent> mingCiContentMap = tipsSingleData.getMingCiContentMap();
+        MingCiContent mingCiContent = mingCiContentMap.get(str);
+        if (mingCiContent != null)
+            spannableStringBuilder.append(TipsNetHelper.renderText(mingCiContent.getText()));
+        return spannableStringBuilder;
+    }
 
 }

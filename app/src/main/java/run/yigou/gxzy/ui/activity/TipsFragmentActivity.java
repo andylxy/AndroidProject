@@ -24,9 +24,9 @@ import run.yigou.gxzy.ui.fragment.TipsUnitFragment;
 
 public final class TipsFragmentActivity extends AppActivity {
 
-    public static void start(Context context, boolean isLocalNet, int bookNo) {
+    public static void start(Context context, /*boolean isLocalNet, */int bookNo) {
         Intent intent = new Intent(context, TipsFragmentActivity.class);
-        isLocal = isLocalNet;
+        //isLocal = isLocalNet;
         BookId = bookNo;
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -40,15 +40,16 @@ public final class TipsFragmentActivity extends AppActivity {
     /**
      * isLocal 加载数据方式. false为本地,true 为网络
      */
-    private static boolean isLocal = false;
+   // private static boolean isLocal = false;
     private static int BookId = 0;
     private RadioGroup radioGroup;
 
     @Override
     protected int getLayoutId() {
-        if (!isLocal)
-            return R.layout.tips_fragment_tab_list;
-        else return R.layout.tips_fragment_tab_net_list;
+        //if (!isLocal)
+        //    return R.layout.tips_fragment_tab_list;
+        //else
+            return R.layout.tips_fragment_tab_net_list;
     }
 
     private FragmentManager fragmentManager;
@@ -76,13 +77,16 @@ public final class TipsFragmentActivity extends AppActivity {
                 ShouFragment(tipsSettingFragment);
             }
         });
-        if (isLocal) {
-            // 创建 Bundle 并传递参数
-            Bundle args = new Bundle();
-            args.putInt("bookNo", BookId);  // 替换为实际参数
-            fragment.setArguments(args);
-            //ShouFragment( fragment);
-        }
+//        if (isLocal) {
+//            // 创建 Bundle 并传递参数
+//            Bundle args = new Bundle();
+//            args.putInt("bookNo", BookId);  // 替换为实际参数
+//            fragment.setArguments(args);
+//            //ShouFragment( fragment);
+//        }
+        Bundle args = new Bundle();
+        args.putInt("bookNo", BookId);  // 替换为实际参数
+        fragment.setArguments(args);
         ShouFragment(fragment);
     }
 

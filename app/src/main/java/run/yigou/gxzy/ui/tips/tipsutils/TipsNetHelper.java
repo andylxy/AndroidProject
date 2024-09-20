@@ -34,6 +34,7 @@ import androidx.annotation.NonNull;
 import androidx.core.internal.view.SupportMenu;
 import androidx.core.view.ViewCompat;
 
+import com.hjq.http.EasyLog;
 import com.lxj.xpopup.XPopup;
 
 import java.text.SimpleDateFormat;
@@ -49,6 +50,7 @@ import java.util.regex.Pattern;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.tips.TipsWindow_Fang_BubbleAttachPopup;
+import run.yigou.gxzy.ui.tips.TipsWindow_MingCi_BubbleAttachPopup;
 import run.yigou.gxzy.ui.tips.TipsWindow_Yao_BubbleAttachPopup;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 
@@ -277,72 +279,172 @@ public class TipsNetHelper {
             );
         }
     }
+//    public static SpannableStringBuilder renderText(String str, final ClickLink clickLink) {
+//        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(str);
+//
+//        while (true) {
+//            // 查找下一个"$"符号的位置
+//            int indexOf = str.indexOf("$");
+//            if (indexOf >= 0) {
+//                // 查找"{"符号的位置
+//                int indexOf2 = str.indexOf("}");
+//                // 计算"$"的数量以确定匹配的结束位置
+//                int size = getAllSubStringPos(str.substring(indexOf, indexOf2), "$").size();
+//                int i = indexOf2;
+//                int i2 = 1;
+//
+//                // 根据找到的"$"数量来调整结束位置
+//                while (size > i2) {
+//                    for (int i3 = 0; i3 < size - i2; i3++) {
+//                        i += str.substring(i + 1).indexOf("}") + 1;
+//                    }
+//                    int i4 = size;
+//                    size = getAllSubStringPos(str.substring(indexOf, i), "$").size();
+//                    i2 = i4;
+//                }
+//
+//                // 提取"$"后面的第一个字符作为标记
+//                String substring = str.substring(indexOf + 1, indexOf + 2);
+//
+//                // 根据标记设置不同的样式
+//                if (substring.equals("a") || substring.equals("w")||  substring.equals("r")) {
+//                    spannableStringBuilder.setSpan(new RelativeSizeSpan(0.7f), indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//                }
+//                if (substring.equals("u")) {
+//                    spannableStringBuilder.setSpan(new ClickableSpan() {
+//                        @Override
+//                        public void onClick(View view) {
+//                            clickLink.clickYaoLink((TextView) view, this);
+//                        }
+//                    }, indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//                }
+//                if (substring.equals("f")) {
+//                    spannableStringBuilder.setSpan(new ClickableSpan() {
+//                        @Override
+//                        public void onClick(View view) {
+//                            clickLink.clickFangLink((TextView) view, this);
+//                        }
+//                    }, indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//                }
+//                if (substring.equals("g")) {
+//                    spannableStringBuilder.setSpan(new ClickableSpan() {
+//                        @Override
+//                        public void onClick(View view) {
+//                            clickLink.clickMingCiLink((TextView) view, this);
+//                        }
+//                    }, indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//                }
+//                // 设置文本颜色
+//                ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(getColoredTextByStrClass(substring));
+//                spannableStringBuilder.setSpan(foregroundColorSpan, indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//
+//                // 替换处理过的部分
+//                spannableStringBuilder.replace(i, i + 1, "");
+//                spannableStringBuilder.replace(indexOf, indexOf + 3, "");
+//
+//                // 更新原始字符串为处理后的字符串
+//                str = spannableStringBuilder.toString();
+//            } else {
+//                // 处理完所有"$"后，进行额外的渲染
+//                renderItemNumber(spannableStringBuilder);
+//                return spannableStringBuilder;
+//            }
+//        }
+//    }
+
     public static SpannableStringBuilder renderText(String str, final ClickLink clickLink) {
+        // 创建一个可变的SpannableStringBuilder用于渲染文本
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(str);
 
         while (true) {
-            // 查找下一个"$"符号的位置
+            // 找到下一个"$"符号的位置
             int indexOf = str.indexOf("$");
             if (indexOf >= 0) {
-                // 查找"{"符号的位置
-                int indexOf2 = str.indexOf("}");
-                // 计算"$"的数量以确定匹配的结束位置
-                int size = getAllSubStringPos(str.substring(indexOf, indexOf2), "$").size();
-                int i = indexOf2;
-                int i2 = 1;
+                // 找到下一个"}"符号的位置
+                int indexOf2 = str.indexOf("}", indexOf);
+                if (indexOf2 == -1) break; // 如果没有找到"}"，则退出循环
 
-                // 根据找到的"$"数量来调整结束位置
+                // 计算"$"符号的数量
+                int size = getAllSubStringPos(str.substring(indexOf, indexOf2), "$").size();
+                int i = indexOf2; // 初始化i为"}"符号的位置
+                int i2 = 1; // 初始化i2为1，用于跟踪"$"数量
+
+                // 根据"$"的数量调整结束位置
                 while (size > i2) {
-                    for (int i3 = 0; i3 < size - i2; i3++) {
+                    for (int j = 0; j < size - i2; j++) {
+                        // 更新i为下一个"}"符号的位置
                         i += str.substring(i + 1).indexOf("}") + 1;
                     }
-                    int i4 = size;
-                    size = getAllSubStringPos(str.substring(indexOf, i), "$").size();
-                    i2 = i4;
+                    int currentSize = size; // 保存当前的大小
+                    size = getAllSubStringPos(str.substring(indexOf, i), "$").size(); // 更新size
+                    i2 = currentSize; // 更新i2为当前大小
                 }
 
-                // 提取"$"后面的第一个字符作为标记
-                String substring = str.substring(indexOf + 1, indexOf + 2);
+                // 提取"$"后面的字符
+                String marker = str.substring(indexOf + 1, indexOf + 2);
 
-                // 根据标记设置不同的样式
-                if (substring.equals("a") || substring.equals("w")||  substring.equals("r")) {
-                    spannableStringBuilder.setSpan(new RelativeSizeSpan(0.7f), indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-                if (substring.equals("u")) {
-                    spannableStringBuilder.setSpan(new ClickableSpan() {
-                        @Override
-                        public void onClick(View view) {
-                            clickLink.clickYaoLink((TextView) view, this);
-                        }
-                    }, indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-                if (substring.equals("f")) {
-                    spannableStringBuilder.setSpan(new ClickableSpan() {
-                        @Override
-                        public void onClick(View view) {
-                            clickLink.clickFangLink((TextView) view, this);
-                        }
-                    }, indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
+                // 根据标记应用不同的样式
+                applyStyle(spannableStringBuilder, marker, indexOf, i, clickLink);
 
-                // 设置文本颜色
-                ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(getColoredTextByStrClass(substring));
-                spannableStringBuilder.setSpan(foregroundColorSpan, indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                // 替换处理过的部分
+                // 将处理过的部分替换为空字符串
                 spannableStringBuilder.replace(i, i + 1, "");
                 spannableStringBuilder.replace(indexOf, indexOf + 3, "");
 
-                // 更新原始字符串为处理后的字符串
+                // 更新原始字符串为修改后的字符串
                 str = spannableStringBuilder.toString();
             } else {
-                // 处理完所有"$"后，进行额外的渲染
+                // 处理完所有"$"后执行其他渲染
                 renderItemNumber(spannableStringBuilder);
-                return spannableStringBuilder;
+                break; // 跳出循环
             }
         }
+
+        return spannableStringBuilder; // 返回最终的SpannableStringBuilder
     }
 
+
+    // 根据标记应用样式的方法
+    private static void applyStyle(SpannableStringBuilder spannableStringBuilder, String marker, int start, int end, final ClickLink clickLink) {
+        // 根据不同的标记应用样式
+        switch (marker) {
+            case "a":
+            case "w":
+            case "r":
+                // 设置相对字体大小
+                spannableStringBuilder.setSpan(new RelativeSizeSpan(0.7f), start + 3, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                break;
+            case "u":
+                // 设置点击事件处理
+                spannableStringBuilder.setSpan(new ClickableSpan() {
+                    @Override
+                    public void onClick(View view) {
+                        clickLink.clickYaoLink((TextView) view, this); // 处理点击
+                    }
+                }, start + 3, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                break;
+            case "f":
+                // 设置另一个点击事件处理
+                spannableStringBuilder.setSpan(new ClickableSpan() {
+                    @Override
+                    public void onClick(View view) {
+                        clickLink.clickFangLink((TextView) view, this); // 处理点击
+                    }
+                }, start + 3, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                break;
+            case "g":
+                // 设置另一个点击事件处理
+                spannableStringBuilder.setSpan(new ClickableSpan() {
+                    @Override
+                    public void onClick(View view) {
+                        clickLink.clickMingCiLink((TextView) view, this); // 处理点击
+                    }
+                }, start + 3, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                break;
+        }
+        // 设置文本颜色
+        ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(getColoredTextByStrClass(marker));
+        spannableStringBuilder.setSpan(foregroundColorSpan, start + 3, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
 
     // 复制内容到剪贴板
     public static void copyToClipboard(Context context, String text) {
@@ -367,10 +469,9 @@ public class TipsNetHelper {
         return renderText(str, new ClickLink() {
             @Override
             public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
-              //  Helper.closeKeyboard(SingletonData.getInstance().curActivity);
+
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
-                System.out.println("tapped:" + charSequence);
-                PointF pointF =(PointF) textView.getTag();
+                EasyLog.print("tapped:" + charSequence);
                 new XPopup.Builder(textView.getContext())
                         .isTouchThrough(true)
                        // .popupPosition(PopupPosition.Right)
@@ -383,16 +484,11 @@ public class TipsNetHelper {
                         .asCustom(new TipsWindow_Yao_BubbleAttachPopup(textView.getContext(),charSequence))
                         .show();
             }
-
             @Override
             public void clickFangLink(TextView textView, ClickableSpan clickableSpan) {
-               // Helper.closeKeyboard(SingletonData.getInstance().curActivity);
+
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
-                System.out.println("tapped:" + charSequence);
-//                MotionEvent org_event =(MotionEvent) textView.getTag();
-//                if (org_event!=null){
-//                    Log.e("Helper-->--XPopup", "可点击的文本 (按下或抬起) mRawX : "+org_event.getRawX() +" mRawY: "+org_event.getRawY());
-//                }
+                EasyLog.print("tapped:" + charSequence);
                 new XPopup.Builder(textView.getContext())
                         .isTouchThrough(true)
                         .positionByWindowCenter(true)
@@ -410,7 +506,30 @@ public class TipsNetHelper {
                         .show();
                 }
 
+            /**
+             * @param textView
+             * @param clickableSpan
+             */
+            @Override
+            public void clickMingCiLink(TextView textView, ClickableSpan clickableSpan) {
+
+                String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
+                EasyLog.print("tapped:" + charSequence);
+                new XPopup.Builder(textView.getContext())
+                        .isTouchThrough(true)
+                        // .popupPosition(PopupPosition.Right)
+                        .positionByWindowCenter(true)
+                        .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
+                        .isViewMode(true)
+                        .atView(textView)
+                        //.atPoint(pointF)
+                        //.hasShadowBg(false) // 去掉半透明背景
+                        .asCustom(new TipsWindow_MingCi_BubbleAttachPopup(textView.getContext(),charSequence))
+                        .show();
+            }
+
         });
+
     }
 
 
@@ -423,7 +542,7 @@ public class TipsNetHelper {
         colorMap.put("f", Color.BLUE); // 蓝色
         colorMap.put("a", Color.GRAY); // 灰色
         colorMap.put("m", Color.RED); // 红色
-        colorMap.put("s", Color.argb(230, 0, 128, 255)); // 半透明蓝色
+        colorMap.put("g", Color.argb(230, 0, 128, 255)); // 半透明蓝色
         colorMap.put("u", Color.BLUE); // 蓝色
         colorMap.put("v", Color.BLUE); // 蓝色
         colorMap.put("w", Color.GREEN); // 绿色
@@ -445,45 +564,6 @@ public class TipsNetHelper {
         return colorValue != null ? colorValue : Color.BLACK;
     }
 
-
-    /**
-     * 根据给定的比较器在数据列表中搜索符合条件的项，并返回一个新的列表，其中包含符合条件的部分数据。
-     *
-     * @param list 要搜索的HH2SectionData列表。
-     * @param dataItemCompare 用于比较的DataItemCompare对象。
-     * @return 包含符合条件数据的HH2SectionData列表。
-     */
-    public static List<HH2SectionData> searchText(List<HH2SectionData> list, DataItemCompare dataItemCompare) {
-        // 创建一个新的ArrayList来存储符合条件的HH2SectionData对象
-        List<HH2SectionData> resultList = new ArrayList<>();
-
-        // 遍历输入的HH2SectionData列表
-        for (HH2SectionData sectionData : list) {
-            // 创建一个临时ArrayList用于存储符合条件的DataItem
-            List<DataItem> filteredItems = null;
-
-            // 遍历每个HH2SectionData对象中的DataItem
-            for (DataItem dataItem : sectionData.getData()) {
-                // 使用比较器判断DataItem是否符合条件
-                if (dataItemCompare.useThisItem(dataItem)) {
-                    // 如果临时列表为空，初始化它
-                    if (filteredItems == null) {
-                        filteredItems = new ArrayList<>();
-                    }
-                    // 将符合条件的DataItem添加到临时列表中
-                    filteredItems.add(dataItem);
-                }
-            }
-
-            // 如果临时列表中有符合条件的数据，创建新的HH2SectionData对象并添加到结果列表中
-            if (filteredItems != null) {
-                resultList.add(new HH2SectionData(filteredItems, sectionData.getSection(), sectionData.getHeader()));
-            }
-        }
-
-        // 返回包含符合条件数据的HH2SectionData列表
-        return resultList;
-    }
 
     /**
      * 表示一个接受类型为 T 的对象并返回布尔值的条件接口。

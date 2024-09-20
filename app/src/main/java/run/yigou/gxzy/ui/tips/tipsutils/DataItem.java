@@ -17,12 +17,24 @@ import java.util.Iterator;
 import java.util.List;
 
 public class DataItem {
+    /**
+     * 记录序号
+     */
     private int ID;
     private SpannableStringBuilder attributedText;
     private List<String> fangList;
+    /**
+     * 内容
+     */
     private String text;
     private List<String> yaoList;
+    /**
+     * 内容注解
+     */
     private String note;
+    /**
+     * 内容笔记
+     */
     private String sectionvideo;
     private SpannableStringBuilder attributedNote;
     private SpannableStringBuilder attributedSectionVideo;
@@ -129,40 +141,40 @@ public class DataItem {
 
 
     public List<String> getFangList() {
-        return this.fangList == null ? new ArrayList() : this.fangList;
+        return this.fangList == null ? new ArrayList<>() : this.fangList;
     }
 
     public List<String> getYaoList() {
-        return this.yaoList == null ? new ArrayList() : this.yaoList;
+        return this.yaoList == null ? new ArrayList<>() : this.yaoList;
     }
 
     protected int getItemIndex(String str) {
         return Integer.parseInt(str.substring(0, str.indexOf("、"))) - 1;
     }
 
-    public static String[] getFangNameList(String str) {
-        ArrayList<Integer> allSubStringPos = TipsNetHelper.getAllSubStringPos(str, "$f");
-        String[] strArr = new String[allSubStringPos.size()];
-        Iterator<Integer> it = allSubStringPos.iterator();
-        int i = 0;
-        while (it.hasNext()) {
-            int intValue = it.next().intValue();
-            strArr[i] = str.substring(intValue + 3, intValue + str.substring(intValue).indexOf("}"));
-            i++;
-        }
-        return strArr;
-    }
-
-    public static String[] getYaoNameList(String str) {
-        ArrayList<Integer> allSubStringPos = TipsNetHelper.getAllSubStringPos(str, "$u");
-        String[] strArr = new String[allSubStringPos.size()];
-        Iterator<Integer> it = allSubStringPos.iterator();
-        int i = 0;
-        while (it.hasNext()) {
-            int intValue = it.next().intValue();
-            strArr[i] = str.substring(intValue + 3, intValue + str.substring(intValue).indexOf("}"));
-            i++;
-        }
-        return strArr;
-    }
+//    public static String[] getFangNameList(String str) {
+//        ArrayList<Integer> allSubStringPos = TipsNetHelper.getAllSubStringPos(str, "$f");
+//        String[] strArr = new String[allSubStringPos.size()];
+//        Iterator<Integer> it = allSubStringPos.iterator();
+//        int i = 0;
+//        while (it.hasNext()) {
+//            int intValue = it.next().intValue();
+//            strArr[i] = str.substring(intValue + 3, intValue + str.substring(intValue).indexOf("}"));
+//            i++;
+//        }
+//        return strArr;
+//    }
+//
+//    public static String[] getYaoNameList(String str) {
+//        ArrayList<Integer> allSubStringPos = TipsNetHelper.getAllSubStringPos(str, "$u");
+//        String[] strArr = new String[allSubStringPos.size()];
+//        Iterator<Integer> it = allSubStringPos.iterator();
+//        int i = 0;
+//        while (it.hasNext()) {
+//            int intValue = it.next().intValue();
+//            strArr[i] = str.substring(intValue + 3, intValue + str.substring(intValue).indexOf("}"));
+//            i++;
+//        }
+//        return strArr;
+//    }
 }

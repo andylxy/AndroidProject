@@ -21,15 +21,15 @@ import com.lxj.xpopup.core.BubbleAttachPopupView;
 import com.lxj.xpopup.util.XPopupUtils;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Show_Fan_Yao_MingCi;
+import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
 
 @SuppressLint("ViewConstructor")
-public class TipsWindow_Yao_BubbleAttachPopup extends BubbleAttachPopupView {
-    String mYao ;//charSequence
-    public TipsWindow_Yao_BubbleAttachPopup(@NonNull Context context, String charSequence) {
+public class TipsWindow_MingCi_BubbleAttachPopup extends BubbleAttachPopupView {
+    String mingCiString;//charSequence
+    public TipsWindow_MingCi_BubbleAttachPopup(@NonNull Context context, String charSequence) {
         super(context);
-        mYao = charSequence;
+        mingCiString = charSequence;
     }
 
     @Override
@@ -48,9 +48,9 @@ public class TipsWindow_Yao_BubbleAttachPopup extends BubbleAttachPopupView {
 //                                .setBubbleRadius(100)
         setArrowRadius(XPopupUtils.dp2px(getContext(), 2f));
         final TextView tv = findViewById(R.id.tv);
-        Show_Fan_Yao_MingCi showFanYaoMingCi =  new Show_Fan_Yao_MingCi();
+        Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();
         tv.setMovementMethod(LocalLinkMovementMethod.getInstance());
-        tv.setText(showFanYaoMingCi.getShowYaoSpanString(mYao));
+        tv.setText(showFanYaoMingCi.getShowMingCiSpanString(mingCiString));
     }
 
 //    @Override

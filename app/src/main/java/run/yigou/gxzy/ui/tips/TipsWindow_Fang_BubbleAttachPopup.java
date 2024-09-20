@@ -18,12 +18,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
-import com.donkingliang.groupedadapter.widget.StickyHeaderLayout;
 import com.lxj.xpopup.core.BubbleAttachPopupView;
 import com.lxj.xpopup.util.XPopupUtils;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.ShowFanYao;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Show_Fan_Yao_MingCi;
 import run.yigou.gxzy.ui.tips.adapter.NoFooterAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 
@@ -62,7 +61,7 @@ public class TipsWindow_Fang_BubbleAttachPopup extends BubbleAttachPopupView {
         rvList.setLayoutManager(new LinearLayoutManager(mContext));
         //加载药方和药物检查实例
        // if (fanYao == null)
-            ShowFanYao fanYao = new ShowFanYao();
+            Show_Fan_Yao_MingCi fanYao = new Show_Fan_Yao_MingCi();
         //检索所有的相关药方
         //if (adapter == null){
             NoFooterAdapter   adapter = new NoFooterAdapter(mContext, GroupModel.getGroups(fanYao.showFang(fanyao_name)));

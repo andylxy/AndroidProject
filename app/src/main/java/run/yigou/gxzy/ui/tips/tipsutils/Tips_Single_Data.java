@@ -11,22 +11,24 @@
 package run.yigou.gxzy.ui.tips.tipsutils;
 
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
 
 
 public class Tips_Single_Data {
     private static Tips_Single_Data tips_Single_Data;
-    private  Map<Integer, Singleton_Net_Data> bookIdContent;
+    private Map<Integer, Singleton_Net_Data> bookIdContent;
     private List<String> allYao;
     private int curBookId;
 
     /**
      * 获取当前打开书本ID
+     *
      * @return 返回ID
      */
     public int getCurBookId() {
@@ -34,34 +36,62 @@ public class Tips_Single_Data {
     }
 
     /**
-     *  记录正在打开的书本的Id
+     * 记录正在打开的书本的Id
+     *
      * @param curBookId 需保存的Id
      */
     public void setCurBookId(int curBookId) {
         this.curBookId = curBookId;
     }
 
-    private ArrayList<HH2SectionData> yaoData;
-    public ArrayList<HH2SectionData> getYaoData() {
-        return yaoData;
+    /**
+     * 药物数据
+     */
+    private HH2SectionData yaoData;
+    private HH2SectionData mingCiData;
+    private Map<String, MingCiContent> mingCiContentMap;
+
+
+    private Map<String, Yao> yaoMap;
+
+
+    public Map<String, MingCiContent> getMingCiContentMap() {
+        return mingCiContentMap;
     }
+
+    public Map<String, Yao> getYaoMap() {
+        return yaoMap;
+    }
+
+    public void setMingCiData(HH2SectionData mingCiData) {
+        if (mingCiData == null) return;
+        this.mingCiData = mingCiData;
+        if (this.mingCiContentMap == null) this.mingCiContentMap = new HashMap<>();
+        for (DataItem item : this.mingCiData.getData()) {
+//                String name = ((MingCiContent)item).getName();
+//                MingCiContent mingCiContent = ((MingCiContent)item);
+            mingCiContentMap.put(((MingCiContent) item).getName(), (MingCiContent) item);
+        }
+    }
+
     public void setYaoData(HH2SectionData yaoData) {
 
-        if (this.yaoData ==null) this.yaoData = new ArrayList<>();
-        this.yaoData.add(yaoData);
+        if (yaoData == null) return;
+        this.yaoData = yaoData;
         // 初始化并填充 allYao 列表
         this.allYao = new ArrayList<>();
-        for (HH2SectionData section : this.yaoData) {
-            for (DataItem item : section.getData()) {
-                String str3 = item.getYaoList().get(0);
-                // 如果有别名映射，则替换
-                String str4 = this.yaoAliasDict.get(str3);
-                if (str4 != null) {
-                    str3 = str4;
-                }
-                this.allYao.add(str3);
+        if (this.yaoMap == null) this.yaoMap = new HashMap<>();
+        for (DataItem item : this.yaoData.getData()) {
+            String str3 = item.getYaoList().get(0);
+            // 如果有别名映射，则替换
+            String str4 = this.yaoAliasDict.get(str3);
+            if (str4 != null) {
+                str3 = str4;
             }
+            yaoMap.put(str3,(Yao)item);
+            this.allYao.add(str3);
         }
+
     }
 
     private Map<String, String> fangAliasDict;
@@ -70,20 +100,22 @@ public class Tips_Single_Data {
     public Map<String, String> getFangAliasDict() {
         return fangAliasDict;
     }
+
     public Map<String, String> getYaoAliasDict() {
         return yaoAliasDict;
     }
 
-    public  Singleton_Net_Data getBookIdContent(int bookId) {
+    public Singleton_Net_Data getBookIdContent(int bookId) {
 
-        Singleton_Net_Data singletonNetData =  bookIdContent.get(bookId);
-        if (singletonNetData ==null){
-            singletonNetData= Singleton_Net_Data.getInstance(bookId);
-            bookIdContent.put(bookId,singletonNetData);
+        Singleton_Net_Data singletonNetData = bookIdContent.get(bookId);
+        if (singletonNetData == null) {
+            singletonNetData = Singleton_Net_Data.getInstance(bookId);
+            bookIdContent.put(bookId, singletonNetData);
         }
         setCurBookId(bookId);
-        return  singletonNetData;
+        return singletonNetData;
     }
+
     private void initAlias() {
         this.yaoAliasDict = new HashMap<String, String>() {
             {
@@ -170,7 +202,7 @@ public class Tips_Single_Data {
     }
 
 
-    private  Tips_Single_Data(){
+    private Tips_Single_Data() {
         bookIdContent = new HashMap<Integer, Singleton_Net_Data>();
         initAlias();
 
@@ -178,6 +210,7 @@ public class Tips_Single_Data {
 
     /**
      * 获取  Tips_Single_Data 单例对象
+     *
      * @return 单例对象
      */
     public static Tips_Single_Data getInstance() {
@@ -186,10 +219,6 @@ public class Tips_Single_Data {
         }
         return tips_Single_Data;
     }
-
-
-
-
 
 
 }

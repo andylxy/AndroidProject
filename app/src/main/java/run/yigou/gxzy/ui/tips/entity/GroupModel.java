@@ -14,7 +14,7 @@ import android.text.SpannableStringBuilder;
 
 import java.util.ArrayList;
 
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.ShowFanYao;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Show_Fan_Yao_MingCi;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
@@ -63,10 +63,10 @@ public class GroupModel {
     /**
      * 获取组列表数据
      */
-    public static ArrayList<GroupEntity> getGroups(ArrayList<ShowFanYao> showFanYaoList) {
+    public static ArrayList<GroupEntity> getGroups(ArrayList<Show_Fan_Yao_MingCi> showFanYaoMingCiList) {
         ArrayList<GroupEntity> groups = new ArrayList<>();
 
-        for (ShowFanYao sectionData :showFanYaoList) {
+        for (Show_Fan_Yao_MingCi sectionData : showFanYaoMingCiList) {
             ArrayList<ChildEntity> children = new ArrayList<>();
             for (DataItem dataItem : sectionData.getData()) {
                 children.add(new ChildEntity(dataItem.getText()));
