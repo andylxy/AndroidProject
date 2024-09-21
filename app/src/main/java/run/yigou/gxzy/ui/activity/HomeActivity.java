@@ -186,6 +186,7 @@ public final class HomeActivity extends AppActivity
         mViewPager.setAdapter(null);
         mNavigationView.setAdapter(null);
         mNavigationAdapter.setOnNavigationListener(null);
+        mHomeActivity=null;
     }
 
 

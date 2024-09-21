@@ -12,6 +12,8 @@ package run.yigou.gxzy.ui.tips.tipsutils.DataBeans;
 
 import android.text.SpannableStringBuilder;
 
+import com.hjq.http.EasyLog;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -54,192 +56,249 @@ public class Show_Fan_Yao_MingCi {
 
     private final ArrayList<Show_Fan_Yao_MingCi> showFanYaoMingCiList = new ArrayList<>();
 
+    /**
+     * 根据方药名称展示相关信息
+     * 该方法首先尝试根据输入的方药名称查找匹配的方剂数据
+     * 如果找不到匹配的方剂，则添加默认的"伤寒金匮方"数据
+     * 最后，处理与输入方药相关的其他内容，并将其添加到返回列表中
+     *
+     * @param fanyao 方药名称，用于查找方剂数据
+     * @return 包含Show_Fan_Yao_MingCi对象的ArrayList，这些对象包含方剂及其相关信息
+     */
     public ArrayList<Show_Fan_Yao_MingCi> showFang(String fanyao) {
-        showFanYaoMingCiList.clear();
-        // 获取方名别名映射
-        Map<String, String> fangAliasDict = singletonData.getFangAliasDict();
-        String aliasName = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            aliasName = fangAliasDict.getOrDefault(fanyao, fanyao);
-        } else {
-            // 兼容 Android 7.0 以下版本
-            aliasName = fangAliasDict.containsKey(fanyao) ? fangAliasDict.get(fanyao) : fanyao;
-        }
-        boolean found = false;
-        ArrayList<HH2SectionData> fangList = singletonData.getFang();
-        for (HH2SectionData sectionData : fangList) {
-            for (DataItem dataItem : sectionData.getData()) {
-                String originalName = dataItem.getFangList().get(0);
-                String actualName = null;
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                    actualName = fangAliasDict.getOrDefault(originalName, originalName);
-                } else {
-                    // 对于 Android 7.0 以下版本使用 get 方法并手动处理默认值
-                    actualName = fangAliasDict.containsKey(originalName) ? fangAliasDict.get(originalName) : originalName;
-                }
+    // 清空现有的展示列表
+    showFanYaoMingCiList.clear();
 
-                if (actualName != null && actualName.equals(aliasName)) {
-                    Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();
-                    // 找到匹配项，添加到 data 和 headers
-                    showFanYaoMingCi.setHeader(sectionData.getHeader());
-                    showFanYaoMingCi.getData().add(dataItem);
-                    showFanYaoMingCiList.add(showFanYaoMingCi);
-                    found = true;
-                    break;  // 跳出当前循环
-                }
-            }
-            if (found) break;  // 如果已找到匹配项，则跳出外层循环
-        }
-        // 如果未找到匹配项，添加默认的 "伤寒金匮方" 数据
-        if (!found) {
-            Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();
-            showFanYaoMingCi.setHeader("伤寒金匮方");
-            DataItem dataItem = new DataItem();
-            dataItem.setText("$m{未见方。}");
-            showFanYaoMingCi.getData().add(dataItem);
-            showFanYaoMingCiList.add(showFanYaoMingCi);
-        }
+    // 获取方名别名映射
+    Map<String, String> fangAliasDict = singletonData.getFangAliasDict();
+    String aliasName = getOrDefault(fangAliasDict, fanyao);
 
-        // 处理其他内容
-        for (HH2SectionData sectionData : singletonData.getContent()) {
-            ArrayList<DataItem> sectionDataList = null;
+    boolean found = false;
+    ArrayList<HH2SectionData> fangList = singletonData.getFang();
+    // 遍历方剂列表，查找匹配的方剂
+    for (HH2SectionData sectionData : fangList) {
+        for (DataItem dataItem : sectionData.getData()) {
+            String originalName = dataItem.getFangList().get(0);
+            String actualName = getOrDefault(fangAliasDict, originalName);
 
-            for (DataItem dataItem : sectionData.getData()) {
-                boolean matchFound = false;
-
-                for (String fangNameInList : dataItem.getFangList()) {
-                    String actualName = null;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                        actualName = fangAliasDict.getOrDefault(fangNameInList, fangNameInList);
-                    } else {
-                        // 对于 Android 7.0 以下版本
-                        actualName = fangAliasDict.containsKey(fangNameInList) ? fangAliasDict.get(fangNameInList) : fangNameInList;
-                    }
-
-                    if (actualName != null && actualName.equals(aliasName)) {
-                        matchFound = true;
-                        break;  // 找到匹配项，退出循环
-                    }
-                }
-
-                if (matchFound) {
-                    if (sectionDataList == null) {
-                        sectionDataList = new ArrayList<>();
-                    }
-                    sectionDataList.add(dataItem);
-                }
-            }
-
-            // 如果有数据，则添加到 data 和 headers
-            if (sectionDataList != null) {
+            // 如果找到匹配的方剂，创建并添加显示对象到列表
+            if (actualName != null && actualName.equals(aliasName)) {
                 Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();
                 showFanYaoMingCi.setHeader(sectionData.getHeader());
-                showFanYaoMingCi.getData().addAll(sectionDataList);
+                showFanYaoMingCi.getData().add(dataItem);
                 showFanYaoMingCiList.add(showFanYaoMingCi);
+                found = true;
+                break;  // 跳出当前循环
             }
         }
-
-        return showFanYaoMingCiList;
+        if (found) break;  // 如果已找到匹配项，则跳出外层循环
     }
 
+    // 如果未找到匹配项，添加默认的 "伤寒金匮方" 数据
+    if (!found) {
+        Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();
+        showFanYaoMingCi.setHeader("伤寒金匮方");
+        DataItem dataItem = new DataItem();
+        dataItem.setText("$m{未见方。}");
+        showFanYaoMingCi.getData().add(dataItem);
+        showFanYaoMingCiList.add(showFanYaoMingCi);
+    }
+
+    // 处理其他内容
+    for (HH2SectionData sectionData : singletonData.getContent()) {
+        ArrayList<DataItem> sectionDataList = null;
+
+        for (DataItem dataItem : sectionData.getData()) {
+            boolean matchFound = false;
+
+            // 遍历数据项中的方名列表，查找匹配项
+            for (String fangNameInList : dataItem.getFangList()) {
+                String actualName = getOrDefault(fangAliasDict, fangNameInList);
+
+                // 如果找到匹配项，将其添加到列表
+                if (actualName != null && actualName.equals(aliasName)) {
+                    matchFound = true;
+                    break;  // 找到匹配项，退出循环
+                }
+            }
+
+            if (matchFound) {
+                if (sectionDataList == null) {
+                    sectionDataList = new ArrayList<>();
+                }
+                sectionDataList.add(dataItem);
+            }
+        }
+
+        // 如果有数据，则添加到 data 和 headers
+        if (sectionDataList != null) {
+            Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();
+            showFanYaoMingCi.setHeader(sectionData.getHeader());
+            showFanYaoMingCi.getData().addAll(sectionDataList);
+            showFanYaoMingCiList.add(showFanYaoMingCi);
+        }
+    }
+
+    // 返回包含方剂信息的列表
+    return showFanYaoMingCiList;
+}
+
+
+private String getOrDefault(Map<String, String> map, String key) {
+    // 空值检查
+    if (map == null) {
+        return key;
+    }
+
+    // 兼容不同版本的 Android SDK
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        return map.getOrDefault(key, key);
+    } else {
+        return map.containsKey(key) ? map.get(key) : key;
+    }
+}
+
+
+    private static final String DRUG_NOT_FOUND = "$r{药物未找到资料}";
+    private static final String SECTION_FORMAT = "$m{%s}-$m{含“$v{%s}”凡%d方：}";
+
     /**
-     * 根据给定的药物名称生成一个 spannable 字符串，其中包含药物相关的信息。
-     *
-     * @param str 药物名称
-     * @return 包含药物信息的 SpannableStringBuilder
-     */
-    public SpannableStringBuilder getShowYaoSpanString(String str) {
-        // 创建一个用于拼接 spannable 文本的对象
-        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
+ * 根据输入的字符串生成包含药物信息的可显示SpannableStringBuilder
+ * 该方法主要用于展示与指定字符串匹配的药物信息，包括药物别名处理、药物存在性检查以及相关配方信息
+ *
+ * @param str 用户输入的字符串，用于查找匹配的药物
+ * @return 包含药物信息的SpannableStringBuilder，用于UI展示
+ */
+public SpannableStringBuilder getShowYaoSpanString(String str) {
+    SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
 
-        // 获取药物别名字典
-        Map<String, String> yaoAliasDict = singletonData.getYaoAliasDict();
-        Map<String, Yao> yaoMap = tipsSingleData.getYaoMap();
-        // 获取药物的实际名称（考虑别名）
-        String actualName = yaoAliasDict.get(str);
-        if (actualName != null) {
-            str = actualName;
+    // 从单例数据中获取药物别名字典和药物映射
+    Map<String, String> yaoAliasDict = singletonData.getYaoAliasDict();
+    Map<String, Yao> yaoMap = tipsSingleData.getYaoMap();
+
+    // 如果输入字符串是药物别名，替换为实际名称
+    String actualName = yaoAliasDict.get(str);
+
+    if (actualName != null) {
+        str = actualName;
+    }
+
+    // 从药物映射中获取药物对象，若不存在则初始化一个空的Yao对象
+    Yao yao = yaoMap.get(str);
+    if (yao == null) {
+        yao = new Yao(); // 或者返回默认值
+    }
+
+    // 初始化数据项列表，用于存储匹配的药物信息
+    List<DataItem> dataItems = new ArrayList<>();
+
+    // 如果药物名称与输入字符串匹配，添加到数据项列表
+    if (yao.getName().equals(str)) {
+        dataItems.add(yao);
+    }
+
+    // 如果数据项列表不为空，将各数据项的属性文本添加到SpannableStringBuilder
+    // 否则，添加药物未找到的提示文本
+    if (!dataItems.isEmpty()) {
+        for (DataItem dataItem : dataItems) {
+            spannableStringBuilder.append((CharSequence) dataItem.getAttributedText());
         }
-        Yao yao = yaoMap.get(str);
-        // 如果不只显示相关方的信息，则开始处理药物数据
+    } else {
+        spannableStringBuilder.append(TipsNetHelper.renderText(DRUG_NOT_FOUND));
+    }
 
-        List<DataItem> dataItems = new ArrayList<>();
-        // 遍历所有的药物数据
-        if (yao.getName().equals(str)) {
-            dataItems.add(yao);
-        }
+    // 从单例数据中获取配方数据，并初始化节计数器
+    List<HH2SectionData> fangData = singletonData.getFang();
+    int sectionCount = 0;
 
-        // 处理数据项并拼接结果
-        if (!dataItems.isEmpty()) {
-            for (DataItem dataItem : dataItems) {
-                spannableStringBuilder.append((CharSequence) dataItem.getAttributedText());
-            }
-        } else {
-            spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText("$r{药物未找到资料}"));
-        }
-        spannableStringBuilder.append((CharSequence) "\n\n");
+    // 遍历配方数据，查找包含目标药物的配方
+    for (HH2SectionData sectionData : fangData) {
+        List<DataItem> filteredItems = new ArrayList<>();
 
-        // 遍历所有的方数据
-        List<HH2SectionData> fangData = singletonData.getFang();
-        int sectionCount = 0; // 记录方数据的数量
-
-        for (HH2SectionData sectionData : fangData) {
-            List<DataItem> filteredItems = new ArrayList<>();
-
-            for (DataItem dataItem : sectionData.getData()) {
-                if (((Fang) dataItem).hasYao(str)) {
-                    filteredItems.add(dataItem);
-                }
-            }
-
-            // 对方数据进行排序
-            String finalStr = str;
-            Collections.sort(filteredItems, new Comparator<DataItem>() {
-                @Override
-                public int compare(DataItem item1, DataItem item2) {
-                    return ((Fang) item1).compare((Fang) item2, finalStr);
-                }
-            });
-
-            int matchedCount = filteredItems.size(); // 记录匹配的方数量
-            if (matchedCount > 0) {
-                if (sectionCount > 0) {
-                    spannableStringBuilder.append((CharSequence) "\n\n");
-                }
-                spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText(
-                        String.format("$m{%s}-$m{含“$v{%s}”凡%d方：}",
-                                sectionData.getHeader(), str, matchedCount)
-                ));
-                spannableStringBuilder.append((CharSequence) "\n");
-
-                for (DataItem dataItem : filteredItems) {
-                    spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
-                }
-
-                sectionCount++;
+        // 筛选包含目标药物的配方数据项
+        for (DataItem dataItem : sectionData.getData()) {
+            if (dataItem instanceof Fang && ((Fang) dataItem).hasYao(str)) {
+                filteredItems.add(dataItem);
             }
         }
+        // 将 str 复制到 final 临时变量中
+        final String finalStr = str;
+        // 对匹配的配方数据项按特定规则排序
+        Collections.sort(filteredItems, (item1, item2) -> {
+            return ((Fang) item1).compare((Fang) item2, finalStr);
+        });
 
+        int matchedCount = filteredItems.size();
+        // 如果有匹配的配方，则添加到SpannableStringBuilder中
+        if (matchedCount > 0) {
+            // 如果不是第一个节，则添加换行符
+            if (sectionCount > 0) {
+                spannableStringBuilder.append("\n\n");
+            }
+            // 格式化并添加节标题和匹配数量
+            spannableStringBuilder.append(TipsNetHelper.renderText(
+                    String.format(SECTION_FORMAT, sectionData.getHeader(), str, matchedCount)
+            ));
+            spannableStringBuilder.append("\n");
+
+            // 添加匹配的配方名称和药物权重信息
+            for (DataItem dataItem : filteredItems) {
+                spannableStringBuilder.append(TipsNetHelper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
+            }
+
+            sectionCount++;
+        }
+    }
+
+    return spannableStringBuilder;
+}
+
+
+
+    /**
+ * 根据给定的药物名称生成一个 spannable 字符串，其中包含药物相关的信息。
+ *
+ * @param str 药物名称
+ * @return 包含药物信息的 SpannableStringBuilder
+ */
+public SpannableStringBuilder getShowMingCiSpanString(String str) {
+
+    // 创建一个用于拼接 spannable 文本的对象
+    SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
+
+    // 空值检查
+    if (str == null) {
         return spannableStringBuilder;
     }
 
-    /**
-     * 根据给定的药物名称生成一个 spannable 字符串，其中包含药物相关的信息。
-     *
-     * @param str 药物名称
-     * @return 包含药物信息的 SpannableStringBuilder
-     */
-    public SpannableStringBuilder getShowMingCiSpanString(String str) {
-
-        // 创建一个用于拼接 spannable 文本的对象
-        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
-        if (str == null) return spannableStringBuilder;
+    try {
         // 获取药物别名字典
         Map<String, MingCiContent> mingCiContentMap = tipsSingleData.getMingCiContentMap();
+
+        // 空值检查
+        if (mingCiContentMap == null) {
+            return spannableStringBuilder;
+        }
+
         MingCiContent mingCiContent = mingCiContentMap.get(str);
-        if (mingCiContent != null)
+        if (mingCiContent != null) {
             spannableStringBuilder.append(TipsNetHelper.renderText(mingCiContent.getText()));
-        return spannableStringBuilder;
+        } else {
+            // 日志记录
+            EasyLog.print("DrugInfo", "No information found for drug: " + str);
+        }
+    } catch (NullPointerException e) {
+        // 异常处理
+        EasyLog.print("DrugInfo", "NullPointerException occurred: " + e.getMessage());
+        e.printStackTrace();
+    } catch (Exception e) {
+        // 其他异常处理
+        EasyLog.print("DrugInfo", "An unexpected error occurred: " + e.getMessage());
+        e.printStackTrace();
     }
+
+    return spannableStringBuilder;
+}
+
 
 }

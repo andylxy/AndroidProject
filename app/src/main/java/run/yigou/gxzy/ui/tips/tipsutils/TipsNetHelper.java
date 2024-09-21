@@ -10,17 +10,12 @@
 
 package run.yigou.gxzy.ui.tips.tipsutils;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.PointF;
-import android.graphics.Rect;
-import android.text.Layout;
 import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
@@ -31,8 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.internal.view.SupportMenu;
-import androidx.core.view.ViewCompat;
 
 import com.hjq.http.EasyLog;
 import com.lxj.xpopup.XPopup;
@@ -47,7 +40,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.tips.TipsWindow_Fang_BubbleAttachPopup;
 import run.yigou.gxzy.ui.tips.TipsWindow_MingCi_BubbleAttachPopup;

@@ -128,10 +128,10 @@ public class GroupModel {
             for (DataItem dataItem : sectionData.getData()) {
                 if (isSearch)
                    // children.add(new ChildEntity(dataItem.getText(),dataItem.getAttributedText()));
-                    children.add(new ChildEntity(dataItem.getText(),dataItem.getNote(),dataItem.getSectionvideo(),dataItem.getAttributedText()));
+                    children.add(new ChildEntity(dataItem.getText(),dataItem.getNote(),dataItem.getSectionvideo()));
                 else
                    // children.add(new ChildEntity(dataItem.getText(),TipsNetHelper.renderText(dataItem.getText())));
-                    children.add(new ChildEntity(dataItem.getText(),dataItem.getNote(),dataItem.getSectionvideo(),TipsNetHelper.renderText(dataItem.getText())));
+                    children.add(new ChildEntity(dataItem.getText(),dataItem.getNote(),dataItem.getSectionvideo()));
             }
             SpannableStringBuilder spannableHeader = TipsNetHelper.renderText(sectionData.getHeader());
             groups.add(new ExpandableGroupEntity(sectionData.getHeader(), spannableHeader,"", isExpand, children));

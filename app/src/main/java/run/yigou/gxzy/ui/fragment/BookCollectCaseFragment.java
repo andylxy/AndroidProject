@@ -91,6 +91,12 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mBookCollectCaseFragment =null;
+    }
+
+    @Override
     protected void initData() {
         setTitle("书架");
         mBookService = new BookService();

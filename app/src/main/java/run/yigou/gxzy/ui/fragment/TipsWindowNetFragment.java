@@ -2,6 +2,9 @@
 
 package run.yigou.gxzy.ui.fragment;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -59,7 +62,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
     /**
      * singleData 所有书籍 数据单例
      */
-    Tips_Single_Data singleData ;
+    Tips_Single_Data singleData;
     /**
      * 当前点击书本数据
      */
@@ -93,6 +96,8 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
 
     }
 
+    private int bookId;
+
     private List<BookInfoNav.Bean.NavItem> analogData() {
         return mNavList;
     }
@@ -106,15 +111,15 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
      */
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
-
-        singletonNetData = Tips_Single_Data.getInstance().getBookIdContent(mAdapter.getItem(position).getBookNo());
+        bookId = mAdapter.getItem(position).getBookNo();
+        singletonNetData = Tips_Single_Data.getInstance().getBookIdContent(bookId);
         singletonNetData.setYaoAliasDict(singleData.getYaoAliasDict());
         singletonNetData.setFangAliasDict(singleData.getFangAliasDict());
 
         getBookData(mAdapter.getItem(position).getBookNo());
         //等待后台数据获取成功
         ThreadPoolManager.getInstance().execute(() -> {
-            int count =0;
+            int count = 0;
             try {
                 while (singletonNetData.getContent().isEmpty() && count < 20) {
                     Thread.sleep(500); // 延迟数据获取成功
@@ -127,13 +132,21 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            if (singletonNetData.getContent().isEmpty()){
-                toast("获取数据失败：" );
+            if (singletonNetData.getContent().isEmpty()) {
+                toast("获取数据失败：");
                 return;
             }
             post(() -> {
+
                 // 启动跳转 到阅读窗口
-                TipsFragmentActivity.start(getAttachActivity(), /*true, */mAdapter.getItem(position).getBookNo());
+                Intent intent = new Intent(getContext(), TipsFragmentActivity.class);
+                intent.putExtra("bookId", bookId);
+                if (!(getContext() instanceof Activity)) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
+                startActivity(intent);
+
+               // TipsFragmentActivity.start(getAttachActivity(), /*true, */mAdapter.getItem(position).getBookNo());
             });
         });
 

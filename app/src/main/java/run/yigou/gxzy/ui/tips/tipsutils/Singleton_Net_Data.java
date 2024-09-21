@@ -2,24 +2,10 @@
 package run.yigou.gxzy.ui.tips.tipsutils;
 
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.view.View;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import run.yigou.gxzy.app.AppApplication;
-import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.ui.adapter.BookReadContenAdapter;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Fang;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
 
 
 public class Singleton_Net_Data {

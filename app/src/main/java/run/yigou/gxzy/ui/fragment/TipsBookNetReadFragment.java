@@ -166,6 +166,12 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         rvList.setAdapter(adapter);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        singletonNetData.setOnContentShowStatusNotification(null);
+        singletonNetData.setOnContentUpdateListener(null);
+    }
 
 //    @Override
 //    public void onResume() {
