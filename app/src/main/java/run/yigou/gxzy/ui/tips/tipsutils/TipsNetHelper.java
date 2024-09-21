@@ -141,7 +141,7 @@ public class TipsNetHelper {
     private static void highlightMatchingText(DataItem dataItem, Pattern pattern) {
         SpannableStringBuilder spannableText = new SpannableStringBuilder(renderText(dataItem.getText()));
         Matcher matcher = pattern.matcher(spannableText);
-        //todo 需要更换突出颜色变更位置点 new ForegroundColorSpan(0xFFFF0000)
+        // todo 需要更换突出颜色变更位置点 new ForegroundColorSpan(0xFFFF0000)
         // 在 Spannable 文本中突出显示所有匹配项 0xFFFF0000 为红色
         while (matcher.find()) {
             spannableText.setSpan(new ForegroundColorSpan(0xFFFF0000), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -344,6 +344,10 @@ public class TipsNetHelper {
 //        }
 //    }
 
+
+
+    //todo 所有的SpannableStringBuilder 都是在这里处理的.
+    //如果要改变样式，需要修改这里，同时修改renderItemNumber()
     public static SpannableStringBuilder renderText(String str, final ClickLink clickLink) {
         // 创建一个可变的SpannableStringBuilder用于渲染文本
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(str);
@@ -537,7 +541,7 @@ public class TipsNetHelper {
         colorMap.put("g", Color.argb(230, 0, 128, 255)); // 半透明蓝色
         colorMap.put("u", Color.BLUE); // 蓝色
         colorMap.put("v", Color.BLUE); // 蓝色
-        colorMap.put("w", Color.GREEN); // 绿色
+        colorMap.put("w", Color.rgb(28,181,92)); // 绿色
         colorMap.put("q", Color.rgb(61, 200, 120)); // 自定义绿色
         colorMap.put("h", Color.BLACK); // 黑色
         colorMap.put("x", Color.parseColor("#EA8E3B")); // 自定义橙色

@@ -3,7 +3,6 @@
 package run.yigou.gxzy.ui.fragment;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 
@@ -26,15 +25,11 @@ import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.api.BookContentApi;
 import run.yigou.gxzy.http.api.BookFangApi;
 import run.yigou.gxzy.http.api.BookInfoNav;
-import run.yigou.gxzy.http.api.YaoContentApi;
-import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.manager.CacheDataManager;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Fang;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
 import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
@@ -48,13 +43,13 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
         return new TipsWindowNetFragment();
     }
 
-    public static TipsWindowNetFragment newInstance(List<BookInfoNav.Bean.NavItem> navList) {
+    public static TipsWindowNetFragment newInstance(List<BookInfoNav.Bean.TabNav> navList) {
         TipsWindowNetFragment bookInfoFragment = new TipsWindowNetFragment();
         bookInfoFragment.mNavList = navList;
         return bookInfoFragment;
     }
 
-    private List<BookInfoNav.Bean.NavItem> mNavList;
+    private List<BookInfoNav.Bean.TabNav> mNavList;
     private SmartRefreshLayout mRefreshLayout;
     private WrapRecyclerView mRecyclerView;
 
@@ -98,7 +93,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
 
     private int bookId;
 
-    private List<BookInfoNav.Bean.NavItem> analogData() {
+    private List<BookInfoNav.Bean.TabNav> analogData() {
         return mNavList;
     }
 
@@ -146,7 +141,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                 }
                 startActivity(intent);
 
-               // TipsFragmentActivity.start(getAttachActivity(), /*true, */mAdapter.getItem(position).getBookNo());
+                // TipsFragmentActivity.start(getAttachActivity(), /*true, */mAdapter.getItem(position).getBookNo());
             });
         });
 
@@ -163,7 +158,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                 .request(new HttpCallback<HttpData<List<HH2SectionData>>>(this) {
                     @Override
                     public void onSucceed(HttpData<List<HH2SectionData>> data) {
-                        if (data != null && data.getData().size() > 0) {
+                        if (data != null && !data.getData().isEmpty()) {
                             List<HH2SectionData> detailList = data.getData();
                             //加载书本内容
                             singletonNetData.setContent(detailList);
@@ -176,10 +171,17 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                 .request(new HttpCallback<HttpData<List<Fang>>>(this) {
                     @Override
                     public void onSucceed(HttpData<List<Fang>> data) {
-                        if (data != null && data.getData().size() > 0) {
+                        if (data != null && !data.getData().isEmpty()) {
                             List<Fang> detailList = data.getData();
                             //加载书本相关的药方
-                            singletonNetData.setFang(new HH2SectionData(detailList, 0, "方"));
+                            BookInfoNav.Bean.TabNav tabNav = Tips_Single_Data.getInstance().getNavTabMap().get(bookId);
+                            StringBuilder fangName = new StringBuilder("\n");
+                            if (tabNav != null) {
+                                fangName.append(tabNav.getBookName());
+                            } else {
+                                fangName.append("药方");
+                            }
+                            singletonNetData.setFang(new HH2SectionData(detailList, 0, fangName.toString()));
                         }
                     }
                 });

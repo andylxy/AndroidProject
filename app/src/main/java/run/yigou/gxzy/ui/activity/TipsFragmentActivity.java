@@ -1,6 +1,7 @@
 package run.yigou.gxzy.ui.activity;
 
 import android.os.Bundle;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import androidx.fragment.app.FragmentManager;
@@ -8,9 +9,11 @@ import androidx.fragment.app.FragmentTransaction;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.ui.fragment.TipsBookNetReadFragment;
 import run.yigou.gxzy.ui.fragment.TipsSettingFragment;
 import run.yigou.gxzy.ui.fragment.TipsUnitFragment;
+import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
 public final class TipsFragmentActivity extends AppActivity {
 
@@ -23,7 +26,7 @@ public final class TipsFragmentActivity extends AppActivity {
     private RadioGroup radioGroup; // 用于切换不同 Fragment 的 RadioGroup
     private FragmentManager fragmentManager; // Fragment 管理器
     private RadioGroup.OnCheckedChangeListener tabCheckedChangeListener; // RadioGroup 的监听器
-
+    private RadioButton currentCheckedRadioButton;
     public TipsFragmentActivity() {
     }
 
@@ -54,7 +57,7 @@ public final class TipsFragmentActivity extends AppActivity {
             // 初始化 RadioGroup
             radioGroup = findViewById(R.id.rg_tab);
             radioGroup.check(FIRST_CONTENT_TAB_ID); // 设置默认选中的 RadioButton
-
+            currentCheckedRadioButton = radioGroup.findViewById(FIRST_CONTENT_TAB_ID);
             // 设置 RadioGroup 的监听器
             tabCheckedChangeListener = (group, checkedId) -> {
                 switch (checkedId) {
@@ -79,6 +82,15 @@ public final class TipsFragmentActivity extends AppActivity {
             Bundle args = new Bundle();
             args.putInt("bookNo", bookId);  // 替换为实际参数
             fragment.setArguments(args);
+
+            BookInfoNav.Bean.TabNav tabNav = Tips_Single_Data.getInstance().getNavTabMap().get(bookId);
+            StringBuilder stringBuilder = new StringBuilder("阅读器");
+            if (tabNav != null) {
+                // 清空内容
+                stringBuilder.setLength(0);
+                stringBuilder.append(tabNav.getBookName());
+            }
+            currentCheckedRadioButton.setText(stringBuilder);
 
             // 显示默认页面
             replaceFragment(fragment);

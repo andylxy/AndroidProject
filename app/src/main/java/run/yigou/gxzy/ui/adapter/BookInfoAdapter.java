@@ -18,8 +18,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import java.util.List;
-
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
 import run.yigou.gxzy.http.api.BookInfoNav;
@@ -35,7 +33,7 @@ import run.yigou.gxzy.other.AppConfig;
  *  描述:
  *
 */
-public final class BookInfoAdapter extends AppAdapter<BookInfoNav.Bean.NavItem> {
+public final class BookInfoAdapter extends AppAdapter<BookInfoNav.Bean.TabNav> {
 
     public BookInfoAdapter(Context context) {
         super(context);
@@ -69,7 +67,7 @@ public final class BookInfoAdapter extends AppAdapter<BookInfoNav.Bean.NavItem> 
         @Override
         public void onBindView(int position) {
             //mTextView.setText(getItem(position));
-            BookInfoNav.Bean.NavItem item = null;
+            BookInfoNav.Bean.TabNav item = null;
             if (getData() != null) {
                 item = getData().get(position);
             }

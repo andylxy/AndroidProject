@@ -158,6 +158,13 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 //                                    mPagerAdapter.addFragment(BookInfoFragment.newInstance(nav.getNavList()), nav.getName());
                                 mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
                                 mTabAdapter.addItem(nav.getName());
+
+                                for (BookInfoNav.Bean.TabNav item : nav.getNavList()){
+
+                                    if (item.getBookNo() >0)
+                                        Tips_Single_Data.getInstance().getNavTabMap().put(item.getBookNo(), item);
+                                }
+
                             }
                         } else
                             bookNavList = new ArrayList<>();
@@ -173,7 +180,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                 .request(new HttpCallback<HttpData<List<Yao>>>(this) {
                     @Override
                     public void onSucceed(HttpData<List<Yao>> data) {
-                        if (data != null && data.getData().size() > 0) {
+                        if (data != null && !data.getData().isEmpty()) {
                             List<Yao> detailList = data.getData();
                             //加载所有药物的数据
                             Tips_Single_Data.getInstance().setYaoData(new HH2SectionData(detailList, 0, "伤寒金匮所有药物"));
@@ -191,7 +198,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                 .request(new HttpCallback<HttpData<List<MingCiContent>>>(this) {
                     @Override
                     public void onSucceed(HttpData<List<MingCiContent>> data) {
-                        if (data != null && data.getData().size() > 0) {
+                        if (data != null && !data.getData().isEmpty()) {
                             List<MingCiContent> detailList = data.getData();
                             //加载所有药物的数据
                             Tips_Single_Data.getInstance().setMingCiData(new HH2SectionData(detailList, 0, "医书相关的名词说明"));

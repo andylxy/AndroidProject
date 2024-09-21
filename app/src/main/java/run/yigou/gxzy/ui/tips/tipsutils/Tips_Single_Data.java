@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
 
@@ -26,6 +27,12 @@ public class Tips_Single_Data {
     private List<String> allYao;
     private int curBookId;
 
+    public Map<Integer, BookInfoNav.Bean.TabNav> getNavTabMap() {
+        if (NavTabMap == null) NavTabMap = new HashMap<>();
+        return NavTabMap;
+    }
+
+    private Map<Integer, BookInfoNav.Bean.TabNav> NavTabMap;
     /**
      * 获取当前打开书本ID
      *

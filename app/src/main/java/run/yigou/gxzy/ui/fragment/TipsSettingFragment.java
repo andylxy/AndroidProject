@@ -82,7 +82,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         // 默认初始化设置
         // 从 SharedPreferences 中读取设置值
         SharedPreferences sharedPreferences = AppApplication.application.getSharedPreferences("shanghan3.1", Context.MODE_PRIVATE);
-        setShowShanghan(sharedPreferences.getInt(AppConst.Key_Shanghan, 1));
+        setShowShanghan(sharedPreferences.getInt(AppConst.Key_Shanghan, 0));
         setShowJinkui(sharedPreferences.getInt(AppConst.Key_Jinkui, 1));
 
         if (getShowShanghan() == AppConst.Show_Shanghan_AllSongBan) {

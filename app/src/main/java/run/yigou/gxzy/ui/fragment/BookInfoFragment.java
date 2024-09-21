@@ -46,13 +46,13 @@ public final class BookInfoFragment extends TitleBarFragment<AppActivity>
         return new BookInfoFragment();
     }
 
-    public static BookInfoFragment newInstance(List<BookInfoNav.Bean.NavItem> navList) {
+    public static BookInfoFragment newInstance(List<BookInfoNav.Bean.TabNav> navList) {
         BookInfoFragment bookInfoFragment = new BookInfoFragment();
         bookInfoFragment.mNavList = navList;
         return bookInfoFragment;
     }
 
-    private List<BookInfoNav.Bean.NavItem> mNavList;
+    private List<BookInfoNav.Bean.TabNav> mNavList;
     private SmartRefreshLayout mRefreshLayout;
     private WrapRecyclerView mRecyclerView;
 
@@ -86,7 +86,7 @@ public final class BookInfoFragment extends TitleBarFragment<AppActivity>
     /**
      * 模拟数据
      */
-    private List<BookInfoNav.Bean.NavItem> analogData() {
+    private List<BookInfoNav.Bean.TabNav> analogData() {
 //        List<String> data = new ArrayList<>();
 //        for (int i = mAdapter.getCount(); i < mAdapter.getCount() + 20; i++) {
 //            data.add("我是第" + i + "条目");

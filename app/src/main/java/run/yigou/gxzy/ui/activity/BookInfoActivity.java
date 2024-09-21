@@ -42,7 +42,7 @@ import run.yigou.gxzy.utils.StringHelper;
  */
 public final class BookInfoActivity extends AppActivity {
     private static final String Book_KEY_IN = "book";
-    private BookInfoNav.Bean.NavItem mNavItem;
+    private BookInfoNav.Bean.TabNav mTabNav;
     private Book mBook;
     private BookService mBookService;
     private TextView tvBookAuthor;
@@ -57,7 +57,7 @@ public final class BookInfoActivity extends AppActivity {
     private ArrayList<TitelInfo> mTitelInfos = new ArrayList<>();
     private List<BookDetailList.Bean> detailList;
 
-    public static void start(Context context, BookInfoNav.Bean.NavItem item) {
+    public static void start(Context context, BookInfoNav.Bean.TabNav item) {
         Intent intent = new Intent(context, BookInfoActivity.class);
         intent.putExtra(AppConst.BOOK, item);
         if (!(context instanceof Activity)) {
@@ -110,7 +110,7 @@ public final class BookInfoActivity extends AppActivity {
         }
         //图片
         GlideApp.with(this.getContext())
-                .load(AppConfig.getHostUrl() + mNavItem.getImageUrl())
+                .load(AppConfig.getHostUrl() + mTabNav.getImageUrl())
                 .into(ivBookImg);
         EasyHttp.get(this)
                 .api(new BookDetailList().setId(mBook.getBookId()))
@@ -201,13 +201,13 @@ public final class BookInfoActivity extends AppActivity {
     private boolean BookCollected(boolean start) {
 
         if (start) {
-            mNavItem = getSerializable(AppConst.BOOK);
+            mTabNav = getSerializable(AppConst.BOOK);
             mBook = new Book();
-            mBook.setAuthor(mNavItem.getAuthor());
-            mBook.setDesc(mNavItem.getDesc());
-            mBook.setImgUrl(mNavItem.getImageUrl());
-            mBook.setName(mNavItem.getBookName());
-            mBook.setBookId(mNavItem.getId());
+            mBook.setAuthor(mTabNav.getAuthor());
+            mBook.setDesc(mTabNav.getDesc());
+            mBook.setImgUrl(mTabNav.getImageUrl());
+            mBook.setName(mTabNav.getBookName());
+            mBook.setBookId(mTabNav.getId());
         }
 
         Book book = mBookService.findBookByAuthorAndName(mBook.getName(), mBook.getAuthor());

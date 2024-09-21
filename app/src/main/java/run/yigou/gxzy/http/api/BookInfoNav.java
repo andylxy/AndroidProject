@@ -12,8 +12,9 @@ package run.yigou.gxzy.http.api;
 
 import com.hjq.http.config.IRequestApi;
 
-import java.io.Serializable;
 import java.util.List;
+
+import run.yigou.gxzy.http.entitymodel.NavItem;
 
 
 /**
@@ -36,7 +37,7 @@ public final class BookInfoNav implements IRequestApi {
     public final static class Bean {
         private String Id;
         private String Name;
-        private List<NavItem> NavList;
+        private List<TabNav> NavList;
 
         public String getId() {
             return Id;
@@ -46,85 +47,11 @@ public final class BookInfoNav implements IRequestApi {
             return Name;
         }
 
-        public List<NavItem> getNavList() {
+        public List<TabNav> getNavList() {
             return NavList;
         }
 
-        public final static class NavItem implements Serializable {
-            private String Id;
-            private String ImageUrl;
-            private String BookName;
-            private String ChenɡShu;
-            private String Author;
-            private String Desc;
-
-            public int getBookNo() {
-                return BookNo;
-            }
-
-            public void setBookNo(int bookNo) {
-                BookNo = bookNo;
-            }
-
-            private int BookNo;
-
-            public NavItem(String desc, String author, String chenɡShu, String bookName, String imageUrl, String id) {
-                Desc = desc;
-                Author = author;
-                ChenɡShu = chenɡShu;
-                BookName = bookName;
-                ImageUrl = imageUrl;
-                Id = id;
-            }
-
-            public String getId() {
-                return Id;
-            }
-
-            public String getImageUrl() {
-                return ImageUrl;
-            }
-
-            public String getBookName() {
-                return BookName;
-            }
-
-            public String getChenɡShu() {
-                return ChenɡShu;
-            }
-
-            public String getAuthor() {
-                return Author;
-            }
-
-            public void setId(String id) {
-                Id = id;
-            }
-
-            public void setImageUrl(String imageUrl) {
-                ImageUrl = imageUrl;
-            }
-
-            public void setBookName(String bookName) {
-                BookName = bookName;
-            }
-
-            public void setChenɡShu(String chenɡShu) {
-                ChenɡShu = chenɡShu;
-            }
-
-            public void setAuthor(String author) {
-                Author = author;
-            }
-
-            public void setDesc(String desc) {
-                Desc = desc;
-            }
-
-            public String getDesc() {
-                return Desc;
-            }
+        public final static class TabNav extends NavItem {
         }
-
     }
 }
