@@ -47,14 +47,13 @@
                 android:text="跳转查看条文"
                 android:layout_weight="0.8"/>
         </LinearLayout>
-        <com.nakardo.atableview.view.ATableView
-            android:layout_gravity="top"
-            android:id="@+id/showfang"
-            android:background="@drawable/round_win"
+        <include
+            android:id="@+id/include_tips_windows_sticky_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            layout="@layout/tips_windows_activity_sticky_list" />
     </LinearLayout>
-    <me.huanghai.searchController.ArrowView
+    <run.yigou.gxzy.ui.tips.widget.ArrowView
         android:id="@+id/arrow"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

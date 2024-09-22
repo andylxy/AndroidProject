@@ -20,13 +20,12 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <com.nakardo.atableview.view.ATableView
-                android:layout_gravity="top"
-                android:id="@+id/showfang"
-                android:background="@drawable/round_win"
+            <include
+                android:id="@+id/include_tips_windows_sticky_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="34dp"/>
+                layout="@layout/tips_windows_activity_sticky_list" />
+
             <LinearLayout
                 android:layout_gravity="bottom"
                 android:orientation="horizontal"
@@ -59,7 +58,7 @@
             </LinearLayout>
         </FrameLayout>
     </LinearLayout>
-    <me.huanghai.searchController.ArrowView
+    <run.yigou.gxzy.ui.tips.widget.ArrowView
         android:id="@+id/arrow"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

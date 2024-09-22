@@ -39,6 +39,9 @@ public class NoFooterAdapter extends GroupedListAdapter {
         super(context, groups);
     }
 
+    public NoFooterAdapter(Context context) {
+        super(context);
+    }
 
     @Override
     public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {

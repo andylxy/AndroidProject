@@ -53,7 +53,7 @@
             android:clipChildren="true"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <com.nakardo.atableview.uikit.UILabel
+            <TextView
                 android:textColor="#000000"
                 android:id="@+id/textview"
                 android:background="@drawable/round_win_inner"
@@ -62,7 +62,7 @@
                 android:layout_height="wrap_content"/>
         </ScrollView>
     </LinearLayout>
-    <me.huanghai.searchController.ArrowView
+    <run.yigou.gxzy.ui.tips.widget.ArrowView
         android:id="@+id/arrow"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
