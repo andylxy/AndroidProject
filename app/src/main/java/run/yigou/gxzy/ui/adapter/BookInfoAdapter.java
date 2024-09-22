@@ -75,9 +75,9 @@ public final class BookInfoAdapter extends AppAdapter<BookInfoNav.Bean.TabNav> {
                 tvBookName.setText(item.getBookName());
                 tvBookAuthor.setText(item.getAuthor());
                 tvBookDesc.setText("     " + (item.getDesc() == null ?"":item.getDesc()));
-                GlideApp.with(this.getItemView())
-                        .load(AppConfig.getHostUrl()+item.getImageUrl())
-                        .into(ivBookImg);
+//                GlideApp.with(this.getItemView())
+//                        .load(AppConfig.getHostUrl()+item.getImageUrl())
+//                        .into(ivBookImg);
             }
         }
     }

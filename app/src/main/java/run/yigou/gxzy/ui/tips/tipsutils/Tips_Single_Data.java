@@ -11,6 +11,8 @@
 package run.yigou.gxzy.ui.tips.tipsutils;
 
 
+import android.app.Activity;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.Map;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.widget.LittleWindow;
 
 
 public class Tips_Single_Data {
@@ -26,7 +29,10 @@ public class Tips_Single_Data {
     private Map<Integer, Singleton_Net_Data> bookIdContent;
     private List<String> allYao;
     private int curBookId;
-
+    public List<LittleWindow> littleWindowStack = new ArrayList();
+    public List<String> getAllYao() {
+        return this.allYao;
+    }
     public Map<Integer, BookInfoNav.Bean.TabNav> getNavTabMap() {
         if (NavTabMap == null) NavTabMap = new HashMap<>();
         return NavTabMap;
@@ -58,7 +64,9 @@ public class Tips_Single_Data {
     private HH2SectionData mingCiData;
     private Map<String, MingCiContent> mingCiContentMap;
 
-
+    public Activity curActivity;
+    //public ShowFragment curFragment;
+    //public TipsWindow curTipsWindow;
     private Map<String, Yao> yaoMap;
 
 
@@ -100,6 +108,15 @@ public class Tips_Single_Data {
         }
 
     }
+    private Singleton_Net_Data curSingletonData;
+
+    public Singleton_Net_Data getCurSingletonData() {
+        return curSingletonData;
+    }
+
+    public void setCurSingletonData(Singleton_Net_Data curSingletonData) {
+        this.curSingletonData = curSingletonData;
+    }
 
     private Map<String, String> fangAliasDict;
     private Map<String, String> yaoAliasDict;
@@ -120,6 +137,7 @@ public class Tips_Single_Data {
             bookIdContent.put(bookId, singletonNetData);
         }
         setCurBookId(bookId);
+        setCurSingletonData(singletonNetData);
         return singletonNetData;
     }
 

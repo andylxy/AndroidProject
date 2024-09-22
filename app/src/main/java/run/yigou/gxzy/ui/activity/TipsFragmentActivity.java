@@ -26,7 +26,7 @@ public final class TipsFragmentActivity extends AppActivity {
     private RadioGroup radioGroup; // 用于切换不同 Fragment 的 RadioGroup
     private FragmentManager fragmentManager; // Fragment 管理器
     private RadioGroup.OnCheckedChangeListener tabCheckedChangeListener; // RadioGroup 的监听器
-    private RadioButton currentCheckedRadioButton;
+
     public TipsFragmentActivity() {
     }
 
@@ -45,7 +45,7 @@ public final class TipsFragmentActivity extends AppActivity {
                 toast("获取书籍信息错误");
                 return;
             }
-
+            Tips_Single_Data.getInstance().curActivity= this;
             // 获取 FragmentManager
             fragmentManager = getSupportFragmentManager();
 
@@ -57,7 +57,7 @@ public final class TipsFragmentActivity extends AppActivity {
             // 初始化 RadioGroup
             radioGroup = findViewById(R.id.rg_tab);
             radioGroup.check(FIRST_CONTENT_TAB_ID); // 设置默认选中的 RadioButton
-            currentCheckedRadioButton = radioGroup.findViewById(FIRST_CONTENT_TAB_ID);
+            RadioButton currentCheckedRadioButton = radioGroup.findViewById(FIRST_CONTENT_TAB_ID);
             // 设置 RadioGroup 的监听器
             tabCheckedChangeListener = (group, checkedId) -> {
                 switch (checkedId) {
