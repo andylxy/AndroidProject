@@ -48,9 +48,8 @@ public class TipsWindow_Yao_BubbleAttachPopup extends BubbleAttachPopupView {
 //                                .setBubbleRadius(100)
         setArrowRadius(XPopupUtils.dp2px(getContext(), 2f));
         final TextView tv = findViewById(R.id.tv);
-        Show_Fan_Yao_MingCi showFanYaoMingCi =  new Show_Fan_Yao_MingCi();
         tv.setMovementMethod(LocalLinkMovementMethod.getInstance());
-        tv.setText(showFanYaoMingCi.getShowYaoSpanString(mYao));
+        tv.setText(Show_Fan_Yao_MingCi.getInstance().getShowYaoSpanString(mYao));
     }
 
 //    @Override

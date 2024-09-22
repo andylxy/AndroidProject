@@ -45,15 +45,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import run.yigou.gxzy.ui.dialog.MenuDialog;
-import run.yigou.gxzy.ui.tips.TipsWindow_Fang_BubbleAttachPopup;
 import run.yigou.gxzy.ui.tips.TipsWindow_MingCi_BubbleAttachPopup;
-import run.yigou.gxzy.ui.tips.TipsWindow_Yao_BubbleAttachPopup;
 import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Show_Fan_Yao_MingCi;
-import run.yigou.gxzy.ui.tips.widget.LittleTableViewWindow;
-import run.yigou.gxzy.ui.tips.widget.LittleTextViewWindow;
+import run.yigou.gxzy.ui.tips.widget.Tips_Tips_Little_TableView_Window;
+import run.yigou.gxzy.ui.tips.widget.Tips_Tips_Little_TextView_Window;
 
 
 public class TipsNetHelper {
@@ -605,11 +603,11 @@ public class TipsNetHelper {
 
 
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-                LittleTextViewWindow littleTextViewWindow = new LittleTextViewWindow();
-                littleTextViewWindow.setYao(charSequence);
-                littleTextViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
-                littleTextViewWindow.setRect(textRect);
-                littleTextViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
+                Tips_Tips_Little_TextView_Window tipsLittleTextViewWindow = new Tips_Tips_Little_TextView_Window();
+                tipsLittleTextViewWindow.setYao(charSequence);
+                //littleTextViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
+                tipsLittleTextViewWindow.setRect(textRect);
+                tipsLittleTextViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
 
 
             }
@@ -620,9 +618,7 @@ public class TipsNetHelper {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("tapped:" + charSequence);
-
-                Show_Fan_Yao_MingCi fanYao = new Show_Fan_Yao_MingCi();
-                ArrayList<GroupEntity> groups = GroupModel.getGroups(fanYao.showFang(charSequence));
+                ArrayList<GroupEntity> groups = GroupModel.getGroups(Show_Fan_Yao_MingCi.getInstance().showFang(charSequence));
 
 
 //                new XPopup.Builder(textView.getContext())
@@ -642,12 +638,12 @@ public class TipsNetHelper {
 //                        .show();
 
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-                LittleTableViewWindow littleTableViewWindow = new LittleTableViewWindow();
-                littleTableViewWindow.setAdapterSource(textView.getContext(),groups);
-                littleTableViewWindow.setFang(charSequence);
-                littleTableViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
-                littleTableViewWindow.setRect(textRect);
-                littleTableViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
+                Tips_Tips_Little_TableView_Window tipsLittleTableViewWindow = new Tips_Tips_Little_TableView_Window();
+                tipsLittleTableViewWindow.setAdapterSource(textView.getContext(),groups);
+                tipsLittleTableViewWindow.setFang(charSequence);
+                //littleTableViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
+                tipsLittleTableViewWindow.setRect(textRect);
+                tipsLittleTableViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
             }
 
             /**

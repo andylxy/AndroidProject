@@ -31,13 +31,10 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.tips.adapter.NoFooterAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupEntity;
-import run.yigou.gxzy.ui.tips.entity.GroupModel;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Show_Fan_Yao_MingCi;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
-/* loaded from: classes.dex */
-public class LittleTableViewWindow extends LittleWindow {
+
+public class Tips_Tips_Little_TableView_Window extends Tips_Little_Window {
     private SpannableStringBuilder attributedString;
     private String fang;
     private ViewGroup mGroup;
@@ -45,22 +42,23 @@ public class LittleTableViewWindow extends LittleWindow {
     private String tag = "littleWindow";
     private View view;
     private Tips_Single_Data tips_single_data = Tips_Single_Data.getInstance();
+    private NoFooterAdapter adapter;
 
-    @Override // me.huanghai.searchController.LittleWindow
+    @Override
     public String getSearchString() {
         return this.fang;
     }
 
-    @Override // me.huanghai.searchController.LittleWindow
+    @Override
     public void show(FragmentManager fragmentManager) {
         super.show(fragmentManager);
-        tips_single_data.littleWindowStack.add(this);
+        tips_single_data.tipsLittleWindowStack.add(this);
     }
 
-    @Override // me.huanghai.searchController.LittleWindow
+    @Override
     public void dismiss() {
         super.dismiss();
-        tips_single_data.littleWindowStack.remove(this);
+        tips_single_data.tipsLittleWindowStack.remove(this);
     }
 
     public void setAttributedString(SpannableStringBuilder spannableStringBuilder) {
@@ -107,16 +105,15 @@ public class LittleTableViewWindow extends LittleWindow {
         return false; // 不是方上下文
     }
 
-
     protected boolean onlyShowRelatedContent() {
 
         Map<String, String> fangAliasDict = tips_single_data.getFangAliasDict(); // 获取方别名字典
         String str = this.fang; // 当前的方
 
         // 如果小窗口堆栈中有内容
-        if (!tips_single_data.littleWindowStack.isEmpty()) {
+        if (!tips_single_data.tipsLittleWindowStack.isEmpty()) {
             // 获取小窗口栈顶的搜索字符串
-            String searchString = tips_single_data.littleWindowStack.get(tips_single_data.littleWindowStack.size() - 1).getSearchString();
+            String searchString = tips_single_data.tipsLittleWindowStack.get(tips_single_data.tipsLittleWindowStack.size() - 1).getSearchString();
 
             // 检查是否有对应的方别名
             String str2 = fangAliasDict.get(searchString);
@@ -134,90 +131,6 @@ public class LittleTableViewWindow extends LittleWindow {
         // return showFragment != null && showFragment.getIsContentOpen();
         return true;
     }
-
-
-    //    public View onCreateVieworg(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-//        // 获取当前窗口的根视图
-//        Activity activity = getActivity();
-//        if (activity == null) {
-//            throw new IllegalStateException("Activity cannot be null.");
-//        }
-//        this.mGroup = (ViewGroup) activity.getWindow().getDecorView();
-//        // 初始化密度、宽度和高度
-//        float density = this.mGroup.getResources().getDisplayMetrics().density;
-//        int height = this.mGroup.getHeight();
-//        int width = this.mGroup.getWidth();
-//        int min = Math.min(50, width / 18);
-//        // 设置FrameLayout的布局参数
-//        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(min, min);
-//        FrameLayout.LayoutParams layoutParams2 = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-//        // 初始化矩形区域
-//        if (this.rect == null) {
-//            this.rect = new Rect();
-//        }
-//        // 计算矩形区域的中心点
-//        int height2 = this.rect.top + (this.rect.height() / 2);
-//        int width2 = this.rect.left + (this.rect.width() / 2);
-//        int i2 = width / 2;
-//        int i3 = height / 2;
-//        int i4 = ArrowView.UP;
-//        // 根据矩形区域的位置决定布局方向
-//        if (height2 < i3) {
-//            // 显示向上的布局
-//            this.view = layoutInflater.inflate(R.layout.show_fang, (ViewGroup) null);
-//            layoutParams2.setMargins(min, this.rect.top + this.rect.height() + min, min, min);
-//            int i5 = min / 2;
-//            layoutParams.setMargins(width2 - i5, this.rect.top + this.rect.height(), (width - width2) - i5, (height - this.rect.top - this.rect.height()) - min);
-//        } else {
-//            // 显示向下的布局
-//            this.view = layoutInflater.inflate(R.layout.show_fang_2, (ViewGroup) null);
-//            layoutParams2.gravity = Gravity.BOTTOM;
-//            Rect rect = new Rect();
-//            this.mGroup.getWindowVisibleDisplayFrame(rect);
-//            layoutParams2.setMargins(min, rect.top + 8, min, (height - this.rect.top) + min);
-//            int i6 = min / 2;
-//            layoutParams.setMargins(width2 - i6, (this.rect.top - min) - 1, (width - width2) - i6, (height - this.rect.top) + 1);
-//        }
-//        // 处理关闭按钮点击事件
-//        Button closeButton = this.view.findViewById(R.id.maskbtn);
-//        closeButton.setOnClickListener(v -> {
-//            LittleTableViewWindow.this.dismiss();
-//            SingletonData.getInstance().popShowFang();
-//        });
-//        // 初始化并配置ATableView
-//        ATableView aTableView = this.view.findViewById(R.id.showfang);
-//        aTableView.init(ATableView.ATableViewStyle.Plain);
-//        final String str = this.fang != null ? this.fang : "";
-//        final ShowFang showFang = new ShowFang(str, onlyShowRelatedContent());
-//        SingletonData.getInstance().pushShowFang(showFang);
-//        aTableView.setDataSource(showFang.getDataSource());
-//        aTableView.setDelegate(showFang.getDelegate());
-//        aTableView.enableHeaderView(true);
-//        // 设置箭头方向
-//        ArrowView arrowView = this.view.findViewById(R.id.arrow);
-//        arrowView.setDirection(height2 < i3 ? ArrowView.UP : ArrowView.DOWN);
-//        arrowView.setLayoutParams(layoutParams);
-//        // 处理左侧按钮点击事件
-//        Button leftButton = this.view.findViewById(R.id.leftbtn);
-//        leftButton.setOnClickListener(v -> {
-//            showFang.putCopyStringsToClipboard();
-//            Toast.makeText(SingletonData.getInstance().curActivity, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
-//        });
-//        // 处理右侧按钮点击事件
-//        Button rightButton = this.view.findViewById(R.id.rightbtn);
-//        rightButton.setOnClickListener(v -> {
-//            Intent intent = new Intent(activity, MainActivity.class);
-//            intent.putExtra("title", str);
-//            intent.putExtra("isFang", "false");
-//            activity.startActivity(intent);
-//        });
-//        // 配置Wrapper布局参数并添加视图
-//        LinearLayout wrapper = this.view.findViewById(R.id.wrapper);
-//        wrapper.setLayoutParams(layoutParams2);
-//        this.mGroup.addView(this.view);
-//        return super.onCreateView(layoutInflater, viewGroup, bundle);
-//    }
-    private NoFooterAdapter adapter;
 
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         // 获取当前活动，确保不为null
@@ -280,32 +193,8 @@ public class LittleTableViewWindow extends LittleWindow {
             //SingletonData.getInstance().popShowFang(); // 更新单例数据
         });
 
-//        // 初始化并配置ATableView
-//        ATableView aTableView = this.view.findViewById(R.id.showfang); // 获取ATableView
-//        aTableView.init(ATableView.ATableViewStyle.Plain); // 初始化表格样式
-//
-//        // 获取内容并更新单例数据
-//        String content = (this.fang != null) ? this.fang : ""; // 获取内容
-//        ShowFang showFang = new ShowFang(content, onlyShowRelatedContent()); // 创建ShowFang实例
-//        SingletonData.getInstance().pushShowFang(showFang); // 更新单例数据
-//        aTableView.setDataSource(showFang.getDataSource()); // 设置数据源
-//        aTableView.setDelegate(showFang.getDelegate()); // 设置委托
-//        aTableView.enableHeaderView(true); // 启用表头视图
-
         rvList = this.view.findViewById(R.id.include_tips_windows_sticky_list).findViewById(R.id.sticky_rv_list);
-        //stickyLayout = (StickyHeaderLayout) findViewById(R.id.sticky_layout);
-
         rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
-        //加载药方和药物检查实例
-        // if (fanYao == null)
-
-        //检索所有的相关药方
-        //if (adapter == null){
-       // adapter = new NoFooterAdapter(getActivity());
-        //}else {
-        //   adapter.clear();
-        //   adapter. setGroups(GroupModel.getGroups(fanYao.showFang(fanyao_name)));
-        // }
 
         adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
             @Override
@@ -330,9 +219,9 @@ public class LittleTableViewWindow extends LittleWindow {
 
 
         // 设置箭头方向
-        ArrowView arrowView = this.view.findViewById(R.id.arrow); // 获取箭头视图
-        arrowView.setDirection(centerY < midHeight ? ArrowView.UP : ArrowView.DOWN); // 设置箭头方向
-        arrowView.setLayoutParams(smallLayoutParams); // 设置箭头布局参数
+        Tips_ArrowView tipsArrowView = this.view.findViewById(R.id.arrow); // 获取箭头视图
+        tipsArrowView.setDirection(centerY < midHeight ? Tips_ArrowView.UP : Tips_ArrowView.DOWN); // 设置箭头方向
+        tipsArrowView.setLayoutParams(smallLayoutParams); // 设置箭头布局参数
 
         // 处理左侧按钮点击事件
         Button leftButton = this.view.findViewById(R.id.leftbtn); // 获取左侧按钮

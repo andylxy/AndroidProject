@@ -1,5 +1,6 @@
 package run.yigou.gxzy.ui.activity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -35,6 +36,7 @@ public final class TipsFragmentActivity extends AppActivity {
         return R.layout.tips_fragment_tab_net_list;
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     protected void initView() {
         try {

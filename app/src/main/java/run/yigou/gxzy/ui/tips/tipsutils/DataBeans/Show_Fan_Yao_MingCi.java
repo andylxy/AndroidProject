@@ -29,6 +29,21 @@ import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
 public class Show_Fan_Yao_MingCi {
 
+   // 写本类单对象
+    private static Show_Fan_Yao_MingCi instance;
+
+    /**
+     * 获取  Show_Fan_Yao_MingCi 单例对象
+     *
+     * @return 单例对象
+     */
+    public static Show_Fan_Yao_MingCi getInstance() {
+        if (instance == null) {
+            instance = new Show_Fan_Yao_MingCi();
+        }
+        return instance;
+    }
+
     private List<DataItem> data = new ArrayList<>();
 
     public List<DataItem> getData() {
@@ -48,7 +63,7 @@ public class Show_Fan_Yao_MingCi {
     private Tips_Single_Data tipsSingleData;
     private Singleton_Net_Data singletonData;
 
-    public Show_Fan_Yao_MingCi() {
+    private Show_Fan_Yao_MingCi() {
         tipsSingleData = Tips_Single_Data.getInstance();
         // 获取 SingletonData 实例和数据结构
         singletonData = tipsSingleData.getBookIdContent(tipsSingleData.getCurBookId());
@@ -68,19 +83,20 @@ public class Show_Fan_Yao_MingCi {
     public ArrayList<Show_Fan_Yao_MingCi> showFang(String fanyao) {
     // 清空现有的展示列表
     showFanYaoMingCiList.clear();
-
+    //Show_Fan_Yao_MingCi showFanYaoMingCi =  Show_Fan_Yao_MingCi.getInstance();
     // 获取方名别名映射
     Map<String, String> fangAliasDict = singletonData.getFangAliasDict();
     String aliasName = getOrDefault(fangAliasDict, fanyao);
 
     boolean found = false;
     ArrayList<HH2SectionData> fangList = singletonData.getFang();
+
     // 遍历方剂列表，查找匹配的方剂
     for (HH2SectionData sectionData : fangList) {
         for (DataItem dataItem : sectionData.getData()) {
             String originalName = dataItem.getFangList().get(0);
             String actualName = getOrDefault(fangAliasDict, originalName);
-
+            List<DataItem> data = new ArrayList<>();
             // 如果找到匹配的方剂，创建并添加显示对象到列表
             if (actualName != null && actualName.equals(aliasName)) {
                 Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();

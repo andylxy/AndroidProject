@@ -7,7 +7,7 @@ import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class ArrowView extends View {
+public class Tips_ArrowView extends View {
     public static int DOWN = 1;
     public static int UP;
     private int border;
@@ -18,7 +18,7 @@ public class ArrowView extends View {
         this.direction = i;
     }
 
-    public ArrowView(Context context) {
+    public Tips_ArrowView(Context context) {
         super(context);
         this.direction = UP;
         this.paint = new Paint();
@@ -26,7 +26,7 @@ public class ArrowView extends View {
         initPaint();
     }
 
-    public ArrowView(Context context, AttributeSet attributeSet) {
+    public Tips_ArrowView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
         this.direction = UP;
         this.paint = new Paint();
@@ -34,7 +34,7 @@ public class ArrowView extends View {
         initPaint();
     }
 
-    public ArrowView(Context context, AttributeSet attributeSet, int i) {
+    public Tips_ArrowView(Context context, AttributeSet attributeSet, int i) {
         super(context, attributeSet, i);
         this.direction = UP;
         this.paint = new Paint();

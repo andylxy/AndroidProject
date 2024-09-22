@@ -21,7 +21,7 @@ import java.util.Map;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
-import run.yigou.gxzy.ui.tips.widget.LittleWindow;
+import run.yigou.gxzy.ui.tips.widget.Tips_Little_Window;
 
 
 public class Tips_Single_Data {
@@ -29,7 +29,7 @@ public class Tips_Single_Data {
     private Map<Integer, Singleton_Net_Data> bookIdContent;
     private List<String> allYao;
     private int curBookId;
-    public List<LittleWindow> littleWindowStack = new ArrayList();
+    public List<Tips_Little_Window> tipsLittleWindowStack = new ArrayList();
     public List<String> getAllYao() {
         return this.allYao;
     }

@@ -10,6 +10,7 @@
 
 package run.yigou.gxzy.ui.tips;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -26,6 +27,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Show_Fan_Yao_MingCi;
 import run.yigou.gxzy.ui.tips.adapter.NoFooterAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 
+@SuppressLint("ViewConstructor")
 public class TipsWindow_Fang_BubbleAttachPopup extends BubbleAttachPopupView {
     private RecyclerView rvList;
     //private StickyHeaderLayout stickyLayout;
@@ -61,7 +63,7 @@ public class TipsWindow_Fang_BubbleAttachPopup extends BubbleAttachPopupView {
         rvList.setLayoutManager(new LinearLayoutManager(mContext));
         //加载药方和药物检查实例
        // if (fanYao == null)
-            Show_Fan_Yao_MingCi fanYao = new Show_Fan_Yao_MingCi();
+            Show_Fan_Yao_MingCi fanYao = Show_Fan_Yao_MingCi.getInstance();
         //检索所有的相关药方
         //if (adapter == null){
             NoFooterAdapter   adapter = new NoFooterAdapter(mContext, GroupModel.getGroups(fanYao.showFang(fanyao_name)));

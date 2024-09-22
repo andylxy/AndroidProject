@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Build;
-import android.util.Log;
 
 import timber.log.Timber;
 
@@ -12,7 +11,7 @@ import timber.log.Timber;
  * LittleWindow类是一个Fragment的子类，用于实现一个小窗口的功能
  * 它主要提供了搜索文本的管理以及自身的显示和隐藏功能
  */
-public class LittleWindow extends Fragment {
+public class Tips_Little_Window extends Fragment {
     // 用于存储搜索文本的字符串
     protected String searchText;
 

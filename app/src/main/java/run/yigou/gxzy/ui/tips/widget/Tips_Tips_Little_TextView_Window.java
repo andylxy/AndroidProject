@@ -30,12 +30,11 @@ import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
 /* loaded from: classes.dex */
-public class LittleTextViewWindow extends LittleWindow {
+public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
     private SpannableStringBuilder attributedString;
     private ViewGroup mGroup;
     private Rect rect;
@@ -44,27 +43,27 @@ public class LittleTextViewWindow extends LittleWindow {
     private String yao;
     private Tips_Single_Data tipsSingleData;
 
-    @Override // me.huanghai.searchController.LittleWindow
+    @Override
     public String getSearchString() {
         return this.yao;
     }
 
-    public LittleTextViewWindow() {
+    public Tips_Tips_Little_TextView_Window() {
         this.tipsSingleData = Tips_Single_Data.getInstance();
         ;
     }
 
-    @Override // me.huanghai.searchController.LittleWindow
+    @Override
     public void show(FragmentManager fragmentManager) {
         super.show(fragmentManager);
 
-        tipsSingleData.littleWindowStack.add(this);
+        tipsSingleData.tipsLittleWindowStack.add(this);
     }
 
     @Override
     public void dismiss() {
         super.dismiss();
-        tipsSingleData.littleWindowStack.remove(this);
+        tipsSingleData.tipsLittleWindowStack.remove(this);
     }
 
     public void setAttributedString(SpannableStringBuilder spannableStringBuilder) {
@@ -104,100 +103,22 @@ public class LittleTextViewWindow extends LittleWindow {
             if (spanStart > 0) {
                 String charSequence = spannableStringBuilder.subSequence(spanStart, spannableStringBuilder.getSpanEnd(clickableSpan)).toString(); // 获取跨度文本
 
-                // 检查是否有对应的姚别名
+                // 检查是否有对应的药别名
                 Map<String, String> yaoAliasDict = tipsSingleData.getYaoAliasDict();
                 String alias = yaoAliasDict.get(charSequence);
                 if (alias != null) {
-                    charSequence = alias; // 使用姚别名替代原文本
+                    charSequence = alias; // 使用药别名替代原文本
                 }
 
-                // 判断是否在姚的上下文中
+                // 判断是否在药的上下文中
                 if (tipsSingleData.getAllYao().contains(charSequence)
                         && spannableStringBuilder.toString().substring(spanStart - 1, spanStart).equals("、")) { // 确保前一个字符为“、”
-                    return true; // 是姚上下文
+                    return true; // 是药上下文
                 }
             }
         }
-        return false; // 不是姚上下文
+        return false; // 不是药上下文
     }
-
-
-//    protected SpannableStringBuilder getSpanString(final String str) {
-//        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
-//        SingletonData singletonData = SingletonData.getInstance();
-//        Map<String, String> yaoAliasDict = singletonData.getYaoAliasDict();
-//        String str2 = yaoAliasDict.get(str);
-//        if (str2 != null) {
-//            str = str2;
-//        }
-//        if (!onlyShowRelatedFang()) {
-//            Iterator<HH2SectionData> it = singletonData.getYaoData().iterator();
-//            while (it.hasNext()) {
-//                for (DataItem dataItem : it.next().getData()) {
-//                    String str3 = dataItem.getYaoList().get(0);
-//                    String str4 = yaoAliasDict.get(str3);
-//                    if (str4 != null) {
-//                        str3 = str4;
-//                    }
-//                    if (str3.equals(str)) {
-//                        spannableStringBuilder.append((CharSequence) dataItem.getAttributedText());
-//                    }
-//                }
-//            }
-//            if (spannableStringBuilder.length() == 0) {
-//                spannableStringBuilder.append((CharSequence) Helper.renderText("$r{药物未找到资料}"));
-//            }
-//            spannableStringBuilder.append((CharSequence) "\n\n");
-//        }
-//        Iterator<HH2SectionData> it2 = SingletonData.getInstance().getFang().iterator();
-//        int i = 0;
-//        while (it2.hasNext()) {
-//            HH2SectionData next = it2.next();
-//            SpannableStringBuilder spannableStringBuilder2 = new SpannableStringBuilder();
-//            List<DataItem> filter = Helper.filter(next.getData(),
-//              new Helper.IFilter<DataItem>() { // from class: me.huanghai.searchController.LittleTextViewWindow.1
-//                @Override // me.huanghai.searchController.Helper.IFilter
-//                public boolean filter(DataItem dataItem2) {
-//                    return ((Fang) dataItem2).hasYao(str);
-//                }
-//            });
-//            Collections.sort(filter, new Comparator<DataItem>() { // from class: me.huanghai.searchController.LittleTextViewWindow.2
-//                @Override // java.util.Comparator
-//                public int compare(DataItem dataItem2, DataItem dataItem3) {
-//                    return ((Fang) dataItem2).compare((Fang) dataItem3, str);
-//                }
-//            });
-//            int i2 = 0;
-//            for (DataItem dataItem2 : filter) {
-//                Iterator<String> it3 = dataItem2.getYaoList().iterator();
-//                while (true) {
-//                    if (!it3.hasNext()) {
-//                        break;
-//                    }
-//                    String next2 = it3.next();
-//                    String str5 = yaoAliasDict.get(next2);
-//                    if (str5 != null) {
-//                        next2 = str5;
-//                    }
-//                    if (next2.equals(str)) {
-//                        i2++;
-//                        spannableStringBuilder2.append((CharSequence) Helper.renderText(((Fang) dataItem2).getFangNameLinkWithYaoWeight(str)));
-//                        break;
-//                    }
-//                }
-//            }
-//            if (i > 0) {
-//                spannableStringBuilder.append((CharSequence) "\n\n");
-//            }
-//            spannableStringBuilder.append((CharSequence) Helper.renderText(String.format("$m{%s}-$m{含“$v{%s}”凡%d方：}", next.getHeader(), str, Integer.valueOf(i2))));
-//            if (i2 > 0) {
-//                spannableStringBuilder.append((CharSequence) "\n");
-//                spannableStringBuilder.append((CharSequence) spannableStringBuilder2);
-//            }
-//            i++;
-//        }
-//        return spannableStringBuilder;
-//    }
 
     /**
      * 根据给定的药物名称获取SpannableStringBuilder对象，该对象包含了与药物相关的文本信息。
@@ -216,7 +137,8 @@ public class LittleTextViewWindow extends LittleWindow {
         str = alias != null ? alias : str;
 
         // 仅在不限制方剂显示时进行处理
-        if (!onlyShowRelatedFang()) {
+     //   if (!onlyShowRelatedFang()) {
+        if (true) {
             // 遍历药物数据
             // 空值检查
             if (tipsSingleData == null || tipsSingleData.getYaoMap() == null) {
@@ -329,9 +251,9 @@ public class LittleTextViewWindow extends LittleWindow {
         String str = this.yao; // 当前药物名称
 
         // 检查 littleWindowStack 是否有元素
-        if (!tipsSingleData.littleWindowStack.isEmpty()) {
+        if (!tipsSingleData.tipsLittleWindowStack.isEmpty()) {
             // 获取栈顶元素的搜索字符串
-            String searchString = tipsSingleData.littleWindowStack.get(tipsSingleData.littleWindowStack.size() - 1).getSearchString();
+            String searchString = tipsSingleData.tipsLittleWindowStack.get(tipsSingleData.tipsLittleWindowStack.size() - 1).getSearchString();
 
             // 查找搜索字符串的别名
             String str2 = yaoAliasDict.get(searchString);
@@ -386,7 +308,7 @@ public class LittleTextViewWindow extends LittleWindow {
             内容布局参数.setMargins(最小尺寸, this.rect.top + this.rect.height() + 最小尺寸, 最小尺寸, 最小尺寸);
             int 一半最小尺寸 = 最小尺寸 / 2;
             箭头布局参数.setMargins(中心宽度 - 一半最小尺寸, this.rect.top + this.rect.height() + 4, (屏幕宽度 - 中心宽度) - 一半最小尺寸, (屏幕高度 - this.rect.top - this.rect.height() - 最小尺寸) - 4);
-            箭头方向 = ArrowView.UP;
+            箭头方向 = Tips_ArrowView.UP;
         } else {
             // 如果目标位置的中心高度在屏幕中下部，则箭头方向设置为向上
             this.view = layoutInflater.inflate(R.layout.show_yao_2, null);
@@ -399,14 +321,14 @@ public class LittleTextViewWindow extends LittleWindow {
             内容布局参数.setMargins(最小尺寸, 可见区域.top + 8, 最小尺寸, (屏幕高度 - this.rect.top) + 最小尺寸);
             int 一半最小尺寸 = 最小尺寸 / 2;
             箭头布局参数.setMargins(中心宽度 - 一半最小尺寸, (this.rect.top - 最小尺寸) - 4, (屏幕宽度 - 中心宽度) - 一半最小尺寸, (屏幕高度 - this.rect.top) + 4);
-            箭头方向 = ArrowView.DOWN;
+            箭头方向 = Tips_ArrowView.DOWN;
         }
 
         // 设置关闭按钮的点击事件，点击时关闭当前视图
         ((Button) this.view.findViewById(R.id.maskbtnYao)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LittleTextViewWindow.this.dismiss();
+                Tips_Tips_Little_TextView_Window.this.dismiss();
             }
         });
 
@@ -419,7 +341,7 @@ public class LittleTextViewWindow extends LittleWindow {
         文本标签.setMovementMethod(LocalLinkMovementMethod.getInstance());
 
         // 设置箭头方向
-        ArrowView 箭头视图 = this.view.findViewById(R.id.arrow);
+        Tips_ArrowView 箭头视图 = this.view.findViewById(R.id.arrow);
         箭头视图.setDirection(箭头方向);
         箭头视图.setLayoutParams(箭头布局参数);
 
@@ -436,11 +358,11 @@ public class LittleTextViewWindow extends LittleWindow {
         ((Button) this.view.findViewById(R.id.rightbtn)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(LittleTextViewWindow.this.getActivity(), TipsFragmentActivity.class);
+                Intent intent = new Intent(Tips_Tips_Little_TextView_Window.this.getActivity(), TipsFragmentActivity.class);
                 intent.putExtra("title", 显示文本);
                 intent.putExtra("isFang", "false");
                 intent.putExtra("yaoZheng", "true");
-                LittleTextViewWindow.this.getActivity().startActivity(intent);
+                Tips_Tips_Little_TextView_Window.this.getActivity().startActivity(intent);
             }
         });
 
@@ -452,7 +374,7 @@ public class LittleTextViewWindow extends LittleWindow {
     }
 
 
-    @Override // android.app.Fragment
+    @Override
     public void onDestroyView() {
         this.mGroup.removeView(this.view);
         super.onDestroyView();
