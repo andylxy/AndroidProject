@@ -83,7 +83,6 @@ public class Show_Fan_Yao_MingCi {
     public ArrayList<Show_Fan_Yao_MingCi> showFang(String fanyao) {
         // 清空现有的展示列表
         showFanYaoMingCiList.clear();
-        //Show_Fan_Yao_MingCi showFanYaoMingCi =  Show_Fan_Yao_MingCi.getInstance();
         // 获取方名别名映射
         Map<String, String> fangAliasDict = singletonData.getFangAliasDict();
         String aliasName = getOrDefault(fangAliasDict, fanyao);
@@ -96,7 +95,6 @@ public class Show_Fan_Yao_MingCi {
             for (DataItem dataItem : sectionData.getData()) {
                 String originalName = dataItem.getFangList().get(0);
                 String actualName = getOrDefault(fangAliasDict, originalName);
-                List<DataItem> data = new ArrayList<>();
                 // 如果找到匹配的方剂，创建并添加显示对象到列表
                 if (actualName != null && actualName.equals(aliasName)) {
                     // 创建对象

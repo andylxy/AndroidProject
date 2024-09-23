@@ -34,7 +34,7 @@ import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
 
-public class Tips_Tips_Little_TableView_Window extends Tips_Little_Window {
+public class Tips_Tips_Little_MingCiView_Window extends Tips_Little_Window {
     private SpannableStringBuilder attributedString;
     private String fang;
     private ViewGroup mGroup;
@@ -192,7 +192,7 @@ public class Tips_Tips_Little_TableView_Window extends Tips_Little_Window {
             // todo: 待完善
             //SingletonData.getInstance().popShowFang(); // 更新单例数据
         });
-        // 初始化列表适配器
+
         rvList = this.view.findViewById(R.id.include_tips_windows_sticky_list).findViewById(R.id.sticky_rv_list);
         rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
         rvList.setAdapter(adapter);
@@ -232,7 +232,6 @@ public class Tips_Tips_Little_TableView_Window extends Tips_Little_Window {
 
     /**
      * 设置适配器数据源
-     *
      * @param groups 数据源
      */
     public void setAdapterSource(Context context, ArrayList<GroupEntity> groups) {
@@ -244,7 +243,7 @@ public class Tips_Tips_Little_TableView_Window extends Tips_Little_Window {
                 @Override
                 public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
                                           int groupPosition) {
-//                Toast.makeText(context, "组头：groupPosition = " + groupPosition, Toast.LENGTH_LONG).show();
+//               Toast.makeText(context, "组头：groupPosition = " + groupPosition,  Toast.LENGTH_LONG).show();
 //                Log.e("eee", adapter.toString() + "  " + holder.toString());
                 }
             });

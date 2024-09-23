@@ -16,6 +16,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.os.Build;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -28,6 +29,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import androidx.annotation.NonNull;
 
@@ -50,6 +54,7 @@ import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Show_Fan_Yao_MingCi;
+import run.yigou.gxzy.ui.tips.widget.Tips_Tips_Little_MingCiView_Window;
 import run.yigou.gxzy.ui.tips.widget.Tips_Tips_Little_TableView_Window;
 import run.yigou.gxzy.ui.tips.widget.Tips_Tips_Little_TextView_Window;
 
@@ -70,8 +75,6 @@ public class TipsNetHelper {
         // 从单例数据中获取必要的映射和列表
         Map<String, String> yaoAliasDict = singletonNetData.getYaoAliasDict();
         Map<String, String> fangAliasDict = singletonNetData.getFangAliasDict();
-//            List<String> allYao = SingletonData.getInstance().getAllYao();
-//            List<String> allFang = SingletonData.getInstance().getAllFang();
 
         // 遍历数据以进行过滤
         for (HH2SectionData sectionData : singletonNetData.getContent()) {
@@ -91,7 +94,8 @@ public class TipsNetHelper {
                     try {
                         pattern = Pattern.compile(sanitizedTerm);
                     } catch (Exception e) {
-                        // 如果正则表达式失败，则回退到基本模式
+                        // 记录错误日志，并使用默认正则表达式
+                        EasyLog.print("Error compiling regex: " + sanitizedTerm + ". Fallback to default.");
                         pattern = Pattern.compile(".");
                     }
 
@@ -109,7 +113,6 @@ public class TipsNetHelper {
                     matchedItems.add(dataItem.getCopy());
                     sectionHasMatches = true;
                     searchKeyEntity.setSearchResTotalNum(searchKeyEntity.getSearchResTotalNum() + 1);
-
                 }
             }
 
@@ -121,22 +124,113 @@ public class TipsNetHelper {
         return filteredData;
     }
 
+//    public static @NonNull ArrayList<HH2SectionData> getSearchHh2SectionData(SearchKeyEntity searchKeyEntity, Singleton_Net_Data singletonNetData) {
+//        // 将搜索词拆分并过滤掉空白项
+//        String[] searchTerms = searchKeyEntity.getSearchKeyText().split(" ");
+//        List<String> validSearchTerms = new ArrayList<>();
+//        for (String term : searchTerms) {
+//            if (!term.isEmpty()) {
+//                validSearchTerms.add(term);
+//            }
+//        }
+//        ArrayList<HH2SectionData> filteredData = new ArrayList<>(); // 用于保存过滤后的结果
+//
+//        // 从单例数据中获取必要的映射和列表
+//        Map<String, String> yaoAliasDict = singletonNetData.getYaoAliasDict();
+//        Map<String, String> fangAliasDict = singletonNetData.getFangAliasDict();
+////            List<String> allYao = SingletonData.getInstance().getAllYao();
+////            List<String> allFang = SingletonData.getInstance().getAllFang();
+//
+//        // 遍历数据以进行过滤
+//        for (HH2SectionData sectionData : singletonNetData.getContent()) {
+//
+//            List<DataItem> matchedItems = new ArrayList<>(); // 用于保存当前部分中的匹配项
+//            boolean sectionHasMatches = false;
+//
+//            // 检查当前部分中的每一个数据项
+//            for (DataItem dataItem : sectionData.getData()) {
+//                boolean itemMatched = false;
+//
+//                // 检查每个搜索词
+//                for (String term : validSearchTerms) {
+//                    String sanitizedTerm = sanitizeTerm(term); // 清理搜索词
+//                    Pattern pattern;
+//
+//                    // 从清理后的搜索词编译正则表达式
+//                    try {
+//                        pattern = Pattern.compile(sanitizedTerm);
+//                    } catch (Exception e) {
+//                        // 如果正则表达式失败，则回退到基本模式
+//                        pattern = Pattern.compile(".");
+//                    }
+//
+//                    // 检查数据项是否符合搜索条件
+//                    if (matchDataItem(dataItem, pattern, sanitizedTerm, yaoAliasDict, fangAliasDict)) {
+//                        itemMatched = true;
+//                        // 突出显示数据项中的匹配文本
+//                        highlightMatchingText(dataItem, pattern);
+//                        break; // 一旦匹配，继续下一个数据项
+//                    }
+//                }
+//
+//                // 如果有任何搜索词匹配，则加入匹配项
+//                if (itemMatched) {
+//                    matchedItems.add(dataItem.getCopy());
+//                    sectionHasMatches = true;
+//                    searchKeyEntity.setSearchResTotalNum(searchKeyEntity.getSearchResTotalNum() + 1);
+//
+//                }
+//            }
+//
+//            // 如果有匹配项，则将其添加到过滤后的结果中
+//            if (sectionHasMatches) {
+//                filteredData.add(new HH2SectionData(matchedItems, sectionData.getSection(), sectionData.getHeader()));
+//            }
+//        }
+//        return filteredData;
+//    }
+
     public interface IFilter<T> {
         boolean filter(T t);
     }
 
-    public static <T> List<T> filter(List<T> 原始列表, IFilter<T> 过滤器) {
-        ArrayList<T> 过滤结果 = new ArrayList<>(); // 创建一个用于存储过滤结果的列表
+    public static <T> List<T> filter(List<T> originalList, IFilter<T> filter) {
+        if (originalList == null || filter == null) {
+            throw new IllegalArgumentException("Original list and filter cannot be null");
+        }
 
-        // 遍历原始列表中的每个元素
-        for (T 元素 : 原始列表) {
-            // 如果元素满足过滤条件，则添加到过滤结果列表中
-            if (过滤器.filter(元素)) {
-                过滤结果.add(元素);
+        boolean isStreamSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
+
+        List<T> filteredResults = new ArrayList<>();
+
+        if (isStreamSupported) {
+            // 使用 Stream API 进行过滤
+            filteredResults = originalList.stream()
+                    .filter(element -> {
+                        try {
+                            return filter.filter(element);
+                        } catch (Exception e) {
+                            // 处理异常，例如记录日志或采取其他措施
+                            EasyLog.print("Error occurred while filtering: " + e.getMessage());
+                            return false;
+                        }
+                    })
+                    .collect(Collectors.toList());
+        } else {
+            // 使用传统循环进行过滤
+            for (T element : originalList) {
+                try {
+                    if (filter.filter(element)) {
+                        filteredResults.add(element);
+                    }
+                } catch (Exception e) {
+                    // 处理异常，例如记录日志或采取其他措施
+                    EasyLog.print("Error occurred while filtering: " + e.getMessage());
+                }
             }
         }
 
-        return 过滤结果; // 返回过滤后的列表
+        return filteredResults; // 返回过滤后的列表
     }
 
 
@@ -582,6 +676,26 @@ public class TipsNetHelper {
         }
     }
 
+    public static Singleton_Net_Data highlightMatchingText(ArrayList<Show_Fan_Yao_MingCi> mingCiList) {
+        if (mingCiList == null || mingCiList.isEmpty()) {
+            throw new IllegalArgumentException("mingCiList cannot be null or empty");
+        }
+
+        ArrayList<HH2SectionData> sectionDataList = new ArrayList<>(mingCiList.size());
+        for (int index = 0; index < mingCiList.size(); index++) {
+            Show_Fan_Yao_MingCi mingCi = mingCiList.get(index);
+            sectionDataList.add(new HH2SectionData(mingCi.getData(), index, mingCi.getHeader()));
+        }
+        Singleton_Net_Data singletonData = Singleton_Net_Data.getInstance();
+        if (singletonData == null) {
+            throw new IllegalStateException("Singleton_Net_Data instance is null");
+        }
+        singletonData.setContent(sectionDataList);
+
+        return singletonData;
+    }
+
+
     public static SpannableStringBuilder renderText(String str) {
         return renderText(str, new ClickLink() {
             @Override
@@ -605,7 +719,7 @@ public class TipsNetHelper {
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 Tips_Tips_Little_TextView_Window tipsLittleTextViewWindow = new Tips_Tips_Little_TextView_Window();
                 tipsLittleTextViewWindow.setYao(charSequence);
-                //littleTextViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
+                //tipsLittleTextViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
                 tipsLittleTextViewWindow.setRect(textRect);
                 tipsLittleTextViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
 
@@ -618,7 +732,8 @@ public class TipsNetHelper {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("tapped:" + charSequence);
-                ArrayList<GroupEntity> groups = GroupModel.getGroups(Show_Fan_Yao_MingCi.getInstance().showFang(charSequence));
+               ArrayList<Show_Fan_Yao_MingCi> mingCiList = Show_Fan_Yao_MingCi.getInstance().showFang(charSequence);
+                ArrayList<GroupEntity> groups = GroupModel.getGroups( mingCiList, charSequence);
 
 
 //                new XPopup.Builder(textView.getContext())
@@ -639,9 +754,9 @@ public class TipsNetHelper {
 
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 Tips_Tips_Little_TableView_Window tipsLittleTableViewWindow = new Tips_Tips_Little_TableView_Window();
-                tipsLittleTableViewWindow.setAdapterSource(textView.getContext(),groups);
+                tipsLittleTableViewWindow.setAdapterSource(textView.getContext(), groups);
                 tipsLittleTableViewWindow.setFang(charSequence);
-                //littleTableViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
+                tipsLittleTableViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
                 tipsLittleTableViewWindow.setRect(textRect);
                 tipsLittleTableViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
             }
@@ -655,17 +770,28 @@ public class TipsNetHelper {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("tapped:" + charSequence);
-                new XPopup.Builder(textView.getContext())
-                        .isTouchThrough(true)
-                        // .popupPosition(PopupPosition.Right)
-                        .positionByWindowCenter(true)
-                        .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
-                        .isViewMode(true)
-                        .atView(textView)
-                        //.atPoint(pointF)
-                        //.hasShadowBg(false) // 去掉半透明背景
-                        .asCustom(new TipsWindow_MingCi_BubbleAttachPopup(textView.getContext(), charSequence))
-                        .show();
+//                new XPopup.Builder(textView.getContext())
+//                        .isTouchThrough(true)
+//                        // .popupPosition(PopupPosition.Right)
+//                        .positionByWindowCenter(true)
+//                        .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
+//                        .isViewMode(true)
+//                        .atView(textView)
+//                        //.atPoint(pointF)
+//                        //.hasShadowBg(false) // 去掉半透明背景
+//                        .asCustom(new TipsWindow_MingCi_BubbleAttachPopup(textView.getContext(), charSequence))
+//                        .show();
+                ArrayList<Show_Fan_Yao_MingCi> mingCiList = Show_Fan_Yao_MingCi.getInstance().showFang(charSequence);
+                ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
+                Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
+                Tips_Tips_Little_MingCiView_Window tipsLittleTableViewWindow = new Tips_Tips_Little_MingCiView_Window();
+                tipsLittleTableViewWindow.setAdapterSource(textView.getContext(), groups);
+                tipsLittleTableViewWindow.setFang(charSequence);
+                //littleTableViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
+                tipsLittleTableViewWindow.setRect(textRect);
+                tipsLittleTableViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
+
+
             }
 
         });
@@ -676,7 +802,7 @@ public class TipsNetHelper {
     private static final HashMap<String, Integer> colorMap = new HashMap<>();
 
     static {
-// 初始化颜色映射
+        // 初始化颜色映射
         colorMap.put("r", Color.RED); // 红色
         colorMap.put("n", Color.BLUE); // 蓝色
         colorMap.put("f", Color.BLUE); // 蓝色
@@ -721,6 +847,7 @@ public class TipsNetHelper {
         boolean test(T t);
     }
 
+
     /**
      * 检查列表中是否有至少一个元素满足给定的条件。
      *
@@ -730,59 +857,18 @@ public class TipsNetHelper {
      * @return 如果列表中至少有一个元素满足条件，则返回 true；否则返回 false。
      */
     public static <T> boolean some(List<T> list, Condition<T> condition) {
-        if (list == null) {
+        // 检查 list 和 condition 是否为 null
+        if (list == null || condition == null) {
             return false;
         }
-
         // 遍历列表中的每个元素
         for (T element : list) {
             if (condition.test(element)) {
                 return true;
             }
         }
-
         return false;
     }
 
-    /**
-     * 将 dp（密度无关像素）值转换为 px（像素）值。
-     *
-     * @param context 用于获取屏幕密度的上下文。
-     * @param dpValue 要转换的dp值。
-     * @return 转换后的像素值。
-     */
-    public static int dip2px(Context context, float dpValue) {
-        // 获取屏幕的显示密度
-        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        // dp值转换为px值，并四舍五入到最接近的整数
-        return (int) ((dpValue * displayMetrics.density) + 0.5f);
-    }
-
-    /**
-     * 将 px（像素）值转换为 dp（密度无关像素）值。
-     *
-     * @param context 用于获取屏幕密度的上下文。
-     * @param pxValue 要转换的像素值。
-     * @return 转换后的dp值。
-     */
-    public static int px2dip(Context context, float pxValue) {
-        // 获取屏幕的显示密度
-        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        // px值转换为dp值，并四舍五入到最接近的整数
-        return (int) ((pxValue / displayMetrics.density) + 0.5f);
-    }
-
-
-    public static int getScreenWidth(Activity activity) {
-        return activity.getWindow().getDecorView().getWidth();
-    }
-
-    public static int getScreenHeight(Activity activity) {
-        return activity.getWindow().getDecorView().getHeight();
-    }
-
-    public static String getDateString(int i) {
-        return new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis() - (((i * 24) * 3600) * 1000)));
-    }
 
 }

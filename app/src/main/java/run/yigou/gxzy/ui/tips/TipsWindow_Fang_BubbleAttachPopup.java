@@ -22,6 +22,8 @@ import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import com.lxj.xpopup.core.BubbleAttachPopupView;
 import com.lxj.xpopup.util.XPopupUtils;
 
+import java.util.ArrayList;
+
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Show_Fan_Yao_MingCi;
 import run.yigou.gxzy.ui.tips.adapter.NoFooterAdapter;
@@ -33,9 +35,9 @@ public class TipsWindow_Fang_BubbleAttachPopup extends BubbleAttachPopupView {
     //private StickyHeaderLayout stickyLayout;
     private Context mContext;
     private String fanyao_name;
-   // private static ShowFanYao fanYao;
+    // private static ShowFanYao fanYao;
 
-   // private static NoFooterAdapter adapter;
+    // private static NoFooterAdapter adapter;
 
     public TipsWindow_Fang_BubbleAttachPopup(@NonNull Context context, String fanyao) {
         super(context);
@@ -57,20 +59,16 @@ public class TipsWindow_Fang_BubbleAttachPopup extends BubbleAttachPopupView {
         setArrowHeight(XPopupUtils.dp2px(getContext(), 8f));
 //                                .setBubbleRadius(100)
         setArrowRadius(XPopupUtils.dp2px(getContext(), 2f));
-        rvList =  findViewById(R.id.sticky_rv_list);
+        rvList = findViewById(R.id.sticky_rv_list);
         //stickyLayout = (StickyHeaderLayout) findViewById(R.id.sticky_layout);
 
         rvList.setLayoutManager(new LinearLayoutManager(mContext));
         //加载药方和药物检查实例
-       // if (fanYao == null)
-            Show_Fan_Yao_MingCi fanYao = Show_Fan_Yao_MingCi.getInstance();
-        //检索所有的相关药方
-        //if (adapter == null){
-            NoFooterAdapter   adapter = new NoFooterAdapter(mContext, GroupModel.getGroups(fanYao.showFang(fanyao_name)));
-        //}else {
-         //   adapter.clear();
-         //   adapter. setGroups(GroupModel.getGroups(fanYao.showFang(fanyao_name)));
-       // }
+
+        Show_Fan_Yao_MingCi fanYao = Show_Fan_Yao_MingCi.getInstance();
+        ArrayList<Show_Fan_Yao_MingCi> mingCiList= Show_Fan_Yao_MingCi.getInstance().showFang(fanyao_name);
+
+        NoFooterAdapter adapter = new NoFooterAdapter(mContext, GroupModel.getGroups(mingCiList,fanyao_name));
 
         adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
             @Override

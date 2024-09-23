@@ -37,7 +37,11 @@ public class ChildEntity {
         this.child_sectiontext = child_sectiontext;
         this.child_sectionnote = child_sectionnote;
         this.child_sectionvideo = child_sectionvideo;
-
+    }
+    public ChildEntity(SpannableStringBuilder child_sectiontext, String child_sectionnote, String child_sectionvideo) {
+        this.attributed_child_sectiontext = child_sectiontext;
+        this.child_sectionnote = child_sectionnote;
+        this.child_sectionvideo = child_sectionvideo;
     }
 
     public ChildEntity(String child_sectiontext, SpannableStringBuilder spannableChild) {
