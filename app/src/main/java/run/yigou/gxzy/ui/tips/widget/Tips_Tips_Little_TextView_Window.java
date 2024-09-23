@@ -286,42 +286,46 @@ public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
         // 获取屏幕装饰视图作为父布局
         this.mGroup = (ViewGroup) getActivity().getWindow().getDecorView();
         // 获取屏幕高度和宽度
-        int 屏幕高度 = this.mGroup.getHeight();
-        int 屏幕宽度 = this.mGroup.getWidth();
+        int screenHeight = this.mGroup.getHeight();
+        int screenWidth = this.mGroup.getWidth();
         // 计算最小尺寸，用于确定箭头的大小
-        int 最小尺寸 = Math.min(50, 屏幕宽度 / 18);
+        int minSize = Math.min(50, screenWidth / 18);
 
         // 创建布局参数
-        FrameLayout.LayoutParams 箭头布局参数 = new FrameLayout.LayoutParams(最小尺寸, 最小尺寸);
-        FrameLayout.LayoutParams 内容布局参数 = new FrameLayout.LayoutParams(-1, -2);
+        FrameLayout.LayoutParams arrowLayoutParams = new FrameLayout.LayoutParams(minSize, minSize);
+        FrameLayout.LayoutParams contentLayoutParams = new FrameLayout.LayoutParams(-1, -2);
 
         // 计算目标位置的中心点坐标
-        int 中心高度 = this.rect.top + (this.rect.height() / 2);
-        int 中心宽度 = this.rect.left + (this.rect.width() / 2);
+        int centerHeight = this.rect.top + (this.rect.height() / 2);
+        int centerWidth = this.rect.left + (this.rect.width() / 2);
 
         // 确定箭头方向（UP为向上，DOWN为向下）
-        int 箭头方向;
-        if (中心高度 < 屏幕高度 / 2) {
+        int arrowDirection;
+        if (centerHeight < screenHeight / 2) {
             // 如果目标位置的中心高度在屏幕中上部，则箭头方向设置为向下
             this.view = layoutInflater.inflate(R.layout.show_yao, null);
             // 设置内容布局参数和箭头布局参数的边距
-            内容布局参数.setMargins(最小尺寸, this.rect.top + this.rect.height() + 最小尺寸, 最小尺寸, 最小尺寸);
-            int 一半最小尺寸 = 最小尺寸 / 2;
-            箭头布局参数.setMargins(中心宽度 - 一半最小尺寸, this.rect.top + this.rect.height() + 4, (屏幕宽度 - 中心宽度) - 一半最小尺寸, (屏幕高度 - this.rect.top - this.rect.height() - 最小尺寸) - 4);
-            箭头方向 = Tips_ArrowView.UP;
+            contentLayoutParams.setMargins(minSize, this.rect.top + this.rect.height() + minSize, minSize, minSize);
+            int halfMinSize = minSize / 2;
+            arrowLayoutParams.setMargins(centerWidth - halfMinSize, this.rect.top + this.rect.height() + 4,
+                    (screenWidth - centerWidth) - halfMinSize,
+                    (screenHeight - this.rect.top - this.rect.height() - minSize) - 4);
+            arrowDirection = Tips_ArrowView.UP;
         } else {
             // 如果目标位置的中心高度在屏幕中下部，则箭头方向设置为向上
             this.view = layoutInflater.inflate(R.layout.show_yao_2, null);
             // 设置内容布局参数的Gravity为底部对齐
-            内容布局参数.gravity = 80; // Gravity.BOTTOM
+            contentLayoutParams.gravity = 80; // Gravity.BOTTOM
             // 获取可见区域的顶部位置
-            Rect 可见区域 = new Rect();
-            this.mGroup.getWindowVisibleDisplayFrame(可见区域);
+            Rect visibleRect = new Rect();
+            this.mGroup.getWindowVisibleDisplayFrame(visibleRect);
             // 设置内容布局参数和箭头布局参数的边距
-            内容布局参数.setMargins(最小尺寸, 可见区域.top + 8, 最小尺寸, (屏幕高度 - this.rect.top) + 最小尺寸);
-            int 一半最小尺寸 = 最小尺寸 / 2;
-            箭头布局参数.setMargins(中心宽度 - 一半最小尺寸, (this.rect.top - 最小尺寸) - 4, (屏幕宽度 - 中心宽度) - 一半最小尺寸, (屏幕高度 - this.rect.top) + 4);
-            箭头方向 = Tips_ArrowView.DOWN;
+            contentLayoutParams.setMargins(minSize, visibleRect.top + 8, minSize, (screenHeight - this.rect.top) + minSize);
+            int halfMinSize = minSize / 2;
+            arrowLayoutParams.setMargins(centerWidth - halfMinSize, (this.rect.top - minSize) - 4,
+                    (screenWidth - centerWidth) - halfMinSize,
+                    (screenHeight - this.rect.top) + 4);
+            arrowDirection = Tips_ArrowView.DOWN;
         }
 
         // 设置关闭按钮的点击事件，点击时关闭当前视图
@@ -333,23 +337,23 @@ public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
         });
 
         // 设置文本内容
-        final TextView 文本标签 = this.view.findViewById(R.id.textview);
+        final TextView textLabel = this.view.findViewById(R.id.textview);
         // 设置文本内容为"未找到"，如果yao有值则设置为yao的内容
-        文本标签.setText("未找到");
-        final String 显示文本 = this.yao != null ? this.yao : "";
-        文本标签.setText(getSpanString(显示文本));
-        文本标签.setMovementMethod(LocalLinkMovementMethod.getInstance());
+        textLabel.setText("未找到");
+        final String displayText = this.yao != null ? this.yao : "";
+        textLabel.setText(getSpanString(displayText));
+        textLabel.setMovementMethod(LocalLinkMovementMethod.getInstance());
 
         // 设置箭头方向
-        Tips_ArrowView 箭头视图 = this.view.findViewById(R.id.arrow);
-        箭头视图.setDirection(箭头方向);
-        箭头视图.setLayoutParams(箭头布局参数);
+        Tips_ArrowView arrowView = this.view.findViewById(R.id.arrow);
+        arrowView.setDirection(arrowDirection);
+        arrowView.setLayoutParams(arrowLayoutParams);
 
         // 设置左侧按钮点击事件，点击时将文本内容复制到剪贴板
         ((Button) this.view.findViewById(R.id.leftbtn)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                TipsNetHelper.copyToClipboard(getActivity(), 文本标签.getText().toString());
+                TipsNetHelper.copyToClipboard(getActivity(), textLabel.getText().toString());
                 Toast.makeText(getActivity(), "已复制到剪贴板", Toast.LENGTH_SHORT).show();
             }
         });
@@ -359,7 +363,7 @@ public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Tips_Tips_Little_TextView_Window.this.getActivity(), TipsFragmentActivity.class);
-                intent.putExtra("title", 显示文本);
+                intent.putExtra("title", displayText);
                 intent.putExtra("isFang", "false");
                 intent.putExtra("yaoZheng", "true");
                 Tips_Tips_Little_TextView_Window.this.getActivity().startActivity(intent);
@@ -367,11 +371,102 @@ public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
         });
 
         // 设置内容布局参数并添加到父布局中
-        ((LinearLayout) this.view.findViewById(R.id.wrapper)).setLayoutParams(内容布局参数);
+        ((LinearLayout) this.view.findViewById(R.id.wrapper)).setLayoutParams(contentLayoutParams);
         this.mGroup.addView(this.view);
         // 调用父类的onCreateView方法
         return super.onCreateView(layoutInflater, viewGroup, bundle);
     }
+
+//    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+//        // 获取屏幕装饰视图作为父布局
+//        this.mGroup = (ViewGroup) getActivity().getWindow().getDecorView();
+//        // 获取屏幕高度和宽度
+//        int 屏幕高度 = this.mGroup.getHeight();
+//        int 屏幕宽度 = this.mGroup.getWidth();
+//        // 计算最小尺寸，用于确定箭头的大小
+//        int 最小尺寸 = Math.min(50, 屏幕宽度 / 18);
+//
+//        // 创建布局参数
+//        FrameLayout.LayoutParams 箭头布局参数 = new FrameLayout.LayoutParams(最小尺寸, 最小尺寸);
+//        FrameLayout.LayoutParams 内容布局参数 = new FrameLayout.LayoutParams(-1, -2);
+//
+//        // 计算目标位置的中心点坐标
+//        int 中心高度 = this.rect.top + (this.rect.height() / 2);
+//        int 中心宽度 = this.rect.left + (this.rect.width() / 2);
+//
+//        // 确定箭头方向（UP为向上，DOWN为向下）
+//        int 箭头方向;
+//        if (中心高度 < 屏幕高度 / 2) {
+//            // 如果目标位置的中心高度在屏幕中上部，则箭头方向设置为向下
+//            this.view = layoutInflater.inflate(R.layout.show_yao, null);
+//            // 设置内容布局参数和箭头布局参数的边距
+//            内容布局参数.setMargins(最小尺寸, this.rect.top + this.rect.height() + 最小尺寸, 最小尺寸, 最小尺寸);
+//            int 一半最小尺寸 = 最小尺寸 / 2;
+//            箭头布局参数.setMargins(中心宽度 - 一半最小尺寸, this.rect.top + this.rect.height() + 4, (屏幕宽度 - 中心宽度) - 一半最小尺寸, (屏幕高度 - this.rect.top - this.rect.height() - 最小尺寸) - 4);
+//            箭头方向 = Tips_ArrowView.UP;
+//        } else {
+//            // 如果目标位置的中心高度在屏幕中下部，则箭头方向设置为向上
+//            this.view = layoutInflater.inflate(R.layout.show_yao_2, null);
+//            // 设置内容布局参数的Gravity为底部对齐
+//            内容布局参数.gravity = 80; // Gravity.BOTTOM
+//            // 获取可见区域的顶部位置
+//            Rect 可见区域 = new Rect();
+//            this.mGroup.getWindowVisibleDisplayFrame(可见区域);
+//            // 设置内容布局参数和箭头布局参数的边距
+//            内容布局参数.setMargins(最小尺寸, 可见区域.top + 8, 最小尺寸, (屏幕高度 - this.rect.top) + 最小尺寸);
+//            int 一半最小尺寸 = 最小尺寸 / 2;
+//            箭头布局参数.setMargins(中心宽度 - 一半最小尺寸, (this.rect.top - 最小尺寸) - 4, (屏幕宽度 - 中心宽度) - 一半最小尺寸, (屏幕高度 - this.rect.top) + 4);
+//            箭头方向 = Tips_ArrowView.DOWN;
+//        }
+//
+//        // 设置关闭按钮的点击事件，点击时关闭当前视图
+//        ((Button) this.view.findViewById(R.id.maskbtnYao)).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Tips_Tips_Little_TextView_Window.this.dismiss();
+//            }
+//        });
+//
+//        // 设置文本内容
+//        final TextView 文本标签 = this.view.findViewById(R.id.textview);
+//        // 设置文本内容为"未找到"，如果yao有值则设置为yao的内容
+//        文本标签.setText("未找到");
+//        final String 显示文本 = this.yao != null ? this.yao : "";
+//        文本标签.setText(getSpanString(显示文本));
+//        文本标签.setMovementMethod(LocalLinkMovementMethod.getInstance());
+//
+//        // 设置箭头方向
+//        Tips_ArrowView 箭头视图 = this.view.findViewById(R.id.arrow);
+//        箭头视图.setDirection(箭头方向);
+//        箭头视图.setLayoutParams(箭头布局参数);
+//
+//        // 设置左侧按钮点击事件，点击时将文本内容复制到剪贴板
+//        ((Button) this.view.findViewById(R.id.leftbtn)).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                TipsNetHelper.copyToClipboard(getActivity(), 文本标签.getText().toString());
+//                Toast.makeText(getActivity(), "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//
+//        // 设置右侧按钮点击事件，点击时启动MainActivity
+//        ((Button) this.view.findViewById(R.id.rightbtn)).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent intent = new Intent(Tips_Tips_Little_TextView_Window.this.getActivity(), TipsFragmentActivity.class);
+//                intent.putExtra("title", 显示文本);
+//                intent.putExtra("isFang", "false");
+//                intent.putExtra("yaoZheng", "true");
+//                Tips_Tips_Little_TextView_Window.this.getActivity().startActivity(intent);
+//            }
+//        });
+//
+//        // 设置内容布局参数并添加到父布局中
+//        ((LinearLayout) this.view.findViewById(R.id.wrapper)).setLayoutParams(内容布局参数);
+//        this.mGroup.addView(this.view);
+//        // 调用父类的onCreateView方法
+//        return super.onCreateView(layoutInflater, viewGroup, bundle);
+//    }
 
 
     @Override

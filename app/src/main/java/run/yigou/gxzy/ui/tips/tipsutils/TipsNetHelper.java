@@ -573,7 +573,7 @@ public class TipsNetHelper {
     // 创建 MenuDialog 实例
     public static MenuDialog.Builder menuDialogBuilder;
     // 同时初始化数据
-    private static List<String> data = Arrays.asList("拷贝本条"/*, "拷贝本章全部内容", "拷贝全部结果"*/);
+    private static List<String> data = Arrays.asList("拷贝内容"/*, "拷贝本章全部内容", "拷贝全部结果"*/);
 
     // 初始化方法
     public static void initDialog(Context context) {

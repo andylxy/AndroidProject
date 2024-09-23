@@ -195,26 +195,6 @@ public class Tips_Tips_Little_TableView_Window extends Tips_Little_Window {
 
         rvList = this.view.findViewById(R.id.include_tips_windows_sticky_list).findViewById(R.id.sticky_rv_list);
         rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
-            @Override
-            public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
-                                      int groupPosition) {
-//                Toast.makeText(mContext, "组头：groupPosition = " + groupPosition,
-//                        Toast.LENGTH_LONG).show();
-//                Log.e("eee", adapter.toString() + "  " + holder.toString());
-            }
-        });
-
-        adapter.setOnChildClickListener(new GroupedRecyclerViewAdapter.OnChildClickListener() {
-            @Override
-            public void onChildClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
-                                     int groupPosition, int childPosition) {
-//                Toast.makeText(mContext, "子项：groupPosition = " + groupPosition
-//                                + ", childPosition = " + childPosition,
-//                        Toast.LENGTH_LONG).show();
-            }
-        });
         rvList.setAdapter(adapter);
 
 
@@ -259,6 +239,25 @@ public class Tips_Tips_Little_TableView_Window extends Tips_Little_Window {
         //检索所有的相关药方
         if (adapter == null) {
             adapter = new NoFooterAdapter(context, groups);
+            adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
+                @Override
+                public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
+                                          int groupPosition) {
+               Toast.makeText(context, "组头：groupPosition = " + groupPosition,
+                      Toast.LENGTH_LONG).show();
+//                Log.e("eee", adapter.toString() + "  " + holder.toString());
+                }
+            });
+
+//            adapter.setOnChildClickListener(new GroupedRecyclerViewAdapter.OnChildClickListener() {
+//                @Override
+//                public void onChildClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
+//                                         int groupPosition, int childPosition) {
+////                Toast.makeText(mContext, "子项：groupPosition = " + groupPosition
+////                                + ", childPosition = " + childPosition,
+////                        Toast.LENGTH_LONG).show();
+//                }
+//            });
         }
 
     }

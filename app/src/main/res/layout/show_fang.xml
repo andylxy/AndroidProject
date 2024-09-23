@@ -30,6 +30,7 @@
                 android:layout_gravity="bottom"
                 android:orientation="horizontal"
                 android:id="@+id/btns"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="34dp">
                 <View

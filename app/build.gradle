@@ -59,7 +59,7 @@ android {
             signingConfig signingConfigs.config
             // 添加清单占位符
             addManifestPlaceholders([
-                    'app_name'    :    '知然醫典 Debug 版'
+                    'app_name'    :    '知然笔记 Debug 版'
             ])
             // 调试模式下只保留一种架构的 so 库，提升打包速度
             ndk {
@@ -72,7 +72,7 @@ android {
             applicationIdSuffix ''
             // 添加清单占位符
             addManifestPlaceholders([
-                    'app_name'    :    '知然醫典 Preview 版'
+                    'app_name'    :    '知然笔记 Preview 版'
             ])
         }
 

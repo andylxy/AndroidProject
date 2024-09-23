@@ -12,14 +12,18 @@ package run.yigou.gxzy.ui.tips.adapter;
 
 import android.content.Context;
 import android.text.SpannableStringBuilder;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import com.hjq.base.BaseDialog;
 import com.hjq.http.EasyLog;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
@@ -69,30 +73,21 @@ public class NoFooterAdapter extends GroupedListAdapter {
         // 设置sectiontext的文本内容
         sectiontext.setText(entity.getAttributed_child_sectiontext());
         sectiontext.setMovementMethod(LocalLinkMovementMethod.getInstance());
-
-        // 为sectiontext设置长按监听，弹出复制对话框
-        sectiontext.setOnLongClickListener(v -> {
-            TipsNetHelper.initDialog(v.getContext());
-            TipsNetHelper.menuDialogBuilder
-                    .setListener((dialog, position, string) -> {
-                        TipsNetHelper.copyToClipboard(v.getContext(), entity.getSpannableChild().toString());
-                    })
-                    .show();
-            return true;
-        });
-
+        setLongClickForView(sectiontext, entity.getAttributed_child_sectiontext());
+        setLongClickForView(sectionnote, entity.getAttributed_child_sectionnote());
+        setLongClickForView(sectionvideo, entity.getAttributed_child_sectionvideo());
         // 为sectiontext设置点击监听，处理点击事件
         sectiontext.setOnClickListener(v -> {
-            Object isClick = v.getTag();
-            if (isClick != null && (boolean) isClick) return;
-            EasyLog.print("条文点击:" + v.getTag());
+            Boolean isClick = (Boolean) v.getTag();
+            if (isClick != null && isClick) return;
+            EasyLog.print("条文点击: " + v.getTag() + ", 实体信息: " + entity);
             toggleVisibility(sectionnote, entity.getChild_sectionnote());
         });
 
         // 为sectionnote设置点击监听，处理点击事件
         sectionnote.setOnClickListener(v -> {
-            Object isClick = v.getTag();
-            if (isClick != null && (boolean) isClick) return;
+            Boolean isClick = (Boolean) v.getTag();
+            if (isClick != null && isClick) return;
             toggleVisibility(sectionvideo, entity.getChild_sectionvideo());
         });
 
@@ -100,6 +95,7 @@ public class NoFooterAdapter extends GroupedListAdapter {
         sectionvideo.setOnClickListener(v -> {
             toggleVisibility(sectionvideo, entity.getChild_sectionvideo());
         });
+
     }
     private void toggleVisibility(TextView textView, String content) {
         if (textView.getVisibility() == View.VISIBLE) {
@@ -109,44 +105,30 @@ public class NoFooterAdapter extends GroupedListAdapter {
         }
     }
 
+   void setLongClickForView(TextView view, SpannableStringBuilder spannableString ){
+       view.setOnLongClickListener(v -> {
+           TipsNetHelper.initDialog(v.getContext());
+           TipsNetHelper.menuDialogBuilder
+                   .setListener((dialog, position, string) -> {
+                       // 增加空值检查
+                       Context context = v.getContext();
+                       if (context != null) {
+                           if (spannableString != null) {
+                               TipsNetHelper.copyToClipboard(context, spannableString.toString());
+                           } else {
+                               // 可以记录日志或提示用户
+                               EasyLog.print("CopyError", spannableString + " is null");
+                           }
+                       } else {
+                           // 可以记录日志或提示用户
+                           EasyLog.print("CopyError", "Context is null in " );
+                       }
 
-
-//    @Override
-//    public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {
-//        ChildEntity entity = mGroups.get(groupPosition).getChildren().get(childPosition);
-//        TextView textView= holder.get(R.id.tv_sectiontext);
-//        SpannableStringBuilder renderText =  TipsNetHelper.renderText(entity.getChild_sectiontext());
-//        textView.setText(renderText);
-//        textView.setMovementMethod(LocalLinkMovementMethod.getInstance());
-//        //长按弹出复制
-//        textView.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View v) {
-//                // 底部选择框
-//                TipsNetHelper.initDialog(v.getContext());
-//                TipsNetHelper.menuDialogBuilder
-//                        .setListener(new MenuDialog.OnListener<String>() {
-//                            @Override
-//                            public void onSelected(BaseDialog dialog, int position, String string) {
-//                                //Toast.makeText(v.getContext(), "位置：" + position + "，文本：" + string, Toast.LENGTH_LONG).show();
-//                                // 复制到剪贴板
-//                                TipsNetHelper. copyToClipboard(v.getContext(), renderText.toString());
-//                            }
-//
-//                            // @Override
-//                            // public void onCancel(BaseDialog dialog) {
-//                            //Toast.makeText(v.getContext(), "取消了", Toast.LENGTH_LONG).show();
-//                            // }
-//                        })
-//                        .show();
-//                // 返回 true 表示事件已被处理
-//                return true;
-//            }
-//        });
-//    }
-//
-//
-
+                   })
+                   .show();
+           return true;
+       });
+   }
 
 
     /**
