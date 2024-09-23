@@ -61,11 +61,11 @@ public class NoFooterAdapter extends GroupedListAdapter {
         sectionvideo.setVisibility(View.GONE);
 
         // 根据实体对象设置TextView的内容和点击方法
-        if (entity.getChild_sectionnote() != null) {
+        if (entity.getAttributed_child_sectionnote() != null) {
             sectionnote.setText(entity.getAttributed_child_sectionnote());
             sectionnote.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }
-        if (entity.getChild_sectionvideo() != null) {
+        if (entity.getAttributed_child_sectionvideo() != null) {
             sectionvideo.setText(entity.getAttributed_child_sectionvideo());
             sectionvideo.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }

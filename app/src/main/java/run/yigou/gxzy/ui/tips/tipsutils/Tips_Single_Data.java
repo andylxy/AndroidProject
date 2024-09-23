@@ -245,5 +245,11 @@ public class Tips_Single_Data {
         return tips_Single_Data;
     }
 
-
+    public void onDestroy() {
+        tips_Single_Data = null;
+        curSingletonData=null;
+        curActivity = null;
+        tipsLittleWindowStack.clear();
+        tipsLittleWindowStack=null;
+    }
 }

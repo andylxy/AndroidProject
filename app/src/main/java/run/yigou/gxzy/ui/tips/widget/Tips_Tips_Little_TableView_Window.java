@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.manager.ReferenceManager;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.tips.adapter.NoFooterAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupEntity;
@@ -43,6 +44,7 @@ public class Tips_Tips_Little_TableView_Window extends Tips_Little_Window {
     private View view;
     private Tips_Single_Data tips_single_data = Tips_Single_Data.getInstance();
     private NoFooterAdapter adapter;
+    private static final String REFERENCE_KEY = "Tips_Tips_Little_TableView_Window";
 
     @Override
     public String getSearchString() {
@@ -52,6 +54,9 @@ public class Tips_Tips_Little_TableView_Window extends Tips_Little_Window {
     @Override
     public void show(FragmentManager fragmentManager) {
         super.show(fragmentManager);
+        // 添加引用
+        ReferenceManager.getInstance().addReference(REFERENCE_KEY, this);
+
         tips_single_data.tipsLittleWindowStack.add(this);
     }
 
@@ -263,7 +268,13 @@ public class Tips_Tips_Little_TableView_Window extends Tips_Little_Window {
     }
 
     private RecyclerView rvList;
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        dismiss();
+        // 清除引用
+        ReferenceManager.getInstance().removeReference(REFERENCE_KEY);
+    }
     @Override
     public void onDestroyView() {
         this.mGroup.removeView(this.view);

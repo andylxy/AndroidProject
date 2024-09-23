@@ -199,10 +199,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (bookId != 0) {
 
             if (init) {
-                adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getContent(), isExpand, false));
+                adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getContent(), isExpand));
             } else {
                 if (!singletonNetData.getSearchResList().isEmpty())
-                    adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getSearchResList(), isExpand, true));
+                    adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getSearchResList(), isExpand));
             }
             adapter.notifyDataChanged();
         }

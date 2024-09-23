@@ -104,6 +104,8 @@ public class DataItem {
         dataItem.setAttributedText(new SpannableStringBuilder(this.attributedText));
         dataItem.setFangList(this.fangList);
         dataItem.setYaoList(this.yaoList);
+        dataItem.setNote(this.note);
+        dataItem.setSectionvideo(this.sectionvideo);
         if (this.attributedNote != null)
             dataItem.setAttributedNote(new SpannableStringBuilder(this.attributedNote));
         if (this.attributedSectionVideo != null)

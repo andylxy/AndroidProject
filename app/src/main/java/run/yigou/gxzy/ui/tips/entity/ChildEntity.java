@@ -32,7 +32,8 @@ public class ChildEntity {
     public ChildEntity(String child_sectiontext) {
         this.child_sectiontext = child_sectiontext;
     }
-
+    public ChildEntity() {
+    }
     public ChildEntity(String child_sectiontext, String child_sectionnote, String child_sectionvideo) {
         this.child_sectiontext = child_sectiontext;
         this.child_sectionnote = child_sectionnote;

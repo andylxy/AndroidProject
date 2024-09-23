@@ -14,6 +14,8 @@ import static run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper.highlightMatchingTe
 
 import android.text.SpannableStringBuilder;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,9 +60,14 @@ public static ArrayList<GroupEntity> getGroups(ArrayList<Show_Fan_Yao_MingCi> sh
 
             // 初始化子项列表
             ArrayList<ChildEntity> children = new ArrayList<>();
-            for (DataItem dataItem : sectionData.getData()) {
+            List<DataItem> dataList = (List<DataItem>) sectionData.getData();
+            if (dataList == null) {
+                continue; // 数据为空，跳过
+            }
+            for (DataItem dataItem : dataList) {
                 if (dataItem != null) {
-                    children.add(new ChildEntity(dataItem.getAttributedText(), dataItem.getNote(), dataItem.getSectionvideo()));
+                    ChildEntity child = getChildEntity(dataItem);
+                    children.add(child);
                 }
             }
 
@@ -69,7 +76,8 @@ public static ArrayList<GroupEntity> getGroups(ArrayList<Show_Fan_Yao_MingCi> sh
             if (header == null) {
                 header = ""; // 防止空指针异常
             }
-            groups.add(new GroupEntity(header, "第尾部", children));
+            String footer = "第尾部"; // 可以改为配置文件或动态生成
+            groups.add(new GroupEntity(header, footer, children));
         }
 
         return groups;
@@ -85,6 +93,18 @@ public static ArrayList<GroupEntity> getGroups(ArrayList<Show_Fan_Yao_MingCi> sh
         return new ArrayList<>();
     }
 }
+
+    private static @NonNull ChildEntity getChildEntity(DataItem dataItem) {
+        ChildEntity child = new ChildEntity();
+        if (dataItem.getAttributedText() != null)
+            child.setAttributed_child_sectiontext(dataItem.getAttributedText());
+        if (dataItem.getAttributedNote() != null)
+            child.setAttributed_child_sectionnote(dataItem.getAttributedNote());
+        if (dataItem.getAttributedSectionVideo() != null)
+            child.setAttributed_child_sectionvideo(dataItem.getAttributedSectionVideo());
+        return child;
+    }
+
 
     /**
      * 获取可展开收起的组列表数据
@@ -118,51 +138,53 @@ public static ArrayList<GroupEntity> getGroups(ArrayList<Show_Fan_Yao_MingCi> sh
         return getExpandableGroups(groupCount, childrenCount, false);
     }
 
-/**
- * 根据给定的分段数据生成可展开的分组列表
- *
- * @param hh2SectionData 分段数据，包含多个分段及其对应的条目
- * @param isExpand       标志位，表示分组是否展开
- * @param isSearch       标志位，表示当前操作是否为搜索模式
- * @return 返回一个包含可展开分组的ArrayList，每个分组包含标题和子项列表
- */
-public static ArrayList<ExpandableGroupEntity> getExpandableGroups(ArrayList<HH2SectionData> hh2SectionData, boolean isExpand, boolean isSearch) {
-    // 初始化存储可展开分组的列表
-    ArrayList<ExpandableGroupEntity> groups = new ArrayList<>();
-    // 如果输入的分段数据为空，则直接返回空的分组列表
-    if (hh2SectionData == null) return groups;
+    /**
+     * 根据给定的分段数据生成可展开的分组列表
+     *
+     * @param hh2SectionData 分段数据，包含多个分段及其对应的条目
+     * @param isExpand       标志位，表示分组是否展开
+     * @return 返回一个包含可展开分组的ArrayList，每个分组包含标题和子项列表
+     */
+    public static ArrayList<ExpandableGroupEntity> getExpandableGroups(ArrayList<HH2SectionData> hh2SectionData, boolean isExpand) {
+        // 初始化存储可展开分组的列表
+        ArrayList<ExpandableGroupEntity> groups = new ArrayList<>();
+        // 如果输入的分段数据为空，则直接返回空的分组列表
+        if (hh2SectionData == null) return groups;
 
-    // 定义一个空字符串常量，用于后续操作
-    String EMPTY_STRING = "";
+        // 定义一个空字符串常量，用于后续操作
+        String EMPTY_STRING = "";
 
-    // 遍历每个分段数据
-    for (HH2SectionData sectionData : hh2SectionData) {
-        // 初始化当前分组的子项列表
-        ArrayList<ChildEntity> children = new ArrayList<>();
-        // 获取当前分段的数据列表
-        List<DataItem> dataItems = (List<DataItem>) sectionData.getData();
-        // 如果数据列表为空，则跳过当前分段
-        if (dataItems == null) continue;
+        // 遍历每个分段数据
+        for (HH2SectionData sectionData : hh2SectionData) {
+            // 初始化当前分组的子项列表
+            ArrayList<ChildEntity> children = new ArrayList<>();
+            // 获取当前分段的数据列表
+            List<DataItem> dataItems = (List<DataItem>) sectionData.getData();
+            // 如果数据列表为空，则跳过当前分段
+            if (dataItems == null) continue;
 
-        // 遍历当前分段的每个数据项
-        for (DataItem dataItem : dataItems) {
-            // 根据是否为搜索模式来决定使用不同的文本内容构造子项实体
-            if (isSearch) {
-                children.add(new ChildEntity(dataItem.getAttributedText(), dataItem.getNote(), dataItem.getSectionvideo()));
-            } else {
-                children.add(new ChildEntity(dataItem.getText(), dataItem.getNote(), dataItem.getSectionvideo()));
+            // 遍历当前分段的每个数据项
+            for (DataItem dataItem : dataItems) {
+                // 根据是否为搜索模式来决定使用不同的文本内容构造子项实体
+//                if (isSearch) {
+//                    children.add(new ChildEntity(dataItem.getAttributedText(), dataItem.getNote(), dataItem.getSectionvideo()));
+//                } else {
+//                    children.add(new ChildEntity(dataItem.getText(), dataItem.getNote(), dataItem.getSectionvideo()));
+//                }
+                if (dataItem != null) {
+                    ChildEntity child = getChildEntity(dataItem);
+                    children.add(child);
+                }
             }
+
+            // 使用辅助类渲染分组头部文本
+            SpannableStringBuilder spannableHeader = TipsNetHelper.renderText(sectionData.getHeader());
+            // 构造可展开分组实体并添加到分组列表中
+            groups.add(new ExpandableGroupEntity(sectionData.getHeader(), spannableHeader, EMPTY_STRING, isExpand, children));
         }
-
-        // 使用辅助类渲染分组头部文本
-        SpannableStringBuilder spannableHeader = TipsNetHelper.renderText(sectionData.getHeader());
-        // 构造可展开分组实体并添加到分组列表中
-        groups.add(new ExpandableGroupEntity(sectionData.getHeader(), spannableHeader, EMPTY_STRING, isExpand, children));
+        // 返回构造好的分组列表
+        return groups;
     }
-    // 返回构造好的分组列表
-    return groups;
-}
-
 
 
 }

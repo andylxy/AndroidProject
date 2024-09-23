@@ -61,7 +61,8 @@ import run.yigou.gxzy.ui.tips.widget.Tips_Tips_Little_TextView_Window;
 
 public class TipsNetHelper {
 
-    public static @NonNull ArrayList<HH2SectionData> getSearchHh2SectionData(SearchKeyEntity searchKeyEntity, Singleton_Net_Data singletonNetData) {
+    public static @NonNull ArrayList<HH2SectionData> getSearchHh2SectionData(SearchKeyEntity searchKeyEntity,
+                                                                             Singleton_Net_Data singletonNetData) {
         // 将搜索词拆分并过滤掉空白项
         String[] searchTerms = searchKeyEntity.getSearchKeyText().split(" ");
         List<String> validSearchTerms = new ArrayList<>();
@@ -355,18 +356,69 @@ public class TipsNetHelper {
     }
 
     /**
-     * 在数据项中突出显示匹配文本。
+     * 高亮匹配的文本
+     * 此方法用于在DataItem的文本、注释和视频部分中高亮显示符合给定模式的文本
+     * 它通过使用正则表达式匹配来查找需要高亮显示的部分，并应用格式化使其突出显示
+     *
+     * @param dataItem 要处理的DataItem对象，包含文本、注释和视频部分
+     * @param pattern  用于匹配的Pattern对象，如果为null将被处理而不是抛出异常
      */
     private static void highlightMatchingText(DataItem dataItem, Pattern pattern) {
-        SpannableStringBuilder spannableText = new SpannableStringBuilder(renderText(dataItem.getText()));
-        Matcher matcher = pattern.matcher(spannableText);
-        // todo 需要更换突出颜色变更位置点 new ForegroundColorSpan(0xFFFF0000)
-        // 在 Spannable 文本中突出显示所有匹配项 0xFFFF0000 为红色
-        while (matcher.find()) {
-            spannableText.setSpan(new ForegroundColorSpan(0xFFFF0000), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        // 检查模式是否为null，如果是null则直接返回
+        if (pattern == null) {
+            return;
         }
+
+        // 使用修改后的方法
+        SpannableStringBuilder spannableText = createSpannable(dataItem.getText());
+        SpannableStringBuilder spannableNote = createSpannable(dataItem.getNote());
+        SpannableStringBuilder spannableSectionVideo = createSpannable(dataItem.getSectionvideo());
+
+        // 创建Matcher对象，用于在各个部分中匹配模式
+        Matcher matcherText = pattern.matcher(spannableText);
+        Matcher matcherNote = pattern.matcher(spannableNote);
+        Matcher matcherSectionVideo = pattern.matcher(spannableSectionVideo);
+
+        // 对匹配到的文本应用高亮显示
+        highlightMatches(matcherText, spannableText);
+        highlightMatches(matcherNote, spannableNote);
+        highlightMatches(matcherSectionVideo, spannableSectionVideo);
+
+        // 将高亮显示后的文本设置回DataItem对象
         dataItem.setAttributedText(spannableText);
+        dataItem.setAttributedNote(spannableNote);
+        dataItem.setAttributedSectionVideo(spannableSectionVideo);
     }
+
+    // 创建SpannableStringBuilder对象，用于渲染DataItem的文本、注释和视频部分
+    public static SpannableStringBuilder createSpannable(String text) {
+        // 当输入的文本为null时，返回一个包含空字符串的SpannableStringBuilder对象
+        if (text == null) {
+            return new SpannableStringBuilder("");
+        }
+        // 返回渲染后的文本的SpannableStringBuilder对象
+        return new SpannableStringBuilder(renderText(text));
+    }
+
+
+    /**
+     * 高亮匹配项
+     * 此方法用于在SpannableStringBuilder中查找匹配项，并将它们高亮显示为红色
+     *
+     * @param matcher 用于查找匹配项的Matcher对象
+     * @param spannable 要进行高亮显示的SpannableStringBuilder对象
+     */
+    private static void highlightMatches(Matcher matcher, SpannableStringBuilder spannable) {
+        // 定义高亮显示的颜色为红色
+        int color = 0xFFFF0000; // 红色
+        // 遍历所有匹配项并应用高亮
+        while (matcher.find()) {
+            // 设置文本高亮颜色，从匹配项开始位置到结束位置（不包含结束位置）
+            spannable.setSpan(new ForegroundColorSpan(color), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+    }
+
+
 
     /**
      * 检查别名以寻找额外的匹配项。
@@ -563,9 +615,13 @@ public class TipsNetHelper {
     //todo 所有的SpannableStringBuilder 都是在这里处理的.
     //如果要改变样式，需要修改这里，同时修改renderItemNumber()
     public static SpannableStringBuilder renderText(String str, final ClickLink clickLink) {
-        // 创建一个可变的SpannableStringBuilder用于渲染文本
+        // 如果输入为 null，返回一个带有默认内容的 SpannableStringBuilder
+        if (str == null) {
+            EasyLog.print("renderText default content: Null ");
+            return new SpannableStringBuilder();
+        }
+        // 创建 SpannableStringBuilder 并初始化
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(str);
-
         while (true) {
             // 找到下一个"$"符号的位置
             int indexOf = str.indexOf("$");
@@ -732,8 +788,8 @@ public class TipsNetHelper {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("tapped:" + charSequence);
-               ArrayList<Show_Fan_Yao_MingCi> mingCiList = Show_Fan_Yao_MingCi.getInstance().showFang(charSequence);
-                ArrayList<GroupEntity> groups = GroupModel.getGroups( mingCiList, charSequence);
+                ArrayList<Show_Fan_Yao_MingCi> mingCiList = Show_Fan_Yao_MingCi.getInstance().showFang(charSequence);
+                ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
 
 
 //                new XPopup.Builder(textView.getContext())

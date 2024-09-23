@@ -10,6 +10,7 @@
 
 package run.yigou.gxzy.ui.tips.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.SpannableStringBuilder;
 import android.view.View;
@@ -46,8 +47,10 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter
         return mGroups;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setmGroups(ArrayList<ExpandableGroupEntity> mGroups) {
         this.mGroups = mGroups;
+       // notifyDataSetChanged();
     }
 
     private ArrayList<ExpandableGroupEntity> mGroups;
@@ -129,11 +132,11 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter
         sectionvideo.setVisibility(View.GONE);
 
         // 根据实体对象设置TextView的内容和点击方法
-        if (entity.getChild_sectionnote() != null) {
+        if (entity.getAttributed_child_sectionnote() != null) {
             sectionnote.setText(entity.getAttributed_child_sectionnote());
             sectionnote.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }
-        if (entity.getChild_sectionvideo() != null) {
+        if (entity.getAttributed_child_sectionvideo() != null) {
             sectionvideo.setText(entity.getAttributed_child_sectionvideo());
             sectionvideo.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }
@@ -151,23 +154,23 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
             EasyLog.print("条文点击: " + v.getTag() + ", 实体信息: " + entity);
-            toggleVisibility(sectionnote, entity.getChild_sectionnote());
+            toggleVisibility(sectionnote, entity.getAttributed_child_sectiontext());
         });
 
         // 为sectionnote设置点击监听，处理点击事件
         sectionnote.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
-            toggleVisibility(sectionvideo, entity.getChild_sectionvideo());
+            toggleVisibility(sectionvideo, entity.getAttributed_child_sectionnote());
         });
 
         // 为sectionvideo设置点击监听，处理点击事件
         sectionvideo.setOnClickListener(v -> {
-            toggleVisibility(sectionvideo, entity.getChild_sectionvideo());
+            toggleVisibility(sectionvideo, entity.getAttributed_child_sectionvideo());
         });
 
     }
-    private void toggleVisibility(TextView textView, String content) {
+    private void toggleVisibility(TextView textView, SpannableStringBuilder content) {
         if (textView.getVisibility() == View.VISIBLE) {
             textView.setVisibility(View.GONE);
         } else if (content != null) {

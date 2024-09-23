@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.manager.ReferenceManager;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
@@ -50,13 +51,14 @@ public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
 
     public Tips_Tips_Little_TextView_Window() {
         this.tipsSingleData = Tips_Single_Data.getInstance();
-        ;
+
     }
 
     @Override
     public void show(FragmentManager fragmentManager) {
         super.show(fragmentManager);
-
+        // 添加引用
+        ReferenceManager.getInstance().addReference(REFERENCE_KEY, this);
         tipsSingleData.tipsLittleWindowStack.add(this);
     }
 
@@ -473,5 +475,15 @@ public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
     public void onDestroyView() {
         this.mGroup.removeView(this.view);
         super.onDestroyView();
+    }
+
+    private static final String REFERENCE_KEY = "Tips_Tips_Little_TextView_Window";
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        dismiss();
+        // 清除引用
+        ReferenceManager.getInstance().removeReference(REFERENCE_KEY);
     }
 }
