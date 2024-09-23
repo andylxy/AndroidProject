@@ -271,7 +271,7 @@ public class Tips_Tips_Little_TableView_Window extends Tips_Little_Window {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        dismiss();
+        //dismiss();
         // 清除引用
         ReferenceManager.getInstance().removeReference(REFERENCE_KEY);
     }

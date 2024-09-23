@@ -8,6 +8,8 @@ import android.widget.RadioGroup;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.hjq.http.EasyLog;
+
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.http.api.BookInfoNav;
@@ -107,6 +109,12 @@ public final class TipsFragmentActivity extends AppActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Tips_Single_Data.getInstance().curActivity= this;
+    }
+
     /**
      * 替换容器中的 Fragment
      * @param fragment 要添加到容器的 Fragment 实例
@@ -135,6 +143,7 @@ public final class TipsFragmentActivity extends AppActivity {
         }
          // 清除引用
         ReferenceManager.getInstance().removeReference(REFERENCE_KEY);
-        Tips_Single_Data.getInstance().curActivity = null;
+        EasyLog.print(REFERENCE_KEY + " onDestroy");
+       // Tips_Single_Data.getInstance().curActivity = null;
     }
 }
