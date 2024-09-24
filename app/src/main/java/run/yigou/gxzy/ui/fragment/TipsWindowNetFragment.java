@@ -118,10 +118,6 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
             try {
                 while (singletonNetData.getContent().isEmpty() && count < 20) {
                     Thread.sleep(500); // 延迟数据获取成功
-//                    if (mAdapter.getItem(position).getBookNo() == 10001) {
-//                        //如果宋版的伤寒.则同获取宋版金匮
-//                        getBookData(10002);
-//                    }
                     count++;
                 }
             } catch (InterruptedException e) {
