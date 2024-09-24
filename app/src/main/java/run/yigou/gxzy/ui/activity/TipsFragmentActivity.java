@@ -54,7 +54,7 @@ public final class TipsFragmentActivity extends AppActivity {
                 toast("获取书籍信息错误");
                 return;
             }
-            Tips_Single_Data.getInstance().curActivity= this;
+
             // 获取 FragmentManager
             fragmentManager = getSupportFragmentManager();
 
@@ -109,11 +109,6 @@ public final class TipsFragmentActivity extends AppActivity {
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Tips_Single_Data.getInstance().curActivity= this;
-    }
 
     /**
      * 替换容器中的 Fragment

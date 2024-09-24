@@ -64,9 +64,6 @@ public class Tips_Single_Data {
     private HH2SectionData mingCiData;
     private Map<String, MingCiContent> mingCiContentMap;
 
-    public Activity curActivity;
-    //public ShowFragment curFragment;
-    //public TipsWindow curTipsWindow;
     private Map<String, Yao> yaoMap;
 
 
@@ -252,7 +249,6 @@ public class Tips_Single_Data {
     public void onDestroy() {
         tips_Single_Data = null;
         curSingletonData=null;
-        curActivity = null;
         tipsLittleWindowStack.clear();
         tipsLittleWindowStack=null;
     }

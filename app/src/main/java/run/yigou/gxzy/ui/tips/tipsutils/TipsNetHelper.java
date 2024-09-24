@@ -10,8 +10,6 @@
 
 package run.yigou.gxzy.ui.tips.tipsutils;
 
-import static com.google.android.material.internal.ContextUtils.getActivity;
-
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -26,7 +24,6 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
-import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -38,20 +35,15 @@ import java.util.stream.Collectors;
 import androidx.annotation.NonNull;
 
 import com.hjq.http.EasyLog;
-import com.lxj.xpopup.XPopup;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import run.yigou.gxzy.ui.dialog.MenuDialog;
-import run.yigou.gxzy.ui.tips.TipsWindow_MingCi_BubbleAttachPopup;
 import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
@@ -59,7 +51,6 @@ import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Show_Fan_Yao_MingCi;
 import run.yigou.gxzy.ui.tips.widget.Tips_Tips_Little_MingCiView_Window;
 import run.yigou.gxzy.ui.tips.widget.Tips_Tips_Little_TableView_Window;
 import run.yigou.gxzy.ui.tips.widget.Tips_Tips_Little_TextView_Window;
-
 
 public class TipsNetHelper {
 
@@ -748,15 +739,15 @@ public class TipsNetHelper {
         if (singletonData == null) {
             throw new IllegalStateException("Singleton_Net_Data instance is null");
         }
-            // 复制当前的书籍的药和药方数据
-           Singleton_Net_Data singletonDataInstance = Tips_Single_Data.getInstance().getCurSingletonData();
-           if (singletonDataInstance != null) {
-               singletonData.setYaoAliasDict(singletonDataInstance.getYaoAliasDict());
-               singletonData.setFangAliasDict(singletonDataInstance.getFangAliasDict());
-           } else {
-               // 处理空值情况
-               EasyLog.print("Singleton data is null");
-           }
+        // 复制当前的书籍的药和药方数据
+        Singleton_Net_Data singletonDataInstance = Tips_Single_Data.getInstance().getCurSingletonData();
+        if (singletonDataInstance != null) {
+            singletonData.setYaoAliasDict(singletonDataInstance.getYaoAliasDict());
+            singletonData.setFangAliasDict(singletonDataInstance.getFangAliasDict());
+        } else {
+            // 处理空值情况
+            EasyLog.print("Singleton data is null");
+        }
 
         singletonData.setContent(sectionDataList);
         return singletonData;
@@ -765,6 +756,7 @@ public class TipsNetHelper {
 
     public static SpannableStringBuilder renderText(String str) {
         return renderText(str, new ClickLink() {
+
             @Override
             public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
 
@@ -783,14 +775,17 @@ public class TipsNetHelper {
 //                        .show();
 
 
+
+                //Activity activity = (Activity) textView.getContext();
+               // ((Activity) textView.getContext()).getFragmentManager();
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 Tips_Tips_Little_TextView_Window tipsLittleTextViewWindow = new Tips_Tips_Little_TextView_Window();
                 tipsLittleTextViewWindow.setYao(charSequence);
                 //tipsLittleTextViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
                 tipsLittleTextViewWindow.setRect(textRect);
-                tipsLittleTextViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
 
-
+              //  tipsLittleTextViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
+                tipsLittleTextViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
             }
 
 
@@ -825,8 +820,8 @@ public class TipsNetHelper {
                 tipsLittleTableViewWindow.setFang(charSequence);
                 tipsLittleTableViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
                 tipsLittleTableViewWindow.setRect(textRect);
-              //  tipsLittleTableViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
-                tipsLittleTableViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
+                //  tipsLittleTableViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
+                tipsLittleTableViewWindow.show( ((Activity) textView.getContext()).getFragmentManager());
             }
 
             /**
@@ -857,7 +852,7 @@ public class TipsNetHelper {
                 tipsLittleTableViewWindow.setFang(charSequence);
                 //littleTableViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
                 tipsLittleTableViewWindow.setRect(textRect);
-                tipsLittleTableViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
+                tipsLittleTableViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
 
 
             }
