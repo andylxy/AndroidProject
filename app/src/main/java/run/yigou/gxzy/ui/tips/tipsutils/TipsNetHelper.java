@@ -82,16 +82,7 @@ public class TipsNetHelper {
                 // 检查每个搜索词
                 for (String term : validSearchTerms) {
                     String sanitizedTerm = sanitizeTerm(term); // 清理搜索词
-                    Pattern pattern;
-
-                    // 从清理后的搜索词编译正则表达式
-                    try {
-                        pattern = Pattern.compile(sanitizedTerm);
-                    } catch (Exception e) {
-                        // 记录错误日志，并使用默认正则表达式
-                        EasyLog.print("Error compiling regex: " + sanitizedTerm + ". Fallback to default.");
-                        pattern = Pattern.compile(".");
-                    }
+                    Pattern pattern = getPattern(sanitizedTerm);
 
                     // 检查数据项是否符合搜索条件
                     if (matchDataItem(dataItem, pattern, sanitizedTerm, yaoAliasDict, fangAliasDict)) {
@@ -116,6 +107,20 @@ public class TipsNetHelper {
             }
         }
         return filteredData;
+    }
+
+    public static @NonNull Pattern getPattern(String sanitizedTerm) {
+        Pattern pattern;
+
+        // 从清理后的搜索词编译正则表达式
+        try {
+            pattern = Pattern.compile(sanitizedTerm);
+        } catch (Exception e) {
+            // 记录错误日志，并使用默认正则表达式
+            EasyLog.print("Error compiling regex: " + sanitizedTerm + ". Fallback to default.");
+            pattern = Pattern.compile(".");
+        }
+        return pattern;
     }
 
 //    public static @NonNull ArrayList<HH2SectionData> getSearchHh2SectionData(SearchKeyEntity searchKeyEntity, Singleton_Net_Data singletonNetData) {
@@ -356,7 +361,7 @@ public class TipsNetHelper {
      * @param dataItem 要处理的DataItem对象，包含文本、注释和视频部分
      * @param pattern  用于匹配的Pattern对象，如果为null将被处理而不是抛出异常
      */
-    private static void highlightMatchingText(DataItem dataItem, Pattern pattern) {
+    public static void highlightMatchingText(DataItem dataItem, Pattern pattern) {
         // 检查模式是否为null，如果是null则直接返回
         if (pattern == null) {
             return;
@@ -844,7 +849,7 @@ public class TipsNetHelper {
 //                        //.hasShadowBg(false) // 去掉半透明背景
 //                        .asCustom(new TipsWindow_MingCi_BubbleAttachPopup(textView.getContext(), charSequence))
 //                        .show();
-                ArrayList<Show_Fan_Yao_MingCi> mingCiList = Show_Fan_Yao_MingCi.getInstance().showFang(charSequence);
+                ArrayList<Show_Fan_Yao_MingCi> mingCiList = Show_Fan_Yao_MingCi.getInstance().showMingCi(charSequence);
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 Tips_Tips_Little_MingCiView_Window tipsLittleTableViewWindow = new Tips_Tips_Little_MingCiView_Window();

@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
@@ -31,6 +33,8 @@ public class Show_Fan_Yao_MingCi {
 
     // 写本类单对象
     private static Show_Fan_Yao_MingCi instance;
+    private static final String DRUG_NOT_FOUND = "$r{药物未找到资料}";
+    private static final String SECTION_FORMAT = "$m{%s}-$m{含“$v{%s}”凡%d方：}";
 
     /**
      * 获取  Show_Fan_Yao_MingCi 单例对象
@@ -168,6 +172,99 @@ public class Show_Fan_Yao_MingCi {
         return showFanYaoMingCiList;
     }
 
+    public ArrayList<Show_Fan_Yao_MingCi> showMingCi(String mingCi) {
+        // 清空现有的展示列表
+        showFanYaoMingCiList.clear();
+        // 获取方名别名映射
+        Map<String, MingCiContent> mingCiContentMap = tipsSingleData.getMingCiContentMap();
+
+        // 兼容低版本 Android
+        MingCiContent mingCiMap;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            mingCiMap = mingCiContentMap.getOrDefault(mingCi, null);
+        } else {
+            // 兼容低版本 Android 的处理方式
+            mingCiMap = mingCiContentMap.get(mingCi);
+        }
+
+        // 空指针检查
+        if (mingCiMap != null) {
+            // 使用 mingCiMap
+            // 创建对象
+            Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();
+            // 检查 sectionData.getHeader() 是否为 null
+            if (mingCiMap.getName() != null) {
+                showFanYaoMingCi.setHeader(mingCiMap.getName().trim());
+            }
+            // 添加数据
+            showFanYaoMingCi.getData().add(mingCiMap);
+            // 将对象添加到列表中
+            showFanYaoMingCiList.add(showFanYaoMingCi);
+
+        } else {
+            // 处理实际名称不存在的情况
+            Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();
+            showFanYaoMingCi.setHeader("当前书籍");
+            DataItem dataItem = new DataItem();
+            dataItem.setText("$m{未见此文字解释。}");
+            showFanYaoMingCi.getData().add(dataItem);
+            showFanYaoMingCiList.add(showFanYaoMingCi);
+        }
+
+
+        // 处理其他章节是否有此文字出现
+        for (HH2SectionData sectionData : singletonData.getContent()) {
+            ArrayList<DataItem> sectionDataList = null;
+
+            for (DataItem dataItem : sectionData.getData()) {
+                boolean matchFound = false;
+
+                Pattern pattern = TipsNetHelper.getPattern(mingCi);
+
+                // 创建一个 Matcher 对象，并重用它
+                Matcher matcher = pattern.matcher("");
+
+                // 空指针检查
+                String text = dataItem.getText();
+                String note = dataItem.getNote();
+                String video = dataItem.getSectionvideo();
+
+                if (text != null && matcher.reset(text).find() ||
+                    note != null && matcher.reset(note).find() ||
+                    video != null && matcher.reset(video).find())
+                {
+                    matchFound = true;
+                }
+                // 遍历数据项，查找匹配项
+                // 突出显示数据项中的匹配文本
+                if (matchFound) {
+                    if (sectionDataList == null) {
+                        sectionDataList = new ArrayList<>();
+                    }
+                    TipsNetHelper.highlightMatchingText(dataItem, pattern);
+                    sectionDataList.add(dataItem);
+                }
+            }
+
+            // 如果有数据，则添加到 data 和 headers
+            if (sectionDataList != null) {
+                Show_Fan_Yao_MingCi showFanYaoMingCi = new Show_Fan_Yao_MingCi();
+                // 确保 sectionData.getHeader() 不为 null，防止空指针异常
+                if (sectionData.getHeader() != null) {
+                    showFanYaoMingCi.setHeader(sectionData.getHeader());
+                }
+                // 确保 sectionDataList 不为 null 且不为空，防止空指针异常
+                if (sectionDataList != null && !sectionDataList.isEmpty()) {
+                    showFanYaoMingCi.getData().addAll(sectionDataList);
+                    // 将 showFanYaoMingCi 添加到列表中
+                    showFanYaoMingCiList.add(showFanYaoMingCi);
+                }
+            }
+        }
+
+        // 返回包含方剂信息的列表
+        return showFanYaoMingCiList;
+    }
 
     private String getOrDefault(Map<String, String> map, String key) {
         // 空值检查
@@ -183,9 +280,6 @@ public class Show_Fan_Yao_MingCi {
         }
     }
 
-
-    private static final String DRUG_NOT_FOUND = "$r{药物未找到资料}";
-    private static final String SECTION_FORMAT = "$m{%s}-$m{含“$v{%s}”凡%d方：}";
 
     /**
      * 根据输入的字符串生成包含药物信息的可显示SpannableStringBuilder
