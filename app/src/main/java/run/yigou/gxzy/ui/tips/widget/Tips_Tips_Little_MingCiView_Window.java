@@ -77,60 +77,7 @@ public class Tips_Tips_Little_MingCiView_Window extends Tips_Little_Window {
         this.rect = rect;
     }
 
-    public boolean isInFangContext() {
-        SpannableStringBuilder spannableStringBuilder = this.attributedString; // 获取可变字符串
-        ClickableSpan[] clickableSpanArr = (ClickableSpan[]) spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), ClickableSpan.class); // 获取所有可点击的跨度
-        Map<String, String> fangAliasDict = tips_single_data.getFangAliasDict(); // 获取方别名字典
 
-        // 如果存在可点击的跨度
-        if (clickableSpanArr.length > 0) {
-            ClickableSpan clickableSpan = clickableSpanArr[0]; // 取第一个可点击跨度
-            int spanStart = spannableStringBuilder.getSpanStart(clickableSpan); // 获取跨度开始位置
-            String charSequence = spannableStringBuilder.subSequence(spanStart, spannableStringBuilder.getSpanEnd(clickableSpan)).toString(); // 获取跨度文本
-
-            // 检查是否有对应的方别名
-            String str = fangAliasDict.get(charSequence);
-            if (str != null) {
-                charSequence = str; // 使用方别名替代原文本
-            }
-
-            // 判断是否在方的上下文中
-            if (tips_single_data.getCurSingletonData().getAllFang().contains(charSequence)
-                    && spanStart > 0
-                    && spannableStringBuilder.toString().substring(spanStart - 1, spanStart).equals("、") // 确保前一个字符为“、”
-                    && spannableStringBuilder.charAt(0) != '*') { // 确保第一个字符不是 '*'
-                return true; // 是方上下文
-            }
-        }
-        return false; // 不是方上下文
-    }
-
-    protected boolean onlyShowRelatedContent() {
-
-        Map<String, String> fangAliasDict = tips_single_data.getFangAliasDict(); // 获取方别名字典
-        String str = this.fang; // 当前的方
-
-        // 如果小窗口堆栈中有内容
-        if (!tips_single_data.tipsLittleWindowStack.isEmpty()) {
-            // 获取小窗口栈顶的搜索字符串
-            String searchString = tips_single_data.tipsLittleWindowStack.get(tips_single_data.tipsLittleWindowStack.size() - 1).getSearchString();
-
-            // 检查是否有对应的方别名
-            String str2 = fangAliasDict.get(searchString);
-            if (str2 != null) {
-                searchString = str2; // 使用方别名替代原搜索字符串
-            }
-
-            // 判断搜索字符串是否与当前方相同，并且是否在方的上下文中
-            return searchString.equals(str) && isInFangContext();
-        }
-        // todo 待完善
-        // 获取当前显示的片段
-        // ShowFragment showFragment = singletonData.curFragment;
-        // 如果当前片段不为空且内容已打开，则返回 true
-        // return showFragment != null && showFragment.getIsContentOpen();
-        return true;
-    }
 
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         // 获取当前活动，确保不为null

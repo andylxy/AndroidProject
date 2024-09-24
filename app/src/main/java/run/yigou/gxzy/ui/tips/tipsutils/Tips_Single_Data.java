@@ -110,6 +110,10 @@ public class Tips_Single_Data {
     }
     private Singleton_Net_Data curSingletonData;
 
+    /**
+     *  当前书籍数据
+     * @return
+     */
     public Singleton_Net_Data getCurSingletonData() {
         return curSingletonData;
     }

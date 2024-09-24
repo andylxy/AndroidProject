@@ -10,6 +10,8 @@
 
 package run.yigou.gxzy.ui.tips.tipsutils;
 
+import static com.google.android.material.internal.ContextUtils.getActivity;
+
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -746,8 +748,17 @@ public class TipsNetHelper {
         if (singletonData == null) {
             throw new IllegalStateException("Singleton_Net_Data instance is null");
         }
-        singletonData.setContent(sectionDataList);
+            // 复制当前的书籍的药和药方数据
+           Singleton_Net_Data singletonDataInstance = Tips_Single_Data.getInstance().getCurSingletonData();
+           if (singletonDataInstance != null) {
+               singletonData.setYaoAliasDict(singletonDataInstance.getYaoAliasDict());
+               singletonData.setFangAliasDict(singletonDataInstance.getFangAliasDict());
+           } else {
+               // 处理空值情况
+               EasyLog.print("Singleton data is null");
+           }
 
+        singletonData.setContent(sectionDataList);
         return singletonData;
     }
 
@@ -814,6 +825,7 @@ public class TipsNetHelper {
                 tipsLittleTableViewWindow.setFang(charSequence);
                 tipsLittleTableViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
                 tipsLittleTableViewWindow.setRect(textRect);
+              //  tipsLittleTableViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
                 tipsLittleTableViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
             }
 

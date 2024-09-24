@@ -154,14 +154,14 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
             EasyLog.print("条文点击: " + v.getTag() + ", 实体信息: " + entity);
-            toggleVisibility(sectionnote, entity.getAttributed_child_sectiontext());
+            toggleVisibility(sectionnote, entity.getAttributed_child_sectionnote());
         });
 
         // 为sectionnote设置点击监听，处理点击事件
         sectionnote.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
-            toggleVisibility(sectionvideo, entity.getAttributed_child_sectionnote());
+            toggleVisibility(sectionvideo, entity.getAttributed_child_sectionvideo());
         });
 
         // 为sectionvideo设置点击监听，处理点击事件
@@ -171,12 +171,21 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter
 
     }
     private void toggleVisibility(TextView textView, SpannableStringBuilder content) {
-        if (textView.getVisibility() == View.VISIBLE) {
-            textView.setVisibility(View.GONE);
-        } else if (content != null) {
-            textView.setVisibility(View.VISIBLE);
-        }
+    // 增加对content的空值检查
+    if (content == null) {
+        return;
     }
+
+    String contentString = content.toString();
+
+    // 简化逻辑
+    if (textView.getVisibility() == View.VISIBLE) {
+        textView.setVisibility(View.GONE);
+    } else if (!contentString.isEmpty()) { // 判断是否为空字符串
+        textView.setVisibility(View.VISIBLE);
+    }
+}
+
 
     void setLongClickForView(TextView view, SpannableStringBuilder spannableString ){
         view.setOnLongClickListener(v -> {
