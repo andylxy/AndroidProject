@@ -9,10 +9,6 @@
  */
 
 package run.yigou.gxzy.ui.tips.tipsutils;
-
-
-import android.app.Activity;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

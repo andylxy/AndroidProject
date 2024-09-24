@@ -123,72 +123,6 @@ public class TipsNetHelper {
         return pattern;
     }
 
-//    public static @NonNull ArrayList<HH2SectionData> getSearchHh2SectionData(SearchKeyEntity searchKeyEntity, Singleton_Net_Data singletonNetData) {
-//        // 将搜索词拆分并过滤掉空白项
-//        String[] searchTerms = searchKeyEntity.getSearchKeyText().split(" ");
-//        List<String> validSearchTerms = new ArrayList<>();
-//        for (String term : searchTerms) {
-//            if (!term.isEmpty()) {
-//                validSearchTerms.add(term);
-//            }
-//        }
-//        ArrayList<HH2SectionData> filteredData = new ArrayList<>(); // 用于保存过滤后的结果
-//
-//        // 从单例数据中获取必要的映射和列表
-//        Map<String, String> yaoAliasDict = singletonNetData.getYaoAliasDict();
-//        Map<String, String> fangAliasDict = singletonNetData.getFangAliasDict();
-////            List<String> allYao = SingletonData.getInstance().getAllYao();
-////            List<String> allFang = SingletonData.getInstance().getAllFang();
-//
-//        // 遍历数据以进行过滤
-//        for (HH2SectionData sectionData : singletonNetData.getContent()) {
-//
-//            List<DataItem> matchedItems = new ArrayList<>(); // 用于保存当前部分中的匹配项
-//            boolean sectionHasMatches = false;
-//
-//            // 检查当前部分中的每一个数据项
-//            for (DataItem dataItem : sectionData.getData()) {
-//                boolean itemMatched = false;
-//
-//                // 检查每个搜索词
-//                for (String term : validSearchTerms) {
-//                    String sanitizedTerm = sanitizeTerm(term); // 清理搜索词
-//                    Pattern pattern;
-//
-//                    // 从清理后的搜索词编译正则表达式
-//                    try {
-//                        pattern = Pattern.compile(sanitizedTerm);
-//                    } catch (Exception e) {
-//                        // 如果正则表达式失败，则回退到基本模式
-//                        pattern = Pattern.compile(".");
-//                    }
-//
-//                    // 检查数据项是否符合搜索条件
-//                    if (matchDataItem(dataItem, pattern, sanitizedTerm, yaoAliasDict, fangAliasDict)) {
-//                        itemMatched = true;
-//                        // 突出显示数据项中的匹配文本
-//                        highlightMatchingText(dataItem, pattern);
-//                        break; // 一旦匹配，继续下一个数据项
-//                    }
-//                }
-//
-//                // 如果有任何搜索词匹配，则加入匹配项
-//                if (itemMatched) {
-//                    matchedItems.add(dataItem.getCopy());
-//                    sectionHasMatches = true;
-//                    searchKeyEntity.setSearchResTotalNum(searchKeyEntity.getSearchResTotalNum() + 1);
-//
-//                }
-//            }
-//
-//            // 如果有匹配项，则将其添加到过滤后的结果中
-//            if (sectionHasMatches) {
-//                filteredData.add(new HH2SectionData(matchedItems, sectionData.getSection(), sectionData.getHeader()));
-//            }
-//        }
-//        return filteredData;
-//    }
-
     public interface IFilter<T> {
         boolean filter(T t);
     }
@@ -331,7 +265,6 @@ public class TipsNetHelper {
         return positionY - scrollY + paddingTop;
     }
 
-
     /**
      * 清理搜索词，去除不必要的字符。
      */
@@ -415,8 +348,6 @@ public class TipsNetHelper {
             spannable.setSpan(new ForegroundColorSpan(color), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
     }
-
-
 
     /**
      * 检查别名以寻找额外的匹配项。
@@ -536,79 +467,6 @@ public class TipsNetHelper {
             );
         }
     }
-//    public static SpannableStringBuilder renderText(String str, final ClickLink clickLink) {
-//        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(str);
-//
-//        while (true) {
-//            // 查找下一个"$"符号的位置
-//            int indexOf = str.indexOf("$");
-//            if (indexOf >= 0) {
-//                // 查找"{"符号的位置
-//                int indexOf2 = str.indexOf("}");
-//                // 计算"$"的数量以确定匹配的结束位置
-//                int size = getAllSubStringPos(str.substring(indexOf, indexOf2), "$").size();
-//                int i = indexOf2;
-//                int i2 = 1;
-//
-//                // 根据找到的"$"数量来调整结束位置
-//                while (size > i2) {
-//                    for (int i3 = 0; i3 < size - i2; i3++) {
-//                        i += str.substring(i + 1).indexOf("}") + 1;
-//                    }
-//                    int i4 = size;
-//                    size = getAllSubStringPos(str.substring(indexOf, i), "$").size();
-//                    i2 = i4;
-//                }
-//
-//                // 提取"$"后面的第一个字符作为标记
-//                String substring = str.substring(indexOf + 1, indexOf + 2);
-//
-//                // 根据标记设置不同的样式
-//                if (substring.equals("a") || substring.equals("w")||  substring.equals("r")) {
-//                    spannableStringBuilder.setSpan(new RelativeSizeSpan(0.7f), indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//                }
-//                if (substring.equals("u")) {
-//                    spannableStringBuilder.setSpan(new ClickableSpan() {
-//                        @Override
-//                        public void onClick(View view) {
-//                            clickLink.clickYaoLink((TextView) view, this);
-//                        }
-//                    }, indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//                }
-//                if (substring.equals("f")) {
-//                    spannableStringBuilder.setSpan(new ClickableSpan() {
-//                        @Override
-//                        public void onClick(View view) {
-//                            clickLink.clickFangLink((TextView) view, this);
-//                        }
-//                    }, indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//                }
-//                if (substring.equals("g")) {
-//                    spannableStringBuilder.setSpan(new ClickableSpan() {
-//                        @Override
-//                        public void onClick(View view) {
-//                            clickLink.clickMingCiLink((TextView) view, this);
-//                        }
-//                    }, indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//                }
-//                // 设置文本颜色
-//                ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(getColoredTextByStrClass(substring));
-//                spannableStringBuilder.setSpan(foregroundColorSpan, indexOf + 3, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//
-//                // 替换处理过的部分
-//                spannableStringBuilder.replace(i, i + 1, "");
-//                spannableStringBuilder.replace(indexOf, indexOf + 3, "");
-//
-//                // 更新原始字符串为处理后的字符串
-//                str = spannableStringBuilder.toString();
-//            } else {
-//                // 处理完所有"$"后，进行额外的渲染
-//                renderItemNumber(spannableStringBuilder);
-//                return spannableStringBuilder;
-//            }
-//        }
-//    }
-
 
     //todo 所有的SpannableStringBuilder 都是在这里处理的.
     //如果要改变样式，需要修改这里，同时修改renderItemNumber()
@@ -766,23 +624,6 @@ public class TipsNetHelper {
             public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
-//                EasyLog.print("tapped:" + charSequence);
-//                new XPopup.Builder(textView.getContext())
-//                        .isTouchThrough(true)
-//                       // .popupPosition(PopupPosition.Right)
-//                        .positionByWindowCenter(true)
-//                        .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
-//                        .isViewMode(true)
-//                        .atView(textView)
-//                        //.atPoint(pointF)
-//                        //.hasShadowBg(false) // 去掉半透明背景
-//                        .asCustom(new TipsWindow_Yao_BubbleAttachPopup(textView.getContext(),charSequence))
-//                        .show();
-
-
-
-                //Activity activity = (Activity) textView.getContext();
-               // ((Activity) textView.getContext()).getFragmentManager();
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 Tips_Tips_Little_TextView_Window tipsLittleTextViewWindow = new Tips_Tips_Little_TextView_Window();
                 tipsLittleTextViewWindow.setYao(charSequence);
@@ -801,23 +642,6 @@ public class TipsNetHelper {
                 EasyLog.print("tapped:" + charSequence);
                 ArrayList<Show_Fan_Yao_MingCi> mingCiList = Show_Fan_Yao_MingCi.getInstance().showFang(charSequence);
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
-
-
-//                new XPopup.Builder(textView.getContext())
-//                        .isTouchThrough(true)
-//                        .positionByWindowCenter(true)
-//                        .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
-//                        .isViewMode(true)
-//                        .atView(textView)
-//                        //.offsetX((int) org_event.getRawX())
-//                        // .offsetY((int) org_event.getRawY())
-//                        // .atPoint(pointF)
-//                        //.hasShadowBg(false) // 去掉半透明背景
-//                        .asCustom(
-//                                new TipsWindow_Fang_BubbleAttachPopup(textView.getContext(), charSequence)
-//                                // .setArrowHeight(XPopupUtils.dp2px(textView.getContext(), 6f) )
-//                        )
-//                        .show();
 
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 Tips_Tips_Little_TableView_Window tipsLittleTableViewWindow = new Tips_Tips_Little_TableView_Window();
@@ -838,17 +662,6 @@ public class TipsNetHelper {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("tapped:" + charSequence);
-//                new XPopup.Builder(textView.getContext())
-//                        .isTouchThrough(true)
-//                        // .popupPosition(PopupPosition.Right)
-//                        .positionByWindowCenter(true)
-//                        .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
-//                        .isViewMode(true)
-//                        .atView(textView)
-//                        //.atPoint(pointF)
-//                        //.hasShadowBg(false) // 去掉半透明背景
-//                        .asCustom(new TipsWindow_MingCi_BubbleAttachPopup(textView.getContext(), charSequence))
-//                        .show();
                 ArrayList<Show_Fan_Yao_MingCi> mingCiList = Show_Fan_Yao_MingCi.getInstance().showMingCi(charSequence);
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
@@ -858,8 +671,6 @@ public class TipsNetHelper {
                 //littleTableViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
                 tipsLittleTableViewWindow.setRect(textRect);
                 tipsLittleTableViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
-
-
             }
 
         });
