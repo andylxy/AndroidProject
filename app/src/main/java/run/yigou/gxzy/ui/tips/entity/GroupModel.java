@@ -107,38 +107,6 @@ public static ArrayList<GroupEntity> getGroups(ArrayList<Show_Fan_Yao_MingCi> sh
 
 
     /**
-     * 获取可展开收起的组列表数据
-     *
-     * @param groupCount    组数量
-     * @param childrenCount 每个组里的子项数量
-     * @param isExpand      是否展开:false 收缩,true 展开
-     * @return groups 列表数据
-     */
-    public static ArrayList<ExpandableGroupEntity> getExpandableGroups(int groupCount, int childrenCount, boolean isExpand) {
-        ArrayList<ExpandableGroupEntity> groups = new ArrayList<>();
-        for (int i = 0; i < groupCount; i++) {
-            ArrayList<ChildEntity> children = new ArrayList<>();
-            for (int j = 0; j < childrenCount; j++) {
-                children.add(new ChildEntity("第" + (i + 1) + "组第" + (j + 1) + "项"));
-            }
-            groups.add(new ExpandableGroupEntity("第" + (i + 1) + "组头部",
-                    "第" + (i + 1) + "组尾部", isExpand, children));
-        }
-        return groups;
-    }
-
-    /**
-     * 获取可展开收起的组列表数据(默认收缩)
-     *
-     * @param groupCount    组数量
-     * @param childrenCount 每个组里的子项数量
-     * @return groups 列表数据
-     */
-    public static ArrayList<ExpandableGroupEntity> getExpandableGroups(int groupCount, int childrenCount) {
-        return getExpandableGroups(groupCount, childrenCount, false);
-    }
-
-    /**
      * 根据给定的分段数据生成可展开的分组列表
      *
      * @param hh2SectionData 分段数据，包含多个分段及其对应的条目
@@ -165,12 +133,6 @@ public static ArrayList<GroupEntity> getGroups(ArrayList<Show_Fan_Yao_MingCi> sh
 
             // 遍历当前分段的每个数据项
             for (DataItem dataItem : dataItems) {
-                // 根据是否为搜索模式来决定使用不同的文本内容构造子项实体
-//                if (isSearch) {
-//                    children.add(new ChildEntity(dataItem.getAttributedText(), dataItem.getNote(), dataItem.getSectionvideo()));
-//                } else {
-//                    children.add(new ChildEntity(dataItem.getText(), dataItem.getNote(), dataItem.getSectionvideo()));
-//                }
                 if (dataItem != null) {
                     ChildEntity child = getChildEntity(dataItem);
                     children.add(child);
