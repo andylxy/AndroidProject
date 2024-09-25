@@ -81,26 +81,36 @@ public class NoFooterAdapter extends GroupedListAdapter {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
             EasyLog.print("条文点击: " + v.getTag() + ", 实体信息: " + entity);
-            toggleVisibility(sectionnote, entity.getChild_sectionnote());
+            toggleVisibility(sectionnote, entity.getAttributed_child_sectionnote());
         });
 
         // 为sectionnote设置点击监听，处理点击事件
         sectionnote.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
-            toggleVisibility(sectionvideo, entity.getChild_sectionvideo());
+            toggleVisibility(sectionvideo, entity.getAttributed_child_sectionvideo());
         });
 
         // 为sectionvideo设置点击监听，处理点击事件
         sectionvideo.setOnClickListener(v -> {
-            toggleVisibility(sectionvideo, entity.getChild_sectionvideo());
+            Boolean isClick = (Boolean) v.getTag();
+            if (isClick != null && isClick) return;
+            toggleVisibility(sectionvideo, entity.getAttributed_child_sectionvideo());
         });
 
     }
-    private void toggleVisibility(TextView textView, String content) {
+    private void toggleVisibility(TextView textView, SpannableStringBuilder content) {
+        // 增加对content的空值检查
+        if (content == null) {
+            return;
+        }
+
+        String contentString = content.toString();
+
+        // 简化逻辑
         if (textView.getVisibility() == View.VISIBLE) {
             textView.setVisibility(View.GONE);
-        } else if (content != null) {
+        } else if (!contentString.isEmpty()) { // 判断是否为空字符串
             textView.setVisibility(View.VISIBLE);
         }
     }
@@ -126,6 +136,8 @@ public class NoFooterAdapter extends GroupedListAdapter {
 
                    })
                    .show();
+           TipsNetHelper.menuDialogBuilder
+                   .setListener(null);
            return true;
        });
    }

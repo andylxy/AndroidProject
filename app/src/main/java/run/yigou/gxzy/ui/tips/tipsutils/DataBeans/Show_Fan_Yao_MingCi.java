@@ -123,7 +123,7 @@ public class Show_Fan_Yao_MingCi {
                     if (sectionDataList == null) {
                         sectionDataList = new ArrayList<>();
                     }
-                    sectionDataList.add(dataItem);
+                    sectionDataList.add(dataItem.getCopy());
                 }
             }
 

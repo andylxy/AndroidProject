@@ -210,6 +210,7 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter
 
                     })
                     .show();
+            TipsNetHelper.menuDialogBuilder.setListener(null);
             return true;
         });
     }
