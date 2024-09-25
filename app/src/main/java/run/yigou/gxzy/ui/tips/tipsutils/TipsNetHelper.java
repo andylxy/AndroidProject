@@ -88,7 +88,7 @@ public class TipsNetHelper {
                     if (matchDataItem(dataItem, pattern, sanitizedTerm, yaoAliasDict, fangAliasDict)) {
                         itemMatched = true;
                         // 突出显示数据项中的匹配文本
-                        highlightMatchingText(dataItem, pattern);
+                        createSingleDataCopy(dataItem, pattern);
                         break; // 一旦匹配，继续下一个数据项
                     }
                 }
@@ -294,7 +294,7 @@ public class TipsNetHelper {
      * @param dataItem 要处理的DataItem对象，包含文本、注释和视频部分
      * @param pattern  用于匹配的Pattern对象，如果为null将被处理而不是抛出异常
      */
-    public static void highlightMatchingText(DataItem dataItem, Pattern pattern) {
+    public static void createSingleDataCopy(DataItem dataItem, Pattern pattern) {
         // 检查模式是否为null，如果是null则直接返回
         if (pattern == null) {
             return;
@@ -336,7 +336,7 @@ public class TipsNetHelper {
      * 高亮匹配项
      * 此方法用于在SpannableStringBuilder中查找匹配项，并将它们高亮显示为红色
      *
-     * @param matcher 用于查找匹配项的Matcher对象
+     * @param matcher   用于查找匹配项的Matcher对象
      * @param spannable 要进行高亮显示的SpannableStringBuilder对象
      */
     private static void highlightMatches(Matcher matcher, SpannableStringBuilder spannable) {
@@ -588,31 +588,31 @@ public class TipsNetHelper {
         }
     }
 
-    public static Singleton_Net_Data highlightMatchingText(ArrayList<Show_Fan_Yao_MingCi> mingCiList) {
+    /**
+     * 创建一个包含指定列表的Singleton_Net_Data实例，并复制当前的书籍的药和药方数据
+     *
+     * @param mingCiList 名词显示列表
+     * @return Singleton_Net_Data
+     */
+    public static Singleton_Net_Data createSingleDataCopy(List<HH2SectionData> mingCiList) {
         if (mingCiList == null || mingCiList.isEmpty()) {
             throw new IllegalArgumentException("mingCiList cannot be null or empty");
         }
-
-        ArrayList<HH2SectionData> sectionDataList = new ArrayList<>(mingCiList.size());
-        for (int index = 0; index < mingCiList.size(); index++) {
-            Show_Fan_Yao_MingCi mingCi = mingCiList.get(index);
-            sectionDataList.add(new HH2SectionData(mingCi.getData(), index, mingCi.getHeader()));
-        }
         Singleton_Net_Data singletonData = Singleton_Net_Data.getInstance();
         if (singletonData == null) {
-            throw new IllegalStateException("Singleton_Net_Data instance is null");
+            EasyLog.print("Singleton_Net_Data instance is null");
         }
-        // 复制当前的书籍的药和药方数据
+        // 深拷贝当前的书籍的药和药方数据
         Singleton_Net_Data singletonDataInstance = Tips_Single_Data.getInstance().getCurSingletonData();
         if (singletonDataInstance != null) {
-            singletonData.setYaoAliasDict(singletonDataInstance.getYaoAliasDict());
-            singletonData.setFangAliasDict(singletonDataInstance.getFangAliasDict());
+            Map<String, String> yaoAliasDict = new HashMap<>(singletonDataInstance.getYaoAliasDict());
+            Map<String, String> fangAliasDict = new HashMap<>(singletonDataInstance.getFangAliasDict());
+            singletonData.setYaoAliasDict(yaoAliasDict);
+            singletonData.setFangAliasDict(fangAliasDict);
         } else {
-            // 处理空值情况
-            EasyLog.print("Singleton data is null");
+            EasyLog.print("singletonData is null, cannot set alias dictionaries");
         }
-
-        singletonData.setContent(sectionDataList);
+        singletonData.setContent(mingCiList);
         return singletonData;
     }
 
@@ -630,7 +630,7 @@ public class TipsNetHelper {
                 //tipsLittleTextViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
                 tipsLittleTextViewWindow.setRect(textRect);
 
-              //  tipsLittleTextViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
+                //  tipsLittleTextViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
                 tipsLittleTextViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
             }
 
@@ -640,7 +640,7 @@ public class TipsNetHelper {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("tapped:" + charSequence);
-                ArrayList<Show_Fan_Yao_MingCi> mingCiList = Show_Fan_Yao_MingCi.getInstance().showFang(charSequence);
+                List<HH2SectionData> mingCiList = Show_Fan_Yao_MingCi.getInstance().showFangTwo(charSequence);
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
 
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
@@ -650,7 +650,7 @@ public class TipsNetHelper {
                 tipsLittleTableViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
                 tipsLittleTableViewWindow.setRect(textRect);
                 //  tipsLittleTableViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
-                tipsLittleTableViewWindow.show( ((Activity) textView.getContext()).getFragmentManager());
+                tipsLittleTableViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
             }
 
             /**
@@ -662,7 +662,7 @@ public class TipsNetHelper {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("tapped:" + charSequence);
-                ArrayList<Show_Fan_Yao_MingCi> mingCiList = Show_Fan_Yao_MingCi.getInstance().showMingCi(charSequence);
+                List<HH2SectionData> mingCiList = Show_Fan_Yao_MingCi.getInstance().showMingCiTwo(charSequence);
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 Tips_Tips_Little_MingCiView_Window tipsLittleTableViewWindow = new Tips_Tips_Little_MingCiView_Window();

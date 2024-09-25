@@ -10,7 +10,6 @@
 
 package run.yigou.gxzy.ui.tips.entity;
 
-import static run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper.highlightMatchingText;
 
 import android.text.SpannableStringBuilder;
 
@@ -19,7 +18,6 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Show_Fan_Yao_MingCi;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
@@ -29,70 +27,71 @@ import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 public class GroupModel {
 
     /**
- * 获取组列表数据
- */
-public static ArrayList<GroupEntity> getGroups(ArrayList<Show_Fan_Yao_MingCi> showFanYaoMingCiList, String charSequence) {
+     * 获取组列表数据
+     */
+    public static ArrayList<GroupEntity> getGroups(List<HH2SectionData> showMingCiList, String charSequence) {
 
-    try {
-        // 获取高亮匹配文本
-        Singleton_Net_Data singletonNetData = highlightMatchingText(showFanYaoMingCiList);
-        if (singletonNetData == null) {
-            throw new NullPointerException("Singleton_Net_Data is null");
-        }
-
-        // 创建搜索关键字实体
-        SearchKeyEntity searchKeyEntity = new SearchKeyEntity(charSequence);
-
-        // 获取过滤后的数据
-        ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity, singletonNetData);
-        if (filteredData == null) {
-            throw new NullPointerException("FilteredData is null");
-        }
-
-        // 初始化组列表
-        ArrayList<GroupEntity> groups = new ArrayList<>();
-
-        // 遍历过滤后的数据
-        for (HH2SectionData sectionData : filteredData) {
-            if (sectionData == null) {
-                continue; // 跳过空的数据
+        try {
+            // 获取高亮匹配文本
+            Singleton_Net_Data singletonNetData = TipsNetHelper.createSingleDataCopy(showMingCiList);
+            if (singletonNetData == null) {
+                throw new NullPointerException("Singleton_Net_Data is null");
             }
 
-            // 初始化子项列表
-            ArrayList<ChildEntity> children = new ArrayList<>();
-            List<DataItem> dataList = (List<DataItem>) sectionData.getData();
-            if (dataList == null) {
-                continue; // 数据为空，跳过
+            // 创建搜索关键字实体
+            SearchKeyEntity searchKeyEntity = new SearchKeyEntity(charSequence);
+
+            // 获取过滤后的数据
+            ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity, singletonNetData);
+            if (filteredData == null) {
+                throw new NullPointerException("FilteredData is null");
             }
-            for (DataItem dataItem : dataList) {
-                if (dataItem != null) {
-                    ChildEntity child = getChildEntity(dataItem);
-                    children.add(child);
+
+            // 初始化组列表
+            ArrayList<GroupEntity> groups = new ArrayList<>();
+
+            // 遍历过滤后的数据
+            for (HH2SectionData sectionData : filteredData) {
+                if (sectionData == null) {
+                    continue; // 跳过空的数据
                 }
+
+                // 初始化子项列表
+                ArrayList<ChildEntity> children = new ArrayList<>();
+                List<DataItem> dataList = (List<DataItem>) sectionData.getData();
+                if (dataList == null) {
+                    continue; // 数据为空，跳过
+                }
+                for (DataItem dataItem : dataList) {
+                    if (dataItem != null) {
+                        ChildEntity child = getChildEntity(dataItem);
+                        children.add(child);
+                    }
+                }
+
+                // 创建组实体并添加到组列表
+                String header = sectionData.getHeader();
+                if (header == null) {
+                    header = ""; // 防止空指针异常
+                }
+                String footer = "第尾部"; // 可以改为配置文件或动态生成
+                groups.add(new GroupEntity(header, footer, children));
             }
 
-            // 创建组实体并添加到组列表
-            String header = sectionData.getHeader();
-            if (header == null) {
-                header = ""; // 防止空指针异常
-            }
-            String footer = "第尾部"; // 可以改为配置文件或动态生成
-            groups.add(new GroupEntity(header, footer, children));
+            return groups;
+        } catch (NullPointerException e) {
+            // 处理空指针异常
+            System.err.println("发生空指针异常: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        } catch (Exception e) {
+            // 其他异常处理
+            System.err.println("发生异常: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
         }
-
-        return groups;
-    } catch (NullPointerException e) {
-        // 处理空指针异常
-        System.err.println("发生空指针异常: " + e.getMessage());
-        e.printStackTrace();
-        return new ArrayList<>();
-    } catch (Exception e) {
-        // 其他异常处理
-        System.err.println("发生异常: " + e.getMessage());
-        e.printStackTrace();
-        return new ArrayList<>();
     }
-}
+
 
     private static @NonNull ChildEntity getChildEntity(DataItem dataItem) {
         ChildEntity child = new ChildEntity();
