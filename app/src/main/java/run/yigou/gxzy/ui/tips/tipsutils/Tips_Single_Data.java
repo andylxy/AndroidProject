@@ -9,8 +9,6 @@
  */
 
 package run.yigou.gxzy.ui.tips.tipsutils;
-
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +17,7 @@ import java.util.Map;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.widget.Tips_Little_Window;
 
 
 public class Tips_Single_Data {
@@ -26,7 +25,10 @@ public class Tips_Single_Data {
     private Map<Integer, Singleton_Net_Data> bookIdContent;
     private List<String> allYao;
     private int curBookId;
-
+    public List<Tips_Little_Window> tipsLittleWindowStack = new ArrayList();
+    public List<String> getAllYao() {
+        return this.allYao;
+    }
     public Map<Integer, BookInfoNav.Bean.TabNav> getNavTabMap() {
         if (NavTabMap == null) NavTabMap = new HashMap<>();
         return NavTabMap;
@@ -57,7 +59,6 @@ public class Tips_Single_Data {
     private HH2SectionData yaoData;
     private HH2SectionData mingCiData;
     private Map<String, MingCiContent> mingCiContentMap;
-
 
     private Map<String, Yao> yaoMap;
 
@@ -100,6 +101,19 @@ public class Tips_Single_Data {
         }
 
     }
+    private Singleton_Net_Data curSingletonData;
+
+    /**
+     *  当前书籍数据
+     * @return
+     */
+    public Singleton_Net_Data getCurSingletonData() {
+        return curSingletonData;
+    }
+
+    public void setCurSingletonData(Singleton_Net_Data curSingletonData) {
+        this.curSingletonData = curSingletonData;
+    }
 
     private Map<String, String> fangAliasDict;
     private Map<String, String> yaoAliasDict;
@@ -120,6 +134,7 @@ public class Tips_Single_Data {
             bookIdContent.put(bookId, singletonNetData);
         }
         setCurBookId(bookId);
+        setCurSingletonData(singletonNetData);
         return singletonNetData;
     }
 
@@ -227,5 +242,10 @@ public class Tips_Single_Data {
         return tips_Single_Data;
     }
 
-
+    public void onDestroy() {
+        tips_Single_Data = null;
+        curSingletonData=null;
+        tipsLittleWindowStack.clear();
+        tipsLittleWindowStack=null;
+    }
 }

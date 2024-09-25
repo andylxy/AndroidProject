@@ -12,6 +12,8 @@ package run.yigou.gxzy.ui.tips.entity;
 
 import android.text.SpannableStringBuilder;
 
+import com.hjq.http.EasyLog;
+
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 
 /**
@@ -26,53 +28,81 @@ public class ChildEntity {
     private SpannableStringBuilder attributed_child_sectionnote;
     private SpannableStringBuilder attributed_child_sectionvideo;
     private SpannableStringBuilder spannableChild;
+
     public ChildEntity(String child_sectiontext) {
         this.child_sectiontext = child_sectiontext;
+    }
+    public ChildEntity() {
     }
     public ChildEntity(String child_sectiontext, String child_sectionnote, String child_sectionvideo) {
         this.child_sectiontext = child_sectiontext;
         this.child_sectionnote = child_sectionnote;
         this.child_sectionvideo = child_sectionvideo;
-
     }
+    public ChildEntity(SpannableStringBuilder child_sectiontext, String child_sectionnote, String child_sectionvideo) {
+        this.attributed_child_sectiontext = child_sectiontext;
+        this.child_sectionnote = child_sectionnote;
+        this.child_sectionvideo = child_sectionvideo;
+    }
+
     public ChildEntity(String child_sectiontext, SpannableStringBuilder spannableChild) {
         this.child_sectiontext = child_sectiontext;
         this.spannableChild = spannableChild;
     }
 
 
-    public SpannableStringBuilder getAttributed_child_sectiontext() {
+    public synchronized SpannableStringBuilder getAttributed_child_sectiontext() {
         if (attributed_child_sectiontext == null) {
-            attributed_child_sectiontext = TipsNetHelper.renderText(child_sectiontext);
+            if (child_sectiontext == null) {
+                attributed_child_sectiontext = new SpannableStringBuilder();
+            } else {
+                attributed_child_sectiontext = TipsNetHelper.renderText(child_sectiontext);
+            }
         }
         return attributed_child_sectiontext;
     }
+
     public void setAttributed_child_sectiontext(SpannableStringBuilder attributed_child_sectiontext) {
         this.attributed_child_sectiontext = attributed_child_sectiontext;
     }
 
-    public SpannableStringBuilder getAttributed_child_sectionvideo() {
+    public synchronized SpannableStringBuilder getAttributed_child_sectionvideo() {
         if (attributed_child_sectionvideo == null) {
-            attributed_child_sectionvideo = TipsNetHelper.renderText(child_sectionvideo);
+            if (child_sectionvideo != null) {
+                attributed_child_sectionvideo = TipsNetHelper.renderText(child_sectionvideo);
+            } else {
+                // 处理 child_sectionvideo 为 null 的情况
+                attributed_child_sectionvideo = new SpannableStringBuilder(); // 或者返回一个默认值
+            }
         }
         return attributed_child_sectionvideo;
     }
+
 
     public void setAttributed_child_sectionvideo(SpannableStringBuilder attributed_child_sectionvideo) {
         this.attributed_child_sectionvideo = attributed_child_sectionvideo;
     }
 
-    public SpannableStringBuilder getAttributed_child_sectionnote() {
+    public synchronized SpannableStringBuilder getAttributed_child_sectionnote() {
         if (attributed_child_sectionnote == null) {
-            attributed_child_sectionnote = TipsNetHelper.renderText(child_sectionnote);
+            if (child_sectionnote == null) {
+                // 防止空指针异常
+                attributed_child_sectionnote = new SpannableStringBuilder();
+            } else {
+                attributed_child_sectionnote = TipsNetHelper.renderText(child_sectionnote);
+            }
+
+            // 记录日志
+            EasyLog.print("ChildEntity", "attributed_child_sectionnote initialized");
         }
+
         return attributed_child_sectionnote;
     }
+
 
     public void setAttributed_child_sectionnote(SpannableStringBuilder attributed_child_sectionnote) {
         this.attributed_child_sectionnote = attributed_child_sectionnote;
     }
-
 
 
     public SpannableStringBuilder getSpannableChild() {

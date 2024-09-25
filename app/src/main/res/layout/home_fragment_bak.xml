@@ -45,22 +45,23 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
-                        android:padding="@dimen/dp_5"
                         android:visibility="visible"
                         android:text="搜索"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/sp_15" />
 
-                    <com.hjq.widget.view.ClearEditText
+                    <androidx.appcompat.widget.AppCompatEditText
                         android:id="@+id/tv_home_hint"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/dp_10"
+                        android:layout_marginHorizontal="@dimen/dp_20"
                         android:layout_weight="1"
+                        android:background="@drawable/home_search_bar_transparent_bg"
                         android:gravity="left|center"
                         android:paddingLeft="@dimen/dp_10"
                         android:textSize="@dimen/sp_15"
                         android:paddingVertical="@dimen/dp_5"
-                        android:textColorHint="@color/darker_gray"
+                        android:text=""
                         android:hint="输入 | 关键字"
                         android:textColor="@color/white60" />
 
@@ -68,7 +69,7 @@
                         android:id="@+id/iv_home_search"
                         android:layout_width="@dimen/dp_24"
                         android:layout_height="@dimen/dp_24"
-                        android:layout_marginEnd="@dimen/dp_20"
+                        android:layout_marginEnd="@dimen/dp_10"
                         app:srcCompat="@drawable/search_ic"
                         app:tint="@color/white" />
 

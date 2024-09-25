@@ -149,22 +149,19 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
                     @Override
                     public void onSucceed(HttpData<List<BookInfoNav.Bean>> data) {
-                        if (data.getData().size() > 0) {
+                        if (!data.getData().isEmpty()) {
                             bookNavList = data.getData();
                             for (BookInfoNav.Bean nav : bookNavList) {
-//                                if (Objects.equals(nav.getName(), "伤寒・金匮"))
-//                                    mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
-//                                else
-//                                    mPagerAdapter.addFragment(BookInfoFragment.newInstance(nav.getNavList()), nav.getName());
-                                mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
-                                mTabAdapter.addItem(nav.getName());
+                                //内容列表存在才添加
+                                if (!nav.getNavList().isEmpty()) {
+                                    mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
+                                    mTabAdapter.addItem(nav.getName());
+                                    for (BookInfoNav.Bean.TabNav item : nav.getNavList()) {
 
-                                for (BookInfoNav.Bean.TabNav item : nav.getNavList()){
-
-                                    if (item.getBookNo() >0)
-                                        Tips_Single_Data.getInstance().getNavTabMap().put(item.getBookNo(), item);
+                                        if (item.getBookNo() > 0)
+                                            Tips_Single_Data.getInstance().getNavTabMap().put(item.getBookNo(), item);
+                                    }
                                 }
-
                             }
                         } else
                             bookNavList = new ArrayList<>();

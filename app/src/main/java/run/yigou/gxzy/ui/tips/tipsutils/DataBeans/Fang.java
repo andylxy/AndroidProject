@@ -124,18 +124,10 @@ public class Fang extends DataItem {
     }
 
     public String getStandardYaoName(String str) {
-        String str2 = singletonData.getYaoAliasDict().get(str);
+        String str2 =  Tips_Single_Data.getInstance().getBookIdContent(Tips_Single_Data.getInstance().getCurBookId()).getYaoAliasDict().get(str);
         return str2 == null ? str : str2;
     }
 
-    Tips_Single_Data tipsSingleData ;
-    Singleton_Net_Data singletonData ;
-
-    public Fang(){
-        tipsSingleData= Tips_Single_Data.getInstance();
-        // 获取 SingletonData 实例和数据结构
-        singletonData = tipsSingleData.getBookIdContent(tipsSingleData.getCurBookId());
-    }
     public class YaoUse {
         int YaoID;
         String amount;

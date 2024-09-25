@@ -34,6 +34,10 @@ public class GroupedListAdapter extends GroupedRecyclerViewAdapter {
         mGroups = groups;
     }
 
+    public GroupedListAdapter(Context context) {
+        super(context);
+    }
+
     @Override
     public int getGroupCount() {
         return mGroups == null ? 0 : mGroups.size();

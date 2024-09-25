@@ -10,11 +10,11 @@
         android:layout_height="match_parent">
         <fragment
             android:id="@+id/fragment_tips_book_read"
-            android:name="run.yigou.gxzy.ui.fragment.TipsBookReadFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            tools:layout="@layout/tips_book_read_activity_group_list" />
+            tools:layout="@layout/tips_book_read_activity_group_list"
+             />
         <RadioGroup
             android:orientation="horizontal"
             android:id="@+id/rg_tab"

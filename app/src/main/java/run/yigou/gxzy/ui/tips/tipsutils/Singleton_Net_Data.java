@@ -48,21 +48,13 @@ public class Singleton_Net_Data {
 
     public ArrayList<HH2SectionData> getContent() {
         if (this.content == null) this.content = new ArrayList<>();
-//        //如果请求为显示伤寒398条,
-//        if(bookId== AppConst.ShangHanNo && getShowShanghan() != AppConst.Show_Shanghan_AllSongBan){
-//           return   new ArrayList<>(this.content.subList(8, 18)); // 创建新列表
-//        }
         //如果实现数据监听处理接口.则由该接口处理后直接返回处理后的数据.
         if (mOnContentUpdateListener != null) {
             //如果实现通知接口,则通知数据已经更新
-            mOnContentUpdateListener.contentDateUpdate(this.content);
             ArrayList<HH2SectionData> updateList = mOnContentUpdateListener.contentDateUpdate(this.content);
-            //如果实现通知接口.则通知数据已经更新.
-            //if (mOnUpdateStatusNotification !=null && !updateList.isEmpty()) mOnUpdateStatusNotification.contentUpdateStatus(true);
-            if (updateList == null || updateList.isEmpty()) return new ArrayList<>();
+            if (updateList == null) return new ArrayList<>();
             return updateList;
         }
-
         return this.content;
     }
 
@@ -123,12 +115,16 @@ public class Singleton_Net_Data {
     }
 
     private int bookId;
+
     //todo 获取实例需优化
     public static Singleton_Net_Data getInstance(int bookId) {
         data = new Singleton_Net_Data(bookId);
         return data;
     }
-
+    public static Singleton_Net_Data getInstance() {
+        data = new Singleton_Net_Data();
+        return data;
+    }
     private OnContentUpdateListener mOnContentUpdateListener;
 
     public interface OnContentUpdateListener {
@@ -149,7 +145,7 @@ public class Singleton_Net_Data {
         this.mOnContentShowStatusNotification = mStatusNotification;
     }
 
-    public  void shanghanShowUpdateNotification() {
+    public void shanghanShowUpdateNotification() {
         if (mOnContentShowStatusNotification != null)
             mOnContentShowStatusNotification.contentShowStatusNotification(1);
 

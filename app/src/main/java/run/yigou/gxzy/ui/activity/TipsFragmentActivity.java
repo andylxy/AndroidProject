@@ -1,5 +1,6 @@
 package run.yigou.gxzy.ui.activity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -7,9 +8,12 @@ import android.widget.RadioGroup;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.hjq.http.EasyLog;
+
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.http.api.BookInfoNav;
+import run.yigou.gxzy.manager.ReferenceManager;
 import run.yigou.gxzy.ui.fragment.TipsBookNetReadFragment;
 import run.yigou.gxzy.ui.fragment.TipsSettingFragment;
 import run.yigou.gxzy.ui.fragment.TipsUnitFragment;
@@ -22,11 +26,12 @@ public final class TipsFragmentActivity extends AppActivity {
     private static final int UNIT_TAB_ID = R.id.unitTab;
     private static final int SETTINGS_TAB_ID = R.id.settingsTab;
     private static final int FRAGMENT_CONTAINER_ID = R.id.fragment_tips_container;
+    private static final String REFERENCE_KEY = "TipsFragmentActivity";
 
     private RadioGroup radioGroup; // 用于切换不同 Fragment 的 RadioGroup
     private FragmentManager fragmentManager; // Fragment 管理器
     private RadioGroup.OnCheckedChangeListener tabCheckedChangeListener; // RadioGroup 的监听器
-    private RadioButton currentCheckedRadioButton;
+
     public TipsFragmentActivity() {
     }
 
@@ -35,8 +40,12 @@ public final class TipsFragmentActivity extends AppActivity {
         return R.layout.tips_fragment_tab_net_list;
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     protected void initView() {
+        // 添加引用
+        ReferenceManager.getInstance().addReference(REFERENCE_KEY, this);
+
         try {
             // 从意图中获取书籍ID
             int bookId = getIntent().getIntExtra("bookId", 0);
@@ -57,7 +66,7 @@ public final class TipsFragmentActivity extends AppActivity {
             // 初始化 RadioGroup
             radioGroup = findViewById(R.id.rg_tab);
             radioGroup.check(FIRST_CONTENT_TAB_ID); // 设置默认选中的 RadioButton
-            currentCheckedRadioButton = radioGroup.findViewById(FIRST_CONTENT_TAB_ID);
+            RadioButton currentCheckedRadioButton = radioGroup.findViewById(FIRST_CONTENT_TAB_ID);
             // 设置 RadioGroup 的监听器
             tabCheckedChangeListener = (group, checkedId) -> {
                 switch (checkedId) {
@@ -100,6 +109,7 @@ public final class TipsFragmentActivity extends AppActivity {
         }
     }
 
+
     /**
      * 替换容器中的 Fragment
      * @param fragment 要添加到容器的 Fragment 实例
@@ -126,5 +136,9 @@ public final class TipsFragmentActivity extends AppActivity {
             // 在 Activity 销毁时注销 RadioGroup 的监听器，避免内存泄漏
             radioGroup.setOnCheckedChangeListener(null);
         }
+         // 清除引用
+        ReferenceManager.getInstance().removeReference(REFERENCE_KEY);
+        EasyLog.print(REFERENCE_KEY + " onDestroy");
+       // Tips_Single_Data.getInstance().curActivity = null;
     }
 }

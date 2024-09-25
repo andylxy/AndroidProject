@@ -54,7 +54,7 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
     private SettingBar mAddressView;
     private SettingBar mPersonDataSetting;
 
-    private TextView mTest_btn;
+
 
 
     /** 省 */
@@ -84,8 +84,7 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         mNameView = findViewById(R.id.sb_person_data_name);
         mAddressView = findViewById(R.id.sb_person_data_address);
         mPersonDataSetting = findViewById(R.id.sb_person_data_setting);
-        mTest_btn = findViewById(R.id.test_btn);
-        setOnClickListener(mAvatarLayout, mAvatarView, mNameView, mAddressView,mPersonDataSetting,mTest_btn);
+        setOnClickListener(mAvatarLayout, mAvatarView, mNameView, mAddressView,mPersonDataSetting);
     }
 
     @Override
@@ -122,7 +121,7 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
     @SingleClick
     @Override
     public void onClick(View view) {
-        //if (isLogin()) return;
+        if (isLogin()) return;
         if (view == mAvatarLayout) {
             ImageSelectActivity.start(getAttachActivity(), data -> {
                 // 裁剪头像
@@ -177,15 +176,6 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
             startActivity(SettingActivity.class);
         }
 
-        else if (view == mTest_btn) {
-//            new XPopup.Builder(getContext())
-//                    //.isTouchThrough(true)
-//                    .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
-//                    .atView(mTest_btn)
-//                    .hasShadowBg(false) // 去掉半透明背景
-//                    .asCustom(new CustomBubbleAttachPopup(getContext()))
-//                    .show();
-        }
 
     }
     /**

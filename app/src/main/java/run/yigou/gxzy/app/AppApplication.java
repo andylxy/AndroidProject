@@ -36,6 +36,7 @@ import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.RequestHandler;
 import run.yigou.gxzy.http.model.RequestServer;
 import run.yigou.gxzy.manager.ActivityManager;
+import run.yigou.gxzy.manager.ReferenceManager;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.other.AppConfig;
 import run.yigou.gxzy.other.CrashHandler;
@@ -99,6 +100,8 @@ public final class AppApplication extends Application {
         mUserInfoService = DbService.getInstance().mUserInfoService;
         initSdk(this);
         initUserLogin();
+        // 初始化 ReferenceManager
+        ReferenceManager.getInstance();
 
     }
 

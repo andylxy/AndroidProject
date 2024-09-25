@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
+import com.hjq.http.EasyLog;
 import com.hjq.widget.view.ClearEditText;
 
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.manager.ReferenceManager;
 import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
@@ -122,18 +124,33 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             // 默认初始化设置  宋版伤寒,金匮显示
             // 从 SharedPreferences 中读取设置值
             SharedPreferences sharedPreferences = AppApplication.application.getSharedPreferences("shanghan3.1", Context.MODE_PRIVATE);
-            showShanghan = sharedPreferences.getInt(AppConst.Key_Shanghan, 1);
+            showShanghan = sharedPreferences.getInt(AppConst.Key_Shanghan, 0);
             showJinkui = sharedPreferences.getInt(AppConst.Key_Jinkui, 1);
             //加载数据处理监听
             singletonNetData.setOnContentUpdateListener(new Singleton_Net_Data.OnContentUpdateListener() {
                 @Override
                 public ArrayList<HH2SectionData> contentDateUpdate(ArrayList<HH2SectionData> contentList) {
-                    //如果请求为显示伤寒398条,
-                    if (showShanghan != AppConst.Show_Shanghan_AllSongBan) {
-                        return new ArrayList<>(contentList.subList(8, 18)); // 创建新列表
+                    if (contentList == null || contentList.isEmpty()) {
+                        return new ArrayList<>();
                     }
+                    int size = contentList.size();
+
+                    if (showJinkui == AppConst.Show_Jinkui_None && showShanghan == AppConst.Show_Shanghan_398) {
+                        return new ArrayList<>(contentList.subList(8, Math.min(18, size)));
+                    }
+                    if (showJinkui == AppConst.Show_Jinkui_None && showShanghan == AppConst.Show_Shanghan_AllSongBan) {
+                        return new ArrayList<>(contentList.subList(0, Math.min(26, size)));
+                    }
+                    if (showJinkui == AppConst.Show_Jinkui_Default && showShanghan == AppConst.Show_Shanghan_398) {
+                        return new ArrayList<>(contentList.subList(8, size));
+                    }
+                    if (showJinkui == AppConst.Show_Jinkui_Default && showShanghan == AppConst.Show_Shanghan_AllSongBan) {
+                        return contentList;
+                    }
+
                     return contentList;
                 }
+
             });
             //宋版显示修改通知
             singletonNetData.setOnContentShowStatusNotification(new Singleton_Net_Data.OnContentShowStatusNotification() {
@@ -171,14 +188,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         super.onDestroy();
         singletonNetData.setOnContentShowStatusNotification(null);
         singletonNetData.setOnContentUpdateListener(null);
+        //singletonNetData =null;
     }
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        //刷新数据显示
-//        reListAdapter(true, false);
-//    }
 
     @Override
     public void onClick(View view) {
@@ -199,10 +211,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (bookId != 0) {
 
             if (init) {
-                adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getContent(), isExpand, false));
+                adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getContent(), isExpand));
             } else {
                 if (!singletonNetData.getSearchResList().isEmpty())
-                    adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getSearchResList(), isExpand, true));
+                    adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getSearchResList(), isExpand));
             }
             adapter.notifyDataChanged();
         }
@@ -247,14 +259,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
     }
 
-
-    //    @NonNull
-//    @Override
-//    protected ImmersionBar createStatusBarConfig() {
-//        return super.createStatusBarConfig()
-//                // 指定导航栏背景颜色
-//                .navigationBarColor(R.color.white);
-//    }
     public static void start(Context context) {
         Intent intent = new Intent(context, TipsBookNetReadFragment.class);
         // intent.putExtra(APPCONST.BOOK, item);
@@ -263,6 +267,5 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         }
         context.startActivity(intent);
     }
-
 
 }
