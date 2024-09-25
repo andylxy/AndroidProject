@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Fang;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
+
 public class DataItem {
     /**
      * 记录序号
@@ -98,20 +101,54 @@ public class DataItem {
         this.attributedText = TipsNetHelper.renderText(this.text);
     }
 
-    public DataItem getCopy() {
-        DataItem dataItem = new DataItem();
+public DataItem getCopy() {
+    DataItem dataItem = new DataItem();
+
+    // 空值检查后设置 pureText
+    if (this.text != null) {
         dataItem.setPureText(this.text);
-        dataItem.setAttributedText(new SpannableStringBuilder(this.attributedText));
-        dataItem.setFangList(this.fangList);
-        dataItem.setYaoList(this.yaoList);
-        dataItem.setNote(this.note);
-        dataItem.setSectionvideo(this.sectionvideo);
-        if (this.attributedNote != null)
-            dataItem.setAttributedNote(new SpannableStringBuilder(this.attributedNote));
-        if (this.attributedSectionVideo != null)
-            dataItem.setAttributedSectionVideo(new SpannableStringBuilder(this.attributedSectionVideo));
-        return dataItem;
     }
+
+    // 空值检查后设置 attributedText
+    if (this.attributedText != null) {
+        dataItem.setAttributedText(new SpannableStringBuilder(this.attributedText));
+    }
+
+    // 深拷贝 fangList
+    if (this.fangList != null) {
+        List<String> fangListCopy = new ArrayList<>(this.fangList);
+        dataItem.setFangList(fangListCopy);
+    }
+
+    // 深拷贝 yaoList
+    if (this.yaoList != null) {
+        List<String> yaoListCopy = new ArrayList<>(this.yaoList);
+        dataItem.setYaoList(yaoListCopy);
+    }
+
+    // 空值检查后设置 note
+    if (this.note != null) {
+        dataItem.setNote(this.note);
+    }
+
+    // 空值检查后设置 sectionvideo
+    if (this.sectionvideo != null) {
+        dataItem.setSectionvideo(this.sectionvideo);
+    }
+
+    // 空值检查后设置 attributedNote
+    if (this.attributedNote != null) {
+        dataItem.setAttributedNote(new SpannableStringBuilder(this.attributedNote));
+    }
+
+    // 空值检查后设置 attributedSectionVideo
+    if (this.attributedSectionVideo != null) {
+        dataItem.setAttributedSectionVideo(new SpannableStringBuilder(this.attributedSectionVideo));
+    }
+
+    return dataItem;
+}
+
 
     private void setPureText(String str) {
         this.text = str;

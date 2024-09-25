@@ -46,5 +46,66 @@ public class MingCiContent extends DataItem {
         this.name = name;
     }
 
+    @Override
+    public MingCiContent getCopy() {
+        MingCiContent dataItem = new MingCiContent();
+
+        // 空值检查后设置 pureText
+        if (getText() != null) {
+            dataItem.setText(this.getText());
+        }
+
+        // 空值检查后设置 attributedText
+        if (this.getAttributedText() != null) {
+            dataItem.setAttributedText(new SpannableStringBuilder(this.getAttributedText()));
+        }
+
+        // 深拷贝 fangList
+        if (getFangList() != null) {
+            List<String> fangListCopy = new ArrayList<>(this.getFangList());
+            dataItem.setFangList(fangListCopy);
+        }
+
+        // 深拷贝 yaoList
+        if (getYaoList() != null) {
+            List<String> yaoListCopy = new ArrayList<>(this.getYaoList());
+            dataItem.setYaoList(yaoListCopy);
+        }
+
+        // 空值检查后设置 note
+        if (getNote() != null) {
+            dataItem.setNote(this.getNote());
+        }
+
+        // 空值检查后设置 sectionvideo
+        if (this.getSectionvideo() != null) {
+            dataItem.setSectionvideo(this.getSectionvideo());
+        }
+
+        // 空值检查后设置 attributedNote
+        if (this.getAttributedNote() != null) {
+            dataItem.setAttributedNote(new SpannableStringBuilder(this.getAttributedNote()));
+        }
+
+        // 空值检查后设置 attributedSectionVideo
+        if (this.getAttributedSectionVideo() != null) {
+            dataItem.setAttributedSectionVideo(new SpannableStringBuilder(this.getAttributedSectionVideo()));
+        }
+
+        // 处理 getName() 可能返回 null 的情况
+        String name = getName();
+        if (name != null) {
+            dataItem.setName(name);
+        }
+
+        // 处理 getMingCiList() 可能返回 null 的情况
+        List<String> mingCiList = getMingCiList();
+        if (mingCiList != null) {
+            dataItem.setMingCiList(new ArrayList<>(mingCiList)); // 防止外部修改原始列表
+        }
+
+        return dataItem;
+    }
+
 
 }

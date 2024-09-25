@@ -166,6 +166,8 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter
 
         // 为sectionvideo设置点击监听，处理点击事件
         sectionvideo.setOnClickListener(v -> {
+            Boolean isClick = (Boolean) v.getTag();
+            if (isClick != null && isClick) return;
             toggleVisibility(sectionvideo, entity.getAttributed_child_sectionvideo());
         });
 
