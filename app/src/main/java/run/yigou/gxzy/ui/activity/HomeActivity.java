@@ -25,6 +25,7 @@ import run.yigou.gxzy.ui.fragment.HomeFragment;
 import run.yigou.gxzy.ui.fragment.MessageFragment;
 import run.yigou.gxzy.ui.fragment.MineFragment;
 import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
+import run.yigou.gxzy.ui.fragment.MyMsgFragment;
 
 /**
  * author : Android 轮子哥
@@ -85,7 +86,7 @@ public final class HomeActivity extends AppActivity
         mPagerAdapter = new FragmentPagerAdapter<>(this);
         mPagerAdapter.addFragment(BookCollectCaseFragment.newInstance());
         mPagerAdapter.addFragment(HomeFragment.newInstance());
-        mPagerAdapter.addFragment(MineFragment.newInstance());
+        mPagerAdapter.addFragment(MyMsgFragment.newInstance());
         // mPagerAdapter.addFragment(MessageFragment.newInstance());
         mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());
         // mPagerAdapter.addFragment(MineFragment.newInstance());

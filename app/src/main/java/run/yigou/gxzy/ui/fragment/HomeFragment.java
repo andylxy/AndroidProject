@@ -133,7 +133,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         switch (viewId) {
             case R.id.tv_home_hint:
             case R.id.iv_home_search:
-                //todo 搜索跳转
+                // todo 搜索跳转
                 // Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
                 // startActivity(intent);
                 break;

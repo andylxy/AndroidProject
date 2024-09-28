@@ -215,7 +215,7 @@ public class Show_Fan_Yao_MingCi {
                         sectionDataList = new ArrayList<>();
                     }
                     TipsNetHelper.createSingleDataCopy(dataItem, pattern);
-                    sectionDataList.add(dataItem);
+                    sectionDataList.add(dataItem.getCopy());
                 }
             }
 

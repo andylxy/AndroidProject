@@ -71,6 +71,7 @@ public class TipsNetHelper {
         Map<String, String> fangAliasDict = singletonNetData.getFangAliasDict();
 
         // 遍历数据以进行过滤
+        int index = 0;
         for (HH2SectionData sectionData : singletonNetData.getContent()) {
             List<DataItem> matchedItems = new ArrayList<>(); // 用于保存当前部分中的匹配项
             boolean sectionHasMatches = false;
@@ -78,6 +79,8 @@ public class TipsNetHelper {
             // 检查当前部分中的每一个数据项
             for (DataItem dataItem : sectionData.getData()) {
                 boolean itemMatched = false;
+                DataItem dataItem2=dataItem.getCopy();
+                dataItem2.setGroupPosition(index);
 
                 // 检查每个搜索词
                 for (String term : validSearchTerms) {
@@ -85,22 +88,23 @@ public class TipsNetHelper {
                     Pattern pattern = getPattern(sanitizedTerm);
 
                     // 检查数据项是否符合搜索条件
-                    if (matchDataItem(dataItem, pattern, sanitizedTerm, yaoAliasDict, fangAliasDict)) {
+                    if (matchDataItem(dataItem2, pattern, sanitizedTerm, yaoAliasDict, fangAliasDict)) {
                         itemMatched = true;
                         // 突出显示数据项中的匹配文本
-                        createSingleDataCopy(dataItem, pattern);
+                        createSingleDataCopy(dataItem2, pattern);
                         break; // 一旦匹配，继续下一个数据项
                     }
                 }
 
                 // 如果有任何搜索词匹配，则加入匹配项
                 if (itemMatched) {
-                    matchedItems.add(dataItem.getCopy());
+                    matchedItems.add(dataItem2);
                     sectionHasMatches = true;
                     searchKeyEntity.setSearchResTotalNum(searchKeyEntity.getSearchResTotalNum() + 1);
                 }
             }
-
+            // 更新索引
+            index++;
             // 如果有匹配项，则将其添加到过滤后的结果中
             if (sectionHasMatches) {
                 filteredData.add(new HH2SectionData(matchedItems, sectionData.getSection(), sectionData.getHeader()));
@@ -577,15 +581,15 @@ public class TipsNetHelper {
     }
 
     // 创建 MenuDialog 实例
-    public static MenuDialog.Builder menuDialogBuilder;
+   // public static MenuDialog.Builder menuDialogBuilder;
     // 同时初始化数据
-    private static List<String> data = Arrays.asList("拷贝内容"/*, "拷贝本章全部内容", "拷贝全部结果"*/);
+    private static List<String> data = Arrays.asList("拷贝内容", "跳转到本章内容"/*, "拷贝全部结果"*/);
 
     // 初始化方法
-    public static void initDialog(Context context) {
-        if (menuDialogBuilder == null) {
-            menuDialogBuilder = new MenuDialog.Builder(context).setList(data);
-        }
+    public static MenuDialog.Builder showListDialog(Context context) {
+
+            return new MenuDialog.Builder(context).setList(data);
+
     }
 
     /**

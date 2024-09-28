@@ -12,22 +12,16 @@ package run.yigou.gxzy.ui.tips.adapter;
 
 import android.content.Context;
 import android.text.SpannableStringBuilder;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
-import com.hjq.base.BaseDialog;
 import com.hjq.http.EasyLog;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
@@ -117,8 +111,8 @@ public class NoFooterAdapter extends GroupedListAdapter {
 
    void setLongClickForView(TextView view, SpannableStringBuilder spannableString ){
        view.setOnLongClickListener(v -> {
-           TipsNetHelper.initDialog(v.getContext());
-           TipsNetHelper.menuDialogBuilder
+
+           TipsNetHelper.showListDialog(v.getContext())
                    .setListener((dialog, position, string) -> {
                        // 增加空值检查
                        Context context = v.getContext();
@@ -136,8 +130,6 @@ public class NoFooterAdapter extends GroupedListAdapter {
 
                    })
                    .show();
-           TipsNetHelper.menuDialogBuilder
-                   .setListener(null);
            return true;
        });
    }

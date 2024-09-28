@@ -101,6 +101,7 @@ public class GroupModel {
             child.setAttributed_child_sectionnote(dataItem.getAttributedNote());
         if (dataItem.getAttributedSectionVideo() != null)
             child.setAttributed_child_sectionvideo(dataItem.getAttributedSectionVideo());
+        child.setGroupPosition(dataItem.getGroupPosition());
         return child;
     }
 

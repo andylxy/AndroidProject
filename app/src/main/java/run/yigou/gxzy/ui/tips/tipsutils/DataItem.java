@@ -41,7 +41,15 @@ public class DataItem {
     private String sectionvideo;
     private SpannableStringBuilder attributedNote;
     private SpannableStringBuilder attributedSectionVideo;
+    private int groupPosition;
 
+    public int getGroupPosition() {
+        return groupPosition;
+    }
+
+    public void setGroupPosition(int groupPosition) {
+        this.groupPosition = groupPosition;
+    }
     public SpannableStringBuilder getAttributedSectionVideo() {
         if (this.attributedSectionVideo != null) {
             return this.attributedSectionVideo;

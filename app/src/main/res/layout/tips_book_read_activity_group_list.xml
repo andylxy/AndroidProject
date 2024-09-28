@@ -80,11 +80,18 @@ android:animateLayoutChanges="true">
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         layout="@layout/tips_fragment_search_key" />
-<androidx.recyclerview.widget.RecyclerView
-    android:id="@+id/tips_book_read_activity_group_list"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#D3D3D3"
-    android:layout_below="@+id/include_tips_book_read"/>
+
+    <com.donkingliang.groupedadapter.widget.StickyHeaderLayout
+        android:id="@+id/sticky_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/include_tips_book_read">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tips_book_read_activity_group_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#D3D3D3"
+            android:layout_below="@+id/sticky_layout"/>
+    </com.donkingliang.groupedadapter.widget.StickyHeaderLayout>
 </RelativeLayout>
 

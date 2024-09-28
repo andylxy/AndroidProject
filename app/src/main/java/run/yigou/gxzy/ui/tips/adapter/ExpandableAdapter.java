@@ -22,6 +22,8 @@ import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import com.hjq.http.EasyLog;
 
+import run.yigou.gxzy.action.ToastAction;
+
 import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
@@ -39,7 +41,7 @@ import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
  * 这种列表类似于{@link ExpandableListView}的效果。
  * 这里我把列表的组尾去掉是为了效果上更像ExpandableListView。
  */
-public class ExpandableAdapter extends GroupedRecyclerViewAdapter
+public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements ToastAction
         // implements View.OnLongClickListener ,View.OnClickListener
 {
 
@@ -50,7 +52,7 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter
     @SuppressLint("NotifyDataSetChanged")
     public void setmGroups(ArrayList<ExpandableGroupEntity> mGroups) {
         this.mGroups = mGroups;
-       // notifyDataSetChanged();
+        // notifyDataSetChanged();
     }
 
     private ArrayList<ExpandableGroupEntity> mGroups;
@@ -126,7 +128,6 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter
         TextView sectiontext = holder.get(R.id.tv_sectiontext);
         TextView sectionnote = holder.get(R.id.tv_sectionnote);
         TextView sectionvideo = holder.get(R.id.tv_sectionvideo);
-
         // 默认隐藏note和video的TextView
         sectionnote.setVisibility(View.GONE);
         sectionvideo.setVisibility(View.GONE);
@@ -145,9 +146,9 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter
         sectiontext.setText(entity.getAttributed_child_sectiontext());
         sectiontext.setMovementMethod(LocalLinkMovementMethod.getInstance());
         // 设置长按监听，弹出复制对话框
-        setLongClickForView(sectiontext, entity.getAttributed_child_sectiontext());
-        setLongClickForView(sectionnote, entity.getAttributed_child_sectionnote());
-        setLongClickForView(sectionvideo, entity.getAttributed_child_sectionvideo());
+        setLongClickForView(sectiontext, entity.getAttributed_child_sectiontext(), entity.getGroupPosition());
+        setLongClickForView(sectionnote, entity.getAttributed_child_sectionnote(), entity.getGroupPosition());
+        setLongClickForView(sectionvideo, entity.getAttributed_child_sectionvideo(), entity.getGroupPosition());
 
         // 为sectiontext设置点击监听，处理点击事件
         sectiontext.setOnClickListener(v -> {
@@ -172,49 +173,61 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter
         });
 
     }
+
     private void toggleVisibility(TextView textView, SpannableStringBuilder content) {
-    // 增加对content的空值检查
-    if (content == null) {
-        return;
+        // 增加对content的空值检查
+        if (content == null) {
+            return;
+        }
+
+        String contentString = content.toString();
+
+        // 简化逻辑
+        if (textView.getVisibility() == View.VISIBLE) {
+            textView.setVisibility(View.GONE);
+        } else if (!contentString.isEmpty()) { // 判断是否为空字符串
+            textView.setVisibility(View.VISIBLE);
+        }
     }
 
-    String contentString = content.toString();
 
-    // 简化逻辑
-    if (textView.getVisibility() == View.VISIBLE) {
-        textView.setVisibility(View.GONE);
-    } else if (!contentString.isEmpty()) { // 判断是否为空字符串
-        textView.setVisibility(View.VISIBLE);
-    }
-}
-
-
-    void setLongClickForView(TextView view, SpannableStringBuilder spannableString ){
+    void setLongClickForView(TextView view, SpannableStringBuilder spannableString, int groupPosition) {
         view.setOnLongClickListener(v -> {
-            TipsNetHelper.initDialog(v.getContext());
-            TipsNetHelper.menuDialogBuilder
-                    .setListener((dialog, position, string) -> {
-                        // 增加空值检查
-                        Context context = v.getContext();
-                        if (context != null) {
-                            if (spannableString != null) {
-                                TipsNetHelper.copyToClipboard(context, spannableString.toString());
-                            } else {
-                                // 可以记录日志或提示用户
-                                EasyLog.print("CopyError", spannableString + " is null");
-                            }
-                        } else {
-                            // 可以记录日志或提示用户
-                            EasyLog.print("CopyError", "Context is null in " );
-                        }
 
+            TipsNetHelper.showListDialog(v.getContext())
+                    .setListener((dialog, position, string) -> {
+                        Context context = v.getContext();
+                        if (string.equals("拷贝内容")) {
+                            if (context != null) {
+                                if (spannableString != null) {
+                                    TipsNetHelper.copyToClipboard(context, spannableString.toString());
+                                } else {
+                                    EasyLog.print("CopyError", "spannableString is null");
+                                    try {
+                                        toast("内容为空，无法拷贝");
+                                    } catch (Exception e) {
+                                        EasyLog.print("CopyError", "Failed to show Toast: " + e.getMessage());
+                                    }
+                                }
+                            } else {
+                                EasyLog.print("CopyError", "Context is null");
+                                try {
+                                    toast("上下文无效，无法拷贝");
+                                } catch (Exception e) {
+                                    EasyLog.print("CopyError", "Failed to show Toast: " + e.getMessage());
+                                }
+                            }
+                        } else if (string.equals("跳转到本章内容")) {
+                            if (mOnJumpSpecifiedItemListener != null && groupPosition > 0) {
+                                mOnJumpSpecifiedItemListener.onJumpSpecifiedItem(groupPosition, -1);
+                            }
+                        }
                     })
                     .show();
-            TipsNetHelper.menuDialogBuilder.setListener(null);
+
             return true;
         });
     }
-
 
 
     /**
@@ -278,5 +291,19 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter
         }
     }
 
+    private OnJumpSpecifiedItemListener mOnJumpSpecifiedItemListener;
+
+    public interface OnJumpSpecifiedItemListener {
+        void onJumpSpecifiedItem(int groupPosition, int childPosition);
+    }
+
+    /**
+     * 设置子项长按事件
+     *
+     * @param listener
+     */
+    public void setOnJumpSpecifiedItemListener(OnJumpSpecifiedItemListener listener) {
+        mOnJumpSpecifiedItemListener = listener;
+    }
 
 }

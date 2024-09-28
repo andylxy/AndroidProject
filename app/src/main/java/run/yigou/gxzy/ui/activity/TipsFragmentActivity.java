@@ -8,15 +8,14 @@ import android.widget.RadioGroup;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.hjq.http.EasyLog;
-
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.manager.ReferenceManager;
 import run.yigou.gxzy.ui.fragment.TipsBookNetReadFragment;
 import run.yigou.gxzy.ui.fragment.TipsSettingFragment;
-import run.yigou.gxzy.ui.fragment.TipsUnitFragment;
+import run.yigou.gxzy.ui.fragment.TipsTemplateUnitYaoFragment;
+import run.yigou.gxzy.ui.fragment.TipsUnitShowFragment;
 import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
 public final class TipsFragmentActivity extends AppActivity {
@@ -45,7 +44,8 @@ public final class TipsFragmentActivity extends AppActivity {
     protected void initView() {
         // 添加引用
         ReferenceManager.getInstance().addReference(REFERENCE_KEY, this);
-
+        // 注册事件
+        // XEventBus.getDefault().register(this);
         try {
             // 从意图中获取书籍ID
             int bookId = getIntent().getIntExtra("bookId", 0);
@@ -60,7 +60,7 @@ public final class TipsFragmentActivity extends AppActivity {
 
             // 创建主要显示页实例
             TipsBookNetReadFragment fragment = new TipsBookNetReadFragment();
-            TipsUnitFragment tipsUnitFragment = new TipsUnitFragment();
+            TipsUnitShowFragment tipsUnitShowFragment = new TipsUnitShowFragment();
             TipsSettingFragment tipsSettingFragment = new TipsSettingFragment();
 
             // 初始化 RadioGroup
@@ -74,7 +74,7 @@ public final class TipsFragmentActivity extends AppActivity {
                         replaceFragment(fragment);
                         break;
                     case UNIT_TAB_ID:
-                        replaceFragment(tipsUnitFragment);
+                        replaceFragment(tipsUnitShowFragment);
                         break;
                     case SETTINGS_TAB_ID:
                         replaceFragment(tipsSettingFragment);
@@ -128,6 +128,15 @@ public final class TipsFragmentActivity extends AppActivity {
         // 使用沉浸式状态栏
         return !super.isStatusBarEnabled();
     }
+//    @Subscribe(priority = 2)
+//    public void onShowUpdateNotificationEvent(final ShowUpdateNotificationEvent event) {
+//        runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                EasyLog.print(REFERENCE_KEY + "Thread is " + Thread.currentThread().getName() + " Thread, ShowUpdateNotificationEvent num=" + event.isUpdateNotification());
+//            }
+//        });
+//    }
 
     @Override
     protected void onDestroy() {
@@ -135,10 +144,12 @@ public final class TipsFragmentActivity extends AppActivity {
         if (radioGroup != null && tabCheckedChangeListener != null) {
             // 在 Activity 销毁时注销 RadioGroup 的监听器，避免内存泄漏
             radioGroup.setOnCheckedChangeListener(null);
+            tabCheckedChangeListener =null;
         }
          // 清除引用
         ReferenceManager.getInstance().removeReference(REFERENCE_KEY);
-        EasyLog.print(REFERENCE_KEY + " onDestroy");
+        //  EasyLog.print(REFERENCE_KEY + " onDestroy");
        // Tips_Single_Data.getInstance().curActivity = null;
+       // XEventBus.getDefault().unregister(this);
     }
 }

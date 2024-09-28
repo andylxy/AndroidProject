@@ -55,23 +55,6 @@ android:animateLayoutChanges="true">
             android:layout_height="match_parent"
             android:layout_marginRight="@dimen/sp_38"
             android:singleLine="true"/>
-        <LinearLayout
-            android:gravity="center"
-            android:layout_gravity="center"
-            android:id="@+id/selectbtnswrapper"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <Button
-                android:textSize="@dimen/sp_14"
-                android:textColor="#ffffff"
-                android:id="@+id/copyitemsbtn"
-                android:background="@drawable/round_win_black_black"
-                android:layout_width="90dp"
-                android:layout_height="match_parent"
-                android:layout_margin="8dp"
-                android:text="拷贝"/>
-        </LinearLayout>
     </FrameLayout>
 </RelativeLayout>
 </RelativeLayout>

@@ -7,11 +7,13 @@ import android.os.Bundle;
 import com.hjq.widget.layout.SettingBar;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.SwitchButton;
+import com.lucas.xbus.XEventBus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
@@ -62,6 +64,8 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         sb_setting_jk = findViewById(R.id.sb_setting_jk);
         sb_setting_sh_switch = findViewById(R.id.sb_setting_sh_switch);
         sb_setting_jk_switch = findViewById(R.id.sb_setting_jk_switch);
+        // 注册事件
+        //XEventBus.getDefault().register(this);
     }
 
     @Override
@@ -149,6 +153,14 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         savePreferences();
         //通知显示已经变更
        tipsSingleData.shanghanShowUpdateNotification();
+       // XEventBus.getDefault().post(new ShowUpdateNotificationEvent().setUpdateNotification(true));
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // 注销事件
+        //XEventBus.getDefault().unregister(this);
     }
 }

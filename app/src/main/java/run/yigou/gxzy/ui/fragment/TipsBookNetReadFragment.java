@@ -10,6 +10,8 @@
 
 package run.yigou.gxzy.ui.fragment;
 
+import static run.yigou.gxzy.utils.ThreadUtil.runOnUiThread;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -28,17 +30,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
+
 import com.hjq.http.EasyLog;
 import com.hjq.widget.view.ClearEditText;
+import com.lucas.annotations.Subscribe;
+import com.lucas.xbus.XEventBus;
 
 import java.util.ArrayList;
 
+import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.manager.ReferenceManager;
 import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
@@ -58,8 +63,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     private Button tipsBtnSearch;
 
     private int showShanghan;
-    private int showJinkui ;
-
+    private int showJinkui;
+    LinearLayoutManager layoutManager;
     public TipsBookNetReadFragment() {
     }
 
@@ -80,14 +85,17 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     @Override
     protected void initView() {
         rvList = findViewById(R.id.tips_book_read_activity_group_list);
-        rvList.setLayoutManager(new LinearLayoutManager(getContext()));
+         layoutManager = new LinearLayoutManager(getContext());
+        rvList.setLayoutManager(layoutManager);
         clearEditText = findViewById(R.id.include_tips_book_read).findViewById(R.id.searchEditText);
         tipsBtnSearch = findViewById(R.id.include_tips_book_read).findViewById(R.id.tips_btn_search);
         tipsBtnSearch.setOnClickListener(this);
         numTips = findViewById(R.id.include_tips_book_read).findViewById(R.id.numTips);
         clearEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
@@ -102,9 +110,13 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                     Log.d("clearEditText", "onTextChanged: 2");
                 }
             }
+
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
+        // 注册事件
+        // XEventBus.getDefault().register(this);
     }
 
     /**
@@ -120,7 +132,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         //获取指定书籍数据
         singletonNetData = Tips_Single_Data.getInstance().getBookIdContent(bookId);
         //兼容处理宋版伤寒,
-        if(bookId== AppConst.ShangHanNo) {
+        if (bookId == AppConst.ShangHanNo) {
             // 默认初始化设置  宋版伤寒,金匮显示
             // 从 SharedPreferences 中读取设置值
             SharedPreferences sharedPreferences = AppApplication.application.getSharedPreferences("shanghan3.1", Context.MODE_PRIVATE);
@@ -180,15 +192,47 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 }
             }
         });
+        //跳转指定章节
+        adapter.setOnJumpSpecifiedItemListener(new ExpandableAdapter.OnJumpSpecifiedItemListener() {
+            @Override
+            public void onJumpSpecifiedItem(int groupPosition, int childPosition) {
+                //   reListAdapter(true, false);
+                clearEditText.setText("");
+                numTips.setText("");
+                layoutManager.scrollToPositionWithOffset(groupPosition, 0);
+                adapter.expandGroup(groupPosition, true);
+//                getHandler().postDelayed(()->{
+//                   // rvList.scrollToPosition(groupPosition);
+//                    //scrollToPosition(position);
+//                    //rvList.smoothScrollToPosition(groupPosition);
+//                    layoutManager.scrollToPositionWithOffset(groupPosition, 0);
+//                    adapter.expandGroup(groupPosition, true);
+//                }, 50);
+            }
+        });
         rvList.setAdapter(adapter);
     }
+
+
+//    @Subscribe(priority = 1)
+//    public void onShowUpdateNotificationEvent(final ShowUpdateNotificationEvent event) {
+//        runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//              EasyLog.print("TipsBookNetReadFragment ==>  Thread is " + Thread.currentThread().getName() + " Thread, ShowUpdateNotificationEvent num=" + event.isUpdateNotification());
+//            }
+//        });
+//    }
+
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         singletonNetData.setOnContentShowStatusNotification(null);
         singletonNetData.setOnContentUpdateListener(null);
-        //singletonNetData =null;
+        adapter.setOnJumpSpecifiedItemListener(null);
+//        XEventBus.getDefault().unregister(this);
+//        EasyLog.print("TipsBookNetReadFragment ==>onClick");
     }
 
 

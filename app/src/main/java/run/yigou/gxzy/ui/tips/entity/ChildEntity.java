@@ -21,6 +21,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
  */
 public class ChildEntity {
 
+
     private String child_sectiontext;
     private String child_sectionnote;
     private String child_sectionvideo;
@@ -28,7 +29,15 @@ public class ChildEntity {
     private SpannableStringBuilder attributed_child_sectionnote;
     private SpannableStringBuilder attributed_child_sectionvideo;
     private SpannableStringBuilder spannableChild;
+    private int groupPosition;
 
+    public int getGroupPosition() {
+        return groupPosition;
+    }
+
+    public void setGroupPosition(int groupPosition) {
+        this.groupPosition = groupPosition;
+    }
     public ChildEntity(String child_sectiontext) {
         this.child_sectiontext = child_sectiontext;
     }
