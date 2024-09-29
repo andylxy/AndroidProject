@@ -12,6 +12,7 @@ package run.yigou.gxzy.ui.tips.tipsutils;
 
 import android.text.SpannableStringBuilder;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.List;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
 
-public class DataItem {
+public class DataItem implements Serializable {
     /**
      * 记录序号
      */

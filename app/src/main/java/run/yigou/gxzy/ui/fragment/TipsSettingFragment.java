@@ -5,21 +5,13 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.hjq.widget.layout.SettingBar;
-import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.SwitchButton;
-import com.lucas.xbus.XEventBus;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.ui.adapter.TipsUnitFragmentAdapter;
 import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
 import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
@@ -91,17 +83,17 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
 
         if (getShowShanghan() == AppConst.Show_Shanghan_AllSongBan) {
             sb_setting_sh_switch.setChecked(true);
-            sb_setting_sh.setLeftText("显示完整宋板伤寒论");
+            sb_setting_sh.setLeftText("完整显示伤寒论・宋板");
         } else {
             sb_setting_sh_switch.setChecked(false);
-            sb_setting_sh.setLeftText("只显示398条辨");
+            sb_setting_sh.setLeftText("显示398条辨伤寒论・宋板");
         }
         if (getShowJinkui() ==AppConst.Show_Jinkui_Default) {
             sb_setting_jk_switch.setChecked(true);
-            sb_setting_jk.setLeftText("显示默认版金匮要略");
+            sb_setting_jk.setLeftText("默认显示金匮要略・宋板");
         } else {
             sb_setting_jk_switch.setChecked(false);
-            sb_setting_jk.setLeftText("不显示金匮要略");
+            sb_setting_jk.setLeftText("不显示金匮要略・宋板");
         }
     }
 

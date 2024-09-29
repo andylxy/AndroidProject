@@ -33,7 +33,7 @@ android {
     // Apk 签名的那些事：https://www.jianshu.com/p/a1f8e5896aa2
     signingConfigs {
         config {
-            storeFile file('E:\\app\\jks\\ctwhzy.jks')
+            storeFile file('E:/app/AndroidProject/jks/ctwhzy.jks')
             storePassword 'andyxiaoyang1A'
             keyAlias 'ctwhzy'
             keyPassword 'andyxiaoyang1A'
@@ -144,7 +144,7 @@ dependencies {
     // 友盟封装
     implementation project(':library:umeng')
     // 轻量事件框架：https://github.com/LucasXu01/XBus
-    implementation project(':library:xbus')
+   // implementation project(':library:xbus')
 
     //安卓设备唯一标识解决方案 https://github.com/gzu-liyujiang/Android_CN_OAID
     //implementation 'com.github.gzu-liyujiang:Android_CN_OAID:4.2.5'

@@ -31,10 +31,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 
-import com.hjq.http.EasyLog;
 import com.hjq.widget.view.ClearEditText;
-import com.lucas.annotations.Subscribe;
-import com.lucas.xbus.XEventBus;
+
 
 import java.util.ArrayList;
 
