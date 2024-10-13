@@ -4,11 +4,17 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Objects;
 import java.util.Random;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class StringHelper {
+
+
+    public static  String getUuid() {
+        return UUID.randomUUID().toString();
+    }
 
     public static String substring(String str,String sub) {
 

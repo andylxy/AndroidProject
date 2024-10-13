@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
@@ -21,7 +22,10 @@ import run.yigou.gxzy.ui.tips.widget.Tips_Little_Window;
 
 
 public class Tips_Single_Data {
-    private static Tips_Single_Data tips_Single_Data;
+   // private static Tips_Single_Data tips_Single_Data;
+
+    private static volatile Tips_Single_Data instance;
+
     private Map<Integer, Singleton_Net_Data> bookIdContent;
     private List<String> allYao;
     private int curBookId;
@@ -29,12 +33,12 @@ public class Tips_Single_Data {
     public List<String> getAllYao() {
         return this.allYao;
     }
-    public Map<Integer, BookInfoNav.Bean.TabNav> getNavTabMap() {
+    public Map<Integer, TabNavBody> getNavTabMap() {
         if (NavTabMap == null) NavTabMap = new HashMap<>();
         return NavTabMap;
     }
 
-    private Map<Integer, BookInfoNav.Bean.TabNav> NavTabMap;
+    private Map<Integer, TabNavBody> NavTabMap;
     /**
      * 获取当前打开书本ID
      *
@@ -235,15 +239,29 @@ public class Tips_Single_Data {
      *
      * @return 单例对象
      */
+//    public static Tips_Single_Data getInstance() {
+//        if (tips_Single_Data == null) {
+//            tips_Single_Data = new Tips_Single_Data();
+//        }
+//        return tips_Single_Data;
+//    }
+
     public static Tips_Single_Data getInstance() {
-        if (tips_Single_Data == null) {
-            tips_Single_Data = new Tips_Single_Data();
+        if (instance == null) {
+            synchronized (Tips_Single_Data.class) {
+                if (instance == null) {
+                    instance = new Tips_Single_Data();
+                }
+            }
         }
-        return tips_Single_Data;
+        return instance;
     }
 
+
+
+
     public void onDestroy() {
-        tips_Single_Data = null;
+        instance = null;
         curSingletonData=null;
         tipsLittleWindowStack.clear();
         tipsLittleWindowStack=null;

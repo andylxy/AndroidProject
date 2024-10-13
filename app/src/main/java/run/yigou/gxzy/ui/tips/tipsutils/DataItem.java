@@ -14,11 +14,7 @@ import android.text.SpannableStringBuilder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Fang;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
 
 public class DataItem implements Serializable {
     /**
@@ -43,6 +39,24 @@ public class DataItem implements Serializable {
     private SpannableStringBuilder attributedNote;
     private SpannableStringBuilder attributedSectionVideo;
     private int groupPosition;
+    private long signatureId;
+    private String signature;
+
+    public long getSignatureId() {
+        return signatureId;
+    }
+
+    public void setSignatureId(long signatureId) {
+        this.signatureId = signatureId;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
 
     public int getGroupPosition() {
         return groupPosition;

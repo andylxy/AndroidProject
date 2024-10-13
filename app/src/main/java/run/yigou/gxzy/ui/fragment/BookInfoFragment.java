@@ -26,6 +26,7 @@ import java.util.List;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
+import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.ui.activity.BookInfoActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
@@ -46,13 +47,13 @@ public final class BookInfoFragment extends TitleBarFragment<AppActivity>
         return new BookInfoFragment();
     }
 
-    public static BookInfoFragment newInstance(List<BookInfoNav.Bean.TabNav> navList) {
+    public static BookInfoFragment newInstance(List<TabNavBody> navList) {
         BookInfoFragment bookInfoFragment = new BookInfoFragment();
         bookInfoFragment.mNavList = navList;
         return bookInfoFragment;
     }
 
-    private List<BookInfoNav.Bean.TabNav> mNavList;
+    private List<TabNavBody> mNavList;
     private SmartRefreshLayout mRefreshLayout;
     private WrapRecyclerView mRecyclerView;
 
@@ -86,7 +87,7 @@ public final class BookInfoFragment extends TitleBarFragment<AppActivity>
     /**
      * 模拟数据
      */
-    private List<BookInfoNav.Bean.TabNav> analogData() {
+    private List<TabNavBody> analogData() {
 //        List<String> data = new ArrayList<>();
 //        for (int i = mAdapter.getCount(); i < mAdapter.getCount() + 20; i++) {
 //            data.add("我是第" + i + "条目");

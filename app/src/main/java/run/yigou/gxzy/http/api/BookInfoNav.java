@@ -34,24 +34,24 @@ public final class BookInfoNav implements IRequestApi {
         return "BookInfo/getNav";
     }
 
-    public final static class Bean {
-        private String Id;
-        private String Name;
-        private List<TabNav> NavList;
-
-        public String getId() {
-            return Id;
-        }
-
-        public String getName() {
-            return Name;
-        }
-
-        public List<TabNav> getNavList() {
-            return NavList;
-        }
-
-        public final static class TabNav extends NavItem {
-        }
-    }
+//    public final static class Bean {
+//        private int Id;
+//        private String Name;
+//        private List<TabNav> NavList;
+//
+//        public int getId() {
+//            return Id;
+//        }
+//
+//        public String getName() {
+//            return Name;
+//        }
+//
+//        public List<TabNav> getNavList() {
+//            return NavList;
+//        }
+//
+//        public final static class TabNav extends NavItem {
+//        }
+//    }
 }

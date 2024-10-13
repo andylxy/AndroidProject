@@ -1,11 +1,12 @@
 package run.yigou.gxzy.greendao;
 
 
-import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.greendao.gen.DaoMaster;
 import run.yigou.gxzy.greendao.gen.DaoSession;
 import run.yigou.gxzy.greendao.util.MySQLiteOpenHelper;
+import run.yigou.gxzy.other.AppConfig;
 
 /**
  *  作者:  zhs
@@ -29,7 +30,7 @@ public class GreenDaoManager {
     }
 
     public GreenDaoManager(){
-        mySQLiteOpenHelper = new MySQLiteOpenHelper(AppApplication.getmContext(), "read" , null);
+        mySQLiteOpenHelper = new MySQLiteOpenHelper(AppApplication.getmContext(), AppConst.dbName, null, AppConfig.isDebug());
         daoMaster = new DaoMaster(mySQLiteOpenHelper.getWritableDatabase());
         daoSession = daoMaster.newSession();
     }

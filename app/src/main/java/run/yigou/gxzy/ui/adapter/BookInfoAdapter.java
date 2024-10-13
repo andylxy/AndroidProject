@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
+import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.other.AppConfig;
@@ -33,7 +34,7 @@ import run.yigou.gxzy.other.AppConfig;
  *  描述:
  *
 */
-public final class BookInfoAdapter extends AppAdapter<BookInfoNav.Bean.TabNav> {
+public final class BookInfoAdapter extends AppAdapter<TabNavBody> {
 
     public BookInfoAdapter(Context context) {
         super(context);
@@ -67,7 +68,7 @@ public final class BookInfoAdapter extends AppAdapter<BookInfoNav.Bean.TabNav> {
         @Override
         public void onBindView(int position) {
             //mTextView.setText(getItem(position));
-            BookInfoNav.Bean.TabNav item = null;
+           TabNavBody item = null;
             if (getData() != null) {
                 item = getData().get(position);
             }

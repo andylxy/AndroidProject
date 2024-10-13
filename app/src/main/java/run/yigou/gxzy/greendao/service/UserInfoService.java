@@ -14,9 +14,7 @@ import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.List;
 
-import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.UserInfo;
-import run.yigou.gxzy.greendao.gen.BookDao;
 import run.yigou.gxzy.greendao.gen.UserInfoDao;
 
 /**
@@ -45,15 +43,15 @@ public class UserInfoService extends BaseService<UserInfo,UserInfoDao> {
     }
 
     public UserInfo getLoginUserInfo() {
-         if (mQueryBuilder.list() .size() ==1){
-             return mQueryBuilder.list().get(0);
+         if (getQueryBuilder().list() .size() ==1){
+             return getQueryBuilder().list().get(0);
          }else return null;
     }
 
     public UserInfo findUserInfoByLoginAccount(String account){
         UserInfo userInfo = null;
         try {
-            QueryBuilder<UserInfo> userInfoQueryBuilder = mQueryBuilder.where(UserInfoDao.Properties.UserLoginAccount.eq(account));
+            QueryBuilder<UserInfo> userInfoQueryBuilder = getQueryBuilder().where(UserInfoDao.Properties.UserLoginAccount.eq(account));
             List<UserInfo> userInfoList = userInfoQueryBuilder.list(); //查出当前对应的数据
             if (userInfoList.size() == 1) {
                 userInfo = userInfoList.get(0);
@@ -66,7 +64,7 @@ public class UserInfoService extends BaseService<UserInfo,UserInfoDao> {
 
     @Override
     public long addEntity(UserInfo entity) {
-        entity.setId(getUuid);
+        entity.setId(getUUID());
         return super.addEntity(entity);
     }
 }

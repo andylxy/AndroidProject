@@ -15,6 +15,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 
 
 public class Yao extends DataItem {
+
     String name;
 
     public String getName() {
@@ -24,4 +25,5 @@ public class Yao extends DataItem {
     public void setName(String name) {
         this.name = name;
     }
+
 }

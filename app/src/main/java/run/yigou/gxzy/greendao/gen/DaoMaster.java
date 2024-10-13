@@ -21,18 +21,34 @@ public class DaoMaster extends AbstractDaoMaster {
 
     /** Creates underlying database table using DAOs. */
     public static void createAllTables(Database db, boolean ifNotExists) {
+        BeiMingCiDao.createTable(db, ifNotExists);
         BookDao.createTable(db, ifNotExists);
+        BookChapterDao.createTable(db, ifNotExists);
+        BookChapterBodyDao.createTable(db, ifNotExists);
         ChapterDao.createTable(db, ifNotExists);
         SearchHistoryDao.createTable(db, ifNotExists);
+        TabNavDao.createTable(db, ifNotExists);
+        TabNavBodyDao.createTable(db, ifNotExists);
         UserInfoDao.createTable(db, ifNotExists);
+        YaoFangDao.createTable(db, ifNotExists);
+        YaoFangBodyDao.createTable(db, ifNotExists);
+        ZhongYaoDao.createTable(db, ifNotExists);
     }
 
     /** Drops underlying database table using DAOs. */
     public static void dropAllTables(Database db, boolean ifExists) {
+        BeiMingCiDao.dropTable(db, ifExists);
         BookDao.dropTable(db, ifExists);
+        BookChapterDao.dropTable(db, ifExists);
+        BookChapterBodyDao.dropTable(db, ifExists);
         ChapterDao.dropTable(db, ifExists);
         SearchHistoryDao.dropTable(db, ifExists);
+        TabNavDao.dropTable(db, ifExists);
+        TabNavBodyDao.dropTable(db, ifExists);
         UserInfoDao.dropTable(db, ifExists);
+        YaoFangDao.dropTable(db, ifExists);
+        YaoFangBodyDao.dropTable(db, ifExists);
+        ZhongYaoDao.dropTable(db, ifExists);
     }
 
     /**
@@ -51,10 +67,18 @@ public class DaoMaster extends AbstractDaoMaster {
 
     public DaoMaster(Database db) {
         super(db, SCHEMA_VERSION);
+        registerDaoClass(BeiMingCiDao.class);
         registerDaoClass(BookDao.class);
+        registerDaoClass(BookChapterDao.class);
+        registerDaoClass(BookChapterBodyDao.class);
         registerDaoClass(ChapterDao.class);
         registerDaoClass(SearchHistoryDao.class);
+        registerDaoClass(TabNavDao.class);
+        registerDaoClass(TabNavBodyDao.class);
         registerDaoClass(UserInfoDao.class);
+        registerDaoClass(YaoFangDao.class);
+        registerDaoClass(YaoFangBodyDao.class);
+        registerDaoClass(ZhongYaoDao.class);
     }
 
     public DaoSession newSession() {

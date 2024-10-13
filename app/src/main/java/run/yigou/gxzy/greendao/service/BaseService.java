@@ -4,23 +4,22 @@ import android.database.Cursor;
 
 import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.database.Database;
-import org.greenrobot.greendao.query.QueryBuilder;
 
+import org.greenrobot.greendao.query.QueryBuilder;
+import org.greenrobot.greendao.query.WhereCondition;
+
+import java.util.ArrayList;
 import java.util.UUID;
 
 import run.yigou.gxzy.greendao.GreenDaoManager;
-import run.yigou.gxzy.greendao.entity.Book;
-import run.yigou.gxzy.greendao.entity.UserInfo;
 import run.yigou.gxzy.greendao.gen.DaoSession;
-import run.yigou.gxzy.greendao.gen.UserInfoDao;
 
 public abstract class BaseService<T, TDao extends AbstractDao<T, ?>> {
 
     public DaoSession daoSession = GreenDaoManager.getInstance().getSession();
-    protected QueryBuilder<T> mQueryBuilder = daoSession.queryBuilder(getEntityClass());
     protected Database mDatabase;
     protected String tableName;
-    protected String getUuid= UUID.randomUUID().toString();
+
     // 定义一个抽象方法，用于在子类中实现获取实体类的 Class 对象
     protected abstract Class<T> getEntityClass();
 
@@ -66,6 +65,28 @@ public abstract class BaseService<T, TDao extends AbstractDao<T, ?>> {
     }
 
     /**
+     * 返回所有记录
+     *
+     * @return
+     */
+    public ArrayList<T> findAll() {
+        //  String sql = "select * from table order by create_date desc";
+        return  (ArrayList<T>) getQueryBuilder().list();
+
+    }
+
+    /**
+     * 返回指定条件的记录
+     *
+     * @return
+     */
+    public ArrayList<T> find(WhereCondition cond, WhereCondition... condMore) {
+        //  String sql = "select * from table order by create_date desc";
+        // 清空查询条件
+        return  (ArrayList<T>) getQueryBuilder().where(cond, condMore).list();
+
+    }
+    /**
      * 通过SQL查找
      *
      * @param sql
@@ -94,5 +115,13 @@ public abstract class BaseService<T, TDao extends AbstractDao<T, ?>> {
         Cursor cursor = daoSession.getDatabase().rawQuery(sql, selectionArgs);
     }
 
+
+    public String getUUID() {
+        return  UUID.randomUUID().toString();
+    }
+
+    public QueryBuilder<T> getQueryBuilder() {
+        return daoSession.queryBuilder(getEntityClass());
+    }
 
 }

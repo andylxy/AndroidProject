@@ -3,14 +3,11 @@ package run.yigou.gxzy.greendao.service;
 import android.database.Cursor;
 
 
-import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-import run.yigou.gxzy.greendao.GreenDaoManager;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.gen.BookDao;
 import run.yigou.gxzy.utils.StringHelper;
@@ -79,7 +76,7 @@ public class BookService extends BaseService<Book,BookDao> {
     public List<Book> getAllBooks() {
         //查出当前对应的数据
        // List<Book> bookList = mBookQueryBuilder.list();
-        return mQueryBuilder.list();
+        return getQueryBuilder().list();
     }
 
     /**
@@ -89,7 +86,7 @@ public class BookService extends BaseService<Book,BookDao> {
      */
     public void addBook(Book book) {
         book.setSortCode(countBookTotalNum() + 1);
-        book.setId(getUuid);
+        book.setId(getUUID());
         addEntity(book);
     }
 
@@ -124,7 +121,7 @@ public class BookService extends BaseService<Book,BookDao> {
     public Book findBookByAuthorAndName(String bookName, String author) {
         Book book = null;
         try {
-            QueryBuilder<Book> bookQueryBuilder = mQueryBuilder.whereOr(BookDao.Properties.Name.eq(bookName), BookDao.Properties.Author.eq(author)).orderAsc(BookDao.Properties.Name);
+            QueryBuilder<Book> bookQueryBuilder = getQueryBuilder().whereOr(BookDao.Properties.Name.eq(bookName), BookDao.Properties.Author.eq(author)).orderAsc(BookDao.Properties.Name);
             //List<Book> bookList = bookQueryBuilder.list();
             // 查出当前对应的数据
             if (bookQueryBuilder.count()>0 ) {
@@ -168,7 +165,7 @@ public class BookService extends BaseService<Book,BookDao> {
         int num = 0;
         try {
             // 查出所有的数据
-            List<Book> bookList = mQueryBuilder.list();
+            List<Book> bookList = getQueryBuilder().list();
             num = bookList.size();
         } catch (Exception e) {
             e.printStackTrace();

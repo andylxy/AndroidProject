@@ -3,17 +3,10 @@ package run.yigou.gxzy.greendao.service;
 import android.database.Cursor;
 
 
-import org.greenrobot.greendao.query.DeleteQuery;
-import org.greenrobot.greendao.query.QueryBuilder;
-
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.UUID;
 
-import run.yigou.gxzy.greendao.GreenDaoManager;
-import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
-import run.yigou.gxzy.greendao.gen.ChapterDao;
 import run.yigou.gxzy.greendao.gen.SearchHistoryDao;
 import run.yigou.gxzy.utils.DateHelper;
 
@@ -58,7 +51,7 @@ public class SearchHistoryService extends BaseService<SearchHistory,SearchHistor
     public ArrayList<SearchHistory> findAllSearchHistory() {
         //  String sql = "select * from search_history order by create_date desc";
         // return findSearchHistorys(sql, null);
-        return  (ArrayList<SearchHistory>)mQueryBuilder.list();
+        return  (ArrayList<SearchHistory>) getQueryBuilder().list();
 
     }
 
@@ -69,7 +62,7 @@ public class SearchHistoryService extends BaseService<SearchHistory,SearchHistor
      * @param searchHistory
      */
     public void addSearchHistory(SearchHistory searchHistory) {
-        searchHistory.setId(getUuid);
+        searchHistory.setId(getUUID());
         searchHistory.setCreateDate(DateHelper.longToTime(new Date().getTime()));
         addEntity(searchHistory);
     }
@@ -87,7 +80,7 @@ public class SearchHistoryService extends BaseService<SearchHistory,SearchHistor
      * 清空历史记录
      */
     public void clearHistory() {
-         mQueryBuilder.buildDelete().executeDeleteWithoutDetachingEntities();
+         getQueryBuilder().buildDelete().executeDeleteWithoutDetachingEntities();
     }
 
     /**

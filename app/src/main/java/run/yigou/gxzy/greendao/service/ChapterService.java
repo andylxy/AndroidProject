@@ -63,7 +63,7 @@ public class ChapterService extends BaseService<Chapter,ChapterDao> {
         if (StringHelper.isEmpty(bookId)) return new ArrayList<>();
         //String sql = "select * from chapter where book_id = ? order by number";
         // return findChapters(sql, new String[]{bookId});
-        QueryBuilder<Chapter> where  = mQueryBuilder.where(ChapterDao.Properties.BookId.eq(bookId));
+        QueryBuilder<Chapter> where  = getQueryBuilder().where(ChapterDao.Properties.BookId.eq(bookId));
         return    where.list();
     }
 
@@ -73,7 +73,7 @@ public class ChapterService extends BaseService<Chapter,ChapterDao> {
      * @param chapter
      */
     public void addChapter(Chapter chapter) {
-        chapter.setId(getUuid);
+        chapter.setId(getUUID());
         addEntity(chapter);
     }
 
@@ -109,7 +109,7 @@ public class ChapterService extends BaseService<Chapter,ChapterDao> {
        // String sel = "delete from chapter where book_id = ?";
        // rawQuery(sel, new String[]{bookId});
 
-        QueryBuilder<Chapter> where  = mQueryBuilder.where(ChapterDao.Properties.BookId.eq(bookId));
+        QueryBuilder<Chapter> where  = getQueryBuilder().where(ChapterDao.Properties.BookId.eq(bookId));
         DeleteQuery<Chapter> deleteQuery = where.buildDelete();
         deleteQuery.executeDeleteWithoutDetachingEntities();
 
@@ -182,7 +182,7 @@ public class ChapterService extends BaseService<Chapter,ChapterDao> {
 
     @Override
     public long addEntity(Chapter entity) {
-        entity.setId(getUuid);
+        entity.setId(getUUID());
         return super.addEntity(entity);
     }
     //

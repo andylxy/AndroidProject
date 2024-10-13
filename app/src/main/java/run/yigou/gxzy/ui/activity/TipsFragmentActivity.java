@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.manager.ReferenceManager;
 import run.yigou.gxzy.ui.fragment.TipsBookNetReadFragment;
@@ -25,7 +26,6 @@ public final class TipsFragmentActivity extends AppActivity {
     private static final int UNIT_TAB_ID = R.id.unitTab;
     private static final int SETTINGS_TAB_ID = R.id.settingsTab;
     private static final int FRAGMENT_CONTAINER_ID = R.id.fragment_tips_container;
-    private static final String REFERENCE_KEY = "TipsFragmentActivity";
 
     private RadioGroup radioGroup; // 用于切换不同 Fragment 的 RadioGroup
     private FragmentManager fragmentManager; // Fragment 管理器
@@ -42,8 +42,7 @@ public final class TipsFragmentActivity extends AppActivity {
     @SuppressLint("NonConstantResourceId")
     @Override
     protected void initView() {
-        // 添加引用
-        ReferenceManager.getInstance().addReference(REFERENCE_KEY, this);
+
         // 注册事件
         // XEventBus.getDefault().register(this);
         try {
@@ -92,13 +91,14 @@ public final class TipsFragmentActivity extends AppActivity {
             args.putInt("bookNo", bookId);  // 替换为实际参数
             fragment.setArguments(args);
 
-            BookInfoNav.Bean.TabNav tabNav = Tips_Single_Data.getInstance().getNavTabMap().get(bookId);
+            TabNavBody tabNav = Tips_Single_Data.getInstance().getNavTabMap().get(bookId);
             StringBuilder stringBuilder = new StringBuilder("阅读器");
             if (tabNav != null) {
                 // 清空内容
                 stringBuilder.setLength(0);
                 stringBuilder.append(tabNav.getBookName());
             }
+            tabNav=null;
             currentCheckedRadioButton.setText(stringBuilder);
 
             // 显示默认页面
@@ -112,6 +112,7 @@ public final class TipsFragmentActivity extends AppActivity {
 
     /**
      * 替换容器中的 Fragment
+     *
      * @param fragment 要添加到容器的 Fragment 实例
      */
     private void replaceFragment(androidx.fragment.app.Fragment fragment) {
@@ -121,7 +122,8 @@ public final class TipsFragmentActivity extends AppActivity {
     }
 
     @Override
-    protected void initData() {}
+    protected void initData() {
+    }
 
     @Override
     public boolean isStatusBarEnabled() {
@@ -141,15 +143,13 @@ public final class TipsFragmentActivity extends AppActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (radioGroup != null && tabCheckedChangeListener != null) {
-            // 在 Activity 销毁时注销 RadioGroup 的监听器，避免内存泄漏
-            radioGroup.setOnCheckedChangeListener(null);
-            tabCheckedChangeListener =null;
-        }
-         // 清除引用
-        ReferenceManager.getInstance().removeReference(REFERENCE_KEY);
+
+        // 在 Activity 销毁时注销 RadioGroup 的监听器，避免内存泄漏
+        radioGroup.setOnCheckedChangeListener(null);
+        tabCheckedChangeListener = null;
+
         //  EasyLog.print(REFERENCE_KEY + " onDestroy");
-       // Tips_Single_Data.getInstance().curActivity = null;
-       // XEventBus.getDefault().unregister(this);
+        // Tips_Single_Data.getInstance().curActivity = null;
+        // XEventBus.getDefault().unregister(this);
     }
 }

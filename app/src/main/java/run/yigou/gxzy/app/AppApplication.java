@@ -189,8 +189,8 @@ public final class AppApplication extends Application {
 
         EasyConfig.with(okHttpClient)
                 // 是否打印日志
-                //.setLogEnabled(AppConfig.isLogEnable())
-                .setLogEnabled(true)
+                .setLogEnabled(AppConfig.isLogEnable())
+                //.setLogEnabled(true)
                 // 设置服务器配置
                 .setServer(new RequestServer())
                 // 设置请求处理策略

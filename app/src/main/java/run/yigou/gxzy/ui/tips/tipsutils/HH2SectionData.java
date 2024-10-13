@@ -17,6 +17,24 @@ public class HH2SectionData implements Serializable {
     private List<? extends DataItem> data;
     private String header;
     private int section;
+    private long signatureId;
+    private String signature;
+
+    public long getSignatureId() {
+        return signatureId;
+    }
+
+    public void setSignatureId(long signatureId) {
+        this.signatureId = signatureId;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
 
     public HH2SectionData() {
     }
@@ -29,6 +47,10 @@ public class HH2SectionData implements Serializable {
 
     public List<? extends DataItem> getData() {
         return this.data;
+    }
+
+    public void setHeader(String header) {
+        this.header = header;
     }
 
     public String getHeader() {

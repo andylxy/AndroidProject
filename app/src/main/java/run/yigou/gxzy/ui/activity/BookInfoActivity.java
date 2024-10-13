@@ -20,6 +20,7 @@ import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.greendao.entity.Book;
+import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookDetailList;
@@ -42,7 +43,7 @@ import run.yigou.gxzy.utils.StringHelper;
  */
 public final class BookInfoActivity extends AppActivity {
     private static final String Book_KEY_IN = "book";
-    private BookInfoNav.Bean.TabNav mTabNav;
+    private TabNavBody mTabNav;
     private Book mBook;
     private BookService mBookService;
     private TextView tvBookAuthor;
@@ -57,7 +58,7 @@ public final class BookInfoActivity extends AppActivity {
     private ArrayList<TitelInfo> mTitelInfos = new ArrayList<>();
     private List<BookDetailList.Bean> detailList;
 
-    public static void start(Context context, BookInfoNav.Bean.TabNav item) {
+    public static void start(Context context, TabNavBody item) {
         Intent intent = new Intent(context, BookInfoActivity.class);
         intent.putExtra(AppConst.BOOK, item);
         if (!(context instanceof Activity)) {
@@ -207,7 +208,7 @@ public final class BookInfoActivity extends AppActivity {
             mBook.setDesc(mTabNav.getDesc());
             mBook.setImgUrl(mTabNav.getImageUrl());
             mBook.setName(mTabNav.getBookName());
-            mBook.setBookId(mTabNav.getId());
+            mBook.setBookId(mTabNav.getId()+"");
         }
 
         Book book = mBookService.findBookByAuthorAndName(mBook.getName(), mBook.getAuthor());

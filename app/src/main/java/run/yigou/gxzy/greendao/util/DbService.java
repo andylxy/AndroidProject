@@ -10,10 +10,18 @@
 
 package run.yigou.gxzy.greendao.util;
 
+import run.yigou.gxzy.greendao.service.BeiMingCiService;
+import run.yigou.gxzy.greendao.service.BookChapterBodyService;
+import run.yigou.gxzy.greendao.service.BookChapterService;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.service.ChapterService;
 import run.yigou.gxzy.greendao.service.SearchHistoryService;
+import run.yigou.gxzy.greendao.service.TabNavBodyService;
+import run.yigou.gxzy.greendao.service.TabNavService;
 import run.yigou.gxzy.greendao.service.UserInfoService;
+import run.yigou.gxzy.greendao.service.YaoFangBodyService;
+import run.yigou.gxzy.greendao.service.YaoFangService;
+import run.yigou.gxzy.greendao.service.YaoService;
 
 /**
  * 版本:  1.0
@@ -24,17 +32,44 @@ public class DbService {
     public BookService mBookService;
     public ChapterService mChapterService;
     public SearchHistoryService mSearchHistoryService;
-    private static DbService instance;
-    public  static DbService getInstance() {
-        if (instance == null) {
-            instance = new DbService();
-        }
-        return instance;
-    }
+    public YaoService mYaoService;
+    public BeiMingCiService mBeiMingCiService;
+    public BookChapterService mBookChapterService;
+    public BookChapterBodyService mBookChapterBodyService;
+    public YaoFangService mYaoFangService;
+    public YaoFangBodyService mYaoFangBodyService;
+    public TabNavBodyService mTabNavBodyService;
+    public TabNavService mTabNavService;
+
     private DbService() {
+        // 防止反射攻击
+        if (instance != null) {
+            throw new IllegalStateException("Singleton instance already created!");
+        }
         mUserInfoService = new UserInfoService();
         mBookService = new BookService();
         mChapterService = new ChapterService();
         mSearchHistoryService = new SearchHistoryService();
+        mYaoService = new YaoService();
+        mBeiMingCiService = new BeiMingCiService();
+        mBookChapterService = new BookChapterService();
+        mBookChapterBodyService = new BookChapterBodyService();
+        mYaoFangService = new YaoFangService();
+        mYaoFangBodyService = new YaoFangBodyService();
+        mTabNavBodyService = new TabNavBodyService();
+        mTabNavService = new TabNavService();
     }
+
+    private volatile static DbService instance;
+    public static DbService getInstance() {
+        if (instance == null) {
+            synchronized (DbService.class) {
+                if (instance == null) {
+                    instance = new DbService();
+                }
+            }
+        }
+        return instance;
+    }
+
 }

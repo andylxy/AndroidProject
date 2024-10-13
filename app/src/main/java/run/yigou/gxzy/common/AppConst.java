@@ -15,7 +15,7 @@ import run.yigou.gxzy.R;
 
 public class AppConst {
 
-
+   public static String dbName = "myzhongyi.db";//服务端公钥
 
 //    public static String publicKey;//服务端公钥
 //    public static String privateKey;//app私钥

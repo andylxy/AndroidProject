@@ -10,6 +10,7 @@
 
 package run.yigou.gxzy.ui.tips.tipsutils.DataBeans;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +27,42 @@ public class Fang extends DataItem {
     List<YaoUse> helpYaoList;
     String makeWay;
     public String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getYaoCount() {
+        return yaoCount;
+    }
+
+    public void setYaoCount(int yaoCount) {
+        this.yaoCount = yaoCount;
+    }
+
+    public float getDrinkNum() {
+        return drinkNum;
+    }
+
+    public void setDrinkNum(float drinkNum) {
+        this.drinkNum = drinkNum;
+    }
+
+    public List<YaoUse> getStandardYaoList() {
+        return standardYaoList;
+    }
+
+    public void setStandardYaoList(YaoUse standardYao) {
+        if (standardYaoList == null) {
+            standardYaoList = new ArrayList<>();
+        }
+        standardYaoList .add(standardYao);
+    }
+
     List<YaoUse> standardYaoList;
     int yaoCount;
 
@@ -42,7 +79,7 @@ public class Fang extends DataItem {
         TipsNetHelper.Condition<YaoUse> iBool = new TipsNetHelper.Condition<YaoUse>() {
             @Override
             public boolean test(YaoUse yaoUse) {
-                return Fang.this.isYaoEqual(yaoUse.showName, str);
+                return Fang.this.isYaoEqual(yaoUse.getShowName(), str);
             }
         };
         return TipsNetHelper.some(this.standardYaoList, iBool) || TipsNetHelper.some(this.extraYaoList, iBool) || TipsNetHelper.some(this.helpYaoList, iBool);
@@ -57,8 +94,8 @@ public class Fang extends DataItem {
         if (yaoUseByYao2 == null) {
             return -1;
         }
-        float max = Math.max(yaoUseByYao.weight, yaoUseByYao.maxWeight) / this.drinkNum;
-        float max2 = Math.max(yaoUseByYao2.weight, yaoUseByYao2.maxWeight) / fang.drinkNum;
+        float max = Math.max(yaoUseByYao.getWeight(), yaoUseByYao.getMaxWeight()) / this.drinkNum;
+        float max2 = Math.max(yaoUseByYao2.getWeight(), yaoUseByYao2.getMaxWeight()) / fang.drinkNum;
         if (max < max2) {
             return 1;
         }
@@ -68,14 +105,14 @@ public class Fang extends DataItem {
     public YaoUse getYaoUseByYao(String str) {
         if (this.standardYaoList != null) {
             for (YaoUse yaoUse : this.standardYaoList) {
-                if (isYaoEqual(yaoUse.showName, str)) {
+                if (isYaoEqual(yaoUse.getShowName(), str)) {
                     return yaoUse;
                 }
             }
         }
         if (this.extraYaoList != null) {
             for (YaoUse yaoUse2 : this.extraYaoList) {
-                if (isYaoEqual(yaoUse2.showName, str)) {
+                if (isYaoEqual(yaoUse2.getShowName(), str)) {
                     return yaoUse2;
                 }
             }
@@ -84,7 +121,7 @@ public class Fang extends DataItem {
             return null;
         }
         for (YaoUse yaoUse3 : this.helpYaoList) {
-            if (isYaoEqual(yaoUse3.showName, str)) {
+            if (isYaoEqual(yaoUse3.getShowName(), str)) {
                 return yaoUse3;
             }
         }
@@ -94,15 +131,15 @@ public class Fang extends DataItem {
     public String getFangNameLinkWithYaoWeight(String str) {
         if (this.standardYaoList != null) {
             for (YaoUse yaoUse : this.standardYaoList) {
-                if (isYaoEqual(yaoUse.showName, str)) {
-                    return String.format(Locale.CHINA, "$f{%s}$w{(%s%.0f%s服)}，", this.name, yaoUse.amount, Float.valueOf(this.drinkNum), def(yaoUse.suffix, ""));
+                if (isYaoEqual(yaoUse.getShowName(), str)) {
+                    return String.format(Locale.CHINA, "$f{%s}$w{(%s%.0f%s服)}，", this.name, yaoUse.getAmount(), Float.valueOf(this.drinkNum), def(yaoUse.getSuffix(), ""));
                 }
             }
         }
         if (this.extraYaoList != null) {
             for (YaoUse yaoUse2 : this.extraYaoList) {
-                if (isYaoEqual(yaoUse2.showName, str)) {
-                    return String.format(Locale.CHINA, "$f{%s}$w{(%s%.0f%s服)}，", this.name, yaoUse2.amount, Float.valueOf(this.drinkNum), def(yaoUse2.suffix, ""));
+                if (isYaoEqual(yaoUse2.getShowName(), str)) {
+                    return String.format(Locale.CHINA, "$f{%s}$w{(%s%.0f%s服)}，", this.name, yaoUse2.getAmount(), Float.valueOf(this.drinkNum), def(yaoUse2.getSuffix(), ""));
                 }
             }
         }
@@ -110,8 +147,8 @@ public class Fang extends DataItem {
             return "";
         }
         for (YaoUse yaoUse3 : this.helpYaoList) {
-            if (isYaoEqual(yaoUse3.showName, str)) {
-                return String.format(Locale.CHINA, "$f{%s}$w{(%s%.0f%s服)}，", this.name, yaoUse3.amount, Float.valueOf(this.drinkNum), def(yaoUse3.suffix, ""));
+            if (isYaoEqual(yaoUse3.getShowName(), str)) {
+                return String.format(Locale.CHINA, "$f{%s}$w{(%s%.0f%s服)}，", this.name, yaoUse3.getAmount(), Float.valueOf(this.drinkNum), def(yaoUse3.getSuffix(), ""));
             }
         }
         return "";
@@ -128,16 +165,5 @@ public class Fang extends DataItem {
         return str2 == null ? str : str2;
     }
 
-    public class YaoUse {
-        int YaoID;
-        String amount;
-        String extraProcess;
-        float maxWeight;
-        String showName;
-        String suffix;
-        float weight;
 
-        YaoUse() {
-        }
-    }
 }

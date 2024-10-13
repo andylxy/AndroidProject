@@ -14,7 +14,7 @@ import java.io.Serializable;
 
 public class NavItem implements Serializable {
 
-    private String Id;
+    private long Id;
     private String ImageUrl;
     private String BookName;
     private String ChenɡShu;
@@ -32,7 +32,7 @@ public class NavItem implements Serializable {
     private int BookNo;
 
 
-    public String getId() {
+    public long getId() {
         return Id;
     }
 
@@ -52,7 +52,7 @@ public class NavItem implements Serializable {
         return Author;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         Id = id;
     }
 
