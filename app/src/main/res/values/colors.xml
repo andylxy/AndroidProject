@@ -230,6 +230,8 @@
 
     <color name="sys_refresh_main">#353535</color>
 
+    <color name="background_book_tab_label_book_item">#E9E9EA</color>
+
     <!--    Toast颜色   -->
     <color name="toast_default">#FFABD3EC</color>
     <color name="toast_green">#FFAFE3B2</color>

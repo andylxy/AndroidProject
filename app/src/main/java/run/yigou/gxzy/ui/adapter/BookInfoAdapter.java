@@ -47,20 +47,17 @@ public final class BookInfoAdapter extends AppAdapter<TabNavBody> {
     }
     private final class ViewHolder extends AppAdapter<?>.ViewHolder {
 
-       // private final TextView mTextView;
+
         private final TextView tvBookName;
         private final TextView tvBookAuthor;
-        private final TextView tvBookDesc;
-        private final ImageView ivBookImg;
+
 
         private ViewHolder() {
             super(R.layout.book_tab_label_book_item);
-           // mTextView = findViewById(R.id.tv_status_text);
+
             tvBookName = findViewById(R.id.tv_book_name);
             tvBookAuthor = findViewById(R.id.tv_book_author);
-            tvBookDesc = findViewById(R.id.tv_book_desc);
-            ivBookImg = findViewById(R.id.iv_book_img);
-            // mTextView = findViewById(R.id.tv_status_text);
+
 
         }
 
@@ -75,7 +72,7 @@ public final class BookInfoAdapter extends AppAdapter<TabNavBody> {
             if (item != null) {
                 tvBookName.setText(item.getBookName());
                 tvBookAuthor.setText(item.getAuthor());
-                tvBookDesc.setText("     " + (item.getDesc() == null ?"":item.getDesc()));
+//                tvBookDesc.setText("     " + (item.getDesc() == null ?"":item.getDesc()));
 //                GlideApp.with(this.getItemView())
 //                        .load(AppConfig.getHostUrl()+item.getImageUrl())
 //                        .into(ivBookImg);

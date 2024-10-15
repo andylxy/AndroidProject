@@ -92,6 +92,7 @@
 
     <com.hjq.widget.layout.NestedViewPager
         android:id="@+id/vp_home_pager"
+        android:layout_marginTop="@dimen/dp_3"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
