@@ -4,6 +4,11 @@ import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.gen.TabNavBodyDao;
 
 public class TabNavBodyService extends BaseService<TabNavBody, TabNavBodyDao>{
+
+
+
+
+
     /**
      * @return
      */

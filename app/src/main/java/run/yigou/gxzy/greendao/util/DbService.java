@@ -49,7 +49,7 @@ public class DbService {
         mUserInfoService = new UserInfoService();
         mBookService = new BookService();
         mChapterService = new ChapterService();
-        mSearchHistoryService = new SearchHistoryService();
+        mSearchHistoryService =  new SearchHistoryService();
         mYaoService = new YaoService();
         mBeiMingCiService = new BeiMingCiService();
         mBookChapterService = new BookChapterService();

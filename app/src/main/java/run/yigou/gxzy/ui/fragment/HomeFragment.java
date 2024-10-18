@@ -250,7 +250,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
             ThreadUtil.runInBackground((this::getAllYaoData));
         if (isGetMingCiData)
             ThreadUtil.runInBackground((this::getAllMingCiData));
-        mSearchHistoryService = new SearchHistoryService();
+        mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
         //初始化搜索历史列表
         initHistoryList();
         llClearHistory.setOnClickListener(v -> {

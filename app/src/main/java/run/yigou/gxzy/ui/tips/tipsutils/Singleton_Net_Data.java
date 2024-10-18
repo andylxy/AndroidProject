@@ -14,13 +14,15 @@ public class Singleton_Net_Data {
     private ArrayList<HH2SectionData> content;
     private ArrayList<HH2SectionData> searchResList;
     private ArrayList<HH2SectionData> fang;
+    private int bookId;
+
+    private static volatile Singleton_Net_Data instance;
 
     public List<String> getAllFang() {
         return this.allFang;
     }
 
     private Map<String, String> yaoAliasDict;
-
 
     public Map<String, String> getYaoAliasDict() {
         return yaoAliasDict;
@@ -99,32 +101,39 @@ public class Singleton_Net_Data {
             }
         }
     }
-
-
-    private Singleton_Net_Data(int bookId) {
-        this();
-        this.bookId = bookId;
-
-    }
-
-    private Singleton_Net_Data() {
-    }
-
     public int getBookId() {
         return bookId;
     }
 
-    private int bookId;
+    private Singleton_Net_Data() {
+        this.bookId = -1; // 默认值
+    }
+    private Singleton_Net_Data(int bookId) {
+        this.bookId = bookId;
+    }
 
-    //todo 获取实例需优化
     public static Singleton_Net_Data getInstance(int bookId) {
-        data = new Singleton_Net_Data(bookId);
-        return data;
+        if (instance == null || instance.bookId != bookId) {
+            synchronized (Singleton_Net_Data.class) {
+                if (instance == null || instance.bookId != bookId) {
+                    instance = new Singleton_Net_Data(bookId);
+                }
+            }
+        }
+        return instance;
     }
+
     public static Singleton_Net_Data getInstance() {
-        data = new Singleton_Net_Data();
-        return data;
+        if (instance == null) {
+            synchronized (Singleton_Net_Data.class) {
+                if (instance == null) {
+                    instance = new Singleton_Net_Data();
+                }
+            }
+        }
+        return instance;
     }
+
     private OnContentUpdateListener mOnContentUpdateListener;
 
     public interface OnContentUpdateListener {

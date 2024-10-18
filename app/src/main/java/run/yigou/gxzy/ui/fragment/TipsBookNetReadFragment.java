@@ -63,6 +63,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     private int showShanghan;
     private int showJinkui;
     LinearLayoutManager layoutManager;
+
     public TipsBookNetReadFragment() {
     }
 
@@ -83,7 +84,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     @Override
     protected void initView() {
         rvList = findViewById(R.id.tips_book_read_activity_group_list);
-         layoutManager = new LinearLayoutManager(getContext());
+        layoutManager = new LinearLayoutManager(getContext());
         rvList.setLayoutManager(layoutManager);
         clearEditText = findViewById(R.id.include_tips_book_read).findViewById(R.id.searchEditText);
         tipsBtnSearch = findViewById(R.id.include_tips_book_read).findViewById(R.id.tips_btn_search);

@@ -26,7 +26,8 @@ public class Tips_Single_Data {
 
     private static volatile Tips_Single_Data instance;
 
-    private Map<Integer, Singleton_Net_Data> bookIdContent;
+
+
     private List<String> allYao;
     private int curBookId;
     public List<Tips_Little_Window> tipsLittleWindowStack = new ArrayList();
@@ -36,6 +37,11 @@ public class Tips_Single_Data {
     public Map<Integer, TabNavBody> getNavTabMap() {
         if (NavTabMap == null) NavTabMap = new HashMap<>();
         return NavTabMap;
+    }
+    private Map<Integer, Singleton_Net_Data> bookIdContent;
+
+    public Map<Integer, Singleton_Net_Data> getBookIdContent() {
+        return bookIdContent;
     }
 
     private Map<Integer, TabNavBody> NavTabMap;

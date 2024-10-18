@@ -20,6 +20,9 @@ public class SearchKeyEntity {
         this.searchResTotalNum = searchResTotalNum;
     }
 
+    public SearchKeyEntity() {
+    }
+
     public SearchKeyEntity(String searchKeyText) {
         this.searchKeyText = searchKeyText;
     }

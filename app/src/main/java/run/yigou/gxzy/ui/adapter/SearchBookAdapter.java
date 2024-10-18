@@ -18,6 +18,7 @@ import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.http.entitymodel.ChapterSearchRes;
 import run.yigou.gxzy.http.entitymodel.SearchKeyText;
 import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
+import run.yigou.gxzy.ui.tips.Search.SearchKey;
 import run.yigou.gxzy.utils.SpannableStringHelper;
 
 /**
@@ -29,7 +30,7 @@ import run.yigou.gxzy.utils.SpannableStringHelper;
  *  描述:
  *
 */
-public final class SearchBookAdapter extends AppAdapter<SearchKeyText> {
+public final class SearchBookAdapter extends AppAdapter<SearchKey> {
 
     private BookContentSearchActivity mBookContentSearchActivity;
     public SearchBookAdapter(Context context) {
@@ -37,10 +38,6 @@ public final class SearchBookAdapter extends AppAdapter<SearchKeyText> {
         mBookContentSearchActivity = (BookContentSearchActivity) context;
     }
 
-//    @Override
-//    public int getItemCount() {
-//        return 10;
-//    }
 
     @NonNull
     @Override
@@ -68,11 +65,11 @@ public final class SearchBookAdapter extends AppAdapter<SearchKeyText> {
         @SuppressLint("SetTextI18n")
         @Override
         public void onBindView(int position) {
-          SearchKeyText keyText =  getItem(position);
+          SearchKey keyText =  getItem(position);
           //  EasyLog.print("ResCount:"+keyText.getSearchTextResCount());
-            mTvSearchBookName.setText( keyText.getBookCaseName());
-            mTvSearchKeyCount.setText( keyText.getSearchTextResCount()+"");
-            if ( keyText.getSearchTextResCount()>0)
+            mTvSearchBookName.setText( keyText.getBookName());
+            mTvSearchKeyCount.setText( keyText.getFilteredData().size()+"");
+            if (!keyText.getFilteredData().isEmpty())
             {
                 // 加载 drawable 中的图片资源
                 mIvSearchAvatar.setImageResource(R.drawable.success);

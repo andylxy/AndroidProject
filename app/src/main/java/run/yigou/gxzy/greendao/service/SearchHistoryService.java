@@ -24,6 +24,10 @@ public class SearchHistoryService extends BaseService<SearchHistory,SearchHistor
 //    public QueryBuilder<SearchHistory> mSearchHistoryQueryBuilder = daoSession.queryBuilder(SearchHistory.class);
 //    SearchHistoryDao daoConn = daoSession.getSearchHistoryDao();
 
+
+
+
+
     private ArrayList<SearchHistory> findSearchHistorys(String sql, String[] selectionArgs) {
         ArrayList<SearchHistory> searchHistories = new ArrayList<>();
         try {
