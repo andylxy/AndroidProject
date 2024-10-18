@@ -10,22 +10,36 @@
 
 package run.yigou.gxzy.ui.fragment;
 
+import static android.app.Activity.RESULT_OK;
+import static android.content.Context.INPUT_METHOD_SERVICE;
+
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.gyf.immersionbar.ImmersionBar;
+import com.hjq.base.BaseAdapter;
 import com.hjq.base.FragmentPagerAdapter;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.EasyLog;
 import com.hjq.http.listener.HttpCallback;
+import com.hjq.widget.layout.WrapRecyclerView;
+import com.hjq.widget.view.ClearEditText;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,15 +51,16 @@ import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.greendao.entity.BeiMingCi;
+import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.entity.TabNav;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.entity.ZhongYao;
 import run.yigou.gxzy.greendao.gen.BeiMingCiDao;
-import run.yigou.gxzy.greendao.gen.BookChapterDao;
 import run.yigou.gxzy.greendao.gen.TabNavBodyDao;
 import run.yigou.gxzy.greendao.gen.TabNavDao;
 import run.yigou.gxzy.greendao.gen.ZhongYaoDao;
 import run.yigou.gxzy.greendao.service.BeiMingCiService;
+import run.yigou.gxzy.greendao.service.SearchHistoryService;
 import run.yigou.gxzy.greendao.service.TabNavBodyService;
 import run.yigou.gxzy.greendao.service.TabNavService;
 import run.yigou.gxzy.greendao.service.YaoService;
@@ -54,12 +69,15 @@ import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.api.MingCiContentApi;
 import run.yigou.gxzy.http.api.YaoContentApi;
 import run.yigou.gxzy.http.model.HttpData;
+import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
+import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;
 import run.yigou.gxzy.ui.adapter.TabAdapter;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
+import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.widget.XCollapsingToolbarLayout;
 
@@ -71,13 +89,13 @@ import run.yigou.gxzy.widget.XCollapsingToolbarLayout;
  */
 public final class HomeFragment extends TitleBarFragment<HomeActivity>
         implements TabAdapter.OnTabListener, ViewPager.OnPageChangeListener,
-        XCollapsingToolbarLayout.OnScrimsListener {
+        XCollapsingToolbarLayout.OnScrimsListener, BaseAdapter.OnItemClickListener {
 
     private XCollapsingToolbarLayout mCollapsingToolbarLayout;
     private Toolbar mToolbar;
 
-    private TextView mAddressView;
-    private TextView mHintView;
+    private TextView mHomeSearchView;
+    private ClearEditText mTvHomeSearchText;
     private AppCompatImageView mSearchView;
     private List<TabNav> bookNavList;
     private RecyclerView mTabView;
@@ -93,6 +111,10 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     //别名信息
     private BeiMingCiService mBeiMingCiService;
 
+    private WrapRecyclerView lvHistoryList;
+    private LinearLayout llHistoryView;
+
+
     public static HomeFragment newInstance() {
         return new HomeFragment();
     }
@@ -102,19 +124,42 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         return R.layout.home_fragment;
     }
 
+    private TextWatcher textWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            // 文本变化之前的操作
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            // 文本变化时的操作
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            // 文本变化之后的操作
+        }
+    };
+
+    @SuppressLint("CutPasteId")
     @Override
     protected void initView() {
+
         mCollapsingToolbarLayout = findViewById(R.id.ctl_home_bar);
         mToolbar = findViewById(R.id.tb_home_title);
 
-        mAddressView = findViewById(R.id.tv_home_address);
-        mHintView = findViewById(R.id.tv_home_hint);
+        mHomeSearchView = findViewById(R.id.tv_home_search);
+        mTvHomeSearchText = findViewById(R.id.tv_home_search_text);
+
         mSearchView = findViewById(R.id.iv_home_search);
 
         mTabView = findViewById(R.id.rv_home_tab);
         mViewPager = findViewById(R.id.vp_home_pager);
+        llHistoryView = findViewById(R.id.include_book_content_search_ll_history_view).findViewById(R.id.ll_history_view);
+        lvHistoryList = findViewById(R.id.include_book_content_search_ll_history_view).findViewById(R.id.lv_history_list);
+        llClearHistory = findViewById(R.id.include_book_content_search_ll_history_view).findViewById(R.id.ll_clear_history);
         mPagerAdapter = new FragmentPagerAdapter<>(this);
-        //mPagerAdapter.addFragment(BrowserFragment.newInstance("https://github.com/getActivity"), "网页演示");
+
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.addOnPageChangeListener(this);
         mTabAdapter = new TabAdapter(getAttachActivity());
@@ -123,9 +168,75 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         ImmersionBar.setTitleBar(getAttachActivity(), mToolbar);
         //设置渐变监听
         mCollapsingToolbarLayout.setOnScrimsListener(this);
-        setOnClickListener(R.id.tv_home_hint, R.id.iv_home_search);
+        setOnClickListener(R.id.tv_home_search_text, R.id.iv_home_search);
+        //搜索处理
+        mTvHomeSearchText.setMaxLines(1);  // 设置最大行数为 1，限制为单行输入
+        mTvHomeSearchText.setSingleLine(true);  // 确保只显示一行
+        mTvHomeSearchText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    // 当 EditText 获取焦点时，添加 TextWatcher
+                    mTvHomeSearchText.addTextChangedListener(textWatcher);
+                    mTabView.setVisibility(View.GONE);
+                    mViewPager.setVisibility(View.GONE);
+                    llHistoryView.setVisibility(View.VISIBLE);
+                    llClearHistory.setVisibility(View.VISIBLE);
 
+                } else {
+                    // 当 EditText 失去焦点时，移除 TextWatcher
+                    mTvHomeSearchText.removeTextChangedListener(textWatcher);
+                    mTabView.setVisibility(View.VISIBLE);
+                    mViewPager.setVisibility(View.VISIBLE);
+                    llHistoryView.setVisibility(View.GONE);
+                    llClearHistory.setVisibility(View.GONE);
+                }
+            }
+        });
+        mTvHomeSearchText.setOnKeyListener((v, keyCode, event) -> {
+            //是否是回车键
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
+                //隐藏键盘
+                ((InputMethodManager) requireActivity().getSystemService(INPUT_METHOD_SERVICE))
+                        .hideSoftInputFromWindow(Objects.requireNonNull(requireActivity().getCurrentFocus())
+                                .getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                //搜索
+                searchKey = Objects.requireNonNull(mTvHomeSearchText.getText()).toString();
+                search();
+            }
+            return false;
+        });
+        //EditText 以外的区域时，EditText 失去焦点
+        // 为整个布局设置触摸事件监听器
+        findViewById(R.id.root_layout).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    // 如果触摸的是 EditText 以外的地方
+                    if (mTvHomeSearchText.isFocused()) {
+                        clearSearchTextFocus();
+                    }
+
+                    return true;
+                }
+                return false;
+            }
+        });
     }
+
+    private void clearSearchTextFocus() {
+        // 使 EditText 失去焦点
+        mTvHomeSearchText.clearFocus();
+        mTvHomeSearchText.setFocusable(false);
+        mTvHomeSearchText.setFocusableInTouchMode(false);
+        mTvHomeSearchText.setText("");
+        //    隐藏软键盘
+        InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(mTvHomeSearchText.getWindowToken(), 0);
+        }
+    }
+
 
     @Override
     protected void initData() {
@@ -134,18 +245,75 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mTabNavService = DbService.getInstance().mTabNavService;
         mTabNavBodyService = DbService.getInstance().mTabNavBodyService;
         getBookInfoList();
-        // mTabAdapter.addItem("网页演示");
         mTabAdapter.setOnTabListener(this);
-//        if (isGetYaoData)
-//            getAllYaoData();
-//        if (isGetMingCiData)
-//            getAllMingCiData();
         if (isGetYaoData)
             ThreadUtil.runInBackground((this::getAllYaoData));
         if (isGetMingCiData)
             ThreadUtil.runInBackground((this::getAllMingCiData));
+        mSearchHistoryService = new SearchHistoryService();
+        //初始化搜索历史列表
+        initHistoryList();
+        llClearHistory.setOnClickListener(v -> {
+            mSearchHistoryService.clearHistory();
+            mSearchHistories.clear();
+            llClearHistory.setVisibility(View.GONE);
+            toast("清空历史记录成功");
+        });
 
+    }
 
+    private SearchHistoryService mSearchHistoryService;
+
+    private SearchHistoryAdapter mSearchHistoryAdapter;
+    private List<SearchHistory> mSearchHistories;
+    private LinearLayout llClearHistory;
+    private String searchKey;//搜索关键字
+
+    /**
+     * 初始化历史列表
+     */
+    private void initHistoryList() {
+        mSearchHistories = mSearchHistoryService.findAllSearchHistory();
+        mSearchHistoryAdapter = new SearchHistoryAdapter(getActivity());
+        mSearchHistoryAdapter.setData(mSearchHistories);
+        mSearchHistoryAdapter.setOnItemClickListener(this);
+        lvHistoryList.setAdapter(mSearchHistoryAdapter);
+        llHistoryView.setVisibility(View.GONE);
+        llClearHistory.setVisibility(View.GONE);
+    }
+
+    /**
+     * 搜索
+     */
+    private void search() {
+        //保存搜索关键字
+        if (!StringHelper.isEmpty(searchKey)) {
+            mSearchHistoryService.addOrUpadteHistory(searchKey);
+            Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
+            // 添加一个参数（Extra）到 Intent
+            intent.putExtra("searchQuery", searchKey);
+
+            startActivityForResult(intent, (resultCode, data) -> {
+//                if (resultCode == RESULT_OK) {
+//                    // 获取返回的数据（Extra）
+//                    String result = data.getStringExtra("result");
+//                    // 处理返回的数据
+//                    toast(result);
+//                }
+                clearSearchTextFocus();
+            });
+        }
+    }
+
+    @Override
+    public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
+
+        if (recyclerView.getId() == R.id.lv_history_list) {
+            searchKey=mSearchHistories.get(position).getContent();
+            mTvHomeSearchText.setText(searchKey);
+            search();
+            //  toast("点击历史搜索关健字");
+        }
     }
 
     @SingleClick
@@ -154,11 +322,14 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         int viewId = view.getId();
 
         switch (viewId) {
-            case R.id.tv_home_hint:
+            case R.id.tv_home_search_text:
+                mTvHomeSearchText.setFocusable(true);
+                mTvHomeSearchText.setFocusableInTouchMode(true);
+                mTvHomeSearchText.requestFocus();
+                break;
             case R.id.iv_home_search:
-                // todo 搜索跳转
-                // Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
-                // startActivity(intent);
+                searchKey = Objects.requireNonNull(mTvHomeSearchText.getText()).toString();
+                search();
                 break;
             default:
                 EasyLog.print("onClick value: " + viewId);
@@ -259,7 +430,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             Tips_Single_Data.getInstance().setYaoData(new HH2SectionData(detailList, 0, "伤寒金匮所有药物"));
                             isGetYaoData = false;
                             //保存内容
-                            ThreadUtil.runInBackground(()->{
+                            ThreadUtil.runInBackground(() -> {
                                 for (Yao yao : detailList) {
                                     List<ZhongYao> zhongYaoList = mYaoService.getQueryBuilder().where(ZhongYaoDao.Properties.SignatureId.eq(yao.getSignatureId())).list();
                                     if (zhongYaoList != null && !zhongYaoList.isEmpty()) {
@@ -340,7 +511,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                      Tips_Single_Data.getInstance().setMingCiData(new HH2SectionData(detailList, 0, "医书相关的名词说明"));
                                      isGetMingCiData = false;
                                      //保存内容
-                                     ThreadUtil.runInBackground(()->{
+                                     ThreadUtil.runInBackground(() -> {
                                          for (MingCiContent mingCiContent : detailList) {
 
                                              List<BeiMingCi> beiMingCiList = mBeiMingCiService.getQueryBuilder().where(BeiMingCiDao.Properties.SignatureId.eq(mingCiContent.getSignatureId())).list();
@@ -383,7 +554,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                              }
                                          }
                                      });
-                               }
+                                 }
 
                              }
 
@@ -453,9 +624,9 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     @Override
     public void onScrimsStateChange(XCollapsingToolbarLayout layout, boolean shown) {
         getStatusBarConfig().statusBarDarkFont(shown).init();
-        mAddressView.setTextColor(ContextCompat.getColor(getAttachActivity(), shown ? R.color.black : R.color.white));
-        mHintView.setBackgroundResource(shown ? R.drawable.home_search_bar_gray_bg : R.drawable.home_search_bar_transparent_bg);
-        mHintView.setTextColor(ContextCompat.getColor(getAttachActivity(), shown ? R.color.black60 : R.color.white60));
+        mHomeSearchView.setTextColor(ContextCompat.getColor(getAttachActivity(), shown ? R.color.black : R.color.white));
+        mTvHomeSearchText.setBackgroundResource(shown ? R.drawable.home_search_bar_gray_bg : R.drawable.home_search_bar_transparent_bg);
+        mTvHomeSearchText.setTextColor(ContextCompat.getColor(getAttachActivity(), shown ? R.color.black60 : R.color.white60));
         mSearchView.setSupportImageTintList(ColorStateList.valueOf(getColor(shown ? R.color.common_icon_color : R.color.white)));
     }
 

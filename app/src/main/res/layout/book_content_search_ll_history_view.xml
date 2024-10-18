@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/ll_history_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dp_3"
+        android:background="@color/translucent"
+        android:orientation="vertical"
+        android:padding="@dimen/dp_5"
+        android:visibility="gone">
+
+        <com.hjq.widget.layout.WrapRecyclerView
+            android:id="@+id/lv_history_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:divider="@color/nothing"
+            android:dividerHeight="@dimen/dp_2"
+            android:fadingEdge="none"
+            android:overScrollMode="never"
+            android:scrollbars="none">
+
+        </com.hjq.widget.layout.WrapRecyclerView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_clear_history"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="@dimen/dp_10"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:layout_marginStart="@dimen/dp_8"
+            android:src="@mipmap/clear" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/dp_8"
+            android:gravity="center_vertical"
+            android:text="清空历史记录"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp_16" /> <!-- 确保文本内容在 TextView 中垂直居中 -->
+    </LinearLayout>
+
+
+</LinearLayout>

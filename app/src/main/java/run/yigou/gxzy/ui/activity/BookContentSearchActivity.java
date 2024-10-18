@@ -101,9 +101,14 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         setTitle("内容搜索");
         // getData();
         initHistoryList();
-
         viewDataInit();
         getHotBooksData();
+        // 获取传递过来的 Intent
+        Intent intent = getIntent();
+        // 从 Intent 中提取参数
+        searchKey= intent.getStringExtra("searchQuery");
+        etSearchKey.setText(searchKey);
+
     }
 
     private void viewDataInit() {
@@ -123,7 +128,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             public void afterTextChanged(final Editable editable) {
                 //保存搜索关键字
                 searchKey = editable.toString();
-                if (StringHelper.isEmpty(searchKey)) {
+                if (!StringHelper.isEmpty(searchKey)) {
                     search();
                 }
 
