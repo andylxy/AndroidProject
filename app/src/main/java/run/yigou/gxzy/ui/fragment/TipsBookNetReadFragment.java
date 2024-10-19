@@ -42,6 +42,7 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
@@ -86,6 +87,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         rvList = findViewById(R.id.tips_book_read_activity_group_list);
         layoutManager = new LinearLayoutManager(getContext());
         rvList.setLayoutManager(layoutManager);
+        rvList.addItemDecoration(new CustomDividerItemDecoration());
         clearEditText = findViewById(R.id.include_tips_book_read).findViewById(R.id.searchEditText);
         tipsBtnSearch = findViewById(R.id.include_tips_book_read).findViewById(R.id.tips_btn_search);
         tipsBtnSearch.setOnClickListener(this);

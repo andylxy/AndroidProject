@@ -48,6 +48,7 @@ import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.adapter.SearchBookAdapter;
 import run.yigou.gxzy.ui.adapter.SearchBookDetailAdapter;
 import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;
+import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.Search.SearchKey;
 import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
@@ -72,7 +73,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     private BookService mBookService;
     private ClearEditText etSearchKey;
     private AppCompatButton tvSearchConform;
-    private RecyclerView lvSearchBooksList;
+    private WrapRecyclerView lvSearchBooksList;
     private WrapRecyclerView lvHistoryList;
     private LinearLayout llClearHistory;
     private LinearLayout llHistoryView;
@@ -80,7 +81,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     private SearchHistoryService mSearchHistoryService;
     private TabNavBodyService mTabNavBodyService;
     private SearchHistoryAdapter mSearchHistoryAdapter;
-    private List<String> mSuggestions;
+   // private List<String> mSuggestions;
     private ExpandableAdapter mSearchBookDetailAdapter;
     private SearchBookAdapter mSearchBookAdapter;
 
@@ -90,10 +91,10 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 
     private String searchKey;//搜索关键字
     //搜索结果
-    private List<ChapterSearchRes> mSearchRes;
+   // private List<ChapterSearchRes> mSearchRes;
     //搜索结果分类
-    private List<ChapterSearchRes> mSearchResorc;
-    private List<SearchKeyText> mSearchKeyTextList;
+   // private List<ChapterSearchRes> mSearchResorc;
+   // private List<SearchKeyText> mSearchKeyTextList;
     private List<SearchHistory> mSearchHistories;
     private WrapRecyclerView mLvSearchBooks;
 
@@ -115,9 +116,9 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         mTabNavBodyService = DbService.getInstance().mTabNavBodyService;
         mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
         //mSuggestions =  new ArrayList<>();
-        mSearchRes = new ArrayList<>();
-        mSearchResorc = new ArrayList<>();
-        mSearchKeyTextList = new ArrayList<>();
+       // mSearchRes = new ArrayList<>();
+       // mSearchResorc = new ArrayList<>();
+       // mSearchKeyTextList = new ArrayList<>();
       //  setTitle("全局搜索");
         // getData();
         initHistoryList();
@@ -274,6 +275,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         lvSearchBooksList.setAdapter(mSearchBookDetailAdapter);
         layoutManager = new LinearLayoutManager(getContext());
         lvSearchBooksList.setLayoutManager(layoutManager);
+        lvSearchBooksList.addItemDecoration(new CustomDividerItemDecoration());
         lvSearchBooksList.setVisibility(View.GONE);
 
         mSearchBookDetailAdapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
