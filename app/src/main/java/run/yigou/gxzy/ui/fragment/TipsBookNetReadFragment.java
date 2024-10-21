@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 
+import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 
 
@@ -50,7 +51,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
 
 public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
-    private RecyclerView rvList;
+    private WrapRecyclerView rvList;
     private ClearEditText clearEditText;
     private ExpandableAdapter adapter;
     private TextView numTips;

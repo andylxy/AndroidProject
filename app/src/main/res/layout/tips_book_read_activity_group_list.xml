@@ -15,11 +15,13 @@ android:animateLayoutChanges="true">
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/include_tips_book_read">
-        <androidx.recyclerview.widget.RecyclerView
+        <com.hjq.widget.layout.WrapRecyclerView
             android:id="@+id/tips_book_read_activity_group_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#D3D3D3"
+            android:layout_margin="@dimen/dp_2"
+            android:padding="@dimen/dp_5"
             android:layout_below="@+id/sticky_layout"/>
     </com.donkingliang.groupedadapter.widget.StickyHeaderLayout>
 </RelativeLayout>

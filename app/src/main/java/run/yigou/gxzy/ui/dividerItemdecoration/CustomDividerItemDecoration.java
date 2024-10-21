@@ -15,7 +15,7 @@ public class CustomDividerItemDecoration extends RecyclerView.ItemDecoration {
     public CustomDividerItemDecoration() {
 
         this.paint = new Paint();
-        this.paint.setColor(Color.argb(230, 0, 128, 255)); //  默认自定义分隔线颜色
+        this.paint.setColor(Color.parseColor("#F4F4F4")); //  默认自定义分隔线颜色
         this.height = 2; // 默认自定义分隔线高度
     }
 
