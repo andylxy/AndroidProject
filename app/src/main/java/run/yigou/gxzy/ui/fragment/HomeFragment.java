@@ -10,7 +10,6 @@
 
 package run.yigou.gxzy.ui.fragment;
 
-import static android.app.Activity.RESULT_OK;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
 import android.annotation.SuppressLint;
@@ -27,7 +26,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
@@ -44,6 +42,7 @@ import com.hjq.widget.view.ClearEditText;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import run.yigou.gxzy.R;
@@ -309,7 +308,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
 
         if (recyclerView.getId() == R.id.lv_history_list) {
-            searchKey=mSearchHistories.get(position).getContent();
+            searchKey = mSearchHistories.get(position).getContent();
             mTvHomeSearchText.setText(searchKey);
             search();
             //  toast("点击历史搜索关健字");
@@ -337,6 +336,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     }
 
     private void getBookInfoList() {
+
         EasyHttp.get(this)
                 .api(new BookInfoNav())
                 .request(new HttpCallback<HttpData<List<TabNav>>>(this) {
@@ -351,42 +351,10 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                     String tabNavId = mTabNavService.getUUID();
                                     mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
                                     mTabAdapter.addItem(nav.getName());
-                                    // 当前数据不存则,添加到数据库
-                                    ArrayList<TabNav> navList = mTabNavService.find(TabNavDao.Properties.CaseId.eq(nav.getCaseId()));
-                                    if (navList == null || navList.isEmpty()) {
-                                        nav.setTabNavId(tabNavId);
-                                        try {
-                                            mTabNavService.addEntity(nav);
-                                        } catch (Exception e) {
-                                            // 处理异常，比如记录日志、通知管理员等
-                                            EasyLog.print("Failed to addEntity: " + e.getMessage());
-                                            // 根据具体情况决定是否需要重新抛出异常
-                                            //throw e;
-                                        }
-
-                                    } else {
-                                        tabNavId = navList.get(0).getTabNavId();
-                                    }
-                                    for (TabNavBody item : nav.getNavList()) {
-
-                                        if (item.getBookNo() > 0)
-                                            Tips_Single_Data.getInstance().getNavTabMap().put(item.getBookNo(), item);
-                                        // 当前数据不存则,添加到数据库
-                                        ArrayList<TabNavBody> list = mTabNavBodyService.find(TabNavBodyDao.Properties.BookNo.eq(item.getBookNo()));
-                                        if (list == null || list.isEmpty()) {
-                                            item.setTabNavId(tabNavId);
-                                            item.setTabNavBodyId(mTabNavBodyService.getUUID());
-                                            try {
-                                                mTabNavBodyService.addEntity(item);
-                                            } catch (Exception e) {
-                                                // 处理异常，比如记录日志、通知管理员等
-                                                EasyLog.print("Failed to addEntity: " + e.getMessage());
-                                                // 根据具体情况决定是否需要重新抛出异常
-                                                //throw e;
-                                            }
-
-                                        }
-                                    }
+                                    ThreadUtil.runInBackground(() -> {
+                                        //保存到数据库
+                                        tabNvaInDb(nav, tabNavId);
+                                    });
                                 }
                             }
                         } else
@@ -397,24 +365,59 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     @Override
                     public void onFail(Exception e) {
                         super.onFail(e);
-
-                        ArrayList<TabNav> navList = mTabNavService.findAll();
-                        if (navList != null && !navList.isEmpty()) {
-                            for (TabNav nav : navList) {
-                                List<TabNavBody> list = nav.getNavList();
-                                mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
-                                mTabAdapter.addItem(nav.getName());
-                                for (TabNavBody item : nav.getNavList()) {
-                                    if (item.getBookNo() > 0)
-                                        Tips_Single_Data.getInstance().getNavTabMap().put(item.getBookNo(), item);
-                                }
+                        Map<Integer, TabNav>  tabNavMap = Tips_Single_Data.getInstance().getNavTabMap();
+                        if (tabNavMap != null && !tabNavMap.isEmpty()) {
+                            // 遍历 Map
+                            for (Map.Entry<Integer, TabNav>  entry : tabNavMap.entrySet()) {
+                               // Integer key = entry.getKey();
+                                TabNav value = entry.getValue();
+                                mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(value.getNavList()));
+                                mTabAdapter.addItem(value.getName());
                             }
-
                         } else {
                             toast("获取数据失败：" + e.getMessage());
                         }
                     }
                 });
+    }
+
+    private void tabNvaInDb(TabNav nav, String tabNavId) {
+        // 当前数据不存则,添加到数据库
+        ArrayList<TabNav> navList = mTabNavService.find(TabNavDao.Properties.CaseId.eq(nav.getCaseId()));
+        if (navList == null || navList.isEmpty()) {
+            nav.setTabNavId(tabNavId);
+            try {
+                mTabNavService.addEntity(nav);
+            } catch (Exception e) {
+                // 处理异常，比如记录日志、通知管理员等
+                EasyLog.print("Failed to addEntity: " + e.getMessage());
+                // 根据具体情况决定是否需要重新抛出异常
+                //throw e;
+            }
+
+        } else {
+            tabNavId = navList.get(0).getTabNavId();
+        }
+        for (TabNavBody item : nav.getNavList()) {
+
+            if (item.getBookNo() > 0)
+                Tips_Single_Data.getInstance().getNavTabBodyMap().put(item.getBookNo(), item);
+            // 当前数据不存则,添加到数据库
+            ArrayList<TabNavBody> list = mTabNavBodyService.find(TabNavBodyDao.Properties.BookNo.eq(item.getBookNo()));
+            if (list == null || list.isEmpty()) {
+                item.setTabNavId(tabNavId);
+                item.setTabNavBodyId(mTabNavBodyService.getUUID());
+                try {
+                    mTabNavBodyService.addEntity(item);
+                } catch (Exception e) {
+                    // 处理异常，比如记录日志、通知管理员等
+                    EasyLog.print("Failed to addEntity: " + e.getMessage());
+                    // 根据具体情况决定是否需要重新抛出异常
+                    //throw e;
+                }
+
+            }
+        }
     }
 
     public void getAllYaoData() {
@@ -479,19 +482,19 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     @Override
                     public void onFail(Exception e) {
                         super.onFail(e);
-                        List<Yao> detailList = new ArrayList<>();
-                        ArrayList<ZhongYao> yaoList = mYaoService.findAll();
-                        for (ZhongYao yao : yaoList) {
-                            Yao yao1 = new Yao();
-                            yao1.setText(yao.getText());
-                            yao1.setName(yao.getName());
-                            //yao1.setYaoList(String.join(",", yao.getYaoList()));
-                            yao1.setYaoList(Arrays.asList(yao.getYaoList()));
-                            yao1.setID(yao.getID());
-                            //yao1.setHeight(yao.getHeight());
-                            detailList.add(yao1);
-                        }
-                        Tips_Single_Data.getInstance().setYaoData(new HH2SectionData(detailList, 0, "伤寒金匮所有药物"));
+//                        List<Yao> detailList = new ArrayList<>();
+//                        ArrayList<ZhongYao> yaoList = mYaoService.findAll();
+//                        for (ZhongYao yao : yaoList) {
+//                            Yao yao1 = new Yao();
+//                            yao1.setText(yao.getText());
+//                            yao1.setName(yao.getName());
+//                            //yao1.setYaoList(String.join(",", yao.getYaoList()));
+//                            yao1.setYaoList(Arrays.asList(yao.getYaoList()));
+//                            yao1.setID(yao.getID());
+//                            //yao1.setHeight(yao.getHeight());
+//                            detailList.add(yao1);
+//                        }
+//                        Tips_Single_Data.getInstance().setYaoData(new HH2SectionData(detailList, 0, "伤寒金匮所有药物"));
                         isGetYaoData = false;
                     }
                 });
@@ -561,19 +564,19 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                              @Override
                              public void onFail(Exception e) {
                                  super.onFail(e);
-                                 List<MingCiContent> detailList = new ArrayList<>();
-                                 ArrayList<BeiMingCi> beiMingCiList = mBeiMingCiService.findAll();
-                                 for (BeiMingCi beiMingCi : beiMingCiList) {
-                                     MingCiContent birdContent = new MingCiContent();
-                                     birdContent.setText(beiMingCi.getText());
-                                     birdContent.setName(beiMingCi.getName());
-                                     //birdContent.setMingCiList(String.join(",", beiMingCi.getMingCiList()));
-                                     birdContent.setYaoList(Arrays.asList(beiMingCi.getMingCiList()));
-                                     birdContent.setID(beiMingCi.getID());
-                                     //yao1.setHeight(yao.getHeight());
-                                     detailList.add(birdContent);
-                                 }
-                                 Tips_Single_Data.getInstance().setMingCiData(new HH2SectionData(detailList, 0, "医书相关的名词说明"));
+//                                 List<MingCiContent> detailList = new ArrayList<>();
+//                                 ArrayList<BeiMingCi> beiMingCiList = mBeiMingCiService.findAll();
+//                                 for (BeiMingCi beiMingCi : beiMingCiList) {
+//                                     MingCiContent birdContent = new MingCiContent();
+//                                     birdContent.setText(beiMingCi.getText());
+//                                     birdContent.setName(beiMingCi.getName());
+//                                     //birdContent.setMingCiList(String.join(",", beiMingCi.getMingCiList()));
+//                                     birdContent.setYaoList(Arrays.asList(beiMingCi.getMingCiList()));
+//                                     birdContent.setID(beiMingCi.getID());
+//                                     //yao1.setHeight(yao.getHeight());
+//                                     detailList.add(birdContent);
+//                                 }
+//                                 Tips_Single_Data.getInstance().setMingCiData(new HH2SectionData(detailList, 0, "医书相关的名词说明"));
                                  isGetMingCiData = false;
                              }
                          }

@@ -9,42 +9,57 @@
  */
 
 package run.yigou.gxzy.ui.tips.tipsutils;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import run.yigou.gxzy.app.AppApplication;
+import run.yigou.gxzy.greendao.entity.TabNav;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.widget.Tips_Little_Window;
 
 
 public class Tips_Single_Data {
-   // private static Tips_Single_Data tips_Single_Data;
+    // private static Tips_Single_Data tips_Single_Data;
 
     private static volatile Tips_Single_Data instance;
-
 
 
     private List<String> allYao;
     private int curBookId;
     public List<Tips_Little_Window> tipsLittleWindowStack = new ArrayList();
+
     public List<String> getAllYao() {
         return this.allYao;
     }
-    public Map<Integer, TabNavBody> getNavTabMap() {
+
+    private Map<Integer, TabNav> NavTabMap;
+
+    public Map<Integer, TabNav> getNavTabMap() {
         if (NavTabMap == null) NavTabMap = new HashMap<>();
         return NavTabMap;
     }
-    private Map<Integer, Singleton_Net_Data> bookIdContent;
 
-    public Map<Integer, Singleton_Net_Data> getBookIdContent() {
-        return bookIdContent;
+    public Map<Integer, TabNavBody> getNavTabBodyMap() {
+        if (NavTabBodyMap == null) NavTabBodyMap = new HashMap<>();
+        return NavTabBodyMap;
     }
 
-    private Map<Integer, TabNavBody> NavTabMap;
+    private Map<Integer, Singleton_Net_Data> bookContentMap;
+
+    public Map<Integer, Singleton_Net_Data> getMapBookContent() {
+        return bookContentMap;
+    }
+
+    private Map<Integer, TabNavBody> NavTabBodyMap;
+
     /**
      * 获取当前打开书本ID
      *
@@ -61,6 +76,12 @@ public class Tips_Single_Data {
      */
     public void setCurBookId(int curBookId) {
         this.curBookId = curBookId;
+    }
+    private final String preferenceKey = "shanghan3.1";
+    private final SharedPreferences sharedPreferences = AppApplication.application.getSharedPreferences(preferenceKey, Context.MODE_PRIVATE);
+
+    public SharedPreferences getSharedPreferences() {
+        return sharedPreferences;
     }
 
     /**
@@ -106,15 +127,17 @@ public class Tips_Single_Data {
             if (str4 != null) {
                 str3 = str4;
             }
-            yaoMap.put(str3,(Yao)item);
+            yaoMap.put(str3, (Yao) item);
             this.allYao.add(str3);
         }
 
     }
+
     private Singleton_Net_Data curSingletonData;
 
     /**
-     *  当前书籍数据
+     * 当前书籍数据
+     *
      * @return
      */
     public Singleton_Net_Data getCurSingletonData() {
@@ -136,12 +159,12 @@ public class Tips_Single_Data {
         return yaoAliasDict;
     }
 
-    public Singleton_Net_Data getBookIdContent(int bookId) {
+    public Singleton_Net_Data getMapBookContent(int bookId) {
 
-        Singleton_Net_Data singletonNetData = bookIdContent.get(bookId);
+        Singleton_Net_Data singletonNetData = bookContentMap.get(bookId);
         if (singletonNetData == null) {
             singletonNetData = Singleton_Net_Data.getInstance(bookId);
-            bookIdContent.put(bookId, singletonNetData);
+            bookContentMap.put(bookId, singletonNetData);
         }
         setCurBookId(bookId);
         setCurSingletonData(singletonNetData);
@@ -182,7 +205,6 @@ public class Tips_Single_Data {
                 put("香豉", "豉");
                 put("肥栀子", "栀子");
                 put("生狼牙", "狼牙");
-                put("干苏叶", "苏叶");
                 put("清酒", "酒");
                 put("白酒", "酒");
                 put("艾叶", "艾");
@@ -235,7 +257,7 @@ public class Tips_Single_Data {
 
 
     private Tips_Single_Data() {
-        bookIdContent = new HashMap<Integer, Singleton_Net_Data>();
+        bookContentMap = new HashMap<Integer, Singleton_Net_Data>();
         initAlias();
 
     }
@@ -245,13 +267,6 @@ public class Tips_Single_Data {
      *
      * @return 单例对象
      */
-//    public static Tips_Single_Data getInstance() {
-//        if (tips_Single_Data == null) {
-//            tips_Single_Data = new Tips_Single_Data();
-//        }
-//        return tips_Single_Data;
-//    }
-
     public static Tips_Single_Data getInstance() {
         if (instance == null) {
             synchronized (Tips_Single_Data.class) {
@@ -264,12 +279,10 @@ public class Tips_Single_Data {
     }
 
 
-
-
     public void onDestroy() {
         instance = null;
-        curSingletonData=null;
+        curSingletonData = null;
         tipsLittleWindowStack.clear();
-        tipsLittleWindowStack=null;
+        tipsLittleWindowStack = null;
     }
 }

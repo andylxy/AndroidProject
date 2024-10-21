@@ -106,7 +106,7 @@ public class Singleton_Net_Data {
     }
 
     private Singleton_Net_Data() {
-        this.bookId = -1; // 默认值
+       this.bookId = -1; // 默认值
     }
     private Singleton_Net_Data(int bookId) {
         this.bookId = bookId;
@@ -124,14 +124,7 @@ public class Singleton_Net_Data {
     }
 
     public static Singleton_Net_Data getInstance() {
-        if (instance == null) {
-            synchronized (Singleton_Net_Data.class) {
-                if (instance == null) {
-                    instance = new Singleton_Net_Data();
-                }
-            }
-        }
-        return instance;
+        return  new Singleton_Net_Data();
     }
 
     private OnContentUpdateListener mOnContentUpdateListener;

@@ -10,8 +10,6 @@
 
 package run.yigou.gxzy.ui.fragment;
 
-import static run.yigou.gxzy.utils.ThreadUtil.runOnUiThread;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -36,7 +34,6 @@ import com.hjq.widget.view.ClearEditText;
 
 import java.util.ArrayList;
 
-import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
@@ -131,15 +128,15 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             bookId = args.getInt("bookNo", 0);
         }
         //获取指定书籍数据
-        singletonNetData = Tips_Single_Data.getInstance().getBookIdContent(bookId);
+        singletonNetData = Tips_Single_Data.getInstance().getMapBookContent(bookId);
         //兼容处理宋版伤寒,
         if (bookId == AppConst.ShangHanNo) {
             // 默认初始化设置  宋版伤寒,金匮显示
             // 从 SharedPreferences 中读取设置值
-            SharedPreferences sharedPreferences = AppApplication.application.getSharedPreferences("shanghan3.1", Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = Tips_Single_Data.getInstance().getSharedPreferences();
             showShanghan = sharedPreferences.getInt(AppConst.Key_Shanghan, 0);
             showJinkui = sharedPreferences.getInt(AppConst.Key_Jinkui, 1);
-            //加载数据处理监听
+            // 加载数据处理监听
             singletonNetData.setOnContentUpdateListener(new Singleton_Net_Data.OnContentUpdateListener() {
                 @Override
                 public ArrayList<HH2SectionData> contentDateUpdate(ArrayList<HH2SectionData> contentList) {
@@ -148,23 +145,30 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                     }
                     int size = contentList.size();
 
-                    if (showJinkui == AppConst.Show_Jinkui_None && showShanghan == AppConst.Show_Shanghan_398) {
-                        return new ArrayList<>(contentList.subList(8, Math.min(18, size)));
-                    }
-                    if (showJinkui == AppConst.Show_Jinkui_None && showShanghan == AppConst.Show_Shanghan_AllSongBan) {
-                        return new ArrayList<>(contentList.subList(0, Math.min(26, size)));
-                    }
-                    if (showJinkui == AppConst.Show_Jinkui_Default && showShanghan == AppConst.Show_Shanghan_398) {
-                        return new ArrayList<>(contentList.subList(8, size));
-                    }
-                    if (showJinkui == AppConst.Show_Jinkui_Default && showShanghan == AppConst.Show_Shanghan_AllSongBan) {
-                        return contentList;
+                    int start = 0;
+                    int end = size;
+
+                    if (showJinkui == AppConst.Show_Jinkui_None) {
+                        if (showShanghan == AppConst.Show_Shanghan_398) {
+                            start = 8;
+                            end = Math.min(18, size);
+                        } else if (showShanghan == AppConst.Show_Shanghan_AllSongBan) {
+                            end = Math.min(26, size);
+                        }
+                    } else if (showJinkui == AppConst.Show_Jinkui_Default) {
+                        if (showShanghan == AppConst.Show_Shanghan_398) {
+                            start = 8;
+                        }
                     }
 
-                    return contentList;
+                    if (start < size) {
+                        return new ArrayList<>(contentList.subList(start, end));
+                    } else {
+                        return  contentList;
+                    }
                 }
-
             });
+
             //宋版显示修改通知
             singletonNetData.setOnContentShowStatusNotification(new Singleton_Net_Data.OnContentShowStatusNotification() {
                 @Override

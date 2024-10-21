@@ -90,16 +90,16 @@ public class LocalLinkMovementMethod extends LinkMovementMethod {
                     this.lastClickTime = System.currentTimeMillis(); // 记录当前点击时间
                 }
            // 打印调试日志
-                EasyLog.print("--->>", "触摸事件处理完成 (按下或抬起) x : "+x  +" y: "+y +" scrollX :"+scrollX+" scrollY: "+scrollY +" offsetForHorizontal: "+offsetForHorizontal);
+             //   EasyLog.print("--->>", "触摸事件处理完成 (按下或抬起) x : "+x  +" y: "+y +" scrollX :"+scrollX+" scrollY: "+scrollY +" offsetForHorizontal: "+offsetForHorizontal);
                 return true; // 事件被处理
             }
             textView.setTag(false);
             // 如果没有点击到可点击的文本，则移除选中状态
-            EasyLog.print("--->>", "未点击到可点击的文本 (按下或抬起) x : "+x  +" y: "+y+" scrollX :"+scrollX+" scrollY: "+scrollY +" offsetForHorizontal: "+offsetForHorizontal);
+           // EasyLog.print("--->>", "未点击到可点击的文本 (按下或抬起) x : "+x  +" y: "+y+" scrollX :"+scrollX+" scrollY: "+scrollY +" offsetForHorizontal: "+offsetForHorizontal);
             Selection.removeSelection(spannable);
         }
         // 如果事件未处理，交给父类处理
-        EasyLog.print("--->>", "触摸事件结束");
+       // EasyLog.print("--->>", "触摸事件结束");
         return super.onTouchEvent(textView, spannable, motionEvent);
     }
 

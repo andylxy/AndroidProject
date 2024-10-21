@@ -39,10 +39,10 @@ import run.yigou.gxzy.greendao.service.BookChapterBodyService;
 import run.yigou.gxzy.greendao.service.BookChapterService;
 import run.yigou.gxzy.greendao.service.YaoFangBodyService;
 import run.yigou.gxzy.greendao.service.YaoFangService;
+import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookContentApi;
 import run.yigou.gxzy.http.api.BookFangApi;
-import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
@@ -136,7 +136,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
         bookId = mAdapter.getItem(position).getBookNo();
-        singletonNetData = Tips_Single_Data.getInstance().getBookIdContent(bookId);
+        singletonNetData = Tips_Single_Data.getInstance().getMapBookContent(bookId);
         singletonNetData.setYaoAliasDict(singleData.getYaoAliasDict());
         singletonNetData.setFangAliasDict(singleData.getFangAliasDict());
         getBookData(bookId);
@@ -185,28 +185,18 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                             //加载书本内容
                             singletonNetData.setContent(detailList);
                             //保存书籍内容
-                            ThreadUtil.runInBackground(()->{
+                            ThreadUtil.runInBackground(() -> {
                                 processDetailList(detailList);
                             });
 
                         }
                     }
 
-                    @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
-                        ArrayList<BookChapter> bookChapterList = mBookChapterService.find(BookChapterDao.Properties.BookId.eq(bookId));
-                        if (bookChapterList != null && !bookChapterList.isEmpty()) {
-                            List<HH2SectionData> detailList = getProcessDetailList(bookChapterList);
-                            //加载书本内容
-                            singletonNetData.setContent(detailList);
-                        }
-                    }
                 });
 
 
         //加载书本相关的药方
-        TabNavBody tabNav = Tips_Single_Data.getInstance().getNavTabMap().get(bookId);
+        TabNavBody tabNav = Tips_Single_Data.getInstance().getNavTabBodyMap().get(bookId);
         StringBuilder fangName = new StringBuilder("\n");
         if (tabNav != null) {
             fangName.append(tabNav.getBookName());
@@ -222,80 +212,15 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                             List<Fang> detailList = data.getData();
                             singletonNetData.setFang(new HH2SectionData(detailList, 0, fangName.toString()));
                             //保存药方数据
-                            ThreadUtil.runInBackground(()->{
+                            ThreadUtil.runInBackground(() -> {
                                 procesFangDetailList(detailList);
                             });
 
                         }
                     }
-
-                    @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
-                        ArrayList<YaoFang> fangList = mYaoFangService.find(YaoFangDao.Properties.BookId.eq(bookId));
-                        if (fangList != null && !fangList.isEmpty()) {
-                            List<Fang> detailList = getProcesFangDetailList(fangList);
-                            singletonNetData.setFang(new HH2SectionData(detailList, 0, fangName.toString()));
-                        }
-                    }
                 });
     }
 
-
-    private List<Fang> getProcesFangDetailList(ArrayList<YaoFang> fangList) {
-        List<Fang> detailList = new ArrayList<>();
-        if (fangList == null || fangList.isEmpty()) {
-            EasyLog.print("FandetailList is empty or null.");
-            return detailList;
-        }
-
-        try {
-            for (YaoFang yaoFang : fangList) {
-                Fang fang = new Fang();
-//                private int yaoCount;
-//                private int height;
-//                private String name;
-//                private int ID;
-//                private int drinkNum;
-//                private String text;
-//                private List<String> fangList;
-//                private List<String> yaoList;
-//                private List<StandardYaoList> standardYaoList;
-                fang.setYaoCount(yaoFang.getYaoCount());
-                fang.setName(yaoFang.getName());
-                fang.setID(yaoFang.getID());
-                fang.setDrinkNum(yaoFang.getDrinkNum());
-                fang.setText(yaoFang.getText());
-                fang.setFangList(Arrays.asList(yaoFang.getFangList()));
-                fang.setYaoList(Arrays.asList(yaoFang.getYaoList()));
-                fang.setID(yaoFang.getID());
-                //
-                for (YaoFangBody content : yaoFang.getStandardYaoList()) {
-                    // 获取章节内容
-//                    int YaoID;
-//                    String amount;
-//                    String extraProcess;
-//                    float maxWeight;
-//                    String showName;
-//                    String suffix;
-//                    float weight;
-                    YaoUse yaoUse = new YaoUse();
-                    yaoUse.setSuffix(content.getSuffix());
-                    yaoUse.setAmount(content.getAmount());
-                    yaoUse.setYaoID(content.getYaoID());
-                    yaoUse.setWeight(content.getWeight());
-                    yaoUse.setShowName(content.getShowName());
-                    yaoUse.setExtraProcess(content.getExtraProcess());
-                    fang.setStandardYaoList(yaoUse);
-                }
-                detailList.add(fang);
-            }
-        } catch (Exception e) {
-            EasyLog.print("Error processing detail list: " + e.getMessage());
-            throw e;
-        }
-        return detailList;
-    }
 
 
     private void procesFangDetailList(List<Fang> detailList) {
@@ -393,14 +318,14 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                 bookChapter.setSignature(hh2SectionData.getSignature());
                 bookChapter.setSignatureId(hh2SectionData.getSignatureId());
                 ArrayList<BookChapter> bookChapterList = mBookChapterService.find(BookChapterDao.Properties.SignatureId.eq(hh2SectionData.getSignatureId()));
-                if (bookChapterList != null && !bookChapterList.isEmpty()){
+                if (bookChapterList != null && !bookChapterList.isEmpty()) {
 
                     BookChapter locBookChapter = bookChapterList.get(0);
                     locBookChapter.setHeader(hh2SectionData.getHeader());
                     locBookChapter.setSection(hh2SectionData.getSection());
                     locBookChapter.setSignature(hh2SectionData.getSignature());
                     mBookChapterService.updateEntity(locBookChapter);
-                }else {
+                } else {
                     mBookChapterService.addEntity(bookChapter);
                 }
 
@@ -436,37 +361,6 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
         } catch (Exception e) {
             EasyLog.print("Error processing detail list: " + e.getMessage());
             //  throw e;
-        }
-    }
-
-    private List<HH2SectionData> getProcessDetailList(ArrayList<BookChapter> bookChapterList) {
-        List<HH2SectionData> detailList = new ArrayList<>();
-
-        try {
-            for (BookChapter bookChapter : bookChapterList) {
-                if (bookChapter == null || bookChapter.getData() == null) {
-                    continue; // 跳过无效的章节
-                }
-
-                List<DataItem> dataList = new ArrayList<>();
-                for (BookChapterBody bookChapterBody : bookChapter.getData()) {
-                    DataItem content = new DataItem();
-                    content.setText(bookChapterBody.getText());
-                    content.setNote(bookChapterBody.getNote());
-                    content.setSectionvideo(bookChapterBody.getSectionvideo());
-                    content.setID(bookChapterBody.getID());
-                    content.setFangList(Arrays.asList(bookChapterBody.getFangList()));
-                    dataList.add(content);
-                }
-
-                detailList.add(new HH2SectionData(dataList, bookChapter.getSection(), bookChapter.getHeader()));
-            }
-
-            return detailList;
-        } catch (Exception e) {
-            // 增加详细日志记录
-            EasyLog.print("Error processing detail list: " + e.getMessage() + ", bookChapterList size: " + bookChapterList.size());
-            return detailList;
         }
     }
 

@@ -28,7 +28,8 @@ import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
 public class Show_Fan_Yao_MingCi {
     // 写本类单对象
-    private static Show_Fan_Yao_MingCi instance;
+    private static volatile Show_Fan_Yao_MingCi instance;
+
     /**
      * 获取  Show_Fan_Yao_MingCi 单例对象
      *
@@ -36,18 +37,24 @@ public class Show_Fan_Yao_MingCi {
      */
     public static Show_Fan_Yao_MingCi getInstance() {
         if (instance == null) {
-            instance = new Show_Fan_Yao_MingCi();
+            synchronized (Show_Fan_Yao_MingCi.class) {
+                if (instance == null) {
+                    instance = new Show_Fan_Yao_MingCi();
+                }
+            }
         }
         return instance;
     }
+
     private Tips_Single_Data tipsSingleData;
     private Singleton_Net_Data singletonData;
 
     private Show_Fan_Yao_MingCi() {
         tipsSingleData = Tips_Single_Data.getInstance();
         // 获取 SingletonData 实例和数据结构
-        singletonData = tipsSingleData.getBookIdContent(tipsSingleData.getCurBookId());
+        singletonData = tipsSingleData.getMapBookContent(tipsSingleData.getCurBookId());
     }
+
     /**
      * 根据方药名称展示相关信息
      * 该方法首先尝试根据输入的方药名称查找匹配的方剂数据
@@ -57,7 +64,7 @@ public class Show_Fan_Yao_MingCi {
      * @param fanyao 方药名称，用于查找方剂数据
      * @return 包含HH2SectionData对象的List，这些对象包含方剂及其相关信息
      */
-    public List<HH2SectionData>  showFangTwo(String fanyao) {
+    public List<HH2SectionData> showFangTwo(String fanyao) {
         // 清空现有的展示列表
 
         List<HH2SectionData> hh2SectionDataList = new ArrayList<>();
@@ -82,7 +89,7 @@ public class Show_Fan_Yao_MingCi {
                         fangCiContent = dataItem.getCopy();
                         // 减少冗余对象创建：通过 Collections.singletonList 创建单元素列表
                         List<DataItem> mingCiContentList = Collections.singletonList(fangCiContent);
-                        String name = sectionData.getHeader() != null ?sectionData.getHeader().trim() : "";
+                        String name = sectionData.getHeader() != null ? sectionData.getHeader().trim() : "";
                         hh2SectionDataList.add(new HH2SectionData(mingCiContentList, 0, name));
                     } catch (NullPointerException e) {
                         // 处理 getCopy 或 getName 抛出的 NullPointerException
@@ -141,7 +148,8 @@ public class Show_Fan_Yao_MingCi {
         // 返回包含方剂信息的列表
         return hh2SectionDataList;
     }
-    public  List<HH2SectionData>  showMingCiTwo(String mingCi) {
+
+    public List<HH2SectionData> showMingCiTwo(String mingCi) {
 
         // 获取方名别名映射
         Map<String, MingCiContent> mingCiContentMap = tipsSingleData.getMingCiContentMap();
@@ -183,7 +191,6 @@ public class Show_Fan_Yao_MingCi {
             List<DataItem> dataItemList = Collections.singletonList(dataItem);
             hh2SectionDataList.add(new HH2SectionData(dataItemList, 0, "当前书籍"));
         }
-
 
 
         // 处理其他章节是否有此文字出现

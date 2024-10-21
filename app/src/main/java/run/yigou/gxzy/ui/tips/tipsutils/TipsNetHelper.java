@@ -79,7 +79,7 @@ public class TipsNetHelper {
             // 检查当前部分中的每一个数据项
             for (DataItem dataItem : sectionData.getData()) {
                 boolean itemMatched = false;
-                DataItem dataItem2=dataItem.getCopy();
+                DataItem dataItem2 = dataItem.getCopy();
                 dataItem2.setGroupPosition(index);
 
                 // 检查每个搜索词
@@ -356,18 +356,26 @@ public class TipsNetHelper {
     /**
      * 检查别名以寻找额外的匹配项。
      */
+
     private static boolean checkAliases(DataItem dataItem, String term, Pattern pattern,
                                         Map<String, String> yaoAliasDict, Map<String, String> fangAliasDict) {
-        // 检查 YaoList 和 FangList 是否与模式匹配
-        for (String yao : dataItem.getYaoList()) {
-            String alias = yaoAliasDict.get(yao);
-            if (alias != null && pattern.matcher(alias).find()) {
-                return true;
-            }
+        // 空指针检查
+        if (yaoAliasDict == null || fangAliasDict == null) {
+            return false;
         }
 
-        for (String fang : dataItem.getFangList()) {
-            String alias = fangAliasDict.get(fang);
+        // 提取公共方法
+        return checkList(dataItem.getYaoList(), yaoAliasDict, pattern) ||
+                checkList(dataItem.getFangList(), fangAliasDict, pattern);
+    }
+
+    private static boolean checkList(Iterable<String> list, Map<String, String> aliasDict, Pattern pattern) {
+        if (list == null) {
+            return false;
+        }
+
+        for (String item : list) {
+            String alias = aliasDict.get(item);
             if (alias != null && pattern.matcher(alias).find()) {
                 return true;
             }
@@ -477,7 +485,7 @@ public class TipsNetHelper {
     public static SpannableStringBuilder renderText(String str, final ClickLink clickLink) {
         // 如果输入为 null，返回一个带有默认内容的 SpannableStringBuilder
         if (str == null) {
-            EasyLog.print("renderText default content: Null ");
+           // EasyLog.print("renderText default content: Null ");
             return new SpannableStringBuilder();
         }
         // 创建 SpannableStringBuilder 并初始化
@@ -581,43 +589,64 @@ public class TipsNetHelper {
     }
 
     // 创建 MenuDialog 实例
-   // public static MenuDialog.Builder menuDialogBuilder;
+    // public static MenuDialog.Builder menuDialogBuilder;
     // 同时初始化数据
     private static List<String> data = Arrays.asList("拷贝内容", "跳转到本章内容"/*, "拷贝全部结果"*/);
 
     // 初始化方法
     public static MenuDialog.Builder showListDialog(Context context) {
 
-            return new MenuDialog.Builder(context).setList(data);
+        return new MenuDialog.Builder(context).setList(data);
 
     }
 
     /**
-     * 创建一个包含指定列表的Singleton_Net_Data实例，并复制当前的书籍的药和药方数据
+     * 创建并返回一个单例数据副本，该副本包含明词列表的引用
+     * 此方法用于在不直接修改原始单例数据的情况下，获取一个含有指定明词列表的新单例数据实例
+     * 它通过深拷贝当前单例数据的别名字典，以及设置新的明词列表内容来实现
      *
-     * @param mingCiList 名词显示列表
-     * @return Singleton_Net_Data
+     * @param mingCiList 明词列表，用于设置到新的单例数据副本中，不能为空或空列表
+     * @return 返回一个包含明词列表的新单例数据副本
+     * @throws IllegalArgumentException 如果提供的明词列表为空或为null
+     * @throws IllegalStateException 如果无法获取单例数据实例
      */
     public static Singleton_Net_Data createSingleDataCopy(List<HH2SectionData> mingCiList) {
+        // 检查输入的明词列表是否为空或为null，如果满足条件，则抛出异常
         if (mingCiList == null || mingCiList.isEmpty()) {
             throw new IllegalArgumentException("mingCiList cannot be null or empty");
         }
+
+        // 获取单例数据实例
         Singleton_Net_Data singletonData = Singleton_Net_Data.getInstance();
-        if (singletonData == null) {
-            EasyLog.print("Singleton_Net_Data instance is null");
-        }
+
+        // 成功获取单例数据实例后，打印日志
+        EasyLog.print("成功获取数据 Singleton_Net_Data");
+
         // 深拷贝当前的书籍的药和药方数据
         Singleton_Net_Data singletonDataInstance = Tips_Single_Data.getInstance().getCurSingletonData();
+
+        // 如果当前单例数据实例不为null，则复制别名字典
         if (singletonDataInstance != null) {
-            Map<String, String> yaoAliasDict = new HashMap<>(singletonDataInstance.getYaoAliasDict());
-            Map<String, String> fangAliasDict = new HashMap<>(singletonDataInstance.getFangAliasDict());
-            singletonData.setYaoAliasDict(yaoAliasDict);
-            singletonData.setFangAliasDict(fangAliasDict);
+            copyAliasDictionaries(singletonData, singletonDataInstance);
+            EasyLog.print("如果当前单例数据实例不为null，则复制别名字典");
         } else {
-            EasyLog.print("singletonData is null, cannot set alias dictionaries");
+            // 如果当前单例数据实例为null，则打印日志，表示无法设置别名字典
+            EasyLog.print("如果当前单例数据实例不为null，则复制别名字典");
         }
+
+        // 设置新的明词列表内容到单例数据实例中
         singletonData.setContent(mingCiList);
+
+        // 成功设置内容后，打印日志
+       // EasyLog.print("成功设置内容");
+
+        // 返回包含新明词列表的单例数据副本
         return singletonData;
+    }
+
+    private static void copyAliasDictionaries(Singleton_Net_Data target, Singleton_Net_Data source) {
+        target.setYaoAliasDict(new HashMap<>(source.getYaoAliasDict()));
+        target.setFangAliasDict(new HashMap<>(source.getFangAliasDict()));
     }
 
 
@@ -643,7 +672,7 @@ public class TipsNetHelper {
             public void clickFangLink(TextView textView, ClickableSpan clickableSpan) {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
-                EasyLog.print("tapped:" + charSequence);
+                EasyLog.print("Fang--tapped:" + charSequence);
                 List<HH2SectionData> mingCiList = Show_Fan_Yao_MingCi.getInstance().showFangTwo(charSequence);
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
 
@@ -665,7 +694,7 @@ public class TipsNetHelper {
             public void clickMingCiLink(TextView textView, ClickableSpan clickableSpan) {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
-                EasyLog.print("tapped:" + charSequence);
+                EasyLog.print("MingCi---tapped:" + charSequence);
                 List<HH2SectionData> mingCiList = Show_Fan_Yao_MingCi.getInstance().showMingCiTwo(charSequence);
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);

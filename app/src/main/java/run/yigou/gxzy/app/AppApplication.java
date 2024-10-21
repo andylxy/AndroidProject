@@ -16,7 +16,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.os.Build;
-import android.os.Handler;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -29,15 +28,17 @@ import com.hjq.bar.TitleBar;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
+import run.yigou.gxzy.greendao.entity.TabNav;
+import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.entity.UserInfo;
 import run.yigou.gxzy.greendao.service.UserInfoService;
+import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.RequestHandler;
 import run.yigou.gxzy.http.model.RequestServer;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.manager.ReferenceManager;
-import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.other.AppConfig;
 import run.yigou.gxzy.other.CrashHandler;
 import run.yigou.gxzy.other.DebugLoggerTree;
@@ -50,18 +51,22 @@ import run.yigou.gxzy.other.ToastStyle;
 import com.hjq.gson.factory.GsonFactory;
 import com.hjq.gson.factory.ParseExceptionCallback;
 import com.hjq.http.EasyConfig;
+import com.hjq.http.EasyLog;
 import com.hjq.toast.ToastUtils;
-import com.hjq.umeng.UmengClient;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
-import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.mmkv.MMKV;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import okhttp3.OkHttpClient;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Fang;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
+import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
+import run.yigou.gxzy.utils.ThreadUtil;
 import timber.log.Timber;
 
 /**
@@ -73,7 +78,6 @@ import timber.log.Timber;
 public final class AppApplication extends Application {
 
     public static AppApplication application;
-
 
 
     //登陆信息
@@ -95,16 +99,107 @@ public final class AppApplication extends Application {
         // 初始化 TitleBar 默认样式
         // TitleBar.setDefaultStyle(new ITitleBarStyle());
         application = this;
-        //构造书籍数据
-        Tips_Single_Data.getInstance();
         mUserInfoService = DbService.getInstance().mUserInfoService;
         initSdk(this);
         initUserLogin();
         // 初始化 ReferenceManager
         ReferenceManager.getInstance();
-
+        //构造书籍数据
+        tipsSingleDataInit();
     }
 
+    /**
+     * 初始化单个数据的提示信息
+     * 该方法用于从数据库中加载导航信息和相关书籍内容，并将它们存储在内存中以便快速访问
+     */
+    private void tipsSingleDataInit() {
+        try {
+            // 获取数据库服务实例
+            DbService dbService = DbService.getInstance();
+            // 检查数据库服务和导航服务是否已初始化
+            if (dbService == null || dbService.mTabNavService == null) {
+                return;
+            }
+            ArrayList<Yao>  yaoData = ConvertEntity.getYaoData();
+            Tips_Single_Data.getInstance().setYaoData(new HH2SectionData(yaoData, 0, "伤寒金匮所有药物"));
+            ArrayList<MingCiContent>   mingCiContentList =  ConvertEntity.getMingCi();
+            Tips_Single_Data.getInstance().setMingCiData(new HH2SectionData(mingCiContentList, 0, "医书相关的名词说明"));
+
+            // 从数据库中加载所有导航信息
+            ArrayList<TabNav> navList = dbService.mTabNavService.findAll();
+            // 检查导航信息是否已加载
+            if (navList != null && !navList.isEmpty()) {
+                // 获取单例数据对象
+                Tips_Single_Data tipsSingleData = Tips_Single_Data.getInstance();
+                // 同步以确保线程安全
+                synchronized (tipsSingleData) {
+                    // 获取导航信息和书籍内容的映射
+                    Map<Integer, TabNav> navTabMap = tipsSingleData.getNavTabMap();
+                    Map<Integer, TabNavBody> navTabBodyMap = tipsSingleData.getNavTabBodyMap();
+
+                    // 遍历导航信息
+                    for (TabNav nav : navList) {
+                        // 将导航信息添加到映射中
+                        navTabMap.put(nav.getCaseId(), nav);
+                        // 遍历导航下的书籍信息
+                        for (TabNavBody item : nav.getNavList()) {
+                            // 检查书籍编号是否有效
+                            if (item.getBookNo() > 0) {
+
+                                // 将书籍信息添加到映射中
+                                navTabBodyMap.put(item.getBookNo(), item);
+                                // 加载书籍内容和方剂数据
+                                loadBookContent(tipsSingleData, item);
+                                loadFangData(tipsSingleData, item);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // 记录日志或进行其他异常处理
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 加载书籍内容
+     * 该方法根据书籍编号获取书籍章节信息，并将其存储在内存中
+     *
+     * @param tipsSingleData 单例数据对象，用于存储书籍内容
+     * @param item 导航信息中的书籍项
+     */
+    private void loadBookContent(Tips_Single_Data tipsSingleData, TabNavBody item) {
+        // 获取书籍章节列表
+        List<HH2SectionData> bookChapterList = ConvertEntity.getBookChapterDetailList(item.getBookNo());
+//        if (item.getBookNo() ==10001){
+//            EasyLog.print("加载了10001");
+//        }
+        // 检查章节列表是否已加载
+        if (bookChapterList != null && !bookChapterList.isEmpty()) {
+            // 将章节列表存储在内存中
+            tipsSingleData.getMapBookContent(item.getBookNo()).setContent(bookChapterList);
+            tipsSingleData.getMapBookContent(item.getBookNo()).setFangAliasDict(tipsSingleData.getFangAliasDict());
+            tipsSingleData.getMapBookContent(item.getBookNo()).setYaoAliasDict(tipsSingleData.getYaoAliasDict());
+        }
+    }
+
+    /**
+     * 加载方剂数据
+     * 该方法根据书籍编号获取方剂信息，并将其存储在内存中
+     *
+     * @param tipsSingleData 单例数据对象，用于存储方剂数据
+     * @param item 导航信息中的书籍项
+     */
+    private void loadFangData(Tips_Single_Data tipsSingleData, TabNavBody item) {
+        // 获取方剂列表
+        ArrayList<Fang> fangList = ConvertEntity.getFangDetailList(item.getBookNo());
+        // 检查方剂列表是否已加载
+        if (!fangList.isEmpty()) {
+            // 将方剂列表存储在内存中
+            tipsSingleData.getMapBookContent(item.getBookNo()).setFang(new HH2SectionData(fangList, 0, item.getBookName() + "方"));
+        }
+    }
     private void initUserLogin() {
         UserInfo userInfo = mUserInfoService.getLoginUserInfo();
         if (userInfo != null) {
@@ -115,7 +210,13 @@ public final class AppApplication extends Application {
 
         }
     }
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        // 释放资源，例如关闭数据库、清理缓存等
+        Tips_Single_Data.getInstance().onDestroy();
 
+    }
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
@@ -127,7 +228,6 @@ public final class AppApplication extends Application {
         // 清理所有图片内存缓存
         GlideApp.get(this).onLowMemory();
     }
-
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);

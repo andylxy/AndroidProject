@@ -4,23 +4,22 @@
     android:layout_height="wrap_content"
     android:gravity="center|left"
     android:orientation="horizontal"
-    android:padding="10dp">
+    android:padding="@dimen/dp_2">
 
     <ImageView
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:src="@drawable/ic_history_black_24dp" />
+        android:layout_width="@dimen/dp_20"
+        android:layout_height="@dimen/dp_20"
+        android:src="@drawable/magnify" />
 
 
     <TextView
         android:id="@+id/tv_history_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
         android:layout_marginLeft="5dp"
         android:text="chapter"
         android:textColor="@color/sys_protect_eye_word"
-        android:textSize="16sp" />
+        android:textSize="@dimen/sp_16" />
 
 
 </LinearLayout>

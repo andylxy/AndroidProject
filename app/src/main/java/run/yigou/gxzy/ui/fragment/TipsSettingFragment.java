@@ -1,6 +1,5 @@
 package run.yigou.gxzy.ui.fragment;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -9,7 +8,6 @@ import com.hjq.widget.view.SwitchButton;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
@@ -22,9 +20,8 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
     private SettingBar sb_setting_jk;
     private SwitchButton sb_setting_sh_switch;
     private SwitchButton sb_setting_jk_switch;
-    private Singleton_Net_Data tipsSingleData;
+    private Singleton_Net_Data singletonNetData;
     private int bookId = 0;
-    private final String preferenceKey = "shanghan3.1";
     //宋版伤寒,金匮显示设置
     private int showJinkui= AppConst.Show_Jinkui_Default;
     private int showShanghan= AppConst.Show_Shanghan_AllSongBan;
@@ -67,7 +64,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         if (args != null) {
             bookId = args.getInt("bookNo", 0);
         }
-        tipsSingleData = Tips_Single_Data.getInstance().getBookIdContent(bookId);
+        singletonNetData = Tips_Single_Data.getInstance().getMapBookContent(bookId);
         // 设置切换按钮的监听
         sb_setting_sh_switch.setOnCheckedChangeListener(this);
         sb_setting_jk_switch.setOnCheckedChangeListener(this);
@@ -77,7 +74,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
     private void showSettingSwitch() {
         // 默认初始化设置
         // 从 SharedPreferences 中读取设置值
-        SharedPreferences sharedPreferences = AppApplication.application.getSharedPreferences("shanghan3.1", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = Tips_Single_Data.getInstance().getSharedPreferences();
         setShowShanghan(sharedPreferences.getInt(AppConst.Key_Shanghan, 0));
         setShowJinkui(sharedPreferences.getInt(AppConst.Key_Jinkui, 1));
 
@@ -96,10 +93,10 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
             sb_setting_jk.setLeftText("不显示金匮要略・宋板");
         }
     }
+    // 获取 SharedPreferences 编辑器
+    SharedPreferences.Editor editor = Tips_Single_Data.getInstance().getSharedPreferences().edit();
 
     public void savePreferences() {
-        // 获取 SharedPreferences 编辑器
-        SharedPreferences.Editor editor = AppApplication.application.getSharedPreferences(preferenceKey, Context.MODE_PRIVATE).edit();
 
         // 保存显示选项
         editor.putInt("showShanghan", getShowShanghan()); // 商汉显示选项
@@ -144,7 +141,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         //保存设置
         savePreferences();
         //通知显示已经变更
-       tipsSingleData.shanghanShowUpdateNotification();
+       singletonNetData.shanghanShowUpdateNotification();
        // XEventBus.getDefault().post(new ShowUpdateNotificationEvent().setUpdateNotification(true));
 
     }
@@ -154,5 +151,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         super.onDestroy();
         // 注销事件
         //XEventBus.getDefault().unregister(this);
+        editor.clear(); // 清除所有数据
+        editor.apply();
     }
 }

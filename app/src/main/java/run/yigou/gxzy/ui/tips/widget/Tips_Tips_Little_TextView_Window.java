@@ -23,6 +23,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.manager.ReferenceManager;
@@ -122,6 +124,46 @@ public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
         return false; // 不是药上下文
     }
 
+
+    /**
+ * 过滤出符合条件的房产信息
+ * 该方法用于从一个数据列表中筛选出特定类型的房产（Fang），并进一步根据提供的字符串参数筛选出包含该字符串的房产信息
+ *
+ * @param sectionData 一个包含DataItem类型数据的列表，该列表可能包含各种类型的DataItem，包括房产信息
+ * @param finalStr1 用于筛选房产信息的字符串，通常代表某个关键词或标识
+ * @return 返回一个包含符合条件的房产信息的列表如果输入为空或没有找到符合条件的房产信息，返回空列表
+ *
+ * 注意：该方法在处理数据时，会根据系统的Android版本选择不同的处理方式，以利用Java 8及更高版本的流式处理特性
+ */
+public static List<? extends DataItem> filterFang(List<? extends DataItem> sectionData, String finalStr1) {
+    // 检查输入参数是否为空，如果任一参数为空，则返回空列表
+    if (sectionData == null || finalStr1 == null) {
+        return Collections.emptyList();
+    }
+
+    // 初始化数据列表，根据Android版本使用不同的方式初始化
+    List<? extends DataItem> dataItems = null;
+    // 当Android版本为N或更高时，使用Optional进行空值检查，并返回空列表作为默认值
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        dataItems = Optional.ofNullable(sectionData)
+                .orElse(Collections.emptyList());
+    }
+
+    // 再次检查Android版本，以确定是否可以使用Java 8的流式处理
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        // 使用流式处理过滤和转换数据列表，筛选出符合条件的房产信息
+        return dataItems.stream()
+                .filter(dataItem -> dataItem instanceof Fang)
+                .map(Fang.class::cast)
+                .filter(fang -> fang.hasYao(finalStr1))
+                .collect(Collectors.toList());
+    }
+    // 如果Android版本不满足条件，返回null
+    return null;
+}
+
+
+
     /**
      * 根据给定的药物名称获取SpannableStringBuilder对象，该对象包含了与药物相关的文本信息。
      * 这些信息包括药物自身的详细描述和包含该药物的方剂信息。
@@ -139,7 +181,7 @@ public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
         str = alias != null ? alias : str;
 
         // 仅在不限制方剂显示时进行处理
-     //   if (!onlyShowRelatedFang()) {
+        //   if (!onlyShowRelatedFang()) {
         if (true) {
             // 遍历药物数据
             // 空值检查
@@ -182,26 +224,30 @@ public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
             // List<DataItem> filteredFang = (List<DataItem>) TipsNetHelper.filter(sectionData.getData(), dataItem -> ((Fang) dataItem).hasYao(finalStr1));
 
             // 假设 TipsNetHelper.filter 方法已知返回类型为 List<DataItem>
-            List<DataItem> filteredFang = (List<DataItem>) TipsNetHelper.filter(
-                    sectionData.getData() != null ? sectionData.getData() : Collections.emptyList(),
-                    dataItem -> {
-                        if (dataItem instanceof Fang) {
-                            return ((Fang) dataItem).hasYao(finalStr1);
-                        }
-                        return false; // 或者抛出异常，取决于业务需求
-                    }
-            );
+            List<? extends DataItem> filteredFang = filterFang(sectionData.getData(), finalStr1);
+
+//            List<DataItem> filteredFang = (List<DataItem>) TipsNetHelper.filter(
+//                    sectionData.getData() != null ? sectionData.getData() : Collections.emptyList(),
+//                    dataItem -> {
+//                        if (dataItem instanceof Fang) {
+//                            return ((Fang) dataItem).hasYao(finalStr1);
+//                        }
+//                        return false; // 或者抛出异常，取决于业务需求
+//                    }
+//            );
 
 
             String finalStr = str;
             // 对筛选结果进行排序
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                filteredFang.sort(new Comparator<DataItem>() {
-                    @Override
-                    public int compare(DataItem dataItem1, DataItem dataItem2) {
-                        return ((Fang) dataItem1).compare((Fang) dataItem2, finalStr);
-                    }
-                });
+                if (filteredFang != null) {
+                    filteredFang.sort(new Comparator<DataItem>() {
+                        @Override
+                        public int compare(DataItem dataItem1, DataItem dataItem2) {
+                            return ((Fang) dataItem1).compare((Fang) dataItem2, finalStr);
+                        }
+                    });
+                }
             } else {
                 Collections.sort(filteredFang, new Comparator<DataItem>() {
                     @Override
@@ -214,18 +260,20 @@ public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
             int matchedCount = 0;
 
             // 遍历筛选后的方剂
-            for (DataItem dataItem : filteredFang) {
-                for (String yaoName : dataItem.getYaoList()) {
-                    // 查找药物的别名
-                    String yaoAlias = yaoAliasDict.get(yaoName);
-                    yaoName = yaoAlias != null ? yaoAlias : yaoName;
+            if (filteredFang != null) {
+                for (DataItem dataItem : filteredFang) {
+                    for (String yaoName : dataItem.getYaoList()) {
+                        // 查找药物的别名
+                        String yaoAlias = yaoAliasDict.get(yaoName);
+                        yaoName = yaoAlias != null ? yaoAlias : yaoName;
 
-                    // 匹配方剂中的药物
-                    if (yaoName.equals(str)) {
-                        matchedCount++;
-                        // 添加方剂名称及其相关药物信息
-                        fangBuilder.append((CharSequence) TipsNetHelper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
-                        break; // 匹配后退出内层循环
+                        // 匹配方剂中的药物
+                        if (yaoName.equals(str)) {
+                            matchedCount++;
+                            // 添加方剂名称及其相关药物信息
+                            fangBuilder.append((CharSequence) TipsNetHelper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
+                            break; // 匹配后退出内层循环
+                        }
                     }
                 }
             }
@@ -268,8 +316,8 @@ public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
         }
 
         // 如果没有栈元素，检查当前显示的 Fragment 是否打开
-       // ShowFragment showFragment = singletonData.curFragment;
-       // return showFragment != null && showFragment.getIsContentOpen();
+        // ShowFragment showFragment = singletonData.curFragment;
+        // return showFragment != null && showFragment.getIsContentOpen();
         return true;
     }
 
@@ -482,7 +530,7 @@ public class Tips_Tips_Little_TextView_Window extends Tips_Little_Window {
     @Override
     public void onDestroy() {
         super.onDestroy();
-       // dismiss();
+        // dismiss();
         // 清除引用
         ReferenceManager.getInstance().removeReference(REFERENCE_KEY);
     }

@@ -1,7 +1,6 @@
 package run.yigou.gxzy.ui.activity;
 
 import android.content.Intent;
-import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -16,9 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import com.hjq.base.BaseAdapter;
-import com.hjq.http.EasyHttp;
 import com.hjq.http.EasyLog;
-import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 
@@ -26,27 +23,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import me.gujun.android.taggroup.TagGroup;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.common.URLCONST;
-import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.gen.TabNavBodyDao;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.service.SearchHistoryService;
 import run.yigou.gxzy.greendao.service.TabNavBodyService;
-import run.yigou.gxzy.greendao.service.TabNavService;
 import run.yigou.gxzy.greendao.util.DbService;
-import run.yigou.gxzy.http.api.HotBook;
-import run.yigou.gxzy.http.api.PageDataOptions;
-import run.yigou.gxzy.http.entitymodel.ChapterSearchRes;
-import run.yigou.gxzy.http.entitymodel.SearchKeyText;
-import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.adapter.SearchBookAdapter;
-import run.yigou.gxzy.ui.adapter.SearchBookDetailAdapter;
 import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.Search.SearchKey;
@@ -151,6 +137,11 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                 searchKey = editable.toString();
                 if (!StringHelper.isEmpty(searchKey)) {
                     search();
+                }else {
+                    llClearHistory.setVisibility(View.VISIBLE);
+                    llHistoryView.setVisibility(View.GONE);
+                    searchKeyTextList.clear();
+                    lvSearchBooksList.setVisibility(View.GONE);
                 }
 
             }
@@ -236,13 +227,14 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      */
     private void initHistoryList() {
         mSearchHistories = mSearchHistoryService.findAllSearchHistory();
-        if (mSearchHistories == null || mSearchHistories.size() == 0) {
+        if (mSearchHistories == null || mSearchHistories.isEmpty()) {
             llHistoryView.setVisibility(View.GONE);
             llClearHistory.setVisibility(View.GONE);
         } else {
             mSearchHistoryAdapter = new SearchHistoryAdapter(getActivity());
             mSearchHistoryAdapter.setData(mSearchHistories);
             mSearchHistoryAdapter.setOnItemClickListener(this);
+            lvHistoryList.addItemDecoration(new CustomDividerItemDecoration());
             lvHistoryList.setAdapter(mSearchHistoryAdapter);
             llClearHistory.setVisibility(View.VISIBLE);
             llHistoryView.setVisibility(View.VISIBLE);
@@ -299,7 +291,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         mSearchBookAdapter.setOnItemClickListener(this);
         mLvSearchBooks.setAdapter(mSearchBookAdapter);
         mLvSearchBooks.setVisibility(View.VISIBLE);
-        // mLlSuggestBooksView.setVisibility(View.GONE);
+        mLvSearchBooks.addItemDecoration(new CustomDividerItemDecoration());
 
     }
 
@@ -330,7 +322,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 //                    }
 //                });
 
-        Map<Integer, Singleton_Net_Data> singleDataMap = Tips_Single_Data.getInstance().getBookIdContent();
+        Map<Integer, Singleton_Net_Data> singleDataMap = Tips_Single_Data.getInstance().getMapBookContent();
         // 遍历 Map
         for (Map.Entry<Integer, Singleton_Net_Data> entry : singleDataMap.entrySet()) {
             Integer key = entry.getKey();
@@ -338,10 +330,19 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             ArrayList<HH2SectionData> filteredData = new ArrayList<>();
             // 处理键值对
             // 检查搜索文本是否有效（不为 null、不为空且不是数字）
-            if (searchKey != null && !searchKey.isEmpty()) {
-                SearchKeyEntity searchKeyEntity = new SearchKeyEntity(searchKey);
-                filteredData.addAll(TipsNetHelper.getSearchHh2SectionData(searchKeyEntity, value));
+            if (searchKey != null && !searchKey.isEmpty() && value != null) {
+                try {
+                    SearchKeyEntity searchKeyEntity = new SearchKeyEntity(searchKey);
+                    List<HH2SectionData> searchResults = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity, value);
+                    if (!searchResults .isEmpty()) {
+                        filteredData.addAll(searchResults);
+                    }
+                } catch (Exception e) {
+                    // 处理异常，例如记录日志或返回默认值
+                  EasyLog.print("Error occurred while fetching search results", e.getMessage());
+                }
             }
+
 
             if (!filteredData.isEmpty()) {
                 ArrayList<TabNavBody> keys = mTabNavBodyService.find(TabNavBodyDao.Properties.BookNo.eq(key));

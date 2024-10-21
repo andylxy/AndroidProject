@@ -56,7 +56,7 @@ public final class SearchBookAdapter extends AppAdapter<SearchKey> {
 
         private ViewHolder() {
             super(R.layout.book_search_book);
-            mIvSearchAvatar = findViewById(R.id.iv_search_avatar);
+            mIvSearchAvatar = findViewById(R.id.iv_search_flag);
             mTvSearchBookName = findViewById(R.id.tv_search_book_name);
             mTvSearchKeyCount = findViewById(R.id.tv_search_key_count);
 

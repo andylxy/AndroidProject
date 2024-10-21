@@ -34,18 +34,12 @@ public class GroupModel {
         try {
             // 获取高亮匹配文本
             Singleton_Net_Data singletonNetData = TipsNetHelper.createSingleDataCopy(showMingCiList);
-            if (singletonNetData == null) {
-                throw new NullPointerException("Singleton_Net_Data is null");
-            }
 
             // 创建搜索关键字实体
             SearchKeyEntity searchKeyEntity = new SearchKeyEntity(charSequence);
 
             // 获取过滤后的数据
             ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity, singletonNetData);
-            if (filteredData == null) {
-                throw new NullPointerException("FilteredData is null");
-            }
 
             // 初始化组列表
             ArrayList<GroupEntity> groups = new ArrayList<>();
