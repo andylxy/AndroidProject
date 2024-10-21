@@ -59,7 +59,7 @@
             </LinearLayout>
         </FrameLayout>
     </LinearLayout>
-    <run.yigou.gxzy.ui.tips.widget.Tips_ArrowView
+    <run.yigou.gxzy.ui.tips.widget.TipsArrowView
         android:id="@+id/arrow"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

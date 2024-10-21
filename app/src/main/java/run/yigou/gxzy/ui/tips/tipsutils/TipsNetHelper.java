@@ -29,7 +29,11 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import androidx.annotation.NonNull;
@@ -47,15 +51,16 @@ import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Show_Fan_Yao_MingCi;
-import run.yigou.gxzy.ui.tips.widget.Tips_Tips_Little_MingCiView_Window;
-import run.yigou.gxzy.ui.tips.widget.Tips_Tips_Little_TableView_Window;
-import run.yigou.gxzy.ui.tips.widget.Tips_Tips_Little_TextView_Window;
+import run.yigou.gxzy.ui.tips.DataBeans.Fang;
+import run.yigou.gxzy.ui.tips.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.widget.TipsLittleMingCiViewWindow;
+import run.yigou.gxzy.ui.tips.widget.TipsLittleTableViewWindow;
+import run.yigou.gxzy.ui.tips.widget.TipsLittleTextViewWindow;
 
 public class TipsNetHelper {
 
     public static @NonNull ArrayList<HH2SectionData> getSearchHh2SectionData(SearchKeyEntity searchKeyEntity,
-                                                                             Singleton_Net_Data singletonNetData) {
+                                                                             SingletonNetData singletonNetData) {
         // 将搜索词拆分并过滤掉空白项
         String[] searchTerms = searchKeyEntity.getSearchKeyText().split(" ");
         List<String> validSearchTerms = new ArrayList<>();
@@ -127,48 +132,48 @@ public class TipsNetHelper {
         return pattern;
     }
 
-    public interface IFilter<T> {
-        boolean filter(T t);
-    }
-
-    public static <T> List<T> filter(List<T> originalList, IFilter<T> filter) {
-        if (originalList == null || filter == null) {
-            throw new IllegalArgumentException("Original list and filter cannot be null");
-        }
-
-        boolean isStreamSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
-
-        List<T> filteredResults = new ArrayList<>();
-
-        if (isStreamSupported) {
-            // 使用 Stream API 进行过滤
-            filteredResults = originalList.stream()
-                    .filter(element -> {
-                        try {
-                            return filter.filter(element);
-                        } catch (Exception e) {
-                            // 处理异常，例如记录日志或采取其他措施
-                            EasyLog.print("Error occurred while filtering: " + e.getMessage());
-                            return false;
-                        }
-                    })
-                    .collect(Collectors.toList());
-        } else {
-            // 使用传统循环进行过滤
-            for (T element : originalList) {
-                try {
-                    if (filter.filter(element)) {
-                        filteredResults.add(element);
-                    }
-                } catch (Exception e) {
-                    // 处理异常，例如记录日志或采取其他措施
-                    EasyLog.print("Error occurred while filtering: " + e.getMessage());
-                }
-            }
-        }
-
-        return filteredResults; // 返回过滤后的列表
-    }
+//    public interface IFilter<T> {
+//        boolean filter(T t);
+//    }
+//
+//    public static <T> List<T> filter(List<T> originalList, IFilter<T> filter) {
+//        if (originalList == null || filter == null) {
+//            throw new IllegalArgumentException("Original list and filter cannot be null");
+//        }
+//
+//        boolean isStreamSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
+//
+//        List<T> filteredResults = new ArrayList<>();
+//
+//        if (isStreamSupported) {
+//            // 使用 Stream API 进行过滤
+//            filteredResults = originalList.stream()
+//                    .filter(element -> {
+//                        try {
+//                            return filter.filter(element);
+//                        } catch (Exception e) {
+//                            // 处理异常，例如记录日志或采取其他措施
+//                            EasyLog.print("Error occurred while filtering: " + e.getMessage());
+//                            return false;
+//                        }
+//                    })
+//                    .collect(Collectors.toList());
+//        } else {
+//            // 使用传统循环进行过滤
+//            for (T element : originalList) {
+//                try {
+//                    if (filter.filter(element)) {
+//                        filteredResults.add(element);
+//                    }
+//                } catch (Exception e) {
+//                    // 处理异常，例如记录日志或采取其他措施
+//                    EasyLog.print("Error occurred while filtering: " + e.getMessage());
+//                }
+//            }
+//        }
+//
+//        return filteredResults; // 返回过滤后的列表
+//    }
 
 
     /**
@@ -260,12 +265,10 @@ public class TipsNetHelper {
         if (textViewPosition == null || textViewPosition.length < 2) {
             return Float.NaN; // 返回 NaN 表示无效值
         }
-
         // 计算滚动偏移量
         int positionY = textViewPosition[1]; // 文本视图的位置 Y 坐标
         int scrollY = textView.getScrollY(); // 当前滚动的 Y 偏移量
         int paddingTop = textView.getCompoundPaddingTop(); // 上方内边距
-
         return positionY - scrollY + paddingTop;
     }
 
@@ -532,7 +535,6 @@ public class TipsNetHelper {
                 break; // 跳出循环
             }
         }
-
         return spannableStringBuilder; // 返回最终的SpannableStringBuilder
     }
 
@@ -588,8 +590,7 @@ public class TipsNetHelper {
         Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
     }
 
-    // 创建 MenuDialog 实例
-    // public static MenuDialog.Builder menuDialogBuilder;
+
     // 同时初始化数据
     private static List<String> data = Arrays.asList("拷贝内容", "跳转到本章内容"/*, "拷贝全部结果"*/);
 
@@ -610,20 +611,20 @@ public class TipsNetHelper {
      * @throws IllegalArgumentException 如果提供的明词列表为空或为null
      * @throws IllegalStateException 如果无法获取单例数据实例
      */
-    public static Singleton_Net_Data createSingleDataCopy(List<HH2SectionData> mingCiList) {
+    public static SingletonNetData createSingleDataCopy(List<HH2SectionData> mingCiList) {
         // 检查输入的明词列表是否为空或为null，如果满足条件，则抛出异常
         if (mingCiList == null || mingCiList.isEmpty()) {
             throw new IllegalArgumentException("mingCiList cannot be null or empty");
         }
 
         // 获取单例数据实例
-        Singleton_Net_Data singletonData = Singleton_Net_Data.getInstance();
+        SingletonNetData singletonData = SingletonNetData.getInstance();
 
         // 成功获取单例数据实例后，打印日志
         EasyLog.print("成功获取数据 Singleton_Net_Data");
 
         // 深拷贝当前的书籍的药和药方数据
-        Singleton_Net_Data singletonDataInstance = Tips_Single_Data.getInstance().getCurSingletonData();
+        SingletonNetData singletonDataInstance = TipsSingleData.getInstance().getCurSingletonData();
 
         // 如果当前单例数据实例不为null，则复制别名字典
         if (singletonDataInstance != null) {
@@ -644,9 +645,160 @@ public class TipsNetHelper {
         return singletonData;
     }
 
-    private static void copyAliasDictionaries(Singleton_Net_Data target, Singleton_Net_Data source) {
+    private static void copyAliasDictionaries(SingletonNetData target, SingletonNetData source) {
         target.setYaoAliasDict(new HashMap<>(source.getYaoAliasDict()));
         target.setFangAliasDict(new HashMap<>(source.getFangAliasDict()));
+    }
+
+    /**
+     * 过滤出符合条件的房产信息
+     * 该方法用于从一个数据列表中筛选出特定类型的房产（Fang），并进一步根据提供的字符串参数筛选出包含该字符串的房产信息
+     *
+     * @param sectionData 一个包含DataItem类型数据的列表，该列表可能包含各种类型的DataItem，包括房产信息
+     * @param finalStr1 用于筛选房产信息的字符串，通常代表某个关键词或标识
+     * @return 返回一个包含符合条件的房产信息的列表如果输入为空或没有找到符合条件的房产信息，返回空列表
+     *
+     * 注意：该方法在处理数据时，会根据系统的Android版本选择不同的处理方式，以利用Java 8及更高版本的流式处理特性
+     */
+    public static List<? extends DataItem> filterFang(List<? extends DataItem> sectionData, String finalStr1) {
+        // 检查输入参数是否为空，如果任一参数为空，则返回空列表
+        if (sectionData == null || finalStr1 == null) {
+            return Collections.emptyList();
+        }
+
+        // 初始化数据列表，根据Android版本使用不同的方式初始化
+        List<? extends DataItem> dataItems = null;
+        // 当Android版本为N或更高时，使用Optional进行空值检查，并返回空列表作为默认值
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            dataItems = Optional.ofNullable(sectionData)
+                    .orElse(Collections.emptyList());
+        }
+
+        // 再次检查Android版本，以确定是否可以使用Java 8的流式处理
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // 使用流式处理过滤和转换数据列表，筛选出符合条件的房产信息
+            return dataItems.stream()
+                    .filter(dataItem -> dataItem instanceof Fang)
+                    .map(Fang.class::cast)
+                    .filter(fang -> fang.hasYao(finalStr1))
+                    .collect(Collectors.toList());
+        }
+        // 如果Android版本不满足条件，返回null
+        return null;
+    }
+
+
+    /**
+     * 根据给定的药物名称获取SpannableStringBuilder对象，该对象包含了与药物相关的文本信息。
+     * 这些信息包括药物自身的详细描述和包含该药物的方剂信息。
+     *
+     * @param str 药物名称，用于查询和生成相关信息。
+     * @return SpannableStringBuilder 包含药物详细信息和相关方剂信息的SpannableStringBuilder对象。
+     */
+    public static SpannableStringBuilder getSpanString(String str) {
+        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
+
+        Map<String, String> yaoAliasDict =  TipsSingleData.getInstance().getYaoAliasDict();
+
+        // 获取药物的别名，若无则保留原名
+        String alias = yaoAliasDict.get(str);
+        str = alias != null ? alias : str;
+
+        // 仅在不限制方剂显示时进行处理
+        //   if (!onlyShowRelatedFang()) {
+        if (true) {
+            // 遍历药物数据
+            // 空值检查
+            if (TipsSingleData.getInstance().getYaoMap() == null) {
+                throw new IllegalArgumentException("tipsSingleData or yaoMap is null");
+            }
+            Map<String, Yao> yaoMap =  TipsSingleData.getInstance().getYaoMap();
+            Yao yaoData = yaoMap.get(str);
+            if (yaoData == null) {
+                // 处理 yaoData 为 null 的情况
+                return spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText("$r{药物未找到资料}"));
+            }
+
+            // 获取药物名称并查找别名
+            String yaoName = yaoData.getName();
+            String yaoAlias = yaoAliasDict.get(yaoName);
+            yaoName = yaoAlias != null ? yaoAlias : yaoName;
+
+            // 如果药物名称匹配，则添加其相关信息
+            if (Objects.equals(yaoName, str)) {
+                spannableStringBuilder.append((CharSequence) yaoData.getAttributedText());
+            }
+
+            // 如果没有找到相关药物，添加提示信息
+            if (spannableStringBuilder.length() == 0) {
+                spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText("$r{药物未找到资料}"));
+            }
+            spannableStringBuilder.append("\n\n");
+        }
+
+        // 处理方剂数据
+        int sectionCount = 0;
+        for (HH2SectionData sectionData :  TipsSingleData.getInstance().getCurSingletonData().getFang()) {
+            SpannableStringBuilder fangBuilder = new SpannableStringBuilder();
+
+            // 筛选与药物相关的方剂
+            String finalStr1 = str;
+            // 假设 TipsNetHelper.filter 方法已知返回类型为 List<DataItem>
+            List<? extends DataItem> filteredFang = filterFang(sectionData.getData(), finalStr1);
+            String finalStr = str;
+            // 对筛选结果进行排序
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                if (filteredFang != null) {
+                    filteredFang.sort(new Comparator<DataItem>() {
+                        @Override
+                        public int compare(DataItem dataItem1, DataItem dataItem2) {
+                            return ((Fang) dataItem1).compare((Fang) dataItem2, finalStr);
+                        }
+                    });
+                }
+            } else {
+                Collections.sort(filteredFang, new Comparator<DataItem>() {
+                    @Override
+                    public int compare(DataItem dataItem1, DataItem dataItem2) {
+                        return ((Fang) dataItem1).compare((Fang) dataItem2, finalStr);
+                    }
+                });
+            }
+
+            int matchedCount = 0;
+
+            // 遍历筛选后的方剂
+            if (filteredFang != null) {
+                for (DataItem dataItem : filteredFang) {
+                    for (String yaoName : dataItem.getYaoList()) {
+                        // 查找药物的别名
+                        String yaoAlias = yaoAliasDict.get(yaoName);
+                        yaoName = yaoAlias != null ? yaoAlias : yaoName;
+
+                        // 匹配方剂中的药物
+                        if (yaoName.equals(str)) {
+                            matchedCount++;
+                            // 添加方剂名称及其相关药物信息
+                            fangBuilder.append((CharSequence) TipsNetHelper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
+                            break; // 匹配后退出内层循环
+                        }
+                    }
+                }
+            }
+
+            // 添加方剂标题和匹配药物数量
+            if (matchedCount > 0) {
+                if (sectionCount > 0) {
+                    spannableStringBuilder.append("\n\n"); // 分隔不同方剂
+                }
+                spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText(
+                        String.format("$m{%s}-$m{含“$v{%s}”凡%d方：}", sectionData.getHeader(), str, matchedCount)));
+                spannableStringBuilder.append("\n").append(fangBuilder);
+                sectionCount++;
+            }
+        }
+
+        return spannableStringBuilder; // 返回最终构建的字符串
     }
 
 
@@ -655,34 +807,26 @@ public class TipsNetHelper {
 
             @Override
             public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
-
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-                Tips_Tips_Little_TextView_Window tipsLittleTextViewWindow = new Tips_Tips_Little_TextView_Window();
+                TipsLittleTextViewWindow tipsLittleTextViewWindow = new TipsLittleTextViewWindow();
                 tipsLittleTextViewWindow.setYao(charSequence);
-                //tipsLittleTextViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
                 tipsLittleTextViewWindow.setRect(textRect);
-
-                //  tipsLittleTextViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
                 tipsLittleTextViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
             }
-
 
             @Override
             public void clickFangLink(TextView textView, ClickableSpan clickableSpan) {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("Fang--tapped:" + charSequence);
-                List<HH2SectionData> mingCiList = Show_Fan_Yao_MingCi.getInstance().showFangTwo(charSequence);
+                List<HH2SectionData> mingCiList = ShowFanYaoMingCi.getInstance().showFangTwo(charSequence);
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
-
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-                Tips_Tips_Little_TableView_Window tipsLittleTableViewWindow = new Tips_Tips_Little_TableView_Window();
+                TipsLittleTableViewWindow tipsLittleTableViewWindow = new TipsLittleTableViewWindow();
                 tipsLittleTableViewWindow.setAdapterSource(textView.getContext(), groups);
                 tipsLittleTableViewWindow.setFang(charSequence);
-                tipsLittleTableViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
                 tipsLittleTableViewWindow.setRect(textRect);
-                //  tipsLittleTableViewWindow.show(Tips_Single_Data.getInstance().curActivity.getFragmentManager());
                 tipsLittleTableViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
             }
 
@@ -695,13 +839,12 @@ public class TipsNetHelper {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("MingCi---tapped:" + charSequence);
-                List<HH2SectionData> mingCiList = Show_Fan_Yao_MingCi.getInstance().showMingCiTwo(charSequence);
+                List<HH2SectionData> mingCiList = ShowFanYaoMingCi.getInstance().showMingCiTwo(charSequence);
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-                Tips_Tips_Little_MingCiView_Window tipsLittleTableViewWindow = new Tips_Tips_Little_MingCiView_Window();
+                TipsLittleMingCiViewWindow tipsLittleTableViewWindow = new TipsLittleMingCiViewWindow();
                 tipsLittleTableViewWindow.setAdapterSource(textView.getContext(), groups);
                 tipsLittleTableViewWindow.setFang(charSequence);
-                //littleTableViewWindow.setAttributedString(new SpannableStringBuilder(textView.getText()));
                 tipsLittleTableViewWindow.setRect(textRect);
                 tipsLittleTableViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
             }

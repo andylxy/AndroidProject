@@ -10,8 +10,8 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
-import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
+import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
 
 public final class TipsSettingFragment extends AppFragment<AppActivity> implements SwitchButton.OnCheckedChangeListener {
@@ -20,7 +20,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
     private SettingBar sb_setting_jk;
     private SwitchButton sb_setting_sh_switch;
     private SwitchButton sb_setting_jk_switch;
-    private Singleton_Net_Data singletonNetData;
+    private SingletonNetData singletonNetData;
     private int bookId = 0;
     //宋版伤寒,金匮显示设置
     private int showJinkui= AppConst.Show_Jinkui_Default;
@@ -64,7 +64,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         if (args != null) {
             bookId = args.getInt("bookNo", 0);
         }
-        singletonNetData = Tips_Single_Data.getInstance().getMapBookContent(bookId);
+        singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
         // 设置切换按钮的监听
         sb_setting_sh_switch.setOnCheckedChangeListener(this);
         sb_setting_jk_switch.setOnCheckedChangeListener(this);
@@ -74,7 +74,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
     private void showSettingSwitch() {
         // 默认初始化设置
         // 从 SharedPreferences 中读取设置值
-        SharedPreferences sharedPreferences = Tips_Single_Data.getInstance().getSharedPreferences();
+        SharedPreferences sharedPreferences = TipsSingleData.getInstance().getSharedPreferences();
         setShowShanghan(sharedPreferences.getInt(AppConst.Key_Shanghan, 0));
         setShowJinkui(sharedPreferences.getInt(AppConst.Key_Jinkui, 1));
 
@@ -94,7 +94,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         }
     }
     // 获取 SharedPreferences 编辑器
-    SharedPreferences.Editor editor = Tips_Single_Data.getInstance().getSharedPreferences().edit();
+    SharedPreferences.Editor editor = TipsSingleData.getInstance().getSharedPreferences().edit();
 
     public void savePreferences() {
 

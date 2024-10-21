@@ -14,13 +14,12 @@ import run.yigou.gxzy.greendao.entity.YaoFangBody;
 import run.yigou.gxzy.greendao.entity.ZhongYao;
 import run.yigou.gxzy.greendao.gen.BookChapterDao;
 import run.yigou.gxzy.greendao.gen.YaoFangDao;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Fang;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.YaoUse;
+import run.yigou.gxzy.ui.tips.DataBeans.Fang;
+import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
+import run.yigou.gxzy.ui.tips.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.DataBeans.YaoUse;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
 
 public class ConvertEntity {
     public static List<HH2SectionData> getBookChapterDetailList(int bookId) {

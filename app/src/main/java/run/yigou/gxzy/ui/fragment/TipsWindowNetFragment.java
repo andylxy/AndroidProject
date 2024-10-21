@@ -19,7 +19,6 @@ import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,7 +38,6 @@ import run.yigou.gxzy.greendao.service.BookChapterBodyService;
 import run.yigou.gxzy.greendao.service.BookChapterService;
 import run.yigou.gxzy.greendao.service.YaoFangBodyService;
 import run.yigou.gxzy.greendao.service.YaoFangService;
-import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookContentApi;
 import run.yigou.gxzy.http.api.BookFangApi;
@@ -47,12 +45,12 @@ import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Fang;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.YaoUse;
+import run.yigou.gxzy.ui.tips.DataBeans.Fang;
+import run.yigou.gxzy.ui.tips.DataBeans.YaoUse;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
-import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
+import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
@@ -80,11 +78,11 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
     /**
      * singleData 所有书籍 数据单例
      */
-    Tips_Single_Data singleData;
+    TipsSingleData singleData;
     /**
      * 当前点击书本数据
      */
-    Singleton_Net_Data singletonNetData;
+    SingletonNetData singletonNetData;
     private BookChapterService mBookChapterService;
     private BookChapterBodyService mBookChapterBodyService;
     private YaoFangService mYaoFangService;
@@ -111,7 +109,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
 
     @Override
     protected void initData() {
-        singleData = Tips_Single_Data.getInstance();
+        singleData = TipsSingleData.getInstance();
         // List<BookInfoNav.Bean.NavList> navList =mNavList;
         mAdapter.setData(analogData());
         // 获取数据表服务
@@ -136,7 +134,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
         bookId = mAdapter.getItem(position).getBookNo();
-        singletonNetData = Tips_Single_Data.getInstance().getMapBookContent(bookId);
+        singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
         singletonNetData.setYaoAliasDict(singleData.getYaoAliasDict());
         singletonNetData.setFangAliasDict(singleData.getFangAliasDict());
         getBookData(bookId);
@@ -196,7 +194,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
 
 
         //加载书本相关的药方
-        TabNavBody tabNav = Tips_Single_Data.getInstance().getNavTabBodyMap().get(bookId);
+        TabNavBody tabNav = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
         StringBuilder fangName = new StringBuilder("\n");
         if (tabNav != null) {
             fangName.append(tabNav.getBookName());

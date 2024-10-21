@@ -77,41 +77,9 @@
             android:label="@string/search_content"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
-        <!-- 书本信息 -->
-        <activity
-            android:name=".ui.activity.FontsActivity"
-            android:label="@string/font"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-        <!-- 书本信息 -->
-        <activity
-            android:name=".ui.activity.BookInfoActivity"
-            android:label="@string/book_data_title"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-        <!-- 书本信息 -->
-        <activity
-            android:name=".ui.activity.TitleDicActivity"
-            android:label="@string/book_data_title_dic"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-        <!-- 阅读内容 -->
-        <activity
-            android:name=".ui.activity.BookReadActivity"
-            android:label="@string/book_data_content"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
 
-        <activity
-            android:name=".ui.activity.TipsBookInfoActivity"
-            android:label="@string/tips_book_data_title"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.activity.TipsBookReadActivity"
-            android:label="@string/tips_book_data_content"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
+  
+
         <activity
             android:name=".ui.activity.TipsFragmentActivity"
             android:label="@string/tips_book_data_content"

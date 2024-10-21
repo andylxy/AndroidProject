@@ -20,7 +20,7 @@ import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.glide.GlideApp;
-import run.yigou.gxzy.ui.activity.BookReadActivity;
+
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.adapter.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
@@ -133,7 +133,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
         if (book == null) {
             toast("书本异常.请删除后,重新加入书架");
         } else {
-            BookReadActivity.start(getActivity(), book);
+           // BookReadActivity.start(getActivity(), book);
 
         }
     }

@@ -20,7 +20,7 @@ import java.util.List;
 
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
+import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 
 
@@ -33,7 +33,7 @@ public class GroupModel {
 
         try {
             // 获取高亮匹配文本
-            Singleton_Net_Data singletonNetData = TipsNetHelper.createSingleDataCopy(showMingCiList);
+            SingletonNetData singletonNetData = TipsNetHelper.createSingleDataCopy(showMingCiList);
 
             // 创建搜索关键字实体
             SearchKeyEntity searchKeyEntity = new SearchKeyEntity(charSequence);

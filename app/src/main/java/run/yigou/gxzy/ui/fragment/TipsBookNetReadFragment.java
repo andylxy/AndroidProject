@@ -24,7 +24,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
@@ -37,7 +36,6 @@ import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
@@ -45,9 +43,9 @@ import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
+import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
-import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
 
 public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
@@ -74,7 +72,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         return R.layout.tips_book_read_activity_group_list;
     }
 
-    Singleton_Net_Data singletonNetData;
+    SingletonNetData singletonNetData;
 
     /**
      *
@@ -129,16 +127,16 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             bookId = args.getInt("bookNo", 0);
         }
         //获取指定书籍数据
-        singletonNetData = Tips_Single_Data.getInstance().getMapBookContent(bookId);
+        singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
         //兼容处理宋版伤寒,
         if (bookId == AppConst.ShangHanNo) {
             // 默认初始化设置  宋版伤寒,金匮显示
             // 从 SharedPreferences 中读取设置值
-            SharedPreferences sharedPreferences = Tips_Single_Data.getInstance().getSharedPreferences();
+            SharedPreferences sharedPreferences = TipsSingleData.getInstance().getSharedPreferences();
             showShanghan = sharedPreferences.getInt(AppConst.Key_Shanghan, 0);
             showJinkui = sharedPreferences.getInt(AppConst.Key_Jinkui, 1);
             // 加载数据处理监听
-            singletonNetData.setOnContentUpdateListener(new Singleton_Net_Data.OnContentUpdateListener() {
+            singletonNetData.setOnContentUpdateListener(new SingletonNetData.OnContentUpdateListener() {
                 @Override
                 public ArrayList<HH2SectionData> contentDateUpdate(ArrayList<HH2SectionData> contentList) {
                     if (contentList == null || contentList.isEmpty()) {
@@ -171,7 +169,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             });
 
             //宋版显示修改通知
-            singletonNetData.setOnContentShowStatusNotification(new Singleton_Net_Data.OnContentShowStatusNotification() {
+            singletonNetData.setOnContentShowStatusNotification(new SingletonNetData.OnContentShowStatusNotification() {
                 @Override
                 public void contentShowStatusNotification(int status) {
                     //刷新数据显示

@@ -51,7 +51,6 @@ import run.yigou.gxzy.other.ToastStyle;
 import com.hjq.gson.factory.GsonFactory;
 import com.hjq.gson.factory.ParseExceptionCallback;
 import com.hjq.http.EasyConfig;
-import com.hjq.http.EasyLog;
 import com.hjq.toast.ToastUtils;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.tencent.mmkv.MMKV;
@@ -61,12 +60,11 @@ import java.util.List;
 import java.util.Map;
 
 import okhttp3.OkHttpClient;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Fang;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.DataBeans.Fang;
+import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
+import run.yigou.gxzy.ui.tips.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
-import run.yigou.gxzy.utils.ThreadUtil;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import timber.log.Timber;
 
 /**
@@ -121,16 +119,16 @@ public final class AppApplication extends Application {
                 return;
             }
             ArrayList<Yao>  yaoData = ConvertEntity.getYaoData();
-            Tips_Single_Data.getInstance().setYaoData(new HH2SectionData(yaoData, 0, "伤寒金匮所有药物"));
+            TipsSingleData.getInstance().setYaoData(new HH2SectionData(yaoData, 0, "伤寒金匮所有药物"));
             ArrayList<MingCiContent>   mingCiContentList =  ConvertEntity.getMingCi();
-            Tips_Single_Data.getInstance().setMingCiData(new HH2SectionData(mingCiContentList, 0, "医书相关的名词说明"));
+            TipsSingleData.getInstance().setMingCiData(new HH2SectionData(mingCiContentList, 0, "医书相关的名词说明"));
 
             // 从数据库中加载所有导航信息
             ArrayList<TabNav> navList = dbService.mTabNavService.findAll();
             // 检查导航信息是否已加载
             if (navList != null && !navList.isEmpty()) {
                 // 获取单例数据对象
-                Tips_Single_Data tipsSingleData = Tips_Single_Data.getInstance();
+                TipsSingleData tipsSingleData = TipsSingleData.getInstance();
                 // 同步以确保线程安全
                 synchronized (tipsSingleData) {
                     // 获取导航信息和书籍内容的映射
@@ -169,7 +167,7 @@ public final class AppApplication extends Application {
      * @param tipsSingleData 单例数据对象，用于存储书籍内容
      * @param item 导航信息中的书籍项
      */
-    private void loadBookContent(Tips_Single_Data tipsSingleData, TabNavBody item) {
+    private void loadBookContent(TipsSingleData tipsSingleData, TabNavBody item) {
         // 获取书籍章节列表
         List<HH2SectionData> bookChapterList = ConvertEntity.getBookChapterDetailList(item.getBookNo());
 //        if (item.getBookNo() ==10001){
@@ -191,7 +189,7 @@ public final class AppApplication extends Application {
      * @param tipsSingleData 单例数据对象，用于存储方剂数据
      * @param item 导航信息中的书籍项
      */
-    private void loadFangData(Tips_Single_Data tipsSingleData, TabNavBody item) {
+    private void loadFangData(TipsSingleData tipsSingleData, TabNavBody item) {
         // 获取方剂列表
         ArrayList<Fang> fangList = ConvertEntity.getFangDetailList(item.getBookNo());
         // 检查方剂列表是否已加载
@@ -214,7 +212,7 @@ public final class AppApplication extends Application {
     public void onTerminate() {
         super.onTerminate();
         // 释放资源，例如关闭数据库、清理缓存等
-        Tips_Single_Data.getInstance().onDestroy();
+        TipsSingleData.getInstance().onDestroy();
 
     }
     @Override

@@ -40,7 +40,6 @@ import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -72,10 +71,10 @@ import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;
 import run.yigou.gxzy.ui.adapter.TabAdapter;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.MingCiContent;
-import run.yigou.gxzy.ui.tips.tipsutils.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
+import run.yigou.gxzy.ui.tips.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.widget.XCollapsingToolbarLayout;
@@ -365,7 +364,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     @Override
                     public void onFail(Exception e) {
                         super.onFail(e);
-                        Map<Integer, TabNav>  tabNavMap = Tips_Single_Data.getInstance().getNavTabMap();
+                        Map<Integer, TabNav>  tabNavMap = TipsSingleData.getInstance().getNavTabMap();
                         if (tabNavMap != null && !tabNavMap.isEmpty()) {
                             // 遍历 Map
                             for (Map.Entry<Integer, TabNav>  entry : tabNavMap.entrySet()) {
@@ -401,7 +400,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         for (TabNavBody item : nav.getNavList()) {
 
             if (item.getBookNo() > 0)
-                Tips_Single_Data.getInstance().getNavTabBodyMap().put(item.getBookNo(), item);
+                TipsSingleData.getInstance().getNavTabBodyMap().put(item.getBookNo(), item);
             // 当前数据不存则,添加到数据库
             ArrayList<TabNavBody> list = mTabNavBodyService.find(TabNavBodyDao.Properties.BookNo.eq(item.getBookNo()));
             if (list == null || list.isEmpty()) {
@@ -430,7 +429,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                         if (data != null && !data.getData().isEmpty()) {
                             List<Yao> detailList = data.getData();
                             //加载所有药物的数据
-                            Tips_Single_Data.getInstance().setYaoData(new HH2SectionData(detailList, 0, "伤寒金匮所有药物"));
+                            TipsSingleData.getInstance().setYaoData(new HH2SectionData(detailList, 0, "伤寒金匮所有药物"));
                             isGetYaoData = false;
                             //保存内容
                             ThreadUtil.runInBackground(() -> {
@@ -511,7 +510,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                  if (data != null && !data.getData().isEmpty()) {
                                      List<MingCiContent> detailList = data.getData();
                                      //加载所有药物的数据
-                                     Tips_Single_Data.getInstance().setMingCiData(new HH2SectionData(detailList, 0, "医书相关的名词说明"));
+                                     TipsSingleData.getInstance().setMingCiData(new HH2SectionData(detailList, 0, "医书相关的名词说明"));
                                      isGetMingCiData = false;
                                      //保存内容
                                      ThreadUtil.runInBackground(() -> {

@@ -41,9 +41,9 @@ import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.Singleton_Net_Data;
+import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
-import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import run.yigou.gxzy.utils.StringHelper;
 
 /**
@@ -322,11 +322,11 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 //                    }
 //                });
 
-        Map<Integer, Singleton_Net_Data> singleDataMap = Tips_Single_Data.getInstance().getMapBookContent();
+        Map<Integer, SingletonNetData> singleDataMap = TipsSingleData.getInstance().getMapBookContent();
         // 遍历 Map
-        for (Map.Entry<Integer, Singleton_Net_Data> entry : singleDataMap.entrySet()) {
+        for (Map.Entry<Integer, SingletonNetData> entry : singleDataMap.entrySet()) {
             Integer key = entry.getKey();
-            Singleton_Net_Data value = entry.getValue();
+            SingletonNetData value = entry.getValue();
             ArrayList<HH2SectionData> filteredData = new ArrayList<>();
             // 处理键值对
             // 检查搜索文本是否有效（不为 null、不为空且不是数字）

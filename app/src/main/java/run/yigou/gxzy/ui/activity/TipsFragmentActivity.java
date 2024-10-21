@@ -14,7 +14,7 @@ import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.ui.fragment.TipsBookNetReadFragment;
 import run.yigou.gxzy.ui.fragment.TipsSettingFragment;
 import run.yigou.gxzy.ui.fragment.TipsUnitShowFragment;
-import run.yigou.gxzy.ui.tips.tipsutils.Tips_Single_Data;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
 public final class TipsFragmentActivity extends AppActivity {
 
@@ -88,7 +88,7 @@ public final class TipsFragmentActivity extends AppActivity {
             args.putInt("bookNo", bookId);  // 替换为实际参数
             fragment.setArguments(args);
 
-            TabNavBody tabNav = Tips_Single_Data.getInstance().getNavTabBodyMap().get(bookId);
+            TabNavBody tabNav = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
             StringBuilder stringBuilder = new StringBuilder("阅读器");
             if (tabNav != null) {
                 // 清空内容

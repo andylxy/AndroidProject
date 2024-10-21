@@ -22,8 +22,6 @@ import run.yigou.gxzy.ui.adapter.NavigationAdapter;
 import run.yigou.gxzy.ui.fragment.BookCollectCaseFragment;
 import run.yigou.gxzy.ui.fragment.FindFragment;
 import run.yigou.gxzy.ui.fragment.HomeFragment;
-import run.yigou.gxzy.ui.fragment.MessageFragment;
-import run.yigou.gxzy.ui.fragment.MineFragment;
 import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
 import run.yigou.gxzy.ui.fragment.MyMsgFragment;
 
