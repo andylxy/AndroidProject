@@ -71,6 +71,7 @@ import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;
 import run.yigou.gxzy.ui.adapter.TabAdapter;
+import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
@@ -179,7 +180,12 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     mTabView.setVisibility(View.GONE);
                     mViewPager.setVisibility(View.GONE);
                     llHistoryView.setVisibility(View.VISIBLE);
-                    llClearHistory.setVisibility(View.VISIBLE);
+                    mSearchHistories = mSearchHistoryService.findAllSearchHistory();
+                    if (!mSearchHistories.isEmpty()) {
+                        mSearchHistoryAdapter.notifyDataSetChanged();
+                        lvHistoryList.setVisibility(View.VISIBLE);
+                        llClearHistory.setVisibility(View.VISIBLE);
+                    }
 
                 } else {
                     // 当 EditText 失去焦点时，移除 TextWatcher
@@ -189,6 +195,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     llHistoryView.setVisibility(View.GONE);
                     llClearHistory.setVisibility(View.GONE);
                 }
+
             }
         });
         mTvHomeSearchText.setOnKeyListener((v, keyCode, event) -> {
@@ -254,7 +261,10 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         llClearHistory.setOnClickListener(v -> {
             mSearchHistoryService.clearHistory();
             mSearchHistories.clear();
+            mSearchHistoryAdapter.notifyDataSetChanged();
             llClearHistory.setVisibility(View.GONE);
+            llHistoryView.setVisibility(View.GONE);
+            lvHistoryList.setVisibility(View.GONE);
             toast("清空历史记录成功");
         });
 
@@ -276,6 +286,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mSearchHistoryAdapter.setData(mSearchHistories);
         mSearchHistoryAdapter.setOnItemClickListener(this);
         lvHistoryList.setAdapter(mSearchHistoryAdapter);
+        lvHistoryList.addItemDecoration(new CustomDividerItemDecoration());
         llHistoryView.setVisibility(View.GONE);
         llClearHistory.setVisibility(View.GONE);
     }
@@ -364,11 +375,11 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     @Override
                     public void onFail(Exception e) {
                         super.onFail(e);
-                        Map<Integer, TabNav>  tabNavMap = TipsSingleData.getInstance().getNavTabMap();
+                        Map<Integer, TabNav> tabNavMap = TipsSingleData.getInstance().getNavTabMap();
                         if (tabNavMap != null && !tabNavMap.isEmpty()) {
                             // 遍历 Map
-                            for (Map.Entry<Integer, TabNav>  entry : tabNavMap.entrySet()) {
-                               // Integer key = entry.getKey();
+                            for (Map.Entry<Integer, TabNav> entry : tabNavMap.entrySet()) {
+                                // Integer key = entry.getKey();
                                 TabNav value = entry.getValue();
                                 mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(value.getNavList()));
                                 mTabAdapter.addItem(value.getName());

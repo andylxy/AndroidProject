@@ -144,7 +144,7 @@
     <color name="nothing">#00000000</color>
     <!-- 半透明 -->
     <color name="translucent">#556495ED</color>
-
+    <color name="translucent2">#F4F4F4</color>
 
     <color name="sys_color">#338fcf</color>
     <!--<color name="sys_color"> #0056ad</color>-->

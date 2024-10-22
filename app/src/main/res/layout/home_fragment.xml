@@ -57,7 +57,7 @@
                         android:layout_marginHorizontal="@dimen/dp_10"
                         android:layout_weight="1"
                         android:gravity="left|center"
-                        android:hint="输入 | 关键字"
+                        android:hint="全局搜索 | 关键字"
                         android:paddingVertical="@dimen/dp_5"
                         android:paddingLeft="@dimen/dp_10"
                         android:textColor="@color/white60"

@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 
+import com.hjq.http.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 
@@ -96,15 +97,12 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                Log.d("clearEditText", "onTextChanged: " + s);
+                EasyLog.print("clearEditText", "onTextChanged: " + s);
                 if (charSequenceIsEmpty(s)) {
                     reListAdapter(true, false);
                     numTips.setText("");
-                    Log.d("clearEditText", "onTextChanged: 1");
-
                 } else {
                     setSearchText(s.toString());
-                    Log.d("clearEditText", "onTextChanged: 2");
                 }
             }
 
@@ -205,28 +203,13 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 numTips.setText("");
                 layoutManager.scrollToPositionWithOffset(groupPosition, 0);
                 adapter.expandGroup(groupPosition, true);
-//                getHandler().postDelayed(()->{
-//                   // rvList.scrollToPosition(groupPosition);
-//                    //scrollToPosition(position);
-//                    //rvList.smoothScrollToPosition(groupPosition);
-//                    layoutManager.scrollToPositionWithOffset(groupPosition, 0);
-//                    adapter.expandGroup(groupPosition, true);
-//                }, 50);
+
             }
         });
         rvList.setAdapter(adapter);
     }
 
 
-//    @Subscribe(priority = 1)
-//    public void onShowUpdateNotificationEvent(final ShowUpdateNotificationEvent event) {
-//        runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//              EasyLog.print("TipsBookNetReadFragment ==>  Thread is " + Thread.currentThread().getName() + " Thread, ShowUpdateNotificationEvent num=" + event.isUpdateNotification());
-//            }
-//        });
-//    }
 
 
     @Override
@@ -235,8 +218,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         singletonNetData.setOnContentShowStatusNotification(null);
         singletonNetData.setOnContentUpdateListener(null);
         adapter.setOnJumpSpecifiedItemListener(null);
-//        XEventBus.getDefault().unregister(this);
-//        EasyLog.print("TipsBookNetReadFragment ==>onClick");
+
     }
 
 

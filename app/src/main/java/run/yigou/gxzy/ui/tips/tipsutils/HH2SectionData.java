@@ -11,6 +11,7 @@
 package run.yigou.gxzy.ui.tips.tipsutils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class HH2SectionData implements Serializable {
@@ -46,7 +47,7 @@ public class HH2SectionData implements Serializable {
     }
 
     public List<? extends DataItem> getData() {
-        return this.data;
+        return  this.data;
     }
 
     public void setHeader(String header) {

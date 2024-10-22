@@ -65,6 +65,7 @@ import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+import run.yigou.gxzy.utils.ThreadUtil;
 import timber.log.Timber;
 
 /**
@@ -103,7 +104,8 @@ public final class AppApplication extends Application {
         // 初始化 ReferenceManager
         ReferenceManager.getInstance();
         //构造书籍数据
-        tipsSingleDataInit();
+        ThreadUtil.runInBackground(this::tipsSingleDataInit);
+
     }
 
     /**
@@ -143,7 +145,6 @@ public final class AppApplication extends Application {
                         for (TabNavBody item : nav.getNavList()) {
                             // 检查书籍编号是否有效
                             if (item.getBookNo() > 0) {
-
                                 // 将书籍信息添加到映射中
                                 navTabBodyMap.put(item.getBookNo(), item);
                                 // 加载书籍内容和方剂数据
