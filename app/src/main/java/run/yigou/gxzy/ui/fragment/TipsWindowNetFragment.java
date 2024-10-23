@@ -4,6 +4,7 @@ package run.yigou.gxzy.ui.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -46,6 +47,7 @@ import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
+import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.DataBeans.YaoUse;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
@@ -84,10 +86,6 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
      * 当前点击书本数据
      */
     SingletonNetData singletonNetData;
-    private BookChapterService mBookChapterService;
-    private BookChapterBodyService mBookChapterBodyService;
-    private YaoFangService mYaoFangService;
-    private YaoFangBodyService mYaoFangBodyService;
 
     @Override
     protected int getLayoutId() {
@@ -101,6 +99,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
         mAdapter = new BookInfoAdapter(getAttachActivity());
         mAdapter.setOnItemClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addItemDecoration(new CustomDividerItemDecoration(Color.parseColor("#F4F4F4"),2));
         mRefreshLayout.setOnRefreshLoadMoreListener(this);
         //表示禁用上拉加载更多功能。
         mRefreshLayout.setEnableLoadMore(false);
@@ -113,11 +112,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
         singleData = TipsSingleData.getInstance();
         // List<BookInfoNav.Bean.NavList> navList =mNavList;
         mAdapter.setData(analogData());
-        // 获取数据表服务
-        mBookChapterService = DbService.getInstance().mBookChapterService;
-        mBookChapterBodyService = DbService.getInstance().mBookChapterBodyService;
-        mYaoFangService = DbService.getInstance().mYaoFangService;
-        mYaoFangBodyService = DbService.getInstance().mYaoFangBodyService;
+
     }
 
 
@@ -222,84 +217,6 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                     }
                 });
     }
-
-
-//    private void procesFangDetailList(List<Fang> detailList) {
-//        if (detailList == null || detailList.isEmpty()) {
-//            EasyLog.print("detailList is empty or null.");
-//            return;
-//        }
-//
-//        try {
-//            StringBuilder chapterId = new StringBuilder();
-//            for (Fang fang : detailList) {
-//                chapterId.setLength(0);
-//                chapterId.append(StringHelper.getUuid());
-//                ArrayList<YaoFang> yaoFangList = mYaoFangService.find(YaoFangDao.Properties.SignatureId.eq(fang.getSignatureId()));
-//                if (yaoFangList != null && !yaoFangList.isEmpty()) {
-//                    YaoFang locYaoFang = yaoFangList.get(0);
-//                    locYaoFang.setText(fang.getText());
-//                    locYaoFang.setFangList(String.join(",", fang.getFangList()));
-//                    locYaoFang.setYaoList(String.join(",", fang.getYaoList()));
-//                    locYaoFang.setSignature(fang.getSignature());
-//                    locYaoFang.setName(fang.getName());
-//                    mYaoFangService.updateEntity(locYaoFang);
-//
-//                } else {
-//                    YaoFang yaoFang = new YaoFang();
-//                    yaoFang.setYaoCount(fang.getYaoCount());
-//                    yaoFang.setName(fang.getName());
-//                    yaoFang.setBookId(bookId);
-//                    yaoFang.setID(fang.getID());
-//                    yaoFang.setDrinkNum(fang.getDrinkNum());
-//                    yaoFang.setText(fang.getText());
-//                    yaoFang.setFangList(String.join(",", fang.getFangList()));
-//                    yaoFang.setYaoList(String.join(",", fang.getYaoList()));
-//                    yaoFang.setYaoFangID(chapterId.toString());
-//                    yaoFang.setSignature(fang.getSignature());
-//                    yaoFang.setSignatureId(fang.getSignatureId());
-//                    mYaoFangService.addEntity(yaoFang);
-//                }
-//
-//                for (YaoUse content : fang.getStandardYaoList()) {
-//                    ArrayList<YaoFangBody> yaoUseList = mYaoFangBodyService.find(YaoFangBodyDao.Properties.SignatureId.eq(content.getSignatureId()));
-//                    if (yaoUseList != null && !yaoUseList.isEmpty()) {
-//                        YaoFangBody locYaoFangBody = yaoUseList.get(0);
-//                        locYaoFangBody.setAmount(content.getAmount());
-//                        locYaoFangBody.setExtraProcess(content.getExtraProcess());
-//                        locYaoFangBody.setShowName(content.getShowName());
-//                        locYaoFangBody.setSignature(content.getSignature());
-//                        locYaoFangBody.setSuffix(content.getSuffix());
-//                        locYaoFangBody.setWeight(content.getWeight());
-//                        mYaoFangBodyService.updateEntity(locYaoFangBody);
-//                    } else {
-//                        YaoFangBody yaoFangBody = getYaoFangBody(content, chapterId);
-//                        mYaoFangBodyService.addEntity(yaoFangBody);
-//                    }
-//
-//                }
-//            }
-//        } catch (Exception e) {
-//            EasyLog.print("Error processing detail list: " + e.getMessage());
-//            throw e;
-//        }
-//    }
-//
-//    private static @NonNull YaoFangBody getYaoFangBody(YaoUse content, StringBuilder chapterId) {
-//        YaoFangBody yaoFangBody = new YaoFangBody();
-//        yaoFangBody.setYaoFangBodyId(StringHelper.getUuid());
-//        yaoFangBody.setYaoFangID(chapterId.toString());
-//        yaoFangBody.setSuffix(content.getSuffix());
-//        yaoFangBody.setAmount(content.getAmount());
-//        yaoFangBody.setYaoID(content.getYaoID());
-//        yaoFangBody.setWeight(content.getWeight());
-//        yaoFangBody.setShowName(content.getShowName());
-//        yaoFangBody.setExtraProcess(content.getExtraProcess());
-//        yaoFangBody.setSignatureId(content.getSignatureId());
-//        yaoFangBody.setSignature(content.getSignature());
-//        return yaoFangBody;
-//    }
-
 
     /**
      * {@link OnRefreshLoadMoreListener}

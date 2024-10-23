@@ -64,12 +64,12 @@ public final class BookCollectCaseAdapter extends AppAdapter<Book> {
             //mTextView.setText(getItem(position));
             if (getData() != null) {
                 Book item = getData().get(position);
-                tvBookName.setText(item.getName());
+                tvBookName.setText(item.getBookName());
                 tvBookAuthor.setText(item.getAuthor());
-                tvBookDesc.setText("     " + item.getDesc());
-                GlideApp.with(this.getItemView())
-                        .load(AppConfig.getHostUrl() + item.getImgUrl())
-                        .into(ivBookImg);
+//                tvBookDesc.setText("     " + item.getDesc());
+//                GlideApp.with(this.getItemView())
+//                        .load(AppConfig.getHostUrl() + item.getImgUrl())
+//                        .into(ivBookImg);
             }
         }
     }

@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
+import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BaseAdapter;
 import com.hjq.http.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
@@ -182,6 +183,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 
     private void init() {
         etSearchKey = findViewById(R.id.et_search_key);
+        // 给这个 View 设置沉浸式，避免状态栏遮挡
+        ImmersionBar.setTitleBar(this, findViewById(R.id.ll_search_key));
         tvSearchConform = findViewById(R.id.tv_search_conform);
         lvSearchBooksList = findViewById(R.id.lv_search_books_list);
         lvHistoryList = findViewById(R.id.lv_history_list);
@@ -348,7 +351,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      * 获取搜索数据
      */
     private void getData() {
-
+        searchKeyTextList.clear();
         singleDataMap = TipsSingleData.getInstance().getMapBookContent();
         // 遍历 Map
         for (Map.Entry<Integer, SingletonNetData> entry : singleDataMap.entrySet()) {
@@ -431,7 +434,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         }
     }
 
-    //    @Override
+//        @Override
 //    public boolean isStatusBarEnabled() {
 //        // 使用沉浸式状态栏
 //        return !super.isStatusBarEnabled();

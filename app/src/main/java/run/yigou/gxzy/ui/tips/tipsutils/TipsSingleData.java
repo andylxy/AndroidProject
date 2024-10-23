@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.greendao.entity.TabNav;
@@ -77,6 +79,7 @@ public class TipsSingleData {
     public void setCurBookId(int curBookId) {
         this.curBookId = curBookId;
     }
+
     private final String preferenceKey = "shanghan3.1";
     private final SharedPreferences sharedPreferences = AppApplication.application.getSharedPreferences(preferenceKey, Context.MODE_PRIVATE);
 
@@ -87,7 +90,6 @@ public class TipsSingleData {
     /**
      * 药物数据
      */
-    private HH2SectionData yaoData;
     private HH2SectionData mingCiData;
     private Map<String, MingCiContent> mingCiContentMap;
 
@@ -115,23 +117,64 @@ public class TipsSingleData {
 
     public void setYaoData(HH2SectionData yaoData) {
 
-        if (yaoData == null) return;
-        this.yaoData = yaoData;
         // 初始化并填充 allYao 列表
-        this.allYao = new ArrayList<>();
-        if (this.yaoMap == null) this.yaoMap = new HashMap<>();
-        for (DataItem item : this.yaoData.getData()) {
-            String str3 = item.getYaoList().get(0);
-            // 如果有别名映射，则替换
-            String str4 = this.yaoAliasDict.get(str3);
-            if (str4 != null) {
-                str3 = str4;
-            }
-            yaoMap.put(str3, (Yao) item);
-            this.allYao.add(str3);
+        if (this.allYao == null) {
+            this.allYao = new CopyOnWriteArrayList<>();
+        } else {
+            this.allYao.clear();
         }
 
+        if (this.yaoMap == null) {
+            this.yaoMap = new ConcurrentHashMap<>();
+        } else {
+            this.yaoMap.clear();
+        }
+
+        if ( yaoData.getData() == null) {
+            return;
+        }
+
+        for (DataItem item : yaoData.getData()) {
+            List<String> yaoList = item.getYaoList();
+            if (yaoList == null || yaoList.isEmpty()) {
+                continue;
+            }
+
+            String yaoStr = yaoList.get(0);
+            // 如果有别名映射，则替换
+            String alias = this.yaoAliasDict.get(yaoStr);
+            if (alias != null) {
+                yaoStr = alias;
+            }
+
+            yaoMap.put(yaoStr, (Yao) item);
+            this.allYao.add(yaoStr);
+        }
     }
+
+//    public void setYaoData(HH2SectionData yaoData) {
+//
+//        if (yaoData == null) return;
+//        this.yaoData = yaoData;
+//        // 初始化并填充 allYao 列表
+//        if (this.allYao == null)
+//            this.allYao = new ArrayList<>();
+//        else this.allYao.clear();
+//        if (this.yaoMap == null) this.yaoMap = new HashMap<>();
+//        else
+//            this.yaoMap.clear();
+//        for (DataItem item : this.yaoData.getData()) {
+//            String str3 = item.getYaoList().get(0);
+//            // 如果有别名映射，则替换
+//            String str4 = this.yaoAliasDict.get(str3);
+//            if (str4 != null) {
+//                str3 = str4;
+//            }
+//            yaoMap.put(str3, (Yao) item);
+//            this.allYao.add(str3);
+//        }
+//
+//    }
 
     private SingletonNetData curSingletonData;
 

@@ -14,26 +14,166 @@ import java.util.Objects;
 import run.yigou.gxzy.greendao.entity.BeiMingCi;
 import run.yigou.gxzy.greendao.entity.BookChapter;
 import run.yigou.gxzy.greendao.entity.BookChapterBody;
+import run.yigou.gxzy.greendao.entity.TabNav;
+import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.entity.YaoFang;
 import run.yigou.gxzy.greendao.entity.YaoFangBody;
 import run.yigou.gxzy.greendao.entity.ZhongYao;
+import run.yigou.gxzy.greendao.gen.BeiMingCiDao;
 import run.yigou.gxzy.greendao.gen.BookChapterBodyDao;
 import run.yigou.gxzy.greendao.gen.BookChapterDao;
+import run.yigou.gxzy.greendao.gen.TabNavBodyDao;
+import run.yigou.gxzy.greendao.gen.TabNavDao;
 import run.yigou.gxzy.greendao.gen.YaoFangBodyDao;
 import run.yigou.gxzy.greendao.gen.YaoFangDao;
+import run.yigou.gxzy.greendao.gen.ZhongYaoDao;
 import run.yigou.gxzy.ui.tips.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.DataBeans.YaoUse;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import run.yigou.gxzy.utils.StringHelper;
+import run.yigou.gxzy.utils.ThreadUtil;
 
 public class ConvertEntity {
 
 
+    public static void saveTabNvaInDb(TabNav nav, String tabNavId) {
+        // 当前数据不存则,添加到数据库
+        ArrayList<TabNav> navList =  DbService.getInstance().mTabNavService.find(TabNavDao.Properties.CaseId.eq(nav.getCaseId()));
+        if (navList == null || navList.isEmpty()) {
+            nav.setTabNavId(tabNavId);
+            try {
+                DbService.getInstance(). mTabNavService.addEntity(nav);
+            } catch (Exception e) {
+                // 处理异常，比如记录日志、通知管理员等
+                EasyLog.print("Failed to addEntity: " + e.getMessage());
+                // 根据具体情况决定是否需要重新抛出异常
+                //throw e;
+            }
+
+        } else {
+            tabNavId = navList.get(0).getTabNavId();
+        }
+        for (TabNavBody item : nav.getNavList()) {
+
+            if (item.getBookNo() > 0)
+                TipsSingleData.getInstance().getNavTabBodyMap().put(item.getBookNo(), item);
+            // 当前数据不存则,添加到数据库
+            ArrayList<TabNavBody> list =  DbService.getInstance().mTabNavBodyService.find(TabNavBodyDao.Properties.BookNo.eq(item.getBookNo()));
+            if (list == null || list.isEmpty()) {
+                item.setTabNavId(tabNavId);
+                item.setTabNavBodyId( DbService.getInstance().mTabNavBodyService.getUUID());
+                try {
+                    DbService.getInstance().mTabNavBodyService.addEntity(item);
+                } catch (Exception e) {
+                    // 处理异常，比如记录日志、通知管理员等
+                    EasyLog.print("Failed to addEntity: " + e.getMessage());
+                    // 根据具体情况决定是否需要重新抛出异常
+                    //throw e;
+                }
+
+            }
+        }
+    }
+
+
+
+
+    public static void saveMingCiContent(List<MingCiContent> detailList) {
+        for (MingCiContent mingCiContent : detailList) {
+
+            List<BeiMingCi> beiMingCiList = DbService.getInstance().mBeiMingCiService.getQueryBuilder().where(BeiMingCiDao.Properties.SignatureId.eq(mingCiContent.getSignatureId())).list();
+            if (beiMingCiList != null && !beiMingCiList.isEmpty()) {
+                BeiMingCi locBeiMingCi = beiMingCiList.get(0);
+                //有更新,与本地数据对比
+                if (!Objects.equals(locBeiMingCi.getSignature(), mingCiContent.getSignature())) {
+                    locBeiMingCi.setText(mingCiContent.getText());
+                    locBeiMingCi.setMingCiList(String.join(",", mingCiContent.getYaoList()));
+                    locBeiMingCi.setName(mingCiContent.getName());
+                    locBeiMingCi.setSignature(mingCiContent.getSignature());
+                    locBeiMingCi.setID(mingCiContent.getID());
+                    try {
+                        DbService.getInstance().mBeiMingCiService.updateEntity(locBeiMingCi);
+                    } catch (Exception e) {
+                        // 处理异常，比如记录日志、通知管理员等
+                        EasyLog.print("Failed to updateEntity: " + e.getMessage());
+                        // 根据具体情况决定是否需要重新抛出异常
+                        //throw e;
+                    }
+
+                }
+            } else {
+                BeiMingCi beiMingCi = new BeiMingCi();
+                beiMingCi.setText(mingCiContent.getText());
+                beiMingCi.setName(mingCiContent.getName());
+                beiMingCi.setMingCiList(String.join(",", mingCiContent.getYaoList()));
+                beiMingCi.setSignature(mingCiContent.getSignature());
+                beiMingCi.setSignatureId(mingCiContent.getSignatureId());
+                beiMingCi.setID(mingCiContent.getID());
+                //yao1.setHeight(yao.getHeight());
+                try {
+                    DbService.getInstance().mBeiMingCiService.addEntity(beiMingCi);
+                } catch (Exception e) {
+                    // 处理异常，比如记录日志、通知管理员等
+                    EasyLog.print("Failed to add entity: " + e.getMessage());
+                    // 根据具体情况决定是否需要重新抛出异常
+                    //throw e;
+                }
+            }
+        }
+    }
+
+
+    public static void saveYaoData(List<Yao> detailList) {
+        //保存内容
+
+        for (Yao yao : detailList) {
+            List<ZhongYao> zhongYaoList = DbService.getInstance().mYaoService.getQueryBuilder().where(ZhongYaoDao.Properties.SignatureId.eq(yao.getSignatureId())).list();
+            if (zhongYaoList != null && !zhongYaoList.isEmpty()) {
+                ZhongYao zhongYao = zhongYaoList.get(0);
+                //有更新,与本地数据对比
+                if (!Objects.equals(zhongYao.getSignature(), yao.getSignature())) {
+                    zhongYao.setText(yao.getText());
+                    zhongYao.setYaoList(String.join(",", yao.getYaoList()));
+                    zhongYao.setName(yao.getName());
+                    zhongYao.setSignature(yao.getSignature());
+                    zhongYao.setID(yao.getID());
+                    try {
+                        DbService.getInstance().mYaoService.updateEntity(zhongYao);
+                    } catch (Exception e) {
+                        // 处理异常，比如记录日志、通知管理员等
+                        EasyLog.print("Failed to updateEntity: " + e.getMessage());
+                        // 根据具体情况决定是否需要重新抛出异常
+                        //throw e;
+                    }
+                }
+            } else {
+
+                ZhongYao yao1 = new ZhongYao();
+                yao1.setText(yao.getText());
+                yao1.setName(yao.getName());
+                yao1.setYaoList(String.join(",", yao.getYaoList()));
+                yao1.setID(yao.getID());
+                yao1.setSignature(yao.getSignature());
+                yao1.setSignatureId(yao.getSignatureId());
+                try {
+                    DbService.getInstance().mYaoService.addEntity(yao1);
+                } catch (Exception e) {
+                    // 处理异常，比如记录日志、通知管理员等
+                    EasyLog.print("Failed to add entity: " + e.getMessage());
+                    // 根据具体情况决定是否需要重新抛出异常
+                    //throw e;
+                }
+            }
+        }
+    }
+
+
     public static void getFangDetailList(HH2SectionData locFangDetailList, List<Fang> netFangDetailList, int bookId) {
-        if (netFangDetailList == null || netFangDetailList.isEmpty() || bookId <= 0 || locFangDetailList == null|| locFangDetailList.getData() == null) {
+        if (netFangDetailList == null || netFangDetailList.isEmpty() || bookId <= 0 || locFangDetailList == null || locFangDetailList.getData() == null) {
             EasyLog.print("FangDetailList is empty or null.or  bookId <=0 .");
             return;
         }
@@ -297,7 +437,6 @@ public class ConvertEntity {
 
 
     }
-
 
     public static List<HH2SectionData> getBookChapterDetailList(int bookId) {
 

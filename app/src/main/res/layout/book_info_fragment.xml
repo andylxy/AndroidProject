@@ -16,6 +16,7 @@
             android:id="@+id/rv_status_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_margin="@dimen/dp_3"
             tools:listCount="10"
             tools:listitem="@layout/picker_item" />
     </com.scwang.smart.refresh.layout.SmartRefreshLayout>

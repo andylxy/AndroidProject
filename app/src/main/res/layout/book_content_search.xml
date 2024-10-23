@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="@dimen/dp_12"
     android:orientation="vertical">
 
     <!--    <com.hjq.bar.TitleBar-->
@@ -16,6 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_55"
         android:gravity="center"
+        android:id="@+id/ll_search_key"
         android:orientation="horizontal"
         android:paddingLeft="@dimen/dp_5"
         android:paddingTop="@dimen/dp_3"

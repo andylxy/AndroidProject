@@ -1,5 +1,7 @@
 package run.yigou.gxzy.ui.fragment;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,11 +19,14 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.greendao.entity.Book;
+import run.yigou.gxzy.greendao.gen.BookDao;
 import run.yigou.gxzy.greendao.service.BookService;
+import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.glide.GlideApp;
 
 import run.yigou.gxzy.ui.activity.HomeActivity;
+import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 
@@ -34,6 +39,7 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,13 +59,22 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     private BookCollectCaseAdapter mBookCollectCaseAdapter;
     private BookService mBookService;
     private SmartRefreshLayout mRefreshLayout;
-    public static  BookCollectCaseFragment mBookCollectCaseFragment;
-//    private ImageView mNobookImageView;
-//    private TextView mNoBtnTextView;
+        private BookCollectCaseFragment() {
+            // 私有构造函数，防止外部实例化
+            if (SingletonHolder.INSTANCE != null) {
+                throw new IllegalStateException("已经初始化，不允许再次创建实例");
+            }
+        }
 
-    public static BookCollectCaseFragment newInstance() {
-        return new BookCollectCaseFragment();
-    }
+        private static class SingletonHolder {
+            private static final BookCollectCaseFragment INSTANCE = new BookCollectCaseFragment();
+        }
+
+        public static BookCollectCaseFragment newInstance() {
+            return SingletonHolder.INSTANCE;
+        }
+
+
 
     @Override
     protected int getLayoutId() {
@@ -68,8 +83,6 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
 
     @Override
     protected void initView() {
-//        mNobookImageView = findViewById(R.id.ll_no_book);
-//        mNoBtnTextView = findViewById(R.id.ll_no_btn);
         mRefreshLayout = findViewById(R.id.rl_status_refresh);
         mLlNoDataTips = findViewById(R.id.ll_no_data_tips);
         mGvBook = findViewById(R.id.gv_book);
@@ -84,33 +97,30 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     @SingleClick
     @Override
     public void onClick(View view) {
-        int index =1;
-       // HomeActivity.start(getContext());
-        HomeActivity.mHomeActivity. switchFragment(index);
+        int index = 1;
+        // HomeActivity.start(getContext());
+        HomeActivity.mHomeActivity.switchFragment(index);
         HomeActivity.mHomeActivity.onNavigationItemSelected(index);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mBookCollectCaseFragment =null;
     }
 
     @Override
     protected void initData() {
         setTitle("书架");
-        mBookService = new BookService();
+        mBookService = DbService.getInstance().mBookService;
         mBookCollectCaseAdapter.setData(loadData());
-        mBookCollectCaseFragment=this;
-
     }
 
     private List<Book> loadData() {
-        List<Book> gvLisg = mBookService.getAllBooks();
-        if (gvLisg.size() > 0) {
+        List<Book> gvList = mBookService.getAllBooks();
+        if (!gvList.isEmpty()) {
             mLlNoDataTips.setVisibility(View.GONE);
             mRefreshLayout.setVisibility(View.VISIBLE);
-            return gvLisg;
+            return gvList;
         } else {
             mLlNoDataTips.setVisibility(View.VISIBLE);
             mRefreshLayout.setVisibility(View.GONE);
@@ -129,12 +139,20 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
         // toast(mBookCollectCaseAdapter.getItem(position));
 
-        Book book = mBookService.getBookById( mBookCollectCaseAdapter.getItem(position).getId());
-        if (book == null) {
+        ArrayList<Book> books = mBookService.find(BookDao.Properties.BookNo.eq(mBookCollectCaseAdapter.getItem(position).getBookNo()));
+        if (books == null || books.isEmpty()) {
             toast("书本异常.请删除后,重新加入书架");
         } else {
-           // BookReadActivity.start(getActivity(), book);
-
+            int bookId = books.get(0).getBookNo();
+            int bookLastReadPosition = books.get(0).getLastReadPosition();
+            // 启动跳转 到阅读窗口
+            Intent intent = new Intent(getContext(), TipsFragmentActivity.class);
+            intent.putExtra("bookId", bookId);
+            intent.putExtra("bookLastReadPosition", bookLastReadPosition);
+            if (!(getContext() instanceof Activity)) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
+            startActivity(intent);
         }
     }
 
@@ -148,11 +166,6 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
 
     @Override
     public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-        //        postDelayed(() -> {
-        //            mBookCollectCaseAdapter.clearData();
-        //            mBookCollectCaseAdapter.setData(loadData());
-        //            mRefreshLayout.finishRefresh();
-        //        }, 1000);
         RefreshLayout();
     }
 
@@ -172,7 +185,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
                     // 标题可以不用填写
                     .setTitle("删除")
                     // 内容必须要填写
-                    .setMessage(book.getName() + "")
+                    .setMessage(book.getBookName())
                     // 确定按钮文本
                     .setConfirm(getString(R.string.common_confirm))
                     // 设置 null 表示不显示取消按钮
@@ -180,20 +193,14 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
                     // 设置点击按钮后不关闭对话框
                     //.setAutoDismiss(false)
                     .setListener(new MessageDialog.OnListener() {
-
                         @Override
                         public void onConfirm(BaseDialog dialog) {
-                            Book book2 = mBookService.getBookById(book.getId());
-                            if (book2 != null) {
-                                mBookService.deleteBookById(book2.getId());
+                            ArrayList<Book> books = mBookService.find(BookDao.Properties.BookNo.eq(mBookCollectCaseAdapter.getItem(position).getBookNo()));
+                            if (books != null && !books.isEmpty()) {
+                                mBookService.deleteEntity(books.get(0));
                                 //刷新书架
                                 RefreshLayout();
                             }
-                        }
-
-                        @Override
-                        public void onCancel(BaseDialog dialog) {
-
                         }
                     })
                     .show();

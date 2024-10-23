@@ -36,9 +36,9 @@
                 android:id="@+id/ll_no_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="@dimen/dp_10"
                 android:text="当前无任何书籍，点击添加"
-                android:textSize="16sp" />
+                android:textSize="@dimen/sp_16" />
 
         </LinearLayout>
 
@@ -52,11 +52,9 @@
                 android:id="@+id/gv_book"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:divider="@color/nothing"
-                android:dividerHeight="10dp"
                 android:listSelector="@color/nothing"
                 android:overScrollMode="never"
-                android:padding="10dp" />
+                android:padding="@dimen/dp_5" />
         </com.scwang.smart.refresh.layout.SmartRefreshLayout>
     </RelativeLayout>
 </LinearLayout>

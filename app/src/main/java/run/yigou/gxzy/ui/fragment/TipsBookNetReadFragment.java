@@ -10,6 +10,8 @@
 
 package run.yigou.gxzy.ui.fragment;
 
+import static android.content.Intent.getIntent;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -18,16 +20,17 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 
+import com.hjq.base.BaseDialog;
 import com.hjq.http.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
@@ -39,6 +42,11 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.greendao.entity.Book;
+import run.yigou.gxzy.greendao.entity.TabNavBody;
+import run.yigou.gxzy.greendao.gen.BookDao;
+import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.ui.dialog.MessageDialog;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
@@ -50,20 +58,40 @@ import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
 
 public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
+    /**
+     *
+     */
     private WrapRecyclerView rvList;
     private ClearEditText clearEditText;
     private ExpandableAdapter adapter;
+    /**
+     *
+     */
     private TextView numTips;
+    /**
+     *
+     */
     private int bookId = 0;
+    private int bookLastReadPosition;
     private String searchText = null;
     private Button tipsBtnSearch;
 
     private int showShanghan;
     private int showJinkui;
-    LinearLayoutManager layoutManager;
+    private LinearLayoutManager layoutManager;
+    /**
+     * 当前选中的章节索引
+     */
+    private int currentIndex = -1;
+    /**
+     * 数据传递
+     */
+
+    private SingletonNetData singletonNetData;
 
     public TipsBookNetReadFragment() {
     }
+
 
     /**
      * @return
@@ -72,8 +100,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     protected int getLayoutId() {
         return R.layout.tips_book_read_activity_group_list;
     }
-
-    SingletonNetData singletonNetData;
 
     /**
      *
@@ -112,6 +138,77 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         });
         // 注册事件
         // XEventBus.getDefault().register(this);
+        //Fragment处理 返回键 动作
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                //  处理自定义逻辑
+                TabNavBody navTabBody = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
+                if (navTabBody != null) {
+                    ArrayList<Book> books = DbService.getInstance().mBookService.find(BookDao.Properties.BookNo.eq(navTabBody.getBookNo()));
+                    if (books == null || books.isEmpty()) {
+                        // 消息对话框
+                        new MessageDialog.Builder(getActivity())
+                                // 标题可以不用填写
+                                .setTitle("加入书架")
+                                // 内容必须要填写
+                                .setMessage(navTabBody.getBookName())
+                                // 确定按钮文本
+                                .setConfirm(getString(R.string.common_confirm))
+                                // 设置 null 表示不显示取消按钮
+                                .setCancel(getString(R.string.common_cancel))
+                                // 设置点击按钮后不关闭对话框
+                                //.setAutoDismiss(false)
+                                .setListener(new MessageDialog.OnListener() {
+
+                                    @Override
+                                    public void onConfirm(BaseDialog dialog) {
+                                        toast("加入书架");
+                                        // 添加数据
+                                        Book book = new Book();
+                                        book.setBookId(DbService.getInstance().mBookService.getUUID());
+                                        book.setBookNo(navTabBody.getBookNo());
+                                        book.setBookName(navTabBody.getBookName());
+                                        book.setAuthor(navTabBody.getAuthor());
+                                        book.setHistoriographerNumb(currentIndex == -1 ? 0 : currentIndex);
+                                        book.setLastReadPosition(currentIndex == -1 ? 0 : currentIndex);
+                                        DbService.getInstance().mBookService.addEntity(book);
+                                        // 刷新书架
+                                        BookCollectCaseFragment.newInstance().RefreshLayout();
+                                        // 允许系统处理返回键
+                                        postDelayed(() -> {
+                                            setEnabled(false); // 禁用当前回调
+                                            requireActivity().onBackPressed(); // 调用系统返回
+                                        }, 1500);
+                                    }
+
+                                    @Override
+                                    public void onCancel(BaseDialog dialog) {
+                                        toast("暂不加入书架");
+                                        // 允许系统处理返回键
+                                        postDelayed(() -> {
+                                            setEnabled(false); // 禁用当前回调
+                                            requireActivity().onBackPressed(); // 调用系统返回
+                                        }, 1500);
+                                    }
+                                })
+                                .show();
+                    } else {
+                        // 更新数据
+                        if (currentIndex != -1) {
+                            Book book = books.get(0);
+                            book.setLastReadPosition(currentIndex);
+                            book.setHistoriographerNumb(currentIndex);
+                            DbService.getInstance().mBookService.updateEntity(book);
+                        }
+                        // 允许系统处理返回键
+                        setEnabled(false); // 禁用当前回调
+                        requireActivity().onBackPressed(); // 调用系统返回
+                    }
+
+                }
+            }
+        });
     }
 
     /**
@@ -123,7 +220,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         Bundle args = getArguments();
         if (args != null) {
             bookId = args.getInt("bookNo", 0);
+            bookLastReadPosition = args.getInt("bookLastReadPosition", 0);
         }
+
         //获取指定书籍数据
         singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
         //兼容处理宋版伤寒,
@@ -161,7 +260,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                     if (start < size) {
                         return new ArrayList<>(contentList.subList(start, end));
                     } else {
-                        return  contentList;
+                        return contentList;
                     }
                 }
             });
@@ -179,7 +278,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         //加载到UI显示
         adapter = new ExpandableAdapter(getContext());
 
-        reListAdapter(true, false);
+
         adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
             @Override
             public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
@@ -192,6 +291,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 } else {
                     expandableAdapter.expandGroup(groupPosition);
                 }
+                //记录当前点击位置,0则表示没有点击,或者点击了第一章.
+                currentIndex = groupPosition;
             }
         });
         //跳转指定章节
@@ -207,9 +308,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             }
         });
         rvList.setAdapter(adapter);
+        reListAdapter(true, false);
     }
-
-
 
 
     @Override
@@ -242,7 +342,12 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
             if (init) {
                 adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getContent(), isExpand));
+                //如果有上次阅读记录，则定位到上次阅读位置
+                layoutManager.scrollToPositionWithOffset(bookLastReadPosition, 0);
+                adapter.expandGroup(bookLastReadPosition, true);
+
             } else {
+                //搜索结果
                 if (!singletonNetData.getSearchResList().isEmpty())
                     adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getSearchResList(), isExpand));
             }

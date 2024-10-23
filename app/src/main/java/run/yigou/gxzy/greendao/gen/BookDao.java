@@ -24,25 +24,13 @@ public class BookDao extends AbstractDao<Book, String> {
      * Can be used for QueryBuilder and for referencing column names.
      */
     public static class Properties {
-        public final static Property Id = new Property(0, String.class, "id", true, "ID");
-        public final static Property BookId = new Property(1, String.class, "bookId", false, "BOOK_ID");
-        public final static Property Name = new Property(2, String.class, "name", false, "NAME");
-        public final static Property ChapterUrl = new Property(3, String.class, "chapterUrl", false, "CHAPTER_URL");
-        public final static Property ImgUrl = new Property(4, String.class, "imgUrl", false, "IMG_URL");
-        public final static Property Desc = new Property(5, String.class, "desc", false, "DESC");
-        public final static Property Author = new Property(6, String.class, "author", false, "AUTHOR");
-        public final static Property Type = new Property(7, String.class, "type", false, "TYPE");
-        public final static Property UpdateDate = new Property(8, String.class, "updateDate", false, "UPDATE_DATE");
-        public final static Property NewestChapterId = new Property(9, String.class, "newestChapterId", false, "NEWEST_CHAPTER_ID");
-        public final static Property NewestChapterTitle = new Property(10, String.class, "newestChapterTitle", false, "NEWEST_CHAPTER_TITLE");
-        public final static Property NewestChapterUrl = new Property(11, String.class, "newestChapterUrl", false, "NEWEST_CHAPTER_URL");
-        public final static Property HistoryChapterId = new Property(12, String.class, "historyChapterId", false, "HISTORY_CHAPTER_ID");
-        public final static Property HisttoryChapterNum = new Property(13, int.class, "histtoryChapterNum", false, "HISTTORY_CHAPTER_NUM");
-        public final static Property SortCode = new Property(14, int.class, "sortCode", false, "SORT_CODE");
-        public final static Property NoReadNum = new Property(15, int.class, "noReadNum", false, "NO_READ_NUM");
-        public final static Property ChapterTotalNum = new Property(16, int.class, "chapterTotalNum", false, "CHAPTER_TOTAL_NUM");
-        public final static Property LastReadPosition = new Property(17, int.class, "lastReadPosition", false, "LAST_READ_POSITION");
-        public final static Property Source = new Property(18, String.class, "source", false, "SOURCE");
+        public final static Property BookId = new Property(0, String.class, "bookId", true, "BOOK_ID");
+        public final static Property BookNo = new Property(1, int.class, "bookNo", false, "BOOK_NO");
+        public final static Property BookName = new Property(2, String.class, "bookName", false, "BOOK_NAME");
+        public final static Property Author = new Property(3, String.class, "author", false, "AUTHOR");
+        public final static Property HistoriographerNumb = new Property(4, int.class, "historiographerNumb", false, "HISTORIOGRAPHER_NUMB");
+        public final static Property SortCode = new Property(5, int.class, "sortCode", false, "SORT_CODE");
+        public final static Property LastReadPosition = new Property(6, int.class, "lastReadPosition", false, "LAST_READ_POSITION");
     }
 
 
@@ -58,25 +46,13 @@ public class BookDao extends AbstractDao<Book, String> {
     public static void createTable(Database db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"BOOK\" (" + //
-                "\"ID\" TEXT PRIMARY KEY NOT NULL ," + // 0: id
-                "\"BOOK_ID\" TEXT," + // 1: bookId
-                "\"NAME\" TEXT," + // 2: name
-                "\"CHAPTER_URL\" TEXT," + // 3: chapterUrl
-                "\"IMG_URL\" TEXT," + // 4: imgUrl
-                "\"DESC\" TEXT," + // 5: desc
-                "\"AUTHOR\" TEXT," + // 6: author
-                "\"TYPE\" TEXT," + // 7: type
-                "\"UPDATE_DATE\" TEXT," + // 8: updateDate
-                "\"NEWEST_CHAPTER_ID\" TEXT," + // 9: newestChapterId
-                "\"NEWEST_CHAPTER_TITLE\" TEXT," + // 10: newestChapterTitle
-                "\"NEWEST_CHAPTER_URL\" TEXT," + // 11: newestChapterUrl
-                "\"HISTORY_CHAPTER_ID\" TEXT," + // 12: historyChapterId
-                "\"HISTTORY_CHAPTER_NUM\" INTEGER NOT NULL ," + // 13: histtoryChapterNum
-                "\"SORT_CODE\" INTEGER NOT NULL ," + // 14: sortCode
-                "\"NO_READ_NUM\" INTEGER NOT NULL ," + // 15: noReadNum
-                "\"CHAPTER_TOTAL_NUM\" INTEGER NOT NULL ," + // 16: chapterTotalNum
-                "\"LAST_READ_POSITION\" INTEGER NOT NULL ," + // 17: lastReadPosition
-                "\"SOURCE\" TEXT);"); // 18: source
+                "\"BOOK_ID\" TEXT PRIMARY KEY NOT NULL ," + // 0: bookId
+                "\"BOOK_NO\" INTEGER NOT NULL ," + // 1: bookNo
+                "\"BOOK_NAME\" TEXT," + // 2: bookName
+                "\"AUTHOR\" TEXT," + // 3: author
+                "\"HISTORIOGRAPHER_NUMB\" INTEGER NOT NULL ," + // 4: historiographerNumb
+                "\"SORT_CODE\" INTEGER NOT NULL ," + // 5: sortCode
+                "\"LAST_READ_POSITION\" INTEGER NOT NULL );"); // 6: lastReadPosition
     }
 
     /** Drops the underlying database table. */
@@ -89,160 +65,48 @@ public class BookDao extends AbstractDao<Book, String> {
     protected final void bindValues(DatabaseStatement stmt, Book entity) {
         stmt.clearBindings();
  
-        String id = entity.getId();
-        if (id != null) {
-            stmt.bindString(1, id);
-        }
- 
         String bookId = entity.getBookId();
         if (bookId != null) {
-            stmt.bindString(2, bookId);
+            stmt.bindString(1, bookId);
         }
+        stmt.bindLong(2, entity.getBookNo());
  
-        String name = entity.getName();
-        if (name != null) {
-            stmt.bindString(3, name);
-        }
- 
-        String chapterUrl = entity.getChapterUrl();
-        if (chapterUrl != null) {
-            stmt.bindString(4, chapterUrl);
-        }
- 
-        String imgUrl = entity.getImgUrl();
-        if (imgUrl != null) {
-            stmt.bindString(5, imgUrl);
-        }
- 
-        String desc = entity.getDesc();
-        if (desc != null) {
-            stmt.bindString(6, desc);
+        String bookName = entity.getBookName();
+        if (bookName != null) {
+            stmt.bindString(3, bookName);
         }
  
         String author = entity.getAuthor();
         if (author != null) {
-            stmt.bindString(7, author);
+            stmt.bindString(4, author);
         }
- 
-        String type = entity.getType();
-        if (type != null) {
-            stmt.bindString(8, type);
-        }
- 
-        String updateDate = entity.getUpdateDate();
-        if (updateDate != null) {
-            stmt.bindString(9, updateDate);
-        }
- 
-        String newestChapterId = entity.getNewestChapterId();
-        if (newestChapterId != null) {
-            stmt.bindString(10, newestChapterId);
-        }
- 
-        String newestChapterTitle = entity.getNewestChapterTitle();
-        if (newestChapterTitle != null) {
-            stmt.bindString(11, newestChapterTitle);
-        }
- 
-        String newestChapterUrl = entity.getNewestChapterUrl();
-        if (newestChapterUrl != null) {
-            stmt.bindString(12, newestChapterUrl);
-        }
- 
-        String historyChapterId = entity.getHistoryChapterId();
-        if (historyChapterId != null) {
-            stmt.bindString(13, historyChapterId);
-        }
-        stmt.bindLong(14, entity.getHisttoryChapterNum());
-        stmt.bindLong(15, entity.getSortCode());
-        stmt.bindLong(16, entity.getNoReadNum());
-        stmt.bindLong(17, entity.getChapterTotalNum());
-        stmt.bindLong(18, entity.getLastReadPosition());
- 
-        String source = entity.getSource();
-        if (source != null) {
-            stmt.bindString(19, source);
-        }
+        stmt.bindLong(5, entity.getHistoriographerNumb());
+        stmt.bindLong(6, entity.getSortCode());
+        stmt.bindLong(7, entity.getLastReadPosition());
     }
 
     @Override
     protected final void bindValues(SQLiteStatement stmt, Book entity) {
         stmt.clearBindings();
  
-        String id = entity.getId();
-        if (id != null) {
-            stmt.bindString(1, id);
-        }
- 
         String bookId = entity.getBookId();
         if (bookId != null) {
-            stmt.bindString(2, bookId);
+            stmt.bindString(1, bookId);
         }
+        stmt.bindLong(2, entity.getBookNo());
  
-        String name = entity.getName();
-        if (name != null) {
-            stmt.bindString(3, name);
-        }
- 
-        String chapterUrl = entity.getChapterUrl();
-        if (chapterUrl != null) {
-            stmt.bindString(4, chapterUrl);
-        }
- 
-        String imgUrl = entity.getImgUrl();
-        if (imgUrl != null) {
-            stmt.bindString(5, imgUrl);
-        }
- 
-        String desc = entity.getDesc();
-        if (desc != null) {
-            stmt.bindString(6, desc);
+        String bookName = entity.getBookName();
+        if (bookName != null) {
+            stmt.bindString(3, bookName);
         }
  
         String author = entity.getAuthor();
         if (author != null) {
-            stmt.bindString(7, author);
+            stmt.bindString(4, author);
         }
- 
-        String type = entity.getType();
-        if (type != null) {
-            stmt.bindString(8, type);
-        }
- 
-        String updateDate = entity.getUpdateDate();
-        if (updateDate != null) {
-            stmt.bindString(9, updateDate);
-        }
- 
-        String newestChapterId = entity.getNewestChapterId();
-        if (newestChapterId != null) {
-            stmt.bindString(10, newestChapterId);
-        }
- 
-        String newestChapterTitle = entity.getNewestChapterTitle();
-        if (newestChapterTitle != null) {
-            stmt.bindString(11, newestChapterTitle);
-        }
- 
-        String newestChapterUrl = entity.getNewestChapterUrl();
-        if (newestChapterUrl != null) {
-            stmt.bindString(12, newestChapterUrl);
-        }
- 
-        String historyChapterId = entity.getHistoryChapterId();
-        if (historyChapterId != null) {
-            stmt.bindString(13, historyChapterId);
-        }
-        stmt.bindLong(14, entity.getHisttoryChapterNum());
-        stmt.bindLong(15, entity.getSortCode());
-        stmt.bindLong(16, entity.getNoReadNum());
-        stmt.bindLong(17, entity.getChapterTotalNum());
-        stmt.bindLong(18, entity.getLastReadPosition());
- 
-        String source = entity.getSource();
-        if (source != null) {
-            stmt.bindString(19, source);
-        }
+        stmt.bindLong(5, entity.getHistoriographerNumb());
+        stmt.bindLong(6, entity.getSortCode());
+        stmt.bindLong(7, entity.getLastReadPosition());
     }
 
     @Override
@@ -253,61 +117,37 @@ public class BookDao extends AbstractDao<Book, String> {
     @Override
     public Book readEntity(Cursor cursor, int offset) {
         Book entity = new Book( //
-            cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0), // id
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // bookId
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // name
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // chapterUrl
-            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // imgUrl
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // desc
-            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // author
-            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // type
-            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // updateDate
-            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // newestChapterId
-            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // newestChapterTitle
-            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // newestChapterUrl
-            cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12), // historyChapterId
-            cursor.getInt(offset + 13), // histtoryChapterNum
-            cursor.getInt(offset + 14), // sortCode
-            cursor.getInt(offset + 15), // noReadNum
-            cursor.getInt(offset + 16), // chapterTotalNum
-            cursor.getInt(offset + 17), // lastReadPosition
-            cursor.isNull(offset + 18) ? null : cursor.getString(offset + 18) // source
+            cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0), // bookId
+            cursor.getInt(offset + 1), // bookNo
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // bookName
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // author
+            cursor.getInt(offset + 4), // historiographerNumb
+            cursor.getInt(offset + 5), // sortCode
+            cursor.getInt(offset + 6) // lastReadPosition
         );
         return entity;
     }
      
     @Override
     public void readEntity(Cursor cursor, Book entity, int offset) {
-        entity.setId(cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0));
-        entity.setBookId(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setChapterUrl(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setImgUrl(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setDesc(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setAuthor(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
-        entity.setType(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
-        entity.setUpdateDate(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
-        entity.setNewestChapterId(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
-        entity.setNewestChapterTitle(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
-        entity.setNewestChapterUrl(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
-        entity.setHistoryChapterId(cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12));
-        entity.setHisttoryChapterNum(cursor.getInt(offset + 13));
-        entity.setSortCode(cursor.getInt(offset + 14));
-        entity.setNoReadNum(cursor.getInt(offset + 15));
-        entity.setChapterTotalNum(cursor.getInt(offset + 16));
-        entity.setLastReadPosition(cursor.getInt(offset + 17));
-        entity.setSource(cursor.isNull(offset + 18) ? null : cursor.getString(offset + 18));
+        entity.setBookId(cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0));
+        entity.setBookNo(cursor.getInt(offset + 1));
+        entity.setBookName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setAuthor(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setHistoriographerNumb(cursor.getInt(offset + 4));
+        entity.setSortCode(cursor.getInt(offset + 5));
+        entity.setLastReadPosition(cursor.getInt(offset + 6));
      }
     
     @Override
     protected final String updateKeyAfterInsert(Book entity, long rowId) {
-        return entity.getId();
+        return entity.getBookId();
     }
     
     @Override
     public String getKey(Book entity) {
         if(entity != null) {
-            return entity.getId();
+            return entity.getBookId();
         } else {
             return null;
         }
@@ -315,7 +155,7 @@ public class BookDao extends AbstractDao<Book, String> {
 
     @Override
     public boolean hasKey(Book entity) {
-        return entity.getId() != null;
+        return entity.getBookId() != null;
     }
 
     @Override

@@ -213,8 +213,6 @@ dependencies {
     previewImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 
     implementation 'org.greenrobot:greendao:3.3.0'
-//    标签
-    implementation 'me.gujun.android.taggroup:library:1.4@aar'
 
    // implementation 'com.github.li-xiaojun:XPopup:2.10.0'
 
