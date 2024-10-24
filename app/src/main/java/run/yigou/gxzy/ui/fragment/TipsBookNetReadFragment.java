@@ -163,7 +163,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
                                     @Override
                                     public void onConfirm(BaseDialog dialog) {
-                                        toast("加入书架");
+                                        //toast("加入书架");
                                         // 添加数据
                                         Book book = new Book();
                                         book.setBookId(DbService.getInstance().mBookService.getUUID());
@@ -179,17 +179,17 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                                         postDelayed(() -> {
                                             setEnabled(false); // 禁用当前回调
                                             requireActivity().onBackPressed(); // 调用系统返回
-                                        }, 1500);
+                                        }, 1000);
                                     }
 
                                     @Override
                                     public void onCancel(BaseDialog dialog) {
-                                        toast("暂不加入书架");
+                                        //toast("暂不加入书架");
                                         // 允许系统处理返回键
                                         postDelayed(() -> {
                                             setEnabled(false); // 禁用当前回调
                                             requireActivity().onBackPressed(); // 调用系统返回
-                                        }, 1500);
+                                        }, 1000);
                                     }
                                 })
                                 .show();
@@ -211,6 +211,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         });
     }
 
+    boolean isShow = false;
+
     /**
      *
      */
@@ -221,6 +223,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (args != null) {
             bookId = args.getInt("bookNo", 0);
             bookLastReadPosition = args.getInt("bookLastReadPosition", 0);
+            isShow = args.getBoolean("isShow", false);
         }
 
         //获取指定书籍数据
@@ -343,9 +346,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             if (init) {
                 adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getContent(), isExpand));
                 //如果有上次阅读记录，则定位到上次阅读位置
-                layoutManager.scrollToPositionWithOffset(bookLastReadPosition, 0);
-                adapter.expandGroup(bookLastReadPosition, true);
-
+                if (isShow) {
+                    layoutManager.scrollToPositionWithOffset(bookLastReadPosition, 0);
+                    adapter.expandGroup(bookLastReadPosition, true);
+                }
             } else {
                 //搜索结果
                 if (!singletonNetData.getSearchResList().isEmpty())

@@ -514,5 +514,6 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mViewPager.setAdapter(null);
         mViewPager.removeOnPageChangeListener(this);
         mTabAdapter.setOnTabListener(null);
+        instance = null;
     }
 }

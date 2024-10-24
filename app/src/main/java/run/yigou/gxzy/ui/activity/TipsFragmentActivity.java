@@ -98,7 +98,10 @@ public final class TipsFragmentActivity extends AppActivity {
         // 设置主要显示页的参数
         Bundle args = new Bundle();
         args.putInt("bookNo", bookId);  // 替换为实际参数
-        args.putInt("bookLastReadPosition",  getIntent() .getIntExtra("bookLastReadPosition",0));
+        int bookLastReadPosition = getIntent() .getIntExtra("bookLastReadPosition",0);
+        boolean isShow = getIntent().getBooleanExtra("bookCollect", false);
+        args.putBoolean("isShow", isShow);
+        args.putInt("bookLastReadPosition", bookLastReadPosition );
         fragment.setArguments(args);
         try {
             TabNavBody tabNav = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);

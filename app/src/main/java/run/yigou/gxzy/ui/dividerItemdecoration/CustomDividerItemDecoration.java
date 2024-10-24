@@ -7,6 +7,8 @@ import android.graphics.Rect;
 import android.view.View;
 import androidx.recyclerview.widget.RecyclerView;
 
+import run.yigou.gxzy.common.AppConst;
+
 public class CustomDividerItemDecoration extends RecyclerView.ItemDecoration {
 
     private final Paint paint;
@@ -17,8 +19,8 @@ public class CustomDividerItemDecoration extends RecyclerView.ItemDecoration {
         this.paint = new Paint();
 
         //this.paint.setColor(Color.parseColor("#F4F4F4")); //  默认自定义分隔线颜色
-        this.paint.setColor(Color.argb(230,  97,185,248)); //  默认自定义分隔线颜色
-        this.height = 2; // 默认自定义分隔线高度
+        this.paint.setColor(AppConst.CustomDivider_Content_RecyclerView_Color); //  默认自定义分隔线颜色
+        this.height = AppConst.CustomDivider_Height; // 默认自定义分隔线高度
     }
 
     public CustomDividerItemDecoration(int color, int height) {

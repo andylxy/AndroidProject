@@ -30,6 +30,7 @@ import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 
+import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BaseAdapter;
 import com.hjq.base.BaseDialog;
 import com.hjq.widget.layout.WrapRecyclerView;
@@ -84,6 +85,8 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     @Override
     protected void initView() {
         mRefreshLayout = findViewById(R.id.rl_status_refresh);
+        // 给这个 View 设置沉浸式，避免状态栏遮挡
+       // ImmersionBar.setTitleBar(this, findViewById(R.id.rl_status_refresh));
         mLlNoDataTips = findViewById(R.id.ll_no_data_tips);
         mGvBook = findViewById(R.id.gv_book);
         mBookCollectCaseAdapter = new BookCollectCaseAdapter(getAttachActivity());
@@ -149,6 +152,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
             Intent intent = new Intent(getContext(), TipsFragmentActivity.class);
             intent.putExtra("bookId", bookId);
             intent.putExtra("bookLastReadPosition", bookLastReadPosition);
+            intent.putExtra("bookCollect",true);
             if (!(getContext() instanceof Activity)) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             }

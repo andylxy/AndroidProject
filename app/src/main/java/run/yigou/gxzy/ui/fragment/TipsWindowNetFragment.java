@@ -26,6 +26,7 @@ import java.util.Objects;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.greendao.entity.BookChapter;
 import run.yigou.gxzy.greendao.entity.BookChapterBody;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
@@ -99,7 +100,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
         mAdapter = new BookInfoAdapter(getAttachActivity());
         mAdapter.setOnItemClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.addItemDecoration(new CustomDividerItemDecoration(Color.parseColor("#F4F4F4"),2));
+        mRecyclerView.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
         mRefreshLayout.setOnRefreshLoadMoreListener(this);
         //表示禁用上拉加载更多功能。
         mRefreshLayout.setEnableLoadMore(false);
