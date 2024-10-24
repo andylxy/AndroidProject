@@ -53,6 +53,7 @@ import com.hjq.gson.factory.ParseExceptionCallback;
 import com.hjq.http.EasyConfig;
 import com.hjq.toast.ToastUtils;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
+import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.mmkv.MMKV;
 
 import java.util.ArrayList;
@@ -120,9 +121,9 @@ public final class AppApplication extends Application {
             if (dbService == null || dbService.mTabNavService == null) {
                 return;
             }
-            ArrayList<Yao>  yaoData = ConvertEntity.getYaoData();
+            ArrayList<Yao> yaoData = ConvertEntity.getYaoData();
             TipsSingleData.getInstance().setYaoData(new HH2SectionData(yaoData, 0, "伤寒金匮所有药物"));
-            ArrayList<MingCiContent>   mingCiContentList =  ConvertEntity.getMingCi();
+            ArrayList<MingCiContent> mingCiContentList = ConvertEntity.getMingCi();
             TipsSingleData.getInstance().setMingCiData(new HH2SectionData(mingCiContentList, 0, "医书相关的名词说明"));
 
             // 从数据库中加载所有导航信息
@@ -166,7 +167,7 @@ public final class AppApplication extends Application {
      * 该方法根据书籍编号获取书籍章节信息，并将其存储在内存中
      *
      * @param tipsSingleData 单例数据对象，用于存储书籍内容
-     * @param item 导航信息中的书籍项
+     * @param item           导航信息中的书籍项
      */
     private void loadBookContent(TipsSingleData tipsSingleData, TabNavBody item) {
         // 获取书籍章节列表
@@ -188,7 +189,7 @@ public final class AppApplication extends Application {
      * 该方法根据书籍编号获取方剂信息，并将其存储在内存中
      *
      * @param tipsSingleData 单例数据对象，用于存储方剂数据
-     * @param item 导航信息中的书籍项
+     * @param item           导航信息中的书籍项
      */
     private void loadFangData(TipsSingleData tipsSingleData, TabNavBody item) {
         // 获取方剂列表
@@ -199,6 +200,7 @@ public final class AppApplication extends Application {
             tipsSingleData.getMapBookContent(item.getBookNo()).setFang(new HH2SectionData(fangList, 0, item.getBookName() + "方"));
         }
     }
+
     private void initUserLogin() {
         UserInfo userInfo = mUserInfoService.getLoginUserInfo();
         if (userInfo != null) {
@@ -209,6 +211,7 @@ public final class AppApplication extends Application {
 
         }
     }
+
     @Override
     public void onTerminate() {
         super.onTerminate();
@@ -216,6 +219,7 @@ public final class AppApplication extends Application {
         TipsSingleData.getInstance().onDestroy();
 
     }
+
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
@@ -227,6 +231,7 @@ public final class AppApplication extends Application {
         // 清理所有图片内存缓存
         GlideApp.get(this).onLowMemory();
     }
+
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
@@ -310,12 +315,6 @@ public final class AppApplication extends Application {
                 })
                 .into();
 
-//        // 设置 Json 解析容错监听
-//        GsonFactory.setJsonCallback((typeToken, fieldName, jsonToken) -> {
-//            // 上报到 Bugly 错误列表
-// //          CrashReport.postCatchedException(new IllegalArgumentException(
-////                    "类型解析异常：" + typeToken + "#" + fieldName + "，后台返回的类型为：" + jsonToken));
-//        });
         // 设置 Json 解析容错监听
         GsonFactory.setParseExceptionCallback(new ParseExceptionCallback() {
 
@@ -339,7 +338,7 @@ public final class AppApplication extends Application {
                     throw new IllegalArgumentException(message);
                 } else {
                     // 上报到 Bugly 错误列表中
-                    //CrashReport.postCatchedException(new IllegalArgumentException(message));
+                    CrashReport.postCatchedException(new IllegalArgumentException(message));
                 }
             }
         });

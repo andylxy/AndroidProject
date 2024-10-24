@@ -3,17 +3,10 @@ package run.yigou.gxzy.ui.fragment;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.bumptech.glide.load.MultiTransformation;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
@@ -22,25 +15,19 @@ import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.gen.BookDao;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.util.DbService;
-import run.yigou.gxzy.http.api.BookInfoNav;
-import run.yigou.gxzy.http.glide.GlideApp;
 
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 
-import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BaseAdapter;
 import com.hjq.base.BaseDialog;
 import com.hjq.widget.layout.WrapRecyclerView;
-import com.hjq.widget.view.CountdownView;
-import com.hjq.widget.view.SwitchButton;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,21 +47,21 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     private BookCollectCaseAdapter mBookCollectCaseAdapter;
     private BookService mBookService;
     private SmartRefreshLayout mRefreshLayout;
-        private BookCollectCaseFragment() {
-            // 私有构造函数，防止外部实例化
-            if (SingletonHolder.INSTANCE != null) {
-                throw new IllegalStateException("已经初始化，不允许再次创建实例");
-            }
-        }
 
-        private static class SingletonHolder {
-            private static final BookCollectCaseFragment INSTANCE = new BookCollectCaseFragment();
+    private BookCollectCaseFragment() {
+        // 私有构造函数，防止外部实例化
+        if (BookCollectCaseHolder.INSTANCE != null) {
+            throw new IllegalStateException("已经初始化，不允许再次创建实例");
         }
+    }
 
-        public static BookCollectCaseFragment newInstance() {
-            return SingletonHolder.INSTANCE;
-        }
+    private static class BookCollectCaseHolder {
+        private static BookCollectCaseFragment INSTANCE = new BookCollectCaseFragment();
+    }
 
+    public static BookCollectCaseFragment newInstance() {
+        return BookCollectCaseHolder.INSTANCE;
+    }
 
 
     @Override
@@ -86,7 +73,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     protected void initView() {
         mRefreshLayout = findViewById(R.id.rl_status_refresh);
         // 给这个 View 设置沉浸式，避免状态栏遮挡
-       // ImmersionBar.setTitleBar(this, findViewById(R.id.rl_status_refresh));
+        // ImmersionBar.setTitleBar(this, findViewById(R.id.rl_status_refresh));
         mLlNoDataTips = findViewById(R.id.ll_no_data_tips);
         mGvBook = findViewById(R.id.gv_book);
         mBookCollectCaseAdapter = new BookCollectCaseAdapter(getAttachActivity());
@@ -109,6 +96,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     @Override
     public void onDestroy() {
         super.onDestroy();
+        BookCollectCaseHolder.INSTANCE = null;
     }
 
     @Override
@@ -152,7 +140,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
             Intent intent = new Intent(getContext(), TipsFragmentActivity.class);
             intent.putExtra("bookId", bookId);
             intent.putExtra("bookLastReadPosition", bookLastReadPosition);
-            intent.putExtra("bookCollect",true);
+            intent.putExtra("bookCollect", true);
             if (!(getContext() instanceof Activity)) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             }

@@ -32,7 +32,6 @@ import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.gen.TabNavBodyDao;
-import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.service.SearchHistoryService;
 import run.yigou.gxzy.greendao.service.TabNavBodyService;
 import run.yigou.gxzy.greendao.util.DbService;
@@ -59,19 +58,15 @@ import run.yigou.gxzy.utils.StringHelper;
  * 描述:
  */
 public final class BookContentSearchActivity extends AppActivity implements BaseAdapter.OnItemClickListener {
-
-    private BookService mBookService;
     private ClearEditText etSearchKey;
     private AppCompatButton tvSearchConform;
     private WrapRecyclerView lvSearchBooksList;
     private WrapRecyclerView lvHistoryList;
     private LinearLayout llClearHistory;
     private LinearLayout llHistoryView;
-    //private TagGroup tgSuggestBook;
     private SearchHistoryService mSearchHistoryService;
     private TabNavBodyService mTabNavBodyService;
     private SearchHistoryAdapter mSearchHistoryAdapter;
-    // private List<String> mSuggestions;
     private ExpandableAdapter mSearchBookDetailAdapter;
     private SearchBookAdapter mSearchBookAdapter;
 
@@ -80,16 +75,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     }
 
     private String searchKey;//搜索关键字
-    //搜索结果
-    // private List<ChapterSearchRes> mSearchRes;
-    //搜索结果分类
-    // private List<ChapterSearchRes> mSearchResorc;
-    // private List<SearchKeyText> mSearchKeyTextList;
     private List<SearchHistory> mSearchHistories;
     private WrapRecyclerView mLvSearchBooks;
-
-    //private LinearLayout mLlSuggestBooksView;
-
     private ArrayList<SearchKey> searchKeyTextList = new ArrayList<>();
     private Map<Integer, SingletonNetData> singleDataMap;
     private LinearLayoutManager layoutManager;
@@ -108,15 +95,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     protected void initData() {
         mTabNavBodyService = DbService.getInstance().mTabNavBodyService;
         mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
-        //mSuggestions =  new ArrayList<>();
-        // mSearchRes = new ArrayList<>();
-        // mSearchResorc = new ArrayList<>();
-        // mSearchKeyTextList = new ArrayList<>();
-        //  setTitle("全局搜索");
-        // getData();
         initHistoryList();
         viewDataInit();
-        // getHotBooksData();
         // 获取传递过来的 Intent
         Intent intent = getIntent();
         // 从 Intent 中提取参数
@@ -168,11 +148,6 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         });
 
         tvSearchConform.setOnClickListener(view -> search());
-//        tgSuggestBook.setOnTagClickListener(tag -> {
-//            etSearchKey.setText(tag);
-//            search();
-//        });
-
         llClearHistory.setOnClickListener(v -> {
             mSearchHistoryService.clearHistory();
             mSearchHistories.clear();
@@ -190,9 +165,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         lvHistoryList = findViewById(R.id.lv_history_list);
         llClearHistory = findViewById(R.id.ll_clear_history);
         llHistoryView = findViewById(R.id.ll_history_view);
-        // tgSuggestBook = findViewById(R.id.tg_suggest_book);
         mLvSearchBooks = findViewById(R.id.lv_search_books);
-        //  mLlSuggestBooksView = findViewById(R.id.ll_suggest_books_view);
     }
 
     /**
@@ -204,11 +177,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             llHistoryView.setVisibility(View.GONE);
             //  setTitle("关键词: " + searchKey);
             getData();
-
-
         }
     }
-
 
     /**
      * 初始化历史列表
@@ -227,40 +197,19 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             llClearHistory.setVisibility(View.VISIBLE);
             llHistoryView.setVisibility(View.VISIBLE);
         }
-
     }
-
     private int showShanghan;
     private int showJinkui;
-
     /**
      * 初始化搜索列表
      */
     private void initSearchList() {
-
         mSearchBookDetailAdapter = new ExpandableAdapter(getActivity());
-        //  mSearchBookDetailAdapter.setData(mSearchRes);
-//        mSearchBookDetailAdapter.setOnItemClickListener((adapterView, view, i) -> {
-//            Intent intent = new Intent(getActivity(), BookReadActivity.class);
-//            Book book = new Book();
-//            book.setDesc(getSearchKey());
-//            book.setId(mSearchResorc.get(i).getId() + "");
-//            book.setName(mSearchResorc.get(i).getBookName());
-//            book.setType(mSearchResorc.get(i).getType());
-//            book.setChapterUrl(mSearchResorc.get(i).getId() + "");
-//            book.setBookId(mSearchResorc.get(i).getId() + "");
-//            book.setSource("Search");
-//            intent.putExtra(AppConst.BOOK, book);
-//            startActivity(intent);
-//        });
-
-
         lvSearchBooksList.setAdapter(mSearchBookDetailAdapter);
         layoutManager = new LinearLayoutManager(getContext());
         lvSearchBooksList.setLayoutManager(layoutManager);
         lvSearchBooksList.addItemDecoration(new CustomDividerItemDecoration());
         lvSearchBooksList.setVisibility(View.GONE);
-
         mSearchBookDetailAdapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
             @Override
             public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
@@ -275,7 +224,6 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                 }
             }
         });
-
         //跳转指定章节
         mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener(new ExpandableAdapter.OnJumpSpecifiedItemListener() {
             @Override
@@ -285,14 +233,12 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                 mSearchBookDetailAdapter.expandGroup(groupPosition, true);
             }
         });
-
         mSearchBookAdapter = new SearchBookAdapter(getActivity());
         mSearchBookAdapter.setData(searchKeyTextList);
         mSearchBookAdapter.setOnItemClickListener(this);
         mLvSearchBooks.setAdapter(mSearchBookAdapter);
         mLvSearchBooks.setVisibility(View.VISIBLE);
         mLvSearchBooks.addItemDecoration(new CustomDividerItemDecoration());
-
     }
 
     private void extHandleShangHanData(int bookId) {
@@ -343,10 +289,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                 reListAdapter();
             }
         });
-
     }
-
-
     /**
      * 获取搜索数据
      */
@@ -357,13 +300,9 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         for (Map.Entry<Integer, SingletonNetData> entry : singleDataMap.entrySet()) {
             Integer key = entry.getKey();
             SingletonNetData value = entry.getValue();
-
-
             //兼容处理宋版伤寒
             if (key == AppConst.ShangHanNo)
                 extHandleShangHanData(key);
-
-
             ArrayList<HH2SectionData> filteredData = new ArrayList<>();
             // 处理键值对
             // 检查搜索文本是否有效（不为 null、不为空且不是数字）
@@ -379,8 +318,6 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                     EasyLog.print("Error occurred while fetching search results", e.getMessage());
                 }
             }
-
-
             if (!filteredData.isEmpty()) {
                 ArrayList<TabNavBody> keys = mTabNavBodyService.find(TabNavBodyDao.Properties.BookNo.eq(key));
                 if (!keys.isEmpty()) {
