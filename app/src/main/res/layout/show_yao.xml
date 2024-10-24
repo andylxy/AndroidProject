@@ -26,46 +26,46 @@
                 android:clipChildren="true"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="34dp">
+                android:layout_marginBottom="@dimen/dp_34">
                 <TextView
                     android:textColor="#000000"
                     android:id="@+id/textview"
                     android:background="@drawable/round_win_inner"
-                    android:padding="10dp"
+                    android:padding="@dimen/dp_10"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
             </ScrollView>
-            <LinearLayout
-                android:layout_gravity="bottom"
-                android:orientation="horizontal"
-                android:id="@+id/btns"
-                android:visibility="gone"
-                android:layout_width="match_parent"
-                android:layout_height="34dp">
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.5"/>
-                <Button
-                    android:textSize="12dp"
-                    android:textColor="#ffffff"
-                    android:id="@+id/leftbtn"
-                    android:background="@drawable/round_win_black"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginRight="4dp"
-                    android:text="拷贝内容"
-                    android:layout_weight="0.86"/>
-                <Button
-                    android:textSize="12dp"
-                    android:textColor="#ffffff"
-                    android:id="@+id/rightbtn"
-                    android:background="@drawable/round_win_black"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="查看药证条文"
-                    android:layout_weight="0.8"/>
-            </LinearLayout>
+<!--            <LinearLayout-->
+<!--                android:layout_gravity="bottom"-->
+<!--                android:orientation="horizontal"-->
+<!--                android:id="@+id/btns"-->
+
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="34dp">-->
+<!--                <View-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:layout_weight="0.5"/>-->
+<!--                <Button-->
+<!--                    android:textSize="12dp"-->
+<!--                    android:textColor="#ffffff"-->
+<!--                    android:id="@+id/leftbtn"-->
+<!--                    android:background="@drawable/round_win_black"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:layout_marginRight="4dp"-->
+<!--                    android:text="拷贝内容"-->
+<!--                    android:layout_weight="0.86"/>-->
+<!--                <Button-->
+<!--                    android:textSize="12dp"-->
+<!--                    android:textColor="#ffffff"-->
+<!--                    android:id="@+id/rightbtn"-->
+<!--                    android:background="@drawable/round_win_black"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:text="查看药证条文"-->
+<!--                    android:layout_weight="0.8"/>-->
+<!--            </LinearLayout>-->
         </FrameLayout>
     </LinearLayout>
     <run.yigou.gxzy.ui.tips.widget.TipsArrowView

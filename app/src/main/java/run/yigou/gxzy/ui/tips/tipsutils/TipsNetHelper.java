@@ -93,7 +93,7 @@ public class TipsNetHelper {
                     Pattern pattern = getPattern(sanitizedTerm);
 
                     // 检查数据项是否符合搜索条件
-                    if (matchDataItem(dataItem2, pattern, sanitizedTerm, yaoAliasDict, fangAliasDict)) {
+                    if (matchDataItem(dataItem2, pattern, yaoAliasDict, fangAliasDict)) {
                         itemMatched = true;
                         // 突出显示数据项中的匹配文本
                         createSingleDataCopy(dataItem2, pattern);
@@ -131,49 +131,6 @@ public class TipsNetHelper {
         }
         return pattern;
     }
-
-//    public interface IFilter<T> {
-//        boolean filter(T t);
-//    }
-//
-//    public static <T> List<T> filter(List<T> originalList, IFilter<T> filter) {
-//        if (originalList == null || filter == null) {
-//            throw new IllegalArgumentException("Original list and filter cannot be null");
-//        }
-//
-//        boolean isStreamSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
-//
-//        List<T> filteredResults = new ArrayList<>();
-//
-//        if (isStreamSupported) {
-//            // 使用 Stream API 进行过滤
-//            filteredResults = originalList.stream()
-//                    .filter(element -> {
-//                        try {
-//                            return filter.filter(element);
-//                        } catch (Exception e) {
-//                            // 处理异常，例如记录日志或采取其他措施
-//                            EasyLog.print("Error occurred while filtering: " + e.getMessage());
-//                            return false;
-//                        }
-//                    })
-//                    .collect(Collectors.toList());
-//        } else {
-//            // 使用传统循环进行过滤
-//            for (T element : originalList) {
-//                try {
-//                    if (filter.filter(element)) {
-//                        filteredResults.add(element);
-//                    }
-//                } catch (Exception e) {
-//                    // 处理异常，例如记录日志或采取其他措施
-//                    EasyLog.print("Error occurred while filtering: " + e.getMessage());
-//                }
-//            }
-//        }
-//
-//        return filteredResults; // 返回过滤后的列表
-//    }
 
 
     /**
@@ -283,14 +240,14 @@ public class TipsNetHelper {
     /**
      * 根据指定的模式匹配数据项。
      */
-    private static boolean matchDataItem(DataItem dataItem, Pattern pattern, String term,
+    private static boolean matchDataItem(DataItem dataItem, Pattern pattern,
                                          Map<String, String> yaoAliasDict, Map<String, String> fangAliasDict) {
         // 检查数据项的属性是否与搜索词和正则匹配
         String attributeText = dataItem.getAttributedText().toString();
         // 这里可以进一步处理别名
 
         // 检查主属性文本是否匹配
-        return pattern.matcher(attributeText).find() || checkAliases(dataItem, term, pattern, yaoAliasDict, fangAliasDict);
+        return pattern.matcher(attributeText).find() || checkAliases(dataItem, pattern, yaoAliasDict, fangAliasDict);
     }
 
     /**
@@ -360,7 +317,7 @@ public class TipsNetHelper {
      * 检查别名以寻找额外的匹配项。
      */
 
-    private static boolean checkAliases(DataItem dataItem, String term, Pattern pattern,
+    private static boolean checkAliases(DataItem dataItem,  Pattern pattern,
                                         Map<String, String> yaoAliasDict, Map<String, String> fangAliasDict) {
         // 空指针检查
         if (yaoAliasDict == null || fangAliasDict == null) {

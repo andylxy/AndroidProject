@@ -48,21 +48,24 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     private BookService mBookService;
     private SmartRefreshLayout mRefreshLayout;
 
+    // 单例模式，确保实例的唯一性
+    private static volatile BookCollectCaseFragment instance;
+    // 私有构造函数，防止外部直接实例化
     private BookCollectCaseFragment() {
-        // 私有构造函数，防止外部实例化
-        if (BookCollectCaseHolder.INSTANCE != null) {
-            throw new IllegalStateException("已经初始化，不允许再次创建实例");
+        try {
+            // 构造函数中的初始化逻辑
+            // 可以在这里添加一些基本的校验逻辑
+        } catch (Exception e) {
+            // 异常处理
+            throw new RuntimeException("Failed to create BookCollectCaseFragment instance", e);
         }
     }
-
-    private static class BookCollectCaseHolder {
-        private static BookCollectCaseFragment INSTANCE = new BookCollectCaseFragment();
+    public static synchronized BookCollectCaseFragment newInstance() {
+        if (instance == null) {
+            instance = new BookCollectCaseFragment();
+        }
+        return instance;
     }
-
-    public static BookCollectCaseFragment newInstance() {
-        return BookCollectCaseHolder.INSTANCE;
-    }
-
 
     @Override
     protected int getLayoutId() {
@@ -96,7 +99,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     @Override
     public void onDestroy() {
         super.onDestroy();
-        BookCollectCaseHolder.INSTANCE = null;
+        instance=null;
     }
 
     @Override

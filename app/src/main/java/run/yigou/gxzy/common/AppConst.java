@@ -26,7 +26,10 @@ public class AppConst {
     public static final int CustomDivider_Height = 5;
     public static final int CustomDivider_Content_RecyclerView_Color = Color.argb(230,  97,185,248);
     public static final int CustomDivider_BookList_RecyclerView_Color = Color.parseColor("#F4F4F4");//Color.argb(230,  97,185,248);
-
+    /**
+     * 加入书架延迟时间
+     */
+    public static final long  postDelayMillis = 800;
     public static final String FILE_NAME_SETTING = "setting";
     /**
      * SharedPreferences 伤寒保存的的Key字符串

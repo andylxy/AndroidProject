@@ -157,10 +157,6 @@ public final class TipsFragmentActivity extends AppActivity {
         // 在 Activity 销毁时注销 RadioGroup 的监听器，避免内存泄漏
         radioGroup.setOnCheckedChangeListener(null);
         tabCheckedChangeListener = null;
-
-        //  EasyLog.print(REFERENCE_KEY + " onDestroy");
-        // Tips_Single_Data.getInstance().curActivity = null;
-        // XEventBus.getDefault().unregister(this);
     }
 
 

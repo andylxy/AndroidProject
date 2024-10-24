@@ -153,13 +153,4 @@ public class SingletonNetData {
 
     }
 
-//    private OnReceiveStatusNotification mOnReceiveStatusNotification;
-//
-//    public interface OnReceiveStatusNotification {
-//        void receiveStatusNotification(boolean status);
-//    }
-//    public void setOnReceiveStatusNotification(OnReceiveStatusNotification mReceiveStatus) {
-//        this.mOnReceiveStatusNotification = mReceiveStatus;
-//    }
-
 }

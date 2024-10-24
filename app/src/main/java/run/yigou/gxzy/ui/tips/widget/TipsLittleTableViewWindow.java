@@ -42,11 +42,6 @@ public class TipsLittleTableViewWindow extends TipsLittleWindow {
     private NoFooterAdapter adapter;
 
     @Override
-    public String getSearchString() {
-        return this.fang;
-    }
-
-    @Override
     public void show(FragmentManager fragmentManager) {
         super.show(fragmentManager);
         tips_single_data.tipsLittleWindowStack.add(this);
@@ -70,7 +65,6 @@ public class TipsLittleTableViewWindow extends TipsLittleWindow {
     public void setRect(Rect rect) {
         this.rect = rect;
     }
-
 
 
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
@@ -185,33 +179,24 @@ public class TipsLittleTableViewWindow extends TipsLittleWindow {
                 @Override
                 public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
                                           int groupPosition) {
-//                Toast.makeText(context, "组头：groupPosition = " + groupPosition, Toast.LENGTH_LONG).show();
-//                Log.e("eee", adapter.toString() + "  " + holder.toString());
                 }
             });
 
-//            adapter.setOnChildClickListener(new GroupedRecyclerViewAdapter.OnChildClickListener() {
-//                @Override
-//                public void onChildClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
-//                                         int groupPosition, int childPosition) {
-////                Toast.makeText(mContext, "子项：groupPosition = " + groupPosition
-////                                + ", childPosition = " + childPosition,
-////                        Toast.LENGTH_LONG).show();
-//                }
-//            });
+
         }
 
     }
 
     private RecyclerView rvList;
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //dismiss();
-    }
-    @Override
-    public void onDestroyView() {
-        this.mGroup.removeView(this.view);
-        super.onDestroyView();
+        dismiss();
+        rvList.setAdapter(null);
+        adapter = null;
+        rvList = null;
+        if (this.view != null)
+            this.mGroup.removeView(this.view);
     }
 }

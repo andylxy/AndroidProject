@@ -1,13 +1,12 @@
 package run.yigou.gxzy.ui.tips.widget;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.text.SpannableStringBuilder;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,9 +19,6 @@ import android.widget.Toast;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
-import com.donkingliang.groupedadapter.holder.BaseViewHolder;
-
 import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
@@ -31,21 +27,16 @@ import run.yigou.gxzy.ui.tips.adapter.NoFooterAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
-
 public class TipsLittleMingCiViewWindow extends TipsLittleWindow {
-    private SpannableStringBuilder attributedString;
+
     private String fang;
     private ViewGroup mGroup;
     private Rect rect;
-    private String tag = "littleWindow";
     private View view;
-    private TipsSingleData tips_single_data = TipsSingleData.getInstance();
+    private final TipsSingleData tips_single_data = TipsSingleData.getInstance();
     private NoFooterAdapter adapter;
+    private RecyclerView rvList;
 
-    @Override
-    public String getSearchString() {
-        return this.fang;
-    }
 
     @Override
     public void show(FragmentManager fragmentManager) {
@@ -59,9 +50,7 @@ public class TipsLittleMingCiViewWindow extends TipsLittleWindow {
         tips_single_data.tipsLittleWindowStack.remove(this);
     }
 
-    public void setAttributedString(SpannableStringBuilder spannableStringBuilder) {
-        this.attributedString = spannableStringBuilder;
-    }
+
 
     public void setFang(String str) {
         String str2 = tips_single_data.getFangAliasDict().get(str);
@@ -75,8 +64,7 @@ public class TipsLittleMingCiViewWindow extends TipsLittleWindow {
         this.rect = rect;
     }
 
-
-
+    @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         // 获取当前活动，确保不为null
         Activity activity = getActivity();
@@ -86,13 +74,11 @@ public class TipsLittleMingCiViewWindow extends TipsLittleWindow {
 
         // 获取窗口的根视图和屏幕信息
         this.mGroup = (ViewGroup) activity.getWindow().getDecorView(); // 获取窗口的根视图
-        DisplayMetrics metrics = this.mGroup.getResources().getDisplayMetrics(); // 获取显示信息
-        float density = metrics.density; // 获取屏幕密度
         int height = this.mGroup.getHeight(); // 获取视图高度
         int width = this.mGroup.getWidth(); // 获取视图宽度
 
         // 计算最小值，用于视图的大小
-        int minSize = Math.min(50, width / 18); // 计算最小尺寸
+        int minSize = Math.min(50, (int) (width / 18)); // 计算最小尺寸
 
         // 创建布局参数
         FrameLayout.LayoutParams smallLayoutParams = new FrameLayout.LayoutParams(minSize, minSize); // 小尺寸布局参数
@@ -112,6 +98,22 @@ public class TipsLittleMingCiViewWindow extends TipsLittleWindow {
         int midHeight = height / 2; // 计算屏幕中间高度
 
         // 根据矩形区域位置决定布局方向
+        this.view = inflateLayout(layoutInflater, centerY, midHeight, width, height, minSize, centerX, smallLayoutParams, largeLayoutParams);
+
+        // 设置按钮点击事件
+        setupButtonClicks(activity, this.view);
+
+        // 配置RecyclerView
+        setupRecyclerView(this.view, activity);
+
+        // 配置Wrapper布局参数并添加视图
+        configureWrapperAndAddView(this.view, largeLayoutParams, centerY, midHeight, smallLayoutParams);
+
+        return super.onCreateView(layoutInflater, viewGroup, bundle); // 返回父类的视图
+    }
+
+    @SuppressLint("InflateParams")
+    private View inflateLayout(LayoutInflater layoutInflater, int centerY, int midHeight, int width, int height, int minSize, int centerX, FrameLayout.LayoutParams smallLayoutParams, FrameLayout.LayoutParams largeLayoutParams) {
         if (centerY < midHeight) {
             // 向上布局
             this.view = layoutInflater.inflate(R.layout.show_fang, null); // 加载向上布局视图
@@ -129,50 +131,46 @@ public class TipsLittleMingCiViewWindow extends TipsLittleWindow {
             smallLayoutParams.setMargins(centerX - (minSize / 2), (this.rect.top - minSize) - 1,
                     (width - centerX) - (minSize / 2), (height - this.rect.top) + 1); // 设置小布局边距
         }
+        return this.view;
+    }
 
+    private void setupButtonClicks(Activity activity, View view) {
         // 处理关闭按钮点击事件
-        Button closeButton = this.view.findViewById(R.id.maskbtn); // 获取关闭按钮
-        closeButton.setOnClickListener(v -> {
-            dismiss(); // 关闭视图
-            // todo: 待完善
-            //SingletonData.getInstance().popShowFang(); // 更新单例数据
-        });
-
-        rvList = this.view.findViewById(R.id.include_tips_windows_sticky_list).findViewById(R.id.sticky_rv_list);
-        rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
-        rvList.setAdapter(adapter);
-
-
-        // 设置箭头方向
-        TipsArrowView tipsArrowView = this.view.findViewById(R.id.arrow); // 获取箭头视图
-        tipsArrowView.setDirection(centerY < midHeight ? TipsArrowView.UP : TipsArrowView.DOWN); // 设置箭头方向
-        tipsArrowView.setLayoutParams(smallLayoutParams); // 设置箭头布局参数
+        Button closeButton = view.findViewById(R.id.maskbtn); // 获取关闭按钮
+        closeButton.setOnClickListener(v -> dismiss()); // 关闭视图
 
         // 处理左侧按钮点击事件
-        Button leftButton = this.view.findViewById(R.id.leftbtn); // 获取左侧按钮
+        Button leftButton = view.findViewById(R.id.leftbtn); // 获取左侧按钮
         leftButton.setOnClickListener(v -> {
             // todo 添加复制功能
-            //showFang.putCopyStringsToClipboard(); // 复制内容到剪贴板
-            // TipsNetHelper.copyToClipboard(getActivity(), content);
             Toast.makeText(activity, "已复制到剪贴板", Toast.LENGTH_SHORT).show(); // 提示信息
         });
 
         // 处理右侧按钮点击事件
-        Button rightButton = this.view.findViewById(R.id.rightbtn); // 获取右侧按钮
+        Button rightButton = view.findViewById(R.id.rightbtn); // 获取右侧按钮
         rightButton.setOnClickListener(v -> {
             Intent intent = new Intent(activity, TipsFragmentActivity.class); // 创建Intent
-            // todo 待完善
-            //intent.putExtra("title", content); // 传递标题
             intent.putExtra("isFang", "false"); // 传递标识
             activity.startActivity(intent); // 启动新的Activity
         });
+    }
+
+    private void setupRecyclerView(View view, Activity activity) {
+        this.rvList = view.findViewById(R.id.include_tips_windows_sticky_list).findViewById(R.id.sticky_rv_list);
+        this.rvList.setLayoutManager(new LinearLayoutManager(activity));
+        this.rvList.setAdapter(adapter);
+    }
+
+    private void configureWrapperAndAddView(View view, FrameLayout.LayoutParams largeLayoutParams, int centerY, int midHeight, FrameLayout.LayoutParams smallLayoutParams) {
+        // 设置箭头方向
+        TipsArrowView tipsArrowView = view.findViewById(R.id.arrow); // 获取箭头视图
+        tipsArrowView.setDirection(centerY < midHeight ? TipsArrowView.UP : TipsArrowView.DOWN); // 设置箭头方向
+        tipsArrowView.setLayoutParams(smallLayoutParams); // 设置箭头布局参数
 
         // 配置Wrapper布局参数并添加视图
-        LinearLayout wrapper = this.view.findViewById(R.id.wrapper); // 获取Wrapper布局
+        LinearLayout wrapper = view.findViewById(R.id.wrapper); // 获取Wrapper布局
         wrapper.setLayoutParams(largeLayoutParams); // 设置布局参数
-        this.mGroup.addView(this.view); // 将视图添加到根视图中
-
-        return super.onCreateView(layoutInflater, viewGroup, bundle); // 返回父类的视图
+        this.mGroup.addView(view); // 将视图添加到根视图中
     }
 
     /**
@@ -180,33 +178,17 @@ public class TipsLittleMingCiViewWindow extends TipsLittleWindow {
      * @param groups 数据源
      */
     public void setAdapterSource(Context context, ArrayList<GroupEntity> groups) {
-
-        //检索所有的相关药方
         if (adapter == null) {
             adapter = new NoFooterAdapter(context, groups);
-            adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
-                @Override
-                public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
-                                          int groupPosition) {
-//               Toast.makeText(context, "组头：groupPosition = " + groupPosition,  Toast.LENGTH_LONG).show();
-//                Log.e("eee", adapter.toString() + "  " + holder.toString());
-                }
+            adapter.setOnHeaderClickListener((adapter, holder, groupPosition) -> {
+                // 处理组头点击事件
             });
 
-//            adapter.setOnChildClickListener(new GroupedRecyclerViewAdapter.OnChildClickListener() {
-//                @Override
-//                public void onChildClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
-//                                         int groupPosition, int childPosition) {
-////                Toast.makeText(mContext, "子项：groupPosition = " + groupPosition
-////                                + ", childPosition = " + childPosition,
-////                        Toast.LENGTH_LONG).show();
-//                }
-//            });
+            adapter.setOnChildClickListener((adapter, holder, groupPosition, childPosition) -> {
+                // 处理子项点击事件
+            });
         }
-
     }
-
-    private RecyclerView rvList;
 
     @Override
     public void onDestroyView() {
