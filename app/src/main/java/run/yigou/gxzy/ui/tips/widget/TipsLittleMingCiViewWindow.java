@@ -191,8 +191,10 @@ public class TipsLittleMingCiViewWindow extends TipsLittleWindow {
     }
 
     @Override
-    public void onDestroyView() {
+    public void onDestroy() {
+        super.onDestroy();
+        dismiss();
         this.mGroup.removeView(this.view);
-        super.onDestroyView();
+
     }
 }

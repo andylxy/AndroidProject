@@ -199,4 +199,5 @@ public class TipsLittleTableViewWindow extends TipsLittleWindow {
         if (this.view != null)
             this.mGroup.removeView(this.view);
     }
+
 }

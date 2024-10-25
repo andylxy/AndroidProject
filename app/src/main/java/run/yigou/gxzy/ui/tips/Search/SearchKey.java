@@ -19,7 +19,7 @@ public class SearchKey extends SearchKeyEntity {
      * @param filteredData 搜索结果
      */
     public SearchKey(String searchKeyText, int searchResTotalNum, String bookName, int bookNo, ArrayList<HH2SectionData> filteredData) {
-        super(searchKeyText, searchResTotalNum);
+        super(new StringBuilder(searchKeyText), searchResTotalNum);
         this.bookName = bookName;
         this.bookNo = bookNo;
         this.filteredData = filteredData;

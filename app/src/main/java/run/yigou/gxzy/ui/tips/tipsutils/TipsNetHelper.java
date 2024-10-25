@@ -58,12 +58,18 @@ import run.yigou.gxzy.ui.tips.widget.TipsLittleTableViewWindow;
 import run.yigou.gxzy.ui.tips.widget.TipsLittleTextViewWindow;
 
 public class TipsNetHelper {
+    private static final List<String> validSearchTerms = new ArrayList<>();
 
     public static @NonNull ArrayList<HH2SectionData> getSearchHh2SectionData(SearchKeyEntity searchKeyEntity,
                                                                              SingletonNetData singletonNetData) {
+        if (singletonNetData.getContent().size() == 1) {
+            searchKeyEntity.getSearchKeyText().append(",未见");
+        }
+
         // 将搜索词拆分并过滤掉空白项
-        String[] searchTerms = searchKeyEntity.getSearchKeyText().split(" ");
-        List<String> validSearchTerms = new ArrayList<>();
+        String[] searchTerms = searchKeyEntity.getSearchKeyText().toString().split("[,.。，]");
+        validSearchTerms.clear();
+
         for (String term : searchTerms) {
             if (!term.isEmpty()) {
                 validSearchTerms.add(term);
@@ -317,7 +323,7 @@ public class TipsNetHelper {
      * 检查别名以寻找额外的匹配项。
      */
 
-    private static boolean checkAliases(DataItem dataItem,  Pattern pattern,
+    private static boolean checkAliases(DataItem dataItem, Pattern pattern,
                                         Map<String, String> yaoAliasDict, Map<String, String> fangAliasDict) {
         // 空指针检查
         if (yaoAliasDict == null || fangAliasDict == null) {
@@ -445,7 +451,7 @@ public class TipsNetHelper {
     public static SpannableStringBuilder renderText(String str, final ClickLink clickLink) {
         // 如果输入为 null，返回一个带有默认内容的 SpannableStringBuilder
         if (str == null) {
-           // EasyLog.print("renderText default content: Null ");
+            // EasyLog.print("renderText default content: Null ");
             return new SpannableStringBuilder();
         }
         // 创建 SpannableStringBuilder 并初始化
@@ -566,7 +572,7 @@ public class TipsNetHelper {
      * @param mingCiList 明词列表，用于设置到新的单例数据副本中，不能为空或空列表
      * @return 返回一个包含明词列表的新单例数据副本
      * @throws IllegalArgumentException 如果提供的明词列表为空或为null
-     * @throws IllegalStateException 如果无法获取单例数据实例
+     * @throws IllegalStateException    如果无法获取单例数据实例
      */
     public static SingletonNetData createSingleDataCopy(List<HH2SectionData> mingCiList) {
         // 检查输入的明词列表是否为空或为null，如果满足条件，则抛出异常
@@ -574,11 +580,8 @@ public class TipsNetHelper {
             throw new IllegalArgumentException("mingCiList cannot be null or empty");
         }
 
-        // 获取单例数据实例
+        // 生成一个书本数据实例
         SingletonNetData singletonData = SingletonNetData.getInstance();
-
-        // 成功获取单例数据实例后，打印日志
-        EasyLog.print("成功获取数据 Singleton_Net_Data");
 
         // 深拷贝当前的书籍的药和药方数据
         SingletonNetData singletonDataInstance = TipsSingleData.getInstance().getCurSingletonData();
@@ -586,17 +589,17 @@ public class TipsNetHelper {
         // 如果当前单例数据实例不为null，则复制别名字典
         if (singletonDataInstance != null) {
             copyAliasDictionaries(singletonData, singletonDataInstance);
-            EasyLog.print("如果当前单例数据实例不为null，则复制别名字典");
+            EasyLog.print("实例别名字典复制成功");
         } else {
             // 如果当前单例数据实例为null，则打印日志，表示无法设置别名字典
-            EasyLog.print("如果当前单例数据实例不为null，则复制别名字典");
+            EasyLog.print("实例为null，无法设置别名字典");
         }
 
         // 设置新的明词列表内容到单例数据实例中
         singletonData.setContent(mingCiList);
 
         // 成功设置内容后，打印日志
-       // EasyLog.print("成功设置内容");
+        // EasyLog.print("成功设置内容");
 
         // 返回包含新明词列表的单例数据副本
         return singletonData;
@@ -612,9 +615,9 @@ public class TipsNetHelper {
      * 该方法用于从一个数据列表中筛选出特定类型的房产（Fang），并进一步根据提供的字符串参数筛选出包含该字符串的房产信息
      *
      * @param sectionData 一个包含DataItem类型数据的列表，该列表可能包含各种类型的DataItem，包括房产信息
-     * @param finalStr1 用于筛选房产信息的字符串，通常代表某个关键词或标识
+     * @param finalStr1   用于筛选房产信息的字符串，通常代表某个关键词或标识
      * @return 返回一个包含符合条件的房产信息的列表如果输入为空或没有找到符合条件的房产信息，返回空列表
-     *
+     * <p>
      * 注意：该方法在处理数据时，会根据系统的Android版本选择不同的处理方式，以利用Java 8及更高版本的流式处理特性
      */
     public static List<? extends DataItem> filterFang(List<? extends DataItem> sectionData, String finalStr1) {
@@ -655,7 +658,7 @@ public class TipsNetHelper {
     public static SpannableStringBuilder getSpanString(String str) {
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
 
-        Map<String, String> yaoAliasDict =  TipsSingleData.getInstance().getYaoAliasDict();
+        Map<String, String> yaoAliasDict = TipsSingleData.getInstance().getYaoAliasDict();
 
         // 获取药物的别名，若无则保留原名
         String alias = yaoAliasDict.get(str);
@@ -669,7 +672,7 @@ public class TipsNetHelper {
             if (TipsSingleData.getInstance().getYaoMap() == null) {
                 throw new IllegalArgumentException("tipsSingleData or yaoMap is null");
             }
-            Map<String, Yao> yaoMap =  TipsSingleData.getInstance().getYaoMap();
+            Map<String, Yao> yaoMap = TipsSingleData.getInstance().getYaoMap();
             Yao yaoData = yaoMap.get(str);
             if (yaoData == null) {
                 // 处理 yaoData 为 null 的情况
@@ -695,7 +698,7 @@ public class TipsNetHelper {
 
         // 处理方剂数据
         int sectionCount = 0;
-        for (HH2SectionData sectionData :  TipsSingleData.getInstance().getCurSingletonData().getFang()) {
+        for (HH2SectionData sectionData : TipsSingleData.getInstance().getCurSingletonData().getFang()) {
             SpannableStringBuilder fangBuilder = new SpannableStringBuilder();
 
             // 筛选与药物相关的方剂
@@ -797,6 +800,7 @@ public class TipsNetHelper {
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("MingCi---tapped:" + charSequence);
                 List<HH2SectionData> mingCiList = ShowFanYaoMingCi.getInstance().showMingCiTwo(charSequence);
+
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 TipsLittleMingCiViewWindow tipsLittleTableViewWindow = new TipsLittleMingCiViewWindow();
@@ -804,6 +808,7 @@ public class TipsNetHelper {
                 tipsLittleTableViewWindow.setFang(charSequence);
                 tipsLittleTableViewWindow.setRect(textRect);
                 tipsLittleTableViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
+
             }
 
         });

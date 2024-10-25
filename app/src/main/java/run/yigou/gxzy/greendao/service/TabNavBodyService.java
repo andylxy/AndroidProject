@@ -6,7 +6,19 @@ import run.yigou.gxzy.greendao.gen.TabNavBodyDao;
 public class TabNavBodyService extends BaseService<TabNavBody, TabNavBodyDao>{
 
 
+    private TabNavBodyService() {
+        if (TabNavBodyService.class.desiredAssertionStatus()) {
+            throw new AssertionError("No instances allowed");
+        }
+    }
 
+    private static class SingletonHolder {
+        private static final TabNavBodyService INSTANCE = new TabNavBodyService();
+    }
+
+    public static TabNavBodyService getInstance() {
+        return TabNavBodyService.SingletonHolder.INSTANCE;
+    }
 
 
     /**

@@ -13,8 +13,6 @@ package run.yigou.gxzy.http.entitymodel;
 import java.io.Serializable;
 import java.util.List;
 
-import run.yigou.gxzy.greendao.entity.Chapter;
-
 /**
  * 版本:  1.0
  * 描述:

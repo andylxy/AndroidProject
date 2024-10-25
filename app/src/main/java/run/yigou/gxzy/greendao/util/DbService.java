@@ -14,7 +14,6 @@ import run.yigou.gxzy.greendao.service.BeiMingCiService;
 import run.yigou.gxzy.greendao.service.BookChapterBodyService;
 import run.yigou.gxzy.greendao.service.BookChapterService;
 import run.yigou.gxzy.greendao.service.BookService;
-import run.yigou.gxzy.greendao.service.ChapterService;
 import run.yigou.gxzy.greendao.service.SearchHistoryService;
 import run.yigou.gxzy.greendao.service.TabNavBodyService;
 import run.yigou.gxzy.greendao.service.TabNavService;
@@ -30,7 +29,6 @@ import run.yigou.gxzy.greendao.service.YaoService;
 public class DbService {
     public UserInfoService mUserInfoService;
     public BookService mBookService;
-    public ChapterService mChapterService;
     public SearchHistoryService mSearchHistoryService;
     public YaoService mYaoService;
     public BeiMingCiService mBeiMingCiService;
@@ -46,18 +44,17 @@ public class DbService {
         if (instance != null) {
             throw new IllegalStateException("Singleton instance already created!");
         }
-        mUserInfoService = new UserInfoService();
-        mBookService = new BookService();
-        mChapterService = new ChapterService();
-        mSearchHistoryService =  new SearchHistoryService();
-        mYaoService = new YaoService();
-        mBeiMingCiService = new BeiMingCiService();
-        mBookChapterService = new BookChapterService();
-        mBookChapterBodyService = new BookChapterBodyService();
-        mYaoFangService = new YaoFangService();
-        mYaoFangBodyService = new YaoFangBodyService();
-        mTabNavBodyService = new TabNavBodyService();
-        mTabNavService = new TabNavService();
+        mUserInfoService =  UserInfoService.getInstance();
+        mBookService =  BookService.getInstance();
+        mSearchHistoryService =   SearchHistoryService.getInstance();
+        mYaoService =  YaoService.getInstance();
+        mBeiMingCiService =  BeiMingCiService.getInstance();
+        mBookChapterService = BookChapterService.getInstance();
+        mBookChapterBodyService =  BookChapterBodyService.getInstance();
+        mYaoFangService =  YaoFangService.getInstance();
+        mYaoFangBodyService =  YaoFangBodyService.getInstance();
+        mTabNavBodyService =  TabNavBodyService.getInstance();
+        mTabNavService =  TabNavService.getInstance();
     }
 
     private volatile static DbService instance;

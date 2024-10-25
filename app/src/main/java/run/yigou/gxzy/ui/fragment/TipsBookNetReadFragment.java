@@ -178,9 +178,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
 // 在 onDestroy 中释放资源
 
-
+    private OnBackPressedCallback onBackPressedCallback;
     private void fragmentOnBackPressed() {
-        requireActivity().getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+
+
+         onBackPressedCallback =  new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 // 处理自定义逻辑
@@ -215,7 +217,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             }
 
             private void showAddToBookshelfDialog(TabNavBody navTabBody) {
-                new MessageDialog.Builder(getActivity())
+                new MessageDialog.Builder(getContext())
                         .setTitle("加入书架")
                         .setMessage(navTabBody.getBookName())
                         .setConfirm(getString(R.string.common_confirm))
@@ -277,7 +279,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                     requireActivity().onBackPressed(); // 调用系统返回
                 }, AppConst.postDelayMillis);
             }
-        });
+        };
+
+        requireActivity().getOnBackPressedDispatcher().addCallback(this,onBackPressedCallback);
 
     }
 
@@ -432,6 +436,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             rvList.setLayoutManager(null);
             rvList.removeItemDecorationAt(0);
         }
+        singletonNetData = null;
+        onBackPressedCallback.remove();
     }
 
 
@@ -490,7 +496,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         // 重置匹配结果数量
         // 检查搜索文本是否有效（不为 null、不为空且不是数字）
         if (searchText != null && !searchText.isEmpty() /*&& !TipsHelper.isNumeric(searchText)*/) {
-            SearchKeyEntity searchKeyEntity = new SearchKeyEntity(searchText);
+            SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(searchText));
             ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity, singletonNetData);
             // 更新展示的数据和结果
             singletonNetData.setSearchResList(filteredData);
@@ -510,7 +516,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
     public static void start(Context context) {
         Intent intent = new Intent(context, TipsBookNetReadFragment.class);
-        // intent.putExtra(APPCONST.BOOK, item);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }

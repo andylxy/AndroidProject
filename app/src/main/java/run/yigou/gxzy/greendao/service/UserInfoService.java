@@ -23,7 +23,19 @@ import run.yigou.gxzy.greendao.gen.UserInfoDao;
  */
 public class UserInfoService extends BaseService<UserInfo,UserInfoDao> {
 
-   // UserInfoDao daoConn = daoSession.getUserInfoDao();
+    private UserInfoService() {
+        if (UserInfoService.class.desiredAssertionStatus()) {
+            throw new AssertionError("No instances allowed");
+        }
+    }
+
+    private static class SingletonHolder {
+        private static final UserInfoService INSTANCE = new UserInfoService();
+    }
+
+    public static UserInfoService getInstance() {
+        return SingletonHolder.INSTANCE;
+    }
 
     @Override
     protected Class<UserInfo> getEntityClass() {

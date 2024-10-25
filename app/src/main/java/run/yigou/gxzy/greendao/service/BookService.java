@@ -17,17 +17,19 @@ import run.yigou.gxzy.utils.StringHelper;
  */
 
 public class BookService extends BaseService<Book,BookDao> {
-
-    //public QueryBuilder<Book> mBookQueryBuilder = daoSession.queryBuilder(Book.class);
-    //BookDao daoConn = daoSession.getBookDao();
-    private ChapterService mChapterService;
-
-    public BookService() {
-        mChapterService = new ChapterService();
+    private BookService() {
+        if (BookService.class.desiredAssertionStatus()) {
+            throw new AssertionError("No instances allowed");
+        }
     }
 
+    private static class SingletonHolder {
+        private static final BookService INSTANCE = new BookService();
+    }
 
-
+    public static BookService getInstance() {
+        return BookService.SingletonHolder.INSTANCE;
+    }
 
     /**
      * 获取所有的书
@@ -39,14 +41,6 @@ public class BookService extends BaseService<Book,BookDao> {
        // List<Book> bookList = mBookQueryBuilder.list();
         return getQueryBuilder().list();
     }
-
-
-
-
-
-
-
-
 
 
     /**
@@ -91,21 +85,6 @@ public class BookService extends BaseService<Book,BookDao> {
     protected void createTable() {
         BookDao.createTable(mDatabase,true);
     }
-
-//    @Override
-//    public void addEntity(Book entity) {
-//        daoConn.insert(entity);
-//    }
-//
-//    @Override
-//    public void updateEntity(Book entity) {
-//        daoConn .update(entity);
-//    }
-//
-//    @Override
-//    public void deleteEntity(Book entity) {
-//        daoConn.delete(entity);
-//    }
 
 
 }

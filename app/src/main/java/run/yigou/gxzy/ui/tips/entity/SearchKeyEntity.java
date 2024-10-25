@@ -12,10 +12,10 @@ package run.yigou.gxzy.ui.tips.entity;
 
 public class SearchKeyEntity {
     //String searchText,  Integer totalNum
-    private  String searchKeyText;
+    private  StringBuilder searchKeyText;
     private int searchResTotalNum=0;
 
-    public SearchKeyEntity(String searchKeyText, int searchResTotalNum) {
+    public SearchKeyEntity(StringBuilder searchKeyText, int searchResTotalNum) {
         this.searchKeyText = searchKeyText;
         this.searchResTotalNum = searchResTotalNum;
     }
@@ -23,15 +23,15 @@ public class SearchKeyEntity {
     public SearchKeyEntity() {
     }
 
-    public SearchKeyEntity(String searchKeyText) {
+    public SearchKeyEntity(StringBuilder searchKeyText) {
         this.searchKeyText = searchKeyText;
     }
 
-    public String getSearchKeyText() {
+    public StringBuilder getSearchKeyText() {
         return searchKeyText;
     }
 
-    public void setSearchKeyText(String searchKeyText) {
+    public void setSearchKeyText(StringBuilder searchKeyText) {
         this.searchKeyText = searchKeyText;
     }
 

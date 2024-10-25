@@ -165,16 +165,12 @@ public class TipsLittleTextViewWindow extends TipsLittleWindow {
         return super.onCreateView(layoutInflater, viewGroup, bundle);
     }
 
-    @Override
-    public void onDestroyView() {
-        this.mGroup.removeView(this.view);
-        super.onDestroyView();
-    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // dismiss();
+         dismiss();
+        this.mGroup.removeView(this.view);
 
     }
 }

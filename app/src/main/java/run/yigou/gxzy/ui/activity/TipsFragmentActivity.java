@@ -45,7 +45,6 @@ public final class TipsFragmentActivity extends AppActivity {
         ImmersionBar.setTitleBar(this, findViewById(R.id.fragment_tips_container));
         // 注册事件
         // XEventBus.getDefault().register(this);
-
         // 从意图中获取书籍ID
         int bookId = getIntent().getIntExtra("bookId", 0);
         if (bookId == 0) {
@@ -53,7 +52,6 @@ public final class TipsFragmentActivity extends AppActivity {
             toast("获取书籍信息错误");
             return;
         }
-
         // 获取 FragmentManager
         fragmentManager = getSupportFragmentManager();
 

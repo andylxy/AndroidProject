@@ -4,6 +4,24 @@ import run.yigou.gxzy.greendao.entity.BookChapter;
 import run.yigou.gxzy.greendao.gen.BookChapterDao;
 
 public class BookChapterService  extends BaseService<BookChapter, BookChapterDao>{
+
+
+    private BookChapterService() {
+        if (BookChapterService.class.desiredAssertionStatus()) {
+            throw new AssertionError("No instances allowed");
+        }
+    }
+
+    private static class SingletonHolder {
+        private static final BookChapterService INSTANCE = new BookChapterService();
+    }
+
+    public static BookChapterService getInstance() {
+        return BookChapterService.SingletonHolder.INSTANCE;
+    }
+
+
+
     /**
      * @return
      */

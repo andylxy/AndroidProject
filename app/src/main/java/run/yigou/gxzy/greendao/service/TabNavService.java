@@ -5,6 +5,22 @@ import run.yigou.gxzy.greendao.entity.TabNav;
 import run.yigou.gxzy.greendao.gen.TabNavDao;
 
 public class TabNavService  extends BaseService<TabNav, TabNavDao>{
+
+
+    private TabNavService() {
+        if (TabNavService.class.desiredAssertionStatus()) {
+            throw new AssertionError("No instances allowed");
+        }
+    }
+
+    private static class SingletonHolder {
+        private static final TabNavService INSTANCE = new TabNavService();
+    }
+
+    public static TabNavService getInstance() {
+        return TabNavService.SingletonHolder.INSTANCE;
+    }
+
     /**
      * @return
      */

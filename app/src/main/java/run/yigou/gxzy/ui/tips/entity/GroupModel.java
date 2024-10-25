@@ -36,7 +36,7 @@ public class GroupModel {
             SingletonNetData singletonNetData = TipsNetHelper.createSingleDataCopy(showMingCiList);
 
             // 创建搜索关键字实体
-            SearchKeyEntity searchKeyEntity = new SearchKeyEntity(charSequence);
+            SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(charSequence));
 
             // 获取过滤后的数据
             ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity, singletonNetData);

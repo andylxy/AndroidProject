@@ -189,50 +189,50 @@ public class ShowFanYaoMingCi {
         }
 
 
-        // 处理其他章节是否有此文字出现
-        for (HH2SectionData sectionData : singletonData.getContent()) {
-            ArrayList<DataItem> sectionDataList = null;
-
-            for (DataItem dataItem : sectionData.getData()) {
-                boolean matchFound = false;
-
-                Pattern pattern = TipsNetHelper.getPattern(mingCi);
-
-                // 创建一个 Matcher 对象，并重用它
-                Matcher matcher = pattern.matcher("");
-
-                // 空指针检查
-                String text = dataItem.getText();
-                String note = dataItem.getNote();
-                String video = dataItem.getSectionvideo();
-
-                if (text != null && matcher.reset(text).find() ||
-                        note != null && matcher.reset(note).find() ||
-                        video != null && matcher.reset(video).find()) {
-                    matchFound = true;
-                }
-                // 遍历数据项，查找匹配项
-                // 突出显示数据项中的匹配文本
-                if (matchFound) {
-                    if (sectionDataList == null) {
-                        sectionDataList = new ArrayList<>();
-                    }
-                    TipsNetHelper.createSingleDataCopy(dataItem, pattern);
-                    sectionDataList.add(dataItem.getCopy());
-                }
-            }
-
-            // 如果有数据，则添加到 data 和 headers
-            if (sectionDataList != null) {
-
-                try {
-                    String name = sectionData.getHeader() != null ? sectionData.getHeader().trim() : "";
-                    hh2SectionDataList.add(new HH2SectionData(sectionDataList, 0, name));
-                } catch (NullPointerException e) {
-                    EasyLog.print("Error: sectionData.getHeader()  returned null.");
-                }
-            }
-        }
+//        // 处理其他章节是否有此文字出现
+//        for (HH2SectionData sectionData : singletonData.getContent()) {
+//            ArrayList<DataItem> sectionDataList = null;
+//
+//            for (DataItem dataItem : sectionData.getData()) {
+//                boolean matchFound = false;
+//
+//                Pattern pattern = TipsNetHelper.getPattern(mingCi);
+//
+//                // 创建一个 Matcher 对象，并重用它
+//                Matcher matcher = pattern.matcher("");
+//
+//                // 空指针检查
+//                String text = dataItem.getText();
+//                String note = dataItem.getNote();
+//                String video = dataItem.getSectionvideo();
+//
+//                if (text != null && matcher.reset(text).find() ||
+//                        note != null && matcher.reset(note).find() ||
+//                        video != null && matcher.reset(video).find()) {
+//                    matchFound = true;
+//                }
+//                // 遍历数据项，查找匹配项
+//                // 突出显示数据项中的匹配文本
+//                if (matchFound) {
+//                    if (sectionDataList == null) {
+//                        sectionDataList = new ArrayList<>();
+//                    }
+//                    TipsNetHelper.createSingleDataCopy(dataItem, pattern);
+//                    sectionDataList.add(dataItem.getCopy());
+//                }
+//            }
+//
+//            // 如果有数据，则添加到 data 和 headers
+//            if (sectionDataList != null) {
+//
+//                try {
+//                    String name = sectionData.getHeader() != null ? sectionData.getHeader().trim() : "";
+//                    hh2SectionDataList.add(new HH2SectionData(sectionDataList, 0, name));
+//                } catch (NullPointerException e) {
+//                    EasyLog.print("Error: sectionData.getHeader()  returned null.");
+//                }
+//            }
+//        }
 
         // 返回包含方剂信息的列表
         return hh2SectionDataList;

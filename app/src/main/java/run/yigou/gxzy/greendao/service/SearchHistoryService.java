@@ -25,7 +25,19 @@ public class SearchHistoryService extends BaseService<SearchHistory,SearchHistor
 //    SearchHistoryDao daoConn = daoSession.getSearchHistoryDao();
 
 
+    private SearchHistoryService() {
+        if (SearchHistoryService.class.desiredAssertionStatus()) {
+            throw new AssertionError("No instances allowed");
+        }
+    }
 
+    private static class SingletonHolder {
+        private static final SearchHistoryService INSTANCE = new SearchHistoryService();
+    }
+
+    public static SearchHistoryService getInstance() {
+        return SearchHistoryService.SingletonHolder.INSTANCE;
+    }
 
 
     private ArrayList<SearchHistory> findSearchHistorys(String sql, String[] selectionArgs) {

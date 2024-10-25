@@ -308,7 +308,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             // 检查搜索文本是否有效（不为 null、不为空且不是数字）
             if (searchKey != null && !searchKey.isEmpty() && value != null) {
                 try {
-                    SearchKeyEntity searchKeyEntity = new SearchKeyEntity(searchKey);
+                    SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(searchKey));
                     List<HH2SectionData> searchResults = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity, value);
                     if (!searchResults.isEmpty()) {
                         filteredData.addAll(searchResults);

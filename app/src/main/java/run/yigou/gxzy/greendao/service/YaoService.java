@@ -5,6 +5,20 @@ import run.yigou.gxzy.greendao.entity.ZhongYao;
 import run.yigou.gxzy.greendao.gen.ZhongYaoDao;
 
 public class YaoService extends BaseService<ZhongYao, ZhongYaoDao> {
+    private YaoService() {
+        if (YaoService.class.desiredAssertionStatus()) {
+            throw new AssertionError("No instances allowed");
+        }
+    }
+
+    private static class SingletonHolder {
+        private static final YaoService INSTANCE = new YaoService();
+    }
+
+    public static YaoService getInstance() {
+        return YaoService.SingletonHolder.INSTANCE;
+    }
+
     /**
      * @return
      */
