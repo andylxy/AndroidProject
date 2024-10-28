@@ -313,10 +313,10 @@ public class ConvertEntity {
     }
 
 
-    public static void getBookDetailList(List<HH2SectionData> locDetailList, List<HH2SectionData> netDetailList, int bookId) {
+    public static boolean getBookDetailList(List<HH2SectionData> locDetailList, List<HH2SectionData> netDetailList, int bookId) {
         if (netDetailList == null || netDetailList.isEmpty() || bookId <= 0) {
             EasyLog.print("BookDetailList is empty or null. or  bookId <=0 .");
-            return;
+            return false;
         }
 
         try {
@@ -373,9 +373,11 @@ public class ConvertEntity {
 
                 }
             }
+
         } catch (Exception e) {
             EasyLog.print("Error processing detail list: " + e.getMessage());
             //  throw e;
+            return false;
         }
 
 //        // 处理 netDetailList 和 locDetailList
@@ -435,7 +437,7 @@ public class ConvertEntity {
 //            }
 //        }
 
-
+        return true;
     }
 
     public static List<HH2SectionData> getBookChapterDetailList(int bookId) {

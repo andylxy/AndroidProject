@@ -79,6 +79,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
     private WrapRecyclerView mRecyclerView;
 
     private BookInfoAdapter mAdapter;
+    private boolean mLoading;
     /**
      * singleData 所有书籍 数据单例
      */
@@ -184,7 +185,10 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                             //保存书籍内容
                             ThreadUtil.runInBackground(() -> {
                                 //加载书本内容
-                                ConvertEntity.getBookDetailList(singletonNetData.getContent(), data.getData(), bookId);
+                                mLoading =  ConvertEntity.getBookDetailList(singletonNetData.getContent(), data.getData(), bookId);
+                                post(() -> {
+                                    singletonNetData.showUpdateHttpDataNotification(mLoading);
+                                });
                             });
 
                         }

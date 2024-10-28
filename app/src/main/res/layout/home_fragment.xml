@@ -72,6 +72,15 @@
                         android:layout_marginEnd="@dimen/dp_20"
                         app:srcCompat="@drawable/search_ic"
                         app:tint="@color/white" />
+<!--                    <androidx.appcompat.widget.AppCompatTextView-->
+<!--                        android:id="@+id/tv_home_load"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="match_parent"-->
+<!--                        android:gravity="center_vertical"-->
+<!--                        android:padding="@dimen/dp_5"-->
+<!--                        android:visibility="visible"-->
+<!--                        android:text="重新加载"-->
+<!--                        android:textSize="@dimen/sp_15" />-->
 
                 </LinearLayout>
 

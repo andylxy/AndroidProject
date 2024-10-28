@@ -10,16 +10,12 @@
 
 package run.yigou.gxzy.ui.fragment;
 
-import static android.content.Intent.getIntent;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -89,7 +85,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
      * 当前选中的章节索引
      */
     private int currentIndex = -1;
-    private boolean isShow = false;
+    private boolean isShowBookCollect = false;
     /**
      * 数据传递
      */
@@ -179,10 +175,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 // 在 onDestroy 中释放资源
 
     private OnBackPressedCallback onBackPressedCallback;
+
     private void fragmentOnBackPressed() {
 
 
-         onBackPressedCallback =  new OnBackPressedCallback(true) {
+        onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 // 处理自定义逻辑
@@ -281,7 +278,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             }
         };
 
-        requireActivity().getOnBackPressedDispatcher().addCallback(this,onBackPressedCallback);
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
 
     }
 
@@ -309,6 +306,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             initializeAdapter();
             setHeaderClickListener();
             setJumpSpecifiedItemListener();
+            setHttpUpdateStatusNotification();
             rvList.setAdapter(adapter);
             refreshData();
         } catch (Exception e) {
@@ -322,7 +320,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (args != null) {
             bookId = args.getInt("bookNo", 0);
             bookLastReadPosition = args.getInt("bookLastReadPosition", 0);
-            isShow = args.getBoolean("isShow", false);
+            isShowBookCollect = args.getBoolean("isShow", false);
         }
     }
 
@@ -400,7 +398,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                     expandableAdapter.expandGroup(groupPosition);
                 }
                 // 记录当前点击位置,0则表示没有点击,或者点击了第一章.
-                if (isShow)
+                if (isShowBookCollect)
                     currentIndex = groupPosition;
             }
         };
@@ -420,17 +418,45 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         adapter.setOnJumpSpecifiedItemListener(onJumpSpecifiedItemListener);
     }
 
+    /**
+     * 设置更新数据监听
+     */
+    private void setHttpUpdateStatusNotification() {
+        SingletonNetData.OnContentGetHttpDataUpdateStatus httpDataStatusNotification = new SingletonNetData.OnContentGetHttpDataUpdateStatus() {
+            /**
+             * @param status
+             */
+            @Override
+            public void onContentUpdateHttpDataStatus(boolean status) {
+                if (status) {
+                    // 刷新数据显示
+                    refreshData();
+                }
+            }
+
+        };
+        singletonNetData.setOnContentUpdateHttpDataNotification(httpDataStatusNotification);
+    }
+
     private void refreshData() {
         reListAdapter(true, false);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshData();
+    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        adapter.setOnHeaderClickListener(null);
+        singletonNetData.setOnContentUpdateListener(null);
         singletonNetData.setOnContentShowStatusNotification(null);
         singletonNetData.setOnContentUpdateListener(null);
         adapter.setOnJumpSpecifiedItemListener(null);
+        singletonNetData.setOnContentUpdateHttpDataNotification(null);
         if (rvList != null) {
             rvList.setAdapter(null);
             rvList.setLayoutManager(null);
@@ -462,7 +488,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             if (init) {
                 adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getContent(), isExpand));
                 //如果有上次阅读记录，则定位到上次阅读位置
-                if (isShow) {
+                if (isShowBookCollect) {
                     layoutManager.scrollToPositionWithOffset(bookLastReadPosition, 0);
                     adapter.expandGroup(bookLastReadPosition, true);
                 }

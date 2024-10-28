@@ -137,6 +137,24 @@ public class SingletonNetData {
         this.mOnContentUpdateListener = mOnUpdateListener;
     }
 
+
+    private OnContentGetHttpDataUpdateStatus mNotification;
+
+    public interface OnContentGetHttpDataUpdateStatus {
+        void onContentUpdateHttpDataStatus(boolean status);
+    }
+
+    public void setOnContentUpdateHttpDataNotification(OnContentGetHttpDataUpdateStatus mOnUpdateListener) {
+        this.mNotification = mOnUpdateListener;
+    }
+
+    public void showUpdateHttpDataNotification(boolean status ) {
+        if (mNotification != null )
+            mNotification.onContentUpdateHttpDataStatus(status);
+
+    }
+
+
     private OnContentShowStatusNotification mOnContentShowStatusNotification;
 
     public interface OnContentShowStatusNotification {

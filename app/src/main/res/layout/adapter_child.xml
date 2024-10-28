@@ -23,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/read_fangjizhujie_background"
-        android:textColor="@color/read_cursor_textColor"
+        android:textColor="@color/sys_common_word"
         android:paddingLeft="@dimen/dp_17"
         android:paddingTop="@dimen/dp_9"
         android:paddingRight="@dimen/dp_20"
