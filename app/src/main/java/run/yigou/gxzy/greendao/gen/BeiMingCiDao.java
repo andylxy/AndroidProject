@@ -32,6 +32,7 @@ public class BeiMingCiDao extends AbstractDao<BeiMingCi, Long> {
         public final static Property Text = new Property(5, String.class, "text", false, "TEXT");
         public final static Property SignatureId = new Property(6, long.class, "signatureId", false, "SIGNATURE_ID");
         public final static Property Signature = new Property(7, String.class, "signature", false, "SIGNATURE");
+        public final static Property ImageUrl = new Property(8, String.class, "imageUrl", false, "IMAGE_URL");
     }
 
 
@@ -54,7 +55,8 @@ public class BeiMingCiDao extends AbstractDao<BeiMingCi, Long> {
                 "\"HEIGHT\" INTEGER NOT NULL ," + // 4: height
                 "\"TEXT\" TEXT," + // 5: text
                 "\"SIGNATURE_ID\" INTEGER NOT NULL ," + // 6: signatureId
-                "\"SIGNATURE\" TEXT);"); // 7: signature
+                "\"SIGNATURE\" TEXT," + // 7: signature
+                "\"IMAGE_URL\" TEXT);"); // 8: imageUrl
     }
 
     /** Drops the underlying database table. */
@@ -94,6 +96,11 @@ public class BeiMingCiDao extends AbstractDao<BeiMingCi, Long> {
         if (signature != null) {
             stmt.bindString(8, signature);
         }
+ 
+        String imageUrl = entity.getImageUrl();
+        if (imageUrl != null) {
+            stmt.bindString(9, imageUrl);
+        }
     }
 
     @Override
@@ -127,6 +134,11 @@ public class BeiMingCiDao extends AbstractDao<BeiMingCi, Long> {
         if (signature != null) {
             stmt.bindString(8, signature);
         }
+ 
+        String imageUrl = entity.getImageUrl();
+        if (imageUrl != null) {
+            stmt.bindString(9, imageUrl);
+        }
     }
 
     @Override
@@ -144,7 +156,8 @@ public class BeiMingCiDao extends AbstractDao<BeiMingCi, Long> {
             cursor.getInt(offset + 4), // height
             cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // text
             cursor.getLong(offset + 6), // signatureId
-            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7) // signature
+            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // signature
+            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8) // imageUrl
         );
         return entity;
     }
@@ -159,6 +172,7 @@ public class BeiMingCiDao extends AbstractDao<BeiMingCi, Long> {
         entity.setText(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
         entity.setSignatureId(cursor.getLong(offset + 6));
         entity.setSignature(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
+        entity.setImageUrl(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
      }
     
     @Override

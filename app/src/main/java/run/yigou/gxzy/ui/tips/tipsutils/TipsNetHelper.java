@@ -251,8 +251,8 @@ public class TipsNetHelper {
         // 检查数据项的属性是否与搜索词和正则匹配
         String attributeText = dataItem.getAttributedText().toString();
         // 这里可以进一步处理别名
-
-        // 检查主属性文本是否匹配
+        if(dataItem.getName()!=null)  return  pattern.matcher(dataItem.getName()).find()|| pattern.matcher(attributeText).find() || checkAliases(dataItem, pattern, yaoAliasDict, fangAliasDict);
+                // 检查主属性文本是否匹配
         return pattern.matcher(attributeText).find() || checkAliases(dataItem, pattern, yaoAliasDict, fangAliasDict);
     }
 

@@ -17,10 +17,12 @@ public class BeiMingCi implements Serializable {
     private String text;
     private long signatureId;
     private String signature;
+    private String imageUrl;
 
-    @Generated(hash = 805985940)
+    @Generated(hash = 206118573)
     public BeiMingCi(Long beiMingCiId, int ID, String mingCiList, String name,
-            int height, String text, long signatureId, String signature) {
+            int height, String text, long signatureId, String signature,
+            String imageUrl) {
         this.beiMingCiId = beiMingCiId;
         this.ID = ID;
         this.mingCiList = mingCiList;
@@ -29,6 +31,7 @@ public class BeiMingCi implements Serializable {
         this.text = text;
         this.signatureId = signatureId;
         this.signature = signature;
+        this.imageUrl = imageUrl;
     }
 
     @Generated(hash = 122937484)
@@ -89,5 +92,13 @@ public class BeiMingCi implements Serializable {
 
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    public String getImageUrl() {
+        return this.imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

@@ -285,7 +285,7 @@ public final class AppApplication extends Application {
         ActivityManager.getInstance().init(application);
 
         // MMKV 初始化
-        MMKV.initialize(application);
+         MMKV.initialize(application);
 
         // 网络请求框架初始化
         OkHttpClient okHttpClient = new OkHttpClient.Builder()

@@ -23,7 +23,6 @@ public class MingCiContent extends DataItem {
      * 名词列表
      */
     private List<String> mingCiList;
-    private String name;
 
     public List<String> getMingCiList() {
         return mingCiList == null ? new ArrayList<>() : this.mingCiList;
@@ -33,13 +32,8 @@ public class MingCiContent extends DataItem {
         this.mingCiList = mingCiList;
     }
 
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+
 
     @Override
     public MingCiContent getCopy() {
@@ -99,6 +93,8 @@ public class MingCiContent extends DataItem {
             dataItem.setMingCiList(new ArrayList<>(mingCiList)); // 防止外部修改原始列表
         }
 
+        if (getImageUrl() != null)
+            dataItem.setImageUrl(getImageUrl());
         return dataItem;
     }
 

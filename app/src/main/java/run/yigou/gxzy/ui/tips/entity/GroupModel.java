@@ -90,12 +90,14 @@ public class GroupModel {
     private static @NonNull ChildEntity getChildEntity(DataItem dataItem) {
         ChildEntity child = new ChildEntity();
         if (dataItem.getAttributedText() != null)
-            child.setAttributed_child_sectiontext(dataItem.getAttributedText());
+            child.setAttributed_child_section_text(dataItem.getAttributedText());
         if (dataItem.getAttributedNote() != null)
-            child.setAttributed_child_sectionnote(dataItem.getAttributedNote());
+            child.setAttributed_child_section_note(dataItem.getAttributedNote());
         if (dataItem.getAttributedSectionVideo() != null)
-            child.setAttributed_child_sectionvideo(dataItem.getAttributedSectionVideo());
+            child.setAttributed_child_section_video(dataItem.getAttributedSectionVideo());
         child.setGroupPosition(dataItem.getGroupPosition());
+        if (dataItem.getImageUrl() != null)
+            child.setChild_section_image(dataItem.getImageUrl());
         return child;
     }
 

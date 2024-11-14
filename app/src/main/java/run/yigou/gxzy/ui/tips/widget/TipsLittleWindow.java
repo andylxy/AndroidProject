@@ -48,58 +48,45 @@ public class TipsLittleWindow extends Fragment {
     }
 
 
-    /**
-     * 隐藏（移除）这个Fragment
-     * <p>
-     * 通过移除事务将Fragment从当前的活动列表中移除，并且退回到之前的BackStack状态
-     */
-    public void dismiss() {
-        // 获取FragmentManager
-        FragmentManager fragmentManager = getFragmentManager();
-        if (fragmentManager == null) {
-            EasyLog.print("Fragment-FragmentManager is null, cannot dismiss fragment.");
-            return;
-        }
+  public void dismiss() {
+      // 获取FragmentManager
+      FragmentManager fragmentManager = getFragmentManager();
+      if (fragmentManager == null) {
+          EasyLog.print("Fragment-FragmentManager is null, cannot dismiss fragment.");
+          return;
+      }
 
-        // 异步提交事务
-        fragmentManager.popBackStack();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.remove(this);
+      // 异步提交事务
+      fragmentManager.popBackStack();
+      FragmentTransaction transaction = fragmentManager.beginTransaction();
+      transaction.remove(this);
 
-        try {
-            // 异步提交事务，兼容不同版本
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                try {
-                    transaction.commitNow();
-                    EasyLog.print("TransactionManager事务提交成功，使用 commitNow()。");
-                } catch (IllegalStateException e) {
-                    EasyLog.print("TransactionManager使用 commitNow() 提交事务失败。");
-                    // 尝试使用 commit() 方法
-                    try {
-                        transaction.commit();
-                        EasyLog.print("TransactionManager事务提交成功，使用 commit()。");
-                    } catch (IllegalStateException ex) {
-                        EasyLog.print("TransactionManager使用 commit() 提交事务失败。");
-                    }
-                } catch (Exception e) {
-                    EasyLog.print("TransactionManager提交事务时发生意外错误。");
-                }
-            } else {
-                try {
-                    transaction.commit();
-                    EasyLog.print("TransactionManager事务提交成功，使用 commit()。");
-                } catch (IllegalStateException e) {
-                    EasyLog.print("TransactionManager使用 commit() 提交事务失败。");
-                } catch (Exception e) {
-                    EasyLog.print("TransactionManager提交事务时发生意外错误。");
-                }
-            }
+      boolean committed = false;
 
-                // 处理外部捕获的 IllegalStateException
-        } catch (IllegalStateException e) {
-            EasyLog.print("Fragment提交事务失败。");
-        }
-
-    }
+      try {
+          // 异步提交事务，兼容不同版本
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+              transaction.commitNow();
+              EasyLog.print("TransactionManager事务提交成功，使用 commitNow()。");
+              committed = true;
+          } else {
+              transaction.commit();
+              EasyLog.print("TransactionManager事务提交成功，使用 commit()。");
+          }
+      } catch (IllegalStateException e) {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !committed) {
+              try {
+                  transaction.commit();
+                  EasyLog.print("TransactionManager事务提交成功，使用 commit()。");
+              } catch (Exception ex) {
+                  EasyLog.print("TransactionManager提交事务失败。");
+              }
+          } else {
+              EasyLog.print("TransactionManager提交事务失败。");
+          }
+      } catch (Exception e) {
+          EasyLog.print("TransactionManager提交事务失败。");
+      }
+  }
 
 }

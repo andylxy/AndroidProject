@@ -133,43 +133,43 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements Toa
         sectionvideo.setVisibility(View.GONE);
 
         // 根据实体对象设置TextView的内容和点击方法
-        if (entity.getAttributed_child_sectionnote() != null) {
-            sectionnote.setText(entity.getAttributed_child_sectionnote());
+        if (entity.getAttributed_child_section_note() != null) {
+            sectionnote.setText(entity.getAttributed_child_section_note());
             sectionnote.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }
-        if (entity.getAttributed_child_sectionvideo() != null) {
-            sectionvideo.setText(entity.getAttributed_child_sectionvideo());
+        if (entity.getAttributed_child_section_video() != null) {
+            sectionvideo.setText(entity.getAttributed_child_section_video());
             sectionvideo.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }
 
         // 设置sectiontext的文本内容
-        sectiontext.setText(entity.getAttributed_child_sectiontext());
+        sectiontext.setText(entity.getAttributed_child_section_text());
         sectiontext.setMovementMethod(LocalLinkMovementMethod.getInstance());
         // 设置长按监听，弹出复制对话框
-        setLongClickForView(sectiontext, entity.getAttributed_child_sectiontext(), entity.getGroupPosition());
-        setLongClickForView(sectionnote, entity.getAttributed_child_sectionnote(), entity.getGroupPosition());
-        setLongClickForView(sectionvideo, entity.getAttributed_child_sectionvideo(), entity.getGroupPosition());
+        setLongClickForView(sectiontext, entity.getAttributed_child_section_text(), entity.getGroupPosition());
+        setLongClickForView(sectionnote, entity.getAttributed_child_section_note(), entity.getGroupPosition());
+        setLongClickForView(sectionvideo, entity.getAttributed_child_section_video(), entity.getGroupPosition());
 
         // 为sectiontext设置点击监听，处理点击事件
         sectiontext.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
             EasyLog.print("条文点击: " + v.getTag() + ", 实体信息: " + entity);
-            toggleVisibility(sectionnote, entity.getAttributed_child_sectionnote());
+            toggleVisibility(sectionnote, entity.getAttributed_child_section_note());
         });
 
         // 为sectionnote设置点击监听，处理点击事件
         sectionnote.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
-            toggleVisibility(sectionvideo, entity.getAttributed_child_sectionvideo());
+            toggleVisibility(sectionvideo, entity.getAttributed_child_section_video());
         });
 
         // 为sectionvideo设置点击监听，处理点击事件
         sectionvideo.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
-            toggleVisibility(sectionvideo, entity.getAttributed_child_sectionvideo());
+            toggleVisibility(sectionvideo, entity.getAttributed_child_section_video());
         });
 
     }

@@ -28,15 +28,15 @@ public class Fang extends DataItem {
     List<YaoUse> extraYaoList;
     List<YaoUse> helpYaoList;
     String makeWay;
-    public String name;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+//    public String name;
+//
+//    public String getName() {
+//        return name;
+//    }
+//
+//    public void setName(String name) {
+//        this.name = name;
+//    }
 
     public int getYaoCount() {
         return yaoCount;
@@ -252,7 +252,7 @@ public class Fang extends DataItem {
                 // 获取后缀，如果为空则使用空字符串
                 String suffix = def(yaoUse.getSuffix(), "");
                 // 格式化并返回药用信息字符串
-                return String.format(Locale.CHINA, "$f{%s}$w{(%s%.0f%s服)}，", this.name, amount, drinkNum, suffix);
+                return String.format(Locale.CHINA, "$f{%s}$w{(%s%.0f%s服)}，", getName(), amount, drinkNum, suffix);
             }
         }
         // 如果没有找到匹配的药用信息，返回null

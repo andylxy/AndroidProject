@@ -22,14 +22,24 @@ import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 public class ChildEntity {
 
 
-    private String child_sectiontext;
-    private String child_sectionnote;
-    private String child_sectionvideo;
-    private SpannableStringBuilder attributed_child_sectiontext;
-    private SpannableStringBuilder attributed_child_sectionnote;
-    private SpannableStringBuilder attributed_child_sectionvideo;
+    private String child_section_text;
+    private String child_section_note;
+    private String child_section_video;
+    private SpannableStringBuilder attributed_child_section_text;
+    private SpannableStringBuilder attributed_child_section_note;
+    private SpannableStringBuilder attributed_child_section_video;
     private SpannableStringBuilder spannableChild;
     private int groupPosition;
+
+    private String child_section_image;
+
+    public String getChild_section_image() {
+        return child_section_image;
+    }
+
+    public void setChild_section_image(String child_section_image) {
+        this.child_section_image = child_section_image;
+    }
 
     public int getGroupPosition() {
         return groupPosition;
@@ -38,79 +48,61 @@ public class ChildEntity {
     public void setGroupPosition(int groupPosition) {
         this.groupPosition = groupPosition;
     }
-    public ChildEntity(String child_sectiontext) {
-        this.child_sectiontext = child_sectiontext;
-    }
     public ChildEntity() {
     }
-    public ChildEntity(String child_sectiontext, String child_sectionnote, String child_sectionvideo) {
-        this.child_sectiontext = child_sectiontext;
-        this.child_sectionnote = child_sectionnote;
-        this.child_sectionvideo = child_sectionvideo;
-    }
-    public ChildEntity(SpannableStringBuilder child_sectiontext, String child_sectionnote, String child_sectionvideo) {
-        this.attributed_child_sectiontext = child_sectiontext;
-        this.child_sectionnote = child_sectionnote;
-        this.child_sectionvideo = child_sectionvideo;
-    }
-
-    public ChildEntity(String child_sectiontext, SpannableStringBuilder spannableChild) {
-        this.child_sectiontext = child_sectiontext;
-        this.spannableChild = spannableChild;
-    }
 
 
-    public synchronized SpannableStringBuilder getAttributed_child_sectiontext() {
-        if (attributed_child_sectiontext == null) {
-            if (child_sectiontext == null) {
-                attributed_child_sectiontext = new SpannableStringBuilder();
+    public synchronized SpannableStringBuilder getAttributed_child_section_text() {
+        if (attributed_child_section_text == null) {
+            if (child_section_text == null) {
+                attributed_child_section_text = new SpannableStringBuilder();
             } else {
-                attributed_child_sectiontext = TipsNetHelper.renderText(child_sectiontext);
+                attributed_child_section_text = TipsNetHelper.renderText(child_section_text);
             }
         }
-        return attributed_child_sectiontext;
+        return attributed_child_section_text;
     }
 
-    public void setAttributed_child_sectiontext(SpannableStringBuilder attributed_child_sectiontext) {
-        this.attributed_child_sectiontext = attributed_child_sectiontext;
+    public void setAttributed_child_section_text(SpannableStringBuilder attributed_child_section_text) {
+        this.attributed_child_section_text = attributed_child_section_text;
     }
 
-    public synchronized SpannableStringBuilder getAttributed_child_sectionvideo() {
-        if (attributed_child_sectionvideo == null) {
-            if (child_sectionvideo != null) {
-                attributed_child_sectionvideo = TipsNetHelper.renderText(child_sectionvideo);
+    public synchronized SpannableStringBuilder getAttributed_child_section_video() {
+        if (attributed_child_section_video == null) {
+            if (child_section_video != null) {
+                attributed_child_section_video = TipsNetHelper.renderText(child_section_video);
             } else {
                 // 处理 child_sectionvideo 为 null 的情况
-                attributed_child_sectionvideo = new SpannableStringBuilder(); // 或者返回一个默认值
+                attributed_child_section_video = new SpannableStringBuilder(); // 或者返回一个默认值
             }
         }
-        return attributed_child_sectionvideo;
+        return attributed_child_section_video;
     }
 
 
-    public void setAttributed_child_sectionvideo(SpannableStringBuilder attributed_child_sectionvideo) {
-        this.attributed_child_sectionvideo = attributed_child_sectionvideo;
+    public void setAttributed_child_section_video(SpannableStringBuilder attributed_child_section_video) {
+        this.attributed_child_section_video = attributed_child_section_video;
     }
 
-    public synchronized SpannableStringBuilder getAttributed_child_sectionnote() {
-        if (attributed_child_sectionnote == null) {
-            if (child_sectionnote == null) {
+    public synchronized SpannableStringBuilder getAttributed_child_section_note() {
+        if (attributed_child_section_note == null) {
+            if (child_section_note == null) {
                 // 防止空指针异常
-                attributed_child_sectionnote = new SpannableStringBuilder();
+                attributed_child_section_note = new SpannableStringBuilder();
             } else {
-                attributed_child_sectionnote = TipsNetHelper.renderText(child_sectionnote);
+                attributed_child_section_note = TipsNetHelper.renderText(child_section_note);
             }
 
             // 记录日志
             EasyLog.print("ChildEntity", "attributed_child_sectionnote initialized");
         }
 
-        return attributed_child_sectionnote;
+        return attributed_child_section_note;
     }
 
 
-    public void setAttributed_child_sectionnote(SpannableStringBuilder attributed_child_sectionnote) {
-        this.attributed_child_sectionnote = attributed_child_sectionnote;
+    public void setAttributed_child_section_note(SpannableStringBuilder attributed_child_section_note) {
+        this.attributed_child_section_note = attributed_child_section_note;
     }
 
 
@@ -122,27 +114,27 @@ public class ChildEntity {
         this.spannableChild = spannableChild;
     }
 
-    public String getChild_sectiontext() {
-        return child_sectiontext;
+    public String getChild_section_text() {
+        return child_section_text;
     }
 
-    public void setChild_sectiontext(String child_sectiontext) {
-        this.child_sectiontext = child_sectiontext;
+    public void setChild_section_text(String child_section_text) {
+        this.child_section_text = child_section_text;
     }
 
-    public String getChild_sectionnote() {
-        return child_sectionnote;
+    public String getChild_section_note() {
+        return child_section_note;
     }
 
-    public void setChild_sectionnote(String child_sectionnote) {
-        this.child_sectionnote = child_sectionnote;
+    public void setChild_section_note(String child_section_note) {
+        this.child_section_note = child_section_note;
     }
 
-    public String getChild_sectionvideo() {
-        return child_sectionvideo;
+    public String getChild_section_video() {
+        return child_section_video;
     }
 
-    public void setChild_sectionvideo(String child_sectionvideo) {
-        this.child_sectionvideo = child_sectionvideo;
+    public void setChild_section_video(String child_section_video) {
+        this.child_section_video = child_section_video;
     }
 }

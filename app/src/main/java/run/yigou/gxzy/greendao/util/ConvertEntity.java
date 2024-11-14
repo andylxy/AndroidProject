@@ -94,6 +94,7 @@ public class ConvertEntity {
                     locBeiMingCi.setMingCiList(String.join(",", mingCiContent.getYaoList()));
                     locBeiMingCi.setName(mingCiContent.getName());
                     locBeiMingCi.setSignature(mingCiContent.getSignature());
+                    locBeiMingCi.setImageUrl(mingCiContent.getImageUrl());
                     locBeiMingCi.setID(mingCiContent.getID());
                     try {
                         DbService.getInstance().mBeiMingCiService.updateEntity(locBeiMingCi);
@@ -112,6 +113,7 @@ public class ConvertEntity {
                 beiMingCi.setMingCiList(String.join(",", mingCiContent.getYaoList()));
                 beiMingCi.setSignature(mingCiContent.getSignature());
                 beiMingCi.setSignatureId(mingCiContent.getSignatureId());
+                beiMingCi.setImageUrl(mingCiContent.getImageUrl());
                 beiMingCi.setID(mingCiContent.getID());
                 //yao1.setHeight(yao.getHeight());
                 try {

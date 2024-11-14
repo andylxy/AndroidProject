@@ -59,6 +59,9 @@ public class AppConst {
      * SharedPreferences 金匮保存的的Key字符串
      */
     public static final String Key_Jinkui = "showJinkui";
-
+    /**
+     * 图片主机地址
+     */
+    public static final String ImageHost = "https://948526c.webp.li/";
 
 }

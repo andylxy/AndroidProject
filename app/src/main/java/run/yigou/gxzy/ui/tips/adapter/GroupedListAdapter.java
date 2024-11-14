@@ -99,6 +99,6 @@ public class GroupedListAdapter extends GroupedRecyclerViewAdapter {
     @Override
     public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {
         ChildEntity entity = mGroups.get(groupPosition).getChildren().get(childPosition);
-        holder.setText(R.id.tv_sectiontext, entity.getChild_sectiontext());
+        holder.setText(R.id.tv_sectiontext, entity.getChild_section_text());
     }
 }

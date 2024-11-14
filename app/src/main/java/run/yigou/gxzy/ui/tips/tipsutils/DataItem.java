@@ -41,6 +41,22 @@ public class DataItem implements Serializable {
     private int groupPosition;
     private long signatureId;
     private String signature;
+    private String imageUrl;
+    private String name;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
 
     public long getSignatureId() {
         return signatureId;
@@ -65,13 +81,14 @@ public class DataItem implements Serializable {
     public void setGroupPosition(int groupPosition) {
         this.groupPosition = groupPosition;
     }
+
     public SpannableStringBuilder getAttributedSectionVideo() {
         if (this.attributedSectionVideo != null) {
             return this.attributedSectionVideo;
         }
-        if (this.sectionvideo!=null)
+        if (this.sectionvideo != null)
             this.attributedSectionVideo = TipsNetHelper.renderText(this.sectionvideo);
-        else  return null;
+        else return null;
         return attributedSectionVideo;
     }
 
@@ -83,9 +100,9 @@ public class DataItem implements Serializable {
         if (this.attributedNote != null) {
             return this.attributedNote;
         }
-        if (this.note!=null)
+        if (this.note != null)
             this.attributedNote = TipsNetHelper.renderText(this.note);
-        else  return null;
+        else return null;
         return attributedNote;
     }
 
@@ -124,53 +141,53 @@ public class DataItem implements Serializable {
         this.attributedText = TipsNetHelper.renderText(this.text);
     }
 
-public DataItem getCopy() {
-    DataItem dataItem = new DataItem();
+    public DataItem getCopy() {
+        DataItem dataItem = new DataItem();
 
-    // 空值检查后设置 pureText
-    if (this.text != null) {
-        dataItem.setPureText(this.text);
+        // 空值检查后设置 pureText
+        if (this.text != null) {
+            dataItem.setPureText(this.text);
+        }
+        if (this.imageUrl != null) dataItem.setImageUrl(this.imageUrl);
+        // 空值检查后设置 attributedText
+        if (this.attributedText != null) {
+            dataItem.setAttributedText(new SpannableStringBuilder(this.attributedText));
+        }
+
+        // 深拷贝 fangList
+        if (this.fangList != null) {
+            List<String> fangListCopy = new ArrayList<>(this.fangList);
+            dataItem.setFangList(fangListCopy);
+        }
+
+        // 深拷贝 yaoList
+        if (this.yaoList != null) {
+            List<String> yaoListCopy = new ArrayList<>(this.yaoList);
+            dataItem.setYaoList(yaoListCopy);
+        }
+
+        // 空值检查后设置 note
+        if (this.note != null) {
+            dataItem.setNote(this.note);
+        }
+
+        // 空值检查后设置 sectionvideo
+        if (this.sectionvideo != null) {
+            dataItem.setSectionvideo(this.sectionvideo);
+        }
+
+        // 空值检查后设置 attributedNote
+        if (this.attributedNote != null) {
+            dataItem.setAttributedNote(new SpannableStringBuilder(this.attributedNote));
+        }
+
+        // 空值检查后设置 attributedSectionVideo
+        if (this.attributedSectionVideo != null) {
+            dataItem.setAttributedSectionVideo(new SpannableStringBuilder(this.attributedSectionVideo));
+        }
+
+        return dataItem;
     }
-
-    // 空值检查后设置 attributedText
-    if (this.attributedText != null) {
-        dataItem.setAttributedText(new SpannableStringBuilder(this.attributedText));
-    }
-
-    // 深拷贝 fangList
-    if (this.fangList != null) {
-        List<String> fangListCopy = new ArrayList<>(this.fangList);
-        dataItem.setFangList(fangListCopy);
-    }
-
-    // 深拷贝 yaoList
-    if (this.yaoList != null) {
-        List<String> yaoListCopy = new ArrayList<>(this.yaoList);
-        dataItem.setYaoList(yaoListCopy);
-    }
-
-    // 空值检查后设置 note
-    if (this.note != null) {
-        dataItem.setNote(this.note);
-    }
-
-    // 空值检查后设置 sectionvideo
-    if (this.sectionvideo != null) {
-        dataItem.setSectionvideo(this.sectionvideo);
-    }
-
-    // 空值检查后设置 attributedNote
-    if (this.attributedNote != null) {
-        dataItem.setAttributedNote(new SpannableStringBuilder(this.attributedNote));
-    }
-
-    // 空值检查后设置 attributedSectionVideo
-    if (this.attributedSectionVideo != null) {
-        dataItem.setAttributedSectionVideo(new SpannableStringBuilder(this.attributedSectionVideo));
-    }
-
-    return dataItem;
-}
 
 
     private void setPureText(String str) {

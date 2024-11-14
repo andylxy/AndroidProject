@@ -32,6 +32,7 @@ import com.hjq.base.BaseDialog;
 import com.hjq.http.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
+import com.tencent.mmkv.MMKV;
 
 
 import java.util.ArrayList;
@@ -279,7 +280,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         };
 
         requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
-
     }
 
 
