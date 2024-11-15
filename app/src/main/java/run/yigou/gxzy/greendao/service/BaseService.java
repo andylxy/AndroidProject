@@ -105,15 +105,7 @@ public abstract class BaseService<T, TDao extends AbstractDao<T, ?>> {
         return cursor;
     }
 
-    /**
-     * 执行SQL进行增删改
-     *
-     * @param sql
-     * @param selectionArgs
-     */
-    public void rawQuery(String sql, String[] selectionArgs) {
-        Cursor cursor = daoSession.getDatabase().rawQuery(sql, selectionArgs);
-    }
+
 
 
     public String getUUID() {

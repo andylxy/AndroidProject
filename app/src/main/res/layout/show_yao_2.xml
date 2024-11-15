@@ -12,11 +12,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </RelativeLayout>
-<!--    <LinearLayout-->
-<!--        android:orientation="vertical"-->
-<!--        android:id="@+id/wrapper"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content">-->
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 <!--        <LinearLayout-->
 <!--            android:layout_gravity="bottom"-->
 <!--            android:orientation="horizontal"-->
@@ -48,22 +48,22 @@
 <!--                android:text="查看药证条文"-->
 <!--                android:layout_weight="0.8"/>-->
 <!--        </LinearLayout>-->
-<!--        <ScrollView-->
-<!--            android:id="@+id/maskscroll"-->
-<!--            android:background="@drawable/round_win"-->
-<!--            android:clipChildren="true"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent">-->
-<!--            <TextView-->
-<!--                android:textColor="#000000"-->
-<!--                android:id="@+id/textview"-->
-<!--                android:background="@drawable/round_win_inner"-->
-<!--                android:padding="10dp"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"/>-->
-<!--        </ScrollView>-->
-<!--    </LinearLayout>-->
-<!--    -->
+        <ScrollView
+            android:id="@+id/maskscroll"
+            android:background="@drawable/round_win"
+            android:clipChildren="true"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:textColor="#000000"
+                android:id="@+id/textview"
+                android:background="@drawable/round_win_inner"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </ScrollView>
+    </LinearLayout>
+
     <run.yigou.gxzy.ui.tips.widget.TipsArrowView
         android:id="@+id/arrow"
         android:layout_width="match_parent"

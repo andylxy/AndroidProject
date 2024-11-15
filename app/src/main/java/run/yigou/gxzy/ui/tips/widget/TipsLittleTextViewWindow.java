@@ -1,7 +1,6 @@
 package run.yigou.gxzy.ui.tips.widget;
 
 import android.app.FragmentManager;
-import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,16 +10,13 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.jetbrains.annotations.Nullable;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
-/* loaded from: classes.dex */
 public class TipsLittleTextViewWindow extends TipsLittleWindow {
 
     private ViewGroup mGroup;
@@ -137,26 +133,6 @@ public class TipsLittleTextViewWindow extends TipsLittleWindow {
         arrowView.setDirection(arrowDirection);
         arrowView.setLayoutParams(arrowLayoutParams);
 
-//        // 设置左侧按钮点击事件，点击时将文本内容复制到剪贴板
-//        ((Button) this.view.findViewById(R.id.leftbtn)).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                TipsNetHelper.copyToClipboard(getActivity(), textLabel.getText().toString());
-//                Toast.makeText(getActivity(), "已复制到剪贴板", Toast.LENGTH_SHORT).show();
-//            }
-//        });
-
-//        // 设置右侧按钮点击事件，点击时启动MainActivity
-//        ((Button) this.view.findViewById(R.id.rightbtn)).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(TipsLittleTextViewWindow.this.getActivity(), TipsFragmentActivity.class);
-//                intent.putExtra("title", displayText);
-//                intent.putExtra("isFang", "false");
-//                intent.putExtra("yaoZheng", "true");
-//                TipsLittleTextViewWindow.this.getActivity().startActivity(intent);
-//            }
-//        });
 
         // 设置内容布局参数并添加到父布局中
         ((LinearLayout) this.view.findViewById(R.id.wrapper)).setLayoutParams(contentLayoutParams);

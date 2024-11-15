@@ -38,7 +38,6 @@ import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.RequestHandler;
 import run.yigou.gxzy.http.model.RequestServer;
 import run.yigou.gxzy.manager.ActivityManager;
-import run.yigou.gxzy.manager.ReferenceManager;
 import run.yigou.gxzy.other.AppConfig;
 import run.yigou.gxzy.other.CrashHandler;
 import run.yigou.gxzy.other.DebugLoggerTree;
@@ -102,8 +101,6 @@ public final class AppApplication extends Application {
         mUserInfoService = DbService.getInstance().mUserInfoService;
         initSdk(this);
         initUserLogin();
-        // 初始化 ReferenceManager
-        ReferenceManager.getInstance();
         //构造书籍数据
         ThreadUtil.runInBackground(this::tipsSingleDataInit);
 
@@ -279,7 +276,7 @@ public final class AppApplication extends Application {
         // UmengClient.init(application, AppConfig.isLogEnable());
 
         // Bugly 异常捕捉
-        //CrashReport.initCrashReport(application, AppConfig.getBuglyId(), AppConfig.isDebug());
+       // CrashReport.initCrashReport(application, AppConfig.getBuglyId(), AppConfig.isDebug());
 
         // Activity 栈管理初始化
         ActivityManager.getInstance().init(application);

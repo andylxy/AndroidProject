@@ -456,6 +456,7 @@ private void fragmentOnBackPressed() {
             refreshData();
         } catch (Exception e) {
             e.printStackTrace();
+            EasyLog.print("TipsBookNetReadFragment initData", e.getMessage());
             // 处理异常，例如显示错误提示
         }
     }
