@@ -39,7 +39,13 @@ public class ShowFanYaoMingCi {
                 }
             }
         }
+        instance.getSingletonData();
         return instance;
+    }
+
+    private  void getSingletonData() {
+        // 获取 SingletonData 实例和数据结构
+        singletonData = tipsSingleData.getMapBookContent(tipsSingleData.getCurBookId());
     }
 
     private TipsSingleData tipsSingleData;
@@ -47,8 +53,7 @@ public class ShowFanYaoMingCi {
 
     private ShowFanYaoMingCi() {
         tipsSingleData = TipsSingleData.getInstance();
-        // 获取 SingletonData 实例和数据结构
-        singletonData = tipsSingleData.getMapBookContent(tipsSingleData.getCurBookId());
+
     }
 
     /**

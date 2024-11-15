@@ -192,7 +192,7 @@ public class TipsLittleTableViewWindow extends TipsLittleWindow {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        dismiss();
+        //dismiss();
         rvList.setAdapter(null);
         adapter = null;
         rvList = null;

@@ -29,7 +29,7 @@ public class AppConst {
     /**
      * 加入书架延迟时间
      */
-    public static final long  postDelayMillis = 500;
+    public static final long  postDelayMillis = 50;
     public static final String FILE_NAME_SETTING = "setting";
     /**
      * SharedPreferences 伤寒保存的的Key字符串

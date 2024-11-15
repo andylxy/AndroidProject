@@ -57,32 +57,32 @@ public class NoFooterAdapter extends GroupedListAdapter {
         // 获取分组位置和子位置对应的实体对象
         ChildEntity entity = mGroups.get(groupPosition).getChildren().get(childPosition);
         // 从Holder中获取三个TextView
-        TextView sectiontext = holder.get(R.id.tv_sectiontext);
-        TextView sectionnote = holder.get(R.id.tv_sectionnote);
-        TextView sectionvideo = holder.get(R.id.tv_sectionvideo);
+        TextView section_text = holder.get(R.id.tv_sectiontext);
+        TextView section_note = holder.get(R.id.tv_sectionnote);
+        TextView section_video = holder.get(R.id.tv_sectionvideo);
 
         // 默认隐藏note和video的TextView
-        sectionnote.setVisibility(View.GONE);
-        sectionvideo.setVisibility(View.GONE);
+        section_note.setVisibility(View.GONE);
+        section_video.setVisibility(View.GONE);
 
         // 根据实体对象设置TextView的内容和点击方法
-        if (entity.getAttributed_child_section_note() != null) {
-            sectionnote.setText(entity.getAttributed_child_section_note());
-            sectionnote.setMovementMethod(LocalLinkMovementMethod.getInstance());
+        if (entity.getAttributed_child_section_note() != null && entity.getAttributed_child_section_note().length() > 0) {
+            section_note.setText(entity.getAttributed_child_section_note());
+            section_note.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }
-        if (entity.getAttributed_child_section_video() != null) {
-            sectionvideo.setText(entity.getAttributed_child_section_video());
-            sectionvideo.setMovementMethod(LocalLinkMovementMethod.getInstance());
+        if (entity.getAttributed_child_section_video() != null&& entity.getAttributed_child_section_video().length() > 0) {
+            section_video.setText(entity.getAttributed_child_section_video());
+            section_video.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }
         //包含文本的SpannableString
         SpannableStringBuilder spannableString = entity.getAttributed_child_section_text();
         // 设置sectiontext的文本内容
         if (entity.getChild_section_image() == null) {
-            sectiontext.setText(spannableString);
+            section_text.setText(spannableString);
         } else {
             // 使用 Glide 加载图片并添加到SpannableString
             String imageUrl = AppConst.ImageHost+ entity.getChild_section_image();
-            Glide.with(sectiontext.getContext())
+            Glide.with(section_text.getContext())
                     .load(imageUrl)
                     .into(new CustomTarget<Drawable>() {
                         /**
@@ -99,14 +99,14 @@ public class NoFooterAdapter extends GroupedListAdapter {
                             spannableString.setSpan(imageSpan, 0, 2, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                             // 将处理好的SpannableString设置到TextView
-                            sectiontext.setText(spannableString);
+                            section_text.setText(spannableString);
 
                             // 获取 TextView 的宽度
-                            sectiontext.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                            section_text.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                                 @Override
                                 public boolean onPreDraw() {
                                     // 获取TextView的宽度
-                                    int textViewWidth = sectiontext.getWidth();
+                                    int textViewWidth = section_text.getWidth();
 
                                     // 如果宽度有效且图片已加载完成
                                     if (textViewWidth > 0) {
@@ -128,10 +128,10 @@ public class NoFooterAdapter extends GroupedListAdapter {
                                         // 在图片后添加换行符
                                         spannableString.append("\n");
                                         // 将处理好的 SpannableString 设置到 TextView
-                                        sectiontext.setText(spannableString);
+                                        section_text.setText(spannableString);
 
                                         // 移除监听器，避免重复绘制
-                                        sectiontext.getViewTreeObserver().removeOnPreDrawListener(sectiontext);
+                                        section_text.getViewTreeObserver().removeOnPreDrawListener(section_text);
                                     }
 
                                     return true;
@@ -147,30 +147,30 @@ public class NoFooterAdapter extends GroupedListAdapter {
 
         }
 
-        sectiontext.setMovementMethod(LocalLinkMovementMethod.getInstance());
-        setLongClickForView(sectiontext, entity.getAttributed_child_section_text());
-        setLongClickForView(sectionnote, entity.getAttributed_child_section_note());
-        setLongClickForView(sectionvideo, entity.getAttributed_child_section_video());
+        section_text.setMovementMethod(LocalLinkMovementMethod.getInstance());
+        setLongClickForView(section_text, entity.getAttributed_child_section_text());
+        setLongClickForView(section_note, entity.getAttributed_child_section_note());
+        setLongClickForView(section_video, entity.getAttributed_child_section_video());
         // 为sectiontext设置点击监听，处理点击事件
-        sectiontext.setOnClickListener(v -> {
+        section_text.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
             // EasyLog.print("条文点击: " + v.getTag() + ", 实体信息: " + entity);
-            toggleVisibility(sectionnote, entity.getAttributed_child_section_note());
+            toggleVisibility(section_note, entity.getAttributed_child_section_note());
         });
 
         // 为sectionnote设置点击监听，处理点击事件
-        sectionnote.setOnClickListener(v -> {
+        section_note.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
-            toggleVisibility(sectionvideo, entity.getAttributed_child_section_video());
+            toggleVisibility(section_video, entity.getAttributed_child_section_video());
         });
 
         // 为sectionvideo设置点击监听，处理点击事件
-        sectionvideo.setOnClickListener(v -> {
+        section_video.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
-            toggleVisibility(sectionvideo, entity.getAttributed_child_section_video());
+            toggleVisibility(section_video, entity.getAttributed_child_section_video());
         });
 
     }

@@ -46,8 +46,8 @@ public class TipsLittleMingCiViewWindow extends TipsLittleWindow {
 
     @Override
     public void dismiss() {
-        super.dismiss();
-        tips_single_data.tipsLittleWindowStack.remove(this);
+       super.dismiss();
+       tips_single_data.tipsLittleWindowStack.remove(this);
     }
 
 
@@ -193,7 +193,7 @@ public class TipsLittleMingCiViewWindow extends TipsLittleWindow {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        dismiss();
+        //dismiss();
         this.mGroup.removeView(this.view);
 
     }
