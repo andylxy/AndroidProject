@@ -335,7 +335,7 @@ public final class AppApplication extends Application {
                     throw new IllegalArgumentException(message);
                 } else {
                     // 上报到 Bugly 错误列表中
-                    CrashReport.postCatchedException(new IllegalArgumentException(message));
+                  //  CrashReport.postCatchedException(new IllegalArgumentException(message));
                 }
             }
         });

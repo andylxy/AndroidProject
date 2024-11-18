@@ -29,7 +29,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
 public class TipsLittleMingCiViewWindow extends TipsLittleWindow {
 
-    private String fang;
+    //private String fang;
     private ViewGroup mGroup;
     private Rect rect;
     private View view;
@@ -52,13 +52,13 @@ public class TipsLittleMingCiViewWindow extends TipsLittleWindow {
 
 
 
-    public void setFang(String str) {
-        String str2 = tips_single_data.getFangAliasDict().get(str);
-        if (str2 != null) {
-            str = str2;
-        }
-        this.fang = str;
-    }
+//    public void setFang(String str) {
+//        String str2 = tips_single_data.getFangAliasDict().get(str);
+//        if (str2 != null) {
+//            str = str2;
+//        }
+//        this.fang = str;
+//    }
 
     public void setRect(Rect rect) {
         this.rect = rect;

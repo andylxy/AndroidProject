@@ -57,7 +57,7 @@ public class ChildEntity {
             if (child_section_text == null) {
                 attributed_child_section_text = new SpannableStringBuilder();
             } else {
-                attributed_child_section_text = TipsNetHelper.renderText(child_section_text);
+                attributed_child_section_text = TipsNetHelper.renderText(child_section_text.trim());
             }
         }
         return attributed_child_section_text;

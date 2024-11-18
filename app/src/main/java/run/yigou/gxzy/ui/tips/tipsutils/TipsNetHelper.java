@@ -805,7 +805,7 @@ public class TipsNetHelper {
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 TipsLittleMingCiViewWindow tipsLittleTableViewWindow = new TipsLittleMingCiViewWindow();
                 tipsLittleTableViewWindow.setAdapterSource(textView.getContext(), groups);
-                tipsLittleTableViewWindow.setFang(charSequence);
+               // tipsLittleTableViewWindow.setFang(charSequence);
                 tipsLittleTableViewWindow.setRect(textRect);
                 tipsLittleTableViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
 

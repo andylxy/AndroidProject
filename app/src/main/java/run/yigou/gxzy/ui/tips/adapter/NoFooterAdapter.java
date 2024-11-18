@@ -33,6 +33,7 @@ import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.other.AppConfig;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
@@ -75,15 +76,26 @@ public class NoFooterAdapter extends GroupedListAdapter {
             section_video.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }
         //包含文本的SpannableString
-        SpannableStringBuilder spannableString = entity.getAttributed_child_section_text();
+        SpannableStringBuilder spannableString = new SpannableStringBuilder();
+        spannableString.append("12");
+        spannableString.append(entity.getAttributed_child_section_text());
+
         // 设置sectiontext的文本内容
         if (entity.getChild_section_image() == null) {
             section_text.setText(spannableString);
         } else {
             // 使用 Glide 加载图片并添加到SpannableString
-            String imageUrl = AppConst.ImageHost+ entity.getChild_section_image();
+            StringBuilder imageUrl = new StringBuilder() ;
+            if (AppConfig.isLogEnable()){
+                imageUrl.append(AppConfig.getHostUrl()).append(entity.getChild_section_image());
+            }
+            else {
+                imageUrl.append(AppConst.ImageHost).append(entity.getChild_section_image());
+            }
+            String url =  imageUrl.toString();
+
             Glide.with(section_text.getContext())
-                    .load(imageUrl)
+                    .load(url)
                     .into(new CustomTarget<Drawable>() {
                         /**
                          * @param resource   the loaded resource.
@@ -124,7 +136,7 @@ public class NoFooterAdapter extends GroupedListAdapter {
 
                                         // 将图片插入到 SpannableString 中
                                         ImageSpan imageSpan = new ImageSpan(resource, ImageSpan.ALIGN_BASELINE);
-                                        spannableString.setSpan(imageSpan, 0, 2, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                        spannableString.setSpan(imageSpan, 0,2, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE);
                                         // 在图片后添加换行符
                                         spannableString.append("\n");
                                         // 将处理好的 SpannableString 设置到 TextView
