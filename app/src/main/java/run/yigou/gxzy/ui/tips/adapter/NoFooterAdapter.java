@@ -49,10 +49,6 @@ public class NoFooterAdapter extends GroupedListAdapter {
         super(context, groups);
     }
 
-    public NoFooterAdapter(Context context) {
-        super(context);
-    }
-
     @Override
     public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {
         // 获取分组位置和子位置对应的实体对象
@@ -71,56 +67,51 @@ public class NoFooterAdapter extends GroupedListAdapter {
             section_note.setText(entity.getAttributed_child_section_note());
             section_note.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }
-        if (entity.getAttributed_child_section_video() != null&& entity.getAttributed_child_section_video().length() > 0) {
+        if (entity.getAttributed_child_section_video() != null && entity.getAttributed_child_section_video().length() > 0) {
             section_video.setText(entity.getAttributed_child_section_video());
             section_video.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }
         //包含文本的SpannableString
         SpannableStringBuilder spannableString = new SpannableStringBuilder();
         spannableString.append("12");
-        spannableString.append(entity.getAttributed_child_section_text());
-
         // 设置sectiontext的文本内容
         if (entity.getChild_section_image() == null) {
+            spannableString.clear();
+            spannableString.append(entity.getAttributed_child_section_text());
             section_text.setText(spannableString);
         } else {
+
+            spannableString.append(entity.getAttributed_child_section_text());
             // 使用 Glide 加载图片并添加到SpannableString
-            StringBuilder imageUrl = new StringBuilder() ;
-            if (AppConfig.isLogEnable()){
+            StringBuilder imageUrl = new StringBuilder();
+            if (AppConfig.isLogEnable()) {
                 imageUrl.append(AppConfig.getHostUrl()).append(entity.getChild_section_image());
-            }
-            else {
+            } else {
                 imageUrl.append(AppConst.ImageHost).append(entity.getChild_section_image());
             }
-            String url =  imageUrl.toString();
-
+           // String url = imageUrl.toString();
             Glide.with(section_text.getContext())
-                    .load(url)
+                    .load( imageUrl.toString())
                     .into(new CustomTarget<Drawable>() {
-                        /**
-                         * @param resource   the loaded resource.
-                         * @param transition
-                         */
                         @Override
                         public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                            // 图片加载完成后，设置图片到指定位置
+                            // 图片加载完成后，设置图片的初始大小
                             resource.setBounds(0, 0, resource.getIntrinsicWidth(), resource.getIntrinsicHeight());
 
                             // 将图片插入到指定位置
                             ImageSpan imageSpan = new ImageSpan(resource, ImageSpan.ALIGN_BASELINE);
                             spannableString.setSpan(imageSpan, 0, 2, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-                            // 将处理好的SpannableString设置到TextView
+                            // 设置初始文本和图片到 TextView
                             section_text.setText(spannableString);
 
-                            // 获取 TextView 的宽度
+                            // 获取 TextView 的宽度并调整图片的大小
                             section_text.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                                 @Override
                                 public boolean onPreDraw() {
-                                    // 获取TextView的宽度
+                                    // 获取 TextView 的宽度
                                     int textViewWidth = section_text.getWidth();
 
-                                    // 如果宽度有效且图片已加载完成
                                     if (textViewWidth > 0) {
                                         // 获取图片的原始宽高
                                         int originalWidth = resource.getIntrinsicWidth();
@@ -128,34 +119,40 @@ public class NoFooterAdapter extends GroupedListAdapter {
 
                                         // 根据 TextView 宽度调整图片大小，保持比例
                                         float ratio = (float) originalWidth / originalHeight;
-                                        int imageWidth = (int) ((int) textViewWidth*0.90f);
+                                        int imageWidth = (int) (textViewWidth * 0.90f); // 图片宽度为 TextView 宽度的 90%
                                         int imageHeight = (int) (imageWidth / ratio);
 
                                         // 设置图片的大小
                                         resource.setBounds(0, 0, imageWidth, imageHeight);
 
-                                        // 将图片插入到 SpannableString 中
-                                        ImageSpan imageSpan = new ImageSpan(resource, ImageSpan.ALIGN_BASELINE);
-                                        spannableString.setSpan(imageSpan, 0,2, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                        // 更新 ImageSpan，并重新设置到 SpannableString
+                                        ImageSpan newImageSpan = new ImageSpan(resource, ImageSpan.ALIGN_BASELINE);
+                                        spannableString.setSpan(newImageSpan, 0, 2, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE);
+
                                         // 在图片后添加换行符
                                         spannableString.append("\n");
-                                        // 将处理好的 SpannableString 设置到 TextView
+
+                                        // 设置处理好的 SpannableString 到 TextView
                                         section_text.setText(spannableString);
 
+                                        // 强制重新布局，更新 TextView 高度
+                                        section_text.requestLayout();
+
                                         // 移除监听器，避免重复绘制
-                                        section_text.getViewTreeObserver().removeOnPreDrawListener(section_text);
+                                        section_text.getViewTreeObserver().removeOnPreDrawListener(this);
                                     }
 
-                                    return true;
+                                    return true;  // 返回 true 表示继续绘制
                                 }
                             });
                         }
 
                         @Override
                         public void onLoadCleared(Drawable placeholder) {
-                            // 可以在图片加载失败时显示一个占位符，或者做其他处理
+                            // 图片加载失败时可以设置一个占位符
                         }
                     });
+
 
         }
 

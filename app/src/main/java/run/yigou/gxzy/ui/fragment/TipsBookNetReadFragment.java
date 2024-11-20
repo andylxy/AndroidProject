@@ -322,112 +322,6 @@ private void fragmentOnBackPressed() {
 
 
 
-//    private void fragmentOnBackPressed() {
-//
-//
-//        onBackPressedCallback = new OnBackPressedCallback(true) {
-//            @Override
-//            public void handleOnBackPressed() {
-//                // 处理自定义逻辑
-//                TabNavBody navTabBody = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
-//                if (navTabBody == null) {
-//                    return;
-//                }
-//
-//                try {
-//                    handleBackPress(navTabBody);
-//                } catch (Exception e) {
-//                    EasyLog.print("HandleBackPress", "Error handling back press: " + e.getMessage());
-//                }
-//            }
-//
-//            private void handleBackPress(TabNavBody navTabBody) {
-//                ArrayList<Book> books = queryBooks(navTabBody);
-//                if (books == null || books.isEmpty()) {
-//                    showAddToBookshelfDialog(navTabBody);
-//                } else {
-//                    updateBookInfo(books);
-//                }
-//            }
-//
-//            private ArrayList<Book> queryBooks(TabNavBody navTabBody) {
-//                try {
-//                    return DbService.getInstance().mBookService.find(BookDao.Properties.BookNo.eq(navTabBody.getBookNo()));
-//                } catch (Exception e) {
-//                    EasyLog.print("QueryBooks", "Error querying books: " + e.getMessage());
-//                    return null;
-//                }
-//            }
-//
-//            private void showAddToBookshelfDialog(TabNavBody navTabBody) {
-//                new MessageDialog.Builder(getContext())
-//                        .setTitle("加入书架")
-//                        .setMessage(navTabBody.getBookName())
-//                        .setConfirm(getString(R.string.common_confirm))
-//                        .setCancel(getString(R.string.common_cancel))
-//                        .setListener(new MessageDialog.OnListener() {
-//                            @Override
-//                            public void onConfirm(BaseDialog dialog) {
-//                                addBookToBookshelf(navTabBody);
-//                            }
-//
-//                            @Override
-//                            public void onCancel(BaseDialog dialog) {
-//                                allowSystemBackPress();
-//                            }
-//                        })
-//                        .show();
-//            }
-//
-//            private void addBookToBookshelf(TabNavBody navTabBody) {
-//                Book book = new Book();
-//                book.setBookId(DbService.getInstance().mBookService.getUUID());
-//                book.setBookNo(navTabBody.getBookNo());
-//                book.setBookName(navTabBody.getBookName());
-//                book.setAuthor(navTabBody.getAuthor());
-//                book.setHistoriographerNumb(currentIndex == -1 ? 0 : currentIndex);
-//                book.setLastReadPosition(currentIndex == -1 ? 0 : currentIndex);
-//
-//                try {
-//                    DbService.getInstance().mBookService.addEntity(book);
-//                    refreshBookshelf();
-//                    allowSystemBackPress();
-//                } catch (Exception e) {
-//                    EasyLog.print("AddBook", "Error adding book to bookshelf: " + e.getMessage());
-//                }
-//            }
-//
-//            private void updateBookInfo(ArrayList<Book> books) {
-//                if (currentIndex != -1) {
-//                    Book book = books.get(0);
-//                    book.setLastReadPosition(currentIndex);
-//                    book.setHistoriographerNumb(currentIndex);
-//
-//                    try {
-//                        DbService.getInstance().mBookService.updateEntity(book);
-//                    } catch (Exception e) {
-//                        EasyLog.print("UpdateBook", "Error updating book info: " + e.getMessage());
-//                    }
-//                }
-//                allowSystemBackPress();
-//            }
-//
-//            private void refreshBookshelf() {
-//                BookCollectCaseFragment.newInstance().RefreshLayout();
-//            }
-//
-//            private void allowSystemBackPress() {
-//                postDelayed(() -> {
-//                    setEnabled(false); // 禁用当前回调
-//                    requireActivity().onBackPressed(); // 调用系统返回
-//                }, AppConst.postDelayMillis);
-//            }
-//        };
-//
-//        requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
-//    }
-
-
     /**
      * 初始化数据
      */
@@ -588,11 +482,11 @@ private void fragmentOnBackPressed() {
         reListAdapter(true, false);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        refreshData();
-    }
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        refreshData();
+//    }
 
     @Override
     public void onDestroy() {

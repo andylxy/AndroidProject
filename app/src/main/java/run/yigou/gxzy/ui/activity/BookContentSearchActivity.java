@@ -192,7 +192,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             mSearchHistoryAdapter = new SearchHistoryAdapter(getActivity());
             mSearchHistoryAdapter.setData(mSearchHistories);
             mSearchHistoryAdapter.setOnItemClickListener(this);
-            lvHistoryList.addItemDecoration(new CustomDividerItemDecoration());
+            lvHistoryList.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
             lvHistoryList.setAdapter(mSearchHistoryAdapter);
             llClearHistory.setVisibility(View.VISIBLE);
             llHistoryView.setVisibility(View.VISIBLE);
@@ -208,7 +208,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         lvSearchBooksList.setAdapter(mSearchBookDetailAdapter);
         layoutManager = new LinearLayoutManager(getContext());
         lvSearchBooksList.setLayoutManager(layoutManager);
-        lvSearchBooksList.addItemDecoration(new CustomDividerItemDecoration());
+        lvSearchBooksList.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
         lvSearchBooksList.setVisibility(View.GONE);
         mSearchBookDetailAdapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
             @Override
@@ -238,7 +238,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         mSearchBookAdapter.setOnItemClickListener(this);
         mLvSearchBooks.setAdapter(mSearchBookAdapter);
         mLvSearchBooks.setVisibility(View.VISIBLE);
-        mLvSearchBooks.addItemDecoration(new CustomDividerItemDecoration());
+        mLvSearchBooks.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
     }
 
     private void extHandleShangHanData(int bookId) {
@@ -371,17 +371,25 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         }
     }
 
-//        @Override
-//    public boolean isStatusBarEnabled() {
-//        // 使用沉浸式状态栏
-//        return !super.isStatusBarEnabled();
-//    }
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener(null);
-        singleDataMap.get(AppConst.ShangHanNo).setOnContentShowStatusNotification(null);
-        singleDataMap.get(AppConst.ShangHanNo).setOnContentUpdateListener(null);
 
+    @Override
+public void onDestroy() {
+    super.onDestroy();
+
+    // 空指针检查
+    if (mSearchBookDetailAdapter != null) {
+        mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener(null);
     }
+
+    if (singleDataMap != null && singleDataMap.containsKey(AppConst.ShangHanNo)) {
+         SingletonNetData  singleData = singleDataMap.get(AppConst.ShangHanNo);
+        if (singleData != null) {
+            singleData.setOnContentShowStatusNotification(null);
+            singleData.setOnContentUpdateListener(null);
+        }
+    }
+
+    // 日志记录
+    EasyLog.print("YourTag", "onDestroy: Released all listeners and resources");
+}
 }

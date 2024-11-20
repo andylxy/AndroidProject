@@ -48,6 +48,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.greendao.entity.BeiMingCi;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.entity.TabNav;
@@ -304,7 +305,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mSearchHistoryAdapter.setData(mSearchHistories);
         mSearchHistoryAdapter.setOnItemClickListener(this);
         lvHistoryList.setAdapter(mSearchHistoryAdapter);
-        lvHistoryList.addItemDecoration(new CustomDividerItemDecoration());
+        lvHistoryList.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
         llHistoryView.setVisibility(View.GONE);
         llClearHistory.setVisibility(View.GONE);
     }

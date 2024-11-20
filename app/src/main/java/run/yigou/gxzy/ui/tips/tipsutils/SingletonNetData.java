@@ -87,27 +87,34 @@ public class SingletonNetData {
         if (this.fang == null) this.fang = new ArrayList<>();
         this.fang.clear();
         this.fang.add(fang);
-        //  初始化并填充 allFang 列表
+
+        // 初始化并填充 allFang 列表
         this.allFang = new ArrayList<>();
         for (HH2SectionData section : this.fang) {
-            for (DataItem item : section.getData()) {
-                String str = item.getFangList().get(0);
-                // 如果有别名映射，则替换
-                String str2 = this.fangAliasDict.get(str);
-                if (str2 != null) {
-                    str = str2;
+            if (section != null && section.getData() != null) {
+                for (DataItem item : section.getData()) {
+                    if (item != null && item.getFangList() != null && !item.getFangList().isEmpty()) {
+                        String originalFangStr = item.getFangList().get(0);
+                        // 如果有别名映射，则替换
+                        String aliasedFangStr = this.fangAliasDict.get(originalFangStr);
+                        if (aliasedFangStr != null) {
+                            originalFangStr = aliasedFangStr;
+                        }
+                        this.allFang.add(originalFangStr);
+                    }
                 }
-                this.allFang.add(str);
             }
         }
     }
+
     public int getBookId() {
         return bookId;
     }
 
     private SingletonNetData() {
-       this.bookId = -1; // 默认值
+        this.bookId = -1; // 默认值
     }
+
     private SingletonNetData(int bookId) {
         this.bookId = bookId;
     }
@@ -124,7 +131,7 @@ public class SingletonNetData {
     }
 
     public static SingletonNetData getInstance() {
-        return  new SingletonNetData();
+        return new SingletonNetData();
     }
 
     private OnContentUpdateListener mOnContentUpdateListener;
@@ -148,8 +155,8 @@ public class SingletonNetData {
         this.mNotification = mOnUpdateListener;
     }
 
-    public void showUpdateHttpDataNotification(boolean status ) {
-        if (mNotification != null )
+    public void showUpdateHttpDataNotification(boolean status) {
+        if (mNotification != null)
             mNotification.onContentUpdateHttpDataStatus(status);
 
     }

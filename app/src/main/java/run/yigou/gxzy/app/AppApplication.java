@@ -101,8 +101,8 @@ public final class AppApplication extends Application {
         mUserInfoService = DbService.getInstance().mUserInfoService;
         initSdk(this);
         initUserLogin();
-        //构造书籍数据
-        ThreadUtil.runInBackground(this::tipsSingleDataInit);
+        //构造书籍数据/实现本地数据搜索
+       ThreadUtil.runInBackground(this::tipsSingleDataInit);
 
     }
 

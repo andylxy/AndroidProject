@@ -768,9 +768,10 @@ public class TipsNetHelper {
             @Override
             public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
+                 EasyLog.print("Yao--tapped:" + charSequence);
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 TipsLittleTextViewWindow tipsLittleTextViewWindow = new TipsLittleTextViewWindow();
-                tipsLittleTextViewWindow.setYao(charSequence);
+                tipsLittleTextViewWindow.setYao(charSequence.trim());
                 tipsLittleTextViewWindow.setRect(textRect);
                 tipsLittleTextViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
             }
@@ -780,7 +781,7 @@ public class TipsNetHelper {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("Fang--tapped:" + charSequence);
-                List<HH2SectionData> mingCiList = ShowFanYaoMingCi.getInstance().showFangTwo(charSequence);
+                List<HH2SectionData> mingCiList = ShowFanYaoMingCi.getInstance().showFangTwo(charSequence.trim());
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 TipsLittleTableViewWindow tipsLittleTableViewWindow = new TipsLittleTableViewWindow();
@@ -799,7 +800,7 @@ public class TipsNetHelper {
 
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("MingCi---tapped:" + charSequence);
-                List<HH2SectionData> mingCiList = ShowFanYaoMingCi.getInstance().showMingCiTwo(charSequence);
+                List<HH2SectionData> mingCiList = ShowFanYaoMingCi.getInstance().showMingCiTwo(charSequence.trim());
 
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
