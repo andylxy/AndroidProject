@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import run.yigou.gxzy.greendao.entity.BeiMingCi;
@@ -38,6 +39,128 @@ import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 public class ConvertEntity {
+
+
+
+//            EasyHttp.post(ApplicationLifecycle.getInstance())
+//                .api(new XxxApi())
+//                .tag("abc")
+//                .request(new OnHttpListener<HttpData<XxxBean>>() {
+//
+//                    @Override
+//                    public void onHttpSuccess(@NonNull HttpData<XxxBean> result) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onHttpFail(@NonNull Throwable throwable) {
+//
+//                    }
+//                });
+//        Application可以传入 ApplicationLifecycle 这样写是完全可以的，但是不能在 Activity 或者 Service 中这样写，
+//        因为这样可能会导致内存泄漏,将意味着框架无法自动把控请求的生命周期。
+//
+//        除了 Application，如果你在 Activity 或者 Service 中采用了 ApplicationLifecycle 的写法，那么为了避免内存泄漏或者崩溃的事情发生，
+//        需要你在请求的时候设置对应的 Tag，然后在恰当的时机手动取消请求（一般在 Activity 或者 Service 销毁或者退出的时候取消请求）。
+//
+//        EasyHttp.cancelByTag("abc");
+
+
+
+        /**
+     * 初始化单个数据的提示信息
+     * 该方法用于从数据库中加载导航信息和相关书籍内容，并将它们存储在内存中以便快速访问
+     */
+    public static void tipsSingleDataInit() {
+        try {
+            // 获取数据库服务实例
+            DbService dbService = DbService.getInstance();
+            // 检查数据库服务和导航服务是否已初始化
+            if (dbService == null || dbService.mTabNavService == null) {
+                return;
+            }
+            ArrayList<Yao> yaoData = ConvertEntity.getYaoData();
+            TipsSingleData.getInstance().setYaoData(new HH2SectionData(yaoData, 0, "伤寒金匮所有药物"));
+            ArrayList<MingCiContent> mingCiContentList = ConvertEntity.getMingCi();
+            TipsSingleData.getInstance().setMingCiData(new HH2SectionData(mingCiContentList, 0, "医书相关的名词说明"));
+
+            // 从数据库中加载所有导航信息
+            ArrayList<TabNav> navList = dbService.mTabNavService.findAll();
+            // 检查导航信息是否已加载
+            if (navList != null && !navList.isEmpty()) {
+                // 获取单例数据对象
+                TipsSingleData tipsSingleData = TipsSingleData.getInstance();
+                // 同步以确保线程安全
+                synchronized (tipsSingleData) {
+                    // 获取导航信息和书籍内容的映射
+                    Map<Integer, TabNav> navTabMap = tipsSingleData.getNavTabMap();
+                    Map<Integer, TabNavBody> navTabBodyMap = tipsSingleData.getNavTabBodyMap();
+
+                    // 遍历导航信息
+                    for (TabNav nav : navList) {
+                        // 将导航信息添加到映射中
+                        navTabMap.put(nav.getCaseId(), nav);
+                        // 遍历导航下的书籍信息
+                        for (TabNavBody item : nav.getNavList()) {
+                            // 检查书籍编号是否有效
+                            if (item.getBookNo() > 0) {
+                                // 将书籍信息添加到映射中
+                                navTabBodyMap.put(item.getBookNo(), item);
+                                // 加载书籍内容和方剂数据
+                                loadBookContent(tipsSingleData, item);
+                                loadFangData(tipsSingleData, item);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // 记录日志或进行其他异常处理
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 加载书籍内容
+     * 该方法根据书籍编号获取书籍章节信息，并将其存储在内存中
+     *
+     * @param tipsSingleData 单例数据对象，用于存储书籍内容
+     * @param item           导航信息中的书籍项
+     */
+    private static void loadBookContent(TipsSingleData tipsSingleData, TabNavBody item) {
+        // 获取书籍章节列表
+        List<HH2SectionData> bookChapterList = ConvertEntity.getBookChapterDetailList(item.getBookNo());
+//        if (item.getBookNo() ==10001){
+//            EasyLog.print("加载了10001");
+//        }
+        // 检查章节列表是否已加载
+        if (bookChapterList != null && !bookChapterList.isEmpty()) {
+            // 将章节列表存储在内存中
+            tipsSingleData.getMapBookContent(item.getBookNo()).setContent(bookChapterList);
+            tipsSingleData.getMapBookContent(item.getBookNo()).setFangAliasDict(tipsSingleData.getFangAliasDict());
+            tipsSingleData.getMapBookContent(item.getBookNo()).setYaoAliasDict(tipsSingleData.getYaoAliasDict());
+        }
+    }
+
+    /**
+     * 加载方剂数据
+     * 该方法根据书籍编号获取方剂信息，并将其存储在内存中
+     *
+     * @param tipsSingleData 单例数据对象，用于存储方剂数据
+     * @param item           导航信息中的书籍项
+     */
+    private static void loadFangData(TipsSingleData tipsSingleData, TabNavBody item) {
+        // 获取方剂列表
+        ArrayList<Fang> fangList = ConvertEntity.getFangDetailList(item.getBookNo());
+        // 检查方剂列表是否已加载
+        if (!fangList.isEmpty()) {
+            // 将方剂列表存储在内存中
+            tipsSingleData.getMapBookContent(item.getBookNo()).setFang(new HH2SectionData(fangList, 0, item.getBookName() + "方"));
+        }
+    }
+
+
+
 
 
     public static void saveTabNvaInDb(TabNav nav, String tabNavId) {
@@ -78,8 +201,6 @@ public class ConvertEntity {
             }
         }
     }
-
-
 
 
     public static void saveMingCiContent(List<MingCiContent> detailList) {

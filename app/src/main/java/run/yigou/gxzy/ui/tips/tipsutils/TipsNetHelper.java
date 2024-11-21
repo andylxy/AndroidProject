@@ -250,9 +250,16 @@ public class TipsNetHelper {
                                          Map<String, String> yaoAliasDict, Map<String, String> fangAliasDict) {
         // 检查数据项的属性是否与搜索词和正则匹配
         String attributeText = dataItem.getAttributedText().toString();
+        for (String fang : dataItem.getFangList()) {
+            if (fang != null) return pattern.matcher(fang).find();
+        }
+        for (String yao : dataItem.getYaoList()) {
+            if (yao != null) return pattern.matcher(yao).find();
+        }
         // 这里可以进一步处理别名
-        if(dataItem.getName()!=null)  return  pattern.matcher(dataItem.getName()).find()|| pattern.matcher(attributeText).find() || checkAliases(dataItem, pattern, yaoAliasDict, fangAliasDict);
-                // 检查主属性文本是否匹配
+        if (dataItem.getName() != null)
+            return pattern.matcher(dataItem.getName()).find() || pattern.matcher(attributeText).find() || checkAliases(dataItem, pattern, yaoAliasDict, fangAliasDict);
+        // 检查主属性文本是否匹配
         return pattern.matcher(attributeText).find() || checkAliases(dataItem, pattern, yaoAliasDict, fangAliasDict);
     }
 
@@ -768,7 +775,7 @@ public class TipsNetHelper {
             @Override
             public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
-                 EasyLog.print("Yao--tapped:" + charSequence);
+                EasyLog.print("Yao--tapped:" + charSequence);
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 TipsLittleTextViewWindow tipsLittleTextViewWindow = new TipsLittleTextViewWindow();
                 tipsLittleTextViewWindow.setYao(charSequence.trim());
@@ -806,7 +813,7 @@ public class TipsNetHelper {
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 TipsLittleMingCiViewWindow tipsLittleTableViewWindow = new TipsLittleMingCiViewWindow();
                 tipsLittleTableViewWindow.setAdapterSource(textView.getContext(), groups);
-               // tipsLittleTableViewWindow.setFang(charSequence);
+                // tipsLittleTableViewWindow.setFang(charSequence);
                 tipsLittleTableViewWindow.setRect(textRect);
                 tipsLittleTableViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
 
