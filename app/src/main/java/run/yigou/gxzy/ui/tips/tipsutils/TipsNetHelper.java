@@ -244,24 +244,67 @@ public class TipsNetHelper {
     }
 
     /**
-     * 根据指定的模式匹配数据项。
+     * 匹配数据项是否符合给定的模式，考虑Yao和Fang的别名字典。
+     *
+     * @param dataItem      要匹配的数据项，包含名称、Yao列表、Fang列表和属性文本。
+     * @param pattern       用于匹配的模式，不能为空。
+     * @param yaoAliasDict  Yao的别名字典，用于扩展匹配可能性。
+     * @param fangAliasDict Fang的别名字典，用于扩展匹配可能性。
+     * @return 如果数据项的任何部分匹配模式，则返回true；否则返回false。
+     * @throws IllegalArgumentException 如果提供的模式为空。
      */
     private static boolean matchDataItem(DataItem dataItem, Pattern pattern,
                                          Map<String, String> yaoAliasDict, Map<String, String> fangAliasDict) {
-        // 检查数据项的属性是否与搜索词和正则匹配
-        String attributeText = dataItem.getAttributedText().toString();
-        for (String fang : dataItem.getFangList()) {
-            if (fang != null) return pattern.matcher(fang).find();
+        // 验证输入的模式不能为空
+        if (pattern == null) {
+            throw new IllegalArgumentException("Pattern cannot be null");
         }
-        for (String yao : dataItem.getYaoList()) {
-            if (yao != null) return pattern.matcher(yao).find();
+
+        // 获取数据项的属性文本，用于后续匹配
+        String attributeText = getAttributeText(dataItem);
+        // 初始化Matcher对象，初始匹配字符串为空
+        Matcher matcher = pattern.matcher("");
+
+        // 检查模式是否匹配Fang列表或Yao列表中的任何项
+        if (matchInList(dataItem.getFangList(), matcher) || matchInList(dataItem.getYaoList(), matcher)) {
+            return true;
         }
-        // 这里可以进一步处理别名
-        if (dataItem.getName() != null)
-            return pattern.matcher(dataItem.getName()).find() || pattern.matcher(attributeText).find() || checkAliases(dataItem, pattern, yaoAliasDict, fangAliasDict);
-        // 检查主属性文本是否匹配
-        return pattern.matcher(attributeText).find() || checkAliases(dataItem, pattern, yaoAliasDict, fangAliasDict);
+
+        // 如果数据项有名称，尝试匹配名称或属性文本，或检查别名
+        if (dataItem.getName() != null) {
+            return matcher.reset(dataItem.getName()).find() || matcher.reset(attributeText).find() || checkAliases(dataItem, pattern, yaoAliasDict, fangAliasDict);
+        }
+
+        // 如果数据项没有名称，匹配属性文本或检查别名
+        return matcher.reset(attributeText).find() || checkAliases(dataItem, pattern, yaoAliasDict, fangAliasDict);
     }
+
+    /**
+     * 从数据项中获取属性文本。
+     *
+     * @param dataItem 要从中获取属性文本的数据项。
+     * @return 属性文本的字符串表示形式，如果属性文本为空则返回空字符串。
+     */
+    private static String getAttributeText(DataItem dataItem) {
+        return (dataItem.getAttributedText() != null) ? dataItem.getAttributedText().toString() : "";
+    }
+
+    /**
+     * 检查列表中的任何项是否匹配给定的模式。
+     *
+     * @param list    要检查的字符串列表。
+     * @param matcher 用于匹配的Matcher对象。
+     * @return 如果列表中的任何项匹配模式，则返回true；否则返回false。
+     */
+    private static boolean matchInList(List<String> list, Matcher matcher) {
+        for (String item : list) {
+            if (item != null && matcher.reset(item).find()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * 高亮匹配的文本
