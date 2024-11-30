@@ -170,8 +170,28 @@ public class NoFooterAdapter extends GroupedListAdapter {
 
         // 为sectionnote设置点击监听，处理点击事件
         section_note.setOnClickListener(v -> {
+            if (v == null) return;
+
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
+
+            int videoLength = 0;
+            try {
+                videoLength = entity.getAttributed_child_section_video().length();
+            } catch (Exception e) {
+                //e.printStackTrace();
+                return;
+            }
+            boolean isVideoAvailable = videoLength > 0;
+
+            if (section_note.getVisibility() == View.VISIBLE && section_video.getVisibility() == View.GONE && !isSectionvideo) {
+                section_note.setVisibility(View.GONE);
+                isSectionvideo = true;
+                return;
+            }
+            if (isVideoAvailable) {
+                isSectionvideo = false;
+            }
             toggleVisibility(section_video, entity.getAttributed_child_section_video());
         });
 
@@ -179,11 +199,16 @@ public class NoFooterAdapter extends GroupedListAdapter {
         section_video.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
+            if (section_video.getVisibility() == View.VISIBLE ) {
+                section_video.setVisibility(View.GONE);
+                isSectionvideo= false;
+                return;
+            }
             toggleVisibility(section_video, entity.getAttributed_child_section_video());
         });
 
     }
-
+    boolean isSectionvideo = false;
     private void toggleVisibility(TextView textView, SpannableStringBuilder content) {
         // 增加对content的空值检查
         if (content == null) {

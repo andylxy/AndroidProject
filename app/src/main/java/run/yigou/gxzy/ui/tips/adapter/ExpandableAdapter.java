@@ -125,65 +125,95 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements Toa
         // 获取分组位置和子位置对应的实体对象
         ChildEntity entity = mGroups.get(groupPosition).getChildren().get(childPosition);
         // 从Holder中获取三个TextView
-        TextView sectiontext = holder.get(R.id.tv_sectiontext);
-        TextView sectionnote = holder.get(R.id.tv_sectionnote);
-        TextView sectionvideo = holder.get(R.id.tv_sectionvideo);
+        TextView section_text = holder.get(R.id.tv_sectiontext);
+        TextView section_note = holder.get(R.id.tv_sectionnote);
+        TextView section_video = holder.get(R.id.tv_sectionvideo);
         // 默认隐藏note和video的TextView
-        sectionnote.setVisibility(View.GONE);
-        sectionvideo.setVisibility(View.GONE);
+        section_note.setVisibility(View.GONE);
+        section_video.setVisibility(View.GONE);
 
         // 根据实体对象设置TextView的内容和点击方法
         if (entity.getAttributed_child_section_note() != null) {
-            sectionnote.setText(entity.getAttributed_child_section_note());
-            sectionnote.setMovementMethod(LocalLinkMovementMethod.getInstance());
+            section_note.setText(entity.getAttributed_child_section_note());
+            section_note.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }
         if (entity.getAttributed_child_section_video() != null) {
-            sectionvideo.setText(entity.getAttributed_child_section_video());
-            sectionvideo.setMovementMethod(LocalLinkMovementMethod.getInstance());
+            section_video.setText(entity.getAttributed_child_section_video());
+            section_video.setMovementMethod(LocalLinkMovementMethod.getInstance());
         }
 
         // 设置sectiontext的文本内容
-        sectiontext.setText(entity.getAttributed_child_section_text());
-        sectiontext.setMovementMethod(LocalLinkMovementMethod.getInstance());
+        section_text.setText(entity.getAttributed_child_section_text());
+        section_text.setMovementMethod(LocalLinkMovementMethod.getInstance());
         // 设置长按监听，弹出复制对话框
-        setLongClickForView(sectiontext, entity.getAttributed_child_section_text(), entity.getGroupPosition());
-        setLongClickForView(sectionnote, entity.getAttributed_child_section_note(), entity.getGroupPosition());
-        setLongClickForView(sectionvideo, entity.getAttributed_child_section_video(), entity.getGroupPosition());
+        setLongClickForView(section_text, entity.getAttributed_child_section_text(), entity.getGroupPosition());
+        setLongClickForView(section_note, entity.getAttributed_child_section_note(), entity.getGroupPosition());
+        setLongClickForView(section_video, entity.getAttributed_child_section_video(), entity.getGroupPosition());
 
         // 为sectiontext设置点击监听，处理点击事件
-        sectiontext.setOnClickListener(v -> {
+        section_text.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
             EasyLog.print("条文点击: " + v.getTag() + ", 实体信息: " + entity);
-            toggleVisibility(sectionnote, entity.getAttributed_child_section_note());
+
+            toggleVisibility(section_note, entity.getAttributed_child_section_note());
         });
 
         // 为sectionnote设置点击监听，处理点击事件
-        sectionnote.setOnClickListener(v -> {
+        section_note.setOnClickListener(v -> {
+            if (v == null) return;
+
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
-            toggleVisibility(sectionvideo, entity.getAttributed_child_section_video());
+
+            int videoLength = 0;
+            try {
+                videoLength = entity.getAttributed_child_section_video().length();
+            } catch (Exception e) {
+                //e.printStackTrace();
+                return;
+            }
+            boolean isVideoAvailable = videoLength > 0;
+
+            if (section_note.getVisibility() == View.VISIBLE && section_video.getVisibility() == View.GONE && !isSectionvideo) {
+                section_note.setVisibility(View.GONE);
+                isSectionvideo = true;
+                return;
+            }
+            if (isVideoAvailable) {
+                isSectionvideo = false;
+            }
+
+            toggleVisibility(section_video, entity.getAttributed_child_section_video());
         });
 
+
         // 为sectionvideo设置点击监听，处理点击事件
-        sectionvideo.setOnClickListener(v -> {
+        section_video.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
-            toggleVisibility(sectionvideo, entity.getAttributed_child_section_video());
+            // 简化逻辑
+            if (section_video.getVisibility() == View.VISIBLE ) {
+                section_video.setVisibility(View.GONE);
+                isSectionvideo= false;
+                return;
+            }
+            toggleVisibility(section_video, entity.getAttributed_child_section_video());
         });
 
     }
+ boolean isSectionvideo = true;
 
     private void toggleVisibility(TextView textView, SpannableStringBuilder content) {
         // 增加对content的空值检查
-        if (content == null) {
+        if (content == null||content.length()==0) {
             return;
         }
 
         String contentString = content.toString();
 
         // 简化逻辑
-        if (textView.getVisibility() == View.VISIBLE) {
+        if (textView.getVisibility() == View.VISIBLE ) {
             textView.setVisibility(View.GONE);
         } else if (!contentString.isEmpty()) { // 判断是否为空字符串
             textView.setVisibility(View.VISIBLE);
