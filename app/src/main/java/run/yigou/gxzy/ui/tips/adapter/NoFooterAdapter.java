@@ -191,7 +191,11 @@ public class NoFooterAdapter extends GroupedListAdapter {
             }
             if (isVideoAvailable) {
                 isSectionvideo = false;
-            }
+            }  else {
+            section_note.setVisibility(View.GONE);
+            isSectionvideo = true;
+            return;
+        }
             toggleVisibility(section_video, entity.getAttributed_child_section_video());
         });
 

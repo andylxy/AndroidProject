@@ -503,63 +503,6 @@ public class ConvertEntity {
             return false;
         }
 
-//        // 处理 netDetailList 和 locDetailList
-//        for (HH2SectionData netSection : netDetailList) {
-//            boolean found = false;
-//            for (HH2SectionData locSection : locDetailList) {
-//                if (Objects.equals(locSection.getSignatureId(), netSection.getSignatureId())) {
-//                    found = true;
-//                    if (!Objects.equals(locSection.getSignature(), netSection.getSignature())) {
-//                        locSection.setSignature(netSection.getSignature());
-//                        locSection.setHeader(netSection.getHeader());
-//                        locSection.setSection(netSection.getSection());
-//                    }
-//                    break;
-//                }
-//            }
-//            if (!found) {
-//                locDetailList.add(netSection);
-//            }
-//        }
-//
-//        // 处理 netDetailList 和 locDetailList 中的 getData() 返回的 List
-//        for (HH2SectionData netSection : netDetailList) {
-//            List<? extends DataItem> netListData = netSection.getData();
-//            if (netListData != null) {
-//                for (DataItem netSubSection : netListData) {
-//                    boolean subFound = false;
-//                    for (HH2SectionData locSection : locDetailList) {
-//                        List<? extends DataItem> locListData = locSection.getData();
-//                        if (locListData != null) {
-//                            for (DataItem locSubSection : locListData) {
-//                                if (Objects.equals(locSubSection.getSignatureId(), netSubSection.getSignatureId())) {
-//                                    subFound = true;
-//                                    if (!Objects.equals(locSubSection.getSignature(), netSubSection.getSignature())) {
-//                                        locSubSection.setSignature(netSubSection.getSignature());
-//                                        locSubSection.setText(netSubSection.getText());
-//                                        locSubSection.setNote(netSubSection.getNote());
-//                                        locSubSection.setSectionvideo(netSubSection.getSectionvideo());
-//                                    }
-//                                    break;
-//                                }
-//                            }
-//                        }
-//                        if (subFound) {
-//                            break;
-//                        }
-//                    }
-//                    if (!subFound) {
-//                        for (HH2SectionData locSection : locDetailList) {
-//                            if (Objects.equals(locSection.getSignatureId(), netSection.getSignatureId())) {
-//                                ((List<DataItem>) locSection.getData()).add(netSubSection);
-//                                break;
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
         return true;
     }
 

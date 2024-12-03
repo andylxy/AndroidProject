@@ -181,7 +181,11 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements Toa
                 return;
             }
             if (isVideoAvailable) {
-                isSectionvideo = false;
+               isSectionvideo = false;
+            }else {
+                section_note.setVisibility(View.GONE);
+                isSectionvideo = true;
+                return;
             }
 
             toggleVisibility(section_video, entity.getAttributed_child_section_video());
