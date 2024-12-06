@@ -14,7 +14,15 @@
 -keep class run.yigou.gxzy.http.model.** {
     <fields>;
 }
-
+-keep class run.yigou.gxzy.http.model.** {
+    <fields>;
+}
+#-keep class run.yigou.gxzy.ui.fragment.noproguard.** {
+#    <fields>;
+#}
+#-keep class run.yigou.gxzy.ui.activity.noproguard.** {
+#    <fields>;
+#}
 # 不混淆被 Log 注解的方法信息
 -keepclassmembernames class ** {
     @run.yigou.gxzy.aop.Log <methods>;

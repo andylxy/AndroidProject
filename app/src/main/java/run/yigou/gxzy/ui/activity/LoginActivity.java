@@ -16,6 +16,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +32,8 @@ import androidx.annotation.Nullable;
 
 import com.gyf.immersionbar.ImmersionBar;
 
+import run.yigou.gxzy.EventBus.LoginEventNotification;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
@@ -46,7 +47,7 @@ import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
 import run.yigou.gxzy.other.KeyboardWatcher;
-import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
+import run.yigou.gxzy.ui.fragment.HomeFragment;
 import run.yigou.gxzy.utils.Base64ConverBitmapHelper;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.wxapi.WXEntryActivity;
@@ -60,8 +61,10 @@ import com.hjq.umeng.UmengClient;
 import com.hjq.umeng.UmengLogin;
 import com.hjq.widget.view.CountdownView;
 import com.hjq.widget.view.SubmitButton;
+import com.lucas.xbus.XEventBus;
 
 import okhttp3.Call;
+
 
 /**
  * author : Android 轮子哥
@@ -74,7 +77,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     private static final String INTENT_KEY_IN_PHONE = "phone";
     private static final String INTENT_KEY_IN_PASSWORD = "password";
 
-    @Log
+
     public static void start(Context context, String phone, String password) {
         Intent intent = new Intent(context, LoginActivity.class);
         intent.putExtra(INTENT_KEY_IN_PHONE, phone);
@@ -118,11 +121,12 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     /**
      * 验证码
      */
-    private  VierCode.Bean mVierificationCode;
+    private VierCode.Bean mVierificationCode;
     /**
      * 默认为 账号登陆
      */
     private int mLongInType = LoginType.mLoginAccount;
+
     @Override
     protected int getLayoutId() {
         return R.layout.login_activity;
@@ -148,7 +152,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         mEtLoginVcode = findViewById(R.id.et_login_vcode);
         mEtLoginTextCode = findViewById(R.id.et_login_text_code);
         if (inLoginOrNoLogin()) return;
-        setOnClickListener(mForgetView, mCommitView, mQQView, mWeChatView, mIvLoginAccount, mIvLoginPhone, mCountdownView,mEtLoginVcode);
+        setOnClickListener(mForgetView, mCommitView, mQQView, mWeChatView, mIvLoginAccount, mIvLoginPhone, mCountdownView, mEtLoginVcode);
         mPasswordView.setOnEditorActionListener(this);
         //setViewShow(mIvLoginAccount);
         getLoginVcode();
@@ -157,7 +161,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
 
     @Override
     protected void initData() {
-       // if (inLoginOrNoLogin()) return;
+        // if (inLoginOrNoLogin()) return;
         postDelayed(() -> {
             KeyboardWatcher.with(LoginActivity.this).setListener(LoginActivity.this);
         }, 500);
@@ -183,15 +187,18 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         // 自动填充手机号和密码
         mPhoneView.setText(getString(INTENT_KEY_IN_PHONE));
         mPasswordView.setText(getString(INTENT_KEY_IN_PASSWORD));
+
+    //    XEventBus.getDefault().register(LoginActivity.this);
     }
 
     /**
      * 检查是否已经登陆
+     *
      * @return true 已登陆,false 未登陆
      */
     private boolean inLoginOrNoLogin() {
         //如果已登陆,侧跳转到我的
-        if(AppApplication.getApplication().mUserInfoToken !=null){
+        if (AppApplication.application.isLogin) {
             HomeActivityStart();
             return true;
         }
@@ -249,12 +256,12 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         }
         if (view == mIvLoginAccount) {
             setViewShow(mIvLoginAccount);
-            mLongInType=LoginType.mLoginAccount;
+            mLongInType = LoginType.mLoginAccount;
             return;
         }
         if (view == mIvLoginPhone) {
             setViewShow(mIvLoginPhone);
-            mLongInType=LoginType.mLoginPhone;
+            mLongInType = LoginType.mLoginPhone;
             return;
         }
         if (view == mEtLoginVcode) {
@@ -274,25 +281,25 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
 
             //登陆逻辑处理
             LoginApi requestApi = null;
-            if(mLongInType== LoginType.mLoginAccount){
-                requestApi=  new LoginApi()
+            if (mLongInType == LoginType.mLoginAccount) {
+                requestApi = new LoginApi()
                         .setUserName(mPhoneView.getText().toString())
                         .setPassword(mPasswordView.getText().toString());
 
-                if (mVierificationCode.isCode()){
-                    requestApi .setVerificationCode(mEtLoginTextCode.getText().toString())
+                if (mVierificationCode.isCode()) {
+                    requestApi.setVerificationCode(mEtLoginTextCode.getText().toString())
                             .setUUID(mVierificationCode.getUuid());
-                }else {
-                    requestApi .setVerificationCode("E6Y4D6")
+                } else {
+                    requestApi.setVerificationCode("E6Y4D6")
                             .setUUID(mVierificationCode.getUuid());
                 }
-            }else if (mLongInType== LoginType.mLoginPhone){
-                requestApi= new LoginApi()
+            } else if (mLongInType == LoginType.mLoginPhone) {
+                requestApi = new LoginApi()
                         .setUserName(mPhoneView.getText().toString())
                         .setPassword(mPasswordView.getText().toString());
             }
 
-            if (requestApi!=null)
+            if (requestApi != null)
                 login(requestApi);
             return;
         }
@@ -312,90 +319,112 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         }
     }
 
-    private  void login(IRequestApi requestApi) {
+    private void login(IRequestApi requestApi) {
         EasyHttp.post(this)
                 .api(requestApi)
-                .request(new HttpCallback<HttpData<WebResponseContent<UserInfo>>>(this) {
+                .request(new HttpCallback<HttpData<WebResponseContent<LoginApi.Bean>>>(this) {
 
-            @Override
-            public void onStart(Call call) {
-                mCommitView.showProgress();
-            }
+                    @Override
+                    public void onStart(Call call) {
+                        mCommitView.showProgress();
+                    }
 
-            @Override
-            public void onEnd(Call call) {
-            }
+                    @Override
+                    public void onSucceed(HttpData<WebResponseContent<LoginApi.Bean>> data) {
+                        if (data == null || data.getData() == null || data.getData().getData() == null) {
+                            // System.out.println("data is empty or null");
+                            toast("登陆失败，请检查账号密码是否正确");
+                            return;
+                        }
 
-            @Override
-            public void onSucceed(HttpData<WebResponseContent<UserInfo>> data) {
-
-                if (data!=null){
-                    if (data.getData() !=null )
-                        //保存登陆信息
+                        // 保存登陆信息
                         AppApplication.getApplication().mUserInfoToken = data.getData().getData();
 
-                    if(data.getData().getData()!=null) {
                         // 更新 Token
-                        EasyConfig.getInstance().addHeader("Authorization", data.getData().getData().getToken());
-                        //保存登陆信息到数据库
-                        UserInfo userInfo =  DbService.getInstance().mUserInfoService.findUserInfoByLoginAccount(data.getData().getData().getUserLoginAccount());
-                        if (userInfo ==null)
-                            DbService.getInstance().mUserInfoService.addEntity(data.getData().getData());
-                        else
-                            DbService.getInstance().mUserInfoService.deleteEntity(data.getData().getData());
+                        String token = data.getData().getData().getToken();
+                        if (token != null && !token.isEmpty()) {
+                            EasyConfig.getInstance().addHeader("Authorization", token);
+                        } else {
+                            // 处理 Token 为空的情况
+                            // System.out.println( "login"+ "Token is empty or null");
+                            // System.out.println( "token "+ token);
+                            toast("登陆失败，请检查账号密码是否正确,获取token不正确");
+                            return;
+                        }
+
+                        // 保存登陆信息到数据库
+                        String userLoginAccount = data.getData().getData().getUserLoginAccount();
+                        if (userLoginAccount != null && !userLoginAccount.isEmpty()) {
+                            UserInfo userInfo = DbService.getInstance().mUserInfoService.findUserInfoByLoginAccount(userLoginAccount);
+                            AppApplication.application.isLogin=true;
+                            try {
+                                if (userInfo == null) {
+                                    DbService.getInstance().mUserInfoService.addEntity(data.getData().getData());
+                                } else {
+                                    DbService.getInstance().mUserInfoService.deleteEntity(data.getData().getData());
+                                }
+                            } catch (Exception e) {
+                                // 记录异常日志
+                                // System.out.println("onSucceed" + "Database operation failed: " + e.getMessage());
+                                toast("登陆信息,保存失败");
+                            }
+                        }
+                      //  XEventBus.getDefault().post(new LoginEventNotification(true));
+                        HomeActivityStart();
 
                     }
 
 
-                }
-                HomeActivityStart();
-            }
-
-            @Override
-            public void onFail(Exception e) {
-                super.onFail(e);
-                postDelayed(() -> {
-                    mCommitView.showError(3000);
-                }, 1000);
-            }
-        });
+                    @Override
+                    public void onFail(Exception e) {
+                        super.onFail(e);
+                        postDelayed(() -> {
+                            mCommitView.showError(3000);
+                        }, 1000);
+                    }
+                });
     }
 
     private void HomeActivityStart() {
-            postDelayed(() -> {
-                // 跳转到首页
-                HomeActivity.start(getContext(), MyFragmentPersonal.class);
-                finish();
-            }, 50);
+        // 登录成功后 , 跳转到首页
+        // 跳转到首页
+        HomeActivity.start(getContext(), HomeFragment.class);
+        finish();
     }
 
-    private  void getLoginVcode() {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+      //  XEventBus.getDefault().unregister(LoginActivity.this);
+    }
+
+    private void getLoginVcode() {
 
         EasyHttp.get(this)
-                .api(new VierCode() )
+                .api(new VierCode())
                 .request(new HttpCallback<HttpData<VierCode.Bean>>(this) {
-            @Override
-            public void onSucceed(HttpData<VierCode.Bean> data) {
-                if (data.getData()!=null&&data.getData().isCode()) {
-                    String img =data.getData().getImg();
-                   if(!StringHelper.isEmpty(img)){
-                       Bitmap bitmap = Base64ConverBitmapHelper.getBase64ToImage(img);
-                       setLoginVcode(bitmap);
-                   }
-                }
-                mVierificationCode = data.getData();
-                setViewShow(mIvLoginAccount);
-            }
-        });
+                    @Override
+                    public void onSucceed(HttpData<VierCode.Bean> data) {
+                        if (data.getData() != null && data.getData().isCode()) {
+                            String img = data.getData().getImg();
+                            if (!StringHelper.isEmpty(img)) {
+                                Bitmap bitmap = Base64ConverBitmapHelper.getBase64ToImage(img);
+                                setLoginVcode(bitmap);
+                            }
+                        }
+                        mVierificationCode = data.getData();
+                        setViewShow(mIvLoginAccount);
+                    }
+                });
     }
 
-    private  void setLoginVcode(Bitmap bitmap) {
+    private void setLoginVcode(Bitmap bitmap) {
         GlideApp.with(this)
-            .load(bitmap)
-            .into(mEtLoginVcode);
+                .load(bitmap)
+                .into(mEtLoginVcode);
     }
 
-    private  void setViewShow(View view) {
+    private void setViewShow(View view) {
         if (view == mIvLoginAccount) {
             mIvLoginAccount.setVisibility(View.GONE);
             mIvLoginPhone.setVisibility(View.VISIBLE);
@@ -405,16 +434,14 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             mEtLoginTextCode.setVisibility(View.VISIBLE);
             mEt_login_sms_code.setText("");
             //是否开启验证码登陆
-            if (mVierificationCode.isCode()){
+            if (mVierificationCode.isCode()) {
                 mEtLoginVcodeLinear.setVisibility(View.VISIBLE);
                 InputTextManager.with(this)
                         .addView(mPhoneView)
                         .addView(mPasswordView)
                         .addView(mEtLoginTextCode)
                         .setMain(mCommitView).build();
-            }
-            else
-            {
+            } else {
                 mEtLoginVcodeLinear.setVisibility(View.GONE);
                 InputTextManager.with(this)
                         .addView(mPhoneView)
@@ -422,8 +449,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                         .setMain(mCommitView).build();
             }
 
-        }
-        else if (view == mIvLoginPhone) {
+        } else if (view == mIvLoginPhone) {
             mIvLoginPhone.setVisibility(View.GONE);
             mIvLoginAccount.setVisibility(View.VISIBLE);
             mLlLoginSmsCodeLinear.setVisibility(View.VISIBLE);

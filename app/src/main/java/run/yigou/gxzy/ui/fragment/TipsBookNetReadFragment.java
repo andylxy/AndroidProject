@@ -15,7 +15,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -33,7 +32,6 @@ import com.hjq.base.BaseDialog;
 import com.hjq.http.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
-import com.tencent.mmkv.MMKV;
 
 
 import java.util.ArrayList;
@@ -42,6 +40,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.common.BookArgs;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.gen.BookDao;
@@ -68,6 +67,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     private WrapRecyclerView rvList;
     private ClearEditText clearEditText;
     private ExpandableAdapter adapter;
+    private BookArgs bookArgs;
     /**
      *
      */
@@ -82,6 +82,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
     private int showShanghan;
     private int showJinkui;
+
     private LinearLayoutManager layoutManager;
     /**
      * 当前选中的章节索引
@@ -94,9 +95,37 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
     private SingletonNetData singletonNetData;
 
-    public TipsBookNetReadFragment() {
+    private OnBackPressedCallback onBackPressedCallback;
+
+    private boolean isHandlingBackPress = false;
+    private int backPressCount = 0;
+    private static final int BACK_PRESS_INTERVAL = 1000; // 1秒内
+    private final Handler backPressHandler = new Handler();
+
+
+    // 单例模式，确保实例的唯一性
+    private static volatile TipsBookNetReadFragment instance;
+
+    // 私有构造函数，防止外部直接实例化
+    private TipsBookNetReadFragment() {
+        try {
+            // 构造函数中的初始化逻辑
+            // 可以在这里添加一些基本的校验逻辑
+        } catch (Exception e) {
+            // 异常处理
+            throw new RuntimeException("Failed to create TipsBookNetReadFragment instance", e);
+        }
     }
 
+    public static synchronized TipsBookNetReadFragment newInstance(BookArgs bookArgs) {
+        if (instance == null) {
+            instance = new TipsBookNetReadFragment();
+        }
+        if (bookArgs != null)
+            instance.bookArgs = bookArgs;
+
+        return instance;
+    }
 
     /**
      * @return
@@ -170,17 +199,13 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         // 注册事件
         // XEventBus.getDefault().register(this);
 
-        // Fragment 处理返回键动作
-        fragmentOnBackPressed();
+        // Fragment 处理返回键动作 AppConst.Key_ShuJie
+        if (TipsSingleData.getInstance().getSharedPreferences().getInt(AppConst.Key_ShuJie, 0) == 1) {
+            fragmentOnBackPressed();
+        }
     }
 
     // onBackPressedCallback在 onDestroy 中释放资源
-    private OnBackPressedCallback onBackPressedCallback;
-
-    private boolean isHandlingBackPress = false;
-    private int backPressCount = 0;
-    private static final int BACK_PRESS_INTERVAL = 1000; // 1秒内
-    private Handler backPressHandler = new Handler();
 
     private void fragmentOnBackPressed() {
         if (isHandlingBackPress) {
@@ -328,7 +353,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     protected void initData() {
         try {
             // 获取传递的书本编号
-            retrieveBookArguments();
+            retrieveBookArguments(bookArgs);
 
             // 获取指定书籍数据
             singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
@@ -337,9 +362,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             if (bookId == SHANGHAN_NO) {
                 initializeShanghanSettings();
                 setShanghanContentUpdateListener();
-                setShanghanContentShowStatusNotification();
             }
-
+            setContentShowStatusNotification();
             // 加载到UI显示
             initializeAdapter();
             setHeaderClickListener();
@@ -354,20 +378,27 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         }
     }
 
-    private void retrieveBookArguments() {
-        Bundle args = getArguments();
-        if (args != null) {
-            bookId = args.getInt("bookNo", 0);
-            bookLastReadPosition = args.getInt("bookLastReadPosition", 0);
-            isShowBookCollect = args.getBoolean("isShow", false);
+    private void retrieveBookArguments(BookArgs bookArgs) {
+
+        if (bookArgs != null) {
+            bookId = bookArgs.getBookNo();
+            bookLastReadPosition = bookArgs.getBookLastReadPosition();
+            isShowBookCollect = bookArgs.isShowBookCollect();
+        } else {
+            bookId = 0;
+
+            bookLastReadPosition = 0;
+            isShowBookCollect = false;
+            searchText = null;
+
         }
     }
 
     private void initializeShanghanSettings() {
-        SharedPreferences sharedPreferences = TipsSingleData.getInstance().getSharedPreferences();
-        if (sharedPreferences != null) {
-            showShanghan = sharedPreferences.getInt(AppConst.Key_Shanghan, 0);
-            showJinkui = sharedPreferences.getInt(AppConst.Key_Jinkui, 1);
+
+        if (TipsSingleData.getInstance().getSharedPreferences() != null) {
+            showShanghan = TipsSingleData.getInstance().getSharedPreferences().getInt(AppConst.Key_Shanghan, 0);
+            showJinkui = TipsSingleData.getInstance().getSharedPreferences().getInt(AppConst.Key_Jinkui, 1);
         } else {
             showShanghan = 0;
             showJinkui = 1;
@@ -409,15 +440,20 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         singletonNetData.setOnContentUpdateListener(contentUpdateListener);
     }
 
-    private void setShanghanContentShowStatusNotification() {
+    private void setContentShowStatusNotification() {
         SingletonNetData.OnContentShowStatusNotification contentShowStatusNotification = new SingletonNetData.OnContentShowStatusNotification() {
             @Override
             public void contentShowStatusNotification(int status) {
                 // 刷新数据显示
                 refreshData();
+                // Fragment 处理返回键动作 AppConst.Key_ShuJie
+                if (TipsSingleData.getInstance().getSharedPreferences().getInt(AppConst.Key_ShuJie, 0) == 1) {
+                    fragmentOnBackPressed();
+                }
             }
         };
-        // 宋版显示修改通知
+
+        // 显示修改通知
         singletonNetData.setOnContentShowStatusNotification(contentShowStatusNotification);
     }
 
@@ -502,7 +538,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             rvList.removeItemDecorationAt(0);
         }
         singletonNetData = null;
-        onBackPressedCallback.remove();
+        if (TipsSingleData.getInstance().getSharedPreferences().getInt(AppConst.Key_ShuJie, 0) == 1) {
+            onBackPressedCallback.remove();
+        }
     }
 
 

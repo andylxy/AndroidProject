@@ -1,11 +1,9 @@
 package run.yigou.gxzy.ui.fragment;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;
-import run.yigou.gxzy.ui.activity.CopyActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
+
 
 /**
  *    author : Android 轮子哥

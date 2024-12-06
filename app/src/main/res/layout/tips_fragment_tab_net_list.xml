@@ -1,60 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/backgroundmask"
+    android:id="@+id/tips_fragment_mask"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <LinearLayout
-        android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <com.hjq.widget.layout.NoScrollViewPager
+        android:id="@+id/tips_fragment_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <FrameLayout
-            android:id="@+id/fragment_tips_container"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-        <RadioGroup
-            android:orientation="horizontal"
-            android:id="@+id/rg_tab"
-            android:background="#eeeeee"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        android:layout_height="0px"
+        android:layout_weight="1" />
 
-            <RadioButton
-                android:id="@+id/firstContentTab"
-                style="@style/myTab"
-                android:drawableTop="@drawable/list_selector"
-                android:singleLine="true"
-                android:text="伤寒杂病论"
-                tools:ignore="TextSizeCheck" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/tips_fragment_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:elevation="@dimen/dp_10"
+        android:orientation="vertical"
+        app:spanCount="4"
+        tools:itemCount="4"
+        tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        tools:listitem="@layout/home_navigation_item" />
+<!--    <LinearLayout-->
+<!--        android:orientation="vertical"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent">-->
+<!--        <FrameLayout-->
+<!--            android:id="@+id/fragment_tips_container"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_weight="1" />-->
+<!--        <RadioGroup-->
+<!--            android:orientation="horizontal"-->
+<!--            android:id="@+id/rg_tab"-->
+<!--            android:background="#eeeeee"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
 
 <!--            <RadioButton-->
-<!--                android:id="@+id/fangYaoTab"-->
+<!--                android:id="@+id/firstContentTab"-->
 <!--                style="@style/myTab"-->
-<!--                android:drawableTop="@drawable/magnify_selector"-->
-<!--                android:text="伤寒金匮方"-->
+<!--                android:drawableTop="@drawable/list_selector"-->
+<!--                android:singleLine="true"-->
+<!--                android:text="伤寒杂病论"-->
+<!--                tools:ignore="TextSizeCheck" />-->
+
+<!--&lt;!&ndash;            <RadioButton&ndash;&gt;-->
+<!--&lt;!&ndash;                android:id="@+id/fangYaoTab"&ndash;&gt;-->
+<!--&lt;!&ndash;                style="@style/myTab"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:drawableTop="@drawable/magnify_selector"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:text="伤寒金匮方"&ndash;&gt;-->
+<!--&lt;!&ndash;                tools:ignore="TextSizeCheck" />&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <RadioButton&ndash;&gt;-->
+<!--&lt;!&ndash;                android:id="@+id/yaoTab"&ndash;&gt;-->
+<!--&lt;!&ndash;                style="@style/myTab"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:drawableTop="@drawable/yao_selector"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:text="伤寒金匮药"&ndash;&gt;-->
+<!--&lt;!&ndash;                tools:ignore="TextSizeCheck" />&ndash;&gt;-->
+
+<!--            <RadioButton-->
+<!--                android:id="@+id/unitTab"-->
+<!--                style="@style/myTab"-->
+<!--                android:drawableTop="@drawable/ruler_selector"-->
+<!--                android:text="汉制单位"-->
 <!--                tools:ignore="TextSizeCheck" />-->
 
 <!--            <RadioButton-->
-<!--                android:id="@+id/yaoTab"-->
+<!--                android:id="@+id/settingsTab"-->
 <!--                style="@style/myTab"-->
-<!--                android:drawableTop="@drawable/yao_selector"-->
-<!--                android:text="伤寒金匮药"-->
+<!--                android:drawableTop="@drawable/settings_selector"-->
+<!--                android:text="设置"-->
 <!--                tools:ignore="TextSizeCheck" />-->
-
-            <RadioButton
-                android:id="@+id/unitTab"
-                style="@style/myTab"
-                android:drawableTop="@drawable/ruler_selector"
-                android:text="汉制单位"
-                tools:ignore="TextSizeCheck" />
-
-            <RadioButton
-                android:id="@+id/settingsTab"
-                style="@style/myTab"
-                android:drawableTop="@drawable/settings_selector"
-                android:text="设置"
-                tools:ignore="TextSizeCheck" />
-        </RadioGroup>
-    </LinearLayout>
+<!--        </RadioGroup>-->
+<!--    </LinearLayout>-->
 </LinearLayout>

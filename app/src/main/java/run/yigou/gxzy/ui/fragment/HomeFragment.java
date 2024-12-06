@@ -46,23 +46,14 @@ import java.util.Objects;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
+import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.greendao.entity.BeiMingCi;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.entity.TabNav;
-import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.greendao.entity.ZhongYao;
-import run.yigou.gxzy.greendao.gen.BeiMingCiDao;
-import run.yigou.gxzy.greendao.gen.TabNavBodyDao;
-import run.yigou.gxzy.greendao.gen.TabNavDao;
-import run.yigou.gxzy.greendao.gen.ZhongYaoDao;
-import run.yigou.gxzy.greendao.service.BeiMingCiService;
 import run.yigou.gxzy.greendao.service.SearchHistoryService;
-import run.yigou.gxzy.greendao.service.TabNavBodyService;
 import run.yigou.gxzy.greendao.service.TabNavService;
-import run.yigou.gxzy.greendao.service.YaoService;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookInfoNav;
@@ -71,6 +62,7 @@ import run.yigou.gxzy.http.api.YaoContentApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
+import run.yigou.gxzy.ui.adapter.NavigationAdapter;
 import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;
 import run.yigou.gxzy.ui.adapter.TabAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
@@ -224,6 +216,9 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
             }
         });
         mTvHomeSearchText.setOnKeyListener((v, keyCode, event) -> {
+            if(!AppApplication.application.isLogin){
+                toast(AppConst.Key_Window_Tips);
+            }
             //是否是回车键
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
                 //隐藏键盘

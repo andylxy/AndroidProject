@@ -4,15 +4,14 @@ import android.view.Gravity;
 import android.view.View;
 
 import com.hjq.base.BaseDialog;
+
+import run.yigou.gxzy.EventBus.LoginEventNotification;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.greendao.util.DbService;
-import run.yigou.gxzy.http.api.LogoutApi;
 import run.yigou.gxzy.http.glide.GlideApp;
-import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.manager.CacheDataManager;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.other.AppConfig;
@@ -22,17 +21,16 @@ import run.yigou.gxzy.ui.dialog.UpdateDialog;
 import run.yigou.gxzy.ui.fragment.HomeFragment;
 import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
 
-import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.widget.layout.SettingBar;
 import com.hjq.widget.view.SwitchButton;
+import com.lucas.xbus.XEventBus;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2019/03/01
- *    desc   : 设置界面
+ * author : Android 轮子哥
+ * github : https://github.com/getActivity/AndroidProject
+ * time   : 2019/03/01
+ * desc   : 设置界面
  */
 public final class SettingActivity extends AppActivity
         implements SwitchButton.OnCheckedChangeListener {
@@ -69,10 +67,11 @@ public final class SettingActivity extends AppActivity
         // 获取应用缓存大小
         mCleanCacheView.setRightText(CacheDataManager.getTotalCacheSize(this));
         //隐藏自动登陆
-        mAutoSwitchView.setVisibility(View.GONE);
+        // mAutoSwitchView.setVisibility(View.GONE);
         mLanguageView.setRightText("简体中文");
         mPhoneView.setRightText("181****1413");
         mPasswordView.setRightText("密码强度较低");
+       // XEventBus.getDefault().register(SettingActivity.this);
     }
 
     @SingleClick
@@ -125,19 +124,15 @@ public final class SettingActivity extends AppActivity
 
             BrowserActivity.start(this, "https://github.com/getActivity/Donate");
 
-        }
-        else if (viewId == R.id.sb_setting_about) {
+        } else if (viewId == R.id.sb_setting_about) {
 
             startActivity(AboutActivity.class);
 
-        }
-        else if (viewId ==  R.id.sb_permission_setting) {
+        } else if (viewId == R.id.sb_permission_setting) {
 
             XXPermissions.startPermissionActivity(this);
 
-        }
-
-        else if (viewId == R.id.sb_setting_auto) {
+        } else if (viewId == R.id.sb_setting_auto) {
 
             // 自动登录
             mAutoSwitchView.setChecked(!mAutoSwitchView.isChecked());
@@ -161,12 +156,14 @@ public final class SettingActivity extends AppActivity
             if (true) {
 
                 DbService.getInstance().mUserInfoService.deleteEntity(AppApplication.application.mUserInfoToken);
-                AppApplication.application.mUserInfoToken =null;
-               // startActivity(LoginActivity.class);
+                AppApplication.application.mUserInfoToken = null;
+                // startActivity(LoginActivity.class);
+                AppApplication.application.isLogin=false;
+               // XEventBus.getDefault().post(new LoginEventNotification(false));
                 HomeActivity.start(getContext(), HomeFragment.class);
-                // 进行内存优化，销毁除登录页之外的所有界面
-                //ActivityManager.getInstance().finishAllActivities(LoginActivity.class);
-                return;
+                finish();
+
+
             }
 
 //            // 退出登录
@@ -192,5 +189,11 @@ public final class SettingActivity extends AppActivity
     @Override
     public void onCheckedChanged(SwitchButton button, boolean checked) {
         toast(checked);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+       // XEventBus.getDefault().unregister(SettingActivity.this);
     }
 }

@@ -84,7 +84,21 @@ public final class FragmentPagerAdapter<F extends Fragment> extends androidx.fra
     public void addFragment(F fragment) {
         addFragment(fragment, null);
     }
+    public void addFragment(F fragment, CharSequence title, int index) {
+        mFragmentSet.add(index,fragment);
+        mFragmentTitle.add(index,title);
 
+        if (mViewPager == null) {
+            return;
+        }
+
+        notifyDataSetChanged();
+        if (mLazyMode) {
+            mViewPager.setOffscreenPageLimit(getCount());
+        } else {
+            mViewPager.setOffscreenPageLimit(1);
+        }
+    }
     public void addFragment(F fragment, CharSequence title) {
         mFragmentSet.add(fragment);
         mFragmentTitle.add(title);
@@ -100,7 +114,19 @@ public final class FragmentPagerAdapter<F extends Fragment> extends androidx.fra
             mViewPager.setOffscreenPageLimit(1);
         }
     }
-
+    public void removeFragment(int position) {
+        mFragmentSet.remove(position);
+        mFragmentTitle.remove(position);
+        if (mViewPager == null) {
+            return;
+        }
+        notifyDataSetChanged();
+        if (mLazyMode) {
+            mViewPager.setOffscreenPageLimit(getCount());
+        } else {
+            mViewPager.setOffscreenPageLimit(1);
+        }
+    }
     /**
      * 获取当前的Fragment
      */

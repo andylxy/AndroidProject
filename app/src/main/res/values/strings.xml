@@ -156,6 +156,12 @@
     <string name="home_nav_message">消息</string>
     <string name="home_nav_me">我的</string>
 
+    <!-- 阅读页 -->
+    <string name="tips_nav_set">设置</string>
+    <string name="tips_nav_book">书籍</string>
+    <string name="tips_nav_unit">单位</string>
+    <string name="tips_nav__title_font_size">字体大小设置</string>
+
     <!-- 登录 -->
     <string name="login_register">注册</string>
     <string name="login_forget">忘记密码？</string>
@@ -188,7 +194,7 @@
     <string name="setting_about">关于我们</string>
 
     <string name="setting_exit">退出登录</string>
-
+    <string name="setting_login">登录</string>
     <!-- 关于 -->
     <string name="about_title">关于我们</string>
     <string name="about_author"><font color="#85b84f">Android</font> 轮子哥</string>

@@ -52,6 +52,7 @@ import com.hjq.gson.factory.ParseExceptionCallback;
 import com.hjq.http.EasyConfig;
 import com.hjq.http.EasyLog;
 import com.hjq.toast.ToastUtils;
+import com.lucas.xbus.XEventBus;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.mmkv.MMKV;
@@ -79,7 +80,7 @@ public final class AppApplication extends Application {
 
     public static AppApplication application;
 
-
+    public   boolean isLogin = false;
     //登陆信息
     private UserInfoService mUserInfoService;
     public UserInfo mUserInfoToken;
@@ -102,101 +103,10 @@ public final class AppApplication extends Application {
         mUserInfoService = DbService.getInstance().mUserInfoService;
         initSdk(this);
         initUserLogin();
+        registryByReflect();
         //构造书籍数据/实现本地数据搜索
        ThreadUtil.runInBackground(ConvertEntity::tipsSingleDataInit);
     }
-
-//    /**
-//     * 初始化单个数据的提示信息
-//     * 该方法用于从数据库中加载导航信息和相关书籍内容，并将它们存储在内存中以便快速访问
-//     */
-//    private void tipsSingleDataInit() {
-//        try {
-//            // 获取数据库服务实例
-//            DbService dbService = DbService.getInstance();
-//            // 检查数据库服务和导航服务是否已初始化
-//            if (dbService == null || dbService.mTabNavService == null) {
-//                return;
-//            }
-//            ArrayList<Yao> yaoData = ConvertEntity.getYaoData();
-//            TipsSingleData.getInstance().setYaoData(new HH2SectionData(yaoData, 0, "伤寒金匮所有药物"));
-//            ArrayList<MingCiContent> mingCiContentList = ConvertEntity.getMingCi();
-//            TipsSingleData.getInstance().setMingCiData(new HH2SectionData(mingCiContentList, 0, "医书相关的名词说明"));
-//
-//            // 从数据库中加载所有导航信息
-//            ArrayList<TabNav> navList = dbService.mTabNavService.findAll();
-//            // 检查导航信息是否已加载
-//            if (navList != null && !navList.isEmpty()) {
-//                // 获取单例数据对象
-//                TipsSingleData tipsSingleData = TipsSingleData.getInstance();
-//                // 同步以确保线程安全
-//                synchronized (tipsSingleData) {
-//                    // 获取导航信息和书籍内容的映射
-//                    Map<Integer, TabNav> navTabMap = tipsSingleData.getNavTabMap();
-//                    Map<Integer, TabNavBody> navTabBodyMap = tipsSingleData.getNavTabBodyMap();
-//
-//                    // 遍历导航信息
-//                    for (TabNav nav : navList) {
-//                        // 将导航信息添加到映射中
-//                        navTabMap.put(nav.getCaseId(), nav);
-//                        // 遍历导航下的书籍信息
-//                        for (TabNavBody item : nav.getNavList()) {
-//                            // 检查书籍编号是否有效
-//                            if (item.getBookNo() > 0) {
-//                                // 将书籍信息添加到映射中
-//                                navTabBodyMap.put(item.getBookNo(), item);
-//                                // 加载书籍内容和方剂数据
-//                                loadBookContent(tipsSingleData, item);
-//                                loadFangData(tipsSingleData, item);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            // 记录日志或进行其他异常处理
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    /**
-//     * 加载书籍内容
-//     * 该方法根据书籍编号获取书籍章节信息，并将其存储在内存中
-//     *
-//     * @param tipsSingleData 单例数据对象，用于存储书籍内容
-//     * @param item           导航信息中的书籍项
-//     */
-//    private void loadBookContent(TipsSingleData tipsSingleData, TabNavBody item) {
-//        // 获取书籍章节列表
-//        List<HH2SectionData> bookChapterList = ConvertEntity.getBookChapterDetailList(item.getBookNo());
-////        if (item.getBookNo() ==10001){
-////            EasyLog.print("加载了10001");
-////        }
-//        // 检查章节列表是否已加载
-//        if (bookChapterList != null && !bookChapterList.isEmpty()) {
-//            // 将章节列表存储在内存中
-//            tipsSingleData.getMapBookContent(item.getBookNo()).setContent(bookChapterList);
-//            tipsSingleData.getMapBookContent(item.getBookNo()).setFangAliasDict(tipsSingleData.getFangAliasDict());
-//            tipsSingleData.getMapBookContent(item.getBookNo()).setYaoAliasDict(tipsSingleData.getYaoAliasDict());
-//        }
-//    }
-//
-//    /**
-//     * 加载方剂数据
-//     * 该方法根据书籍编号获取方剂信息，并将其存储在内存中
-//     *
-//     * @param tipsSingleData 单例数据对象，用于存储方剂数据
-//     * @param item           导航信息中的书籍项
-//     */
-//    private void loadFangData(TipsSingleData tipsSingleData, TabNavBody item) {
-//        // 获取方剂列表
-//        ArrayList<Fang> fangList = ConvertEntity.getFangDetailList(item.getBookNo());
-//        // 检查方剂列表是否已加载
-//        if (!fangList.isEmpty()) {
-//            // 将方剂列表存储在内存中
-//            tipsSingleData.getMapBookContent(item.getBookNo()).setFang(new HH2SectionData(fangList, 0, item.getBookName() + "方"));
-//        }
-//    }
 
 private void initUserLogin() {
     try {
@@ -205,6 +115,7 @@ private void initUserLogin() {
             mUserInfoToken = userInfo; // 直接赋值，避免重复调用
             if (mUserInfoToken.getToken() != null) {
                 // 添加 http 请求 Token
+                isLogin = true;
                 EasyConfig.getInstance().addHeader("Authorization", mUserInfoToken.getToken());
             }
         }
@@ -213,14 +124,31 @@ private void initUserLogin() {
         EasyLog.print("InitUserLogin", "Error initializing user login: " + e.getMessage());
     }
 }
+    /**
+     * 方法一：以反射调用
+     */
+    public void registryByReflect(){
+        XEventBus.getDefault().register(this);
+    }
 
+    /**
+     * 方法二：APT方式调用
+     */
+//    public void registryByApt(){
+//      AptMethodFinder aptMethodFinder = new AptMethodFinder();
+//        //注解处理器代码的模板类
+////        AptMethodFinderTemplate aptMethodFinder = new AptMethodFinderTemplate();
+//        //注解处理调用方式
+//        XEventBus.builder().setMethodHandle(aptMethodFinder).build().register(this);
+//    }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
         // 释放资源，例如关闭数据库、清理缓存等
         TipsSingleData.getInstance().onDestroy();
-
+        // 注销事件总线
+        XEventBus.getDefault().unregister(this);
     }
 
     @Override

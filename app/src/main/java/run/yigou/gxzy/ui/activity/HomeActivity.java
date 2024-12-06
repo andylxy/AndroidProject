@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -12,18 +13,23 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.FragmentPagerAdapter;
+import com.lucas.annotations.Subscribe;
+import com.lucas.xbus.XEventBus;
 
+import run.yigou.gxzy.EventBus.LoginEventNotification;
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.other.DoubleClickHelper;
 import run.yigou.gxzy.ui.adapter.NavigationAdapter;
 import run.yigou.gxzy.ui.fragment.BookCollectCaseFragment;
-import run.yigou.gxzy.ui.fragment.FindFragment;
 import run.yigou.gxzy.ui.fragment.HomeFragment;
 import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
 import run.yigou.gxzy.ui.fragment.MyMsgFragment;
+import run.yigou.gxzy.utils.ThreadUtil;
 
 /**
  * author : Android 轮子哥
@@ -44,9 +50,9 @@ public final class HomeActivity extends AppActivity
     private FragmentPagerAdapter<AppFragment<?>> mPagerAdapter;
 
     public static void start(Context context) {
-        start(context, FindFragment.class);
+        start(context, HomeFragment.class);
     }
-
+    @Log
     public static void start(Context context, Class<? extends AppFragment<?>> fragmentClass) {
         Intent intent = new Intent(context, HomeActivity.class);
         intent.putExtra(INTENT_KEY_IN_FRAGMENT_CLASS, fragmentClass);
@@ -61,6 +67,7 @@ public final class HomeActivity extends AppActivity
         return R.layout.home_activity;
     }
 
+  private  NavigationAdapter.MenuItem msgMenuItem ;
     @Override
     protected void initView() {
         mViewPager = findViewById(R.id.vp_home_pager);
@@ -71,32 +78,69 @@ public final class HomeActivity extends AppActivity
                 ContextCompat.getDrawable(this, R.drawable.home_home_selector)));
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_found),
                 ContextCompat.getDrawable(this, R.drawable.home_found_selector)));
-        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_message),
-                ContextCompat.getDrawable(this, R.drawable.home_message_selector)));
+
+        msgMenuItem  =  new NavigationAdapter.MenuItem(getString(R.string.home_nav_message),
+                ContextCompat.getDrawable(this, R.drawable.home_message_selector));
+
+        //如果已登陆,
+       // if(AppApplication.application.isLogin){
+            mNavigationAdapter.addItem(msgMenuItem);
+       // }
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_me),
                 ContextCompat.getDrawable(this, R.drawable.home_me_selector)));
+
         mNavigationAdapter.setOnNavigationListener(this);
         mNavigationView.setAdapter(mNavigationAdapter);
     }
 
     @Override
     protected void initData() {
-        mPagerAdapter = new FragmentPagerAdapter<>(this);
+      mPagerAdapter = new FragmentPagerAdapter<>(this);
         mPagerAdapter.addFragment(BookCollectCaseFragment.newInstance());
         mPagerAdapter.addFragment(HomeFragment.newInstance());
-        mPagerAdapter.addFragment(MyMsgFragment.newInstance());
-        // mPagerAdapter.addFragment(MessageFragment.newInstance());
+
+        //如果已登陆
+       // if(AppApplication.application.isLogin){
+            mPagerAdapter.addFragment(MyMsgFragment.newInstance());
+        //}
         mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());
-        // mPagerAdapter.addFragment(MineFragment.newInstance());
         mViewPager.setAdapter(mPagerAdapter);
         mHomeActivity = this;
+
+      //  XEventBus.getDefault().register(HomeActivity.this);
         onNewIntent(getIntent());
+    }
+
+
+    @Subscribe(priority = 1)
+    public void onEvent( LoginEventNotification event) {
+        ThreadUtil.runOnUiThread(()->{
+            if (event.getLoginNotification()) {
+                //如果已登陆,
+                if(AppApplication.application.isLogin){
+                    mNavigationAdapter.addItem(2,msgMenuItem);
+                    mNavigationAdapter.notifyDataSetChanged();
+                    mPagerAdapter.addFragment(MyMsgFragment.newInstance(),null,2);
+                }
+
+            } else {
+                //如果退出登陆,
+                if(!AppApplication.application.isLogin){
+                    mNavigationAdapter.removeItem(2);
+                    mPagerAdapter.removeFragment(2);
+                }
+
+            }
+            mNavigationAdapter.notifyDataSetChanged();
+            mPagerAdapter.notifyDataSetChanged();
+        });
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        switchFragment(mPagerAdapter.getFragmentIndex(getSerializable(INTENT_KEY_IN_FRAGMENT_CLASS)));
+        switchFragment(intent.getIntExtra(INTENT_KEY_IN_FRAGMENT_INDEX, 1));
+        //switchFragment(1);
     }
 
     @Override
@@ -186,6 +230,7 @@ public final class HomeActivity extends AppActivity
         mNavigationView.setAdapter(null);
         mNavigationAdapter.setOnNavigationListener(null);
         mHomeActivity=null;
+    //    XEventBus.getDefault().unregister(HomeActivity.this);
     }
 
 

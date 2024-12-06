@@ -13,6 +13,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.http.model.FileContentResolver;
+import com.hjq.permissions.XXPermissions;
 import com.hjq.widget.layout.SettingBar;
 
 
@@ -24,53 +25,60 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.TitleBarFragment;
+import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.UpdateImageApi;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.ui.activity.HomeActivity;
+import run.yigou.gxzy.ui.activity.AboutActivity;
 import run.yigou.gxzy.ui.activity.ImageCropActivity;
 import run.yigou.gxzy.ui.activity.ImagePreviewActivity;
 import run.yigou.gxzy.ui.activity.ImageSelectActivity;
 import run.yigou.gxzy.ui.activity.LoginActivity;
 import run.yigou.gxzy.ui.activity.SettingActivity;
-import run.yigou.gxzy.ui.dialog.AddressDialog;
+import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.dialog.InputDialog;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2019/04/20
- *    desc   : 个人资料
+ * author : Android 轮子哥
+ * github : https://github.com/getActivity/AndroidProject
+ * time   : 2019/04/20
+ * desc   : 个人资料
  */
 public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
 
     public static MyFragmentPersonal newInstance() {
         return new MyFragmentPersonal();
     }
+
     private ViewGroup mAvatarLayout;
     private ImageView mAvatarView;
     private SettingBar mIdView;
     private SettingBar mNameView;
-    private SettingBar mAddressView;
+    private TextView mMyLogin;
     private SettingBar mPersonDataSetting;
+    private TextView mLoginExit;
+    private SettingBar mAboutView;
+    private SettingBar mPermissionView;
+//
+//    /** 省 */
+//    private String mProvince = "...";
+//    /** 市 */
+//    private String mCity = "...";
+//    /** 区 */
+//    private String mArea = "...";
 
-
-
-
-    /** 省 */
-    private String mProvince = "...";
-    /** 市 */
-    private String mCity = "...";
-    /** 区 */
-    private String mArea = "...";
-
-    /** 头像地址 */
+    /**
+     * 头像地址
+     */
     private Uri mAvatarUrl;
+
     @Override
     public boolean isStatusBarEnabled() {
         // 使用沉浸式状态栏
         return !super.isStatusBarEnabled();
     }
+
     @Override
     protected int getLayoutId() {
         return R.layout.personal_data_activity;
@@ -82,9 +90,13 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         mAvatarView = findViewById(R.id.iv_person_data_avatar);
         mIdView = findViewById(R.id.sb_person_data_id);
         mNameView = findViewById(R.id.sb_person_data_name);
-        mAddressView = findViewById(R.id.sb_person_data_address);
+        //  mAddressView = findViewById(R.id.sb_person_data_address);
         mPersonDataSetting = findViewById(R.id.sb_person_data_setting);
-        setOnClickListener(mAvatarLayout, mAvatarView, mNameView, mAddressView,mPersonDataSetting);
+        mMyLogin = findViewById(R.id.my_setting_login);
+        mLoginExit = findViewById(R.id.my_Login_exit);
+        mAboutView = findViewById(R.id.my_setting_about);
+        mPermissionView = findViewById(R.id.my_permission_setting);
+        setOnClickListener(mAvatarLayout, mAvatarView, mNameView, mPersonDataSetting, mMyLogin, mLoginExit, mAboutView, mPermissionView);
     }
 
     @Override
@@ -95,16 +107,22 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
                 .error(R.drawable.avatar_placeholder_ic)
                 .transform(new MultiTransformation<>(new CenterCrop(), new CircleCrop()))
                 .into(mAvatarView);
-        String address = mProvince + mCity + mArea;
+        //String address = mProvince + mCity + mArea;
         mIdView.setRightText("...");
         mNameView.setRightText("...");
-        mAddressView.setRightText(address);
+        // mAddressView.setRightText(address);
         mPersonDataSetting.setVisibility(View.GONE);
-        if (AppApplication.application.mUserInfoToken !=null){
+        mLoginExit.setVisibility(View.VISIBLE);
+        mMyLogin.setVisibility(View.VISIBLE);
+        if (AppApplication.application.isLogin) {
             mIdView.setRightText(AppApplication.application.mUserInfoToken.getUserLoginAccount());
             mNameView.setRightText(AppApplication.application.mUserInfoToken.getUserName());
             //mAddressView.setRightText(address);
             mPersonDataSetting.setVisibility(View.VISIBLE);
+            mMyLogin.setVisibility(View.GONE);
+            mLoginExit.setVisibility(View.VISIBLE);
+        } else {
+            mLoginExit.setVisibility(View.GONE);
         }
 
     }
@@ -115,13 +133,33 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
     @Override
     public void onResume() {
         super.onResume();
+        //initView();
         initData();
+
+        //     toast("onResume");
     }
 
     @SingleClick
     @Override
     public void onClick(View view) {
-        if (isLogin()) return;
+
+        if (view == mAboutView) {
+
+            startActivity(AboutActivity.class);
+            return;
+        } else if (view == mPermissionView) {
+
+            XXPermissions.startPermissionActivity(this);
+            return;
+        }
+        // 登陆功能后期开放
+        if (!AppApplication.application.isLogin) {
+            toast(AppConst.Key_Window_Tips);
+            //跳登陆页面
+            // startActivity(LoginActivity.class);
+              return;
+        }
+        // 以下功能需要 请先登录;
         if (view == mAvatarLayout) {
             ImageSelectActivity.start(getAttachActivity(), data -> {
                 // 裁剪头像
@@ -152,37 +190,66 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
                         }
                     })
                     .show();
-        } else if (view == mAddressView) {
-            new AddressDialog.Builder(getAttachActivity())
-                    //.setTitle("选择地区")
-                    // 设置默认省份
-                    .setProvince(mProvince)
-                    // 设置默认城市（必须要先设置默认省份）
-                    .setCity(mCity)
-                    // 不选择县级区域
-                    //.setIgnoreArea()
-                    .setListener((dialog, province, city, area) -> {
-                        String address = province + city + area;
-                        if (!mAddressView.getRightText().equals(address)) {
-                            mProvince = province;
-                            mCity = city;
-                            mArea = area;
-                            mAddressView.setRightText(address);
-                        }
-                    })
-                    .show();
         }
+//        else if (view == mAddressView) {
+//            new AddressDialog.Builder(getAttachActivity())
+//                    //.setTitle("选择地区")
+//                    // 设置默认省份
+//                    .setProvince(mProvince)
+//                    // 设置默认城市（必须要先设置默认省份）
+//                    .setCity(mCity)
+//                    // 不选择县级区域
+//                    //.setIgnoreArea()
+//                    .setListener((dialog, province, city, area) -> {
+//                        String address = province + city + area;
+//                        if (!mAddressView.getRightText().equals(address)) {
+//                            mProvince = province;
+//                            mCity = city;
+//                            mArea = area;
+//                            mAddressView.setRightText(address);
+//                        }
+//                    })
+//                    .show();
+//        }
         else if (view == mPersonDataSetting) {
+
             startActivity(SettingActivity.class);
+
+        } else if (view == mLoginExit) {
+
+            if (true) {
+
+                DbService.getInstance().mUserInfoService.deleteEntity(AppApplication.application.mUserInfoToken);
+                AppApplication.application.mUserInfoToken = null;
+                AppApplication.application.isLogin = false;
+                // startActivity(LoginActivity.class);
+                HomeActivity.start(getContext(), HomeFragment.class);
+                // 进行内存优化，销毁除登录页之外的所有界面
+                //ActivityManager.getInstance().finishAllActivities(LoginActivity.class);
+                return;
+            }
+
+//            // 退出登录
+//            EasyHttp.post(this)
+//                    .api(new LogoutApi())
+//                    .request(new HttpCallback<HttpData<Void>>(this) {
+//
+//                        @Override
+//                        public void onSucceed(HttpData<Void> data) {
+//                            startActivity(LoginActivity.class);
+//                            // 进行内存优化，销毁除登录页之外的所有界面
+//                            ActivityManager.getInstance().finishAllActivities(LoginActivity.class);
+//                        }
+//                    });
+
         }
-
-
     }
+
     /**
-     *     登陆
+     * 登陆
      */
     private boolean isLogin() {
-        if (AppApplication.application.mUserInfoToken ==null){
+        if (!AppApplication.application.isLogin) {
             startActivity(LoginActivity.class);
             return true;
         }

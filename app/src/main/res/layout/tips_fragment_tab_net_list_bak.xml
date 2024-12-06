@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/backgroundmask"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <FrameLayout
+            android:id="@+id/fragment_tips_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <RadioGroup
+            android:orientation="horizontal"
+            android:id="@+id/rg_tab"
+            android:background="#eeeeee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/firstContentTab"
+                style="@style/myTab"
+                android:drawableTop="@drawable/list_selector"
+                android:singleLine="true"
+                android:text="伤寒杂病论"
+                tools:ignore="TextSizeCheck" />
+
+<!--            <RadioButton-->
+<!--                android:id="@+id/fangYaoTab"-->
+<!--                style="@style/myTab"-->
+<!--                android:drawableTop="@drawable/magnify_selector"-->
+<!--                android:text="伤寒金匮方"-->
+<!--                tools:ignore="TextSizeCheck" />-->
+
+<!--            <RadioButton-->
+<!--                android:id="@+id/yaoTab"-->
+<!--                style="@style/myTab"-->
+<!--                android:drawableTop="@drawable/yao_selector"-->
+<!--                android:text="伤寒金匮药"-->
+<!--                tools:ignore="TextSizeCheck" />-->
+
+            <RadioButton
+                android:id="@+id/unitTab"
+                style="@style/myTab"
+                android:drawableTop="@drawable/ruler_selector"
+                android:text="汉制单位"
+                tools:ignore="TextSizeCheck" />
+
+            <RadioButton
+                android:id="@+id/settingsTab"
+                style="@style/myTab"
+                android:drawableTop="@drawable/settings_selector"
+                android:text="设置"
+                tools:ignore="TextSizeCheck" />
+        </RadioGroup>
+    </LinearLayout>
+</LinearLayout>

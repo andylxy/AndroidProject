@@ -144,7 +144,7 @@ dependencies {
     // 友盟封装
     implementation project(':library:umeng')
     // 轻量事件框架：https://github.com/LucasXu01/XBus
-   // implementation project(':library:xbus')
+    implementation project(':library:xbus')
 
     //安卓设备唯一标识解决方案 https://github.com/gzu-liyujiang/Android_CN_OAID
     //implementation 'com.github.gzu-liyujiang:Android_CN_OAID:4.2.5'

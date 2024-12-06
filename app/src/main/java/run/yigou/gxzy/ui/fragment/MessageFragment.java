@@ -9,8 +9,8 @@ import run.yigou.gxzy.aop.Permissions;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.glide.GlideApp;
-import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.activity.LoginActivity;
+import run.yigou.gxzy.ui.activity.HomeActivity;
 
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;

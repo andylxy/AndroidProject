@@ -14,7 +14,7 @@
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -69,14 +69,27 @@
                 app:bar_rightDrawable="@drawable/arrows_right_ic"
                 tools:bar_rightText="密码强度较低" />
 
+
+
+            <com.hjq.widget.layout.SettingBar
+                android:id="@+id/sb_permission_setting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:bar_leftText="@string/setting_permission"
+                app:bar_rightDrawable="@drawable/arrows_right_ic" />
+
+            <com.hjq.widget.layout.SettingBar
+                android:id="@+id/sb_setting_cache"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:bar_leftText="@string/setting_cache"
+                app:bar_rightDrawable="@drawable/arrows_right_ic" />
             <com.hjq.widget.layout.SettingBar
                 android:id="@+id/sb_setting_agreement"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp_15"
                 app:bar_leftText="@string/setting_agreement"
                 app:bar_rightDrawable="@drawable/arrows_right_ic" />
-
             <com.hjq.widget.layout.SettingBar
                 android:id="@+id/sb_setting_about"
                 android:layout_width="match_parent"
@@ -89,6 +102,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dp_15"
+                android:visibility="gone"
                 app:bar_leftText="@string/setting_auto">
 
                 <com.hjq.widget.view.SwitchButton
@@ -97,28 +111,19 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="end|center_vertical"
                     android:layout_marginHorizontal="@dimen/dp_15" />
-
             </com.hjq.widget.layout.SettingBar>
-            <com.hjq.widget.layout.SettingBar
-                android:id="@+id/sb_permission_setting"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:bar_leftText="@string/setting_permission"
-                app:bar_rightDrawable="@drawable/arrows_right_ic" />
-            <com.hjq.widget.layout.SettingBar
-                android:id="@+id/sb_setting_cache"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:bar_leftText="@string/setting_cache"
-                app:bar_rightDrawable="@drawable/arrows_right_ic" />
 
-            <com.hjq.widget.layout.SettingBar
+            <TextView
                 android:id="@+id/sb_setting_exit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/dp_15"
-                app:bar_leftText="@string/setting_exit"
-                app:bar_leftTextColor="@color/red" />
+                android:layout_marginVertical="@dimen/dp_10"
+                android:background="@color/white"
+                android:padding="@dimen/dp_10"
+                android:gravity="center"
+                android:textSize="@dimen/sp_15"
+                android:text="@string/setting_exit"
+                android:textColor="@color/red" />
 
         </LinearLayout>
 

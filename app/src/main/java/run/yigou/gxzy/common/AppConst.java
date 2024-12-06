@@ -63,5 +63,10 @@ public class AppConst {
      * 图片主机地址
      */
     public static final String ImageHost = "https://948526c.webp.li/";
+    /**
+     * SharedPreferences 是否开启书架的的Key字符串
+     */
+    public static final String Key_ShuJie = "showShuJie";
 
+    public static final String Key_Window_Tips = "功能暂时未实现,敬请等待";
 }

@@ -16,9 +16,27 @@ public final class TipsUnitShowFragment extends AppFragment<AppActivity>{
 
     private WrapRecyclerView rvTipsUnitList;
     private TipsUnitFragmentAdapter tipsUnitFragmentAdapter;
-    public static TipsUnitShowFragment newInstance() {
-        return new TipsUnitShowFragment();
+
+
+    // 单例模式，确保实例的唯一性
+    private static volatile TipsUnitShowFragment instance;
+    // 私有构造函数，防止外部直接实例化
+    private TipsUnitShowFragment() {
+        try {
+            // 构造函数中的初始化逻辑
+            // 可以在这里添加一些基本的校验逻辑
+        } catch (Exception e) {
+            // 异常处理
+            throw new RuntimeException("Failed to create TipsUnitShowFragment instance", e);
+        }
     }
+    public static synchronized TipsUnitShowFragment newInstance() {
+        if (instance == null) {
+            instance = new TipsUnitShowFragment();
+        }
+        return instance;
+    }
+
 
     @Override
     protected int getLayoutId() {
