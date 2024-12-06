@@ -79,7 +79,11 @@ import timber.log.Timber;
 public final class AppApplication extends Application {
 
     public static AppApplication application;
+    /**
+     * 是否打开所有页面功能
+     */
 
+    public boolean global_openness =true;
     public   boolean isLogin = false;
     //登陆信息
     private UserInfoService mUserInfoService;

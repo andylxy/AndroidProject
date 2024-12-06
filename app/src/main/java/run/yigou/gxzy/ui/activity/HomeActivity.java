@@ -82,12 +82,12 @@ public final class HomeActivity extends AppActivity
         msgMenuItem  =  new NavigationAdapter.MenuItem(getString(R.string.home_nav_message),
                 ContextCompat.getDrawable(this, R.drawable.home_message_selector));
 
-        //如果已登陆,
-       // if(AppApplication.application.isLogin){
+        //开放全部功能
+        if(AppApplication.application.global_openness){
             mNavigationAdapter.addItem(msgMenuItem);
-       // }
-        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_me),
-                ContextCompat.getDrawable(this, R.drawable.home_me_selector)));
+            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_me),
+                    ContextCompat.getDrawable(this, R.drawable.home_me_selector)));
+        }
 
         mNavigationAdapter.setOnNavigationListener(this);
         mNavigationView.setAdapter(mNavigationAdapter);
@@ -99,11 +99,11 @@ public final class HomeActivity extends AppActivity
         mPagerAdapter.addFragment(BookCollectCaseFragment.newInstance());
         mPagerAdapter.addFragment(HomeFragment.newInstance());
 
-        //如果已登陆
-       // if(AppApplication.application.isLogin){
+        //开放全部功能
+        if(AppApplication.application.global_openness){
             mPagerAdapter.addFragment(MyMsgFragment.newInstance());
-        //}
-        mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());
+            mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());
+        }
         mViewPager.setAdapter(mPagerAdapter);
         mHomeActivity = this;
 
@@ -112,29 +112,29 @@ public final class HomeActivity extends AppActivity
     }
 
 
-    @Subscribe(priority = 1)
-    public void onEvent( LoginEventNotification event) {
-        ThreadUtil.runOnUiThread(()->{
-            if (event.getLoginNotification()) {
-                //如果已登陆,
-                if(AppApplication.application.isLogin){
-                    mNavigationAdapter.addItem(2,msgMenuItem);
-                    mNavigationAdapter.notifyDataSetChanged();
-                    mPagerAdapter.addFragment(MyMsgFragment.newInstance(),null,2);
-                }
-
-            } else {
-                //如果退出登陆,
-                if(!AppApplication.application.isLogin){
-                    mNavigationAdapter.removeItem(2);
-                    mPagerAdapter.removeFragment(2);
-                }
-
-            }
-            mNavigationAdapter.notifyDataSetChanged();
-            mPagerAdapter.notifyDataSetChanged();
-        });
-    }
+//    @Subscribe(priority = 1)
+//    public void onEvent( LoginEventNotification event) {
+//        ThreadUtil.runOnUiThread(()->{
+//            if (event.getLoginNotification()) {
+//                //如果已登陆,
+//                if(AppApplication.application.isLogin){
+//                    mNavigationAdapter.addItem(2,msgMenuItem);
+//                    mNavigationAdapter.notifyDataSetChanged();
+//                    mPagerAdapter.addFragment(MyMsgFragment.newInstance(),null,2);
+//                }
+//
+//            } else {
+//                //如果退出登陆,
+//                if(!AppApplication.application.isLogin){
+//                    mNavigationAdapter.removeItem(2);
+//                    mPagerAdapter.removeFragment(2);
+//                }
+//
+//            }
+//            mNavigationAdapter.notifyDataSetChanged();
+//            mPagerAdapter.notifyDataSetChanged();
+//        });
+//    }
 
     @Override
     protected void onNewIntent(Intent intent) {

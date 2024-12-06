@@ -153,11 +153,14 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
             return;
         }
         // 登陆功能后期开放
-        if (!AppApplication.application.isLogin) {
+        if (!AppApplication.application.global_openness) {
             toast(AppConst.Key_Window_Tips);
-            //跳登陆页面
-            // startActivity(LoginActivity.class);
-              return;
+        }else {
+            if (!AppApplication.application.isLogin) {
+                //跳登陆页面
+                startActivity(LoginActivity.class);
+                return;
+            }
         }
         // 以下功能需要 请先登录;
         if (view == mAvatarLayout) {

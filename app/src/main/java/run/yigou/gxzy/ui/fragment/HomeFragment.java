@@ -216,9 +216,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
             }
         });
         mTvHomeSearchText.setOnKeyListener((v, keyCode, event) -> {
-            if(!AppApplication.application.isLogin){
-                toast(AppConst.Key_Window_Tips);
-            }
+
             //是否是回车键
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
                 //隐藏键盘
@@ -241,7 +239,6 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     if (mTvHomeSearchText.isFocused()) {
                         clearSearchTextFocus();
                     }
-
                     return true;
                 }
                 return false;
@@ -309,6 +306,13 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
      * 搜索
      */
     private void search() {
+
+        //开放全部功能
+        if(!AppApplication.application.global_openness){
+            toast(AppConst.Key_Window_Tips);
+            return;
+        }
+
         //保存搜索关键字
         if (!StringHelper.isEmpty(searchKey)) {
             mSearchHistoryService.addOrUpadteHistory(searchKey);
