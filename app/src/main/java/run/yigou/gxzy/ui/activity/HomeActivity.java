@@ -85,10 +85,10 @@ public final class HomeActivity extends AppActivity
         //开放全部功能
         if(AppApplication.application.global_openness){
             mNavigationAdapter.addItem(msgMenuItem);
-            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_me),
-                    ContextCompat.getDrawable(this, R.drawable.home_me_selector)));
-        }
 
+        }
+        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_me),
+                ContextCompat.getDrawable(this, R.drawable.home_me_selector)));
         mNavigationAdapter.setOnNavigationListener(this);
         mNavigationView.setAdapter(mNavigationAdapter);
     }
@@ -102,8 +102,8 @@ public final class HomeActivity extends AppActivity
         //开放全部功能
         if(AppApplication.application.global_openness){
             mPagerAdapter.addFragment(MyMsgFragment.newInstance());
-            mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());
         }
+        mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());
         mViewPager.setAdapter(mPagerAdapter);
         mHomeActivity = this;
 

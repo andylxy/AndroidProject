@@ -83,8 +83,8 @@ public final class AppApplication extends Application {
      * 是否打开所有页面功能
      */
 
-    public boolean global_openness =true;
-    public   boolean isLogin = false;
+    public boolean global_openness = true;
+    public boolean isLogin = false;
     //登陆信息
     private UserInfoService mUserInfoService;
     public UserInfo mUserInfoToken;
@@ -101,37 +101,36 @@ public final class AppApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        // 初始化 TitleBar 默认样式
-        // TitleBar.setDefaultStyle(new ITitleBarStyle());
         application = this;
         mUserInfoService = DbService.getInstance().mUserInfoService;
         initSdk(this);
         initUserLogin();
         registryByReflect();
         //构造书籍数据/实现本地数据搜索
-       ThreadUtil.runInBackground(ConvertEntity::tipsSingleDataInit);
+        ThreadUtil.runInBackground(ConvertEntity::tipsSingleDataInit);
     }
 
-private void initUserLogin() {
-    try {
-        UserInfo userInfo = mUserInfoService.getLoginUserInfo();
-        if (userInfo != null) {
-            mUserInfoToken = userInfo; // 直接赋值，避免重复调用
-            if (mUserInfoToken.getToken() != null) {
-                // 添加 http 请求 Token
-                isLogin = true;
-                EasyConfig.getInstance().addHeader("Authorization", mUserInfoToken.getToken());
+    private void initUserLogin() {
+        try {
+            UserInfo userInfo = mUserInfoService.getLoginUserInfo();
+            if (userInfo != null) {
+                mUserInfoToken = userInfo; // 直接赋值，避免重复调用
+                if (mUserInfoToken.getToken() != null) {
+                    // 添加 http 请求 Token
+                    isLogin = true;
+                    EasyConfig.getInstance().addHeader("Authorization", mUserInfoToken.getToken());
+                }
             }
+        } catch (Exception e) {
+            // 记录异常日志，或者进行其他错误处理
+            EasyLog.print("InitUserLogin", "Error initializing user login: " + e.getMessage());
         }
-    } catch (Exception e) {
-        // 记录异常日志，或者进行其他错误处理
-        EasyLog.print("InitUserLogin", "Error initializing user login: " + e.getMessage());
     }
-}
+
     /**
      * 方法一：以反射调用
      */
-    public void registryByReflect(){
+    public void registryByReflect() {
         XEventBus.getDefault().register(this);
     }
 
@@ -145,7 +144,6 @@ private void initUserLogin() {
 //        //注解处理调用方式
 //        XEventBus.builder().setMethodHandle(aptMethodFinder).build().register(this);
 //    }
-
     @Override
     public void onTerminate() {
         super.onTerminate();
@@ -214,13 +212,13 @@ private void initUserLogin() {
         // UmengClient.init(application, AppConfig.isLogEnable());
 
         // Bugly 异常捕捉
-       // CrashReport.initCrashReport(application, AppConfig.getBuglyId(), AppConfig.isDebug());
+        // CrashReport.initCrashReport(application, AppConfig.getBuglyId(), AppConfig.isDebug());
 
         // Activity 栈管理初始化
         ActivityManager.getInstance().init(application);
 
         // MMKV 初始化
-         MMKV.initialize(application);
+        MMKV.initialize(application);
 
         // 网络请求框架初始化
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
@@ -273,7 +271,7 @@ private void initUserLogin() {
                     throw new IllegalArgumentException(message);
                 } else {
                     // 上报到 Bugly 错误列表中
-                  //  CrashReport.postCatchedException(new IllegalArgumentException(message));
+                    //  CrashReport.postCatchedException(new IllegalArgumentException(message));
                 }
             }
         });
