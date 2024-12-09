@@ -80,6 +80,7 @@ public class ShowFanYaoMingCi {
         // 遍历方剂列表，查找匹配的方剂
         for (HH2SectionData sectionData : fangList) {
             for (DataItem dataItem : sectionData.getData()) {
+                if (dataItem.getFangList().isEmpty()) continue;
                 String originalName = dataItem.getFangList().get(0);
                 String actualName = getOrDefault(fangAliasDict, originalName);
                 // 如果找到匹配的方剂，创建并添加显示对象到列表

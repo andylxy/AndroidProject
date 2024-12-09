@@ -152,6 +152,8 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         editor.putInt("showShuJie", getShowShuJie()); // 书加显示选项
         // 提交更改
         editor.apply(); // 异步保存更改
+
+
     }
 
     @Override
@@ -170,12 +172,6 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
     public void onCheckedChanged(SwitchButton button, boolean checked) {
 
         if (button.getId() == R.id.sb_setting_shu_jie_switch) {
-            if (checked) {
-
-                setShowShanghan(AppConst.Show_Shanghan_AllSongBan);
-            } else {
-                setShowShanghan(AppConst.Show_Shanghan_398);
-            }
             //保存设置
             savePreferences();
             return;

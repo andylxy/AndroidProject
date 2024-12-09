@@ -52,6 +52,7 @@ public final class HomeActivity extends AppActivity
     public static void start(Context context) {
         start(context, HomeFragment.class);
     }
+
     @Log
     public static void start(Context context, Class<? extends AppFragment<?>> fragmentClass) {
         Intent intent = new Intent(context, HomeActivity.class);
@@ -67,7 +68,8 @@ public final class HomeActivity extends AppActivity
         return R.layout.home_activity;
     }
 
-  private  NavigationAdapter.MenuItem msgMenuItem ;
+    private NavigationAdapter.MenuItem msgMenuItem;
+
     @Override
     protected void initView() {
         mViewPager = findViewById(R.id.vp_home_pager);
@@ -79,11 +81,11 @@ public final class HomeActivity extends AppActivity
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_found),
                 ContextCompat.getDrawable(this, R.drawable.home_found_selector)));
 
-        msgMenuItem  =  new NavigationAdapter.MenuItem(getString(R.string.home_nav_message),
+        msgMenuItem = new NavigationAdapter.MenuItem(getString(R.string.home_nav_message),
                 ContextCompat.getDrawable(this, R.drawable.home_message_selector));
 
         //开放全部功能
-        if(AppApplication.application.global_openness){
+        if (AppApplication.application.global_openness) {
             mNavigationAdapter.addItem(msgMenuItem);
 
         }
@@ -95,24 +97,32 @@ public final class HomeActivity extends AppActivity
 
     @Override
     protected void initData() {
-      mPagerAdapter = new FragmentPagerAdapter<>(this);
+        mPagerAdapter = new FragmentPagerAdapter<>(this);
         mPagerAdapter.addFragment(BookCollectCaseFragment.newInstance());
         mPagerAdapter.addFragment(HomeFragment.newInstance());
 
         //开放全部功能
-        if(AppApplication.application.global_openness){
+        if (AppApplication.application.global_openness) {
             mPagerAdapter.addFragment(MyMsgFragment.newInstance());
         }
         mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());
         mViewPager.setAdapter(mPagerAdapter);
         mHomeActivity = this;
 
-      //  XEventBus.getDefault().register(HomeActivity.this);
+        //  XEventBus.getDefault().register(HomeActivity.this);
         onNewIntent(getIntent());
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-//    @Subscribe(priority = 1)
+            initView();
+
+            initData();
+    }
+
+    //    @Subscribe(priority = 1)
 //    public void onEvent( LoginEventNotification event) {
 //        ThreadUtil.runOnUiThread(()->{
 //            if (event.getLoginNotification()) {
@@ -229,8 +239,8 @@ public final class HomeActivity extends AppActivity
         mViewPager.setAdapter(null);
         mNavigationView.setAdapter(null);
         mNavigationAdapter.setOnNavigationListener(null);
-        mHomeActivity=null;
-    //    XEventBus.getDefault().unregister(HomeActivity.this);
+        mHomeActivity = null;
+        //    XEventBus.getDefault().unregister(HomeActivity.this);
     }
 
 

@@ -32,6 +32,10 @@ public class AppConst {
     public static final long  postDelayMillis = 50;
     public static final String FILE_NAME_SETTING = "setting";
     /**
+     *
+     */
+    public static final String preferenceKey = "shanghan3.1";
+    /**
      * SharedPreferences 伤寒保存的的Key字符串
      */
     public static final String Key_Shanghan = "showShanghan";

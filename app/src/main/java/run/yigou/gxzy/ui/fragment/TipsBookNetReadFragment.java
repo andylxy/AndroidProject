@@ -357,12 +357,12 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
             // 获取指定书籍数据
             singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
-
             // 兼容处理宋版伤寒
             if (bookId == SHANGHAN_NO) {
                 initializeShanghanSettings();
                 setShanghanContentUpdateListener();
             }
+
             setContentShowStatusNotification();
             // 加载到UI显示
             initializeAdapter();
@@ -444,7 +444,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         SingletonNetData.OnContentShowStatusNotification contentShowStatusNotification = new SingletonNetData.OnContentShowStatusNotification() {
             @Override
             public void contentShowStatusNotification(int status) {
-                // 刷新数据显示
+                // 兼容处理宋版伤寒
+                if (bookId == SHANGHAN_NO) {
+                    initializeShanghanSettings();
+                    setShanghanContentUpdateListener();
+                }
                 refreshData();
                 // Fragment 处理返回键动作 AppConst.Key_ShuJie
                 if (TipsSingleData.getInstance().getSharedPreferences().getInt(AppConst.Key_ShuJie, 0) == 1) {

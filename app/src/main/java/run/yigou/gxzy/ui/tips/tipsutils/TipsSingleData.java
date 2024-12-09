@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import run.yigou.gxzy.app.AppApplication;
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.greendao.entity.TabNav;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
@@ -80,11 +81,10 @@ public class TipsSingleData {
         this.curBookId = curBookId;
     }
 
-    private final String preferenceKey = "shanghan3.1";
-    private final SharedPreferences sharedPreferences = AppApplication.application.getSharedPreferences(preferenceKey, Context.MODE_PRIVATE);
+
 
     public SharedPreferences getSharedPreferences() {
-        return sharedPreferences;
+        return AppApplication.application.getSharedPreferences(AppConst.preferenceKey, Context.MODE_PRIVATE);
     }
 
     /**
