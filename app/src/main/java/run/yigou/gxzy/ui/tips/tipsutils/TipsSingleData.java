@@ -83,9 +83,9 @@ public class TipsSingleData {
 
 
 
-    public SharedPreferences getSharedPreferences() {
-        return AppApplication.application.getSharedPreferences(AppConst.preferenceKey, Context.MODE_PRIVATE);
-    }
+//    public SharedPreferences getSharedPreferences() {
+//        return AppApplication.application.getSharedPreferences(AppConst.preferenceKey, Context.MODE_PRIVATE);
+//    }
 
     /**
      * 药物数据

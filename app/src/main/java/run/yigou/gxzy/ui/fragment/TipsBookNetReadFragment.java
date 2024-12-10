@@ -14,7 +14,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -32,15 +31,20 @@ import com.hjq.base.BaseDialog;
 import com.hjq.http.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
+import com.lucas.annotations.Subscribe;
+import com.lucas.xbus.XEventBus;
 
 
 import java.util.ArrayList;
 
+import run.yigou.gxzy.EventBus.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.BookArgs;
+import run.yigou.gxzy.common.FragmentSetting;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.gen.BookDao;
@@ -54,15 +58,11 @@ import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+import run.yigou.gxzy.utils.ThreadUtil;
 
 
 public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
-    private static final int SHANGHAN_NO = AppConst.ShangHanNo;
-    private static final int SHOW_SHANGHAN_398 = AppConst.Show_Shanghan_398;
-    private static final int SHOW_SHANGHAN_ALL_SONGBAN = AppConst.Show_Shanghan_AllSongBan;
-    private static final int SHOW_JINKUI_NONE = AppConst.Show_Jinkui_None;
-    private static final int SHOW_JINKUI_DEFAULT = AppConst.Show_Jinkui_Default;
 
     private WrapRecyclerView rvList;
     private ClearEditText clearEditText;
@@ -80,8 +80,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     private String searchText = null;
     private Button tipsBtnSearch;
 
-    private int showShanghan;
-    private int showJinkui;
 
     private LinearLayoutManager layoutManager;
     /**
@@ -95,12 +93,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
     private SingletonNetData singletonNetData;
 
-    private OnBackPressedCallback onBackPressedCallback;
 
-    private boolean isHandlingBackPress = false;
-    private int backPressCount = 0;
-    private static final int BACK_PRESS_INTERVAL = 1000; // 1秒内
-    private final Handler backPressHandler = new Handler();
+// 在 onDestroy 中释放资源
+
+    private OnBackPressedCallback onBackPressedCallback;
 
 
     // 单例模式，确保实例的唯一性
@@ -195,52 +191,19 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             public void afterTextChanged(Editable s) {
             }
         });
-
         // 注册事件
-        // XEventBus.getDefault().register(this);
-
-        // Fragment 处理返回键动作 AppConst.Key_ShuJie
-        if (TipsSingleData.getInstance().getSharedPreferences().getInt(AppConst.Key_ShuJie, 0) == 1) {
-            fragmentOnBackPressed();
-        }
+        XEventBus.getDefault().register(TipsBookNetReadFragment.this);
     }
 
-    // onBackPressedCallback在 onDestroy 中释放资源
 
     private void fragmentOnBackPressed() {
-        if (isHandlingBackPress) {
-            return;
-        }
-
+        // 显示返回键
         onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (isHandlingBackPress) {
-                    return;
-                }
-                isHandlingBackPress = true;
-
-                // 增加计数器并启动定时器
-                backPressCount++;
-                if (backPressCount == 1) {
-                    backPressHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            backPressCount = 0; // 重置计数器
-                        }
-                    }, BACK_PRESS_INTERVAL);
-                } else if (backPressCount == 2) {
-                    backPressHandler.removeCallbacksAndMessages(null); // 取消定时器
-                    backPressCount = 0; // 重置计数器
-                    allowSystemBackPress(); // 执行系统返回
-                    isHandlingBackPress = false;
-                    return;
-                }
-
                 // 处理自定义逻辑
                 TabNavBody navTabBody = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
                 if (navTabBody == null) {
-                    isHandlingBackPress = false;
                     return;
                 }
 
@@ -248,8 +211,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                     handleBackPress(navTabBody);
                 } catch (Exception e) {
                     EasyLog.print("HandleBackPress", "Error handling back press: " + e.getMessage());
-                } finally {
-                    isHandlingBackPress = false;
                 }
             }
 
@@ -264,11 +225,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
             private ArrayList<Book> queryBooks(TabNavBody navTabBody) {
                 try {
-                    ArrayList<Book> books = DbService.getInstance().mBookService.find(BookDao.Properties.BookNo.eq(navTabBody.getBookNo()));
-                    EasyLog.print("QueryBooks", "Queried books for bookNo: " + navTabBody.getBookNo() + ", result size: " + (books == null ? "null" : books.size()));
-                    return books;
+                    return DbService.getInstance().mBookService.find(BookDao.Properties.BookNo.eq(navTabBody.getBookNo()));
                 } catch (Exception e) {
-                    EasyLog.print("QueryBooks", "Error querying books for bookNo: " + navTabBody.getBookNo() + ", error: " + e.getMessage());
+                    EasyLog.print("QueryBooks", "Error querying books: " + e.getMessage());
                     return null;
                 }
             }
@@ -304,7 +263,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
                 try {
                     DbService.getInstance().mBookService.addEntity(book);
-                    EasyLog.print("AddBook", "Book added to bookshelf: " + book.getBookName());
                     refreshBookshelf();
                     allowSystemBackPress();
                 } catch (Exception e) {
@@ -320,7 +278,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
                     try {
                         DbService.getInstance().mBookService.updateEntity(book);
-                        EasyLog.print("UpdateBook", "Book info updated: " + book.getBookName());
                     } catch (Exception e) {
                         EasyLog.print("UpdateBook", "Error updating book info: " + e.getMessage());
                     }
@@ -330,19 +287,17 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
             private void refreshBookshelf() {
                 BookCollectCaseFragment.newInstance().RefreshLayout();
-                EasyLog.print("RefreshBookshelf", "Bookshelf refreshed.");
             }
 
             private void allowSystemBackPress() {
                 postDelayed(() -> {
                     setEnabled(false); // 禁用当前回调
                     requireActivity().onBackPressed(); // 调用系统返回
-                    EasyLog.print("AllowSystemBackPress", "System back press allowed.");
                 }, AppConst.postDelayMillis);
             }
         };
-
         requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
+
     }
 
 
@@ -354,16 +309,20 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         try {
             // 获取传递的书本编号
             retrieveBookArguments(bookArgs);
-
+            //fragmentSetting = AppApplication.getApplication().getFragmentSetting();
             // 获取指定书籍数据
             singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
             // 兼容处理宋版伤寒
-            if (bookId == SHANGHAN_NO) {
-                initializeShanghanSettings();
+            if (bookId == AppConst.ShangHanNo) {
+                // initializeShanghanSettings();
                 setShanghanContentUpdateListener();
             }
+            // Fragment 处理返回键动作,是否保存阅读
 
-            setContentShowStatusNotification();
+            if (AppApplication.getApplication().fragmentSetting.isShuJie())
+                fragmentOnBackPressed();
+
+            //setContentShowStatusNotification();
             // 加载到UI显示
             initializeAdapter();
             setHeaderClickListener();
@@ -394,16 +353,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         }
     }
 
-    private void initializeShanghanSettings() {
-
-        if (TipsSingleData.getInstance().getSharedPreferences() != null) {
-            showShanghan = TipsSingleData.getInstance().getSharedPreferences().getInt(AppConst.Key_Shanghan, 0);
-            showJinkui = TipsSingleData.getInstance().getSharedPreferences().getInt(AppConst.Key_Jinkui, 1);
-        } else {
-            showShanghan = 0;
-            showJinkui = 1;
-        }
-    }
 
     private void setShanghanContentUpdateListener() {
         SingletonNetData.OnContentUpdateListener contentUpdateListener = new SingletonNetData.OnContentUpdateListener() {
@@ -412,25 +361,27 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 if (contentList == null || contentList.isEmpty()) {
                     return new ArrayList<>();
                 }
+
                 int size = contentList.size();
 
                 int start = 0;
                 int end = size;
 
-                if (showJinkui == SHOW_JINKUI_NONE) {
-                    if (showShanghan == SHOW_SHANGHAN_398) {
+
+                if (!AppApplication.getApplication().fragmentSetting.isSong_JinKui()) {
+                    if (!AppApplication.getApplication().fragmentSetting.isSong_ShangHan()) {
                         start = 8;
                         end = Math.min(18, size);
-                    } else if (showShanghan == SHOW_SHANGHAN_ALL_SONGBAN) {
+                    } else {
                         end = Math.min(26, size);
                     }
-                } else if (showJinkui == SHOW_JINKUI_DEFAULT) {
-                    if (showShanghan == SHOW_SHANGHAN_398) {
+                } else {
+                    if (!AppApplication.getApplication().fragmentSetting.isSong_ShangHan()) {
                         start = 8;
                     }
                 }
 
-                if (start < size && end <= size) {
+                if (start < size ) {
                     return new ArrayList<>(contentList.subList(start, end));
                 } else {
                     return contentList;
@@ -440,26 +391,34 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         singletonNetData.setOnContentUpdateListener(contentUpdateListener);
     }
 
-    private void setContentShowStatusNotification() {
-        SingletonNetData.OnContentShowStatusNotification contentShowStatusNotification = new SingletonNetData.OnContentShowStatusNotification() {
-            @Override
-            public void contentShowStatusNotification(int status) {
-                // 兼容处理宋版伤寒
-                if (bookId == SHANGHAN_NO) {
-                    initializeShanghanSettings();
-                    setShanghanContentUpdateListener();
-                }
-                refreshData();
-                // Fragment 处理返回键动作 AppConst.Key_ShuJie
-                if (TipsSingleData.getInstance().getSharedPreferences().getInt(AppConst.Key_ShuJie, 0) == 1) {
-                    fragmentOnBackPressed();
-                }
-            }
-        };
+    @Subscribe(priority = 1)
+    public void onEvent(TipsFragmentSettingEventNotification event) {
+        ThreadUtil.runOnUiThread(() -> {
 
-        // 显示修改通知
-        singletonNetData.setOnContentShowStatusNotification(contentShowStatusNotification);
+            // 兼容处理宋版伤寒
+            if (bookId == AppConst.ShangHanNo) {
+                setShanghanContentUpdateListener();
+            }
+            refreshData();
+            // Fragment 处理返回键动作,是否保存阅读
+            setBackPressedCallback();
+           // EasyLog.print("TipsBookNetReadFragment onEvent", "onEvent");
+
+        });
     }
+
+    private void setBackPressedCallback() {
+        if (AppApplication.getApplication().fragmentSetting.isShuJie()) {
+            if (onBackPressedCallback == null)
+                fragmentOnBackPressed();
+        } else {
+            if (onBackPressedCallback != null) {
+                onBackPressedCallback.remove();
+                onBackPressedCallback = null;
+            }
+        }
+    }
+
 
     private void initializeAdapter() {
         adapter = new ExpandableAdapter(getContext());
@@ -542,9 +501,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             rvList.removeItemDecorationAt(0);
         }
         singletonNetData = null;
-        if (TipsSingleData.getInstance().getSharedPreferences().getInt(AppConst.Key_ShuJie, 0) == 1) {
+        if (onBackPressedCallback != null) {
             onBackPressedCallback.remove();
         }
+        // 注销事件
+        XEventBus.getDefault().unregister(TipsBookNetReadFragment.this);
     }
 
 

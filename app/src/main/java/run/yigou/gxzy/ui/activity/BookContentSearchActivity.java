@@ -28,7 +28,9 @@ import java.util.Objects;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.common.FragmentSetting;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.gen.TabNavBodyDao;
@@ -89,6 +91,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     @Override
     protected void initView() {
         init();
+        fragmentSetting = AppApplication.application.fragmentSetting;
     }
 
     @Override
@@ -97,6 +100,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
         initHistoryList();
         viewDataInit();
+
         // 获取传递过来的 Intent
         Intent intent = getIntent();
         // 从 Intent 中提取参数
@@ -200,6 +204,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     }
     private int showShanghan;
     private int showJinkui;
+    private FragmentSetting fragmentSetting;
     /**
      * 初始化搜索列表
      */
@@ -245,9 +250,9 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 
         // 默认初始化设置  宋版伤寒,金匮显示
         // 从 SharedPreferences 中读取设置值
-        SharedPreferences sharedPreferences = TipsSingleData.getInstance().getSharedPreferences();
-        showShanghan = sharedPreferences.getInt(AppConst.Key_Shanghan, 0);
-        showJinkui = sharedPreferences.getInt(AppConst.Key_Jinkui, 1);
+//        SharedPreferences sharedPreferences = TipsSingleData.getInstance().getSharedPreferences();
+//        showShanghan = sharedPreferences.getInt(AppConst.Key_Shanghan, 0);
+//        showJinkui = sharedPreferences.getInt(AppConst.Key_Jinkui, 1);
         // 加载数据处理监听
         singleDataMap.get(bookId).setOnContentUpdateListener(new SingletonNetData.OnContentUpdateListener() {
             @Override
@@ -260,15 +265,27 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                 int start = 0;
                 int end = size;
 
-                if (showJinkui == AppConst.Show_Jinkui_None) {
-                    if (showShanghan == AppConst.Show_Shanghan_398) {
+//                if (showJinkui == AppConst.Show_Jinkui_None) {
+//                    if (showShanghan == AppConst.Show_Shanghan_398) {
+//                        start = 8;
+//                        end = Math.min(18, size);
+//                    } else if (showShanghan == AppConst.Show_Shanghan_AllSongBan) {
+//                        end = Math.min(26, size);
+//                    }
+//                } else if (showJinkui == AppConst.Show_Jinkui_Default) {
+//                    if (showShanghan == AppConst.Show_Shanghan_398) {
+//                        start = 8;
+//                    }
+//                }
+                if (!fragmentSetting.isSong_JinKui()) {
+                    if (!fragmentSetting.isSong_ShangHan()) {
                         start = 8;
                         end = Math.min(18, size);
-                    } else if (showShanghan == AppConst.Show_Shanghan_AllSongBan) {
+                    } else {
                         end = Math.min(26, size);
                     }
-                } else if (showJinkui == AppConst.Show_Jinkui_Default) {
-                    if (showShanghan == AppConst.Show_Shanghan_398) {
+                } else {
+                    if (!fragmentSetting.isSong_ShangHan()) {
                         start = 8;
                     }
                 }

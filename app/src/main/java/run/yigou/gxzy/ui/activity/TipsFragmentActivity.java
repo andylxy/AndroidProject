@@ -36,7 +36,6 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
         return R.layout.tips_fragment_tab_net_list;
     }
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     protected void initView() {
         // 给这个 View 设置沉浸式，避免状态栏遮挡

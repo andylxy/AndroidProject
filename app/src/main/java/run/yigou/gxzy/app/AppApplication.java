@@ -28,6 +28,8 @@ import com.hjq.bar.TitleBar;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
+import run.yigou.gxzy.common.FragmentSetting;
+import run.yigou.gxzy.common.ManagerSetting;
 import run.yigou.gxzy.greendao.entity.TabNav;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.entity.UserInfo;
@@ -85,6 +87,7 @@ public final class AppApplication extends Application {
 
     public boolean global_openness = true;
     public boolean isLogin = false;
+
     //登陆信息
     private UserInfoService mUserInfoService;
     public UserInfo mUserInfoToken;
@@ -106,9 +109,26 @@ public final class AppApplication extends Application {
         initSdk(this);
         initUserLogin();
         registryByReflect();
+
+        fragmentSetting = ManagerSetting.getFragmentSetting();
         //构造书籍数据/实现本地数据搜索
         ThreadUtil.runInBackground(ConvertEntity::tipsSingleDataInit);
     }
+
+    public FragmentSetting fragmentSetting;
+
+//    /**
+//     * 获取默认配置
+//     *
+//     * @return
+//     */
+//    public FragmentSetting getFragmentSetting() {
+//        if (fragmentSetting != null) {
+//            return fragmentSetting;
+//        }
+//        fragmentSetting = ManagerSetting.getFragmentSetting();
+//        return fragmentSetting;
+//    }
 
     private void initUserLogin() {
         try {

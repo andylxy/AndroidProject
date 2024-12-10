@@ -1,16 +1,21 @@
 package run.yigou.gxzy.ui.fragment;
 
 import android.content.SharedPreferences;
-import android.os.Bundle;
+import android.view.View;
 
 import com.hjq.widget.layout.SettingBar;
 import com.hjq.widget.view.SwitchButton;
+import com.lucas.xbus.XEventBus;
 
+import run.yigou.gxzy.EventBus.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.BookArgs;
+import run.yigou.gxzy.common.FragmentSetting;
+import run.yigou.gxzy.common.ManagerSetting;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
@@ -21,40 +26,17 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
     private SettingBar sb_setting_jk;
     private SwitchButton sb_setting_sh_switch;
     private SwitchButton sb_setting_jk_switch;
-    private SingletonNetData singletonNetData;
+   // private SingletonNetData singletonNetData;
 
     private SettingBar sb_setting_shu_jie;
     private SwitchButton sb_setting_shu_jie_switch;
 
     private int bookId = 0;
-    //宋版伤寒,金匮显示设置
-    private int showJinkui = AppConst.Show_Jinkui_Default;
-    private int showShanghan = AppConst.Show_Shanghan_AllSongBan;
-    private int shujie = 0;
 
-    public int getShowShanghan() {
-        return this.showShanghan;
-    }
 
-    public void setShowShanghan(int i) {
-        this.showShanghan = i;
-    }
+    private FragmentSetting fragmentSetting;
 
-    public int getShowJinkui() {
-        return this.showJinkui;
-    }
 
-    public void setShowJinkui(int i) {
-        this.showJinkui = i;
-    }
-
-    public void setShowShuJie(int i) {
-        this.shujie = i;
-    }
-
-    public int getShowShuJie() {
-        return this.shujie;
-    }
 
 
     private BookArgs bookArgs;
@@ -93,12 +75,11 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         sb_setting_jk = findViewById(R.id.sb_setting_jk);
         sb_setting_sh_switch = findViewById(R.id.sb_setting_sh_switch);
         sb_setting_jk_switch = findViewById(R.id.sb_setting_jk_switch);
-
         sb_setting_shu_jie = findViewById(R.id.sb_setting_shu_jie);
         sb_setting_shu_jie_switch = findViewById(R.id.sb_setting_shu_jie_switch);
 
         // 注册事件
-        //XEventBus.getDefault().register(this);
+        XEventBus.getDefault().register(TipsSettingFragment.this);
     }
 
     @Override
@@ -108,53 +89,45 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         if (bookArgs != null) {
             bookId = bookArgs.getBookNo();
         }
-        singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
+
+        //singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
         sb_setting_shu_jie.setLeftText("打开阅读后加入书架");
         // 设置切换按钮的监听
         sb_setting_shu_jie_switch.setOnCheckedChangeListener(this);
         sb_setting_sh_switch.setOnCheckedChangeListener(this);
         sb_setting_jk_switch.setOnCheckedChangeListener(this);
+
+
         showSettingSwitch();
     }
 
     private void showSettingSwitch() {
         // 默认初始化设置
-        // 从 SharedPreferences 中读取设置值
-        SharedPreferences sharedPreferences = TipsSingleData.getInstance().getSharedPreferences();
-        setShowShanghan(sharedPreferences.getInt(AppConst.Key_Shanghan, 0));
-        setShowJinkui(sharedPreferences.getInt(AppConst.Key_Jinkui, 1));
-        setShowShuJie(sharedPreferences.getInt(AppConst.Key_ShuJie, 0));
-        sb_setting_shu_jie_switch.setChecked(getShowShuJie()==1);
-        if (getShowShanghan() == AppConst.Show_Shanghan_AllSongBan) {
-            sb_setting_sh_switch.setChecked(true);
+
+        fragmentSetting = AppApplication.getApplication().fragmentSetting;
+
+        if (bookId != AppConst.ShangHanNo) {
+            sb_setting_sh.setVisibility(View.GONE);
+            sb_setting_jk.setVisibility(View.GONE);
+        }else{
+            sb_setting_sh.setVisibility(View.VISIBLE);
+            sb_setting_jk.setVisibility(View.VISIBLE);
+        }
+        sb_setting_shu_jie_switch.setChecked(fragmentSetting.isShuJie());
+        sb_setting_sh_switch.setChecked(fragmentSetting.isSong_ShangHan());
+        sb_setting_jk_switch.setChecked(fragmentSetting.isSong_JinKui());
+        if (fragmentSetting.isSong_ShangHan()) {
             sb_setting_sh.setLeftText("完整显示伤寒论・宋板");
         } else {
-            sb_setting_sh_switch.setChecked(false);
             sb_setting_sh.setLeftText("显示398条辨伤寒论・宋板");
         }
-        if (getShowJinkui() == AppConst.Show_Jinkui_Default) {
-            sb_setting_jk_switch.setChecked(true);
+        if (fragmentSetting.isSong_JinKui()) {
             sb_setting_jk.setLeftText("默认显示金匮要略・宋板");
         } else {
-            sb_setting_jk_switch.setChecked(false);
             sb_setting_jk.setLeftText("不显示金匮要略・宋板");
         }
     }
 
-    // 获取 SharedPreferences 编辑器
-    SharedPreferences.Editor editor = TipsSingleData.getInstance().getSharedPreferences().edit();
-
-    public void savePreferences() {
-
-        // 保存显示选项
-        editor.putInt("showShanghan", getShowShanghan()); // 商汉显示选项
-        editor.putInt("showJinkui", getShowJinkui()); // 金匮显示选项
-        editor.putInt("showShuJie", getShowShuJie()); // 书加显示选项
-        // 提交更改
-        editor.apply(); // 异步保存更改
-
-
-    }
 
     @Override
     public void onResume() {
@@ -170,36 +143,40 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
 
     @Override
     public void onCheckedChanged(SwitchButton button, boolean checked) {
-
+        TipsFragmentSettingEventNotification tipsFragmentSettingEventNotification = new TipsFragmentSettingEventNotification();
         if (button.getId() == R.id.sb_setting_shu_jie_switch) {
             //保存设置
-            savePreferences();
-            return;
+            fragmentSetting.setShuJie(checked);
         }
 
         if (button.getId() == R.id.sb_setting_sh_switch) {
             if (checked) {
                 sb_setting_sh.setLeftText("显示完整宋板伤寒论");
-                setShowShanghan(AppConst.Show_Shanghan_AllSongBan);
+
+                tipsFragmentSettingEventNotification.setShanghan_Notification(true);
             } else {
                 sb_setting_sh.setLeftText("只显示398条辨");
-                setShowShanghan(AppConst.Show_Shanghan_398);
+
+                tipsFragmentSettingEventNotification.setShanghan_Notification(false);
             }
+            fragmentSetting.setSong_ShangHan(checked);
         }
         if (button.getId() == R.id.sb_setting_jk_switch) {
             if (checked) {
                 sb_setting_jk.setLeftText("显示默认版金匮要略");
-                setShowJinkui(AppConst.Show_Jinkui_Default);
+
+                tipsFragmentSettingEventNotification.setJinkui_Notification(true);
             } else {
                 sb_setting_jk.setLeftText("不显示金匮要略");
-                setShowJinkui(AppConst.Show_Jinkui_None);
+
+                tipsFragmentSettingEventNotification.setJinkui_Notification(false);
             }
+            fragmentSetting.setSong_JinKui(checked);
         }
         //保存设置
-        savePreferences();
+        ManagerSetting.saveFragmentSetting(fragmentSetting);
         //通知显示已经变更
-        singletonNetData.shanghanShowUpdateNotification();
-        // XEventBus.getDefault().post(new ShowUpdateNotificationEvent().setUpdateNotification(true));
+        XEventBus.getDefault().post(tipsFragmentSettingEventNotification);
 
     }
 
@@ -207,8 +184,6 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
     public void onDestroy() {
         super.onDestroy();
         // 注销事件
-        //XEventBus.getDefault().unregister(this);
-        editor.clear(); // 清除所有数据
-        editor.apply();
+        XEventBus.getDefault().unregister(TipsSettingFragment.this);
     }
 }

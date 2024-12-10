@@ -113,14 +113,14 @@ public final class HomeActivity extends AppActivity
         onNewIntent(getIntent());
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-            initView();
-
-            initData();
-    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//
+//            initView();
+//
+//           initData();
+//    }
 
     //    @Subscribe(priority = 1)
 //    public void onEvent( LoginEventNotification event) {
