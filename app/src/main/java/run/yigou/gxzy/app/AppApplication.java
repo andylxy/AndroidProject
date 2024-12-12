@@ -28,6 +28,7 @@ import com.hjq.bar.TitleBar;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.FragmentSetting;
 import run.yigou.gxzy.common.ManagerSetting;
 import run.yigou.gxzy.greendao.entity.TabNav;
@@ -85,10 +86,11 @@ public final class AppApplication extends Application {
      * 是否打开所有页面功能
      */
 
-    public boolean global_openness = true;
-    public boolean isLogin = false;
+    public boolean global_openness = false;
+
 
     //登陆信息
+    public boolean isLogin = false;
     private UserInfoService mUserInfoService;
     public UserInfo mUserInfoToken;
 
@@ -106,13 +108,12 @@ public final class AppApplication extends Application {
         super.onCreate();
         application = this;
         mUserInfoService = DbService.getInstance().mUserInfoService;
-        initSdk(this);
         initUserLogin();
-        registryByReflect();
-
         fragmentSetting = ManagerSetting.getFragmentSetting();
         //构造书籍数据/实现本地数据搜索
         ThreadUtil.runInBackground(ConvertEntity::tipsSingleDataInit);
+        registryByReflect();
+        initSdk(this);
     }
 
     public FragmentSetting fragmentSetting;
@@ -195,7 +196,7 @@ public final class AppApplication extends Application {
     /**
      * 初始化一些第三方框架
      */
-    public static void initSdk(Application application) {
+    public void initSdk(Application application) {
         // 设置标题栏初始化器
         TitleBar.setDefaultStyle(new TitleBarStyle());
 
@@ -256,7 +257,11 @@ public final class AppApplication extends Application {
                 .setRetryCount(1)
                 .setInterceptor((api, params, headers) -> {
                     // 添加全局请求头
-                    // headers.put("Authorization", mUserInfoToken.getToken());
+                    if (mUserInfoToken != null)
+                        headers.put("Authorization", mUserInfoToken.getToken());
+                    //如果是全局开启，并且没有登陆就添加可获取全部的数据
+                    if (global_openness && mUserInfoToken == null)
+                        headers.put(AppConst.Key_User_Name, AppConst.Key_User_Token);
                     headers.put("app", "2");
                     // headers.put("ClientId", DeviceIdentifier.getAndroidID(this));
                     headers.put("versionName", AppConfig.getVersionName());

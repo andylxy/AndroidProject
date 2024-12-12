@@ -202,8 +202,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             llHistoryView.setVisibility(View.VISIBLE);
         }
     }
-    private int showShanghan;
-    private int showJinkui;
+
+
     private FragmentSetting fragmentSetting;
     /**
      * 初始化搜索列表
@@ -249,10 +249,6 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     private void extHandleShangHanData(int bookId) {
 
         // 默认初始化设置  宋版伤寒,金匮显示
-        // 从 SharedPreferences 中读取设置值
-//        SharedPreferences sharedPreferences = TipsSingleData.getInstance().getSharedPreferences();
-//        showShanghan = sharedPreferences.getInt(AppConst.Key_Shanghan, 0);
-//        showJinkui = sharedPreferences.getInt(AppConst.Key_Jinkui, 1);
         // 加载数据处理监听
         singleDataMap.get(bookId).setOnContentUpdateListener(new SingletonNetData.OnContentUpdateListener() {
             @Override
@@ -265,18 +261,6 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                 int start = 0;
                 int end = size;
 
-//                if (showJinkui == AppConst.Show_Jinkui_None) {
-//                    if (showShanghan == AppConst.Show_Shanghan_398) {
-//                        start = 8;
-//                        end = Math.min(18, size);
-//                    } else if (showShanghan == AppConst.Show_Shanghan_AllSongBan) {
-//                        end = Math.min(26, size);
-//                    }
-//                } else if (showJinkui == AppConst.Show_Jinkui_Default) {
-//                    if (showShanghan == AppConst.Show_Shanghan_398) {
-//                        start = 8;
-//                    }
-//                }
                 if (!fragmentSetting.isSong_JinKui()) {
                     if (!fragmentSetting.isSong_ShangHan()) {
                         start = 8;
@@ -298,14 +282,14 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             }
         });
 
-        //宋版显示修改通知
-        singleDataMap.get(bookId).setOnContentShowStatusNotification(new SingletonNetData.OnContentShowStatusNotification() {
-            @Override
-            public void contentShowStatusNotification(int status) {
-                //刷新数据显示
-                reListAdapter();
-            }
-        });
+//        //宋版显示修改通知
+//        singleDataMap.get(bookId).setOnContentShowStatusNotification(new SingletonNetData.OnContentShowStatusNotification() {
+//            @Override
+//            public void contentShowStatusNotification(int status) {
+//                //刷新数据显示
+//                reListAdapter();
+//            }
+//        });
     }
     /**
      * 获取搜索数据
@@ -401,7 +385,6 @@ public void onDestroy() {
     if (singleDataMap != null && singleDataMap.containsKey(AppConst.ShangHanNo)) {
          SingletonNetData  singleData = singleDataMap.get(AppConst.ShangHanNo);
         if (singleData != null) {
-            singleData.setOnContentShowStatusNotification(null);
             singleData.setOnContentUpdateListener(null);
         }
     }

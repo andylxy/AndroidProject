@@ -49,6 +49,7 @@ ext {
                 HOST_URL = "http://192.168.2.210:8991/"
             } else {
                 HOST_URL = "http://192.168.2.210:8991/"
+               // HOST_URL = "http://192.168.2.158:8991/"
             }
             break
         case SERVER_TYPE_PRODUCT:

@@ -20,14 +20,19 @@ import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
+import run.yigou.gxzy.utils.AESUtil;
 
+import com.github.gzuliyujiang.rsautils.AESUtils;
+import com.github.gzuliyujiang.rsautils.RC4Utils;
 import com.hjq.base.BaseAdapter;
 import com.hjq.base.BaseDialog;
+import com.hjq.http.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +55,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
 
     // 单例模式，确保实例的唯一性
     private static volatile BookCollectCaseFragment instance;
+
     // 私有构造函数，防止外部直接实例化
     private BookCollectCaseFragment() {
         try {
@@ -60,6 +66,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
             throw new RuntimeException("Failed to create BookCollectCaseFragment instance", e);
         }
     }
+
     public static synchronized BookCollectCaseFragment newInstance() {
         if (instance == null) {
             instance = new BookCollectCaseFragment();
@@ -87,9 +94,17 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
 
     }
 
+
     @SingleClick
     @Override
     public void onClick(View view) {
+
+//        String data = "你好";
+//        String password = "1qaz2wsx3edc4rfv";
+//        EasyLog.print("明文密码：" + password);
+//        String encryptedData = RC4Utils.encryptToBase64(data.getBytes(CHARSET), password);
+//        EasyLog.print("RC4加密：" + encryptedData);
+
         int index = 1;
         // HomeActivity.start(getContext());
         HomeActivity.mHomeActivity.switchFragment(index);
@@ -99,7 +114,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     @Override
     public void onDestroy() {
         super.onDestroy();
-        instance=null;
+        instance = null;
     }
 
     @Override

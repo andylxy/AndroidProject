@@ -64,6 +64,10 @@ public abstract class BaseService<T, TDao extends AbstractDao<T, ?>> {
             daoConn.delete(entity);
     }
 
+    public void deleteAll() {
+
+        daoConn.deleteAll();
+    }
     /**
      * 返回所有记录
      *

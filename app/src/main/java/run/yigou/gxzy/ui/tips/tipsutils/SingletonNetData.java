@@ -145,37 +145,37 @@ public class SingletonNetData {
     }
 
 
-    private OnContentGetHttpDataUpdateStatus mNotification;
+//    private OnContentGetHttpDataUpdateStatus mNotification;
+//
+//    public interface OnContentGetHttpDataUpdateStatus {
+//        void onContentUpdateHttpDataStatus(boolean status);
+//    }
+//
+//    public void setOnContentUpdateHttpDataNotification(OnContentGetHttpDataUpdateStatus mOnUpdateListener) {
+//        this.mNotification = mOnUpdateListener;
+//    }
+//
+//    public void showUpdateHttpDataNotification(boolean status) {
+//        if (mNotification != null)
+//            mNotification.onContentUpdateHttpDataStatus(status);
+//
+//    }
 
-    public interface OnContentGetHttpDataUpdateStatus {
-        void onContentUpdateHttpDataStatus(boolean status);
-    }
 
-    public void setOnContentUpdateHttpDataNotification(OnContentGetHttpDataUpdateStatus mOnUpdateListener) {
-        this.mNotification = mOnUpdateListener;
-    }
-
-    public void showUpdateHttpDataNotification(boolean status) {
-        if (mNotification != null)
-            mNotification.onContentUpdateHttpDataStatus(status);
-
-    }
-
-
-    private OnContentShowStatusNotification mOnContentShowStatusNotification;
-
-    public interface OnContentShowStatusNotification {
-        void contentShowStatusNotification(int status);
-    }
-
-    public void setOnContentShowStatusNotification(OnContentShowStatusNotification mStatusNotification) {
-        this.mOnContentShowStatusNotification = mStatusNotification;
-    }
-
-    public void shanghanShowUpdateNotification() {
-        if (mOnContentShowStatusNotification != null)
-            mOnContentShowStatusNotification.contentShowStatusNotification(1);
-
-    }
+//    private OnContentShowStatusNotification mOnContentShowStatusNotification;
+//
+//    public interface OnContentShowStatusNotification {
+//        void contentShowStatusNotification(int status);
+//    }
+//
+//    public void setOnContentShowStatusNotification(OnContentShowStatusNotification mStatusNotification) {
+//        this.mOnContentShowStatusNotification = mStatusNotification;
+//    }
+//
+//    public void shanghanShowUpdateNotification() {
+//        if (mOnContentShowStatusNotification != null)
+//            mOnContentShowStatusNotification.contentShowStatusNotification(1);
+//
+//    }
 
 }

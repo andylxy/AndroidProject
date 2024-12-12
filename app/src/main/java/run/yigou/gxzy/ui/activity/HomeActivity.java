@@ -68,8 +68,7 @@ public final class HomeActivity extends AppActivity
         return R.layout.home_activity;
     }
 
-    private NavigationAdapter.MenuItem msgMenuItem;
-
+ //   private NavigationAdapter.MenuItem msgMenuItem;
     @Override
     protected void initView() {
         mViewPager = findViewById(R.id.vp_home_pager);
@@ -80,14 +79,12 @@ public final class HomeActivity extends AppActivity
                 ContextCompat.getDrawable(this, R.drawable.home_home_selector)));
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_found),
                 ContextCompat.getDrawable(this, R.drawable.home_found_selector)));
-
-        msgMenuItem = new NavigationAdapter.MenuItem(getString(R.string.home_nav_message),
-                ContextCompat.getDrawable(this, R.drawable.home_message_selector));
-
+//        msgMenuItem = new NavigationAdapter.MenuItem(getString(R.string.home_nav_message),
+//                ContextCompat.getDrawable(this, R.drawable.home_message_selector));
         //开放全部功能
         if (AppApplication.application.global_openness) {
-            mNavigationAdapter.addItem(msgMenuItem);
-
+            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_message),
+                    ContextCompat.getDrawable(this, R.drawable.home_message_selector)));
         }
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_me),
                 ContextCompat.getDrawable(this, R.drawable.home_me_selector)));

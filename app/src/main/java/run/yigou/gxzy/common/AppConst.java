@@ -44,4 +44,17 @@ public class AppConst {
 
 
     public static final String Key_Window_Tips = "功能暂时未实现,敬请等待";
+
+    /**
+     *  匿名用户token
+     */
+    public static final String Key_User_Token = "E6D90DDBC70C4F4EA3C312B6FCB473C8";
+    public static final String Key_User_Name = "AuthorId";
+    /**
+     *  Rc4加密密钥
+     */
+    public static String rc4_SecretKey="C5ABA9E202D94C13A3CB66002BF77FAF";
+
+
+
 }

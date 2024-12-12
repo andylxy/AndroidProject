@@ -1,6 +1,5 @@
 package run.yigou.gxzy.ui.activity;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -35,6 +34,8 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
     protected int getLayoutId() {
         return R.layout.tips_fragment_tab_net_list;
     }
+
+
 
     @Override
     protected void initView() {
@@ -85,9 +86,6 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
         mPagerAdapter.addFragment(TipsSettingFragment .newInstance(bookArgs));
         mViewPager.setAdapter(mPagerAdapter);
         onNewIntent(getIntent());
-
-
-
     }
     @Override
     protected void onNewIntent(Intent intent) {
@@ -150,8 +148,11 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
     protected void onDestroy() {
         super.onDestroy();
         mViewPager.setAdapter(null);
+        mViewPager=null;
         mNavigationView.setAdapter(null);
+        mNavigationView=null;
         mNavigationAdapter.setOnNavigationListener(null);
+        mNavigationAdapter = null;
     }
 
 }

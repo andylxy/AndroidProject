@@ -327,7 +327,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             initializeAdapter();
             setHeaderClickListener();
             setJumpSpecifiedItemListener();
-            setHttpUpdateStatusNotification();
+            //setHttpUpdateStatusNotification();
             rvList.setAdapter(adapter);
             refreshData();
         } catch (Exception e) {
@@ -353,42 +353,46 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         }
     }
 
+    SingletonNetData.OnContentUpdateListener contentUpdateListener;
 
     private void setShanghanContentUpdateListener() {
-        SingletonNetData.OnContentUpdateListener contentUpdateListener = new SingletonNetData.OnContentUpdateListener() {
-            @Override
-            public ArrayList<HH2SectionData> contentDateUpdate(ArrayList<HH2SectionData> contentList) {
-                if (contentList == null || contentList.isEmpty()) {
-                    return new ArrayList<>();
-                }
 
-                int size = contentList.size();
+        if (contentUpdateListener == null) {
+            contentUpdateListener = new SingletonNetData.OnContentUpdateListener() {
+                @Override
+                public ArrayList<HH2SectionData> contentDateUpdate(ArrayList<HH2SectionData> contentList) {
+                    if (contentList == null || contentList.isEmpty()) {
+                        return new ArrayList<>();
+                    }
 
-                int start = 0;
-                int end = size;
+                    int size = contentList.size();
+
+                    int start = 0;
+                    int end = size;
 
 
-                if (!AppApplication.getApplication().fragmentSetting.isSong_JinKui()) {
-                    if (!AppApplication.getApplication().fragmentSetting.isSong_ShangHan()) {
-                        start = 8;
-                        end = Math.min(18, size);
+                    if (!AppApplication.getApplication().fragmentSetting.isSong_JinKui()) {
+                        if (!AppApplication.getApplication().fragmentSetting.isSong_ShangHan()) {
+                            start = 8;
+                            end = Math.min(18, size);
+                        } else {
+                            end = Math.min(26, size);
+                        }
                     } else {
-                        end = Math.min(26, size);
+                        if (!AppApplication.getApplication().fragmentSetting.isSong_ShangHan()) {
+                            start = 8;
+                        }
                     }
-                } else {
-                    if (!AppApplication.getApplication().fragmentSetting.isSong_ShangHan()) {
-                        start = 8;
-                    }
-                }
 
-                if (start < size ) {
-                    return new ArrayList<>(contentList.subList(start, end));
-                } else {
-                    return contentList;
+                    if (start < size) {
+                        return new ArrayList<>(contentList.subList(start, end));
+                    } else {
+                        return contentList;
+                    }
                 }
-            }
-        };
-        singletonNetData.setOnContentUpdateListener(contentUpdateListener);
+            };
+            singletonNetData.setOnContentUpdateListener(contentUpdateListener);
+        }
     }
 
     @Subscribe(priority = 1)
@@ -402,7 +406,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             refreshData();
             // Fragment 处理返回键动作,是否保存阅读
             setBackPressedCallback();
-           // EasyLog.print("TipsBookNetReadFragment onEvent", "onEvent");
+            // EasyLog.print("TipsBookNetReadFragment onEvent", "onEvent");
 
         });
     }
@@ -442,9 +446,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         };
         adapter.setOnHeaderClickListener(headerClickListener);
     }
-
+    ExpandableAdapter.OnJumpSpecifiedItemListener onJumpSpecifiedItemListener;
     private void setJumpSpecifiedItemListener() {
-        ExpandableAdapter.OnJumpSpecifiedItemListener onJumpSpecifiedItemListener = new ExpandableAdapter.OnJumpSpecifiedItemListener() {
+        if (onJumpSpecifiedItemListener ==null){
+            onJumpSpecifiedItemListener = new ExpandableAdapter.OnJumpSpecifiedItemListener() {
             @Override
             public void onJumpSpecifiedItem(int groupPosition, int childPosition) {
                 clearEditText.setText("");
@@ -453,28 +458,28 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 adapter.expandGroup(groupPosition, true);
             }
         };
-        adapter.setOnJumpSpecifiedItemListener(onJumpSpecifiedItemListener);
+        adapter.setOnJumpSpecifiedItemListener(onJumpSpecifiedItemListener);}
     }
 
-    /**
-     * 设置更新数据监听
-     */
-    private void setHttpUpdateStatusNotification() {
-        SingletonNetData.OnContentGetHttpDataUpdateStatus httpDataStatusNotification = new SingletonNetData.OnContentGetHttpDataUpdateStatus() {
-            /**
-             * @param status
-             */
-            @Override
-            public void onContentUpdateHttpDataStatus(boolean status) {
-                if (status) {
-                    // 刷新数据显示
-                    refreshData();
-                }
-            }
-
-        };
-        singletonNetData.setOnContentUpdateHttpDataNotification(httpDataStatusNotification);
-    }
+//    /**
+//     * 设置更新数据监听
+//     */
+//    private void setHttpUpdateStatusNotification() {
+//        SingletonNetData.OnContentGetHttpDataUpdateStatus httpDataStatusNotification = new SingletonNetData.OnContentGetHttpDataUpdateStatus() {
+//            /**
+//             * @param status
+//             */
+//            @Override
+//            public void onContentUpdateHttpDataStatus(boolean status) {
+//                if (status) {
+//                    // 刷新数据显示
+//                    refreshData();
+//                }
+//            }
+//
+//        };
+//        singletonNetData.setOnContentUpdateHttpDataNotification(httpDataStatusNotification);
+//    }
 
     private void refreshData() {
         reListAdapter(true, false);
@@ -491,15 +496,17 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         super.onDestroy();
         adapter.setOnHeaderClickListener(null);
         singletonNetData.setOnContentUpdateListener(null);
-        singletonNetData.setOnContentShowStatusNotification(null);
+        //singletonNetData.setOnContentShowStatusNotification(null);
         singletonNetData.setOnContentUpdateListener(null);
         adapter.setOnJumpSpecifiedItemListener(null);
-        singletonNetData.setOnContentUpdateHttpDataNotification(null);
+        //singletonNetData.setOnContentUpdateHttpDataNotification(null);
         if (rvList != null) {
             rvList.setAdapter(null);
             rvList.setLayoutManager(null);
             rvList.removeItemDecorationAt(0);
         }
+        contentUpdateListener= null;
+        onJumpSpecifiedItemListener = null;
         singletonNetData = null;
         if (onBackPressedCallback != null) {
             onBackPressedCallback.remove();

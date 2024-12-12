@@ -1,5 +1,9 @@
 <resources>
-    <string name="app_name">知然笔记</string>
+    <string name="app_name">桂版。伤寒论查阅</string>
+    <string name="app_name_debug">桂版。伤寒论查阅 Debug 版</string>
+    <string name="app_name_preview">桂版。伤寒论查阅 Preview 版</string>
+<!--    <string name="app_name">知然中医查询</string>-->
+
 
     <!-- 通用的 -->
     <string name="common_loading">加载中&#8230;</string>

@@ -59,7 +59,7 @@ android {
             signingConfig signingConfigs.config
             // 添加清单占位符
             addManifestPlaceholders([
-                    'app_name'    :    '知然笔记 Debug 版'
+                    'app_name'    :    '@string/app_name_debug'
             ])
             // 调试模式下只保留一种架构的 so 库，提升打包速度
             ndk {
@@ -72,7 +72,7 @@ android {
             applicationIdSuffix ''
             // 添加清单占位符
             addManifestPlaceholders([
-                    'app_name'    :    '知然笔记 Preview 版'
+                    'app_name'    :   '@string/app_name_preview'
             ])
         }
 
@@ -145,6 +145,9 @@ dependencies {
     implementation project(':library:umeng')
     // 轻量事件框架：https://github.com/LucasXu01/XBus
     implementation project(':library:xbus')
+
+    //Android平台通用的RSA算法工具类及其例子 https://github.com/gzu-liyujiang/RSAUtils
+    implementation 'com.github.gzu-liyujiang:RSAUtils:2.0.0'
 
     //安卓设备唯一标识解决方案 https://github.com/gzu-liyujiang/Android_CN_OAID
     //implementation 'com.github.gzu-liyujiang:Android_CN_OAID:4.2.5'
