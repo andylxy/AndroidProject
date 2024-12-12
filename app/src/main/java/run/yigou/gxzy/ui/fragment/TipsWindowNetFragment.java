@@ -185,7 +185,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                             //保存书籍内容
                             ThreadUtil.runInBackground(() -> {
                                 //加载书本内容
-                                mLoading =  ConvertEntity.getBookDetailList(singletonNetData.getContent(), data.getData(), bookId);
+                                mLoading =  ConvertEntity.getBookDetailList( data.getData(), bookId);
                                //通知数据更新完成
                                 //2024.11.15 取消息通知,后续优化手动更新
                                //  post(() -> {

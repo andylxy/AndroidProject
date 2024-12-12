@@ -5,6 +5,7 @@ import android.database.Cursor;
 import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.database.Database;
 
+import org.greenrobot.greendao.query.DeleteQuery;
 import org.greenrobot.greendao.query.QueryBuilder;
 import org.greenrobot.greendao.query.WhereCondition;
 
@@ -63,7 +64,18 @@ public abstract class BaseService<T, TDao extends AbstractDao<T, ?>> {
         if (entity!=null)
             daoConn.delete(entity);
     }
+    public void deleteAll(WhereCondition cond, WhereCondition... condMore) {
 
+       // DaoSession daoSession = ((AserbaoApplication) getApplication()).getDaoSession();
+       // QueryBuilder<Student> where = daoSession.queryBuilder(Student.class).where(StudentDao.Properties.Id.gt(5));
+      //  DeleteQuery<Student> deleteQuery = where.buildDelete();
+      //  deleteQuery.executeDeleteWithoutDetachingEntities();
+
+        QueryBuilder<T> where=  daoConn.queryBuilder().where(cond, condMore);
+        DeleteQuery<T> deleteQuery = where.buildDelete();
+        deleteQuery.executeDeleteWithoutDetachingEntities();
+
+    }
     public void deleteAll() {
 
         daoConn.deleteAll();

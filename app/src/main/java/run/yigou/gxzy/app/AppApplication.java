@@ -86,7 +86,7 @@ public final class AppApplication extends Application {
      * 是否打开所有页面功能
      */
 
-    public boolean global_openness = false;
+    public boolean global_openness = true;
 
 
     //登陆信息
@@ -111,7 +111,8 @@ public final class AppApplication extends Application {
         initUserLogin();
         fragmentSetting = ManagerSetting.getFragmentSetting();
         //构造书籍数据/实现本地数据搜索
-        ThreadUtil.runInBackground(ConvertEntity::tipsSingleDataInit);
+        ///ThreadUtil.runInBackground(ConvertEntity::tipsSingleDataInit);
+
         registryByReflect();
         initSdk(this);
     }

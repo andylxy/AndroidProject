@@ -386,6 +386,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     @Override
                     public void onFail(Exception e) {
                         super.onFail(e);
+                        //加载本地数据
+                        ConvertEntity.tipsSingleDataInit();
                         Map<Integer, TabNav> tabNavMap = TipsSingleData.getInstance().getNavTabMap();
                         if (tabNavMap != null && !tabNavMap.isEmpty()) {
                             // 遍历 Map
