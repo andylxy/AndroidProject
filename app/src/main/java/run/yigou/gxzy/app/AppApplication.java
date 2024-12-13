@@ -31,11 +31,8 @@ import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.FragmentSetting;
 import run.yigou.gxzy.common.ManagerSetting;
-import run.yigou.gxzy.greendao.entity.TabNav;
-import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.entity.UserInfo;
 import run.yigou.gxzy.greendao.service.UserInfoService;
-import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.RequestHandler;
@@ -57,20 +54,10 @@ import com.hjq.http.EasyLog;
 import com.hjq.toast.ToastUtils;
 import com.lucas.xbus.XEventBus;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
-import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.mmkv.MMKV;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import okhttp3.OkHttpClient;
-import run.yigou.gxzy.ui.tips.DataBeans.Fang;
-import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
-import run.yigou.gxzy.ui.tips.DataBeans.Yao;
-import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
-import run.yigou.gxzy.utils.ThreadUtil;
 import timber.log.Timber;
 
 /**
@@ -112,7 +99,6 @@ public final class AppApplication extends Application {
         fragmentSetting = ManagerSetting.getFragmentSetting();
         //构造书籍数据/实现本地数据搜索
         ///ThreadUtil.runInBackground(ConvertEntity::tipsSingleDataInit);
-
         registryByReflect();
         initSdk(this);
     }

@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
@@ -111,6 +112,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
     // 单例模式，确保实例的唯一性
     private static volatile HomeFragment instance;
+
     // 私有构造函数，防止外部直接实例化
     private HomeFragment() {
         try {
@@ -262,6 +264,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
     @Override
     protected void initData() {
+        //加载本地数据
+        ConvertEntity.tipsSingleDataInit();
         mTabNavService = DbService.getInstance().mTabNavService;
         getBookInfoList();
         mTabAdapter.setOnTabListener(this);
@@ -287,7 +291,6 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     }
 
 
-
     /**
      * 初始化历史列表
      */
@@ -308,7 +311,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     private void search() {
 
         //开放全部功能
-        if(!AppApplication.application.global_openness){
+        if (!AppApplication.application.global_openness) {
             toast(AppConst.Key_Window_Tips);
             return;
         }
@@ -365,29 +368,37 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     @Override
                     public void onSucceed(HttpData<List<TabNav>> data) {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
-                            bookNavList = data.getData();
-                            for (TabNav nav : bookNavList) {
-                                //内容列表存在才添加
+                            if (mTabNavService == null || mPagerAdapter == null || mTabAdapter == null) {
+                                throw new IllegalStateException("mTabNavService, mPagerAdapter, or mTabAdapter is not initialized");
+                            }
+
+                            List<TabNav> newBookNavList = new CopyOnWriteArrayList<>(data.getData());
+                            for (TabNav nav : newBookNavList) {
+                                // 内容列表存在才添加
                                 if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
                                     String tabNavId = mTabNavService.getUUID();
                                     mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
                                     mTabAdapter.addItem(nav.getName());
                                     ThreadUtil.runInBackground(() -> {
-                                        //保存到数据库
-                                       ConvertEntity.saveTabNvaInDb(nav, tabNavId);
+                                        try {
+                                            // 保存到数据库
+                                            ConvertEntity.saveTabNvaInDb(nav, tabNavId);
+                                        } catch (Exception e) {
+                                           EasyLog.print("onSucceed", "Failed to save TabNav to database"+ e.getMessage());
+                                        }
                                     });
                                 }
                             }
-                        } else
+                            bookNavList = newBookNavList;
+                        } else {
                             bookNavList = new ArrayList<>();
-
+                        }
                     }
+
 
                     @Override
                     public void onFail(Exception e) {
                         super.onFail(e);
-                        //加载本地数据
-                        ConvertEntity.tipsSingleDataInit();
                         Map<Integer, TabNav> tabNavMap = TipsSingleData.getInstance().getNavTabMap();
                         if (tabNavMap != null && !tabNavMap.isEmpty()) {
                             // 遍历 Map
@@ -423,6 +434,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             });
                         }
                     }
+
                     @Override
                     public void onFail(Exception e) {
                         super.onFail(e);
@@ -447,7 +459,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                      //保存内容
                                      ThreadUtil.runInBackground(() -> {
                                          ConvertEntity.saveMingCiContent(detailList);
-                                    });
+                                     });
                                  }
                              }
 

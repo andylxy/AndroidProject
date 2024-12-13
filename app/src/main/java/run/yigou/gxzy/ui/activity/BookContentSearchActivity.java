@@ -133,6 +133,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                     llHistoryView.setVisibility(View.GONE);
                     searchKeyTextList.clear();
                     lvSearchBooksList.setVisibility(View.GONE);
+                    mLvSearchBooks.setVisibility(View.GONE);
+                    mSearchBookDetailAdapter.setSearch(false);
                 }
 
             }
@@ -210,6 +212,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      */
     private void initSearchList() {
         mSearchBookDetailAdapter = new ExpandableAdapter(getActivity());
+        mSearchBookDetailAdapter.setSearch(true);
         lvSearchBooksList.setAdapter(mSearchBookDetailAdapter);
         layoutManager = new LinearLayoutManager(getContext());
         lvSearchBooksList.setLayoutManager(layoutManager);
@@ -233,6 +236,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener(new ExpandableAdapter.OnJumpSpecifiedItemListener() {
             @Override
             public void onJumpSpecifiedItem(int groupPosition, int childPosition) {
+                mSearchBookDetailAdapter.setSearch(false);
                 reListAdapter();
                 layoutManager.scrollToPositionWithOffset(groupPosition, 0);
                 mSearchBookDetailAdapter.expandGroup(groupPosition, true);
@@ -379,8 +383,10 @@ public void onDestroy() {
 
     // 空指针检查
     if (mSearchBookDetailAdapter != null) {
+        mSearchBookDetailAdapter.setSearch(false);
         mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener(null);
     }
+
 
     if (singleDataMap != null && singleDataMap.containsKey(AppConst.ShangHanNo)) {
          SingletonNetData  singleData = singleDataMap.get(AppConst.ShangHanNo);
@@ -389,7 +395,5 @@ public void onDestroy() {
         }
     }
 
-    // 日志记录
-    EasyLog.print("YourTag", "onDestroy: Released all listeners and resources");
 }
 }

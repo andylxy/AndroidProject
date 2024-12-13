@@ -21,13 +21,19 @@ import android.widget.TextView;
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import com.hjq.http.EasyLog;
+import com.lucas.xbus.XEventBus;
 
+import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
 import run.yigou.gxzy.action.ToastAction;
 
 import java.util.ArrayList;
 
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.ui.fragment.TipsBookNetReadFragment;
+import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
@@ -59,6 +65,13 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements Toa
 
     public ExpandableAdapter(Context context) {
         super(context);
+        // 注册事件
+       // XEventBus.getDefault().register(ExpandableAdapter.this);
+    }
+
+    public void onDestroy() {
+        // 注销事件
+        //XEventBus.getDefault().unregister(ExpandableAdapter.this);
     }
 
     @Override
@@ -154,7 +167,7 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements Toa
         section_text.setOnClickListener(v -> {
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
-            EasyLog.print("条文点击: " + v.getTag() + ", 实体信息: " + entity);
+            // EasyLog.print("条文点击: " + v.getTag() + ", 实体信息: " + entity);
 
             toggleVisibility(section_note, entity.getAttributed_child_section_note());
         });
@@ -181,8 +194,8 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements Toa
                 return;
             }
             if (isVideoAvailable) {
-               isSectionvideo = false;
-            }else {
+                isSectionvideo = false;
+            } else {
                 section_note.setVisibility(View.GONE);
                 isSectionvideo = true;
                 return;
@@ -197,27 +210,39 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements Toa
             Boolean isClick = (Boolean) v.getTag();
             if (isClick != null && isClick) return;
             // 简化逻辑
-            if (section_video.getVisibility() == View.VISIBLE ) {
+            if (section_video.getVisibility() == View.VISIBLE) {
                 section_video.setVisibility(View.GONE);
-                isSectionvideo= false;
+                isSectionvideo = false;
                 return;
             }
             toggleVisibility(section_video, entity.getAttributed_child_section_video());
         });
 
     }
- boolean isSectionvideo = true;
+
+    boolean isSectionvideo = true;
+
+
+    public boolean getSearch() {
+        return isSearch;
+    }
+
+    public void setSearch(boolean search) {
+        isSearch = search;
+    }
+
+    private boolean isSearch = false;
 
     private void toggleVisibility(TextView textView, SpannableStringBuilder content) {
         // 增加对content的空值检查
-        if (content == null||content.length()==0) {
+        if (content == null || content.length() == 0) {
             return;
         }
 
         String contentString = content.toString();
 
         // 简化逻辑
-        if (textView.getVisibility() == View.VISIBLE ) {
+        if (textView.getVisibility() == View.VISIBLE) {
             textView.setVisibility(View.GONE);
         } else if (!contentString.isEmpty()) { // 判断是否为空字符串
             textView.setVisibility(View.VISIBLE);
@@ -227,8 +252,14 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements Toa
 
     void setLongClickForView(TextView view, SpannableStringBuilder spannableString, int groupPosition) {
         view.setOnLongClickListener(v -> {
+            int type = 0;
+            if (getSearch()) {
 
-            TipsNetHelper.showListDialog(v.getContext())
+                type = AppConst.noFooter_Type;
+            } else {
+                type = AppConst.data_Type;
+            }
+            TipsNetHelper.showListDialog(v.getContext(), type)
                     .setListener((dialog, position, string) -> {
                         Context context = v.getContext();
                         if (string.equals("拷贝内容")) {
@@ -255,6 +286,17 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements Toa
                             if (mOnJumpSpecifiedItemListener != null && groupPosition > 0) {
                                 mOnJumpSpecifiedItemListener.onJumpSpecifiedItem(groupPosition, -1);
                             }
+                        } else if (string.equals("重新下载全部数据")) {
+                            //通知显示已经变更
+                            ShowUpdateNotificationEvent showUpdateNotification = TipsSingleData.getInstance().getCurSingletonData().getShowUpdateNotification();
+                            if (!showUpdateNotification.isUpdateNotification()) {
+                                // 标记正在重新下载数据
+                                showUpdateNotification.setUpdateNotification(true);
+                                XEventBus.getDefault().post(showUpdateNotification);
+                            } else {
+                                toast("正在重新下载数据!!!!");
+                            }
+
                         }
                     })
                     .show();

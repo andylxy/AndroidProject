@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
+
 
 public class SingletonNetData {
     private static SingletonNetData data;
@@ -16,6 +18,7 @@ public class SingletonNetData {
     private ArrayList<HH2SectionData> fang;
     private int bookId;
 
+    private final ShowUpdateNotificationEvent mShowUpdateNotification = new ShowUpdateNotificationEvent();
     private static volatile SingletonNetData instance;
 
     public List<String> getAllFang() {
@@ -27,6 +30,11 @@ public class SingletonNetData {
     public Map<String, String> getYaoAliasDict() {
         return yaoAliasDict;
     }
+
+    public ShowUpdateNotificationEvent getShowUpdateNotification() {
+        return mShowUpdateNotification;
+    }
+
 
     public void setYaoAliasDict(Map<String, String> yaoAliasDict) {
         if (yaoAliasDict != null)

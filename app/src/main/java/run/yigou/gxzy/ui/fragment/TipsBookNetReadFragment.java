@@ -37,6 +37,7 @@ import com.lucas.xbus.XEventBus;
 
 import java.util.ArrayList;
 
+import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
 import run.yigou.gxzy.EventBus.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
@@ -68,6 +69,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     private ClearEditText clearEditText;
     private ExpandableAdapter adapter;
     private BookArgs bookArgs;
+    private boolean isBtnSearch;
     /**
      *
      */
@@ -171,7 +173,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 if (charSequenceIsEmpty(text)) {
                     reListAdapter(true, false);
                     numTips.setText("");
+                    adapter.setSearch(false);
                 } else {
+                    adapter.setSearch(true);
                     setSearchText(text);
                 }
             };
@@ -429,7 +433,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     }
 
     private void setHeaderClickListener() {
-        GroupedRecyclerViewAdapter.OnHeaderClickListener headerClickListener = new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
+        adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
             @Override
             public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
                                       int groupPosition) {
@@ -443,22 +447,61 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 if (isShowBookCollect)
                     currentIndex = groupPosition;
             }
-        };
-        adapter.setOnHeaderClickListener(headerClickListener);
-    }
-    ExpandableAdapter.OnJumpSpecifiedItemListener onJumpSpecifiedItemListener;
-    private void setJumpSpecifiedItemListener() {
-        if (onJumpSpecifiedItemListener ==null){
-            onJumpSpecifiedItemListener = new ExpandableAdapter.OnJumpSpecifiedItemListener() {
+
+
+        });
+        adapter.setOnHeaderLongClickListener(new GroupedRecyclerViewAdapter.OnHeaderLongClickListener() {
+
+            /**
+             * @param adapter2
+             * @param holder
+             * @param groupPosition
+             * @return
+             */
             @Override
-            public void onJumpSpecifiedItem(int groupPosition, int childPosition) {
-                clearEditText.setText("");
-                numTips.setText("");
-                layoutManager.scrollToPositionWithOffset(groupPosition, 0);
-                adapter.expandGroup(groupPosition, true);
+            public boolean onHeaderLongClick(GroupedRecyclerViewAdapter adapter2, BaseViewHolder holder, int groupPosition) {
+                // 搜索状态不响应长按
+                if(adapter.getSearch()) return true;
+                TipsNetHelper.showListDialog(getContext(), AppConst.reData_Type)
+                        .setListener((dialog, position, string) -> {
+                            if (string.equals("重新下载全部数据")) {
+                                //通知显示已经变更
+                                ShowUpdateNotificationEvent showUpdateNotification = singletonNetData.getShowUpdateNotification();
+                                if (!showUpdateNotification.isUpdateNotification()) {
+                                    // 标记正在重新下载数据
+                                    showUpdateNotification.setUpdateNotification(true);
+                                    XEventBus.getDefault().post(showUpdateNotification);
+                                } else {
+                                    toast("正在重新下载数据!!!!");
+                                }
+                            }
+
+                        })
+                        .show();
+
+                return true;
             }
-        };
-        adapter.setOnJumpSpecifiedItemListener(onJumpSpecifiedItemListener);}
+        });
+    }
+
+    ExpandableAdapter.OnJumpSpecifiedItemListener onJumpSpecifiedItemListener;
+
+    private void setJumpSpecifiedItemListener() {
+        if (onJumpSpecifiedItemListener == null) {
+            onJumpSpecifiedItemListener = new ExpandableAdapter.OnJumpSpecifiedItemListener() {
+                @Override
+                public void onJumpSpecifiedItem(int groupPosition, int childPosition) {
+                    clearEditText.setText("");
+                    numTips.setText("");
+                    postDelayed(()->{
+                        layoutManager.scrollToPositionWithOffset(groupPosition, 0);
+                        adapter.expandGroup(groupPosition, true);
+                    },300);
+
+                }
+            };
+            adapter.setOnJumpSpecifiedItemListener(onJumpSpecifiedItemListener);
+        }
     }
 
 //    /**
@@ -505,12 +548,14 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             rvList.setLayoutManager(null);
             rvList.removeItemDecorationAt(0);
         }
-        contentUpdateListener= null;
+        contentUpdateListener = null;
         onJumpSpecifiedItemListener = null;
         singletonNetData = null;
         if (onBackPressedCallback != null) {
             onBackPressedCallback.remove();
         }
+        // 注销适配器事件
+        adapter.onDestroy();
         // 注销事件
         XEventBus.getDefault().unregister(TipsBookNetReadFragment.this);
     }
@@ -523,7 +568,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
             if (this.searchText == null) {
                 reListAdapter(true, false);
-            } else setSearchText(this.searchText);
+                adapter.setSearch(false);
+            } else {
+                setSearchText(this.searchText);
+                adapter.setSearch(true);
+            }
         }
     }
 

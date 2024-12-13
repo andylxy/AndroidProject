@@ -232,7 +232,7 @@ public class NoFooterAdapter extends GroupedListAdapter {
     void setLongClickForView(TextView view, SpannableStringBuilder spannableString) {
         view.setOnLongClickListener(v -> {
 
-            TipsNetHelper.showListDialog(v.getContext())
+            TipsNetHelper.showListDialog(v.getContext(),AppConst.noFooter_Type)
                     .setListener((dialog, position, string) -> {
                         // 增加空值检查
                         Context context = v.getContext();

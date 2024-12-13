@@ -9,8 +9,7 @@ public class ShowUpdateNotificationEvent {
         return updateNotification;
     }
 
-    public ShowUpdateNotificationEvent setUpdateNotification(boolean flag) {
+    public void setUpdateNotification(boolean flag) {
         this.updateNotification = flag;
-        return this;
     }
 }

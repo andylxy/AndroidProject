@@ -15,6 +15,8 @@ import com.hjq.http.EasyHttp;
 import com.hjq.http.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
+import com.lucas.annotations.Subscribe;
+import com.lucas.xbus.XEventBus;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
@@ -114,7 +117,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
         singleData = TipsSingleData.getInstance();
         // List<BookInfoNav.Bean.NavList> navList =mNavList;
         mAdapter.setData(analogData());
-
+        XEventBus.getDefault().register(TipsWindowNetFragment.this);
     }
 
 
@@ -166,6 +169,15 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
 
     }
 
+
+    @Subscribe(priority = 1)
+    public void onUpdateEvent(ShowUpdateNotificationEvent event) {
+        ThreadUtil.runOnUiThread(() -> {
+            getBookData(bookId);
+        });
+    }
+
+
     /**
      * 获取点击项的数据
      *
@@ -185,13 +197,15 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                             //保存书籍内容
                             ThreadUtil.runInBackground(() -> {
                                 //加载书本内容
-                                mLoading =  ConvertEntity.getBookDetailList( data.getData(), bookId);
-                               //通知数据更新完成
-                                //2024.11.15 取消息通知,后续优化手动更新
-                               //  post(() -> {
-                               //      singletonNetData.showUpdateHttpDataNotification(mLoading);
-                               // });
+                                mLoading = ConvertEntity.getBookDetailList(data.getData(), bookId);
+                                //通知数据更新完成
                             });
+                            ShowUpdateNotificationEvent showUpdateNotification = singletonNetData.getShowUpdateNotification();
+                            if (showUpdateNotification.isUpdateNotification()) {
+                                // 通知数据下载结束更新
+                                showUpdateNotification.setUpdateNotification(false);
+                                toast("数据已经重新下载完成,退出App重新打开!!!!");
+                            }
 
                         }
                     }
@@ -214,10 +228,10 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                     public void onSucceed(HttpData<List<Fang>> data) {
                         if (data != null && !data.getData().isEmpty()) {
                             List<Fang> detailList = data.getData();
-                           singletonNetData.setFang(new HH2SectionData(detailList, 0, fangName.toString()));
+                            singletonNetData.setFang(new HH2SectionData(detailList, 0, fangName.toString()));
                             //保存药方数据
                             ThreadUtil.runInBackground(() -> {
-                                ConvertEntity.getFangDetailList(singletonNetData.getFang().get(0),data.getData(),bookId);
+                                ConvertEntity.getFangDetailList(singletonNetData.getFang().get(0), data.getData(), bookId);
                             });
 
                         }
@@ -248,5 +262,11 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
             mAdapter.setLastPage(mAdapter.getCount() >= 100);
             mRefreshLayout.setNoMoreData(mAdapter.isLastPage());
         }, 1000);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        XEventBus.getDefault().unregister(TipsWindowNetFragment.this);
     }
 }

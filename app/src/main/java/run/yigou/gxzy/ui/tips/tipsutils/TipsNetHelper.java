@@ -605,12 +605,26 @@ public class TipsNetHelper {
 
 
     // 同时初始化数据
-    private static List<String> data = Arrays.asList("拷贝内容", "跳转到本章内容"/*, "拷贝全部结果"*/);
+    private static final List<String> reData = Collections.singletonList("重新下载全部数据"/*, "拷贝全部结果"*/);
+    private static final List<String> data = Arrays.asList("拷贝内容",  "重新下载全部数据"/*, "拷贝全部结果"*/);
+    private static final List<String> noFooterData = Arrays.asList("拷贝内容", "跳转到本章内容"/*, "拷贝全部结果"*/);
 
     // 初始化方法
-    public static MenuDialog.Builder showListDialog(Context context) {
+    public static MenuDialog.Builder showListDialog(Context context, int type) {
+        MenuDialog.Builder builder;
+        switch (type) {
+            case 3:
+                builder = new MenuDialog.Builder(context).setList(reData);
+                break;
+            case 2:
+                builder = new MenuDialog.Builder(context).setList(noFooterData);
+                break;
+            case 1:
+            default:
+                builder = new MenuDialog.Builder(context).setList(data);
+        }
 
-        return new MenuDialog.Builder(context).setList(data);
+        return builder;
 
     }
 
