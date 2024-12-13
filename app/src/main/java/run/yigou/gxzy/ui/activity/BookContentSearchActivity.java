@@ -130,7 +130,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                     search();
                 } else {
                     llClearHistory.setVisibility(View.VISIBLE);
-                    llHistoryView.setVisibility(View.GONE);
+                    llHistoryView.setVisibility(View.VISIBLE);
                     searchKeyTextList.clear();
                     lvSearchBooksList.setVisibility(View.GONE);
                     mLvSearchBooks.setVisibility(View.GONE);
