@@ -10,6 +10,7 @@
 
 package run.yigou.gxzy.ui.tips.tipsutils;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -719,6 +720,7 @@ public class TipsNetHelper {
      * @param str 药物名称，用于查询和生成相关信息。
      * @return SpannableStringBuilder 包含药物详细信息和相关方剂信息的SpannableStringBuilder对象。
      */
+    @SuppressLint("DefaultLocale")
     public static SpannableStringBuilder getSpanString(String str) {
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
 
@@ -740,7 +742,7 @@ public class TipsNetHelper {
             Yao yaoData = yaoMap.get(str);
             if (yaoData == null) {
                 // 处理 yaoData 为 null 的情况
-                return spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText("$r{药物未找到资料}"));
+                return spannableStringBuilder.append(TipsNetHelper.renderText("$r{药物未找到资料}"));
             }
 
             // 获取药物名称并查找别名
@@ -749,13 +751,15 @@ public class TipsNetHelper {
             yaoName = yaoAlias != null ? yaoAlias : yaoName;
 
             // 如果药物名称匹配，则添加其相关信息
-            if (Objects.equals(yaoName, str)) {
-                spannableStringBuilder.append((CharSequence) yaoData.getAttributedText());
+            if (!yaoName.isEmpty()) {
+                spannableStringBuilder.append(yaoData.getAttributedText());
             }
+
+
 
             // 如果没有找到相关药物，添加提示信息
             if (spannableStringBuilder.length() == 0) {
-                spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText("$r{药物未找到资料}"));
+                spannableStringBuilder.append(TipsNetHelper.renderText("$r{药物未找到资料}"));
             }
             spannableStringBuilder.append("\n\n");
         }
@@ -766,9 +770,8 @@ public class TipsNetHelper {
             SpannableStringBuilder fangBuilder = new SpannableStringBuilder();
 
             // 筛选与药物相关的方剂
-            String finalStr1 = str;
             // 假设 TipsNetHelper.filter 方法已知返回类型为 List<DataItem>
-            List<? extends DataItem> filteredFang = filterFang(sectionData.getData(), finalStr1);
+            List<? extends DataItem> filteredFang = filterFang(sectionData.getData(), str);
             String finalStr = str;
             // 对筛选结果进行排序
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -803,7 +806,7 @@ public class TipsNetHelper {
                         if (yaoName.equals(str)) {
                             matchedCount++;
                             // 添加方剂名称及其相关药物信息
-                            fangBuilder.append((CharSequence) TipsNetHelper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
+                            fangBuilder.append(TipsNetHelper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
                             break; // 匹配后退出内层循环
                         }
                     }
@@ -815,7 +818,7 @@ public class TipsNetHelper {
                 if (sectionCount > 0) {
                     spannableStringBuilder.append("\n\n"); // 分隔不同方剂
                 }
-                spannableStringBuilder.append((CharSequence) TipsNetHelper.renderText(
+                spannableStringBuilder.append(TipsNetHelper.renderText(
                         String.format("$m{%s}-$m{含“$v{%s}”凡%d方：}", sectionData.getHeader(), str, matchedCount)));
                 spannableStringBuilder.append("\n").append(fangBuilder);
                 sectionCount++;

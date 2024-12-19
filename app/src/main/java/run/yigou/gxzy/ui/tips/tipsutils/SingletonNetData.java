@@ -52,6 +52,7 @@ public class SingletonNetData {
     }
 
     public Map<String, String> getFangAliasDict() {
+        if (fangAliasDict == null) fangAliasDict = new HashMap<String, String>();
         return this.fangAliasDict;
     }
 
@@ -99,19 +100,36 @@ public class SingletonNetData {
         // 初始化并填充 allFang 列表
         this.allFang = new ArrayList<>();
         for (HH2SectionData section : this.fang) {
-            if (section != null && section.getData() != null) {
-                for (DataItem item : section.getData()) {
-                    if (item != null && item.getFangList() != null && !item.getFangList().isEmpty()) {
-                        String originalFangStr = item.getFangList().get(0);
-                        // 如果有别名映射，则替换
-                        String aliasedFangStr = this.fangAliasDict.get(originalFangStr);
-                        if (aliasedFangStr != null) {
-                            originalFangStr = aliasedFangStr;
+
+//            for (DataItem item : section.getData()) {
+//                if (item != null && item.getFangList() != null && !item.getFangList().isEmpty()) {
+//                    String originalFangStr = item.getFangList().get(0);
+//                    // 如果有别名映射，则替换
+//                    String aliasedFangStr = this.fangAliasDict.get(originalFangStr);
+//                    if (aliasedFangStr != null) {
+//                        originalFangStr = aliasedFangStr;
+//                    }
+//                    this.allFang.add(originalFangStr);
+//                }
+//            }
+
+            for (DataItem item : section.getData()) {
+                this.allFang.add(item.getName());
+                if (item.getFangList() != null && !item.getFangList().isEmpty()) {
+                    // 如果有别名映射，则替换
+
+                    for (String fangStr : item.getFangList()) {
+                        String aliasedFangStr = this.fangAliasDict.get(fangStr);
+                        if (aliasedFangStr == null) {
+                            this.fangAliasDict.put(fangStr, item.getName());
                         }
-                        this.allFang.add(originalFangStr);
                     }
+
+                    this.allFang.addAll(item.getFangList());
                 }
             }
+
+
         }
     }
 

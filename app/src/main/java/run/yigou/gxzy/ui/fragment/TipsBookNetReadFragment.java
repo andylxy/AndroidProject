@@ -144,15 +144,15 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (rvList == null) {
             throw new IllegalStateException("rvList not found");
         }
-        clearEditText = findViewById(R.id.include_tips_book_read).findViewById(R.id.searchEditText);
+        clearEditText =findViewById(R.id.searchEditText);
         if (clearEditText == null) {
             throw new IllegalStateException("clearEditText not found");
         }
-        tipsBtnSearch = findViewById(R.id.include_tips_book_read).findViewById(R.id.tips_btn_search);
+        tipsBtnSearch =findViewById(R.id.tips_btn_search);
         if (tipsBtnSearch == null) {
             throw new IllegalStateException("tipsBtnSearch not found");
         }
-        numTips = findViewById(R.id.include_tips_book_read).findViewById(R.id.numTips);
+        numTips =findViewById(R.id.numTips);
         if (numTips == null) {
             throw new IllegalStateException("numTips not found");
         }

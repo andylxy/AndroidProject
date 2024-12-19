@@ -55,10 +55,10 @@ public class TipsLittleTableViewWindow extends TipsLittleWindow {
 
 
     public void setFang(String str) {
-        String str2 = tips_single_data.getFangAliasDict().get(str);
-        if (str2 != null) {
-            str = str2;
-        }
+//        String str2 = tips_single_data.getFangAliasDict().get(str);
+//        if (str2 != null) {
+//            str = str2;
+//        }
         this.fang = str;
     }
 

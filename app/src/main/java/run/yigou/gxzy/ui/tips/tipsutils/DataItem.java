@@ -252,6 +252,7 @@ public class DataItem implements Serializable {
 
     try {
         copyIfNotNull(this.text, dataItem::setPureText);
+        copyIfNotNull(this.name, dataItem::setName);
         copyIfNotNull(this.imageUrl, dataItem::setImageUrl);
         copyIfNotNull(this.attributedText, attributedText -> dataItem.setAttributedText(new SpannableStringBuilder(attributedText)));
         copyIfNotNull(this.fangList, fangList -> dataItem.setFangList(new ArrayList<>(fangList)));

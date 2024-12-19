@@ -13,12 +13,16 @@ package run.yigou.gxzy.ui.tips.tipsutils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.hjq.http.EasyLog;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.common.AppConst;
@@ -35,11 +39,11 @@ public class TipsSingleData {
     private static volatile TipsSingleData instance;
 
 
-    private List<String> allYao;
+    private  Set<String> allYao;
     private int curBookId;
     public List<TipsLittleWindow> tipsLittleWindowStack = new ArrayList();
 
-    public List<String> getAllYao() {
+    public Set<String> getAllYao() {
         return this.allYao;
     }
 
@@ -82,7 +86,6 @@ public class TipsSingleData {
     }
 
 
-
 //    public SharedPreferences getSharedPreferences() {
 //        return AppApplication.application.getSharedPreferences(AppConst.preferenceKey, Context.MODE_PRIVATE);
 //    }
@@ -117,9 +120,9 @@ public class TipsSingleData {
 
     public void setYaoData(HH2SectionData yaoData) {
 
-        // 初始化并填充 allYao 列表
+        // 初始化并填充 allYao 集合
         if (this.allYao == null) {
-            this.allYao = new CopyOnWriteArrayList<>();
+            this.allYao = new CopyOnWriteArraySet<>();
         } else {
             this.allYao.clear();
         }
@@ -130,51 +133,39 @@ public class TipsSingleData {
             this.yaoMap.clear();
         }
 
-        if ( yaoData.getData() == null) {
+        if (yaoData.getData() == null) {
             return;
         }
 
         for (DataItem item : yaoData.getData()) {
-            List<String> yaoList = item.getYaoList();
-            if (yaoList == null || yaoList.isEmpty()) {
-                continue;
-            }
+//            List<String> yaoList =item.getYaoList() ;
+//            if (yaoList == null || yaoList.isEmpty()) {
+//                continue;
+//            }
 
-            String yaoStr = yaoList.get(0);
             // 如果有别名映射，则替换
-            String alias = this.yaoAliasDict.get(yaoStr);
-            if (alias != null) {
-                yaoStr = alias;
+            for (String aliaName : item.getYaoList()) {
+                String alia = this.getYaoAliasDict().get(aliaName);
+                if (alia != null) {
+                        EasyLog.print(alia);
+                        yaoMap.put(alia, (Yao) item);
+                        this.allYao.add(alia);
+
+                } else {
+                        EasyLog.print(aliaName);
+                        yaoMap.put(aliaName, (Yao) item);
+                        this.allYao.add(aliaName);
+
+                }
             }
 
-            yaoMap.put(yaoStr, (Yao) item);
-            this.allYao.add(yaoStr);
+
+                yaoMap.put(item.getName(), (Yao) item);
+                this.allYao.add(item.getName());
+
         }
     }
 
-//    public void setYaoData(HH2SectionData yaoData) {
-//
-//        if (yaoData == null) return;
-//        this.yaoData = yaoData;
-//        // 初始化并填充 allYao 列表
-//        if (this.allYao == null)
-//            this.allYao = new ArrayList<>();
-//        else this.allYao.clear();
-//        if (this.yaoMap == null) this.yaoMap = new HashMap<>();
-//        else
-//            this.yaoMap.clear();
-//        for (DataItem item : this.yaoData.getData()) {
-//            String str3 = item.getYaoList().get(0);
-//            // 如果有别名映射，则替换
-//            String str4 = this.yaoAliasDict.get(str3);
-//            if (str4 != null) {
-//                str3 = str4;
-//            }
-//            yaoMap.put(str3, (Yao) item);
-//            this.allYao.add(str3);
-//        }
-//
-//    }
 
     private SingletonNetData curSingletonData;
 
@@ -195,10 +186,12 @@ public class TipsSingleData {
     private Map<String, String> yaoAliasDict;
 
     public Map<String, String> getFangAliasDict() {
+        if (fangAliasDict == null) fangAliasDict = new HashMap<>();
         return fangAliasDict;
     }
 
     public Map<String, String> getYaoAliasDict() {
+        if (yaoAliasDict == null) yaoAliasDict = new HashMap<>();
         return yaoAliasDict;
     }
 
@@ -217,60 +210,65 @@ public class TipsSingleData {
     private void initAlias() {
         this.yaoAliasDict = new HashMap<String, String>() {
             {
-                put("术", "白术");
-                put("朮", "白术");
-                put("白朮", "白术");
-                put("桂", "桂枝");
-                put("桂心", "桂枝");
-                put("肉桂", "桂枝");
-                put("白芍药", "芍药");
-                put("枣", "大枣");
-                put("枣膏", "大枣");
-                put("枣肉", "大枣");
-                put("生姜汁", "生姜");
-                put("姜", "生姜");
-                put("生葛", "葛根");
-                put("生地黄", "地黄");
-                put("干地黄", "地黄");
-                put("生地", "地黄");
-                put("熟地", "地黄");
-                put("生地黄汁", "地黄");
-                put("地黄汁", "地黄");
-                put("甘遂末", "甘遂");
-                put("茵陈蒿末", "茵陈蒿");
-                put("大附子", "附子");
-                put("川乌", "乌头");
-                put("粉", "白粉");
-                put("白蜜", "蜜");
-                put("食蜜", "蜜");
-                put("杏子", "杏仁");
-                put("葶苈", "葶苈子");
-                put("香豉", "豉");
-                put("肥栀子", "栀子");
-                put("生狼牙", "狼牙");
-                put("清酒", "酒");
-                put("白酒", "酒");
-                put("艾叶", "艾");
-                put("乌扇", "射干");
-                put("代赭石", "赭石");
-                put("代赭", "赭石");
-                put("煅灶下灰", "煅灶灰");
-                put("干苏叶", "苏叶");
-                put("蛇床子仁", "蛇床子");
-                put("牡丹皮", "牡丹");
-                put("小麦汁", "小麦");
-                put("小麦粥", "小麦");
-                put("麦粥", "小麦");
-                put("大麦粥", "大麦");
-                put("大麦粥汁", "大麦");
+//                put("术", "白术");
+//                put("朮", "白术");
+//                put("白朮", "白术");
+//                put("桂", "桂枝");
+//                put("桂心", "桂枝");
+//                put("肉桂", "桂枝");
+//                put("白芍药", "芍药");
+//                put("枣", "大枣");
+//                put("枣膏", "大枣");
+//                put("枣肉", "大枣");
+//                put("生姜汁", "生姜");
+//                put("姜", "生姜");
+//                put("生葛", "葛根");
+//                put("生地黄", "地黄");
+//                put("干地黄", "地黄");
+//                put("生地", "地黄");
+//                put("熟地", "地黄");
+//                put("生地黄汁", "地黄");
+//                put("地黄汁", "地黄");
+//                put("甘遂末", "甘遂");
+//                put("茵陈蒿末", "茵陈蒿");
+//                put("大附子", "附子");
+//                put("川乌", "乌头");
+//                put("粉", "白粉");
+//                put("白蜜", "蜜");
+//                put("食蜜", "蜜");
+//                put("杏子", "杏仁");
+//                put("葶苈", "葶苈子");
+//                put("香豉", "豉");
+//                put("肥栀子", "栀子");
+//                put("生狼牙", "狼牙");
+//                put("清酒", "酒");
+//                put("白酒", "酒");
+//                put("艾叶", "艾");
+//                put("乌扇", "射干");
+//                put("代赭石", "赭石");
+//                put("代赭", "赭石");
+//                put("煅灶下灰", "煅灶灰");
+//                put("干苏叶", "苏叶");
+//                put("蛇床子仁", "蛇床子");
+//                put("牡丹皮", "牡丹");
+//                put("小麦汁", "小麦");
+//                put("小麦粥", "小麦");
+//                put("麦粥", "小麦");
+//                put("大麦粥", "大麦");
+//                put("大麦粥汁", "大麦");
+//
+
+
                 put("葱白", "葱");
                 put("赤硝", "赤消");
                 put("硝石", "赤消");
                 put("消石", "赤消");
                 put("芒消", "芒硝");
+
                 put("法醋", "苦酒");
                 put("大猪胆", "猪胆汁");
                 put("大猪胆汁", "猪胆汁");
+
                 put("鸡子白", "鸡子");
                 put("太一禹余粮", "禹余粮");
                 put("妇人中裈近隐处取烧作灰", "中裈灰");
@@ -286,6 +284,7 @@ public class TipsSingleData {
                 put("川椒", "蜀椒");
                 put("生竹茹", "竹茹");
                 put("柏皮", "黄柏");
+                put("猪胆", "猪胆汁");
             }
         };
         this.fangAliasDict = new HashMap<String, String>() {
@@ -301,7 +300,7 @@ public class TipsSingleData {
 
     private TipsSingleData() {
         bookContentMap = new HashMap<Integer, SingletonNetData>();
-        initAlias();
+        //initAlias();
 
     }
 

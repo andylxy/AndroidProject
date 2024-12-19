@@ -59,6 +59,7 @@ import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.api.MingCiContentApi;
+import run.yigou.gxzy.http.api.YaoAliaApi;
 import run.yigou.gxzy.http.api.YaoContentApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
@@ -69,6 +70,7 @@ import run.yigou.gxzy.ui.adapter.TabAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.DataBeans.YaoAlia;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import run.yigou.gxzy.utils.StringHelper;
@@ -315,17 +317,17 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
             toast(AppConst.Key_Window_Tips);
             return;
         }
-
-        //保存搜索关键字
-        if (!StringHelper.isEmpty(searchKey)) {
-            mSearchHistoryService.addOrUpadteHistory(searchKey);
-            Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
-            // 添加一个参数（Extra）到 Intent
-            intent.putExtra("searchQuery", searchKey);
-            startActivityForResult(intent, (resultCode, data) -> {
-                clearSearchTextFocus();
-            });
-        }
+           //有限功能不开放全部功能
+//        //保存搜索关键字
+//        if (!StringHelper.isEmpty(searchKey)) {
+//            mSearchHistoryService.addOrUpadteHistory(searchKey);
+//            Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
+//            // 添加一个参数（Extra）到 Intent
+//            intent.putExtra("searchQuery", searchKey);
+//            startActivityForResult(intent, (resultCode, data) -> {
+//                clearSearchTextFocus();
+//            });
+//        }
     }
 
     @Override
@@ -426,8 +428,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                         if (data != null && !data.getData().isEmpty()) {
                             List<Yao> detailList = data.getData();
                             //加载所有药物的数据
-                            TipsSingleData.getInstance().setYaoData(new HH2SectionData(detailList, 0, "伤寒金匮所有药物"));
-                            isGetYaoData = false;
+                            TipsSingleData.getInstance().setYaoData(new HH2SectionData(detailList, 0, "常用本草药物"));
+                           isGetYaoData = false;
                             //保存内容
                             ThreadUtil.runInBackground(() -> {
                                 ConvertEntity.saveYaoData(detailList);
@@ -441,6 +443,39 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                         isGetYaoData = false;
                     }
                 });
+
+
+
+        EasyHttp.get(this)
+                .api(new YaoAliaApi())
+                .request(new HttpCallback<HttpData<List<YaoAlia>>>(this) {
+                    @Override
+                    public void onSucceed(HttpData<List<YaoAlia>> data) {
+                        if (data != null && !data.getData().isEmpty()) {
+                            List<YaoAlia> detailList = data.getData();
+                            //加载额外的别名的数据
+                           // TipsSingleData.getInstance().setYaoData(new HH2SectionData(detailList, 0, "常用本草药物"));
+                            //保存内容
+                            ThreadUtil.runInBackground(() -> {
+                                //加载额外的别名的数据
+                                Map<String, String> yaoAliasDict=   TipsSingleData.getInstance(). getYaoAliasDict();
+                                for (YaoAlia yaoAlia : detailList) {
+                                     yaoAliasDict.put(yaoAlia.getBieming(),yaoAlia.getName() );
+                                 }
+                                //保存数据
+                               // ConvertEntity.saveYaoData(detailList);
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        super.onFail(e);
+                        isGetYaoData = false;
+                    }
+                });
+
+
     }
 
     public void getAllMingCiData() {

@@ -45,10 +45,10 @@ public class TipsLittleTextViewWindow extends TipsLittleWindow {
 
 
     public void setYao(String str) {
-        String str2 = tipsSingleData.getYaoAliasDict().get(str);
-        if (str2 != null) {
-            str = str2;
-        }
+//        String str2 = tipsSingleData.getYaoAliasDict().get(str);
+//        if (str2 != null) {
+//            str = str2;
+//        }
         this.yao = str;
     }
 

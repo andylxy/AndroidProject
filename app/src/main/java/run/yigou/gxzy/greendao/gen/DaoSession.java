@@ -8,6 +8,7 @@ import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.identityscope.IdentityScopeType;
 import org.greenrobot.greendao.internal.DaoConfig;
 
+import run.yigou.gxzy.greendao.entity.AliaZhongYao;
 import run.yigou.gxzy.greendao.entity.BeiMingCi;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.BookChapter;
@@ -20,6 +21,7 @@ import run.yigou.gxzy.greendao.entity.YaoFang;
 import run.yigou.gxzy.greendao.entity.YaoFangBody;
 import run.yigou.gxzy.greendao.entity.ZhongYao;
 
+import run.yigou.gxzy.greendao.gen.AliaZhongYaoDao;
 import run.yigou.gxzy.greendao.gen.BeiMingCiDao;
 import run.yigou.gxzy.greendao.gen.BookDao;
 import run.yigou.gxzy.greendao.gen.BookChapterDao;
@@ -41,6 +43,7 @@ import run.yigou.gxzy.greendao.gen.ZhongYaoDao;
  */
 public class DaoSession extends AbstractDaoSession {
 
+    private final DaoConfig aliaZhongYaoDaoConfig;
     private final DaoConfig beiMingCiDaoConfig;
     private final DaoConfig bookDaoConfig;
     private final DaoConfig bookChapterDaoConfig;
@@ -53,6 +56,7 @@ public class DaoSession extends AbstractDaoSession {
     private final DaoConfig yaoFangBodyDaoConfig;
     private final DaoConfig zhongYaoDaoConfig;
 
+    private final AliaZhongYaoDao aliaZhongYaoDao;
     private final BeiMingCiDao beiMingCiDao;
     private final BookDao bookDao;
     private final BookChapterDao bookChapterDao;
@@ -68,6 +72,9 @@ public class DaoSession extends AbstractDaoSession {
     public DaoSession(Database db, IdentityScopeType type, Map<Class<? extends AbstractDao<?, ?>>, DaoConfig>
             daoConfigMap) {
         super(db);
+
+        aliaZhongYaoDaoConfig = daoConfigMap.get(AliaZhongYaoDao.class).clone();
+        aliaZhongYaoDaoConfig.initIdentityScope(type);
 
         beiMingCiDaoConfig = daoConfigMap.get(BeiMingCiDao.class).clone();
         beiMingCiDaoConfig.initIdentityScope(type);
@@ -102,6 +109,7 @@ public class DaoSession extends AbstractDaoSession {
         zhongYaoDaoConfig = daoConfigMap.get(ZhongYaoDao.class).clone();
         zhongYaoDaoConfig.initIdentityScope(type);
 
+        aliaZhongYaoDao = new AliaZhongYaoDao(aliaZhongYaoDaoConfig, this);
         beiMingCiDao = new BeiMingCiDao(beiMingCiDaoConfig, this);
         bookDao = new BookDao(bookDaoConfig, this);
         bookChapterDao = new BookChapterDao(bookChapterDaoConfig, this);
@@ -114,6 +122,7 @@ public class DaoSession extends AbstractDaoSession {
         yaoFangBodyDao = new YaoFangBodyDao(yaoFangBodyDaoConfig, this);
         zhongYaoDao = new ZhongYaoDao(zhongYaoDaoConfig, this);
 
+        registerDao(AliaZhongYao.class, aliaZhongYaoDao);
         registerDao(BeiMingCi.class, beiMingCiDao);
         registerDao(Book.class, bookDao);
         registerDao(BookChapter.class, bookChapterDao);
@@ -128,6 +137,7 @@ public class DaoSession extends AbstractDaoSession {
     }
     
     public void clear() {
+        aliaZhongYaoDaoConfig.clearIdentityScope();
         beiMingCiDaoConfig.clearIdentityScope();
         bookDaoConfig.clearIdentityScope();
         bookChapterDaoConfig.clearIdentityScope();
@@ -139,6 +149,10 @@ public class DaoSession extends AbstractDaoSession {
         yaoFangDaoConfig.clearIdentityScope();
         yaoFangBodyDaoConfig.clearIdentityScope();
         zhongYaoDaoConfig.clearIdentityScope();
+    }
+
+    public AliaZhongYaoDao getAliaZhongYaoDao() {
+        return aliaZhongYaoDao;
     }
 
     public BeiMingCiDao getBeiMingCiDao() {

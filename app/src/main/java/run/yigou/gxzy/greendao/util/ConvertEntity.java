@@ -79,7 +79,7 @@ public class ConvertEntity {
                 return;
             }
             ArrayList<Yao> yaoData = ConvertEntity.getYaoData();
-            TipsSingleData.getInstance().setYaoData(new HH2SectionData(yaoData, 0, "伤寒金匮所有药物"));
+            TipsSingleData.getInstance().setYaoData(new HH2SectionData(yaoData, 0, "常用本草药物"));
             ArrayList<MingCiContent> mingCiContentList = ConvertEntity.getMingCi();
             TipsSingleData.getInstance().setMingCiData(new HH2SectionData(mingCiContentList, 0, "医书相关的名词说明"));
 
@@ -650,11 +650,12 @@ public class ConvertEntity {
             Yao yao1 = new Yao();
             yao1.setText(RC4Helper.decrypt(yao.getText()));
             yao1.setName(yao.getName());
-            //yao1.setYaoList(String.join(",", yao.getYaoList()));
-            yao1.setYaoList(
-                    (yao.getYaoList() != null && !yao.getYaoList().isEmpty())
-                            ? Arrays.asList(yao.getYaoList().split(","))
-                            : Arrays.asList());
+
+            if (yao.getYaoList() != null && !yao.getYaoList().isEmpty()){
+              //List<String> yaliasList =  Arrays.asList(yao.getYaoList().split("[,，。、.;]"));
+                yao1.setYaoList(Arrays.asList(yao.getYaoList().split("[,，。、.;]")));
+            }
+
             yao1.setID(yao.getID());
             //yao1.setHeight(yao.getHeight());
             detailList.add(yao1);

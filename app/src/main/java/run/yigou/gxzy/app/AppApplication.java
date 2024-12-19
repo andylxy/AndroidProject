@@ -73,7 +73,7 @@ public final class AppApplication extends Application {
      * 是否打开所有页面功能
      */
 
-    public boolean global_openness = true;
+    public boolean global_openness = false;
 
 
     //登陆信息
@@ -89,7 +89,7 @@ public final class AppApplication extends Application {
         return application;
     }
 
-    @Log("启动耗时")
+   // @Log("启动耗时")
     @Override
     public void onCreate() {
         super.onCreate();

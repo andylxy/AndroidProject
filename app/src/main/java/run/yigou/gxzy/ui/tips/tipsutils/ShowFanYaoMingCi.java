@@ -80,8 +80,8 @@ public class ShowFanYaoMingCi {
         // 遍历方剂列表，查找匹配的方剂
         for (HH2SectionData sectionData : fangList) {
             for (DataItem dataItem : sectionData.getData()) {
-                if (dataItem.getFangList().isEmpty()) continue;
-                String originalName = dataItem.getFangList().get(0);
+               // if (dataItem.getFangList().isEmpty()) continue;
+                String originalName = dataItem.getName();
                 String actualName = getOrDefault(fangAliasDict, originalName);
                 // 如果找到匹配的方剂，创建并添加显示对象到列表
                 if (actualName != null && actualName.equals(aliasName)) {
@@ -103,7 +103,6 @@ public class ShowFanYaoMingCi {
             }
             if (found) break;  // 如果已找到匹配项，则跳出外层循环
         }
-
         // 如果未找到匹配项，添加默认的 "伤寒金匮方" 数据
         if (!found) {
             DataItem dataItem = new DataItem();
@@ -157,7 +156,6 @@ public class ShowFanYaoMingCi {
         Map<String, MingCiContent> mingCiContentMap = tipsSingleData.getMingCiContentMap();
 
         List<HH2SectionData> hh2SectionDataList = new ArrayList<>();
-
 
         // 兼容低版本 Android
         MingCiContent mingCiMap;
