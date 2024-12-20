@@ -452,18 +452,18 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     @Override
                     public void onSucceed(HttpData<List<YaoAlia>> data) {
                         if (data != null && !data.getData().isEmpty()) {
-                            List<YaoAlia> detailList = data.getData();
+
                             //加载额外的别名的数据
                            // TipsSingleData.getInstance().setYaoData(new HH2SectionData(detailList, 0, "常用本草药物"));
                             //保存内容
                             ThreadUtil.runInBackground(() -> {
                                 //加载额外的别名的数据
                                 Map<String, String> yaoAliasDict=   TipsSingleData.getInstance(). getYaoAliasDict();
-                                for (YaoAlia yaoAlia : detailList) {
+                                for (YaoAlia yaoAlia : data.getData()) {
                                      yaoAliasDict.put(yaoAlia.getBieming(),yaoAlia.getName() );
                                  }
                                 //保存数据
-                               // ConvertEntity.saveYaoData(detailList);
+                               ConvertEntity.saveYaoAlia(data.getData());
                             });
                         }
                     }

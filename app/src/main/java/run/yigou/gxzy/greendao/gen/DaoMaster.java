@@ -21,7 +21,7 @@ public class DaoMaster extends AbstractDaoMaster {
 
     /** Creates underlying database table using DAOs. */
     public static void createAllTables(Database db, boolean ifNotExists) {
-        AliaZhongYaoDao.createTable(db, ifNotExists);
+        AboutDao.createTable(db, ifNotExists);
         BeiMingCiDao.createTable(db, ifNotExists);
         BookDao.createTable(db, ifNotExists);
         BookChapterDao.createTable(db, ifNotExists);
@@ -33,11 +33,12 @@ public class DaoMaster extends AbstractDaoMaster {
         YaoFangDao.createTable(db, ifNotExists);
         YaoFangBodyDao.createTable(db, ifNotExists);
         ZhongYaoDao.createTable(db, ifNotExists);
+        ZhongYaoAliaDao.createTable(db, ifNotExists);
     }
 
     /** Drops underlying database table using DAOs. */
     public static void dropAllTables(Database db, boolean ifExists) {
-        AliaZhongYaoDao.dropTable(db, ifExists);
+        AboutDao.dropTable(db, ifExists);
         BeiMingCiDao.dropTable(db, ifExists);
         BookDao.dropTable(db, ifExists);
         BookChapterDao.dropTable(db, ifExists);
@@ -49,6 +50,7 @@ public class DaoMaster extends AbstractDaoMaster {
         YaoFangDao.dropTable(db, ifExists);
         YaoFangBodyDao.dropTable(db, ifExists);
         ZhongYaoDao.dropTable(db, ifExists);
+        ZhongYaoAliaDao.dropTable(db, ifExists);
     }
 
     /**
@@ -67,7 +69,7 @@ public class DaoMaster extends AbstractDaoMaster {
 
     public DaoMaster(Database db) {
         super(db, SCHEMA_VERSION);
-        registerDaoClass(AliaZhongYaoDao.class);
+        registerDaoClass(AboutDao.class);
         registerDaoClass(BeiMingCiDao.class);
         registerDaoClass(BookDao.class);
         registerDaoClass(BookChapterDao.class);
@@ -79,6 +81,7 @@ public class DaoMaster extends AbstractDaoMaster {
         registerDaoClass(YaoFangDao.class);
         registerDaoClass(YaoFangBodyDao.class);
         registerDaoClass(ZhongYaoDao.class);
+        registerDaoClass(ZhongYaoAliaDao.class);
     }
 
     public DaoSession newSession() {

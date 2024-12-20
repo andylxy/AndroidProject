@@ -114,12 +114,11 @@ public class TipsSingleData {
         for (DataItem item : this.mingCiData.getData()) {
 //                String name = ((MingCiContent)item).getName();
 //                MingCiContent mingCiContent = ((MingCiContent)item);
-            mingCiContentMap.put(((MingCiContent) item).getName(), (MingCiContent) item);
+            mingCiContentMap.put(item.getName(), (MingCiContent) item);
         }
     }
 
     public void setYaoData(HH2SectionData yaoData) {
-
         // 初始化并填充 allYao 集合
         if (this.allYao == null) {
             this.allYao = new CopyOnWriteArraySet<>();
@@ -132,27 +131,17 @@ public class TipsSingleData {
         } else {
             this.yaoMap.clear();
         }
-
-        if (yaoData.getData() == null) {
-            return;
-        }
-
         for (DataItem item : yaoData.getData()) {
-//            List<String> yaoList =item.getYaoList() ;
-//            if (yaoList == null || yaoList.isEmpty()) {
-//                continue;
-//            }
-
             // 如果有别名映射，则替换
             for (String aliaName : item.getYaoList()) {
                 String alia = this.getYaoAliasDict().get(aliaName);
                 if (alia != null) {
-                        EasyLog.print(alia);
+                       // EasyLog.print(alia);
                         yaoMap.put(alia, (Yao) item);
                         this.allYao.add(alia);
 
                 } else {
-                        EasyLog.print(aliaName);
+                      //  EasyLog.print(aliaName);
                         yaoMap.put(aliaName, (Yao) item);
                         this.allYao.add(aliaName);
 

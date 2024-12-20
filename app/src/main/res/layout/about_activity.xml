@@ -32,35 +32,90 @@
         android:orientation="vertical">
 
         <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_author_book"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/about_author"
             android:layout_marginTop="@dimen/dp_5"
+            android:text="@string/about_author"
             android:textColor="#222222"
             android:textSize="@dimen/sp_18" />
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_version"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/about_version"
-            android:gravity="center_horizontal|left"
-            android:layout_marginTop="@dimen/dp_5"
-            android:padding="@dimen/dp_5"
-            android:textColor="#222222"
-            android:textSize="@dimen/sp_16" />
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_5"
-            android:padding="@dimen/dp_5"
-            android:autoLink="all"
-            android:gravity="center_horizontal|left"
-            android:lineSpacingExtra="@dimen/dp_6"
-            android:text="@string/about_developer"
-            android:textColor="#222222"
-            android:textSize="@dimen/sp_14" />
+
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="@dimen/dp_30"
+                android:orientation="vertical">
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:gravity="center_horizontal|left"
+                    android:padding="@dimen/dp_5"
+                    android:text="@string/about_thks"
+                    android:textColor="#222222"
+                    android:textSize="@dimen/sp_16" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tv_thks"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal|left"
+                    android:padding="@dimen/dp_5"
+                    android:text="@string/about_version"
+                    android:textColor="#222222"
+                    android:textSize="@dimen/sp_16" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:gravity="center_horizontal|left"
+                    android:padding="@dimen/dp_5"
+                    android:text="@string/about_manual"
+                    android:textColor="#222222"
+                    android:textSize="@dimen/sp_16" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tv_developer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autoLink="all"
+                    android:gravity="center_horizontal|left"
+                    android:lineSpacingExtra="@dimen/dp_6"
+                    android:padding="@dimen/dp_5"
+                    android:text="@string/about_developer"
+                    android:textColor="#222222"
+                    android:textSize="@dimen/sp_14" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:gravity="center_horizontal|left"
+                    android:padding="@dimen/dp_5"
+                    android:text="@string/about_updata"
+                    android:textColor="#222222"
+                    android:textSize="@dimen/sp_16" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tv_updata_log"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autoLink="all"
+                    android:gravity="center_horizontal|left"
+                    android:lineSpacingExtra="@dimen/dp_6"
+                    android:padding="@dimen/dp_5"
+                    android:text="@string/about_updata_log"
+                    android:textColor="#222222"
+                    android:textSize="@dimen/sp_14" />
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
 
     </LinearLayout>
+
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tv_copyright"

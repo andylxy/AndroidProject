@@ -155,6 +155,7 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         // 登陆功能后期开放
         if (!AppApplication.application.global_openness) {
             toast(AppConst.Key_Window_Tips);
+            return;
         }else {
             if (!AppApplication.application.isLogin) {
                 //跳登陆页面

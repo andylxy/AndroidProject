@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import run.yigou.gxzy.greendao.entity.About;
 import run.yigou.gxzy.greendao.entity.BeiMingCi;
 import run.yigou.gxzy.greendao.entity.BookChapter;
 import run.yigou.gxzy.greendao.entity.BookChapterBody;
@@ -20,6 +21,7 @@ import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.entity.YaoFang;
 import run.yigou.gxzy.greendao.entity.YaoFangBody;
 import run.yigou.gxzy.greendao.entity.ZhongYao;
+import run.yigou.gxzy.greendao.entity.ZhongYaoAlia;
 import run.yigou.gxzy.greendao.gen.BeiMingCiDao;
 import run.yigou.gxzy.greendao.gen.BookChapterBodyDao;
 import run.yigou.gxzy.greendao.gen.BookChapterDao;
@@ -28,9 +30,11 @@ import run.yigou.gxzy.greendao.gen.TabNavDao;
 import run.yigou.gxzy.greendao.gen.YaoFangBodyDao;
 import run.yigou.gxzy.greendao.gen.YaoFangDao;
 import run.yigou.gxzy.greendao.gen.ZhongYaoDao;
+import run.yigou.gxzy.greendao.service.AboutService;
 import run.yigou.gxzy.ui.tips.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.DataBeans.YaoAlia;
 import run.yigou.gxzy.ui.tips.DataBeans.YaoUse;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
@@ -78,11 +82,17 @@ public class ConvertEntity {
             if (dbService == null || dbService.mTabNavService == null) {
                 return;
             }
+            //
             ArrayList<Yao> yaoData = ConvertEntity.getYaoData();
             TipsSingleData.getInstance().setYaoData(new HH2SectionData(yaoData, 0, "常用本草药物"));
             ArrayList<MingCiContent> mingCiContentList = ConvertEntity.getMingCi();
+            // 加载常用名词
             TipsSingleData.getInstance().setMingCiData(new HH2SectionData(mingCiContentList, 0, "医书相关的名词说明"));
-
+              // 加载中药别名
+            Map<String, String> yaoAliasDict=   TipsSingleData.getInstance(). getYaoAliasDict();
+            for (ZhongYaoAlia yaoAlia : getYaoAlia()) {
+                yaoAliasDict.put(yaoAlia.getBieming(),yaoAlia.getName() );
+            }
             // 从数据库中加载所有导航信息
             ArrayList<TabNav> navList = dbService.mTabNavService.findAll();
             // 检查导航信息是否已加载
@@ -156,6 +166,37 @@ public class ConvertEntity {
             // 将方剂列表存储在内存中
             tipsSingleData.getMapBookContent(item.getBookNo()).setFang(new HH2SectionData(fangList, 0, item.getBookName() + "方"));
         }
+    }
+
+
+    public static void saveYaoAlia(List<YaoAlia> yaoAliaList) {
+        DbService.getInstance().mYaoAliasService.deleteAll();
+        for (YaoAlia yaoAlia : yaoAliaList) {
+            ZhongYaoAlia zhongYaoAlia = new ZhongYaoAlia();
+            zhongYaoAlia.setName(yaoAlia.getName());
+            zhongYaoAlia.setBieming(yaoAlia.getBieming());
+            DbService.getInstance().mYaoAliasService.addEntity(zhongYaoAlia);
+        }
+    }
+
+    public static List<ZhongYaoAlia> getYaoAlia() {
+
+        return DbService.getInstance().mYaoAliasService.findAll();
+
+    }
+
+    public static void saveAbout(List<About> aboutList) {
+        DbService.getInstance().mAboutService.deleteAll();
+        for (About about : aboutList) {
+            DbService.getInstance().mAboutService.addEntity(about);
+        }
+    }
+
+    public static List<About> getAbout() {
+
+
+        return DbService.getInstance().mAboutService.findAll();
+
     }
 
 
@@ -396,7 +437,7 @@ public class ConvertEntity {
         try {
 
             ArrayList<YaoFang> yaoFangList = DbService.getInstance().mYaoFangService.find(YaoFangDao.Properties.BookId.eq(bookId));
-            for (YaoFang fang : yaoFangList){
+            for (YaoFang fang : yaoFangList) {
 
                 DbService.getInstance().mYaoFangBodyService.deleteAll(YaoFangBodyDao.Properties.YaoFangID.eq(fang.getYaoFangID()));
                 DbService.getInstance().mYaoFangService.deleteEntity(fang);
@@ -405,23 +446,23 @@ public class ConvertEntity {
             for (Fang fang : netFangDetailList) {
                 chapterId.setLength(0);
                 chapterId.append(StringHelper.getUuid());
-                    YaoFang yaoFang = new YaoFang();
-                    yaoFang.setYaoCount(fang.getYaoCount());
-                    yaoFang.setName(fang.getName());
-                    yaoFang.setBookId(bookId);
-                    yaoFang.setID(fang.getID());
-                    yaoFang.setDrinkNum(fang.getDrinkNum());
-                    yaoFang.setText(RC4Helper.encrypt(fang.getText()));
-                    yaoFang.setFangList(String.join(",", fang.getFangList()));
-                    yaoFang.setYaoList(String.join(",", fang.getYaoList()));
-                    yaoFang.setYaoFangID(chapterId.toString());
-                    yaoFang.setSignature(fang.getSignature());
-                    yaoFang.setSignatureId(fang.getSignatureId());
-                    DbService.getInstance().mYaoFangService.addEntity(yaoFang);
+                YaoFang yaoFang = new YaoFang();
+                yaoFang.setYaoCount(fang.getYaoCount());
+                yaoFang.setName(fang.getName());
+                yaoFang.setBookId(bookId);
+                yaoFang.setID(fang.getID());
+                yaoFang.setDrinkNum(fang.getDrinkNum());
+                yaoFang.setText(RC4Helper.encrypt(fang.getText()));
+                yaoFang.setFangList(String.join(",", fang.getFangList()));
+                yaoFang.setYaoList(String.join(",", fang.getYaoList()));
+                yaoFang.setYaoFangID(chapterId.toString());
+                yaoFang.setSignature(fang.getSignature());
+                yaoFang.setSignatureId(fang.getSignatureId());
+                DbService.getInstance().mYaoFangService.addEntity(yaoFang);
 
                 for (YaoUse content : fang.getStandardYaoList()) {
-                        YaoFangBody yaoFangBody = getYaoFangBody(content, chapterId);
-                        DbService.getInstance().mYaoFangBodyService.addEntity(yaoFangBody);
+                    YaoFangBody yaoFangBody = getYaoFangBody(content, chapterId);
+                    DbService.getInstance().mYaoFangBodyService.addEntity(yaoFangBody);
                 }
             }
         } catch (Exception e) {
@@ -517,8 +558,8 @@ public class ConvertEntity {
         StringBuilder chapterId = new StringBuilder();
         try {
 
-            ArrayList<BookChapter> bookChapterList =  DbService.getInstance().mBookChapterService.find(BookChapterDao.Properties.BookId.eq(bookId));
-            for (BookChapter bookChapter : bookChapterList){
+            ArrayList<BookChapter> bookChapterList = DbService.getInstance().mBookChapterService.find(BookChapterDao.Properties.BookId.eq(bookId));
+            for (BookChapter bookChapter : bookChapterList) {
                 DbService.getInstance().mYaoFangBodyService.deleteAll(BookChapterBodyDao.Properties.BookChapterId.eq(bookChapter.getBookChapterId()));
                 DbService.getInstance().mBookChapterService.deleteEntity(bookChapter);
             }
@@ -542,7 +583,7 @@ public class ConvertEntity {
                     BookChapterBody bookChapterBody = new BookChapterBody();
                     bookChapterBody.setBookChapterBodyId(StringHelper.getUuid());
                     bookChapterBody.setBookChapterId(chapterId.toString());
-                    bookChapterBody.setText(RC4Helper.encrypt(content.getText()) );
+                    bookChapterBody.setText(RC4Helper.encrypt(content.getText()));
                     bookChapterBody.setNote(RC4Helper.encrypt(content.getNote()));
                     bookChapterBody.setSectionvideo(RC4Helper.encrypt(content.getSectionvideo()));
                     bookChapterBody.setID(content.getID());
@@ -575,7 +616,7 @@ public class ConvertEntity {
                 List<DataItem> dataList = new ArrayList<>();
                 for (BookChapterBody bookChapterBody : bookChapter.getData()) {
                     DataItem content = new DataItem();
-                    content.setText( RC4Helper.decrypt( bookChapterBody.getText()));
+                    content.setText(RC4Helper.decrypt(bookChapterBody.getText()));
                     content.setNote(RC4Helper.decrypt(bookChapterBody.getNote()));
                     content.setSectionvideo(RC4Helper.decrypt(bookChapterBody.getSectionvideo()));
                     content.setID(bookChapterBody.getID());
@@ -651,8 +692,8 @@ public class ConvertEntity {
             yao1.setText(RC4Helper.decrypt(yao.getText()));
             yao1.setName(yao.getName());
 
-            if (yao.getYaoList() != null && !yao.getYaoList().isEmpty()){
-              //List<String> yaliasList =  Arrays.asList(yao.getYaoList().split("[,，。、.;]"));
+            if (yao.getYaoList() != null && !yao.getYaoList().isEmpty()) {
+                //List<String> yaliasList =  Arrays.asList(yao.getYaoList().split("[,，。、.;]"));
                 yao1.setYaoList(Arrays.asList(yao.getYaoList().split("[,，。、.;]")));
             }
 

@@ -61,8 +61,7 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
             toast("获取书籍信息错误");
             return;
         }
-
-        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(tabNav.getBookName(),
+        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(tabNav.getBookName().split("[.,・]").length==0?tabNav.getBookName():tabNav.getBookName().split("[.,・]")[0],
                 ContextCompat.getDrawable(this, R.drawable.list_selector)));
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_unit),
                 ContextCompat.getDrawable(this, R.drawable.ruler_selector)));

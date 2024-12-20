@@ -10,6 +10,7 @@
 
 package run.yigou.gxzy.greendao.util;
 
+import run.yigou.gxzy.greendao.service.AboutService;
 import run.yigou.gxzy.greendao.service.BeiMingCiService;
 import run.yigou.gxzy.greendao.service.BookChapterBodyService;
 import run.yigou.gxzy.greendao.service.BookChapterService;
@@ -18,6 +19,7 @@ import run.yigou.gxzy.greendao.service.SearchHistoryService;
 import run.yigou.gxzy.greendao.service.TabNavBodyService;
 import run.yigou.gxzy.greendao.service.TabNavService;
 import run.yigou.gxzy.greendao.service.UserInfoService;
+import run.yigou.gxzy.greendao.service.YaoAliasService;
 import run.yigou.gxzy.greendao.service.YaoFangBodyService;
 import run.yigou.gxzy.greendao.service.YaoFangService;
 import run.yigou.gxzy.greendao.service.YaoService;
@@ -38,6 +40,8 @@ public class DbService {
     public YaoFangBodyService mYaoFangBodyService;
     public TabNavBodyService mTabNavBodyService;
     public TabNavService mTabNavService;
+    public AboutService mAboutService;
+    public YaoAliasService  mYaoAliasService;
 
     private DbService() {
         // 防止反射攻击
@@ -55,6 +59,8 @@ public class DbService {
         mYaoFangBodyService =  YaoFangBodyService.getInstance();
         mTabNavBodyService =  TabNavBodyService.getInstance();
         mTabNavService =  TabNavService.getInstance();
+        mAboutService =  AboutService.getInstance();
+        mYaoAliasService =  YaoAliasService.getInstance();
     }
 
     private volatile static DbService instance;

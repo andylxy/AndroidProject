@@ -7,8 +7,8 @@ import org.greenrobot.greendao.annotation.Id;
 import java.io.Serializable;
 
 @Entity
-public class AliaZhongYao implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class ZhongYaoAlia implements Serializable {
+    private static final long serialVersionUID = 10L;
 
     @Id(autoincrement = true)
     private Long yaoAliaId;
@@ -19,8 +19,8 @@ public class AliaZhongYao implements Serializable {
     private String text;
     private long signatureId;
     private String signature;
-    @Generated(hash = 1925581821)
-    public AliaZhongYao(Long yaoAliaId, int id, String name, String bieming,
+    @Generated(hash = 1207603431)
+    public ZhongYaoAlia(Long yaoAliaId, int id, String name, String bieming,
             int height, String text, long signatureId, String signature) {
         this.yaoAliaId = yaoAliaId;
         this.id = id;
@@ -31,8 +31,8 @@ public class AliaZhongYao implements Serializable {
         this.signatureId = signatureId;
         this.signature = signature;
     }
-    @Generated(hash = 575411074)
-    public AliaZhongYao() {
+    @Generated(hash = 1677485815)
+    public ZhongYaoAlia() {
     }
     public Long getYaoAliaId() {
         return this.yaoAliaId;
@@ -82,6 +82,7 @@ public class AliaZhongYao implements Serializable {
     public void setSignature(String signature) {
         this.signature = signature;
     }
+
 
 
 
