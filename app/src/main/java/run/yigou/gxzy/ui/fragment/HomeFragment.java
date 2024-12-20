@@ -319,15 +319,15 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         }
            //有限功能不开放全部功能
 //        //保存搜索关键字
-//        if (!StringHelper.isEmpty(searchKey)) {
-//            mSearchHistoryService.addOrUpadteHistory(searchKey);
-//            Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
-//            // 添加一个参数（Extra）到 Intent
-//            intent.putExtra("searchQuery", searchKey);
-//            startActivityForResult(intent, (resultCode, data) -> {
-//                clearSearchTextFocus();
-//            });
-//        }
+        if (!StringHelper.isEmpty(searchKey)) {
+            mSearchHistoryService.addOrUpadteHistory(searchKey);
+            Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
+            // 添加一个参数（Extra）到 Intent
+            intent.putExtra("searchQuery", searchKey);
+            startActivityForResult(intent, (resultCode, data) -> {
+                clearSearchTextFocus();
+            });
+        }
     }
 
     @Override
