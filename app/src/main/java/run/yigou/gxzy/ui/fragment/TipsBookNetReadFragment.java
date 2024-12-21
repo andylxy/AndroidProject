@@ -144,15 +144,15 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (rvList == null) {
             throw new IllegalStateException("rvList not found");
         }
-        clearEditText =findViewById(R.id.searchEditText);
+        clearEditText = findViewById(R.id.searchEditText);
         if (clearEditText == null) {
             throw new IllegalStateException("clearEditText not found");
         }
-        tipsBtnSearch =findViewById(R.id.tips_btn_search);
+        tipsBtnSearch = findViewById(R.id.tips_btn_search);
         if (tipsBtnSearch == null) {
             throw new IllegalStateException("tipsBtnSearch not found");
         }
-        numTips =findViewById(R.id.numTips);
+        numTips = findViewById(R.id.numTips);
         if (numTips == null) {
             throw new IllegalStateException("numTips not found");
         }
@@ -343,6 +343,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
     private void retrieveBookArguments(BookArgs bookArgs) {
 
+        if (clearEditText != null) {
+            clearEditText.setText("");
+        }
         if (bookArgs != null) {
             bookId = bookArgs.getBookNo();
             bookLastReadPosition = bookArgs.getBookLastReadPosition();
@@ -461,7 +464,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             @Override
             public boolean onHeaderLongClick(GroupedRecyclerViewAdapter adapter2, BaseViewHolder holder, int groupPosition) {
                 // 搜索状态不响应长按
-                if(adapter.getSearch()) return true;
+                if (adapter.getSearch()) return true;
                 TipsNetHelper.showListDialog(getContext(), AppConst.reData_Type)
                         .setListener((dialog, position, string) -> {
                             if (string.equals("重新下载全部数据")) {
@@ -493,10 +496,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 public void onJumpSpecifiedItem(int groupPosition, int childPosition) {
                     clearEditText.setText("");
                     numTips.setText("");
-                    postDelayed(()->{
+                    postDelayed(() -> {
                         layoutManager.scrollToPositionWithOffset(groupPosition, 0);
                         adapter.expandGroup(groupPosition, true);
-                    },300);
+                    }, 300);
 
                 }
             };
