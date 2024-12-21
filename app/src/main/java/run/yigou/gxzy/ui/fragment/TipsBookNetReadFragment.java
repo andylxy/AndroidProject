@@ -119,9 +119,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (instance == null) {
             instance = new TipsBookNetReadFragment();
         }
-        if (bookArgs != null)
+        if (bookArgs != null){
             instance.bookArgs = bookArgs;
-
+        }
         return instance;
     }
 
@@ -313,6 +313,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         try {
             // 获取传递的书本编号
             retrieveBookArguments(bookArgs);
+
             //fragmentSetting = AppApplication.getApplication().getFragmentSetting();
             // 获取指定书籍数据
             singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
@@ -343,13 +344,15 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
     private void retrieveBookArguments(BookArgs bookArgs) {
 
+        if (clearEditText != null) {
+            clearEditText.setText("");
+        }
         if (bookArgs != null) {
             bookId = bookArgs.getBookNo();
             bookLastReadPosition = bookArgs.getBookLastReadPosition();
             isShowBookCollect = bookArgs.isShowBookCollect();
         } else {
             bookId = 0;
-
             bookLastReadPosition = 0;
             isShowBookCollect = false;
             searchText = null;
@@ -504,25 +507,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         }
     }
 
-//    /**
-//     * 设置更新数据监听
-//     */
-//    private void setHttpUpdateStatusNotification() {
-//        SingletonNetData.OnContentGetHttpDataUpdateStatus httpDataStatusNotification = new SingletonNetData.OnContentGetHttpDataUpdateStatus() {
-//            /**
-//             * @param status
-//             */
-//            @Override
-//            public void onContentUpdateHttpDataStatus(boolean status) {
-//                if (status) {
-//                    // 刷新数据显示
-//                    refreshData();
-//                }
-//            }
-//
-//        };
-//        singletonNetData.setOnContentUpdateHttpDataNotification(httpDataStatusNotification);
-//    }
 
     private void refreshData() {
         reListAdapter(true, false);
@@ -554,8 +538,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (onBackPressedCallback != null) {
             onBackPressedCallback.remove();
         }
-        // 注销适配器事件
-        adapter.onDestroy();
+
         // 注销事件
         XEventBus.getDefault().unregister(TipsBookNetReadFragment.this);
     }

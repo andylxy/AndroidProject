@@ -69,10 +69,6 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements Toa
        // XEventBus.getDefault().register(ExpandableAdapter.this);
     }
 
-    public void onDestroy() {
-        // 注销事件
-        //XEventBus.getDefault().unregister(ExpandableAdapter.this);
-    }
 
     @Override
     public int getGroupCount() {

@@ -105,18 +105,7 @@ public final class AppApplication extends Application {
 
     public FragmentSetting fragmentSetting;
 
-//    /**
-//     * 获取默认配置
-//     *
-//     * @return
-//     */
-//    public FragmentSetting getFragmentSetting() {
-//        if (fragmentSetting != null) {
-//            return fragmentSetting;
-//        }
-//        fragmentSetting = ManagerSetting.getFragmentSetting();
-//        return fragmentSetting;
-//    }
+
 
     private void initUserLogin() {
         try {
