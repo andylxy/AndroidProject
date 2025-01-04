@@ -113,7 +113,7 @@ public class TipsLittleTextViewWindow extends TipsLittleWindow {
         }
 
         // 设置关闭按钮的点击事件，点击时关闭当前视图
-        ((Button) this.view.findViewById(R.id.maskbtnYao)).setOnClickListener(new View.OnClickListener() {
+        this.view.findViewById(R.id.maskbtnYao).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 TipsLittleTextViewWindow.this.dismiss();
@@ -135,7 +135,7 @@ public class TipsLittleTextViewWindow extends TipsLittleWindow {
 
 
         // 设置内容布局参数并添加到父布局中
-        ((LinearLayout) this.view.findViewById(R.id.wrapper)).setLayoutParams(contentLayoutParams);
+        this.view.findViewById(R.id.wrapper).setLayoutParams(contentLayoutParams);
         this.mGroup.addView(this.view);
         // 调用父类的onCreateView方法
         return super.onCreateView(layoutInflater, viewGroup, bundle);

@@ -33,9 +33,9 @@ public final class RestartActivity extends AppActivity {
 
     @Override
     protected void initData() {
-        restart(this);
+       // restart(this);
         finish();
-        toast(R.string.common_crash_hint);
+        toast(R.string.common_crash_hint2);
     }
 
     public static void restart(Context context) {

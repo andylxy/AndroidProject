@@ -22,6 +22,7 @@
     <string name="common_second">秒</string>
 
     <string name="common_crash_hint">应用出了点小意外，正在重新启动</string>
+    <string name="common_crash_hint2">应用出了点小意外，请重新启动</string>
 
     <string name="common_network_error">当前网络不可用，请检查网络设置</string>
 

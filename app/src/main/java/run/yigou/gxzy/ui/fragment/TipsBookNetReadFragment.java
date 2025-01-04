@@ -69,7 +69,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     private ClearEditText clearEditText;
     private ExpandableAdapter adapter;
     private BookArgs bookArgs;
-    private boolean isBtnSearch;
+
     /**
      *
      */
@@ -575,7 +575,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 }
             } else {
                 //搜索结果
-                if (!singletonNetData.getSearchResList().isEmpty())
+               // if (!singletonNetData.getSearchResList().isEmpty())
                     adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getSearchResList(), isExpand));
             }
             adapter.notifyDataChanged();

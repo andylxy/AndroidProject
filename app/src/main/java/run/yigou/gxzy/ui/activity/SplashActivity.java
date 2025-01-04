@@ -61,19 +61,19 @@ public final class SplashActivity extends AppActivity {
             mDebugView.setVisibility(View.INVISIBLE);
         }
 
-        if (true) {
-            return;
-        }
-        // 刷新用户信息
-        EasyHttp.post(this)
-                .api(new UserInfoApi())
-                .request(new HttpCallback<HttpData<UserInfoApi.Bean>>(this) {
-
-                    @Override
-                    public void onSucceed(HttpData<UserInfoApi.Bean> data) {
-
-                    }
-                });
+//        if (true) {
+//            return;
+//        }
+//        // 刷新用户信息
+//        EasyHttp.post(this)
+//                .api(new UserInfoApi())
+//                .request(new HttpCallback<HttpData<UserInfoApi.Bean>>(this) {
+//
+//                    @Override
+//                    public void onSucceed(HttpData<UserInfoApi.Bean> data) {
+//
+//                    }
+//                });
     }
 
     @NonNull
