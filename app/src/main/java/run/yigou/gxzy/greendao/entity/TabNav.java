@@ -18,6 +18,7 @@ public class TabNav  implements Serializable {
     private String tabNavId;
     private int caseId;
     private String name;
+    private  int order;
     @ToMany(referencedJoinProperty = "tabNavId")
     private List<TabNavBody> navList;
     /** Used to resolve relations */
@@ -26,15 +27,18 @@ public class TabNav  implements Serializable {
     /** Used for active entity operations. */
     @Generated(hash = 353333401)
     private transient TabNavDao myDao;
-    @Generated(hash = 1856834222)
-    public TabNav(String tabNavId, int caseId, String name) {
+
+    @Generated(hash = 1330423056)
+    public TabNav(String tabNavId, int caseId, String name, int order) {
         this.tabNavId = tabNavId;
         this.caseId = caseId;
         this.name = name;
+        this.order = order;
     }
     @Generated(hash = 1847113361)
     public TabNav() {
     }
+
     public String getTabNavId() {
         return this.tabNavId;
     }
@@ -52,6 +56,12 @@ public class TabNav  implements Serializable {
     }
     public void setName(String name) {
         this.name = name;
+    }
+    public int getOrder() {
+        return this.order;
+    }
+    public void setOrder(int order) {
+        this.order = order;
     }
     /**
      * To-many relationship, resolved on first access (and after reset).
@@ -118,4 +128,5 @@ public class TabNav  implements Serializable {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getTabNavDao() : null;
     }
+
 }

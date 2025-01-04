@@ -374,24 +374,20 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                 throw new IllegalStateException("mTabNavService, mPagerAdapter, or mTabAdapter is not initialized");
                             }
 
-                            List<TabNav> newBookNavList = new CopyOnWriteArrayList<>(data.getData());
-                            for (TabNav nav : newBookNavList) {
+                            bookNavList = new CopyOnWriteArrayList<>(data.getData());
+                            for (TabNav nav : bookNavList) {
                                 // 内容列表存在才添加
                                 if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
-                                    String tabNavId = mTabNavService.getUUID();
+
                                     mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
                                     mTabAdapter.addItem(nav.getName());
-                                    ThreadUtil.runInBackground(() -> {
-                                        try {
-                                            // 保存到数据库
-                                            ConvertEntity.saveTabNvaInDb(nav, tabNavId);
-                                        } catch (Exception e) {
-                                           EasyLog.print("onSucceed", "Failed to save TabNav to database"+ e.getMessage());
-                                        }
-                                    });
+
                                 }
                             }
-                            bookNavList = newBookNavList;
+                            // 保存到数据库
+                            ThreadUtil.runInBackground(() -> {
+                                    ConvertEntity.saveTabNvaInDb(bookNavList);
+                            });
                         } else {
                             bookNavList = new ArrayList<>();
                         }

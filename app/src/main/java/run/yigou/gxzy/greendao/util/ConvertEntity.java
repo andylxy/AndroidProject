@@ -31,6 +31,7 @@ import run.yigou.gxzy.greendao.gen.YaoFangBodyDao;
 import run.yigou.gxzy.greendao.gen.YaoFangDao;
 import run.yigou.gxzy.greendao.gen.ZhongYaoDao;
 import run.yigou.gxzy.greendao.service.AboutService;
+import run.yigou.gxzy.ui.fragment.TipsWindowNetFragment;
 import run.yigou.gxzy.ui.tips.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.DataBeans.Yao;
@@ -88,10 +89,10 @@ public class ConvertEntity {
             ArrayList<MingCiContent> mingCiContentList = ConvertEntity.getMingCi();
             // 加载常用名词
             TipsSingleData.getInstance().setMingCiData(new HH2SectionData(mingCiContentList, 0, "医书相关的名词说明"));
-              // 加载中药别名
-            Map<String, String> yaoAliasDict=   TipsSingleData.getInstance(). getYaoAliasDict();
+            // 加载中药别名
+            Map<String, String> yaoAliasDict = TipsSingleData.getInstance().getYaoAliasDict();
             for (ZhongYaoAlia yaoAlia : getYaoAlia()) {
-                yaoAliasDict.put(yaoAlia.getBieming(),yaoAlia.getName() );
+                yaoAliasDict.put(yaoAlia.getBieming(), yaoAlia.getName());
             }
             // 从数据库中加载所有导航信息
             ArrayList<TabNav> navList = dbService.mTabNavService.findAll();
@@ -108,7 +109,7 @@ public class ConvertEntity {
                     // 遍历导航信息
                     for (TabNav nav : navList) {
                         // 将导航信息添加到映射中
-                        navTabMap.put(nav.getCaseId(), nav);
+                        navTabMap.put(nav.getOrder(), nav);
                         // 遍历导航下的书籍信息
                         for (TabNavBody item : nav.getNavList()) {
                             // 检查书籍编号是否有效
@@ -200,42 +201,56 @@ public class ConvertEntity {
     }
 
 
-    public static void saveTabNvaInDb(TabNav nav, String tabNavId) {
-        // 当前数据不存则,添加到数据库
-        ArrayList<TabNav> navList = DbService.getInstance().mTabNavService.find(TabNavDao.Properties.CaseId.eq(nav.getCaseId()));
-        if (navList == null || navList.isEmpty()) {
-            nav.setTabNavId(tabNavId);
-            try {
-                DbService.getInstance().mTabNavService.addEntity(nav);
-            } catch (Exception e) {
-                // 处理异常，比如记录日志、通知管理员等
-                EasyLog.print("Failed to addEntity: " + e.getMessage());
-                // 根据具体情况决定是否需要重新抛出异常
-                //throw e;
-            }
+    public static void saveTabNvaInDb(List<TabNav> bookNavList) {
 
-        } else {
-            tabNavId = navList.get(0).getTabNavId();
-        }
-        for (TabNavBody item : nav.getNavList()) {
+       int order=0;
+        for (TabNav nav : bookNavList) {
+            // 内容列表存在才添加
+            if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
+               String tabNavId = DbService.getInstance().mTabNavService.getUUID();
+                // 当前数据不存则,添加到数据库
+                ArrayList<TabNav> navList = DbService.getInstance().mTabNavService.find(TabNavDao.Properties.CaseId.eq(nav.getCaseId()));
+                if (navList == null || navList.isEmpty()) {
+                    nav.setTabNavId(tabNavId);
+                    nav.setOrder(order);
+                    order++;
+                    try {
+                        DbService.getInstance().mTabNavService.addEntity(nav);
+                    } catch (Exception e) {
+                        // 处理异常，比如记录日志、通知管理员等
+                        EasyLog.print("Failed to addEntity: " + e.getMessage());
+                        // 根据具体情况决定是否需要重新抛出异常
+                        //throw e;
+                    }
 
-            if (item.getBookNo() > 0)
-                TipsSingleData.getInstance().getNavTabBodyMap().put(item.getBookNo(), item);
-            // 当前数据不存则,添加到数据库
-            ArrayList<TabNavBody> list = DbService.getInstance().mTabNavBodyService.find(TabNavBodyDao.Properties.BookNo.eq(item.getBookNo()));
-            if (list == null || list.isEmpty()) {
-                item.setTabNavId(tabNavId);
-                item.setTabNavBodyId(DbService.getInstance().mTabNavBodyService.getUUID());
-                try {
-                    DbService.getInstance().mTabNavBodyService.addEntity(item);
-                } catch (Exception e) {
-                    // 处理异常，比如记录日志、通知管理员等
-                    EasyLog.print("Failed to addEntity: " + e.getMessage());
-                    // 根据具体情况决定是否需要重新抛出异常
-                    //throw e;
+                } else {
+                    tabNavId = navList.get(0).getTabNavId();
+                }
+
+                for (TabNavBody item : nav.getNavList()) {
+
+                    if (item.getBookNo() > 0)
+                        TipsSingleData.getInstance().getNavTabBodyMap().put(item.getBookNo(), item);
+                    // 当前数据不存则,添加到数据库
+                    ArrayList<TabNavBody> list = DbService.getInstance().mTabNavBodyService.find(TabNavBodyDao.Properties.BookNo.eq(item.getBookNo()));
+                    if (list == null || list.isEmpty()) {
+                        item.setTabNavId(tabNavId);
+                        item.setTabNavBodyId(DbService.getInstance().mTabNavBodyService.getUUID());
+                        try {
+                            DbService.getInstance().mTabNavBodyService.addEntity(item);
+                        } catch (Exception e) {
+                            // 处理异常，比如记录日志、通知管理员等
+                            EasyLog.print("Failed to addEntity: " + e.getMessage());
+                            // 根据具体情况决定是否需要重新抛出异常
+                            //throw e;
+                        }
+
+                    }
                 }
 
             }
+
+
         }
     }
 

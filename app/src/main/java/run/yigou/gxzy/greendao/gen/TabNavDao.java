@@ -27,6 +27,7 @@ public class TabNavDao extends AbstractDao<TabNav, String> {
         public final static Property TabNavId = new Property(0, String.class, "tabNavId", true, "TAB_NAV_ID");
         public final static Property CaseId = new Property(1, int.class, "caseId", false, "CASE_ID");
         public final static Property Name = new Property(2, String.class, "name", false, "NAME");
+        public final static Property Order = new Property(3, int.class, "order", false, "ORDER");
     }
 
     private DaoSession daoSession;
@@ -47,7 +48,8 @@ public class TabNavDao extends AbstractDao<TabNav, String> {
         db.execSQL("CREATE TABLE " + constraint + "\"TAB_NAV\" (" + //
                 "\"TAB_NAV_ID\" TEXT PRIMARY KEY NOT NULL ," + // 0: tabNavId
                 "\"CASE_ID\" INTEGER NOT NULL ," + // 1: caseId
-                "\"NAME\" TEXT);"); // 2: name
+                "\"NAME\" TEXT," + // 2: name
+                "\"ORDER\" INTEGER NOT NULL );"); // 3: order
     }
 
     /** Drops the underlying database table. */
@@ -70,6 +72,7 @@ public class TabNavDao extends AbstractDao<TabNav, String> {
         if (name != null) {
             stmt.bindString(3, name);
         }
+        stmt.bindLong(4, entity.getOrder());
     }
 
     @Override
@@ -86,6 +89,7 @@ public class TabNavDao extends AbstractDao<TabNav, String> {
         if (name != null) {
             stmt.bindString(3, name);
         }
+        stmt.bindLong(4, entity.getOrder());
     }
 
     @Override
@@ -104,7 +108,8 @@ public class TabNavDao extends AbstractDao<TabNav, String> {
         TabNav entity = new TabNav( //
             cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0), // tabNavId
             cursor.getInt(offset + 1), // caseId
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2) // name
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // name
+            cursor.getInt(offset + 3) // order
         );
         return entity;
     }
@@ -114,6 +119,7 @@ public class TabNavDao extends AbstractDao<TabNav, String> {
         entity.setTabNavId(cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0));
         entity.setCaseId(cursor.getInt(offset + 1));
         entity.setName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setOrder(cursor.getInt(offset + 3));
      }
     
     @Override
