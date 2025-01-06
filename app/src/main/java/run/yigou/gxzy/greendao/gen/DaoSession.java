@@ -13,6 +13,7 @@ import run.yigou.gxzy.greendao.entity.BeiMingCi;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.BookChapter;
 import run.yigou.gxzy.greendao.entity.BookChapterBody;
+import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.entity.TabNav;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
@@ -27,6 +28,7 @@ import run.yigou.gxzy.greendao.gen.BeiMingCiDao;
 import run.yigou.gxzy.greendao.gen.BookDao;
 import run.yigou.gxzy.greendao.gen.BookChapterDao;
 import run.yigou.gxzy.greendao.gen.BookChapterBodyDao;
+import run.yigou.gxzy.greendao.gen.ChapterDao;
 import run.yigou.gxzy.greendao.gen.SearchHistoryDao;
 import run.yigou.gxzy.greendao.gen.TabNavDao;
 import run.yigou.gxzy.greendao.gen.TabNavBodyDao;
@@ -50,6 +52,7 @@ public class DaoSession extends AbstractDaoSession {
     private final DaoConfig bookDaoConfig;
     private final DaoConfig bookChapterDaoConfig;
     private final DaoConfig bookChapterBodyDaoConfig;
+    private final DaoConfig chapterDaoConfig;
     private final DaoConfig searchHistoryDaoConfig;
     private final DaoConfig tabNavDaoConfig;
     private final DaoConfig tabNavBodyDaoConfig;
@@ -64,6 +67,7 @@ public class DaoSession extends AbstractDaoSession {
     private final BookDao bookDao;
     private final BookChapterDao bookChapterDao;
     private final BookChapterBodyDao bookChapterBodyDao;
+    private final ChapterDao chapterDao;
     private final SearchHistoryDao searchHistoryDao;
     private final TabNavDao tabNavDao;
     private final TabNavBodyDao tabNavBodyDao;
@@ -91,6 +95,9 @@ public class DaoSession extends AbstractDaoSession {
 
         bookChapterBodyDaoConfig = daoConfigMap.get(BookChapterBodyDao.class).clone();
         bookChapterBodyDaoConfig.initIdentityScope(type);
+
+        chapterDaoConfig = daoConfigMap.get(ChapterDao.class).clone();
+        chapterDaoConfig.initIdentityScope(type);
 
         searchHistoryDaoConfig = daoConfigMap.get(SearchHistoryDao.class).clone();
         searchHistoryDaoConfig.initIdentityScope(type);
@@ -121,6 +128,7 @@ public class DaoSession extends AbstractDaoSession {
         bookDao = new BookDao(bookDaoConfig, this);
         bookChapterDao = new BookChapterDao(bookChapterDaoConfig, this);
         bookChapterBodyDao = new BookChapterBodyDao(bookChapterBodyDaoConfig, this);
+        chapterDao = new ChapterDao(chapterDaoConfig, this);
         searchHistoryDao = new SearchHistoryDao(searchHistoryDaoConfig, this);
         tabNavDao = new TabNavDao(tabNavDaoConfig, this);
         tabNavBodyDao = new TabNavBodyDao(tabNavBodyDaoConfig, this);
@@ -135,6 +143,7 @@ public class DaoSession extends AbstractDaoSession {
         registerDao(Book.class, bookDao);
         registerDao(BookChapter.class, bookChapterDao);
         registerDao(BookChapterBody.class, bookChapterBodyDao);
+        registerDao(Chapter.class, chapterDao);
         registerDao(SearchHistory.class, searchHistoryDao);
         registerDao(TabNav.class, tabNavDao);
         registerDao(TabNavBody.class, tabNavBodyDao);
@@ -151,6 +160,7 @@ public class DaoSession extends AbstractDaoSession {
         bookDaoConfig.clearIdentityScope();
         bookChapterDaoConfig.clearIdentityScope();
         bookChapterBodyDaoConfig.clearIdentityScope();
+        chapterDaoConfig.clearIdentityScope();
         searchHistoryDaoConfig.clearIdentityScope();
         tabNavDaoConfig.clearIdentityScope();
         tabNavBodyDaoConfig.clearIdentityScope();
@@ -179,6 +189,10 @@ public class DaoSession extends AbstractDaoSession {
 
     public BookChapterBodyDao getBookChapterBodyDao() {
         return bookChapterBodyDao;
+    }
+
+    public ChapterDao getChapterDao() {
+        return chapterDao;
     }
 
     public SearchHistoryDao getSearchHistoryDao() {

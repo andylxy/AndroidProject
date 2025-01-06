@@ -45,17 +45,17 @@ public final class BookCollectCaseAdapter extends AppAdapter<Book> {
         // private final ImageView mDelete;
         private final TextView tvBookName;
         private final TextView tvBookAuthor;
-        private final TextView tvBookDesc;
-        private final ImageView ivBookImg;
+        //private final TextView tvBookDesc;
+        //private final ImageView ivBookImg;
 
         private ViewHolder() {
             super(R.layout.book_tab_label_book_item);
             // mTextView = findViewById(R.id.tv_status_text);
             tvBookName = findViewById(R.id.tv_book_name);
             tvBookAuthor = findViewById(R.id.tv_book_author);
-            tvBookDesc = findViewById(R.id.tv_book_desc);
-            ivBookImg = findViewById(R.id.iv_book_img);
-           // mDelete = findViewById(R.id.iv_book_del);
+            // tvBookDesc = findViewById(R.id.tv_book_desc);
+            //  ivBookImg = findViewById(R.id.iv_book_img);
+            // mDelete = findViewById(R.id.iv_book_del);
         }
 
         @SuppressLint("SetTextI18n")

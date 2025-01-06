@@ -344,9 +344,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     @SingleClick
     @Override
     public void onClick(View view) {
-        int viewId = view.getId();
 
-        switch (viewId) {
+        switch (view.getId()) {
             case R.id.tv_home_search_text:
                 mTvHomeSearchText.setFocusable(true);
                 mTvHomeSearchText.setFocusableInTouchMode(true);
@@ -357,7 +356,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                 search();
                 break;
             default:
-                EasyLog.print("onClick value: " + viewId);
+                EasyLog.print("onClick value: " + view.getId());
         }
     }
 
@@ -386,7 +385,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             }
                             // 保存到数据库
                             ThreadUtil.runInBackground(() -> {
-                                    ConvertEntity.saveTabNvaInDb(bookNavList);
+                                    ConvertEntity.saveTabNvaInDb(bookNavList, newInstance());
                             });
                         } else {
                             bookNavList = new ArrayList<>();

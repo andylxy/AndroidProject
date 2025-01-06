@@ -18,11 +18,12 @@ public class TabNavBody  implements Serializable {
     private String chengShu;
     private String author;
     private String desc;
+    private int chapterCount;
 
-    @Generated(hash = 1975171977)
+    @Generated(hash = 381308413)
     public TabNavBody(String tabNavBodyId, String tabNavId, Long Id, int bookNo,
             String imageUrl, String bookName, String chengShu, String author,
-            String desc) {
+            String desc, int chapterCount) {
         this.tabNavBodyId = tabNavBodyId;
         this.tabNavId = tabNavId;
         this.Id = Id;
@@ -32,6 +33,7 @@ public class TabNavBody  implements Serializable {
         this.chengShu = chengShu;
         this.author = author;
         this.desc = desc;
+        this.chapterCount = chapterCount;
     }
     @Generated(hash = 1918260576)
     public TabNavBody() {
@@ -90,5 +92,11 @@ public class TabNavBody  implements Serializable {
     }
     public void setDesc(String desc) {
         this.desc = desc;
+    }
+    public int getChapterCount() {
+        return this.chapterCount;
+    }
+    public void setChapterCount(int chapterCount) {
+        this.chapterCount = chapterCount;
     }
 }

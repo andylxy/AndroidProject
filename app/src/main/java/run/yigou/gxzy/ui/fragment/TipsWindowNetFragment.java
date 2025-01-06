@@ -4,7 +4,6 @@ package run.yigou.gxzy.ui.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -23,42 +22,31 @@ import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.greendao.entity.BookChapter;
-import run.yigou.gxzy.greendao.entity.BookChapterBody;
+import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.greendao.entity.YaoFang;
-import run.yigou.gxzy.greendao.entity.YaoFangBody;
-import run.yigou.gxzy.greendao.gen.BookChapterBodyDao;
-import run.yigou.gxzy.greendao.gen.BookChapterDao;
-import run.yigou.gxzy.greendao.gen.YaoFangBodyDao;
-import run.yigou.gxzy.greendao.gen.YaoFangDao;
-import run.yigou.gxzy.greendao.service.BookChapterBodyService;
-import run.yigou.gxzy.greendao.service.BookChapterService;
-import run.yigou.gxzy.greendao.service.YaoFangBodyService;
-import run.yigou.gxzy.greendao.service.YaoFangService;
+import run.yigou.gxzy.greendao.gen.ChapterDao;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookContentApi;
 import run.yigou.gxzy.http.api.BookFangApi;
+import run.yigou.gxzy.http.api.ChapterContentApi;
+import run.yigou.gxzy.http.api.ChapterListApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.DataBeans.Fang;
-import run.yigou.gxzy.ui.tips.DataBeans.YaoUse;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
-import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 
@@ -185,6 +173,38 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
      */
     public void getBookData(int bookId) {
 
+//        //加载书本相关的药方
+      TabNavBody book = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
+
+//        if (book != null) {
+//            ArrayList<Chapter> list = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(book.getBookNo()));
+//            List<HH2SectionData> detailList = new ArrayList<>();
+//            for (Chapter chapter : list) {
+//
+//                if (!chapter.getIsDownload()) {
+//                    getChapterList(chapter,detailList);
+//                }
+//                detailList.add(new HH2SectionData(new ArrayList<>(), chapter.getChapterSection(), chapter.getChapterHeader()));
+//
+////                try {
+////                    DbService.getInstance().mChapterService.updateEntity(chapter);
+////                } catch (Exception e) {
+////                    // 处理异常，比如记录日志、通知管理员等
+////                    EasyLog.print("Failed to addEntity: " + e.getMessage());
+////                    return;
+////                    // 根据具体情况决定是否需要重新抛出异常
+////                    //throw e;
+////                }
+//
+//
+//            }
+//            //加载书本内容
+//            singletonNetData.setContent(detailList);
+//        } else {
+//            toast("书籍信息错误,退出后重新打开!!!!");
+//        }
+
+
         EasyHttp.get(this)
                 .api(new BookContentApi().setBookId(bookId))
                 .request(new HttpCallback<HttpData<List<HH2SectionData>>>(this) {
@@ -212,12 +232,9 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
 
                 });
 
-
-        //加载书本相关的药方
-        TabNavBody tabNav = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
         StringBuilder fangName = new StringBuilder("\n");
-        if (tabNav != null) {
-            fangName.append(tabNav.getBookName());
+        if (book != null) {
+            fangName.append(book.getBookName());
         } else {
             fangName.append("药方");
         }
@@ -238,6 +255,40 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
                     }
                 });
     }
+//    public  void getChapterList(Chapter chapter, List<HH2SectionData> detailList ) {
+//
+//        EasyHttp.get(this)
+//                .api(new ChapterContentApi().setContentId(chapter.getChapterSection()).setSgnatureId(chapter.getSgnatureId()))
+//
+//                .request(new HttpCallback<HttpData<List<HH2SectionData>>>(this) {
+//                    @Override
+//                    public void onSucceed(HttpData<List<HH2SectionData>> data) {
+//                        if (data != null && !data.getData().isEmpty()) {
+//                          //  ArrayList<Chapter> list = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(item.getBookNo()));
+//
+//                            for (HH2SectionData hh2SectionData  : detailList) {
+//                               if (hh2SectionData.getSignatureId() ==data.getData().get(0).getSignatureId()){
+//                                 ArrayList<DataItem> list = (ArrayList<DataItem>) data.getData().get(0).getData();
+//                                  // hh2SectionData.getData().addAll(list);
+//                                   for (DataItem  dataItem :   data.getData().get(0).getData()) {
+//
+//                                       hh2SectionData.getData().add(dataItem);
+//                                    }
+//                               }
+//                            }
+//
+//
+//                       }
+//                    }
+//
+//                    @Override
+//                    public void onFail(Exception e) {
+//                        super.onFail(e);
+//
+//                    }
+//                });
+//
+//    }
 
     /**
      * {@link OnRefreshLoadMoreListener}
