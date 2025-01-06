@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.base.BaseAdapter;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.lucas.annotations.Subscribe;
@@ -20,7 +19,6 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
@@ -28,22 +26,16 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.greendao.gen.ChapterDao;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
-import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookContentApi;
 import run.yigou.gxzy.http.api.BookFangApi;
-import run.yigou.gxzy.http.api.ChapterContentApi;
-import run.yigou.gxzy.http.api.ChapterListApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.DataBeans.Fang;
-import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
@@ -128,20 +120,26 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
             singletonNetData.setYaoAliasDict(singleData.getYaoAliasDict());
         if (singletonNetData.getFangAliasDict() == null)
             singletonNetData.setFangAliasDict(singleData.getFangAliasDict());
+
         getBookData(bookId);
         //等待后台数据获取成功
         ThreadPoolManager.getInstance().execute(() -> {
             int count = 0;
             try {
-                while (singletonNetData.getContent().isEmpty() && count < 20) {
-                    Thread.sleep(500); // 延迟数据获取成功
+                while (singletonNetData.getContent().isEmpty() && count < 60) {
+                    Thread.sleep(1000); // 延迟数据获取成功
                     count++;
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             if (singletonNetData.getContent().isEmpty()) {
-                toast("获取数据失败：");
+                TabNavBody book = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
+                if (book != null) {
+                    toast( "网络异常 : <<"+book.getBookName()+">> 获取数据失败,");
+                }else {
+                    toast("网络异常 :获取数据失败,");
+                }
                 return;
             }
             post(() -> {
@@ -175,7 +173,8 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
 
 //        //加载书本相关的药方
       TabNavBody book = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
-
+//
+        // 获取书本章节列表,后续再实现
 //        if (book != null) {
 //            ArrayList<Chapter> list = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(book.getBookNo()));
 //            List<HH2SectionData> detailList = new ArrayList<>();
