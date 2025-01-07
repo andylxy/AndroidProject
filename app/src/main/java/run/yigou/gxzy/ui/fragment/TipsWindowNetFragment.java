@@ -3,6 +3,7 @@
 package run.yigou.gxzy.ui.fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 
@@ -19,6 +20,7 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
@@ -32,6 +34,9 @@ import run.yigou.gxzy.http.api.BookContentApi;
 import run.yigou.gxzy.http.api.BookFangApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ThreadPoolManager;
+import run.yigou.gxzy.ui.activity.AboutActivity;
+import run.yigou.gxzy.ui.activity.CopyActivity;
+import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
@@ -42,7 +47,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 
-public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
+public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
         implements OnRefreshLoadMoreListener,
         BaseAdapter.OnItemClickListener {
 
@@ -100,7 +105,13 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
         XEventBus.getDefault().register(TipsWindowNetFragment.this);
     }
 
-
+    // 在 Fragment 中使用 WeakReference 来避免内存泄漏
+    private WeakReference<Activity> weakActivity;
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        weakActivity = new WeakReference<>((Activity) context);
+    }
     private List<TabNavBody> analogData() {
         return mNavList;
     }
@@ -123,7 +134,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
 
         getBookData(bookId);
         //等待后台数据获取成功
-        ThreadPoolManager.getInstance().execute(() -> {
+        ThreadUtil.runInBackground(() -> {
             int count = 0;
             try {
                 while (singletonNetData.getContent().isEmpty() && count < 60) {
@@ -136,21 +147,43 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
             if (singletonNetData.getContent().isEmpty()) {
                 TabNavBody book = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
                 if (book != null) {
-                    toast( "网络异常 : <<"+book.getBookName()+">> 获取数据失败,");
-                }else {
+                    toast("网络异常 : <<" + book.getBookName() + ">> 获取数据失败,");
+                } else {
                     toast("网络异常 :获取数据失败,");
                 }
                 return;
             }
+//            post(() -> {
+//                // 启动跳转 到阅读窗口
+//                Intent intent = new Intent(getContext(), TipsFragmentActivity.class);
+//                intent.putExtra("bookId", bookId);
+//                if (!(getContext() instanceof Activity)) {
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                }
+//                startActivity(intent);
+//            });
             post(() -> {
-                // 启动跳转 到阅读窗口
-                Intent intent = new Intent(getContext(), TipsFragmentActivity.class);
+                // 获取 Activity 上下文，避免使用 getContext() 引发潜在问题
+                Activity activity = weakActivity.get();
+
+                if (activity == null) {
+                    // 如果 Fragment 当前不附加到 Activity，直接返回，不进行启动操作
+                    return;
+                }
+
+                // 启动跳转到阅读窗口
+                Intent intent = new Intent(activity, TipsFragmentActivity.class);
+              //  Intent intent = new Intent(activity, CopyActivity.class);
                 intent.putExtra("bookId", bookId);
-                if (!(getContext() instanceof Activity)) {
+
+                // 如果当前上下文不是 Activity，需要添加 FLAG_ACTIVITY_NEW_TASK
+                if (!(activity instanceof Activity)) {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
-                startActivity(intent);
+
+                activity.startActivity(intent);
             });
+
         });
 
     }
@@ -172,7 +205,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
     public void getBookData(int bookId) {
 
 //        //加载书本相关的药方
-      TabNavBody book = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
+        TabNavBody book = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
 //
         // 获取书本章节列表,后续再实现
 //        if (book != null) {
@@ -316,7 +349,10 @@ public final class TipsWindowNetFragment extends TitleBarFragment<AppActivity>
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+        // 清理 post 或异步任务，确保引用不再存在
+        weakActivity.clear();
         XEventBus.getDefault().unregister(TipsWindowNetFragment.this);
+        super.onDestroy();
+
     }
 }

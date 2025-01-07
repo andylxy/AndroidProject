@@ -183,6 +183,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
     @Override
     public void onDestroy() {
         super.onDestroy();
+        instance =null;
         // 注销事件
         XEventBus.getDefault().unregister(TipsSettingFragment.this);
     }

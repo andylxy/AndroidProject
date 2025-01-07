@@ -51,6 +51,12 @@ public final class TipsUnitShowFragment extends AppFragment<AppActivity>{
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        instance =null;
+    }
+
+    @Override
     protected void initData() {
         tipsUnitFragmentAdapter.setData(loadData());
     }

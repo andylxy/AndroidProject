@@ -538,7 +538,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (onBackPressedCallback != null) {
             onBackPressedCallback.remove();
         }
-
+        instance =null;
         // 注销事件
         XEventBus.getDefault().unregister(TipsBookNetReadFragment.this);
     }

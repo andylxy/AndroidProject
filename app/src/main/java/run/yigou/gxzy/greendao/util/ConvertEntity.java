@@ -222,9 +222,9 @@ public class ConvertEntity {
                             //throw e;
                         }
                         // 获取章节列表
-                        ThreadUtil.runInBackground(() -> {
-                            getChapterList(homeFragment, item);
-                        });
+                       // ThreadUtil.runInBackground(() -> {
+                       //     getChapterList(homeFragment, item);
+                       // });
 
                     }
                 }

@@ -145,13 +145,13 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         mViewPager.setAdapter(null);
         mViewPager=null;
         mNavigationView.setAdapter(null);
         mNavigationView=null;
         mNavigationAdapter.setOnNavigationListener(null);
         mNavigationAdapter = null;
+        super.onDestroy();
     }
 
 }
