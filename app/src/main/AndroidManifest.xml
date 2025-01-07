@@ -161,7 +161,7 @@
             android:screenOrientation="portrait" />
         <!-- 关于我们 -->
         <activity
-            android:name=".ui.activity.CopyActivity"
+            android:name=".ui.activity.CopyActivityTest"
             android:label="@string/about_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />

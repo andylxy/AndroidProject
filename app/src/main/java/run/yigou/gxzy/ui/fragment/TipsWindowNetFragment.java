@@ -35,7 +35,9 @@ import run.yigou.gxzy.http.api.BookFangApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.ui.activity.AboutActivity;
+import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.activity.CopyActivity;
+import run.yigou.gxzy.ui.activity.CopyActivityTest;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
@@ -107,11 +109,13 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
 
     // 在 Fragment 中使用 WeakReference 来避免内存泄漏
     private WeakReference<Activity> weakActivity;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         weakActivity = new WeakReference<>((Activity) context);
     }
+
     private List<TabNavBody> analogData() {
         return mNavList;
     }
@@ -125,6 +129,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
      */
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
+        
         bookId = mAdapter.getItem(position).getBookNo();
         singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
         if (singletonNetData.getYaoAliasDict() == null)
@@ -153,15 +158,6 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
                 }
                 return;
             }
-//            post(() -> {
-//                // 启动跳转 到阅读窗口
-//                Intent intent = new Intent(getContext(), TipsFragmentActivity.class);
-//                intent.putExtra("bookId", bookId);
-//                if (!(getContext() instanceof Activity)) {
-//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                }
-//                startActivity(intent);
-//            });
             post(() -> {
                 // 获取 Activity 上下文，避免使用 getContext() 引发潜在问题
                 Activity activity = weakActivity.get();
@@ -170,10 +166,9 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
                     // 如果 Fragment 当前不附加到 Activity，直接返回，不进行启动操作
                     return;
                 }
-
                 // 启动跳转到阅读窗口
                 Intent intent = new Intent(activity, TipsFragmentActivity.class);
-              //  Intent intent = new Intent(activity, CopyActivity.class);
+                //  Intent intent = new Intent(activity, CopyActivity.class);
                 intent.putExtra("bookId", bookId);
 
                 // 如果当前上下文不是 Activity，需要添加 FLAG_ACTIVITY_NEW_TASK
@@ -181,7 +176,9 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
 
-                activity.startActivity(intent);
+                startActivityForResult(intent, (resultCode, data) -> {
+
+                });
             });
 
         });
