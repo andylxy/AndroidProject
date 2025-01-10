@@ -103,27 +103,29 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     private OnBackPressedCallback onBackPressedCallback;
 
 
-    // 单例模式，确保实例的唯一性
-    private static volatile TipsBookNetReadFragment instance;
-
-    // 私有构造函数，防止外部直接实例化
-    private TipsBookNetReadFragment() {
-        try {
-            // 构造函数中的初始化逻辑
-            // 可以在这里添加一些基本的校验逻辑
-        } catch (Exception e) {
-            // 异常处理
-            throw new RuntimeException("Failed to create TipsBookNetReadFragment instance", e);
-        }
-    }
+//    // 单例模式，确保实例的唯一性
+//    private static volatile TipsBookNetReadFragment instance;
+//
+//    // 私有构造函数，防止外部直接实例化
+//    private TipsBookNetReadFragment() {
+//        try {
+//            // 构造函数中的初始化逻辑
+//            // 可以在这里添加一些基本的校验逻辑
+//        } catch (Exception e) {
+//            // 异常处理
+//            throw new RuntimeException("Failed to create TipsBookNetReadFragment instance", e);
+//        }
+//    }
 
     public static synchronized TipsBookNetReadFragment newInstance(BookArgs bookArgs) {
-        if (instance == null) {
-            instance = new TipsBookNetReadFragment();
-        }
-        if (bookArgs != null) {
-            instance.bookArgs = bookArgs;
-        }
+//        if (instance == null) {
+//            instance = new TipsBookNetReadFragment();
+//        }
+//        if (bookArgs != null) {
+//            instance.bookArgs = bookArgs;
+//        }
+        TipsBookNetReadFragment instance = new TipsBookNetReadFragment();
+        instance.bookArgs = bookArgs;
         return instance;
     }
 
@@ -462,7 +464,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     private void initializeAdapter() {
         adapter = new ExpandableAdapter(getContext());
     }
+
     private boolean isShowUpdateNotification = true;
+
     private void setHeaderClickListener() {
         adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
             @Override
@@ -495,7 +499,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 if (adapter.getSearch()) return true;
                 TipsNetHelper.showListDialog(getContext(), AppConst.reData_Type)
                         .setListener((dialog, position, string) -> {
-                            if (string.equals("重新下载全部数据") ) {
+                            if (string.equals("重新下载全部数据")) {
                                 //通知显示已经变更
                                 ShowUpdateNotificationEvent showUpdateNotification = new ShowUpdateNotificationEvent();
                                 if (isShowUpdateNotification) {
@@ -508,16 +512,16 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                                     toast("重新下载全部数据数据!!!!");
                                 }
                             }
-                            if (string.equals("重新下本章节") ) {
+                            if (string.equals("重新下本章节")) {
                                 //通知显示已经变更
                                 ShowUpdateNotificationEvent showUpdateNotification = new ShowUpdateNotificationEvent();
-                                if ( isShowUpdateNotification) {
+                                if (isShowUpdateNotification) {
                                     // 标记正在重新下载数据
                                     showUpdateNotification.setUpdateNotification(true);
                                     showUpdateNotification.setChapterNotification(true);
                                     isShowUpdateNotification = false;
-                                   // HH2SectionData hh2Section =  singletonNetData.getContent().get(groupPosition);
-                                    showUpdateNotification.setChapterId( singletonNetData.getContent().get(groupPosition).getSignatureId());
+                                    // HH2SectionData hh2Section =  singletonNetData.getContent().get(groupPosition);
+                                    showUpdateNotification.setChapterId(singletonNetData.getContent().get(groupPosition).getSignatureId());
                                     XEventBus.getDefault().post(showUpdateNotification);
                                 } else {
                                     toast("正在重新下本章节数据!!!!");
@@ -583,7 +587,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (onBackPressedCallback != null) {
             onBackPressedCallback.remove();
         }
-        instance = null;
+       // instance = null;
         // 注销事件
         XEventBus.getDefault().unregister(TipsBookNetReadFragment.this);
     }
