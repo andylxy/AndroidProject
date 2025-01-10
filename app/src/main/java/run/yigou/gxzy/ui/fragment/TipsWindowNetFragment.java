@@ -194,13 +194,14 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
 
     }
 
-    private ShowUpdateNotificationEvent showUpdateNotificationEvent;
-
+    private boolean showUpdateNotificationEvent=false;
+    private ShowUpdateNotificationEvent eventEntity;
     // 标记正在重新下载数据
     @Subscribe(priority = 1)
     public void onUpdateEvent(ShowUpdateNotificationEvent event) {
         ThreadUtil.runOnUiThread(() -> {
-            showUpdateNotificationEvent = event;
+            showUpdateNotificationEvent = true;
+            eventEntity = event;
             if (event.isUpdateNotification() && event.isAllChapterNotification()) {
                 getBookData(bookId);
                 toast("正在重新下载全部数据!!!!");
@@ -268,15 +269,10 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
      * 通知数据下载结束更新
      */
     private void chapterNotificationEvent() {
-        ShowUpdateNotificationEvent showUpdateNotification = singletonNetData.getShowUpdateNotification();
-        if (showUpdateNotification.isUpdateNotification()) {
-            // 通知数据下载结束更新
-            showUpdateNotification.setUpdateNotification(false);
-            showUpdateNotification.setChapterNotification(false);
-            showUpdateNotification.setAllChapterNotification(false);
-            showUpdateNotification.setChapterId(0L);
-            toast("数据已经重新下载完成!!!!");
-        }
+
+          // 通知数据下载结束更新
+
+        toast("数据已经重新下载完成!!!!");
     }
 
     private final List<HH2SectionData> detailList = new ArrayList<>();
@@ -284,14 +280,14 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
     private void getBookChapter(TabNavBody book) {
         if (book != null) {
             ArrayList<Chapter> list = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(book.getBookNo()));
-            if (showUpdateNotificationEvent == null) detailList.clear();
+            if (!showUpdateNotificationEvent) detailList.clear();
             for (Chapter chapter : list) {
 
-                if (showUpdateNotificationEvent != null && Objects.equals(showUpdateNotificationEvent.getChapterId(), chapter.getSignatureId())) {
+                if (showUpdateNotificationEvent&& Objects.equals(eventEntity.getChapterId(), chapter.getSignatureId())) {
                     getChapterList(chapter, detailList);
                     break;
 
-                } else if (showUpdateNotificationEvent == null) {
+                } else if (!showUpdateNotificationEvent) {
 
                     HH2SectionData section = null;
                     if (!chapter.getIsDownload()) {
@@ -356,7 +352,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
                                     //通知数据更新完成
                                     XEventBus.getDefault().post(chapterContentNotificationEvent);
                                     // 通知数据下载结束更新
-                                    if (showUpdateNotificationEvent != null)
+                                    if (showUpdateNotificationEvent)
                                         chapterNotificationEvent();
                                     try {
                                         // 更新数据库

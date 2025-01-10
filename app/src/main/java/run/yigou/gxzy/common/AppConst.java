@@ -61,8 +61,17 @@ public class AppConst {
     /**
      * 阅读弹出方式
      */
+    /**
+     * 重新下载本章节
+     */
     public static int reData_Type = 3;
+    /**
+     * 搜索时弹出
+     */
     public static int noFooter_Type = 2;
+    /**
+     * 继续普通弹出选择
+     */
     public static int data_Type = 1;
 
 }

@@ -336,6 +336,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             setJumpSpecifiedItemListener();
             //setHttpUpdateStatusNotification();
             rvList.setAdapter(adapter);
+            adapter.setSearch(false);
             refreshData();
         } catch (Exception e) {
             e.printStackTrace();
@@ -435,6 +436,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                         adapter.getmGroups().set(event.getGroupPosition(), groupEntity);
                         // 刷新列表
                         adapter.notifyGroupChanged(event.getGroupPosition());
+                        isShowUpdateNotification = true;
                         break;
                     }
                 }
@@ -460,7 +462,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     private void initializeAdapter() {
         adapter = new ExpandableAdapter(getContext());
     }
-
+    private boolean isShowUpdateNotification = true;
     private void setHeaderClickListener() {
         adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
             @Override
@@ -493,26 +495,29 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 if (adapter.getSearch()) return true;
                 TipsNetHelper.showListDialog(getContext(), AppConst.reData_Type)
                         .setListener((dialog, position, string) -> {
-                            if (string.equals("重新下载全部数据")) {
+                            if (string.equals("重新下载全部数据") ) {
                                 //通知显示已经变更
-                                ShowUpdateNotificationEvent showUpdateNotification = singletonNetData.getShowUpdateNotification();
-                                if (!showUpdateNotification.isUpdateNotification()) {
+                                ShowUpdateNotificationEvent showUpdateNotification = new ShowUpdateNotificationEvent();
+                                if (isShowUpdateNotification) {
                                     // 标记正在重新下载数据
                                     showUpdateNotification.setUpdateNotification(true);
                                     showUpdateNotification.setAllChapterNotification(true);
+                                    isShowUpdateNotification = false;
                                     XEventBus.getDefault().post(showUpdateNotification);
                                 } else {
                                     toast("重新下载全部数据数据!!!!");
                                 }
                             }
-                            if (string.equals("重新下本章节")) {
+                            if (string.equals("重新下本章节") ) {
                                 //通知显示已经变更
-                                ShowUpdateNotificationEvent showUpdateNotification = singletonNetData.getShowUpdateNotification();
-                                if (!showUpdateNotification.isUpdateNotification()) {
+                                ShowUpdateNotificationEvent showUpdateNotification = new ShowUpdateNotificationEvent();
+                                if ( isShowUpdateNotification) {
                                     // 标记正在重新下载数据
                                     showUpdateNotification.setUpdateNotification(true);
                                     showUpdateNotification.setChapterNotification(true);
-                                    showUpdateNotification.setChapterId(singletonNetData.getContent().get(groupPosition).getSignatureId());
+                                    isShowUpdateNotification = false;
+                                   // HH2SectionData hh2Section =  singletonNetData.getContent().get(groupPosition);
+                                    showUpdateNotification.setChapterId( singletonNetData.getContent().get(groupPosition).getSignatureId());
                                     XEventBus.getDefault().post(showUpdateNotification);
                                 } else {
                                     toast("正在重新下本章节数据!!!!");

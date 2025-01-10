@@ -606,7 +606,7 @@ public class TipsNetHelper {
 
 
     // 同时初始化数据
-    private static final List<String> reData = Arrays.asList( "重新下本章节","重新下载全部数据");
+    private static final List<String> reData = Arrays.asList( "重新下本章节");//,"重新下载全部数据");
     private static final List<String> data = Arrays.asList("拷贝内容");//, "重新下本章节", "重新下载全部数据");
     private static final List<String> noFooterData = Arrays.asList("拷贝内容", "跳转到本章内容"/*, "拷贝全部结果"*/);
 

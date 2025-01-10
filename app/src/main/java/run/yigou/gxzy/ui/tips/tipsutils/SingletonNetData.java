@@ -18,7 +18,7 @@ public class SingletonNetData {
     private ArrayList<HH2SectionData> fang;
     private int bookId;
 
-    private final ShowUpdateNotificationEvent mShowUpdateNotification = new ShowUpdateNotificationEvent();
+   // private final ShowUpdateNotificationEvent mShowUpdateNotification = new ShowUpdateNotificationEvent();
     private static volatile SingletonNetData instance;
 
     public List<String> getAllFang() {
@@ -31,9 +31,9 @@ public class SingletonNetData {
         return yaoAliasDict;
     }
 
-    public ShowUpdateNotificationEvent getShowUpdateNotification() {
-        return mShowUpdateNotification;
-    }
+//    public ShowUpdateNotificationEvent getShowUpdateNotification() {
+//        return mShowUpdateNotification;
+//    }
 
 
     public void setYaoAliasDict(Map<String, String> yaoAliasDict) {
