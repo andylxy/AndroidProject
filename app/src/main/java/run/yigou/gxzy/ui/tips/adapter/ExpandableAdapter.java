@@ -66,7 +66,7 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements Toa
     public ExpandableAdapter(Context context) {
         super(context);
         // 注册事件
-       // XEventBus.getDefault().register(ExpandableAdapter.this);
+        // XEventBus.getDefault().register(ExpandableAdapter.this);
     }
 
 
@@ -278,22 +278,35 @@ public class ExpandableAdapter extends GroupedRecyclerViewAdapter implements Toa
                                     EasyLog.print("CopyError", "Failed to show Toast: " + e.getMessage());
                                 }
                             }
-                        } else if (string.equals("跳转到本章内容")) {
+                        }
+                        else if (string.equals("跳转到本章内容")) {
                             if (mOnJumpSpecifiedItemListener != null && groupPosition > 0) {
                                 mOnJumpSpecifiedItemListener.onJumpSpecifiedItem(groupPosition, -1);
                             }
-                        } else if (string.equals("重新下载全部数据")) {
-                            //通知显示已经变更
-                            ShowUpdateNotificationEvent showUpdateNotification = TipsSingleData.getInstance().getCurSingletonData().getShowUpdateNotification();
-                            if (!showUpdateNotification.isUpdateNotification()) {
-                                // 标记正在重新下载数据
-                                showUpdateNotification.setUpdateNotification(true);
-                                XEventBus.getDefault().post(showUpdateNotification);
-                            } else {
-                                toast("正在重新下载数据!!!!");
-                            }
-
                         }
+//                        else if (string.equals("重新下载全部数据")) {
+//                            //通知显示已经变更
+//                            ShowUpdateNotificationEvent showUpdateNotification = TipsSingleData.getInstance().getCurSingletonData().getShowUpdateNotification();
+//                            if (!showUpdateNotification.isUpdateNotification()) {
+//                                // 标记正在重新下载数据
+//                                showUpdateNotification.setUpdateNotification(true);
+//                                XEventBus.getDefault().post(showUpdateNotification);
+//                            } else {
+//                                toast("正在重新下载数据!!!!");
+//                            }
+//
+//                        } else if (string.equals("重新下本章节")) {
+//                            //通知显示已经变更
+//                            ShowUpdateNotificationEvent showUpdateNotification = TipsSingleData.getInstance().getCurSingletonData().getShowUpdateNotification();;
+//                            if (!showUpdateNotification.isUpdateNotification()) {
+//                                // 标记正在重新下载数据
+//                                showUpdateNotification.setUpdateNotification(false);
+//                                XEventBus.getDefault().post(showUpdateNotification);
+//                            } else {
+//                                toast("正在重新下本章节数据!!!!");
+//                            }
+//                        }
+
                     })
                     .show();
 

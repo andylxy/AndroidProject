@@ -14,6 +14,7 @@ package run.yigou.gxzy.ui.tips.entity;
 import android.text.SpannableStringBuilder;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,33 +116,37 @@ public class GroupModel {
         // 如果输入的分段数据为空，则直接返回空的分组列表
         if (hh2SectionData == null) return groups;
 
-        // 定义一个空字符串常量，用于后续操作
-        String EMPTY_STRING = "";
+//        // 定义一个空字符串常量，用于后续操作
+//        String EMPTY_STRING = "";
 
         // 遍历每个分段数据
         for (HH2SectionData sectionData : hh2SectionData) {
-            // 初始化当前分组的子项列表
-            ArrayList<ChildEntity> children = new ArrayList<>();
-            // 获取当前分段的数据列表
-            List<DataItem> dataItems = (List<DataItem>) sectionData.getData();
-            // 如果数据列表为空，则跳过当前分段
-            if (dataItems == null) continue;
-
-            // 遍历当前分段的每个数据项
-            for (DataItem dataItem : dataItems) {
-                if (dataItem != null) {
-                    ChildEntity child = getChildEntity(dataItem);
-                    children.add(child);
-                }
-            }
-
-            // 使用辅助类渲染分组头部文本
-            SpannableStringBuilder spannableHeader = TipsNetHelper.renderText(sectionData.getHeader());
-            // 构造可展开分组实体并添加到分组列表中
-            groups.add(new ExpandableGroupEntity(sectionData.getHeader(), spannableHeader, EMPTY_STRING, isExpand, children));
+            ExpandableGroupEntity group = getExpandableGroupEntity(isExpand, sectionData);
+            groups.add(group);
         }
         // 返回构造好的分组列表
         return groups;
+    }
+
+    public static @Nullable ExpandableGroupEntity getExpandableGroupEntity(boolean isExpand, HH2SectionData sectionData) {
+        // 获取当前分段的数据列表
+        List<DataItem> dataItems = (List<DataItem>) sectionData.getData();
+        // 如果数据列表为空，则跳过当前分段
+        if (dataItems == null) return null;
+        // 初始化当前分组的子项列表
+        ArrayList<ChildEntity> children = new ArrayList<>();
+        // 遍历当前分段的每个数据项
+        for (DataItem dataItem : dataItems) {
+            if (dataItem != null) {
+                ChildEntity child = getChildEntity(dataItem);
+                children.add(child);
+            }
+        }
+        // 使用辅助类渲染分组头部文本
+        SpannableStringBuilder spannableHeader = TipsNetHelper.renderText(sectionData.getHeader());
+        // 构造可展开分组实体并添加到分组列表中
+        ExpandableGroupEntity group = new ExpandableGroupEntity(sectionData.getHeader(), spannableHeader, "", isExpand, children);
+        return group;
     }
 
 

@@ -27,23 +27,27 @@ public class Chapter implements Serializable {
     // 章节标题
     private String chapterHeader;
     // 书签id
-    private Long sgnatureId;
+    private Long signatureId;
     // 是否下载
     private boolean isDownload=false;
 
-    @Generated(hash = 557810523)
+
+
+    @Generated(hash = 443104719)
     public Chapter(Long id, int bookId, int chapterSection, String chapterHeader,
-            Long sgnatureId, boolean isDownload) {
+            Long signatureId, boolean isDownload) {
         this.id = id;
         this.bookId = bookId;
         this.chapterSection = chapterSection;
         this.chapterHeader = chapterHeader;
-        this.sgnatureId = sgnatureId;
+        this.signatureId = signatureId;
         this.isDownload = isDownload;
     }
     @Generated(hash = 393170288)
     public Chapter() {
     }
+
+
 
     public Long getId() {
         return this.id;
@@ -76,11 +80,12 @@ public class Chapter implements Serializable {
     public void setIsDownload(boolean isDownload) {
         this.isDownload = isDownload;
     }
-    public Long getSgnatureId() {
-        return this.sgnatureId;
+    public Long getSignatureId() {
+        return this.signatureId;
     }
-    public void setSgnatureId(Long sgnatureId) {
-        this.sgnatureId = sgnatureId;
+    public void setSignatureId(Long signatureId) {
+        this.signatureId = signatureId;
     }
+
 
 }

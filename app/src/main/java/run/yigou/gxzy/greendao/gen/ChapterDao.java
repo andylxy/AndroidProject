@@ -28,7 +28,7 @@ public class ChapterDao extends AbstractDao<Chapter, Long> {
         public final static Property BookId = new Property(1, int.class, "bookId", false, "BOOK_ID");
         public final static Property ChapterSection = new Property(2, int.class, "chapterSection", false, "CHAPTER_SECTION");
         public final static Property ChapterHeader = new Property(3, String.class, "chapterHeader", false, "CHAPTER_HEADER");
-        public final static Property SgnatureId = new Property(4, Long.class, "sgnatureId", false, "SGNATURE_ID");
+        public final static Property SignatureId = new Property(4, Long.class, "signatureId", false, "SIGNATURE_ID");
         public final static Property IsDownload = new Property(5, boolean.class, "isDownload", false, "IS_DOWNLOAD");
     }
 
@@ -49,7 +49,7 @@ public class ChapterDao extends AbstractDao<Chapter, Long> {
                 "\"BOOK_ID\" INTEGER NOT NULL ," + // 1: bookId
                 "\"CHAPTER_SECTION\" INTEGER NOT NULL ," + // 2: chapterSection
                 "\"CHAPTER_HEADER\" TEXT," + // 3: chapterHeader
-                "\"SGNATURE_ID\" INTEGER," + // 4: sgnatureId
+                "\"SIGNATURE_ID\" INTEGER," + // 4: signatureId
                 "\"IS_DOWNLOAD\" INTEGER NOT NULL );"); // 5: isDownload
     }
 
@@ -75,9 +75,9 @@ public class ChapterDao extends AbstractDao<Chapter, Long> {
             stmt.bindString(4, chapterHeader);
         }
  
-        Long sgnatureId = entity.getSgnatureId();
-        if (sgnatureId != null) {
-            stmt.bindLong(5, sgnatureId);
+        Long signatureId = entity.getSignatureId();
+        if (signatureId != null) {
+            stmt.bindLong(5, signatureId);
         }
         stmt.bindLong(6, entity.getIsDownload() ? 1L: 0L);
     }
@@ -98,9 +98,9 @@ public class ChapterDao extends AbstractDao<Chapter, Long> {
             stmt.bindString(4, chapterHeader);
         }
  
-        Long sgnatureId = entity.getSgnatureId();
-        if (sgnatureId != null) {
-            stmt.bindLong(5, sgnatureId);
+        Long signatureId = entity.getSignatureId();
+        if (signatureId != null) {
+            stmt.bindLong(5, signatureId);
         }
         stmt.bindLong(6, entity.getIsDownload() ? 1L: 0L);
     }
@@ -117,7 +117,7 @@ public class ChapterDao extends AbstractDao<Chapter, Long> {
             cursor.getInt(offset + 1), // bookId
             cursor.getInt(offset + 2), // chapterSection
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // chapterHeader
-            cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4), // sgnatureId
+            cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4), // signatureId
             cursor.getShort(offset + 5) != 0 // isDownload
         );
         return entity;
@@ -129,7 +129,7 @@ public class ChapterDao extends AbstractDao<Chapter, Long> {
         entity.setBookId(cursor.getInt(offset + 1));
         entity.setChapterSection(cursor.getInt(offset + 2));
         entity.setChapterHeader(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setSgnatureId(cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4));
+        entity.setSignatureId(cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4));
         entity.setIsDownload(cursor.getShort(offset + 5) != 0);
      }
     

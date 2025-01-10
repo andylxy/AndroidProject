@@ -37,6 +37,7 @@ import com.lucas.xbus.XEventBus;
 
 import java.util.ArrayList;
 
+import run.yigou.gxzy.EventBus.ChapterContentNotificationEvent;
 import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
 import run.yigou.gxzy.EventBus.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.R;
@@ -53,6 +54,7 @@ import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
+import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
@@ -119,7 +121,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (instance == null) {
             instance = new TipsBookNetReadFragment();
         }
-        if (bookArgs != null){
+        if (bookArgs != null) {
             instance.bookArgs = bookArgs;
         }
         return instance;
@@ -144,15 +146,15 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (rvList == null) {
             throw new IllegalStateException("rvList not found");
         }
-        clearEditText =findViewById(R.id.searchEditText);
+        clearEditText = findViewById(R.id.searchEditText);
         if (clearEditText == null) {
             throw new IllegalStateException("clearEditText not found");
         }
-        tipsBtnSearch =findViewById(R.id.tips_btn_search);
+        tipsBtnSearch = findViewById(R.id.tips_btn_search);
         if (tipsBtnSearch == null) {
             throw new IllegalStateException("tipsBtnSearch not found");
         }
-        numTips =findViewById(R.id.numTips);
+        numTips = findViewById(R.id.numTips);
         if (numTips == null) {
             throw new IllegalStateException("numTips not found");
         }
@@ -418,6 +420,30 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         });
     }
 
+    // 章节内容更新事件
+    @Subscribe(priority = 1)
+    public void onChapterContentNotificationEvent(ChapterContentNotificationEvent event) {
+        ThreadUtil.runOnUiThread(() -> {
+            if (bookId == event.getBookId()) {
+                for (int i = 0; i < singletonNetData.getContent().size(); i++) {
+                    HH2SectionData hh2SectionData = singletonNetData.getContent().get(i);
+                    if (hh2SectionData.getSection() == event.getChapterSection() && hh2SectionData.getSignatureId() == event.getSignatureId()) {
+                        singletonNetData.getContent().set(i, event.getData());
+                        // 创建一个GroupModel对象
+                        ExpandableGroupEntity groupEntity = GroupModel.getExpandableGroupEntity(false, event.getData());
+                        // 更新数据
+                        adapter.getmGroups().set(event.getGroupPosition(), groupEntity);
+                        // 刷新列表
+                        adapter.notifyGroupChanged(event.getGroupPosition());
+                        break;
+                    }
+                }
+            }
+
+
+        });
+    }
+
     private void setBackPressedCallback() {
         if (AppApplication.getApplication().fragmentSetting.isShuJie()) {
             if (onBackPressedCallback == null)
@@ -464,7 +490,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             @Override
             public boolean onHeaderLongClick(GroupedRecyclerViewAdapter adapter2, BaseViewHolder holder, int groupPosition) {
                 // 搜索状态不响应长按
-                if(adapter.getSearch()) return true;
+                if (adapter.getSearch()) return true;
                 TipsNetHelper.showListDialog(getContext(), AppConst.reData_Type)
                         .setListener((dialog, position, string) -> {
                             if (string.equals("重新下载全部数据")) {
@@ -473,9 +499,23 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                                 if (!showUpdateNotification.isUpdateNotification()) {
                                     // 标记正在重新下载数据
                                     showUpdateNotification.setUpdateNotification(true);
+                                    showUpdateNotification.setAllChapterNotification(true);
                                     XEventBus.getDefault().post(showUpdateNotification);
                                 } else {
-                                    toast("正在重新下载数据!!!!");
+                                    toast("重新下载全部数据数据!!!!");
+                                }
+                            }
+                            if (string.equals("重新下本章节")) {
+                                //通知显示已经变更
+                                ShowUpdateNotificationEvent showUpdateNotification = singletonNetData.getShowUpdateNotification();
+                                if (!showUpdateNotification.isUpdateNotification()) {
+                                    // 标记正在重新下载数据
+                                    showUpdateNotification.setUpdateNotification(true);
+                                    showUpdateNotification.setChapterNotification(true);
+                                    showUpdateNotification.setChapterId(singletonNetData.getContent().get(groupPosition).getSignatureId());
+                                    XEventBus.getDefault().post(showUpdateNotification);
+                                } else {
+                                    toast("正在重新下本章节数据!!!!");
                                 }
                             }
 
@@ -496,10 +536,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 public void onJumpSpecifiedItem(int groupPosition, int childPosition) {
                     clearEditText.setText("");
                     numTips.setText("");
-                    postDelayed(()->{
+                    postDelayed(() -> {
                         layoutManager.scrollToPositionWithOffset(groupPosition, 0);
                         adapter.expandGroup(groupPosition, true);
-                    },300);
+                    }, 300);
 
                 }
             };
@@ -538,7 +578,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (onBackPressedCallback != null) {
             onBackPressedCallback.remove();
         }
-        instance =null;
+        instance = null;
         // 注销事件
         XEventBus.getDefault().unregister(TipsBookNetReadFragment.this);
     }
@@ -575,8 +615,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 }
             } else {
                 //搜索结果
-               // if (!singletonNetData.getSearchResList().isEmpty())
-                    adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getSearchResList(), isExpand));
+                // if (!singletonNetData.getSearchResList().isEmpty())
+                adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getSearchResList(), isExpand));
             }
             adapter.notifyDataChanged();
         }

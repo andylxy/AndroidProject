@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.base.BaseAdapter;
 import com.hjq.http.EasyHttp;
+import com.hjq.http.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.lucas.annotations.Subscribe;
@@ -21,17 +22,24 @@ import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import run.yigou.gxzy.EventBus.ChapterContentNotificationEvent;
 import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
+import run.yigou.gxzy.greendao.gen.ChapterDao;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
+import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookContentApi;
 import run.yigou.gxzy.http.api.BookFangApi;
+import run.yigou.gxzy.http.api.ChapterContentApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.ui.activity.AboutActivity;
@@ -43,6 +51,7 @@ import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.DataBeans.Fang;
+import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
@@ -129,7 +138,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
      */
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
-        
+
         bookId = mAdapter.getItem(position).getBookNo();
         singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
         if (singletonNetData.getYaoAliasDict() == null)
@@ -185,11 +194,21 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
 
     }
 
+    private ShowUpdateNotificationEvent showUpdateNotificationEvent;
 
+    // 标记正在重新下载数据
     @Subscribe(priority = 1)
     public void onUpdateEvent(ShowUpdateNotificationEvent event) {
         ThreadUtil.runOnUiThread(() -> {
-            getBookData(bookId);
+            showUpdateNotificationEvent = event;
+            if (event.isUpdateNotification() && event.isAllChapterNotification()) {
+                getBookData(bookId);
+                toast("正在重新下载全部数据!!!!");
+            } else {
+                getBookData(bookId);
+                toast("正在重新下载本章节数据!!!!");
+            }
+
         });
     }
 
@@ -204,36 +223,24 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
 //        //加载书本相关的药方
         TabNavBody book = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
 //
-        // 获取书本章节列表,后续再实现
-//        if (book != null) {
-//            ArrayList<Chapter> list = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(book.getBookNo()));
-//            List<HH2SectionData> detailList = new ArrayList<>();
-//            for (Chapter chapter : list) {
-//
-//                if (!chapter.getIsDownload()) {
-//                    getChapterList(chapter,detailList);
-//                }
-//                detailList.add(new HH2SectionData(new ArrayList<>(), chapter.getChapterSection(), chapter.getChapterHeader()));
-//
-////                try {
-////                    DbService.getInstance().mChapterService.updateEntity(chapter);
-////                } catch (Exception e) {
-////                    // 处理异常，比如记录日志、通知管理员等
-////                    EasyLog.print("Failed to addEntity: " + e.getMessage());
-////                    return;
-////                    // 根据具体情况决定是否需要重新抛出异常
-////                    //throw e;
-////                }
-//
-//
-//            }
-//            //加载书本内容
-//            singletonNetData.setContent(detailList);
-//        } else {
-//            toast("书籍信息错误,退出后重新打开!!!!");
-//        }
+        // todo 后续优化为设置开关
+        if (true) {
+            getBookChapter(book);
+        } else {
+            //获取书籍章节列表
+            getBookContentAll(bookId);
+        }
 
+        StringBuilder fangName = new StringBuilder("\n");
+        if (book != null) {
+            fangName.append(book.getBookName());
+        } else {
+            fangName.append("药方");
+        }
+        getBookFang(bookId, fangName);
+    }
 
+    private void getBookContentAll(int bookId) {
         EasyHttp.get(this)
                 .api(new BookContentApi().setBookId(bookId))
                 .request(new HttpCallback<HttpData<List<HH2SectionData>>>(this) {
@@ -249,24 +256,66 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
                                 mLoading = ConvertEntity.getBookDetailList(data.getData(), bookId);
                                 //通知数据更新完成
                             });
-                            ShowUpdateNotificationEvent showUpdateNotification = singletonNetData.getShowUpdateNotification();
-                            if (showUpdateNotification.isUpdateNotification()) {
-                                // 通知数据下载结束更新
-                                showUpdateNotification.setUpdateNotification(false);
-                                toast("数据已经重新下载完成,退出App重新打开!!!!");
-                            }
+                            chapterNotificationEvent();
 
                         }
                     }
 
                 });
+    }
 
-        StringBuilder fangName = new StringBuilder("\n");
-        if (book != null) {
-            fangName.append(book.getBookName());
-        } else {
-            fangName.append("药方");
+    /**
+     * 通知数据下载结束更新
+     */
+    private void chapterNotificationEvent() {
+        ShowUpdateNotificationEvent showUpdateNotification = singletonNetData.getShowUpdateNotification();
+        if (showUpdateNotification.isUpdateNotification()) {
+            // 通知数据下载结束更新
+            showUpdateNotification.setUpdateNotification(false);
+            showUpdateNotification.setChapterNotification(false);
+            showUpdateNotification.setAllChapterNotification(false);
+            showUpdateNotification.setChapterId(0L);
+            toast("数据已经重新下载完成!!!!");
         }
+    }
+
+    private final List<HH2SectionData> detailList = new ArrayList<>();
+
+    private void getBookChapter(TabNavBody book) {
+        if (book != null) {
+            ArrayList<Chapter> list = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(book.getBookNo()));
+            if (showUpdateNotificationEvent == null) detailList.clear();
+            for (Chapter chapter : list) {
+
+                if (showUpdateNotificationEvent != null && Objects.equals(showUpdateNotificationEvent.getChapterId(), chapter.getSignatureId())) {
+                    getChapterList(chapter, detailList);
+                    break;
+
+                } else if (showUpdateNotificationEvent == null) {
+
+                    HH2SectionData section = null;
+                    if (!chapter.getIsDownload()) {
+                        getChapterList(chapter, detailList);
+                        section = new HH2SectionData(new ArrayList<>(), chapter.getChapterSection(), chapter.getChapterHeader());
+                    } else {
+                        // 从数据库中获取数据
+                        List<DataItem> dataItem = ConvertEntity.getBookChapterDetailList(chapter);
+                        // 创建HH2SectionData对象
+                        section = new HH2SectionData(dataItem, chapter.getChapterSection(), chapter.getChapterHeader());
+                    }
+
+                    section.setSignatureId(chapter.getSignatureId());
+                    detailList.add(section);
+                }
+            }
+            //加载书本内容
+            singletonNetData.setContent(detailList);
+        } else {
+            toast("书籍信息错误,退出后重新打开!!!!");
+        }
+    }
+
+    private void getBookFang(int bookId, StringBuilder fangName) {
         EasyHttp.get(this)
                 .api(new BookFangApi().setBookId(bookId))
                 .request(new HttpCallback<HttpData<List<Fang>>>(this) {
@@ -277,47 +326,77 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
                             singletonNetData.setFang(new HH2SectionData(detailList, 0, fangName.toString()));
                             //保存药方数据
                             ThreadUtil.runInBackground(() -> {
-                                ConvertEntity.getFangDetailList(singletonNetData.getFang().get(0), data.getData(), bookId);
+                                ConvertEntity.getFangDetailList(data.getData(), bookId);
                             });
 
                         }
                     }
                 });
     }
-//    public  void getChapterList(Chapter chapter, List<HH2SectionData> detailList ) {
-//
-//        EasyHttp.get(this)
-//                .api(new ChapterContentApi().setContentId(chapter.getChapterSection()).setSgnatureId(chapter.getSgnatureId()))
-//
-//                .request(new HttpCallback<HttpData<List<HH2SectionData>>>(this) {
-//                    @Override
-//                    public void onSucceed(HttpData<List<HH2SectionData>> data) {
-//                        if (data != null && !data.getData().isEmpty()) {
-//                          //  ArrayList<Chapter> list = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(item.getBookNo()));
-//
-//                            for (HH2SectionData hh2SectionData  : detailList) {
-//                               if (hh2SectionData.getSignatureId() ==data.getData().get(0).getSignatureId()){
-//                                 ArrayList<DataItem> list = (ArrayList<DataItem>) data.getData().get(0).getData();
-//                                  // hh2SectionData.getData().addAll(list);
-//                                   for (DataItem  dataItem :   data.getData().get(0).getData()) {
-//
-//                                       hh2SectionData.getData().add(dataItem);
-//                                    }
-//                               }
-//                            }
-//
-//
-//                       }
-//                    }
-//
-//                    @Override
-//                    public void onFail(Exception e) {
-//                        super.onFail(e);
-//
-//                    }
-//                });
-//
-//    }
+
+    public void getChapterList(Chapter chapter, List<HH2SectionData> detailList) {
+
+        EasyHttp.get(this)
+                .api(new ChapterContentApi()
+                        .setContentId(chapter.getChapterSection())
+                        .setSignatureId(chapter.getSignatureId())
+                        .setBookId(chapter.getBookId())
+                )
+
+                .request(new HttpCallback<HttpData<List<HH2SectionData>>>(this) {
+                    @Override
+                    public void onSucceed(HttpData<List<HH2SectionData>> data) {
+                        if (data != null && !data.getData().isEmpty()) {
+                            //  ArrayList<Chapter> list = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(item.getBookNo()));
+                            for (int i = 0; i < detailList.size(); i++) {
+                                if (detailList.get(i).getSignatureId() == data.getData().get(0).getSignatureId()) {
+                                    HH2SectionData hh2SectionData1 = new HH2SectionData(data.getData().get(0).getData(), chapter.getChapterSection(), chapter.getChapterHeader());
+                                    ChapterContentNotificationEvent chapterContentNotificationEvent = getChapterContentNotificationEvent(chapter, i);
+                                    chapterContentNotificationEvent.setData(hh2SectionData1);
+                                    //通知数据更新完成
+                                    XEventBus.getDefault().post(chapterContentNotificationEvent);
+                                    // 通知数据下载结束更新
+                                    if (showUpdateNotificationEvent != null)
+                                        chapterNotificationEvent();
+                                    try {
+                                        // 更新数据库
+                                        chapter.setIsDownload(true);
+                                        DbService.getInstance().mChapterService.updateEntity(chapter);
+                                        //保存内容
+                                        ConvertEntity.saveBookChapterDetailList(chapter, data.getData());
+
+                                    } catch (Exception e) {
+                                        // 处理异常，比如记录日志、通知管理员等
+                                        EasyLog.print("Failed to updateEntity: " + e.getMessage());
+                                        return;
+                                        // 根据具体情况决定是否需要重新抛出异常
+                                        //throw e;
+                                    }
+                                }
+                            }
+
+
+                        }
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        super.onFail(e);
+
+                    }
+                });
+
+    }
+
+    private @NonNull ChapterContentNotificationEvent getChapterContentNotificationEvent(Chapter chapter, int i) {
+        ChapterContentNotificationEvent chapterContentNotificationEvent = new ChapterContentNotificationEvent();
+        chapterContentNotificationEvent.setBookId(bookId);
+        chapterContentNotificationEvent.setChapterSection(chapter.getChapterSection());
+        chapterContentNotificationEvent.setChapterHeader(chapter.getChapterHeader());
+        chapterContentNotificationEvent.setSignatureId(chapter.getSignatureId());
+        chapterContentNotificationEvent.setGroupPosition(i);
+        return chapterContentNotificationEvent;
+    }
 
     /**
      * {@link OnRefreshLoadMoreListener}

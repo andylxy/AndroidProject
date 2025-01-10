@@ -23,17 +23,25 @@ public final class ChapterContentApi implements IRequestApi {
         this.contentId = contentId;
         return this;
     }
-    private Long sgnatureId;
+    private Long signatureId;
 
-    public Long getSgnatureId() {
-        return sgnatureId;
+    public Long getSignatureId() {
+        return signatureId;
     }
 
-    public ChapterContentApi setSgnatureId(Long sgnatureId) {
-        this.sgnatureId = sgnatureId;
+    public ChapterContentApi setSignatureId(Long signatureId) {
+        this.signatureId = signatureId;
         return this;
     }
-
+    private int bookId;
     private int contentId;
 
+    public int getBookId() {
+        return bookId;
+    }
+
+    public ChapterContentApi setBookId(int bookId) {
+        this.bookId = bookId;
+        return this;
+    }
 }

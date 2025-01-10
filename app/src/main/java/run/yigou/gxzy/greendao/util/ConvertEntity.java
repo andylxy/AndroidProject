@@ -222,9 +222,9 @@ public class ConvertEntity {
                             //throw e;
                         }
                         // 获取章节列表
-                       // ThreadUtil.runInBackground(() -> {
-                       //     getChapterList(homeFragment, item);
-                       // });
+                        ThreadUtil.runInBackground(() -> {
+                            getChapterList(homeFragment, item);
+                        });
 
                     }
                 }
@@ -322,8 +322,8 @@ public class ConvertEntity {
     }
 
 
-    public static void getFangDetailList(HH2SectionData locFangDetailList, List<Fang> netFangDetailList, int bookId) {
-        if (netFangDetailList == null || netFangDetailList.isEmpty() || bookId <= 0 || locFangDetailList == null || locFangDetailList.getData() == null) {
+    public static void getFangDetailList(List<Fang> netFangDetailList, int bookId) {
+        if (netFangDetailList == null || netFangDetailList.isEmpty() || bookId <= 0) {
             EasyLog.print("FangDetailList is empty or null.or  bookId <=0 .");
             return;
         }
@@ -382,6 +382,94 @@ public class ConvertEntity {
         return yaoFangBody;
     }
 
+
+    public static List<DataItem> getBookChapterDetailList(Chapter chapter) {
+
+        ArrayList<BookChapter> bookChapterList = DbService.getInstance().mBookChapterService.find(BookChapterDao.Properties.SignatureId.eq(chapter.getSignatureId()));
+
+        List<DataItem> dataList = new ArrayList<>();
+        try {
+            for (BookChapter bookChapter : bookChapterList) {
+                if (bookChapter.getData() == null) {
+                    continue; // 跳过无效的章节
+                }
+                for (BookChapterBody bookChapterBody : bookChapter.getData()) {
+                    DataItem content = new DataItem();
+                    content.setText(RC4Helper.decrypt(bookChapterBody.getText()));
+                    content.setNote(RC4Helper.decrypt(bookChapterBody.getNote()));
+                    content.setSectionvideo(RC4Helper.decrypt(bookChapterBody.getSectionvideo()));
+                    content.setID(bookChapterBody.getID());
+                    content.setFangList(
+                            (bookChapterBody.getFangList() != null && !bookChapterBody.getFangList().isEmpty())
+                                    ? Arrays.asList(bookChapterBody.getFangList().split(","))
+                                    : Arrays.asList()
+                    );
+                    dataList.add(content);
+                }
+
+            }
+            return dataList;
+        } catch (Exception e) {
+            // 增加详细日志记录
+            EasyLog.print("Error processing detail list: " + e.getMessage() + ", bookChapterList size: " + bookChapterList.size());
+            return dataList;
+        }
+    }
+
+
+    public static boolean saveBookChapterDetailList(Chapter chapter, List<HH2SectionData> netDetailList) {
+        if (netDetailList == null || netDetailList.isEmpty() || chapter.getBookId() <= 0) {
+            EasyLog.print("BookDetailList is empty or null. or  bookId <=0 .");
+            return false;
+        }
+        StringBuilder chapterId = new StringBuilder();
+        try {
+
+            ArrayList<BookChapter> bookChapterList = DbService.getInstance().mBookChapterService
+                    .find(BookChapterDao.Properties.SignatureId.eq(chapter.getSignatureId()));
+            for (BookChapter bookChapter : bookChapterList) {
+                DbService.getInstance().mYaoFangBodyService
+                        .deleteAll(BookChapterBodyDao.Properties.BookChapterId.eq(bookChapter.getBookChapterId()));
+                DbService.getInstance().mBookChapterService.deleteEntity(bookChapter);
+            }
+
+            for (HH2SectionData hh2SectionData : netDetailList) {
+                chapterId.setLength(0);
+                chapterId.append(StringHelper.getUuid());
+
+                BookChapter bookChapter = new BookChapter();
+                bookChapter.setSection(hh2SectionData.getSection());
+                bookChapter.setHeader(hh2SectionData.getHeader());
+                bookChapter.setBookId(chapter.getBookId());
+                bookChapter.setBookChapterId(chapterId.toString());
+                bookChapter.setSignature(hh2SectionData.getSignature());
+                bookChapter.setSignatureId(hh2SectionData.getSignatureId());
+                DbService.getInstance().mBookChapterService.addEntity(bookChapter);
+
+                for (DataItem content : hh2SectionData.getData()) {
+
+                    // 获取章节内容
+                    BookChapterBody bookChapterBody = new BookChapterBody();
+                    bookChapterBody.setBookChapterBodyId(StringHelper.getUuid());
+                    bookChapterBody.setBookChapterId(chapterId.toString());
+                    bookChapterBody.setText(RC4Helper.encrypt(content.getText()));
+                    bookChapterBody.setNote(RC4Helper.encrypt(content.getNote()));
+                    bookChapterBody.setSectionvideo(RC4Helper.encrypt(content.getSectionvideo()));
+                    bookChapterBody.setID(content.getID());
+                    bookChapterBody.setFangList(String.join(",", content.getFangList()));
+                    bookChapterBody.setSignature(content.getSignature());
+                    bookChapterBody.setSignatureId(content.getSignatureId());
+                    DbService.getInstance().mBookChapterBodyService.addEntity(bookChapterBody);
+                }
+            }
+
+        } catch (Exception e) {
+            EasyLog.print("Error processing detail list: " + e.getMessage());
+            //  throw e;
+            return false;
+        }
+        return true;
+    }
 
     public static boolean getBookDetailList(List<HH2SectionData> netDetailList, int bookId) {
         if (netDetailList == null || netDetailList.isEmpty() || bookId <= 0) {

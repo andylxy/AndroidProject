@@ -273,7 +273,8 @@ public final class CrashActivity extends AppActivity {
     @Override
     public void onBackPressed() {
         // 重启应用
-        RestartActivity.restart(this);
+       // RestartActivity.restart(this);
+        toast(R.string.common_crash_hint2);
         finish();
     }
 
