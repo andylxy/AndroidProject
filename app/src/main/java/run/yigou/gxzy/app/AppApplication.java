@@ -58,6 +58,7 @@ import com.tencent.mmkv.MMKV;
 
 import okhttp3.OkHttpClient;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+import run.yigou.gxzy.utils.SerialUtil;
 import timber.log.Timber;
 
 /**
@@ -201,7 +202,8 @@ public final class AppApplication extends Application {
         ToastUtils.setDebugMode(AppConfig.isDebug());
         // 设置 Toast 拦截器
         ToastUtils.setInterceptor(new ToastLogInterceptor());
-
+        // 初始化序列化器
+        SerialUtil.getInstance(application);
         // 本地异常捕捉
         CrashHandler.register(application);
 
@@ -239,9 +241,9 @@ public final class AppApplication extends Application {
                     if (global_openness && mUserInfoToken == null)
                         headers.put(AppConst.Key_User_Name, AppConst.Key_User_Token);
                     headers.put("app", "2");
-                    // headers.put("ClientId", DeviceIdentifier.getAndroidID(this));
-                    headers.put("versionName", AppConfig.getVersionName());
-                    headers.put("versionCode", String.valueOf(AppConfig.getVersionCode()));
+                    headers.put("SessionId", SerialUtil.getSerial());
+                   // headers.put("versionName", AppConfig.getVersionName());
+                  //  headers.put("versionCode", String.valueOf(AppConfig.getVersionCode()));
                     headers.put("Content-Type", "application/json;charset=UTF-8");
                     headers.put("Accept", "application/json, text/plain, */*");
                     // 添加全局请求参数

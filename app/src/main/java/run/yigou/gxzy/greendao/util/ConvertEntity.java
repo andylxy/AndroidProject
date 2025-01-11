@@ -428,7 +428,7 @@ public class ConvertEntity {
             ArrayList<BookChapter> bookChapterList = DbService.getInstance().mBookChapterService
                     .find(BookChapterDao.Properties.SignatureId.eq(chapter.getSignatureId()));
             for (BookChapter bookChapter : bookChapterList) {
-                DbService.getInstance().mYaoFangBodyService
+                DbService.getInstance().mBookChapterBodyService
                         .deleteAll(BookChapterBodyDao.Properties.BookChapterId.eq(bookChapter.getBookChapterId()));
                 DbService.getInstance().mBookChapterService.deleteEntity(bookChapter);
             }
@@ -481,7 +481,7 @@ public class ConvertEntity {
 
             ArrayList<BookChapter> bookChapterList = DbService.getInstance().mBookChapterService.find(BookChapterDao.Properties.BookId.eq(bookId));
             for (BookChapter bookChapter : bookChapterList) {
-                DbService.getInstance().mYaoFangBodyService.deleteAll(BookChapterBodyDao.Properties.BookChapterId.eq(bookChapter.getBookChapterId()));
+                DbService.getInstance().mBookChapterBodyService.deleteAll(BookChapterBodyDao.Properties.BookChapterId.eq(bookChapter.getBookChapterId()));
                 DbService.getInstance().mBookChapterService.deleteEntity(bookChapter);
             }
 

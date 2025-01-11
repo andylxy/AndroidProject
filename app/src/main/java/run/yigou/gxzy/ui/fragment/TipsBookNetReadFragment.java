@@ -14,7 +14,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -28,7 +27,9 @@ import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 
 import com.hjq.base.BaseDialog;
+import com.hjq.http.EasyHttp;
 import com.hjq.http.EasyLog;
+import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 import com.lucas.annotations.Subscribe;
@@ -36,9 +37,8 @@ import com.lucas.xbus.XEventBus;
 
 
 import java.util.ArrayList;
+import java.util.List;
 
-import run.yigou.gxzy.EventBus.ChapterContentNotificationEvent;
-import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
 import run.yigou.gxzy.EventBus.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
@@ -46,13 +46,19 @@ import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.BookArgs;
-import run.yigou.gxzy.common.FragmentSetting;
 import run.yigou.gxzy.greendao.entity.Book;
+import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.gen.BookDao;
+import run.yigou.gxzy.greendao.gen.ChapterDao;
+import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.http.api.BookFangApi;
+import run.yigou.gxzy.http.api.ChapterContentApi;
+import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
+import run.yigou.gxzy.ui.tips.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
@@ -90,6 +96,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
      * 当前选中的章节索引
      */
     private int currentIndex = -1;
+    /**
+     * 是否保存到书架
+     */
     private boolean isShowBookCollect = false;
     /**
      * 数据传递
@@ -308,7 +317,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
     }
 
-
     /**
      * 初始化数据
      */
@@ -318,12 +326,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             // 获取传递的书本编号
             retrieveBookArguments(bookArgs);
 
-            //fragmentSetting = AppApplication.getApplication().getFragmentSetting();
             // 获取指定书籍数据
             singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
             // 兼容处理宋版伤寒
             if (bookId == AppConst.ShangHanNo) {
-                // initializeShanghanSettings();
                 setShanghanContentUpdateListener();
             }
             // Fragment 处理返回键动作,是否保存阅读
@@ -331,7 +337,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             if (AppApplication.getApplication().fragmentSetting.isShuJie())
                 fragmentOnBackPressed();
 
-            //setContentShowStatusNotification();
             // 加载到UI显示
             initializeAdapter();
             setHeaderClickListener();
@@ -423,30 +428,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         });
     }
 
-    // 章节内容更新事件
-    @Subscribe(priority = 1)
-    public void onChapterContentNotificationEvent(ChapterContentNotificationEvent event) {
-        ThreadUtil.runOnUiThread(() -> {
-            if (bookId == event.getBookId()) {
-                for (int i = 0; i < singletonNetData.getContent().size(); i++) {
-                    HH2SectionData hh2SectionData = singletonNetData.getContent().get(i);
-                    if (hh2SectionData.getSection() == event.getChapterSection() && hh2SectionData.getSignatureId() == event.getSignatureId()) {
-                        singletonNetData.getContent().set(i, event.getData());
-                        // 创建一个GroupModel对象
-                        ExpandableGroupEntity groupEntity = GroupModel.getExpandableGroupEntity(false, event.getData());
-                        // 更新数据
-                        adapter.getmGroups().set(event.getGroupPosition(), groupEntity);
-                        // 刷新列表
-                        adapter.notifyGroupChanged(event.getGroupPosition());
-                        isShowUpdateNotification = true;
-                        break;
-                    }
-                }
-            }
 
-
-        });
-    }
 
     private void setBackPressedCallback() {
         if (AppApplication.getApplication().fragmentSetting.isShuJie()) {
@@ -481,6 +463,20 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 // 记录当前点击位置,0则表示没有点击,或者点击了第一章.
                 if (isShowBookCollect)
                     currentIndex = groupPosition;
+
+//                //加载数据
+//                HH2SectionData chapterHH2SectionData = singletonNetData.getContent().get(groupPosition);
+//
+//                for (Chapter chapter : chapterList) {
+//
+//                    if (chapterHH2SectionData.getData().isEmpty() ) {
+//                        if (chapterHH2SectionData.getSignatureId() == chapter.getSignatureId()) {
+//                            getChapterList(chapter, singletonNetData.getContent());
+//                        }
+//                    }
+//
+//                }
+
             }
 
 
@@ -499,30 +495,38 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 if (adapter.getSearch()) return true;
                 TipsNetHelper.showListDialog(getContext(), AppConst.reData_Type)
                         .setListener((dialog, position, string) -> {
-                            if (string.equals("重新下载全部数据")) {
-                                //通知显示已经变更
-                                ShowUpdateNotificationEvent showUpdateNotification = new ShowUpdateNotificationEvent();
-                                if (isShowUpdateNotification) {
-                                    // 标记正在重新下载数据
-                                    showUpdateNotification.setUpdateNotification(true);
-                                    showUpdateNotification.setAllChapterNotification(true);
-                                    isShowUpdateNotification = false;
-                                    XEventBus.getDefault().post(showUpdateNotification);
-                                } else {
-                                    toast("重新下载全部数据数据!!!!");
-                                }
-                            }
+//                            if (string.equals("重新下载全部数据")) {
+//                                //通知显示已经变更
+//                                ShowUpdateNotificationEvent showUpdateNotification = new ShowUpdateNotificationEvent();
+//                                if (isShowUpdateNotification) {
+//                                    // 标记正在重新下载数据
+//                                    showUpdateNotification.setUpdateNotification(true);
+//                                    showUpdateNotification.setAllChapterNotification(true);
+//                                    isShowUpdateNotification = false;
+//                                    XEventBus.getDefault().post(showUpdateNotification);
+//                                } else {
+//                                    toast("重新下载全部数据数据!!!!");
+//                                }
+//                            }
                             if (string.equals("重新下本章节")) {
                                 //通知显示已经变更
-                                ShowUpdateNotificationEvent showUpdateNotification = new ShowUpdateNotificationEvent();
+                                // ShowUpdateNotificationEvent showUpdateNotification = new ShowUpdateNotificationEvent();
                                 if (isShowUpdateNotification) {
                                     // 标记正在重新下载数据
-                                    showUpdateNotification.setUpdateNotification(true);
-                                    showUpdateNotification.setChapterNotification(true);
+//                                    showUpdateNotification.setUpdateNotification(true);
+//                                    showUpdateNotification.setChapterNotification(true);
                                     isShowUpdateNotification = false;
-                                    // HH2SectionData hh2Section =  singletonNetData.getContent().get(groupPosition);
-                                    showUpdateNotification.setChapterId(singletonNetData.getContent().get(groupPosition).getSignatureId());
-                                    XEventBus.getDefault().post(showUpdateNotification);
+//                                    // HH2SectionData hh2Section =  singletonNetData.getContent().get(groupPosition);
+//                                    showUpdateNotification.setChapterId(singletonNetData.getContent().get(groupPosition).getSignatureId());
+//                                    XEventBus.getDefault().post(showUpdateNotification);
+
+
+                                    for (Chapter chapter : chapterList) {
+                                        if (chapter.getSignatureId() == singletonNetData.getContent().get(groupPosition).getSignatureId()) {
+                                            getChapterList(chapter, singletonNetData.getContent());
+                                        }
+                                    }
+
                                 } else {
                                     toast("正在重新下本章节数据!!!!");
                                 }
@@ -536,7 +540,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         });
     }
 
-    ExpandableAdapter.OnJumpSpecifiedItemListener onJumpSpecifiedItemListener;
+    private ExpandableAdapter.OnJumpSpecifiedItemListener onJumpSpecifiedItemListener;
 
     private void setJumpSpecifiedItemListener() {
         if (onJumpSpecifiedItemListener == null) {
@@ -556,8 +560,133 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         }
     }
 
+    private ArrayList<Chapter> chapterList;
+
+    private void bookInitData() {
+
+        singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
+        if (singletonNetData.getYaoAliasDict() == null)
+            singletonNetData.setYaoAliasDict(singletonNetData.getYaoAliasDict());
+        if (singletonNetData.getFangAliasDict() == null)
+            singletonNetData.setFangAliasDict(singletonNetData.getFangAliasDict());
+
+        //加载书本相关的药方
+
+        TabNavBody book = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
+        if (book != null) {
+            chapterList = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(book.getBookNo()));
+            //加载书本相关的章节
+            getBookData(book);
+        } else {
+            toast("书籍信息错误,退出后重新打开!!!!");
+        }
+
+    }
+
+    /**
+     * 获取数据
+     */
+    public void getBookData(TabNavBody book) {
+
+
+        if (book != null) {
+            //加载书本相关的章节
+            getBookChapter();
+            StringBuilder fangName = new StringBuilder("\n").append(book.getBookName());
+            getBookFang(bookId, fangName);
+        }
+    }
+
+    private void getBookChapter() {
+        int setp =150;
+        for (Chapter chapter : chapterList) {
+            if (!chapter.getIsDownload()) {
+                postDelayed(()->{
+                    getChapterList(chapter, singletonNetData.getContent());
+                },setp);
+                setp+=500;
+            }
+        }
+    }
+
+    public void getChapterList(Chapter chapter, ArrayList<HH2SectionData> detailList) {
+
+        EasyHttp.get(this)
+                .api(new ChapterContentApi()
+                        .setContentId(chapter.getChapterSection())
+                        .setSignatureId(chapter.getSignatureId())
+                        .setBookId(chapter.getBookId())
+                )
+                .request(new HttpCallback<HttpData<List<HH2SectionData>>>(this) {
+                    @Override
+                    public void onSucceed(HttpData<List<HH2SectionData>> data) {
+                        if (data != null && !data.getData().isEmpty()) {
+                            //  ArrayList<Chapter> list = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(item.getBookNo()));
+                            for (int i = 0; i < detailList.size(); i++) {
+                                if (detailList.get(i).getSignatureId() == data.getData().get(0).getSignatureId()) {
+                                    HH2SectionData hh2SectionData = new HH2SectionData(data.getData().get(0).getData(), chapter.getChapterSection(), chapter.getChapterHeader());
+                                    ExpandableGroupEntity groupEntity = GroupModel.getExpandableGroupEntity(false, hh2SectionData);
+                                    // 更新数据
+                                    detailList.set(i, hh2SectionData);
+                                    adapter.getmGroups().set(i, groupEntity);
+                                    // 刷新列表
+                                    adapter.notifyGroupChanged(i);
+                                    //
+                                    if (!isShowUpdateNotification) {
+                                        isShowUpdateNotification = true;
+                                        toast("重新下载完成!!!!");
+                                    }
+                                    try {
+                                        // 更新数据库
+                                        chapter.setIsDownload(true);
+                                        DbService.getInstance().mChapterService.updateEntity(chapter);
+                                        //保存内容
+                                        ConvertEntity.saveBookChapterDetailList(chapter, data.getData());
+
+                                    } catch (Exception e) {
+                                        // 处理异常，比如记录日志、通知管理员等
+                                        EasyLog.print("Failed to updateEntity: " + e.getMessage());
+                                        return;
+                                        // 根据具体情况决定是否需要重新抛出异常
+                                        //throw e;
+                                    }
+                                }
+                            }
+
+
+                        }
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        super.onFail(e);
+
+                    }
+                });
+
+    }
+
+    private void getBookFang(int bookId, StringBuilder fangName) {
+        EasyHttp.get(this)
+                .api(new BookFangApi().setBookId(bookId))
+                .request(new HttpCallback<HttpData<List<Fang>>>(this) {
+                    @Override
+                    public void onSucceed(HttpData<List<Fang>> data) {
+                        if (data != null && !data.getData().isEmpty()) {
+                            List<Fang> detailList = data.getData();
+                            singletonNetData.setFang(new HH2SectionData(detailList, 0, fangName.toString()));
+                            //保存药方数据
+                            ThreadUtil.runInBackground(() -> {
+                                ConvertEntity.getFangDetailList(data.getData(), bookId);
+                            });
+
+                        }
+                    }
+                });
+    }
 
     private void refreshData() {
+        bookInitData();
         reListAdapter(true, false);
     }
 
@@ -572,10 +701,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         super.onDestroy();
         adapter.setOnHeaderClickListener(null);
         singletonNetData.setOnContentUpdateListener(null);
-        //singletonNetData.setOnContentShowStatusNotification(null);
+
         singletonNetData.setOnContentUpdateListener(null);
         adapter.setOnJumpSpecifiedItemListener(null);
-        //singletonNetData.setOnContentUpdateHttpDataNotification(null);
+
         if (rvList != null) {
             rvList.setAdapter(null);
             rvList.setLayoutManager(null);
@@ -587,7 +716,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
         if (onBackPressedCallback != null) {
             onBackPressedCallback.remove();
         }
-       // instance = null;
+        // instance = null;
         // 注销事件
         XEventBus.getDefault().unregister(TipsBookNetReadFragment.this);
     }

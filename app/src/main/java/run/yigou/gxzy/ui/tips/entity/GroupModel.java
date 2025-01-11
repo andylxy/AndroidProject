@@ -30,7 +30,7 @@ public class GroupModel {
     /**
      * 获取组列表数据
      */
-    public static ArrayList<GroupEntity> getGroups(List<HH2SectionData> showMingCiList, String charSequence) {
+    public static ArrayList<GroupEntity> getGroups(List<HH2SectionData> showMingCiList, String charSequence, boolean isFang ) {
 
         try {
             // 获取高亮匹配文本
@@ -44,25 +44,42 @@ public class GroupModel {
 
             // 初始化组列表
             ArrayList<GroupEntity> groups = new ArrayList<>();
-
+            boolean isFirst = true;
             // 遍历过滤后的数据
             for (HH2SectionData sectionData : filteredData) {
                 if (sectionData == null) {
                     continue; // 跳过空的数据
                 }
 
-                // 初始化子项列表
-                ArrayList<ChildEntity> children = new ArrayList<>();
+
                 List<DataItem> dataList = (List<DataItem>) sectionData.getData();
                 if (dataList == null) {
                     continue; // 数据为空，跳过
                 }
-                for (DataItem dataItem : dataList) {
-                    if (dataItem != null) {
-                        ChildEntity child = getChildEntity(dataItem);
-                        children.add(child);
+                // 初始化子项列表
+                ArrayList<ChildEntity> children = new ArrayList<>();
+               if (isFang){
+                for (int i = 0; i < dataList.size(); i++) {
+                    DataItem dataItem = dataList.get(i);
+                    ChildEntity child = getChildEntity(dataItem);
+                    if (i == 0 && isFirst) {
+                        isFirst = false;
+                        SpannableStringBuilder spannable = TipsNetHelper.renderText("$x{" + child.getName() + "}" + "\n");
+                        child.setAttributed_child_section_text(spannable.append(child.getAttributed_child_section_text()));
                     }
+                    children.add(child);
+
+                }}else {
+                   for (DataItem dataItem : dataList) {
+                       if (dataItem != null) {
+                           ChildEntity child = getChildEntity(dataItem);
+                           children.add(child);
+                       }
+                   }
                 }
+
+
+
 
                 // 创建组实体并添加到组列表
                 String header = sectionData.getHeader();
@@ -99,6 +116,8 @@ public class GroupModel {
         child.setGroupPosition(dataItem.getGroupPosition());
         if (dataItem.getImageUrl() != null)
             child.setChild_section_image(dataItem.getImageUrl());
+        if (dataItem.getName() != null)
+            child.setName(dataItem.getName());
         return child;
     }
 

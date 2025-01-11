@@ -849,7 +849,7 @@ public class TipsNetHelper {
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("Fang--tapped:" + charSequence);
                 List<HH2SectionData> mingCiList = ShowFanYaoMingCi.getInstance().showFangTwo(charSequence.trim());
-                ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
+                ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence,true);
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 TipsLittleTableViewWindow tipsLittleTableViewWindow = new TipsLittleTableViewWindow();
                 tipsLittleTableViewWindow.setAdapterSource(textView.getContext(), groups);
@@ -869,7 +869,7 @@ public class TipsNetHelper {
                 EasyLog.print("MingCi---tapped:" + charSequence);
                 List<HH2SectionData> mingCiList = ShowFanYaoMingCi.getInstance().showMingCiTwo(charSequence.trim());
 
-                ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence);
+                ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence, false);
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
                 TipsLittleMingCiViewWindow tipsLittleTableViewWindow = new TipsLittleMingCiViewWindow();
                 tipsLittleTableViewWindow.setAdapterSource(textView.getContext(), groups);

@@ -38,19 +38,18 @@ public class TipsLittleTableViewWindow extends TipsLittleWindow {
     private ViewGroup mGroup;
     private Rect rect;
     private View view;
-    private TipsSingleData tips_single_data = TipsSingleData.getInstance();
     private NoFooterAdapter adapter;
 
     @Override
     public void show(FragmentManager fragmentManager) {
         super.show(fragmentManager);
-        tips_single_data.tipsLittleWindowStack.add(this);
+        TipsSingleData.getInstance().tipsLittleWindowStack.add(this);
     }
 
     @Override
     public void dismiss() {
         super.dismiss();
-        tips_single_data.tipsLittleWindowStack.remove(this);
+        TipsSingleData.getInstance().tipsLittleWindowStack.remove(this);
     }
 
 

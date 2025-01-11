@@ -312,7 +312,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
      */
     private void search() {
 
-      //  toast(AppConst.Key_Window_Tips);
+        toast(AppConst.Key_Window_Tips);
         //开放全部功能
         if (!AppApplication.application.global_openness) {
             toast(AppConst.Key_Window_Tips);

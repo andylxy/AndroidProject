@@ -21,7 +21,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
  */
 public class ChildEntity {
 
-
+    private String name;
     private String child_section_text;
     private String child_section_note;
     private String child_section_video;
@@ -136,5 +136,13 @@ public class ChildEntity {
 
     public void setChild_section_video(String child_section_video) {
         this.child_section_video = child_section_video;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
