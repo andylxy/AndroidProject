@@ -59,7 +59,7 @@ public class ConvertEntity {
             if (dbService == null || dbService.mTabNavService == null) {
                 return;
             }
-            //
+            // 加载常用药物
             ArrayList<Yao> yaoData = ConvertEntity.getYaoData();
             TipsSingleData.getInstance().setYaoData(new HH2SectionData(yaoData, 0, "常用本草药物"));
             ArrayList<MingCiContent> mingCiContentList = ConvertEntity.getMingCi();

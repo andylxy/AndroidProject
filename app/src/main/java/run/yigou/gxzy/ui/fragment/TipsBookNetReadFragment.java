@@ -429,7 +429,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     }
 
 
-
     private void setBackPressedCallback() {
         if (AppApplication.getApplication().fragmentSetting.isShuJie()) {
             if (onBackPressedCallback == null)
@@ -593,18 +592,24 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             //加载书本相关的章节
             getBookChapter();
             StringBuilder fangName = new StringBuilder("\n").append(book.getBookName());
-            getBookFang(bookId, fangName);
+            //书本相关的药方只加载一次
+            if (!singletonNetData.getBookFang(bookId)){
+                getBookFang(bookId, fangName);
+                //标记书本是否已经下载过
+                singletonNetData.setBookFang(bookId);
+            }
         }
     }
 
     private void getBookChapter() {
-        int setp =150;
+        int setp = 150;
         for (Chapter chapter : chapterList) {
+            // 从数据库中获取数据,是否下载过
             if (!chapter.getIsDownload()) {
-                postDelayed(()->{
+                postDelayed(() -> {
                     getChapterList(chapter, singletonNetData.getContent());
-                },setp);
-                setp+=500;
+                }, setp);
+                setp += 500;
             }
         }
     }

@@ -250,7 +250,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         });
     }
 
-    private void clearSearchTextFocus() {
+    public void clearSearchTextFocus() {
         // 使 EditText 失去焦点
         mTvHomeSearchText.clearFocus();
         mTvHomeSearchText.setFocusable(false);
@@ -379,6 +379,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                 // 内容列表存在才添加
                                 if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
 
+                                    // 添加到适配器
                                     mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
                                     mTabAdapter.addItem(nav.getName());
 

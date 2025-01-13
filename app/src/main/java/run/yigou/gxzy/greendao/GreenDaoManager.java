@@ -35,8 +35,8 @@ public class GreenDaoManager {
     private GreenDaoManager() {
         try {
             // 构造函数中的初始化代码
-            boolean isDebug = false;
-            mySQLiteOpenHelper = new MySQLiteOpenHelper(AppApplication.getmContext(), AppConst.dbName, null, isDebug);
+           // boolean isDebug = AppConfig.isDebug();
+            mySQLiteOpenHelper = new MySQLiteOpenHelper(AppApplication.getContext(), AppConst.dbName, null, AppConfig.isDebug());
             daoMaster = new DaoMaster(mySQLiteOpenHelper.getWritableDatabase());
             daoSession = daoMaster.newSession();
         } catch (Exception e) {

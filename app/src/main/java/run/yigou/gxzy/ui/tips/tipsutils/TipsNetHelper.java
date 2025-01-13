@@ -901,7 +901,6 @@ public class TipsNetHelper {
         colorMap.put("h", Color.BLACK); // 黑色
         colorMap.put("x", Color.parseColor("#EA8E3B")); // 自定义橙色
         colorMap.put("y", Color.parseColor("#9A764F")); // 自定义棕色
-
     }
 
     /**

@@ -86,7 +86,7 @@ public final class AppApplication extends Application {
         return application;
     }
 
-    public static Context getmContext() {
+    public static Context getContext() {
         return application;
     }
 

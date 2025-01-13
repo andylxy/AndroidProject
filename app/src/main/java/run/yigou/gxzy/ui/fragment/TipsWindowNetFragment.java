@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.base.BaseAdapter;
 import com.hjq.widget.layout.WrapRecyclerView;
-import com.lucas.xbus.XEventBus;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
@@ -38,14 +37,14 @@ import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
-
+/**
+ * HomeFragment页面下
+ * Tab标签分类下的书籍信息列表
+ **/
 public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
         implements OnRefreshLoadMoreListener,
         BaseAdapter.OnItemClickListener {
 
-    public static TipsWindowNetFragment newInstance() {
-        return new TipsWindowNetFragment();
-    }
 
     public static TipsWindowNetFragment newInstance(List<TabNavBody> navList) {
         TipsWindowNetFragment bookInfoFragment = new TipsWindowNetFragment();
@@ -90,7 +89,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
        // singleData = TipsSingleData.getInstance();
         // List<BookInfoNav.Bean.NavList> navList =mNavList;
         mAdapter.setData(analogData());
-        XEventBus.getDefault().register(TipsWindowNetFragment.this);
+       // XEventBus.getDefault().register(TipsWindowNetFragment.this);
     }
     // 在 Fragment 中使用 WeakReference 来避免内存泄漏
     private WeakReference<Activity> weakActivity;
@@ -119,7 +118,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
         getBookData(bookId);
 
     }
-    private void stratFragmentActivity() {
+    private void startFragmentActivity() {
         // 获取 Activity 上下文，避免使用 getContext() 引发潜在问题
         Activity activity = weakActivity.get();
         if (activity == null) {
@@ -182,7 +181,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
         //加载书本内容
         singletonNetData.setContent(detailList);
         // 启动跳转到阅读窗口
-        stratFragmentActivity();
+        startFragmentActivity();
     }
 
     /**
@@ -214,7 +213,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
     public void onDestroy() {
         // 清理 post 或异步任务，确保引用不再存在
         weakActivity.clear();
-        XEventBus.getDefault().unregister(TipsWindowNetFragment.this);
+       // XEventBus.getDefault().unregister(TipsWindowNetFragment.this);
         super.onDestroy();
 
     }

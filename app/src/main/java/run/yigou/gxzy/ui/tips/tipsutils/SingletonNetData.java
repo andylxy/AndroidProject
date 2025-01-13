@@ -2,12 +2,13 @@
 package run.yigou.gxzy.ui.tips.tipsutils;
 
 
+import android.os.Build;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import run.yigou.gxzy.EventBus.ShowUpdateNotificationEvent;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class SingletonNetData {
@@ -21,9 +22,6 @@ public class SingletonNetData {
    // private final ShowUpdateNotificationEvent mShowUpdateNotification = new ShowUpdateNotificationEvent();
     private static volatile SingletonNetData instance;
 
-    public List<String> getAllFang() {
-        return this.allFang;
-    }
 
     private Map<String, String> yaoAliasDict;
 
@@ -36,6 +34,34 @@ public class SingletonNetData {
 //    }
 
 
+private final Map<Integer, Boolean> bookFang = new ConcurrentHashMap<>();
+
+/**
+ * 获取指定 bookFangId 的状态，默认为 false
+ *
+ * @param bookFangId 要查询的 bookFangId
+ * @return 对应的布尔值，如果不存在则返回 false
+ */
+public Boolean getBookFang(Integer bookFangId) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        return bookFang.getOrDefault(bookFangId, false);
+    }
+    return false;
+}
+
+/**
+ * 设置指定 bookFangId 的状态为 true
+ *
+ * @param bookFangId 要设置的 bookFangId
+ */
+public void setBookFang(Integer bookFangId) {
+    // 使用 putIfAbsent 避免不必要的覆盖操作
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        bookFang.putIfAbsent(bookFangId, true);
+    }
+}
+
+
     public void setYaoAliasDict(Map<String, String> yaoAliasDict) {
         if (yaoAliasDict != null)
             this.yaoAliasDict = yaoAliasDict;
@@ -43,7 +69,7 @@ public class SingletonNetData {
 
     }
 
-    protected Map<String, String> fangAliasDict;
+    private Map<String, String> fangAliasDict;
 
     public void setFangAliasDict(Map<String, String> fangAliasDict) {
         if (fangAliasDict != null)
