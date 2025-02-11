@@ -630,6 +630,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                             for (int i = 0; i < detailList.size(); i++) {
                                 if (detailList.get(i).getSignatureId() == data.getData().get(0).getSignatureId()) {
                                     HH2SectionData hh2SectionData = new HH2SectionData(data.getData().get(0).getData(), chapter.getChapterSection(), chapter.getChapterHeader());
+                                    hh2SectionData.setSignatureId(data.getData().get(0).getSignatureId());
                                     ExpandableGroupEntity groupEntity = GroupModel.getExpandableGroupEntity(false, hh2SectionData);
                                     // 更新数据
                                     detailList.set(i, hh2SectionData);
@@ -662,11 +663,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                         }
                     }
 
-                    @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
-
-                    }
+//                    @Override
+//                    public void onFail(Exception e) {
+//                        super.onFail(e);
+//                        toast("onFail  getChapterList!!!");
+//                    }
                 });
 
     }

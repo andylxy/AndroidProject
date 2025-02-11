@@ -46,9 +46,11 @@ ext {
             LOG_ENABLE = true
             BUGLY_ID = "4b99ab25ef"
             if (serverType == SERVER_TYPE_PREVIEW) {
-                HOST_URL = "http://192.168.2.158:8991/"
-            } else {
+               // HOST_URL = "http://192.168.2.158:8991/"
                 HOST_URL = "http://192.168.2.210:8991/"
+            } else {
+                HOST_URL = "http://192.168.2.158:8991/"
+               // HOST_URL = "http://192.168.2.210:8991/"
 
             }
             break
