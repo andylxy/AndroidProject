@@ -3,6 +3,7 @@ package run.yigou.gxzy.ui.fragment;
 import android.annotation.SuppressLint;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -31,7 +32,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
    // private String searchText = null;
     private Button tipsBtnSearch;
     private ClearEditText clearEditText;
-
+    private TextView ll_no_btn;
     // 使用 for 循环查找包含 SearchText控件指定内容
     List<String> searchTextResults = new ArrayList<>();
 
@@ -49,7 +50,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
 
     @Override
     protected void initView() {
-
+        ll_no_btn = findViewById(R.id.ll_no_btn);
         mRecyclerView = findViewById(R.id.tips_book_fang_yao_list);
         clearEditText = findViewById(R.id.searchEditText);
         tipsBtnSearch = findViewById(R.id.tips_btn_search);
@@ -128,6 +129,14 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
             mAdapter.setData(loadData());
         }
         mAdapter.notifyDataSetChanged();
+        if ( loadData() != null && !loadData().isEmpty()) {
+            ll_no_btn.setVisibility(View.GONE);
+            mRecyclerView.setVisibility(View.VISIBLE);
+        } else {
+            ll_no_btn.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
+        }
+
     }
 
     /**
