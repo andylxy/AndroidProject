@@ -127,6 +127,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                 //保存搜索关键字
                 searchKey = editable.toString();
                 if (!StringHelper.isEmpty(searchKey)) {
+                    // 如果内容不为空则重新光标定位
+                   etSearchKey.setSelection(searchKey.length());
                     search();
                 } else {
                     llClearHistory.setVisibility(View.VISIBLE);
@@ -207,6 +209,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 
 
     private FragmentSetting fragmentSetting;
+
     /**
      * 初始化搜索列表
      */
@@ -216,7 +219,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         lvSearchBooksList.setAdapter(mSearchBookDetailAdapter);
         layoutManager = new LinearLayoutManager(getContext());
         lvSearchBooksList.setLayoutManager(layoutManager);
-        lvSearchBooksList.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
+        lvSearchBooksList.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_Content_RecyclerView_Color, AppConst.CustomDivider_Height));
         lvSearchBooksList.setVisibility(View.GONE);
         mSearchBookDetailAdapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
             @Override
@@ -295,6 +298,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 //            }
 //        });
     }
+
     /**
      * 获取搜索数据
      */
@@ -378,22 +382,22 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 
 
     @Override
-public void onDestroy() {
-    super.onDestroy();
+    public void onDestroy() {
+        super.onDestroy();
 
-    // 空指针检查
-    if (mSearchBookDetailAdapter != null) {
-        mSearchBookDetailAdapter.setSearch(false);
-        mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener(null);
-    }
-
-
-    if (singleDataMap != null && singleDataMap.containsKey(AppConst.ShangHanNo)) {
-         SingletonNetData  singleData = singleDataMap.get(AppConst.ShangHanNo);
-        if (singleData != null) {
-            singleData.setOnContentUpdateListener(null);
+        // 空指针检查
+        if (mSearchBookDetailAdapter != null) {
+            mSearchBookDetailAdapter.setSearch(false);
+            mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener(null);
         }
-    }
 
-}
+
+        if (singleDataMap != null && singleDataMap.containsKey(AppConst.ShangHanNo)) {
+            SingletonNetData singleData = singleDataMap.get(AppConst.ShangHanNo);
+            if (singleData != null) {
+                singleData.setOnContentUpdateListener(null);
+            }
+        }
+
+    }
 }

@@ -158,17 +158,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             throw new IllegalStateException("rvList not found");
         }
         clearEditText = findViewById(R.id.searchEditText);
-        if (clearEditText == null) {
-            throw new IllegalStateException("clearEditText not found");
-        }
+
         tipsBtnSearch = findViewById(R.id.tips_btn_search);
-        if (tipsBtnSearch == null) {
-            throw new IllegalStateException("tipsBtnSearch not found");
-        }
+
         numTips = findViewById(R.id.numTips);
-        if (numTips == null) {
-            throw new IllegalStateException("numTips not found");
-        }
+
 
         // 设置 RecyclerView 布局管理器和装饰
         layoutManager = new LinearLayoutManager(getContext());

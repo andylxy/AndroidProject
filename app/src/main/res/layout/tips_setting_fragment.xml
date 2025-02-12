@@ -9,8 +9,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:leftIcon="@null"
-        app:title="阅读设置" />
-
+        app:title="其他功能" />
+    <com.hjq.widget.layout.SettingBar
+        android:id="@+id/sb_setting_yao_uint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_15"
+        app:bar_leftText="@string/yao_unit_title"
+        app:bar_rightDrawable="@drawable/arrows_right_ic" />
     <com.hjq.widget.layout.SettingBar
         android:id="@+id/sb_setting_shu_jie"
         android:layout_width="match_parent"

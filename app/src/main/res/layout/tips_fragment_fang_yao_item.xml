@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_margin="@dimen/dp_2"
+    android:background="@color/background_book_tab_label_book_item"
+    >
+
+    <TextView
+        android:id="@+id/tv_fang_yao"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dp_3"
+        android:layout_weight="1"
+        android:textColor="@color/sys_blue_deep_word"
+        android:textSize="16sp" />
+
+<!--    <TextView-->
+<!--        android:id="@+id/tv_book_author"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:padding="@dimen/dp_3"-->
+<!--        android:text="author"-->
+<!--        android:layout_weight="1"-->
+<!--        android:textColor="@color/sys_blue_deep_word"-->
+<!--        android:textSize="16sp"/>-->
+
+
+</LinearLayout>

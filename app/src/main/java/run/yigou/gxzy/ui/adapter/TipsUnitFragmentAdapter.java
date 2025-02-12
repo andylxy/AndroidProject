@@ -1,5 +1,6 @@
 package run.yigou.gxzy.ui.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -19,10 +20,6 @@ public final class TipsUnitFragmentAdapter extends AppAdapter<String> {
         super(context);
     }
 
-//    @Override
-//    public int getItemCount() {
-//        return 10;
-//    }
 
     @NonNull
     @Override
@@ -37,10 +34,11 @@ public final class TipsUnitFragmentAdapter extends AppAdapter<String> {
             tvTipsUnitFragmentItem =findViewById(R.id. tv_tips_unit_fragment_item);
         }
 
+        @SuppressLint("SetTextI18n")
         @Override
         public void onBindView(int position) {
             if (getData() != null && !getData().isEmpty()) {
-                tvTipsUnitFragmentItem.setText(getData().get(position));
+                tvTipsUnitFragmentItem.setText((position+1)+"、"+getData().get(position));
             }
         }
     }

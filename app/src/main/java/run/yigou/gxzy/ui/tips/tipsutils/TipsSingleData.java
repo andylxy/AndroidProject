@@ -43,8 +43,8 @@ public class TipsSingleData {
     private int curBookId;
     public List<TipsLittleWindow> tipsLittleWindowStack = new ArrayList();
 
-    public Set<String> getAllYao() {
-        return this.allYao;
+    public List<String>  getAllYao() {
+        return  new ArrayList<>(this.allYao);
     }
 
     private Map<Integer, TabNav> NavTabMap;

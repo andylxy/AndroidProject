@@ -2,7 +2,7 @@
     <string name="app_name">伤寒杂病论・桂林古本</string>
     <string name="app_name_debug">伤寒杂病论・桂林古本 Debug 版</string>
     <string name="app_name_preview">伤寒杂病论・桂林古本 Preview 版</string>
-<!--    <string name="app_name">知然中医查询</string>-->
+    <!--    <string name="app_name">知然中医查询</string>-->
 
 
     <!-- 通用的 -->
@@ -162,10 +162,12 @@
     <string name="home_nav_me">我的</string>
 
     <!-- 阅读页 -->
-    <string name="tips_nav_set">设置</string>
+    <string name="tips_nav_set">其他</string>
     <string name="tips_nav_book">书籍</string>
-    <string name="tips_nav_unit">单位</string>
-    <string name="tips_nav__title_font_size">字体大小设置</string>
+    <string name="tips_nav_fang">方</string>
+    <string name="tips_nav_yao">本草药物</string>
+    <string name="tips_nav_unit">汉制单位</string>
+    <string name="tips_nav_title_font_size">字体大小设置</string>
 
     <!-- 登录 -->
     <string name="login_register">注册</string>
@@ -200,11 +202,14 @@
 
     <string name="setting_exit">退出登录</string>
     <string name="setting_login">登录</string>
+    <!--    汉制单位  -->
+    <string name="yao_unit_title">汉制单位</string>
+    <string name="yao_unit_des"><font color="#FF252C">以上剂量单位内容仅供参考</font></string>
     <!-- 关于 -->
     <string name="about_title">关于本App</string>
     <string name="about_version">"   1、感谢“风若吹”老师,一直以来无私的帮助校对论寒论・桂林古本。"</string>
     <string name="about_author"><font color="#FF252C">桂林古版</font> ・伤寒论</string>
-    <string name="about_thks"><font color="#FF252C"><font color="#FF252C">"致谢(不分顺序)"</font></font></string>
+    <string name="about_thks"><font color="#FF252C">"致谢(不分顺序)"</font></string>
     <string name="about_manual"><font color="#FF252C">关于数据来源说明</font></string>
     <string name="about_developer">"    1、本App内容为个人收集、整理的资料，版权归原作者所有，摘录仅为个人学习、研究使用，所有资料已注明出处，未用于任何商业用途。\n       2、内容在整理过程中难免产生纰漏，甚至信息原本就有错误（许多医案为后人整理；许多医案中的按语为编者的理解未必正确；医者虽治愈疾病但其解释未必正确），所以本App一切内容仅供参考，若有身体不适应当及时就医，请勿盲目套方。\n        3、本App方默认以《伤寒杂病论》桂林古本为底,学习和运用《伤寒杂病论》查阅工具。"</string>
     <string name="about_updata"><font color="#FF252C">App更新说明</font></string>

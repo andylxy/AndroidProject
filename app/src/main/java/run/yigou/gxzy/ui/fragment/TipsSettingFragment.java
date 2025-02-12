@@ -16,6 +16,7 @@ import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.BookArgs;
 import run.yigou.gxzy.common.FragmentSetting;
 import run.yigou.gxzy.common.ManagerSetting;
+import run.yigou.gxzy.ui.activity.YaoUintActivity;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
@@ -24,6 +25,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
 
     private SettingBar sb_setting_sh;
     private SettingBar sb_setting_jk;
+    private SettingBar sb_setting_yao_uint;
     private SwitchButton sb_setting_sh_switch;
     private SwitchButton sb_setting_jk_switch;
    // private SingletonNetData singletonNetData;
@@ -71,6 +73,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
 
     @Override
     protected void initView() {
+        sb_setting_yao_uint = findViewById(R.id.sb_setting_yao_uint);
         sb_setting_sh = findViewById(R.id.sb_setting_sh);
         sb_setting_jk = findViewById(R.id.sb_setting_jk);
         sb_setting_sh_switch = findViewById(R.id.sb_setting_sh_switch);
@@ -96,9 +99,21 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         sb_setting_shu_jie_switch.setOnCheckedChangeListener(this);
         sb_setting_sh_switch.setOnCheckedChangeListener(this);
         sb_setting_jk_switch.setOnCheckedChangeListener(this);
-
-
+        sb_setting_yao_uint.setOnClickListener(this);
         showSettingSwitch();
+    }
+
+    @Override
+    public void onClick(View view) {
+        super.onClick(view);
+        switch (view.getId()) {
+            case R.id.sb_setting_yao_uint:
+                // 跳转到药单位设置页面
+                startActivityForResult(YaoUintActivity.class, null);
+                break;
+            default:
+                break;
+        }
     }
 
     private void showSettingSwitch() {

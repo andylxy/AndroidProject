@@ -151,7 +151,9 @@ public final class AboutActivity extends AppActivity {
             EasyLog.print("setText", "TextView is null for text: " + text);
         }
     }
+
     StringBuilder spannableStringBuilder = new StringBuilder();
+
     private void setSpannableText(AppCompatTextView textView, String text) {
         if (textView != null) {
             spannableStringBuilder.setLength(0);

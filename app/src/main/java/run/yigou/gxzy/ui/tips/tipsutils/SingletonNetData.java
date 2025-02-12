@@ -13,6 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SingletonNetData {
     private static SingletonNetData data;
+
+
     protected List<String> allFang;
     private ArrayList<HH2SectionData> content;
     private ArrayList<HH2SectionData> searchResList;
@@ -22,6 +24,9 @@ public class SingletonNetData {
    // private final ShowUpdateNotificationEvent mShowUpdateNotification = new ShowUpdateNotificationEvent();
     private static volatile SingletonNetData instance;
 
+    public List<String> getAllFang() {
+        return allFang;
+    }
 
     private Map<String, String> yaoAliasDict;
 
@@ -126,19 +131,6 @@ public void setBookFang(Integer bookFangId) {
         // 初始化并填充 allFang 列表
         this.allFang = new ArrayList<>();
         for (HH2SectionData section : this.fang) {
-
-//            for (DataItem item : section.getData()) {
-//                if (item != null && item.getFangList() != null && !item.getFangList().isEmpty()) {
-//                    String originalFangStr = item.getFangList().get(0);
-//                    // 如果有别名映射，则替换
-//                    String aliasedFangStr = this.fangAliasDict.get(originalFangStr);
-//                    if (aliasedFangStr != null) {
-//                        originalFangStr = aliasedFangStr;
-//                    }
-//                    this.allFang.add(originalFangStr);
-//                }
-//            }
-
             for (DataItem item : section.getData()) {
                 this.allFang.add(item.getName());
                 if (item.getFangList() != null && !item.getFangList().isEmpty()) {
