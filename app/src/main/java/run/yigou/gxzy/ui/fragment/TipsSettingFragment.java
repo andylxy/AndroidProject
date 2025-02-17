@@ -80,6 +80,8 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         sb_setting_jk_switch = findViewById(R.id.sb_setting_jk_switch);
         sb_setting_shu_jie = findViewById(R.id.sb_setting_shu_jie);
         sb_setting_shu_jie_switch = findViewById(R.id.sb_setting_shu_jie_switch);
+        // 设置切换按钮的隐藏
+        sb_setting_yao_uint.setVisibility(View.GONE);
 
         // 注册事件
         XEventBus.getDefault().register(TipsSettingFragment.this);

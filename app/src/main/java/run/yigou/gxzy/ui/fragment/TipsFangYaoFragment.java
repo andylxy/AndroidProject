@@ -12,6 +12,7 @@ import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import run.yigou.gxzy.R;
@@ -26,19 +27,27 @@ import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
 
     public static final String TAG = "TipsFangYaoFragment";
-    private boolean isFangYao;
+    /**
+     * 1 是方 2 是药 , 3 是汉制单位
+     */
+    private int typeFangYao;
     private TextView numTips;
     private WrapRecyclerView mRecyclerView;
-   // private String searchText = null;
     private Button tipsBtnSearch;
     private ClearEditText clearEditText;
     private TextView ll_no_btn;
     // 使用 for 循环查找包含 SearchText控件指定内容
     List<String> searchTextResults = new ArrayList<>();
 
-    public static TipsFangYaoFragment newInstance(boolean isFang) {
+    /**
+     * 创建一个实例，并设置类型。
+     *
+     * @param typeFangYao 1 是方 2 是药,3 是汉制单位
+     * @return TipsFangYaoFragment 实例
+     */
+    public static TipsFangYaoFragment newInstance(int typeFangYao) {
         TipsFangYaoFragment fragment = new TipsFangYaoFragment();
-        fragment.isFangYao = isFang;
+        fragment.typeFangYao = typeFangYao;
         return fragment;
     }
 
@@ -96,10 +105,10 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
 
     @SuppressLint("DefaultLocale")
     public void setSearchText(String searchText) {
-       // this.searchText = searchText;
+        // this.searchText = searchText;
         // 重置匹配结果数量
         // 检查搜索文本是否有效（不为 null、不为空且不是数字）
-        if (searchText != null && !searchText.isEmpty() ) {
+        if (searchText != null && !searchText.isEmpty()) {
             searchTextResults.clear();
             for (String str : loadData()) {
                 if (str.contains(searchText)) {
@@ -129,7 +138,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
             mAdapter.setData(loadData());
         }
         mAdapter.notifyDataSetChanged();
-        if ( loadData() != null && !loadData().isEmpty()) {
+        if (loadData() != null && !loadData().isEmpty()) {
             ll_no_btn.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
         } else {
@@ -160,22 +169,42 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
     protected void initData() {
 
         //判断是方或者药
-        if (isFangYao)
-            mAdapter = new TipsFangYaoAdapter(getAttachActivity(), true);
-        else
-            mAdapter = new TipsFangYaoAdapter(getAttachActivity(), false);
-        //mAdapter.setData(loadData());
+        switch (typeFangYao) {
+            case 1:
+                mAdapter = new TipsFangYaoAdapter(getAttachActivity(), 1);
+                break;
+            case 2:
+                mAdapter = new TipsFangYaoAdapter(getAttachActivity(), 2);
+                break;
+            case 3:
+                mAdapter = new TipsFangYaoAdapter(getAttachActivity(), 3);
+                break;
+            default:
+                break;
+        }
+
         mRecyclerView.setAdapter(mAdapter);
         //设置数据源
         reListAdapter(false);
     }
 
     private List<String> loadData() {
-        if (isFangYao) {
-            return TipsSingleData.getInstance().getCurSingletonData().getAllFang();
-        } else {
-            return TipsSingleData.getInstance().getAllYao();
+        List<String> gvList;
+        switch (typeFangYao) {
+            case 1:
+                gvList = TipsSingleData.getInstance().getCurSingletonData().getAllFang();
+                break;
+            case 2:
+                gvList = TipsSingleData.getInstance().getAllYao();
+                break;
+            default:
+                String[] dataStrings = {"汉制一两约为 15.625克", "汉制一两为 24铢", "汉制一铢为 0.65克", "汉制一升约为 200毫升", "汉制一合为 20毫升", "杏仁一枚约为 0.4克", "1石=四钧＝29760克", "1钧=三十斤＝7440克", "1斤=248克", "1斤=16两", "1斤=液体250毫升", "1两=15.625克", "1两=24铢", "1升=液体200毫升", "1合=20毫升", "1圭=0.5克", "1龠=10毫升", "1撮=2克", "1方寸匕=金石类2.74克", "1方寸匕=药末约2克", "1方寸匕=草木类药末约1克", "半方寸匕=一刀圭=一钱匕=1.5克", "一钱匕=1.5-1.8克", "一铢=100个黍米的重量", "一分=3.9-4.2克", "梧桐子大约为 黄豆大", "蜀椒一升=50克", "葶力子一升=60克", "吴茱萸一升=50克", "五味子一升=50克", "半夏一升=130克", "虻虫一升=16克", "附子大者1枚=20-30克", "附子中者1枚=15克", "强乌头1枚小者=3克", "强乌头1枚大者=5-6克", "杏仁大者10枚=4克", "栀子10枚平均15克", "瓜蒌大小平均1枚=46克", "枳实1枚约14.4克", "石膏鸡蛋大1枚约40克", "厚朴1尺约30克", "竹叶一握约12克", "1斛=10斗＝20000毫升", "1斗=10升＝2000毫升", "1升=10合＝200毫升", "1合=2龠＝20毫升", "1龠=5撮＝10毫升", "1撮=4圭＝2毫升", "1圭=0.5毫升", "1引=10丈＝2310厘米", "1丈=10尺＝231厘米", "1尺=10寸＝23.1厘米", "1寸=10分＝2.31厘米", "1分=0.231厘米"};
+                gvList = new ArrayList<>(Arrays.asList(dataStrings));
         }
-
+        if (gvList != null && !gvList.isEmpty()) {
+            return gvList;
+        } else {
+            return new ArrayList<>();
+        }
     }
 }

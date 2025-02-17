@@ -11,19 +11,17 @@ import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
-import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.ui.tips.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
 
 
 public final class TipsFangYaoAdapter extends AppAdapter<String> {
     private final String TAG = "TipsFangYaoAdapter";
-    private boolean isFangYao;
+    private final int typeFangYao;
 
-    public TipsFangYaoAdapter(Context context, boolean isFang) {
+    public TipsFangYaoAdapter(Context context, int typeFangYao) {
         super(context);
-        this.isFangYao = isFang;
+        this.typeFangYao = typeFangYao;
     }
 
     @NonNull
@@ -44,17 +42,27 @@ public final class TipsFangYaoAdapter extends AppAdapter<String> {
         @SuppressLint("SetTextI18n")
         @Override
         public void onBindView(int position) {
-            if (isFangYao) {
-                if (getData() != null) {
-                    String f = (position + 1) + "、" + "$f{" + getData().get(position) + "}";
-                    mFang_Yao.setText(TipsNetHelper.renderText(f));
+            switch (typeFangYao) {
+                case 1:
+                    if (getData() != null) {
+                        String f = (position + 1) + "、" + "$f{" + getData().get(position) + "}";
+                        mFang_Yao.setText(TipsNetHelper.renderText(f));
 
-                }
-            } else {
-                if (getData() != null) {
-                    String u = (position + 1) + "、" + "$u{" + getData().get(position) + "}";
-                    mFang_Yao.setText(TipsNetHelper.renderText(u));
-                }
+                    }
+                    break;
+                case 2:
+                    if (getData() != null) {
+                        String u = (position + 1) + "、" + "$u{" + getData().get(position) + "}";
+                        mFang_Yao.setText(TipsNetHelper.renderText(u));
+                    }
+                    break;
+                case 3:
+                    if (getData() != null && !getData().isEmpty()) {
+                        mFang_Yao.setText((position + 1) + "、" + getData().get(position));
+                    }
+                    break;
+                default:
+                    break;
             }
 
         }

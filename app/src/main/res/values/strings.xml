@@ -167,6 +167,7 @@
     <string name="tips_nav_fang">方</string>
     <string name="tips_nav_yao">本草药物</string>
     <string name="tips_nav_unit">汉制单位</string>
+    <string name="tips_nav_msg">AI对话</string>
     <string name="tips_nav_title_font_size">字体大小设置</string>
 
     <!-- 登录 -->

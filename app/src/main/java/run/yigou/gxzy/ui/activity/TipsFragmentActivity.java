@@ -17,6 +17,7 @@ import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.BookArgs;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.ui.adapter.NavigationAdapter;
+import run.yigou.gxzy.ui.fragment.AiMsgFragment;
 import run.yigou.gxzy.ui.fragment.TipsBookNetReadFragment;
 import run.yigou.gxzy.ui.fragment.TipsFangYaoFragment;
 import run.yigou.gxzy.ui.fragment.TipsSettingFragment;
@@ -34,7 +35,6 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
     protected int getLayoutId() {
         return R.layout.tips_fragment_tab_net_list;
     }
-
 
     @Override
     protected void initView() {
@@ -61,7 +61,6 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
             return;
         }
         String bookName = tabNav.getBookName().split("[.,・]").length == 0 ? tabNav.getBookName() : tabNav.getBookName().split("[.,・]")[0];
-
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(bookName,
                 ContextCompat.getDrawable(this, R.drawable.list_selector)));
 
@@ -70,14 +69,21 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
          */
         {
 
-            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(bookName +getString(R.string.tips_nav_fang),
-                    ContextCompat.getDrawable(this, R.drawable.list_selector)));
+            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(bookName + getString(R.string.tips_nav_fang),
+                    ContextCompat.getDrawable(this, R.drawable.list_fang_selector)));
+
             mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_yao),
+                    ContextCompat.getDrawable(this, R.drawable.ruler_yao_selector)));
+
+            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_unit),
                     ContextCompat.getDrawable(this, R.drawable.ruler_selector)));
         }
+        /*
+         * 智能消息 --暂时不开发
+         */
+         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_msg),
+                 ContextCompat.getDrawable(this, R.drawable.ruler_selector_msg)));
 
-//        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_unit),
-//                ContextCompat.getDrawable(this, R.drawable.ruler_selector)));
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_set),
                 ContextCompat.getDrawable(this, R.drawable.settings_selector)));
         mNavigationAdapter.setOnNavigationListener(this);
@@ -93,17 +99,27 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
         boolean isShow = getIntent().getBooleanExtra("bookCollect", false);
         BookArgs bookArgs = BookArgs.newInstance(bookId, bookLastReadPosition, isShow);
         mPagerAdapter = new FragmentPagerAdapter<>(this);
+
         mPagerAdapter.addFragment(TipsBookNetReadFragment.newInstance(bookArgs));
-
-
          /*
             如果是黄帝内经和本草类型，则不显示方药和药单位
         */
-        {   // true 为方，false为药
-            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(true));
-            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(false));
+        {
+            /*
+             *  true 为方
+             */
+            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(1));
+
+            /*
+             *  false 为药
+             */
+            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(2));
+            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(3));
         }
-       // mPagerAdapter.addFragment(TipsYaoUnitShowFragment.newInstance());
+        /*
+         * 智能消息 --暂时不开发
+         */
+        mPagerAdapter.addFragment(AiMsgFragment.newInstance());
         mPagerAdapter.addFragment(TipsSettingFragment.newInstance(bookArgs));
         mViewPager.setAdapter(mPagerAdapter);
         onNewIntent(getIntent());
@@ -139,6 +155,8 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
             case 1:
             case 2:
             case 3:
+            case 4:
+            case 5:
                 mViewPager.setCurrentItem(fragmentIndex);
                 mNavigationAdapter.setSelectedPosition(fragmentIndex);
                 break;
@@ -158,6 +176,8 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
             case 1:
             case 2:
             case 3:
+            case 4:
+            case 5:
                 mViewPager.setCurrentItem(position);
                 return true;
             default:
