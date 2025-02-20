@@ -16,6 +16,7 @@ import run.yigou.gxzy.greendao.service.BookChapterBodyService;
 import run.yigou.gxzy.greendao.service.BookChapterService;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.service.ChapterService;
+import run.yigou.gxzy.greendao.service.ChatMessageBeanService;
 import run.yigou.gxzy.greendao.service.SearchHistoryService;
 import run.yigou.gxzy.greendao.service.TabNavBodyService;
 import run.yigou.gxzy.greendao.service.TabNavService;
@@ -44,6 +45,7 @@ public class DbService {
     public AboutService mAboutService;
     public YaoAliasService  mYaoAliasService;
     public ChapterService mChapterService;
+    public ChatMessageBeanService mChatMessageBeanService;
 
     private DbService() {
         // 防止反射攻击
@@ -64,6 +66,7 @@ public class DbService {
         mAboutService =  AboutService.getInstance();
         mYaoAliasService =  YaoAliasService.getInstance();
         mChapterService =  ChapterService.getInstance();
+        mChatMessageBeanService =  ChatMessageBeanService.getInstance();
     }
 
     private volatile static DbService instance;

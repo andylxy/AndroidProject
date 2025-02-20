@@ -100,7 +100,6 @@ public abstract class BaseService<T, TDao extends AbstractDao<T, ?>> {
         //  String sql = "select * from table order by create_date desc";
         // 清空查询条件
         return  (ArrayList<T>) getQueryBuilder().where(cond, condMore).list();
-
     }
     /**
      * 通过SQL查找

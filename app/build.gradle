@@ -1,7 +1,7 @@
-apply plugin : 'com.android.application'
-apply plugin : 'android-aspectjx'
+apply plugin: 'com.android.application'
+apply plugin: 'android-aspectjx'
 apply plugin: 'org.greenrobot.greendao'//greendao插件dependencies
-apply from : '../common.gradle'
+apply from: '../common.gradle'
 
 
 // Android 代码规范文档：https://github.com/getActivity/AndroidCodeStandard
@@ -59,7 +59,7 @@ android {
             signingConfig signingConfigs.config
             // 添加清单占位符
             addManifestPlaceholders([
-                    'app_name'    :    '@string/app_name_debug'
+                    'app_name': '@string/app_name_debug'
             ])
             // 调试模式下只保留一种架构的 so 库，提升打包速度
             ndk {
@@ -72,7 +72,7 @@ android {
             applicationIdSuffix '.preview'
             // 添加清单占位符
             addManifestPlaceholders([
-                    'app_name'    :   '@string/app_name_preview'
+                    'app_name': '@string/app_name_preview'
             ])
         }
 
@@ -90,7 +90,7 @@ android {
             signingConfig signingConfigs.config
             // 添加清单占位符
             addManifestPlaceholders([
-                    'app_name'    :    '@string/app_name'
+                    'app_name': '@string/app_name'
             ])
             // 仅保留两种架构的 so 库，根据 Bugly 统计得出
             ndk {
@@ -149,6 +149,9 @@ dependencies {
     //Android平台通用的RSA算法工具类及其例子 https://github.com/gzu-liyujiang/RSAUtils
     implementation 'com.github.gzu-liyujiang:RSAUtils:2.0.0'
 
+    //AndroidUtilCode 是一个强大易用的安卓工具类库，它合理地封装了安卓开发中常用的函数，具有完善的 Demo 和单元测试
+    implementation 'com.blankj:utilcodex:1.31.1'
+
     //安卓设备唯一标识解决方案 https://github.com/gzu-liyujiang/Android_CN_OAID
     //implementation 'com.github.gzu-liyujiang:Android_CN_OAID:4.2.5'
     // 权限请求框架：https://github.com/getActivity/XXPermissions
@@ -162,6 +165,7 @@ dependencies {
 
     // 网络请求框架：https://github.com/getActivity/EasyHttp
     implementation 'com.github.getActivity:EasyHttp:10.2'
+    //implementation 'com.github.getActivity:EasyHttp:13.0'
     // OkHttp 框架：https://github.com/square/okhttp
     // noinspection GradleDependency
     implementation 'com.squareup.okhttp3:okhttp:3.12.13'
@@ -180,7 +184,7 @@ dependencies {
     // 图片加载框架：https://github.com/bumptech/glide
     // 官方使用文档：https://github.com/Muyangmin/glide-docs-cn
     implementation 'com.github.bumptech.glide:glide:4.12.0'
-    
+
     implementation 'com.github.donkingliang:GroupedRecyclerViewAdapter:2.4.3'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
 
@@ -217,7 +221,7 @@ dependencies {
 
     implementation 'org.greenrobot:greendao:3.3.0'
 
-   // implementation 'com.github.li-xiaojun:XPopup:2.10.0'
+    // implementation 'com.github.li-xiaojun:XPopup:2.10.0'
 
     // 多语种：https://github.com/getActivity/MultiLanguages
     // 悬浮窗：https://github.com/getActivity/XToast

@@ -40,24 +40,7 @@ public class SearchHistoryService extends BaseService<SearchHistory,SearchHistor
     }
 
 
-    private ArrayList<SearchHistory> findSearchHistorys(String sql, String[] selectionArgs) {
-        ArrayList<SearchHistory> searchHistories = new ArrayList<>();
-        try {
-            Cursor cursor = selectBySql(sql, selectionArgs);
-            if (cursor == null) return searchHistories;
-            while (cursor.moveToNext()) {
-                SearchHistory searchHistory = new SearchHistory();
-                searchHistory.setId(cursor.getString(0));
-                searchHistory.setContent(cursor.getString(1));
-                searchHistory.setCreateDate(cursor.getString(2));
-                searchHistories.add(searchHistory);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return searchHistories;
-        }
-        return searchHistories;
-    }
+
 
     /**
      * 返回所有历史记录（按时间从大到小）

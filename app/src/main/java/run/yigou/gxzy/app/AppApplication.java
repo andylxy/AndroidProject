@@ -22,6 +22,9 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
+import com.blankj.utilcode.util.GsonUtils;
+import com.blankj.utilcode.util.Utils;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonToken;
 import com.hjq.bar.TitleBar;
@@ -102,6 +105,9 @@ public final class AppApplication extends Application {
         ///ThreadUtil.runInBackground(ConvertEntity::tipsSingleDataInit);
         registryByReflect();
         initSdk(this);
+        //初始化工具类
+        Utils.init(this);
+        GsonUtils.setGsonDelegate(new Gson());
     }
 
     public FragmentSetting fragmentSetting;
