@@ -151,7 +151,8 @@ dependencies {
 
     //AndroidUtilCode 是一个强大易用的安卓工具类库，它合理地封装了安卓开发中常用的函数，具有完善的 Demo 和单元测试
     implementation 'com.blankj:utilcodex:1.31.1'
-
+    // Markwon 是一个 Markdown 库，它允许您使用 Markdown 语法在 Android 上渲染文本
+    implementation "io.noties.markwon:core:4.6.2"
     //安卓设备唯一标识解决方案 https://github.com/gzu-liyujiang/Android_CN_OAID
     //implementation 'com.github.gzu-liyujiang:Android_CN_OAID:4.2.5'
     // 权限请求框架：https://github.com/getActivity/XXPermissions

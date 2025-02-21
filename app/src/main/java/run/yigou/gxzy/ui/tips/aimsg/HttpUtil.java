@@ -38,10 +38,20 @@ public class HttpUtil {
     public static void chat(String send, final CallBack callback) {
         // ChatGPT API的URL地址
         String url = AiConfig.getProxyAddress() + "/v1/chat/completions";
-
+//        HttpResponse<String> response = Unirest.post("https://api.siliconflow.cn/v1/chat/completions")
+//                .header("Authorization", "Bearer sk-cjjduahzvzrjecmvyoarkmxupkpxbyihdpykedypixcjuvvz")
+//                .header("Content-Type", "application/json")
+//                .body("{\n  \"model\": \"deepseek-ai/DeepSeek-R1-Distill-Qwen-7B\",\n  \"stream\": true,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"什么是五行\"\n    }\n  ]\n}")
+//                .asString();
         // 获取API Key，用于验证请求
-        String apiKey = "Bearer " + AiConfig.getApiKey();
-
+       // String key = "sk-cjjduahzvzrjecmvyoarkmxupkpxbyihdpykedypixcjuvvz";
+        String key = "sk-coVs954kxVeOSTpCQ8qM6EbAAJfA69w1kM2vYgApre5i9TVz";
+        String apiKey;
+        if (AiConfig.getApiKey() != null && AiConfig.getApiKey().length() == key.length()) {
+            apiKey = "Bearer " + AiConfig.getApiKey();
+        } else {
+            apiKey = "Bearer " + key;
+        }
         // 如果不使用上下文（历史消息），则清空历史记录
         if (!AiConfig.getUseContext()) {
             history.clear();
@@ -191,8 +201,9 @@ public class HttpUtil {
     public interface CallBack {
         /**
          * 处理消息返回结果
+         *
          * @param result 返回的消息结果
-         * @param isLast   false返回部分消息,不是完整消息; true返回完整消息
+         * @param isLast false返回部分消息,不是完整消息; true返回完整消息
          */
         void onCallBack(String result, boolean isLast); // 回调方法
     }

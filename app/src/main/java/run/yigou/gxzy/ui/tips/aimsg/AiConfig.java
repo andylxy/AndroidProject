@@ -42,7 +42,7 @@ public class AiConfig {
      * 模型代理地址
      */
     public static String getProxyAddress() {
-        return SPUtils.getInstance().getString("proxyAddress", "http://proxy.chat.carlife.host");
+        return SPUtils.getInstance().getString("proxyAddress", "https://api.siliconflow.cn");
     }
 
     public static void setProxyAddress(String value) {

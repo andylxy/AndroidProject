@@ -21,6 +21,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -28,6 +29,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.hjq.http.EasyLog;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
 
@@ -69,10 +71,12 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
         mChatAdapter = new TipsAiChatAdapter(activity);
         mChatAdapter.setHasStableIds(true);
         // 设置 RecyclerView 的动画时长
-        rv_chat.getItemAnimator().setChangeDuration(0);
+        //rv_chat.getItemAnimator().setChangeDuration(0);
+        rv_chat.setItemAnimator(null); // 禁用动画
         // 设置 RecyclerView 的布局管理器和适配器
         rv_chat.setLayoutManager(new LinearLayoutManager(getContext()));
         rv_chat.setAdapter(mChatAdapter);
+
         // 注册事件
         XEventBus.getDefault().register(AiMsgFragment.this);
         // 初始化消息数据
@@ -92,6 +96,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
                 ((TextView) findViewById(R.id.tv_title)).setText(AiConfig.getAssistantName());
         });
     }
+
+    private int index = 0;
 
     /**
      * 初始化聊天消息
@@ -191,7 +197,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
                             });
                         }
 
-                        final int[] index = {0};
+
                         HttpUtil.chat(result, new HttpUtil.CallBack() {
                             @Override
                             public void onCallBack(final String result, final boolean isLast) {
@@ -201,19 +207,27 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
                                         receivedMessage.setContent(result);
 
                                         // 根据滚动状态决定是否更新数据
-                                        if ((scrollState == 0 && index[0] % 3 == 0) || isLast) {
+                                        if ((scrollState == 0 && index % 3 == 0) || isLast) {
                                             mChatAdapter.updateData();
+                                            rv_chat .scrollBy(0, 15);
                                         }
 
                                         // 滚动到最后一条消息
-                                        if ((scrollState == 0 && ++index[0] % 20 == 0) || isLast) {
-                                            if (rv_chat != null) {
-                                                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
-                                            }
-                                        }
+//                                        if ((scrollState == 0 && ++index % 20 == 0) || isLast) {
+//                                            EasyLog.print("scrollState: "+scrollState);
+//                                            if (rv_chat != null) {
+//                                                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+//
+//                                            }
+//
+//                                        }
 
                                         if (isLast) {
                                             // 将回复消息插入数据库
+                                            //index =0;
+
+                                            //rv_chat.smoothScrollToPosition(mChatAdapter.getData().size() - 1);
+                                           // rv_chat .scrollBy(0, 20);
                                             receivedMessage.setCreateDate(DateHelper.getSeconds1());
                                             receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
                                             DbService.getInstance().mChatMessageBeanService.addEntity(receivedMessage);
@@ -245,9 +259,17 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
         chatMessageBeans = DbService.getInstance().mChatMessageBeanService.findAll();
         if (chatMessageBeans != null) {
             mChatAdapter.setData(chatMessageBeans);
-            return;
+            int lastPosition = mChatAdapter.getData().size() - 1;
+            if (lastPosition > 0) {
+                rv_chat.smoothScrollToPosition(lastPosition);
+            }
+
+        }else{
+            mChatAdapter.setData(new ArrayList<ChatMessageBean>());
+
         }
-        mChatAdapter.setData(new ArrayList<ChatMessageBean>());
+
+
     }
 
     @Override

@@ -156,9 +156,7 @@ public final class AiConfigActivity extends AppActivity {
     @SuppressLint("SetTextI18n")
     private void showProxyAddressSelectionDialog() {
         final String[] items = new String[]{
-                "https://api.openai.com",
-                "http://proxy.chat.carlife.host",
-                "https://api.gptsapi.net",
+                "https://api.siliconflow.cn","https://api.lkeap.cloud.tencent.com",
                 "手动输入"
         };
         new MenuDialog.Builder(this).setList(items)
@@ -283,7 +281,7 @@ public final class AiConfigActivity extends AppActivity {
     @SuppressLint("SetTextI18n")
     private void showModelSelectionDialog() {
         final String[] items = new String[]{
-                "gpt-4o", "chatgpt-4o-latest（推荐）", "gpt-4o-mini（推荐）", "gpt-4-turbo", "gpt-3.5-turbo-16k", "claude-3-opus-20240229", "claude-3-5-sonnet-20240620（推荐）", "claude-3-haiku-20240307", "手动输入"};// 预设的模型选项和手动输入选项
+               "deepseek-ai/DeepSeek-R1（推荐-流动硅基）","deepseek-r1（推荐-腾讯）", "手动输入"};// 预设的模型选项和手动输入选项
 
         new MenuDialog.Builder(this).setList(items)
                 .setListener((dialog, position, string) -> {
@@ -291,7 +289,15 @@ public final class AiConfigActivity extends AppActivity {
                         showModelDialog();
                     } else {
                         String selectedModel = items[position];
-                        AiConfig.setGptModel(selectedModel.replace("（推荐）", ""));
+                        if (selectedModel.contains("流动硅基")) {
+                            selectedModel = selectedModel.replace("（推荐-流动硅基）", "");
+                            selectedModel = selectedModel.replace("（流动硅基）", "");
+                        }
+                        if (selectedModel.contains("腾讯")) {
+                            selectedModel = selectedModel.replace("（推荐-腾讯）", "");
+                            selectedModel = selectedModel.replace("（腾讯）", "");
+                        }
+                        AiConfig.setGptModel(selectedModel);
                         tv_model_name.setText("当前模型：" + AiConfig.getGptModel());
 
                         ToastUtils.showLong("已选择模型: " + AiConfig.getGptModel());
