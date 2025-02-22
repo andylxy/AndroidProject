@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import run.yigou.gxzy.greendao.entity.About;
+import run.yigou.gxzy.greendao.entity.AiConfig;
+import run.yigou.gxzy.greendao.entity.AiConfigBody;
 import run.yigou.gxzy.greendao.entity.BeiMingCi;
 import run.yigou.gxzy.greendao.entity.BookChapter;
 import run.yigou.gxzy.greendao.entity.BookChapterBody;
@@ -416,6 +418,39 @@ public class ConvertEntity {
         }
     }
 
+    public static boolean saveAiConfigList(List<AiConfig> aiConfigs) {
+        if (aiConfigs == null || aiConfigs.isEmpty()) {
+            EasyLog.print("AiConfig is empty or null.");
+            return false;
+        }
+        StringBuilder aiConfigId = new StringBuilder();
+        try {
+
+            DbService.getInstance().mAiConfigService.deleteAll();
+            DbService.getInstance().mAiConfigBodyService.deleteAll();
+
+            for (AiConfig aiConfig : aiConfigs) {
+                aiConfigId.setLength(0);
+                aiConfigId.append(StringHelper.getUuid());
+                aiConfig.setAiConfigId(aiConfigId.toString());
+                if (aiConfig.getApiKey() != null && !aiConfig.getApiKey().isEmpty())
+                    aiConfig.setApiKey(RC4Helper.encrypt(aiConfig.getApiKey()));
+                DbService.getInstance().mAiConfigService.addEntity(aiConfig);
+
+                for (AiConfigBody aiConfigBody : aiConfig.getModelList()) {
+                    aiConfigBody.setAiConfigBodyId(StringHelper.getUuid());
+                    aiConfigBody.setAiConfigId(aiConfigId.toString());
+                    DbService.getInstance().mAiConfigBodyService.addEntity(aiConfigBody);
+                }
+            }
+
+        } catch (Exception e) {
+            EasyLog.print("Error processing detail list: " + e.getMessage());
+            //  throw e;
+            return false;
+        }
+        return true;
+    }
 
     public static boolean saveBookChapterDetailList(Chapter chapter, List<HH2SectionData> netDetailList) {
         if (netDetailList == null || netDetailList.isEmpty() || chapter.getBookId() <= 0) {

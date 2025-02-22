@@ -17,7 +17,7 @@
         android:text="4月12日 早上07:51" />
 
     <RelativeLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/dp_10">
 
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_receive_nick"
             android:layout_marginStart="@dimen/dp_5"
-            android:layout_marginEnd="@dimen/dp_50"
+            android:layout_marginEnd="@dimen/dp_5"
             android:layout_toEndOf="@id/iv_receive_picture"
             android:background="@drawable/chat_tv_receive"
             android:paddingStart="@dimen/dp_15"

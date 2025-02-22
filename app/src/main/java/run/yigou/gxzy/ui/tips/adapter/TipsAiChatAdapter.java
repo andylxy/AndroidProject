@@ -7,10 +7,16 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import io.noties.markwon.Markwon;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
 import timber.log.Timber;
+
+import io.noties.markwon.AbstractMarkwonPlugin;
+import io.noties.markwon.Markwon;
+import io.noties.markwon.MarkwonConfiguration;
+import io.noties.markwon.MarkwonVisitor;
 
 
 public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
@@ -22,8 +28,14 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
     private static final int LAYOUT_SYSTEM = R.layout.tips_ai_msg_chat_system;
     private static final int LAYOUT_DEFAULT = 0; // 默认布局资源ID
 
+    // 初始化 Markwon
+   private   Markwon markwon ;
+
     public TipsAiChatAdapter(Context context) {
         super(context);
+        // 初始化 Markwon
+         markwon = Markwon.create(context);
+
     }
 
     @Override
@@ -84,7 +96,9 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     TextView tv_receive_content = findViewById(R.id.tv_receive_content);
                     ImageView iv_receive_picture = findViewById(R.id.iv_receive_picture);
                     TextView tv_receive_nick = findViewById(R.id.tv_receive_nick);
-                    tv_receive_content.setText(bean.getContent());
+                    //tv_receive_content.setText(bean.getContent());
+                    // 设置 Markdown 文本
+                    markwon.setMarkdown(tv_receive_content, bean.getContent());
                     tv_receive_nick.setText(bean.getNick());
                     iv_receive_picture.setImageResource(R.drawable.icon);
                     break;

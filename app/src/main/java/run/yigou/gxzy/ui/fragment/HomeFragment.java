@@ -51,12 +51,14 @@ import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.greendao.entity.AiConfig;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.entity.TabNav;
 import run.yigou.gxzy.greendao.service.SearchHistoryService;
 import run.yigou.gxzy.greendao.service.TabNavService;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.http.api.AiConfigApi;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.api.MingCiContentApi;
 import run.yigou.gxzy.http.api.YaoAliaApi;
@@ -312,13 +314,13 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
      */
     private void search() {
 
-     //   toast(AppConst.Key_Window_Tips);
+        //   toast(AppConst.Key_Window_Tips);
         //开放全部功能
         if (!AppApplication.application.global_openness) {
             toast(AppConst.Key_Window_Tips);
             return;
         }
-           //有限功能不开放全部功能
+        //有限功能不开放全部功能
 //        //保存搜索关键字
         if (!StringHelper.isEmpty(searchKey)) {
             mSearchHistoryService.addOrUpadteHistory(searchKey);
@@ -387,7 +389,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             }
                             // 保存到数据库
                             ThreadUtil.runInBackground(() -> {
-                                    ConvertEntity.saveTabNvaInDb(bookNavList, newInstance());
+                                ConvertEntity.saveTabNvaInDb(bookNavList, newInstance());
                             });
                         } else {
                             bookNavList = new ArrayList<>();
@@ -426,7 +428,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             List<Yao> detailList = data.getData();
                             //加载所有药物的数据
                             TipsSingleData.getInstance().setYaoData(new HH2SectionData(detailList, 0, "常用本草药物"));
-                           isGetYaoData = false;
+                            isGetYaoData = false;
                             //保存内容
                             ThreadUtil.runInBackground(() -> {
                                 ConvertEntity.saveYaoData(detailList);
@@ -442,7 +444,6 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                 });
 
 
-
         EasyHttp.get(this)
                 .api(new YaoAliaApi())
                 .request(new HttpCallback<HttpData<List<YaoAlia>>>(this) {
@@ -451,16 +452,16 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                         if (data != null && !data.getData().isEmpty()) {
 
                             //加载额外的别名的数据
-                           // TipsSingleData.getInstance().setYaoData(new HH2SectionData(detailList, 0, "常用本草药物"));
+                            // TipsSingleData.getInstance().setYaoData(new HH2SectionData(detailList, 0, "常用本草药物"));
                             //保存内容
                             ThreadUtil.runInBackground(() -> {
                                 //加载额外的别名的数据
-                                Map<String, String> yaoAliasDict=   TipsSingleData.getInstance(). getYaoAliasDict();
+                                Map<String, String> yaoAliasDict = TipsSingleData.getInstance().getYaoAliasDict();
                                 for (YaoAlia yaoAlia : data.getData()) {
-                                     yaoAliasDict.put(yaoAlia.getBieming(),yaoAlia.getName() );
-                                 }
+                                    yaoAliasDict.put(yaoAlia.getBieming(), yaoAlia.getName());
+                                }
                                 //保存数据
-                               ConvertEntity.saveYaoAlia(data.getData());
+                                ConvertEntity.saveYaoAlia(data.getData());
                             });
                         }
                     }

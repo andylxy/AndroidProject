@@ -26,6 +26,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.greendao.entity.AiConfig;
 import run.yigou.gxzy.greendao.entity.TabNav;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
@@ -52,6 +53,17 @@ public class TipsSingleData {
     public Map<Integer, TabNav> getNavTabMap() {
         if (NavTabMap == null) NavTabMap = new HashMap<>();
         return NavTabMap;
+    }
+
+    private  List<AiConfig> aiConfigList ;
+
+    public List<AiConfig> getAiConfigList() {
+        if (aiConfigList == null) aiConfigList = new ArrayList<>();
+        return aiConfigList;
+    }
+
+    public void setAiConfigList(List<AiConfig> aiConfigList) {
+        this.aiConfigList = aiConfigList;
     }
 
     public Map<Integer, TabNavBody> getNavTabBodyMap() {

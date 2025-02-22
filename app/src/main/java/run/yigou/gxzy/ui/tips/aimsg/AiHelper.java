@@ -17,44 +17,44 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class HttpUtil {
+/**
+ * AiHelper类是一个辅助类，兼容openAi接口, 用于与Ai数据模型 API进行交互，实现聊天功能。
+ */
+public class AiHelper {
 
     // 存储聊天记录的历史消息列表
     private static ArrayList<Message> history = new ArrayList<>();
 
+    /**
+     * 清空历史记录
+     */
+    public static void clearHistory() {
+        history.clear();
+    }
+
     // 构造请求的JSON数据
     private static HashMap<String, Object> gptRequestJson = new HashMap<String, Object>() {{
-        put("model", AiConfig.getGptModel()); // 使用配置中的GPT模型
+        put("model", AiConfigHelper.getGptModel()); // 使用配置中的GPT模型
         put("stream", true);           // 启用流式传输
         put("messages", history);      // 设置历史消息
     }};
 
     /**
-     * 调用ChatGPT API接口进行聊天
+     * 调用在线Ai模型 API接口进行聊天
      *
      * @param send     用户发送的消息
      * @param callback 回调接口，用于处理返回的结果
      */
     public static void chat(String send, final CallBack callback) {
-        // ChatGPT API的URL地址
-        String url = AiConfig.getProxyAddress() + "/v1/chat/completions";
-//        HttpResponse<String> response = Unirest.post("https://api.siliconflow.cn/v1/chat/completions")
-//                .header("Authorization", "Bearer sk-cjjduahzvzrjecmvyoarkmxupkpxbyihdpykedypixcjuvvz")
-//                .header("Content-Type", "application/json")
-//                .body("{\n  \"model\": \"deepseek-ai/DeepSeek-R1-Distill-Qwen-7B\",\n  \"stream\": true,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"什么是五行\"\n    }\n  ]\n}")
-//                .asString();
+        // Ai API的URL地址
+        String url = AiConfigHelper.getProxyAddress() + "/v1/chat/completions";
         // 获取API Key，用于验证请求
-       // String key = "sk-cjjduahzvzrjecmvyoarkmxupkpxbyihdpykedypixcjuvvz";
-        String key = "sk-coVs954kxVeOSTpCQ8qM6EbAAJfA69w1kM2vYgApre5i9TVz";
-        String apiKey;
-        if (AiConfig.getApiKey() != null && AiConfig.getApiKey().length() == key.length()) {
-            apiKey = "Bearer " + AiConfig.getApiKey();
-        } else {
-            apiKey = "Bearer " + key;
-        }
+
+        String  apiKey = "Bearer " + AiConfigHelper.getApiKey();
+
         // 如果不使用上下文（历史消息），则清空历史记录
-        if (!AiConfig.getUseContext()) {
-            history.clear();
+        if (!AiConfigHelper.getUseContext()) {
+            clearHistory();
         }
 
         // 将用户的消息添加到历史记录中
@@ -64,10 +64,10 @@ public class HttpUtil {
         history.add(message);
 
         // 更新请求中的模型配置
-        gptRequestJson.put("model", AiConfig.getGptModel());
+        gptRequestJson.put("model", AiConfigHelper.getGptModel());
 
         // 打印调试信息
-        LogUtils.d("gptRequestJson", GsonUtils.toJson(gptRequestJson));
+         LogUtils.d("gptRequestJson", GsonUtils.toJson(gptRequestJson));
 
         // 创建请求体，使用JSON格式传递参数
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), GsonUtils.toJson(gptRequestJson));

@@ -3,6 +3,7 @@ package run.yigou.gxzy.ui.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.Build;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -12,20 +13,38 @@ import android.widget.TextView;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.hjq.base.BaseDialog;
+import com.hjq.http.EasyHttp;
+import com.hjq.http.listener.HttpCallback;
 import com.lucas.xbus.XEventBus;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import run.yigou.gxzy.EventBus.ChatMessageBeanEvent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.greendao.entity.AiConfig;
+import run.yigou.gxzy.greendao.entity.AiConfigBody;
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
+import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.http.api.AiConfigApi;
+import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.dialog.InputDialog;
 import run.yigou.gxzy.ui.dialog.MenuDialog;
-import run.yigou.gxzy.ui.fragment.TipsSettingFragment;
-import run.yigou.gxzy.ui.tips.aimsg.AiConfig;
+import run.yigou.gxzy.ui.dialog.MessageDialog;
+import run.yigou.gxzy.ui.tips.aimsg.AiConfigHelper;
+import run.yigou.gxzy.ui.tips.aimsg.AiHelper;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+import run.yigou.gxzy.utils.DateHelper;
+import run.yigou.gxzy.utils.RC4Helper;
 import run.yigou.gxzy.utils.ShareUtil;
+import run.yigou.gxzy.utils.ThreadUtil;
 
 
 public final class AiConfigActivity extends AppActivity {
@@ -43,6 +62,10 @@ public final class AiConfigActivity extends AppActivity {
     private TextView tv_assistant_name;
     private TextView tv_api_key;
     private Button bt_clear_msg;
+
+    private List<AiConfig> aiConfigList;
+    private final List<String> proxyAddressSelectionList = new ArrayList<>();
+    private List<String> modelSelectionList = new ArrayList<>();
 
     @Override
     protected int getLayoutId() {
@@ -82,25 +105,76 @@ public final class AiConfigActivity extends AppActivity {
     @SuppressLint("SetTextI18n")
     @Override
     protected void initData() {
-
-        sw_use_context.setChecked(AiConfig.getUseContext());
+        sw_use_context.setChecked(AiConfigHelper.getUseContext());
         sw_use_context.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-            /**
-             * @param buttonView The compound button view whose state has changed.
-             * @param isChecked  The new checked state of buttonView.
-             */
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                AiConfig.setUseContext(isChecked);
+                AiConfigHelper.setUseContext(isChecked);
             }
         });
-        tv_api_key.setText(AiConfig.getApiKey() != null ? AiConfig.getApiKey() : "设置API_KEY（如sk-xxx）");
-        tv_model_proxy.setText("当前代理：" + AiConfig.getProxyAddress());
-        tv_model_name.setText("当前模型：" + AiConfig.getGptModel());
-        tv_assistant_name.setText(AiConfig.getAssistantName() != null ? AiConfig.getAssistantName() : "设置小助手昵称");
+        if (AiConfigHelper.getApiKey() != null && !AiConfigHelper.getApiKey().isEmpty()) {
+            tv_api_key.setText(apiKeyShow(RC4Helper.decrypt(AiConfigHelper.getApiKey())));
+        } else {
+            tv_api_key.setText("设置API_KEY（如sk-xxx）");
+        }
+
+        tv_model_name.setText("当前模型：" + AiConfigHelper.getGptModel());
+        tv_model_proxy.setText("当前Ai " + AiConfigHelper.getProvideAi() + "：" + AiConfigHelper.getProxyAddress());
+        tv_assistant_name.setText(AiConfigHelper.getAssistantName() != null ? AiConfigHelper.getAssistantName() : "设置小助手昵称");
+        getAiConfigList();
+
     }
 
+
+    private void getAiConfigList() {
+
+        aiConfigList = DbService.getInstance().mAiConfigService.findAll();
+
+        if (calculateDaysDifference(AiConfigHelper.getConfigCronJob(), DateHelper.getYearMonthDay1()) >=15 || aiConfigList == null || aiConfigList.isEmpty()) {
+            EasyHttp.get(this)
+                    .api(new AiConfigApi())
+                    .request(new HttpCallback<HttpData<List<run.yigou.gxzy.greendao.entity.AiConfig>>>(this) {
+                        @Override
+                        public void onSucceed(HttpData<List<run.yigou.gxzy.greendao.entity.AiConfig>> data) {
+                            if (data != null && data.getData() != null && !data.getData().isEmpty()) {
+                                aiConfigList = data.getData();
+                                // TipsSingleData.getInstance().setAiConfigList(data.getData());
+                                // 保存到数据库
+                                ThreadUtil.runInBackground(() -> {
+                                    setProxyAddress();
+                                    ConvertEntity.saveAiConfigList(aiConfigList);
+                                });
+                                AiConfigHelper.setConfigCronJob(DateHelper.getYearMonthDay1());
+                            }
+                        }
+                    });
+        } else {
+            setProxyAddress();
+        }
+    }
+
+
+    private void setProxyAddress() {
+        if (aiConfigList != null && !aiConfigList.isEmpty()) {
+            proxyAddressSelectionList.clear();
+            for (AiConfig aiConfig : aiConfigList) {
+                proxyAddressSelectionList.add(aiConfig.getProvideAi());
+                if (AiConfigHelper.getProvideAi() != null && !AiConfigHelper.getProvideAi().isEmpty() && AiConfigHelper.getProvideAi().equals(aiConfig.getProvideAi())) {
+                    // 判断是否为当前Ai,则设置当前Ai模型
+                    if (aiConfig.getModelList() != null && !aiConfig.getModelList().isEmpty()) {
+                        modelSelectionList.clear();
+                        for (AiConfigBody aiConfigBody : aiConfig.getModelList()) {
+                            modelSelectionList.add(aiConfigBody.getGptModelName());
+                        }
+                    }
+                   String aiName =  aiConfig.getProvideAi();
+                    modelSelectionList.add("手动输入");
+                }
+            }
+
+            proxyAddressSelectionList.add("手动输入");
+        }
+    }
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -126,12 +200,62 @@ public final class AiConfigActivity extends AppActivity {
                 showShareDialog();
                 break;
             case R.id.bt_open_main:
-                finish();
+                showBtOpenMain();
                 break;
             case R.id.bt_clear_msg:
                 showClearMsgDialog();
                 break;
             default:
+        }
+    }
+
+    private void showBtOpenMain() {
+        StringBuilder text = new StringBuilder();
+        boolean isNull = false;
+        if (AiConfigHelper.getAssistantName() == null || AiConfigHelper.getAssistantName().isEmpty()) {
+            text.append("小助手昵称为空");
+            isNull = true;
+        }
+        if (AiConfigHelper.getApiKey() == null || AiConfigHelper.getApiKey().isEmpty()) {
+            text.append("\nAPI_KEY为空");
+            isNull = true;
+        }
+        if (AiConfigHelper.getGptModel() == null || AiConfigHelper.getGptModel().isEmpty()) {
+            text.append("\nGPT模型为空");
+            isNull = true;
+        }
+        if (AiConfigHelper.getProxyAddress() == null || AiConfigHelper.getProxyAddress().isEmpty()) {
+            text.append("\nAI调用地址为空");
+            isNull = true;
+        }
+        if (isNull) {
+            // 消息对话框
+            new MessageDialog.Builder(getActivity())
+                    // 标题可以不用填写
+                    .setTitle("配置AI参数")
+                    // 内容必须要填写
+                    .setMessage(text)
+                    // 确定按钮文本
+                    .setConfirm(getString(R.string.common_confirm))
+                    // 设置 null 表示不显示取消按钮
+                    .setCancel(getString(R.string.common_cancel))
+                    // 设置点击按钮后不关闭对话框
+                    //.setAutoDismiss(false)
+                    .setListener(new MessageDialog.OnListener() {
+
+                        @Override
+                        public void onConfirm(BaseDialog dialog) {
+                            return;
+                        }
+
+                        @Override
+                        public void onCancel(BaseDialog dialog) {
+                            finish();
+                        }
+                    })
+                    .show();
+        } else {
+            finish();
         }
     }
 
@@ -155,22 +279,77 @@ public final class AiConfigActivity extends AppActivity {
 
     @SuppressLint("SetTextI18n")
     private void showProxyAddressSelectionDialog() {
-        final String[] items = new String[]{
-                "https://api.siliconflow.cn","https://api.lkeap.cloud.tencent.com",
-                "手动输入"
-        };
-        new MenuDialog.Builder(this).setList(items)
+
+        new MenuDialog.Builder(this).setList(proxyAddressSelectionList)
                 .setListener((dialog, position, string) -> {
-                    if (position == items.length - 1) { // 判断是否选择了“手动输入”选项
+                    if (position == proxyAddressSelectionList.size() - 1) { // 判断是否选择了“手动输入”选项
                         showProxyAddressDialog();
                     } else {
-                        String selectedProxyAddress = items[position];
-                        AiConfig.setProxyAddress(selectedProxyAddress);
-                        tv_model_proxy.setText("当前代理：" + AiConfig.getProxyAddress());
-                        ToastUtils.showLong("已选择代理地址: " + selectedProxyAddress);
+                        String selectedProxyAddress = proxyAddressSelectionList.get(position);
+
+
+                        for (AiConfig aiConfig : aiConfigList) {
+                            if (aiConfig.getProvideAi().equals(selectedProxyAddress)) {
+                                modelSelectionList.clear();
+                                for (AiConfigBody aiConfigBody : aiConfig.getModelList()) {
+                                    modelSelectionList.add(aiConfigBody.getGptModelName());
+                                }
+
+                                AiConfigHelper.setProxyAddress(aiConfig.getAiUrl());
+                                AiConfigHelper.setProvideAi(aiConfig.getProvideAi());
+
+                                if (aiConfig.getApiKey() != null && !aiConfig.getApiKey().isEmpty()) {
+                                    AiConfigHelper.setApiKey(aiConfig.getApiKey());
+                                    tv_api_key.setText(apiKeyShow(RC4Helper.decrypt(aiConfig.getApiKey())));
+                                } else {
+                                    AiConfigHelper.setApiKey("");
+                                }
+                                AiConfigHelper.setGptModel("");
+                                tv_model_proxy.setText("当前Ai " + AiConfigHelper.getProvideAi() + "：" + aiConfig.getAiUrl());
+                                modelSelectionList.add("手动输入");
+                                tv_model_name.setText("当前模型：空");
+                                break;
+                            }
+
+                        }
+
+                        ToastUtils.showLong("已选择AI模型: " + selectedProxyAddress);
                     }
                 })
                 .show();
+    }
+
+    private String apiKeyShow(String apiKey) {
+
+
+        String displayApiKey;
+
+        if (apiKey == null || apiKey.isEmpty()) {
+            return "";
+        }
+
+        if (apiKey.length() <= 10) {
+            // 如果 apiKey 长度小于等于10，直接显示
+            displayApiKey = apiKey;
+        } else {
+            // 获取前5个字符
+            String start = apiKey.substring(0, 5);
+            // 获取后5个字符
+            String end = apiKey.substring(apiKey.length() - 5);
+            // 计算中间需要隐藏的字符数量
+            int middleLength = apiKey.length() - 10;
+            // 生成中间的 ** 字符串
+            StringBuilder middle = new StringBuilder();
+            for (int i = 0; i < middleLength; i++) {
+                middle.append("*");
+            }
+            // 拼接结果
+            displayApiKey = start + middle.toString() + end;
+        }
+
+        return displayApiKey;
+
+
     }
 
     private void showProxyAddressDialog() {
@@ -180,7 +359,7 @@ public final class AiConfigActivity extends AppActivity {
                 // 标题可以不用填写
                 .setTitle("手动输入模型代理地址")
                 // 内容可以不用填写
-                .setContent(AiConfig.getProxyAddress())
+                .setContent(AiConfigHelper.getProxyAddress())
                 // 提示可以不用填写
                 .setHint("请输入代理地址")
                 // 确定按钮文本
@@ -195,8 +374,8 @@ public final class AiConfigActivity extends AppActivity {
                     public void onConfirm(BaseDialog dialog, String content) {
 
                         if (content != null && !content.isEmpty()) {
-                            AiConfig.setProxyAddress(content.trim());
-                            tv_model_proxy.setText("当前代理：" + AiConfig.getProxyAddress());
+                            AiConfigHelper.setProxyAddress(content.trim());
+                            tv_model_proxy.setText("当前代理：" + AiConfigHelper.getProxyAddress());
                             ToastUtils.showLong("已选择代理地址:  + Config.proxyAddress！");
                         } else {
 
@@ -220,7 +399,7 @@ public final class AiConfigActivity extends AppActivity {
                 // 标题可以不用填写
                 .setTitle("API_KEY")
                 // 内容可以不用填写
-                .setContent(AiConfig.getApiKey())
+                .setContent((AiConfigHelper.getApiKey() != null && !AiConfigHelper.getApiKey().isEmpty()) ? apiKeyShow(RC4Helper.decrypt(AiConfigHelper.getApiKey())) : "设置API_KEY（如sk-xxx）")
                 // 提示可以不用填写
                 .setHint("xx-xxxxxx")
                 // 确定按钮文本
@@ -233,9 +412,11 @@ public final class AiConfigActivity extends AppActivity {
 
                     @Override
                     public void onConfirm(BaseDialog dialog, String content) {
-                        AiConfig.setApiKey(content.trim());
-                        tv_api_key.setText(AiConfig.getApiKey() != null ? AiConfig.getApiKey() : "设置API_KEY（如sk-xxx）");
-                        ToastUtils.showLong("API_KEY设置成功！");
+                        if (content != null && !content.isEmpty()) {
+                            AiConfigHelper.setApiKey(RC4Helper.encrypt(AiConfigHelper.getApiKey()));
+                            tv_api_key.setText(content);
+                            ToastUtils.showLong("API_KEY设置成功！");
+                        }
                     }
 
                     @Override
@@ -251,7 +432,7 @@ public final class AiConfigActivity extends AppActivity {
                 // 标题可以不用填写
                 .setTitle("昵称")
                 // 内容可以不用填写
-                .setContent(AiConfig.getAssistantName())
+                .setContent(AiConfigHelper.getAssistantName())
                 // 提示可以不用填写
                 .setHint("请输入昵称")
                 // 确定按钮文本
@@ -265,11 +446,11 @@ public final class AiConfigActivity extends AppActivity {
                     @Override
                     public void onConfirm(BaseDialog dialog, String content) {
                         if (content != null && !content.isEmpty()) {
-                            AiConfig.setAssistantName(content.trim());
-                            tv_assistant_name.setText(AiConfig.getAssistantName() != null ? AiConfig.getAssistantName() : "设置小助手昵称");
+                            AiConfigHelper.setAssistantName(content.trim());
+                            tv_assistant_name.setText(AiConfigHelper.getAssistantName() != null ? AiConfigHelper.getAssistantName() : "设置小助手昵称");
                             ToastUtils.showLong("昵称设置成功！");
                             XEventBus.getDefault().post(new ChatMessageBeanEvent().setAssistantName(true));
-                        }else {
+                        } else {
                             ToastUtils.showLong("昵称不能设为空！");
                         }
                     }
@@ -278,29 +459,27 @@ public final class AiConfigActivity extends AppActivity {
                 .show();
     }
 
+
     @SuppressLint("SetTextI18n")
     private void showModelSelectionDialog() {
-        final String[] items = new String[]{
-               "deepseek-ai/DeepSeek-R1（推荐-流动硅基）","deepseek-r1（推荐-腾讯）", "手动输入"};// 预设的模型选项和手动输入选项
 
-        new MenuDialog.Builder(this).setList(items)
+//        if (modelSelectionList.isEmpty()) {
+//            ToastUtils.showLong("请先选择模型!");
+//            return;
+//        }
+        new MenuDialog.Builder(this).setList(modelSelectionList)
                 .setListener((dialog, position, string) -> {
-                    if (position == items.length - 1) { // 判断是否选择了“手动输入”选项
+                    if (position == modelSelectionList.size() - 1) { // 判断是否选择了“手动输入”选项
                         showModelDialog();
                     } else {
-                        String selectedModel = items[position];
-                        if (selectedModel.contains("流动硅基")) {
-                            selectedModel = selectedModel.replace("（推荐-流动硅基）", "");
-                            selectedModel = selectedModel.replace("（流动硅基）", "");
-                        }
-                        if (selectedModel.contains("腾讯")) {
-                            selectedModel = selectedModel.replace("（推荐-腾讯）", "");
-                            selectedModel = selectedModel.replace("（腾讯）", "");
-                        }
-                        AiConfig.setGptModel(selectedModel);
-                        tv_model_name.setText("当前模型：" + AiConfig.getGptModel());
+                        String selectedModel = modelSelectionList.get(position);
 
-                        ToastUtils.showLong("已选择模型: " + AiConfig.getGptModel());
+                        selectedModel = selectedModel.replace("（推荐）", "");
+
+                        AiConfigHelper.setGptModel(selectedModel);
+                        tv_model_name.setText("当前模型：" + AiConfigHelper.getGptModel());
+
+                        ToastUtils.showLong("已选择模型: " + AiConfigHelper.getGptModel());
 
                     }
                 })
@@ -314,7 +493,7 @@ public final class AiConfigActivity extends AppActivity {
                 // 标题可以不用填写
                 .setTitle("手动输入模型名称")
                 // 内容可以不用填写
-                .setContent(AiConfig.getGptModel())
+                .setContent(AiConfigHelper.getGptModel())
                 // 提示可以不用填写
                 .setHint("请输入模型名称")
                 // 确定按钮文本
@@ -328,9 +507,9 @@ public final class AiConfigActivity extends AppActivity {
                     @Override
                     public void onConfirm(BaseDialog dialog, String content) {
                         if (content != null) {
-                            AiConfig.setGptModel(content.trim());
-                            tv_model_name.setText("当前模型：" + AiConfig.getGptModel());
-                            ToastUtils.showLong("已选择模型: " + AiConfig.getGptModel());
+                            AiConfigHelper.setGptModel(content.trim());
+                            tv_model_name.setText("当前模型：" + AiConfigHelper.getGptModel());
+                            ToastUtils.showLong("已选择模型: " + AiConfigHelper.getGptModel());
                         } else {
                             ToastUtils.showLong("请勿为空！");
                         }
@@ -357,6 +536,27 @@ public final class AiConfigActivity extends AppActivity {
 
         Intent chooserIntent = Intent.createChooser(shareIntent, "分享");
         startActivity(chooserIntent);
+    }
+
+    // 定义函数，接受传入的时间字符串，计算日期差异
+    public static long calculateDaysDifference(String startDateStr, String endDateStr) {
+        try {
+            // 定义日期格式，符合 "yyyy-MM-dd" 格式
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+            // 解析传入的日期字符串为 Date 对象
+            Date startDate = sdf.parse(startDateStr);
+            Date endDate = sdf.parse(endDateStr);
+
+            // 获取两个日期之间的时间差（毫秒）
+            long diffInMillies = endDate.getTime() - startDate.getTime();
+
+            // 将毫秒差异转换为天数
+            return TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1; // 返回-1，表示发生了错误
     }
 
     @Override

@@ -3,17 +3,15 @@ package run.yigou.gxzy.ui.fragment;
 import static com.blankj.utilcode.util.ThreadUtils.runOnUiThread;
 
 import run.yigou.gxzy.EventBus.ChatMessageBeanEvent;
-import run.yigou.gxzy.EventBus.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.TitleBarFragment;
-import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.ui.activity.AiConfigActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.tips.adapter.TipsAiChatAdapter;
-import run.yigou.gxzy.ui.tips.aimsg.AiConfig;
+import run.yigou.gxzy.ui.tips.aimsg.AiConfigHelper;
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
-import run.yigou.gxzy.ui.tips.aimsg.HttpUtil;
+import run.yigou.gxzy.ui.tips.aimsg.AiHelper;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
@@ -21,7 +19,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -29,7 +26,8 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.hjq.http.EasyLog;
+import com.blankj.utilcode.util.GsonUtils;
+import com.blankj.utilcode.util.LogUtils;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
 
@@ -61,8 +59,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
 
     @Override
     protected void initView() {
-        if (AiConfig.getAssistantName() != null)
-            ((TextView) findViewById(R.id.tv_title)).setText(AiConfig.getAssistantName());
+        if (AiConfigHelper.getAssistantName() != null)
+            ((TextView) findViewById(R.id.tv_title)).setText(AiConfigHelper.getAssistantName());
         rv_chat = findViewById(R.id.rv_chat);
         // 获取 Activity
         Activity activity = getActivity();
@@ -91,9 +89,10 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
             if (event.isClear()) {
                 initData();
                 mChatAdapter.notifyDataSetChanged();
+                AiHelper.clearHistory();
             }
             if (event.isAssistantName())
-                ((TextView) findViewById(R.id.tv_title)).setText(AiConfig.getAssistantName());
+                ((TextView) findViewById(R.id.tv_title)).setText(AiConfigHelper.getAssistantName());
         });
     }
 
@@ -147,9 +146,12 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
             @Override
             public void onClick(View v) {
 
-                // 检查 API Key 是否为空
-                if (AiConfig.getApiKey() == null || AiConfig.getApiKey().isEmpty()) {
+                // 检查 配置
+                if (AiConfigHelper.getApiKey() == null || AiConfigHelper.getApiKey().isEmpty()
+                        || AiConfigHelper.getGptModel() == null || AiConfigHelper.getGptModel().isEmpty()
+                        || AiConfigHelper.getProxyAddress() == null || AiConfigHelper.getProxyAddress().isEmpty()) {
                     startActivity(new Intent(getActivity(), AiConfigActivity.class));
+                    return;
                 }
 
                 String result = ((EditText) findViewById(R.id.chat_content)).getText().toString();
@@ -182,7 +184,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
                         mChatAdapter.addItem(chatMessageBeanSend);
 
                         // 添加收到的消息
-                        final ChatMessageBean receivedMessage = new ChatMessageBean(ChatMessageBean.TYPE_RECEIVED, AiConfig.getAssistantName(), "", "请稍等...");
+                        final ChatMessageBean receivedMessage = new ChatMessageBean(ChatMessageBean.TYPE_RECEIVED, AiConfigHelper.getAssistantName(), "", "请稍等...");
                         mChatAdapter.addItem(receivedMessage);
 
                         // 滚动到最后一条消息
@@ -198,9 +200,12 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
                         }
 
 
-                        HttpUtil.chat(result, new HttpUtil.CallBack() {
+                        AiHelper.chat(result, new AiHelper.CallBack() {
                             @Override
                             public void onCallBack(final String result, final boolean isLast) {
+                                // 打印调试信息
+                                LogUtils.d("gptResponse", result);
+
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -209,7 +214,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
                                         // 根据滚动状态决定是否更新数据
                                         if ((scrollState == 0 && index % 3 == 0) || isLast) {
                                             mChatAdapter.updateData();
-                                            rv_chat .scrollBy(0, 15);
+                                            rv_chat.scrollBy(0, 15);
                                         }
 
                                         // 滚动到最后一条消息
@@ -224,10 +229,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
 
                                         if (isLast) {
                                             // 将回复消息插入数据库
-                                            //index =0;
-
                                             //rv_chat.smoothScrollToPosition(mChatAdapter.getData().size() - 1);
-                                           // rv_chat .scrollBy(0, 20);
+                                            // rv_chat .scrollBy(0, 20);
                                             receivedMessage.setCreateDate(DateHelper.getSeconds1());
                                             receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
                                             DbService.getInstance().mChatMessageBeanService.addEntity(receivedMessage);
@@ -264,7 +267,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
                 rv_chat.smoothScrollToPosition(lastPosition);
             }
 
-        }else{
+        } else {
             mChatAdapter.setData(new ArrayList<ChatMessageBean>());
 
         }
