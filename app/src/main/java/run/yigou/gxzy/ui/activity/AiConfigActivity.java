@@ -35,6 +35,7 @@ import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.AiConfigApi;
 import run.yigou.gxzy.http.model.HttpData;
+import run.yigou.gxzy.other.DoubleClickHelper;
 import run.yigou.gxzy.ui.dialog.InputDialog;
 import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
@@ -208,27 +209,17 @@ public final class AiConfigActivity extends AppActivity {
             default:
         }
     }
-
+    @Override
+    public void onBackPressed() {
+        if (!DoubleClickHelper.isOnDoubleClick()) {
+           // toast(R.string.home_exit_hint);
+            showBtOpenMain();
+        }
+    }
     private void showBtOpenMain() {
         StringBuilder text = new StringBuilder();
-        boolean isNull = false;
-        if (AiConfigHelper.getAssistantName() == null || AiConfigHelper.getAssistantName().isEmpty()) {
-            text.append("小助手昵称为空");
-            isNull = true;
-        }
-        if (AiConfigHelper.getApiKey() == null || AiConfigHelper.getApiKey().isEmpty()) {
-            text.append("\nAPI_KEY为空");
-            isNull = true;
-        }
-        if (AiConfigHelper.getGptModel() == null || AiConfigHelper.getGptModel().isEmpty()) {
-            text.append("\nGPT模型为空");
-            isNull = true;
-        }
-        if (AiConfigHelper.getProxyAddress() == null || AiConfigHelper.getProxyAddress().isEmpty()) {
-            text.append("\nAI调用地址为空");
-            isNull = true;
-        }
-        if (isNull) {
+       // boolean isNull = isNull(text);
+        if (isNull(text)) {
             // 消息对话框
             new MessageDialog.Builder(getActivity())
                     // 标题可以不用填写
@@ -236,9 +227,9 @@ public final class AiConfigActivity extends AppActivity {
                     // 内容必须要填写
                     .setMessage(text)
                     // 确定按钮文本
-                    .setConfirm(getString(R.string.common_confirm))
+                    .setConfirm("配置AI")
                     // 设置 null 表示不显示取消按钮
-                    .setCancel(getString(R.string.common_cancel))
+                    .setCancel("返回")
                     // 设置点击按钮后不关闭对话框
                     //.setAutoDismiss(false)
                     .setListener(new MessageDialog.OnListener() {
@@ -257,6 +248,27 @@ public final class AiConfigActivity extends AppActivity {
         } else {
             finish();
         }
+    }
+
+    private static boolean isNull(StringBuilder text) {
+        boolean isNull = false;
+        if (AiConfigHelper.getAssistantName() == null || AiConfigHelper.getAssistantName().isEmpty()) {
+            text.append("小助手昵称为空");
+            isNull = true;
+        }
+        if (AiConfigHelper.getApiKey() == null || AiConfigHelper.getApiKey().isEmpty()) {
+            text.append("\nAPI_KEY为空");
+            isNull = true;
+        }
+        if (AiConfigHelper.getGptModel() == null || AiConfigHelper.getGptModel().isEmpty()) {
+            text.append("\nGPT模型为空");
+            isNull = true;
+        }
+        if (AiConfigHelper.getProxyAddress() == null || AiConfigHelper.getProxyAddress().isEmpty()) {
+            text.append("\nAI调用地址为空");
+            isNull = true;
+        }
+        return isNull;
     }
 
     private void showClearMsgDialog() {

@@ -150,6 +150,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
                 if (AiConfigHelper.getApiKey() == null || AiConfigHelper.getApiKey().isEmpty()
                         || AiConfigHelper.getGptModel() == null || AiConfigHelper.getGptModel().isEmpty()
                         || AiConfigHelper.getProxyAddress() == null || AiConfigHelper.getProxyAddress().isEmpty()) {
+                    toast("请先配置好AI参数");
                     startActivity(new Intent(getActivity(), AiConfigActivity.class));
                     return;
                 }
