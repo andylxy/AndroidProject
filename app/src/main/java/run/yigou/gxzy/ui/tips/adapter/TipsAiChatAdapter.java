@@ -100,14 +100,14 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     // 设置 Markdown 文本
                     markwon.setMarkdown(tv_receive_content, bean.getContent());
                     tv_receive_nick.setText(bean.getNick());
-                    iv_receive_picture.setImageResource(R.drawable.icon);
+                    iv_receive_picture.setImageResource(R.drawable.ic_chatroom);
                     break;
 
                 case ChatMessageBean.TYPE_SEND:
                     TextView tv_send_content = findViewById(R.id.tv_send_content);
                     ImageView iv_send_picture = findViewById(R.id.iv_send_picture);
                     tv_send_content.setText(bean.getContent());
-                    iv_send_picture.setImageResource(R.drawable.icon);
+                    iv_send_picture.setImageResource(R.drawable.chat_user_default);
                     break;
                 case ChatMessageBean.TYPE_SYSTEM:
                     TextView tv_system_content = findViewById(R.id.tv_system_content);

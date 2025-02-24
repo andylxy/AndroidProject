@@ -26,7 +26,7 @@
             android:layout_alignParentEnd="true"
             android:layout_width="@dimen/dp_40"
             android:layout_height="@dimen/dp_40"
-            android:background="@drawable/chat_user_default"
+            android:background="@drawable/icon"
             android:scaleType="centerCrop" />
 
         <TextView
