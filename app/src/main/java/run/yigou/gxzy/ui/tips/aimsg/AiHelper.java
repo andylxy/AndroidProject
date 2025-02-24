@@ -11,6 +11,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import run.yigou.gxzy.utils.RC4Helper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -50,7 +51,12 @@ public class AiHelper {
         String url = AiConfigHelper.getProxyAddress() + "/v1/chat/completions";
         // 获取API Key，用于验证请求
 
-        String  apiKey = "Bearer " + AiConfigHelper.getApiKey();
+        if (AiConfigHelper.getApiKey().isEmpty()) {
+            ToastUtils.showLong("请先配置API Key");
+            return;
+        }
+
+        String  apiKey = "Bearer " + RC4Helper.decrypt(AiConfigHelper.getApiKey());
 
         // 如果不使用上下文（历史消息），则清空历史记录
         if (!AiConfigHelper.getUseContext()) {
