@@ -8,8 +8,9 @@
  * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.http.model;
+package run.yigou.gxzy.http.Server;
 
+import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.other.AppConfig;
 
 import com.hjq.http.config.IRequestServer;
@@ -30,7 +31,7 @@ public class RequestServer implements IRequestServer {
 
     @Override
     public String getPath() {
-        return "api/";
+        return "/api/AppBookRequest/";
     }
 
     //    @Override

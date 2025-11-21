@@ -23,7 +23,7 @@ public final class GetChapterDetail implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "BookInfo/getChapterDetail";
+        return "getChapterDetail";
     }
 
     public String getId() {

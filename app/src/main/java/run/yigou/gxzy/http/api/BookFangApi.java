@@ -13,7 +13,7 @@ public final class BookFangApi implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "BookChapter/GetBookIdFang";
+        return "GetBookIdFang";
     }
 
     public int getBookId() {

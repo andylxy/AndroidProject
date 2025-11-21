@@ -9,6 +9,6 @@ public final class MingCiContentApi implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "BeiMingCi/GetAllMingCi";
+        return "GetAllMingCi";
     }
 }

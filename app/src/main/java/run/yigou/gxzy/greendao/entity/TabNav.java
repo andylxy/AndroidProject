@@ -27,7 +27,6 @@ public class TabNav  implements Serializable {
     /** Used for active entity operations. */
     @Generated(hash = 353333401)
     private transient TabNavDao myDao;
-
     @Generated(hash = 1330423056)
     public TabNav(String tabNavId, int caseId, String name, int order) {
         this.tabNavId = tabNavId;
@@ -38,7 +37,6 @@ public class TabNav  implements Serializable {
     @Generated(hash = 1847113361)
     public TabNav() {
     }
-
     public String getTabNavId() {
         return this.tabNavId;
     }
@@ -128,5 +126,5 @@ public class TabNav  implements Serializable {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getTabNavDao() : null;
     }
-
+   
 }

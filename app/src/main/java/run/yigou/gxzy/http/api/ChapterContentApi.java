@@ -12,7 +12,7 @@ public final class ChapterContentApi implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "BookChapter/GetChapterContent";
+        return "GetChapterContent";
     }
 
     public int getContentId() {

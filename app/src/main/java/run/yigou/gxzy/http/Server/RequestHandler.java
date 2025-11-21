@@ -1,4 +1,4 @@
-package run.yigou.gxzy.http.model;
+package run.yigou.gxzy.http.Server;
 
 import android.app.Application;
 import android.content.Context;
@@ -10,6 +10,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.google.gson.JsonSyntaxException;
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.ui.activity.LoginActivity;
 import com.hjq.gson.factory.GsonFactory;
@@ -120,8 +121,8 @@ public final class RequestHandler implements IRequestHandler {
         try {
             result = GsonFactory.getSingletonGson().fromJson(text, type);
         } catch (JsonSyntaxException e) {
-            // 返回结果读取异常
-            throw new DataException(mApplication.getString(R.string.http_data_explain_error), e);
+            // 返回结果读取异常，将原始响应文本加入异常信息中以便调试
+            throw new DataException(mApplication.getString(R.string.http_data_explain_error) + ", response: " + text, e);
         }
 
         if (result instanceof HttpData) {

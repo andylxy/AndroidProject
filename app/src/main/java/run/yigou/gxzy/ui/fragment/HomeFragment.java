@@ -411,6 +411,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             }
                         } else {
                             toast("获取数据失败：" + e.getMessage());
+                            EasyLog.print(e);
                         }
                     }
                 });

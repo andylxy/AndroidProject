@@ -31,27 +31,7 @@ public final class BookInfoNav implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "BookInfo/getNav";
+        return "getNav";
     }
 
-//    public final static class Bean {
-//        private int Id;
-//        private String Name;
-//        private List<TabNav> NavList;
-//
-//        public int getId() {
-//            return Id;
-//        }
-//
-//        public String getName() {
-//            return Name;
-//        }
-//
-//        public List<TabNav> getNavList() {
-//            return NavList;
-//        }
-//
-//        public final static class TabNav extends NavItem {
-//        }
-//    }
 }

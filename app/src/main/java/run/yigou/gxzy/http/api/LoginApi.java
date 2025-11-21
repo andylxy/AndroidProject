@@ -15,7 +15,7 @@ public final class LoginApi implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "user/login";
+        return "login";
     }
 
     /** 手机号 */

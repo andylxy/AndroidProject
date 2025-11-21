@@ -19,6 +19,7 @@ import run.yigou.gxzy.R;
 
 public class AppConst {
 
+    public static String UrlPath = "/api/AppBookRequest/";
     public static String dbName = "myzhongyi.db";
 
 //    public static String publicKey;//服务端公钥

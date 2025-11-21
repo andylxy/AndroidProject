@@ -224,6 +224,7 @@ public class ConvertEntity {
                             //throw e;
                         }
                         // 获取章节列表
+                        //todo 添加延时执行
                         ThreadUtil.runInBackground(() -> {
                             getChapterList(homeFragment, item);
                         });

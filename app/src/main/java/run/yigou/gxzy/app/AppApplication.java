@@ -30,7 +30,6 @@ import com.google.gson.stream.JsonToken;
 import com.hjq.bar.TitleBar;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.FragmentSetting;
 import run.yigou.gxzy.common.ManagerSetting;
@@ -38,8 +37,8 @@ import run.yigou.gxzy.greendao.entity.UserInfo;
 import run.yigou.gxzy.greendao.service.UserInfoService;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.glide.GlideApp;
-import run.yigou.gxzy.http.model.RequestHandler;
-import run.yigou.gxzy.http.model.RequestServer;
+import run.yigou.gxzy.http.Server.RequestHandler;
+import run.yigou.gxzy.http.Server.RequestServer;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.other.AppConfig;
 import run.yigou.gxzy.other.CrashHandler;
@@ -55,8 +54,10 @@ import com.hjq.gson.factory.ParseExceptionCallback;
 import com.hjq.http.EasyConfig;
 import com.hjq.http.EasyLog;
 import com.hjq.toast.ToastUtils;
+import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
+import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.mmkv.MMKV;
 
 import okhttp3.OkHttpClient;
@@ -136,6 +137,10 @@ public final class AppApplication extends Application {
      */
     public void registryByReflect() {
         XEventBus.getDefault().register(this);
+    }
+    @Subscribe
+    public void onDummyEvent(Object event) {
+        // 空实现，仅为满足XEventBus注册要求
     }
 
     /**

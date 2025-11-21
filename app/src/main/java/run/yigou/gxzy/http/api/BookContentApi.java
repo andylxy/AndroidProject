@@ -15,7 +15,7 @@ public final class BookContentApi implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "BookChapter/GetBookIdContent";
+        return "GetBookIdContent";
     }
 
     public int getBookId() {

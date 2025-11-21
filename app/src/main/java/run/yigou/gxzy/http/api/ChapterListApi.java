@@ -12,7 +12,7 @@ public final class ChapterListApi implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "BookInfo/GetBookChapter";
+        return "GetBookChapter";
     }
     public int getBookId() {
         return bookId;

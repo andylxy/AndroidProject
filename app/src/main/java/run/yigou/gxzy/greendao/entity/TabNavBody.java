@@ -1,10 +1,12 @@
 package run.yigou.gxzy.greendao.entity;
 
+import com.google.gson.annotations.SerializedName;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.Generated;
 
 import java.io.Serializable;
-import org.greenrobot.greendao.annotation.Generated;
+
 @Entity
 public class TabNavBody  implements Serializable {
     private static final long serialVersionUID = 555454L;
@@ -19,7 +21,6 @@ public class TabNavBody  implements Serializable {
     private String author;
     private String desc;
     private int chapterCount;
-
     @Generated(hash = 381308413)
     public TabNavBody(String tabNavBodyId, String tabNavId, Long Id, int bookNo,
             String imageUrl, String bookName, String chengShu, String author,
@@ -38,7 +39,6 @@ public class TabNavBody  implements Serializable {
     @Generated(hash = 1918260576)
     public TabNavBody() {
     }
-
     public String getTabNavBodyId() {
         return this.tabNavBodyId;
     }
@@ -78,8 +78,8 @@ public class TabNavBody  implements Serializable {
     public String getChengShu() {
         return this.chengShu;
     }
-    public void setChengShu(String chenɡShu) {
-        this.chengShu = chenɡShu;
+    public void setChengShu(String chengShu) {
+        this.chengShu = chengShu;
     }
     public String getAuthor() {
         return this.author;
@@ -99,4 +99,5 @@ public class TabNavBody  implements Serializable {
     public void setChapterCount(int chapterCount) {
         this.chapterCount = chapterCount;
     }
+
 }

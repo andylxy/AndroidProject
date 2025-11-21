@@ -9,6 +9,6 @@ public final class YaoContentApi implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "ZhongYao/GetAllZhongYao";
+        return "GetAllZhongYao";
     }
 }
