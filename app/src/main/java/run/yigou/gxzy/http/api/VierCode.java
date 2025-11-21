@@ -12,26 +12,24 @@ public final class VierCode implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "User/getVierificationCode";
+        return "getPicCaptcha";
     }
 
     public final static class Bean {
-        private String img;
+        private String validCodeBase64;
+        private boolean isCode;
+        private String validCodeReqNo;
 
         public boolean isCode() {
             return isCode;
         }
-
-        private boolean isCode;
         public String getImg() {
-            return img;
+            return validCodeBase64;
         }
 
         public String getUuid() {
-            return uuid;
+            return validCodeReqNo;
         }
-
-        private String uuid;
     }
 
 }

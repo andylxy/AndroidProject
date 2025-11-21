@@ -9,6 +9,6 @@ public final class AboutApi implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "DevConfig/getAboutInfo";
+        return "getAboutInfo";
     }
 }
