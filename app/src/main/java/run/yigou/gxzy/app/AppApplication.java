@@ -250,7 +250,7 @@ public final class AppApplication extends Application {
                         headers.put("Authorization", mUserInfoToken.getToken());
                     //如果是全局开启，并且没有登陆就添加可获取全部的数据
                     if (global_openness && mUserInfoToken == null)
-                        headers.put(AppConst.Key_User_Name, AppConst.Key_User_Token);
+                        headers.put("Authorization", AppConst.AllowAnonymous_Token);
                     headers.put("app", "2");
                     headers.put("SessionId", SerialUtil.getSerial());
                    // headers.put("versionName", AppConfig.getVersionName());

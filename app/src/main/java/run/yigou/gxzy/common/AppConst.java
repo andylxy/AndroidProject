@@ -52,8 +52,8 @@ public class AppConst {
     /**
      * 匿名用户token
      */
-    public static final String Key_User_Token = "E6D90DDBC70C4F4EA3C312B6FCB473C8";
-    public static final String Key_User_Name = "AuthorId";
+    public static final String AllowAnonymous_Token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ2b2wuY29yZS5vd25lciIsImp0aSI6IjE5NzEyNDYzOTk3NTIzNzYzMjAiLCJpYXQiOjE3NjM3NDAxNTcsIm5iZiI6MTc2Mzc0MDE1NywiZXhwIjoxNzYzNzQ3MzU3LCJhdWQiOiJ2b2wuY29yZSIsIlVTRVJfSUQiOjE5NzEyNDYzOTk3NTIzNzYzMjAsIkFDQ09VTlQiOiJhZG1pbjY2NiIsIk5BTUUiOiI2NjYiLCJJU19TVVBFUl9BRE1JTiI6ZmFsc2UsIk9SR19JRCI6MTk5MDY4NTg1MDU5NzQ2MjAxNiwiVEVOQU5UX0lEIjpudWxsfQ.ydOA3sKKiu70ICakee4VUHPUMvFP6Fmt91EybYl8TwY";
+
     /**
      * Rc4加密密钥
      */
