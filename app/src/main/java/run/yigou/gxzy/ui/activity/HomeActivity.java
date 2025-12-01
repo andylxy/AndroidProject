@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -13,10 +12,8 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.FragmentPagerAdapter;
-import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
 
-import run.yigou.gxzy.EventBus.LoginEventNotification;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.app.AppActivity;
@@ -25,11 +22,10 @@ import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.other.DoubleClickHelper;
 import run.yigou.gxzy.ui.adapter.NavigationAdapter;
+import run.yigou.gxzy.ui.fragment.AiMsgFragment;
 import run.yigou.gxzy.ui.fragment.BookCollectCaseFragment;
 import run.yigou.gxzy.ui.fragment.HomeFragment;
 import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
-import run.yigou.gxzy.ui.fragment.MyMsgFragment;
-import run.yigou.gxzy.utils.ThreadUtil;
 
 /**
  * author : Android 轮子哥
@@ -74,17 +70,23 @@ public final class HomeActivity extends AppActivity
         mViewPager = findViewById(R.id.vp_home_pager);
         mNavigationView = findViewById(R.id.rv_home_navigation);
 
+        // 添加这一行，设置沉浸式状态栏，避免状态栏遮挡
+       // ImmersionBar.setTitleBar(this, findViewById(R.id.vp_home_pager));
+
         mNavigationAdapter = new NavigationAdapter(this);
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_index),
                 ContextCompat.getDrawable(this, R.drawable.home_home_selector)));
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_found),
                 ContextCompat.getDrawable(this, R.drawable.home_found_selector)));
 
-//        //开放全部功能
-//        if (AppApplication.application.global_openness) {
+        //开放全部功能
+        if (AppApplication.application.global_openness) {
 //            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_message),
 //                    ContextCompat.getDrawable(this, R.drawable.home_message_selector)));
-//        }
+
+            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_aimsg),
+                    ContextCompat.getDrawable(this, R.drawable.ruler_selector_msg)));
+        }
 
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_me),
                 ContextCompat.getDrawable(this, R.drawable.home_me_selector)));
@@ -99,15 +101,15 @@ public final class HomeActivity extends AppActivity
         mPagerAdapter.addFragment(BookCollectCaseFragment.newInstance());
         mPagerAdapter.addFragment(homeFragment);
 
-//        //开放全部功能
-//        if (AppApplication.application.global_openness) {
-//            mPagerAdapter.addFragment(MyMsgFragment.newInstance());
-//        }
+        //开放全部功能
+        if (AppApplication.application.global_openness) {
+            mPagerAdapter.addFragment(AiMsgFragment.newInstance());
+        }
         mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());
         mViewPager.setAdapter(mPagerAdapter);
         mHomeActivity = this;
 
-        //  XEventBus.getDefault().register(HomeActivity.this);
+         XEventBus.getDefault().register(HomeActivity.this);
         onNewIntent(getIntent());
     }
 
@@ -239,7 +241,7 @@ public final class HomeActivity extends AppActivity
         mNavigationView.setAdapter(null);
         mNavigationAdapter.setOnNavigationListener(null);
         mHomeActivity = null;
-        //    XEventBus.getDefault().unregister(HomeActivity.this);
+        XEventBus.getDefault().unregister(HomeActivity.this);
     }
 
 

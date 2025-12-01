@@ -81,7 +81,7 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
         /*
          * 智能消息 --暂时不开发
          */
-         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_msg),
+         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_aimsg),
                  ContextCompat.getDrawable(this, R.drawable.ruler_selector_msg)));
 
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_set),

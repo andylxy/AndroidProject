@@ -18,6 +18,7 @@ import run.yigou.gxzy.utils.ThreadUtil;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,6 +29,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.LogUtils;
+import com.hjq.bar.OnTitleBarListener;
+import com.hjq.bar.TitleBar;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
 
@@ -48,6 +51,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
         return new AiMsgFragment();
     }
 
+
     @Override
     protected int getLayoutId() {
         //  return R.layout.tips_ai_msg_fragment;
@@ -60,7 +64,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
     @Override
     protected void initView() {
         if (AiConfigHelper.getAssistantName() != null)
-            ((TextView) findViewById(R.id.tv_title)).setText(AiConfigHelper.getAssistantName());
+          setTitle(AiConfigHelper.getAssistantName());
+        getStatusBarConfig().setTitleBar(this, findViewById(R.id.tv_title));
         rv_chat = findViewById(R.id.rv_chat);
         // 获取 Activity
         Activity activity = getActivity();
@@ -74,7 +79,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
         // 设置 RecyclerView 的布局管理器和适配器
         rv_chat.setLayoutManager(new LinearLayoutManager(getContext()));
         rv_chat.setAdapter(mChatAdapter);
-
+        setTitle("Ai对话");
         // 注册事件
         XEventBus.getDefault().register(AiMsgFragment.this);
         // 初始化消息数据
@@ -247,13 +252,28 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> {
         });
 
         //   设置点击事件
-        findViewById(R.id.ll_settings).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(getActivity(), AiConfigActivity.class));
-            }
-        });
+//        findViewById(R.id.tv_title).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                startActivity(new Intent(getActivity(), AiConfigActivity.class));
+//            }
+//        });
+        //setRightTitle("...");
+        //getTitleBar().setRightTitleSize(26);
+        //getTitleBar().setRightTitleColor(Color.BLACK);
 
+    }
+
+
+
+//    @Override
+//    public void onTitleClick(View view) {
+//        toast("中间  View 被点击");
+//    }
+
+    @Override
+    public void onRightClick(View view) {
+        startActivity(new Intent(getActivity(), AiConfigActivity.class));
     }
 
     private ArrayList<ChatMessageBean> chatMessageBeans;
