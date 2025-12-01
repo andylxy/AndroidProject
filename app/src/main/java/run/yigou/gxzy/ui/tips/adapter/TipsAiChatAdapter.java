@@ -26,7 +26,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
     private static final int LAYOUT_RECEIVED = R.layout.tips_ai_msg_chat_receive;
     private static final int LAYOUT_SEND = R.layout.tips_ai_msg_chat_send;
     private static final int LAYOUT_SYSTEM = R.layout.tips_ai_msg_chat_system;
-    private static final int LAYOUT_DEFAULT = 0; // 默认布局资源ID
+    private static final int LAYOUT_DEFAULT = R.layout.tips_ai_msg_chat_system; // 默认布局资源ID
 
     // 初始化 Markwon
    private   Markwon markwon ;
@@ -34,19 +34,23 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
     public TipsAiChatAdapter(Context context) {
         super(context);
         // 初始化 Markwon
-         markwon = Markwon.create(context);
+        markwon = Markwon.create(context);
+        Timber.tag("TipsAiChatAdapter").d("Adapter created");
 
     }
 
     @Override
     public int getItemViewType(int position) {
-
-       // ChatMessageBean chatMessageBean =   getItem(position);
-
-      //  int type =   chatMessageBean.getType();
-       // EasyLog.print("getItemViewType: " + type);
-        return getItem(position).getType();
+        int type = getItem(position).getType();
+        Timber.tag("TipsAiChatAdapter").d("getItemViewType: position=%d, type=%d", position, type);
+        return type;
     }
+    
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+    
     public void updateData() {
         if (getData() != null) {
             notifyItemChanged(getData().size() - 1);
@@ -57,6 +61,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
     @NonNull
     @Override
     public TipsAiChatAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Timber.tag("TipsAiChatAdapter").d("onCreateViewHolder: viewType=%d", viewType);
 
         switch (viewType) {
             case ChatMessageBean.TYPE_RECEIVED:
@@ -74,11 +79,8 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                 viewTypeLayout = LAYOUT_DEFAULT;
                 break;
         }
-        // 确保 viewTypeLayout 是有效的布局资源ID
-        if (viewTypeLayout == 0) {
-            throw new IllegalArgumentException("Invalid layout resource ID for viewType: " + viewType);
-        }
 
+        Timber.tag("TipsAiChatAdapter").d("onCreateViewHolder: viewTypeLayout=%d", viewTypeLayout);
         return new TipsAiChatAdapter.ViewHolder(viewTypeLayout);
     }
 
@@ -86,11 +88,14 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
 
         private ViewHolder(int viewlayout) {
             super(viewlayout);
+            Timber.tag("TipsAiChatAdapter").d("ViewHolder created with layout: %d", viewlayout);
         }
 
         @Override
         public void onBindView(int position) {
             ChatMessageBean bean = getItem(position);
+            Timber.tag("TipsAiChatAdapter").d("onBindView: position=%d, type=%d", position, bean.getType());
+            
             switch (bean.getType()) {
                 case ChatMessageBean.TYPE_RECEIVED:
                     TextView tv_receive_content = findViewById(R.id.tv_receive_content);
@@ -98,24 +103,34 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     TextView tv_receive_nick = findViewById(R.id.tv_receive_nick);
                     //tv_receive_content.setText(bean.getContent());
                     // 设置 Markdown 文本
-                    markwon.setMarkdown(tv_receive_content, bean.getContent());
-                    tv_receive_nick.setText(bean.getNick());
-                    iv_receive_picture.setImageResource(R.drawable.ic_chatroom);
+                    if (markwon != null && tv_receive_content != null && bean.getContent() != null) {
+                        markwon.setMarkdown(tv_receive_content, bean.getContent());
+                    }
+                    if (tv_receive_nick != null) {
+                        tv_receive_nick.setText(bean.getNick());
+                    }
+                    if (iv_receive_picture != null) {
+                        iv_receive_picture.setImageResource(R.drawable.ic_chatroom);
+                    }
                     break;
 
                 case ChatMessageBean.TYPE_SEND:
                     TextView tv_send_content = findViewById(R.id.tv_send_content);
                     ImageView iv_send_picture = findViewById(R.id.iv_send_picture);
-                    tv_send_content.setText(bean.getContent());
-                    iv_send_picture.setImageResource(R.drawable.chat_user_default);
+                    if (tv_send_content != null) {
+                        tv_send_content.setText(bean.getContent());
+                    }
+                    if (iv_send_picture != null) {
+                        iv_send_picture.setImageResource(R.drawable.chat_user_default);
+                    }
                     break;
                 case ChatMessageBean.TYPE_SYSTEM:
                     TextView tv_system_content = findViewById(R.id.tv_system_content);
-                    tv_system_content.setText(bean.getContent());
+                    if (tv_system_content != null) {
+                        tv_system_content.setText(bean.getContent());
+                    }
                     break;
             }
         }
-
-
     }
 }

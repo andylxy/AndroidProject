@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#f0f0f0">
+
     <!-- 主聊天界面 -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,19 +16,21 @@
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:leftIcon="@drawable/arrows_left_ic"
             app:rightIcon="@drawable/wx_add_chat_icon"
             app:title="@string/app_name_ai" />
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:orientation="vertical">
 
             <com.hjq.widget.layout.WrapRecyclerView
                 android:id="@+id/rv_chat"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_above="@+id/rl_input"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:layout_margin="@dimen/dp_2"
                 android:layout_marginTop="@dimen/dp_3"
                 android:layout_marginBottom="@dimen/dp_2"
@@ -37,8 +40,13 @@
             <RelativeLayout
                 android:id="@+id/rl_input"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_48"
-                android:layout_alignParentBottom="true">
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="3dp"
+                android:background="#ffffff"
+                android:paddingStart="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_8"
+                android:paddingEnd="@dimen/dp_10"
+                android:paddingBottom="@dimen/dp_8">
 
                 <Button
                     android:id="@+id/bt_asr"
@@ -46,11 +54,11 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:background="@drawable/comment_red_btn"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="15dp"
+                    android:paddingTop="@dimen/dp_10"
+                    android:paddingBottom="@dimen/dp_10"
                     android:text="按住 说话"
                     android:textColor="@color/white"
-                    android:textSize="26sp"
+                    android:textSize="@dimen/sp_18"
                     android:textStyle="bold"
                     android:visibility="gone" />
 
@@ -59,58 +67,62 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="@dimen/dp_5"
                     android:src="@drawable/switch__text_icon1"
                     android:visibility="gone" />
 
                 <RelativeLayout
                     android:id="@+id/chat_bottom"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/dp_43"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
-                    android:background="#C3BEBE"
                     android:focusableInTouchMode="true">
 
                     <Button
                         android:id="@+id/chat_send"
-                        android:layout_width="@dimen/dp_55"
-                        android:layout_height="@dimen/dp_35"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginStart="@dimen/dp_5"
-                        android:layout_marginEnd="@dimen/dp_10"
+                        android:layout_marginEnd="@dimen/dp_5"
                         android:background="#70A9F3"
+                        android:minWidth="@dimen/dp_60"
+                        android:paddingStart="@dimen/dp_10"
+                        android:paddingEnd="@dimen/dp_10"
                         android:text="发送"
                         android:textColor="@color/white"
-                        android:textSize="@dimen/sp_20" />
+                        android:textSize="@dimen/sp_16" />
 
                     <ImageView
                         android:id="@+id/chat_voice"
-                        android:layout_width="41dp"
-                        android:layout_height="41dp"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
                         android:layout_centerVertical="true"
                         android:background="@drawable/wx_chat_icon4"
-                        android:textSize="14sp"
                         android:visibility="gone" />
 
                     <EditText
                         android:id="@+id/chat_content"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/dp_36"
+                        android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:layout_marginStart="@dimen/dp_4"
-                        android:layout_marginEnd="@dimen/dp_5"
+                        android:layout_marginEnd="@dimen/dp_4"
                         android:layout_toStartOf="@id/chat_send"
                         android:layout_toEndOf="@id/chat_voice"
-                        android:background="@drawable/b05"
-                        android:paddingStart="@dimen/dp_5"
-                        android:paddingEnd="@dimen/dp_5" />
+                        android:background="@drawable/chat_input_bg"
+                        android:hint="请输入消息..."
+                        android:maxLines="4"
+                        android:minHeight="@dimen/dp_36"
+                        android:paddingStart="@dimen/dp_10"
+                        android:paddingTop="@dimen/dp_8"
+                        android:paddingEnd="@dimen/dp_10"
+                        android:paddingBottom="@dimen/dp_8" />
                 </RelativeLayout>
 
             </RelativeLayout>
-
-        </RelativeLayout>
-
+        </LinearLayout>
     </LinearLayout>
 
     <!-- 侧边栏目录 -->
@@ -155,4 +167,5 @@
             android:paddingEnd="@dimen/dp_5" />
 
     </LinearLayout>
+
 </androidx.drawerlayout.widget.DrawerLayout>
