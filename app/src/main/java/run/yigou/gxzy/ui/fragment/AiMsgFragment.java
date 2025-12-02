@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -118,25 +119,32 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         
         // 设置EditText的输入监听器，确保光标始终在最左侧
         EditText chatContent = findViewById(R.id.chat_content);
-        chatContent.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        ImageView clearButton = findViewById(R.id.iv_clear);
+        
+        // 设置清除按钮的点击事件
+        clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    // 光标始终在最左侧
-                    chatContent.setSelection(0, 0);
-                }
+            public void onClick(View v) {
+                chatContent.setText("");
             }
         });
         
-        // 监听文本变化，实现内容向上扩展的效果
+        // 合并所有的文本监听功能到一个监听器中
         chatContent.addTextChangedListener(new TextWatcher() {
             int lines = 1;
             
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            
+
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // 根据文本内容控制清除按钮的显示和隐藏
+                if (s.length() > 0) {
+                    clearButton.setVisibility(View.VISIBLE);
+                } else {
+                    clearButton.setVisibility(View.GONE);
+                }
+            }
             
             @Override
             public void afterTextChanged(Editable s) {
@@ -151,8 +159,22 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 lines = currentLines;
             }
         });
-
-
+        
+        chatContent.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    // 光标始终在最左侧
+                    chatContent.setSelection(0, 0);
+                    // 根据文本内容控制清除按钮的显示和隐藏
+                    if (chatContent.getText().length() > 0) {
+                        clearButton.setVisibility(View.VISIBLE);
+                    } else {
+                        clearButton.setVisibility(View.GONE);
+                    }
+                }
+            }
+        });
     }
 
 
