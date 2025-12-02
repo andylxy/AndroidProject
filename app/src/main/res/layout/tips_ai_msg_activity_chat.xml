@@ -93,7 +93,7 @@
                             android:layout_height="wrap_content"
                             android:background="@drawable/chat_input_enhanced_bg"
                             android:paddingStart="@dimen/dp_5"
-                            android:paddingEnd="@dimen/dp_30"
+                            android:paddingEnd="@dimen/dp_40"
                             android:paddingTop="@dimen/dp_3"
                             android:paddingBottom="@dimen/dp_3"
                             android:minHeight="@dimen/dp_36"
@@ -110,10 +110,13 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:padding="@dimen/dp_5"
+                            android:padding="@dimen/dp_8"
                             android:src="@drawable/close_icon"
                             android:visibility="gone"
-                            android:contentDescription="清除输入内容" />
+                            android:contentDescription="清除输入内容"
+                            android:maxWidth="@dimen/dp_32"
+                            android:maxHeight="@dimen/dp_32"
+                            android:background="?android:attr/selectableItemBackgroundBorderless" />
 
                     </RelativeLayout>
 

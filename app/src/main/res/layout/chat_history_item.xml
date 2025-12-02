@@ -29,7 +29,25 @@
             android:layout_height="wrap_content"
             android:text="时间"
             android:textColor="#666666"
-            android:textSize="@dimen/sp_12" />
+            android:textSize="@dimen/sp_12"
+            android:layout_marginEnd="@dimen/dp_10" />
+
+        <ImageButton
+            android:id="@+id/btn_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_delete"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:paddingStart="@dimen/dp_12"
+            android:paddingEnd="@dimen/dp_12"
+            android:paddingTop="@dimen/dp_8"
+            android:paddingBottom="@dimen/dp_8"
+            android:contentDescription="删除会话"
+            android:scaleType="centerInside"
+            android:maxWidth="@dimen/dp_40"
+            android:maxHeight="@dimen/dp_40" />
 
     </LinearLayout>
 

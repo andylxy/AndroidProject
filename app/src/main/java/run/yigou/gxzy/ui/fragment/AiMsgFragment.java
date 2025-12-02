@@ -110,6 +110,32 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             }
         });
         
+        // 设置聊天历史记录项删除监听
+        chatHistoryAdapter.setOnChatHistoryItemDeleteListener(new ChatHistoryAdapter.OnChatHistoryItemDeleteListener() {
+            @Override
+            public void onChatHistoryItemDelete(int position, ChatHistoryAdapter.ChatHistoryItem item) {
+                // 获取会话列表
+                List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
+                // 确保位置有效
+                if (position >= 0 && position < sessions.size()) {
+                    // 从数据库中删除会话
+                    ChatSessionBean sessionToDelete = sessions.get(position);
+                    DbService.getInstance().mChatSessionBeanService.deleteEntity(sessionToDelete);
+                    
+                    // 如果删除的是当前会话，清空聊天界面
+                    if (currentSession != null && currentSession.getId().equals(sessionToDelete.getId())) {
+                        currentSession = null;
+                        if (mChatAdapter != null) {
+                            mChatAdapter.setData(new ArrayList<ChatMessageBean>());
+                        }
+                    }
+                    
+                    // 重新加载聊天历史记录
+                    populateChatHistoryWithTestData();
+                }
+            }
+        });
+        
         // 设置标题栏点击监听
         if (getTitleBar() != null) {
             getTitleBar().setOnTitleBarListener(this);
@@ -739,25 +765,57 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                             createNewSession("新对话");
                         }
 
-                        // 检查并添加系统消息
-                        boolean messageExists = false;
-                        for (ChatMessageBean message : mChatAdapter.getData()) {
-                            if (message.getType() == ChatMessageBean.TYPE_SYSTEM && time.equals(message.getContent())) {
-                                messageExists = true;
+                        // 检查消息列表中是否只有系统消息
+                        boolean onlySystemMessages = true;
+                        List<ChatMessageBean> currentMessages = mChatAdapter.getData();
+                        for (ChatMessageBean message : currentMessages) {
+                            if (message.getType() != ChatMessageBean.TYPE_SYSTEM) {
+                                onlySystemMessages = false;
                                 break;
                             }
                         }
 
-                        if (!messageExists) {
-                            ChatMessageBean chatMessageBeanSystem = new ChatMessageBean(ChatMessageBean.TYPE_SYSTEM, null, null, sdf.format(new Date()));
-                            chatMessageBeanSystem.setSessionId(currentSession.getId());
-                            chatMessageBeanSystem.setCreateDate(DateHelper.getSeconds1());
-                            chatMessageBeanSystem.setIsDelete(ChatMessageBean.IS_Delete_NO);
-                            // 保存系统消息到数据库
-                            long systemMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(chatMessageBeanSystem);
-                            chatMessageBeanSystem.setId(systemMsgId);
-                            mChatAdapter.addItem(chatMessageBeanSystem);
-                            Log.d(TAG, "Saved system message to database with ID: " + systemMsgId);
+                        // 只有当消息列表中包含非系统消息时，才保存系统消息到数据库
+                        if (!onlySystemMessages) {
+                            // 检查并添加系统消息
+                            boolean messageExists = false;
+                            for (ChatMessageBean message : mChatAdapter.getData()) {
+                                if (message.getType() == ChatMessageBean.TYPE_SYSTEM && time.equals(message.getContent())) {
+                                    messageExists = true;
+                                    break;
+                                }
+                            }
+
+                            if (!messageExists) {
+                                ChatMessageBean chatMessageBeanSystem = new ChatMessageBean(ChatMessageBean.TYPE_SYSTEM, null, null, sdf.format(new Date()));
+                                chatMessageBeanSystem.setSessionId(currentSession.getId());
+                                chatMessageBeanSystem.setCreateDate(DateHelper.getSeconds1());
+                                chatMessageBeanSystem.setIsDelete(ChatMessageBean.IS_Delete_NO);
+                                // 保存系统消息到数据库
+                                long systemMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(chatMessageBeanSystem);
+                                chatMessageBeanSystem.setId(systemMsgId);
+                                mChatAdapter.addItem(chatMessageBeanSystem);
+                                Log.d(TAG, "Saved system message to database with ID: " + systemMsgId);
+                            }
+                        } else {
+                            // 如果只有系统消息，添加系统消息但不保存到数据库
+                            boolean messageExists = false;
+                            for (ChatMessageBean message : mChatAdapter.getData()) {
+                                if (message.getType() == ChatMessageBean.TYPE_SYSTEM && time.equals(message.getContent())) {
+                                    messageExists = true;
+                                    break;
+                                }
+                            }
+
+                            if (!messageExists) {
+                                ChatMessageBean chatMessageBeanSystem = new ChatMessageBean(ChatMessageBean.TYPE_SYSTEM, null, null, sdf.format(new Date()));
+                                chatMessageBeanSystem.setSessionId(currentSession.getId());
+                                chatMessageBeanSystem.setCreateDate(DateHelper.getSeconds1());
+                                chatMessageBeanSystem.setIsDelete(ChatMessageBean.IS_Delete_NO);
+                                // 不保存系统消息到数据库，只添加到界面
+                                mChatAdapter.addItem(chatMessageBeanSystem);
+                                Log.d(TAG, "Added system message to UI only (not saved to database)");
+                            }
                         }
 
                         // 添加发送消息
@@ -900,7 +958,45 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
     @Override
     public void onRightClick(View view) {
-        startActivity(new Intent(getActivity(), AiConfigActivity.class));
+        // 右侧按钮（wx_add_chat_icon）被点击，添加新会话
+        handleAddNewSession();
+    }
+
+    /**
+     * 处理添加新会话的逻辑
+     */
+    private void handleAddNewSession() {
+        // 创建新会话
+        createNewSession("新对话");
+        
+        // 添加系统消息到界面（但不保存到数据库）
+        if (mChatAdapter != null) {
+            ChatMessageBean systemMessage = new ChatMessageBean(
+                    ChatMessageBean.TYPE_SYSTEM, 
+                    null, 
+                    null, 
+                    sdf.format(new Date()));
+            systemMessage.setSessionId(currentSession.getId());
+            systemMessage.setCreateDate(DateHelper.getSeconds1());
+            systemMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+            mChatAdapter.addItem(systemMessage);
+            Log.d(TAG, "Added system message to UI only (not saved to database yet)");
+        }
+        
+        // 清空输入框
+        EditText chatContent = findViewById(R.id.chat_content);
+        chatContent.setText("");
+        
+        // 更新聊天历史记录列表
+        populateChatHistoryWithTestData();
+        
+        // 加载新会话数据
+        loadChatDataForSession(currentSession.getId());
+        
+        // 关闭侧边栏（如果打开的话）
+        if (drawerLayout != null) {
+            drawerLayout.closeDrawers();
+        }
     }
 
     private ArrayList<ChatMessageBean> chatMessageBeans;

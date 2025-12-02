@@ -1,11 +1,16 @@
 package run.yigou.gxzy.ui.tips.adapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
@@ -14,6 +19,7 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
 
     private int selectedPosition = -1;
     private OnChatHistoryItemClickListener mListener;
+    private OnChatHistoryItemDeleteListener mDeleteListener;
 
     public ChatHistoryAdapter(Context context) {
         super(context);
@@ -34,11 +40,16 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
         mListener = listener;
     }
 
+    public void setOnChatHistoryItemDeleteListener(OnChatHistoryItemDeleteListener listener) {
+        mDeleteListener = listener;
+    }
+
     private final class ViewHolder extends AppAdapter<?>.ViewHolder {
         private TextView tvTitle;
         private TextView tvPreview;
         private TextView tvTime;
         private TextView tvMessageCount;
+        private ImageButton btnDelete;
 
         private ViewHolder(int viewLayout) {
             super(viewLayout);
@@ -46,6 +57,7 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
             tvPreview = findViewById(R.id.tv_chat_preview);
             tvTime = findViewById(R.id.tv_chat_time);
             tvMessageCount = findViewById(R.id.tv_message_count);
+            btnDelete = findViewById(R.id.btn_delete);
         }
 
         @Override
@@ -71,16 +83,43 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
                 getItemView().setBackgroundColor(getContext().getResources().getColor(R.color.common_primary_color));
             }
             
+            // 设置删除按钮点击事件
+            btnDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // 显示确认对话框
+                    showDeleteConfirmationDialog(position, item);
+                }
+            });
+
             getItemView().setOnClickListener(v -> {
                 if (mListener != null) {
                     mListener.onChatHistoryItemClick(position, item);
                 }
             });
         }
+
+        private void showDeleteConfirmationDialog(int position, ChatHistoryItem item) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle("确认删除");
+            builder.setMessage("确定要删除该会话记录吗？删除后将无法恢复。");
+            builder.setPositiveButton("确定", (dialog, which) -> {
+                if (mDeleteListener != null) {
+                    mDeleteListener.onChatHistoryItemDelete(position, item);
+                }
+            });
+            builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
     }
 
     public interface OnChatHistoryItemClickListener {
         void onChatHistoryItemClick(int position, ChatHistoryItem item);
+    }
+
+    public interface OnChatHistoryItemDeleteListener {
+        void onChatHistoryItemDelete(int position, ChatHistoryItem item);
     }
 
     public static class ChatHistoryItem {
