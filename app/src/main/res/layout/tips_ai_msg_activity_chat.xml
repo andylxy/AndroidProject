@@ -68,55 +68,61 @@
                     android:src="@drawable/switch__text_icon1"
                     android:visibility="gone" />
 
-                <RelativeLayout
+                <LinearLayout
                     android:id="@+id/chat_bottom"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#C3BEBE"
                     android:paddingTop="@dimen/dp_2"
                     android:paddingBottom="@dimen/dp_2"
+                    android:orientation="vertical"
                     android:focusableInTouchMode="true">
-
-                    <Button
-                        android:id="@+id/chat_send"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="@dimen/dp_4"
-                        android:layout_marginEnd="@dimen/dp_4"
-                        android:background="#70A9F3"
-                        android:text="发送"
-                        android:textColor="@color/white"
-                        android:textSize="@dimen/sp_16"
-                        android:minWidth="@dimen/dp_50"
-                        android:minHeight="@dimen/dp_30" />
-
-                    <ImageView
-                        android:id="@+id/chat_voice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:background="@drawable/wx_chat_icon4"
-                        android:layout_marginStart="@dimen/dp_4"
-                        android:layout_marginEnd="@dimen/dp_4"
-                        android:visibility="gone" />
 
                     <EditText
                         android:id="@+id/chat_content"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
                         android:layout_marginStart="@dimen/dp_4"
                         android:layout_marginEnd="@dimen/dp_4"
-                        android:layout_toStartOf="@id/chat_send"
-                        android:layout_toEndOf="@id/chat_voice"
-                        android:background="@drawable/b05"
+                        android:background="@drawable/chat_input_compact_bg"
                         android:paddingStart="@dimen/dp_5"
                         android:paddingEnd="@dimen/dp_5"
-                        android:minHeight="@dimen/dp_36" />
-                </RelativeLayout>
+                        android:paddingTop="@dimen/dp_3"
+                        android:paddingBottom="@dimen/dp_3"
+                        android:minHeight="@dimen/dp_36"
+                        android:maxLines="6"
+                        android:inputType="textMultiLine"
+                        android:scrollbars="vertical"
+                        android:gravity="top|start"
+                        android:singleLine="false"
+                        android:overScrollMode="always" />
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_marginTop="@dimen/dp_4"
+                        android:layout_marginBottom="@dimen/dp_4">
+
+                        <Button
+                            android:id="@+id/chat_send"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="#70A9F3"
+                            android:text="发送"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/sp_14"
+                            android:minWidth="@dimen/dp_40"
+                            android:minHeight="@dimen/dp_24"
+                            android:paddingStart="@dimen/dp_8"
+                            android:paddingEnd="@dimen/dp_8"
+                            android:paddingTop="@dimen/dp_2"
+                            android:paddingBottom="@dimen/dp_2" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
             </RelativeLayout>
 
         </LinearLayout>

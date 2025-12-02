@@ -20,6 +20,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -112,6 +114,42 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         Log.d(TAG, "initView: rv_chat=" + rv_chat);
         Log.d(TAG, "initView: mChatAdapter=" + mChatAdapter);
         Log.d(TAG, "initView: layoutManager=" + layoutManager);
+        
+        // 设置EditText的输入监听器，确保光标始终在最左侧
+        EditText chatContent = findViewById(R.id.chat_content);
+        chatContent.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    // 光标始终在最左侧
+                    chatContent.setSelection(0, 0);
+                }
+            }
+        });
+        
+        // 监听文本变化，实现内容向上扩展的效果
+        chatContent.addTextChangedListener(new TextWatcher() {
+            int lines = 1;
+            
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            
+            @Override
+            public void afterTextChanged(Editable s) {
+                // 获取当前行数
+                int currentLines = chatContent.getLineCount();
+                
+                // 如果行数增加，滚动到顶部以实现向上扩展的效果
+                if (currentLines > lines) {
+                    chatContent.scrollTo(0, 0);
+                }
+                
+                lines = currentLines;
+            }
+        });
 
 
     }
