@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -108,6 +109,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 设置标题栏点击监听
         if (getTitleBar() != null) {
             getTitleBar().setOnTitleBarListener(this);
+        }
+        
+        // 禁止通过边缘滑动手势打开侧边栏
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.START);
         }
         
         // 获取 Activity
@@ -298,6 +304,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         receiveMessage3.setCreateDate(DateHelper.getSeconds1());
         session1Messages.add(receiveMessage3);
         
+        Log.d(TAG, "Session 1 message count: " + session1Messages.size());
+        
         ChatSession session1 = new ChatSession(
                 "与AI助手对话 - 中医基本理论", 
                 "我: 你好，我想了解一下中医的基本理论\nAI: 您好！我是您的AI助手，我可以帮您解答关于中医、健康等方面的问题...",
@@ -348,6 +356,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 "4. 情绪调节：避免过度焦虑和压力");
         receiveMessage5.setCreateDate(DateHelper.getSeconds1());
         session2Messages.add(receiveMessage5);
+        
+        Log.d(TAG, "Session 2 message count: " + session2Messages.size());
         
         ChatSession session2 = new ChatSession(
                 "脾胃调理咨询", 
@@ -400,6 +410,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         receiveMessage7.setCreateDate(DateHelper.getSeconds1());
         session3Messages.add(receiveMessage7);
         
+        Log.d(TAG, "Session 3 message count: " + session3Messages.size());
+        
         ChatSession session3 = new ChatSession(
                 "失眠问题咨询", 
                 "我: 最近总是失眠怎么办?\nAI: 失眠可能与心脾两虚有关，建议您可以尝试以下方法...",
@@ -449,6 +461,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 "建议在专业中医师指导下使用中药，以确保用药安全和疗效。");
         receiveMessage9.setCreateDate(DateHelper.getSeconds1());
         session4Messages.add(receiveMessage9);
+        
+        Log.d(TAG, "Session 4 message count: " + session4Messages.size());
         
         ChatSession session4 = new ChatSession(
                 "感冒用药咨询", 
@@ -502,6 +516,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         receiveMessage11.setCreateDate(DateHelper.getSeconds1());
         session5Messages.add(receiveMessage11);
         
+        Log.d(TAG, "Session 5 message count: " + session5Messages.size());
+        
         ChatSession session5 = new ChatSession(
                 "养生茶推荐", 
                 "我: 有什么推荐的养生茶吗?\nAI: 根据您的体质，我推荐以下几种养生茶...",
@@ -529,6 +545,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     session.getPreview(),
                     session.getTime(),
                     session.getMessageCount()));
+            Log.d(TAG, "Added session to sidebar: " + session.getTitle() + ", message count: " + session.getMessageCount());
         }
 
         // 更新适配器数据
@@ -567,6 +584,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             ChatSession session = chatSessions.get(sessionPosition);
             if (mChatAdapter != null) {
                 mChatAdapter.setData(new ArrayList<>(session.getMessages()));
+                Log.d(TAG, "Loaded " + session.getMessages().size() + " messages for session " + sessionPosition);
             }
             
             // 将会话标题同步设置到TitleBar标题显示
@@ -588,6 +606,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 public void run() {
                     if (mChatAdapter.getItemCount() > 0) {
                         rv_chat.scrollToPosition(mChatAdapter.getItemCount() - 1);
+                        Log.d(TAG, "Scrolled to position " + (mChatAdapter.getItemCount() - 1));
                     }
                 }
             });

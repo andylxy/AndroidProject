@@ -156,7 +156,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:orientation="vertical"
-        android:background="@color/common_window_background_color"
+        android:background="@color/sys_protect_eye_bg"
         android:elevation="4dp"
         android:translationZ="4dp">
 
@@ -177,7 +177,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="【聊天记录】"
-                android:textColor="#313031"
+                android:textColor="@color/sys_protect_eye_word"
                 android:textSize="@dimen/sp_18"
                 android:textStyle="bold" />
 
