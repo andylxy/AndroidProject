@@ -4,7 +4,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#f0f0f0">
+    android:background="@color/common_window_background_color">
     <!-- 主聊天界面 -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,9 +14,10 @@
         <com.hjq.bar.TitleBar
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/dp_35"
             app:rightIcon="@drawable/wx_add_chat_icon"
-            app:title="@string/app_name_ai" />
+            app:title="@string/app_name_ai"
+            android:background="@drawable/enhanced_title_bar_bg" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -43,7 +44,8 @@
                 android:paddingStart="@dimen/dp_4"
                 android:paddingEnd="@dimen/dp_4"
                 android:paddingTop="@dimen/dp_2"
-                android:paddingBottom="@dimen/dp_2">
+                android:paddingBottom="@dimen/dp_2"
+                android:background="@color/common_window_background_color">
 
                 <Button
                     android:id="@+id/bt_asr"
@@ -72,7 +74,6 @@
                     android:id="@+id/chat_bottom"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#C3BEBE"
                     android:paddingTop="@dimen/dp_2"
                     android:paddingBottom="@dimen/dp_2"
                     android:orientation="vertical"
@@ -84,7 +85,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/dp_4"
                         android:layout_marginEnd="@dimen/dp_4"
-                        android:background="@drawable/chat_input_compact_bg"
+                        android:background="@drawable/chat_input_enhanced_bg"
                         android:paddingStart="@dimen/dp_5"
                         android:paddingEnd="@dimen/dp_5"
                         android:paddingTop="@dimen/dp_3"
@@ -136,7 +137,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:orientation="vertical"
-        android:background="#f0f0f0"
+        android:background="@color/common_window_background_color"
         android:elevation="4dp"
         android:translationZ="4dp">
 
