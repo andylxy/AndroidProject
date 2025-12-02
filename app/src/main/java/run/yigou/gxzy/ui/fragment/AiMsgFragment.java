@@ -83,7 +83,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         Log.d(TAG, "initView: Starting initialization");
         if (AiConfigHelper.getAssistantName() != null)
           setTitle(AiConfigHelper.getAssistantName());
+        // 初始化状态栏,设置为沉浸式
         getStatusBarConfig().setTitleBar(this, findViewById(R.id.tv_title));
+        getStatusBarConfig().setTitleBar(this, findViewById(R.id.side_panel));
         rv_chat = findViewById(R.id.rv_chat);
         drawerLayout = findViewById(R.id.drawer_layout);
         chatHistoryList = findViewById(R.id.chat_history_list);
@@ -229,16 +231,13 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     private void populateChatWithTestData() {
         Log.d(TAG, "populateChatWithTestData: Starting to populate test data");
         
-        // 如果还没有初始化会话数据，则先初始化
+        // 只有在数据库中有会话数据时才加载
         List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
-        if (sessions.isEmpty()) {
-            initChatSessions();
-        }
-        
-        // 加载第一个会话的数据
-        sessions = DbService.getInstance().mChatSessionBeanService.findAll();
         if (!sessions.isEmpty()) {
+            // 加载第一个会话的数据
             loadChatDataForSession(sessions.get(0).getId());
+        } else {
+            Log.d(TAG, "populateChatWithTestData: No session data found, not loading test data");
         }
     }
     
@@ -252,6 +251,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             return; // 如果已有数据，不需要重新初始化
         }
         
+        // 只有在数据库确实为空时才添加测试数据
         String currentTime = DateHelper.getSeconds1();
         
         // 创建会话1: 中医基本理论
@@ -719,33 +719,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     private void initMsgs() {
         Log.d(TAG, "initMsgs: Initializing messages");
 
-        // 按住说话按钮
-        //       Button bt_asr = findViewById(R.id.bt_asr);
-//        bt_asr.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View view, MotionEvent event) {
-//            }
-//        });
-
-//        ImageView bt_switch = findViewById(R.id.bt_switch);
-//        bt_switch.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                bt_asr.setVisibility(View.GONE);
-//                findViewById(R.id.chat_bottom).setVisibility(View.VISIBLE);
-//            }
-//        });
-//
-//        ImageView chat_voice = findViewById(R.id.chat_voice);
-//        chat_voice.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                ;
-//                bt_asr.setVisibility(View.VISIBLE);
-//                findViewById(R.id.chat_bottom).setVisibility(View.GONE);
-//            }
-//        });
-
         Button chat_send = findViewById(R.id.chat_send);
         chat_send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -940,21 +913,26 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     protected void initData() {
         Log.d(TAG, "initData: Starting to initialize data");
         
-        // 初始化会话数据
-        initChatSessions();
-        
-        // 加载会话历史记录
-        populateChatHistoryWithTestData();
-        
-        // 如果当前没有会话，加载第一个会话的数据
-        if (currentSession == null) {
-            List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
-            if (!sessions.isEmpty()) {
+        // 只有在数据库中有会话数据时才初始化
+        List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
+        if (!sessions.isEmpty()) {
+            // 初始化会话数据
+            initChatSessions();
+            
+            // 加载会话历史记录
+            populateChatHistoryWithTestData();
+            
+            // 如果当前没有会话，加载第一个会话的数据
+            if (currentSession == null) {
                 loadChatDataForSession(sessions.get(0).getId());
-            } else {
-                // 没有会话数据时显示默认内容
-                loadDefaultSessionData();
             }
+        } else {
+            // 没有会话数据时不加载任何内容，保持界面空白
+            Log.d(TAG, "No session data found in database, not loading any content");
+            // 清空侧边栏
+            chatHistoryAdapter.setData(new ArrayList<ChatHistoryAdapter.ChatHistoryItem>());
+            // 显示默认空内容
+            loadDefaultSessionData();
         }
         
         Log.d(TAG, "initData: Completed data initialization");

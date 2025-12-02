@@ -57,11 +57,18 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
             tvTime.setText(item.getTime());
             tvMessageCount.setText(item.getMessageCount());
 
+            // 设置斑马纹背景
+            if (position % 2 == 0) {
+                // 偶数行使用较浅的背景色
+                getItemView().setBackgroundResource(R.drawable.chat_history_item_bg_even);
+            } else {
+                // 奇数行使用稍深的背景色
+                getItemView().setBackgroundResource(R.drawable.chat_history_item_bg_odd);
+            }
+
             // 设置选中状态
             if (position == selectedPosition) {
                 getItemView().setBackgroundColor(getContext().getResources().getColor(R.color.common_primary_color));
-            } else {
-                getItemView().setBackgroundColor(getContext().getResources().getColor(android.R.color.transparent));
             }
             
             getItemView().setOnClickListener(v -> {
