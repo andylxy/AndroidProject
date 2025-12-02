@@ -165,7 +165,7 @@
 
         </LinearLayout>
 
-        <ListView
+        <com.hjq.widget.layout.WrapRecyclerView
             android:id="@+id/chat_history_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

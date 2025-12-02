@@ -51,8 +51,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     private static final String TAG = "AiMsgFragment";
     private RecyclerView rv_chat;
     private DrawerLayout drawerLayout;
-    private ListView chatHistoryList;
-    private ChatHistoryAdapter chatHistoryAdapter;
+    private RecyclerView chatHistoryList;
+    private run.yigou.gxzy.ui.tips.adapter.ChatHistoryAdapter chatHistoryAdapter; // 修改导入路径
     @SuppressLint("SimpleDateFormat")
     private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
     private int scrollState = 0;
@@ -85,6 +85,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 初始化聊天历史记录列表
         chatHistoryAdapter = new ChatHistoryAdapter(getActivity());
         chatHistoryList.setAdapter(chatHistoryAdapter);
+        chatHistoryList.setLayoutManager(new LinearLayoutManager(getContext()));
         
         // 设置标题栏点击监听
         if (getTitleBar() != null) {

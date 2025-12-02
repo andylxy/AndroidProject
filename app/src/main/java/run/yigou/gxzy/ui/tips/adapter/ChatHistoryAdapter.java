@@ -1,40 +1,21 @@
 package run.yigou.gxzy.ui.tips.adapter;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
+import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.greendao.entity.ChatMessageBean;
+import run.yigou.gxzy.app.AppAdapter;
 
-public class ChatHistoryAdapter extends BaseAdapter {
+public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistoryItem> {
     private Context context;
-    private List<ChatHistoryItem> chatHistoryItems;
 
     public ChatHistoryAdapter(Context context) {
+        super(context);
         this.context = context;
-        this.chatHistoryItems = new ArrayList<>();
-    }
-
-    public void setData(List<ChatHistoryItem> data) {
-        this.chatHistoryItems = data;
-        notifyDataSetChanged();
-    }
-
-    @Override
-    public int getCount() {
-        return chatHistoryItems.size();
-    }
-
-    @Override
-    public ChatHistoryItem getItem(int position) {
-        return chatHistoryItems.get(position);
     }
 
     @Override
@@ -42,42 +23,50 @@ public class ChatHistoryAdapter extends BaseAdapter {
         return position;
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
-        if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.chat_history_item, parent, false);
-            holder = new ViewHolder();
-            holder.tvChatTitle = convertView.findViewById(R.id.tv_chat_title);
-            holder.tvChatPreview = convertView.findViewById(R.id.tv_chat_preview);
-            holder.tvChatTime = convertView.findViewById(R.id.tv_chat_time);
-            holder.tvMessageCount = convertView.findViewById(R.id.tv_message_count);
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-
-        ChatHistoryItem item = getItem(position);
-        holder.tvChatTitle.setText(item.getTitle());
-        holder.tvChatPreview.setText(item.getPreview());
-        holder.tvChatTime.setText(item.getTime());
-        holder.tvMessageCount.setText(item.getMessageCount());
-        
-        // 设置斑马纹背景
-        if (position % 2 == 0) {
-            convertView.setBackgroundResource(R.drawable.chat_history_item_bg_even);
-        } else {
-            convertView.setBackgroundResource(R.drawable.chat_history_item_bg_odd);
-        }
-
-        return convertView;
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ViewHolder(R.layout.chat_history_item);
     }
 
-    static class ViewHolder {
-        TextView tvChatTitle;
-        TextView tvChatPreview;
-        TextView tvChatTime;
-        TextView tvMessageCount;
+    private final class ViewHolder extends AppAdapter<?>.ViewHolder {
+
+        private ViewHolder(int viewlayout) {
+            super(viewlayout);
+        }
+
+        @Override
+        public void onBindView(int position) {
+            ChatHistoryItem item = getItem(position);
+            
+            TextView tvChatTitle = findViewById(R.id.tv_chat_title);
+            TextView tvChatPreview = findViewById(R.id.tv_chat_preview);
+            TextView tvChatTime = findViewById(R.id.tv_chat_time);
+            TextView tvMessageCount = findViewById(R.id.tv_message_count);
+
+            if (tvChatTitle != null) {
+                tvChatTitle.setText(item.getTitle());
+            }
+            
+            if (tvChatPreview != null) {
+                tvChatPreview.setText(item.getPreview());
+            }
+            
+            if (tvChatTime != null) {
+                tvChatTime.setText(item.getTime());
+            }
+            
+            if (tvMessageCount != null) {
+                tvMessageCount.setText(item.getMessageCount());
+            }
+            
+            // 设置斑马纹背景
+            if (position % 2 == 0) {
+                itemView.setBackgroundResource(R.drawable.chat_history_item_bg_even);
+            } else {
+                itemView.setBackgroundResource(R.drawable.chat_history_item_bg_odd);
+            }
+        }
     }
 
     public static class ChatHistoryItem {
