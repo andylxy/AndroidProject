@@ -15,6 +15,7 @@
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_35"
+            app:leftIcon="@drawable/switch12832"
             app:rightIcon="@drawable/wx_add_chat_icon"
             app:title="@string/app_name_ai"
             android:background="@drawable/enhanced_title_bar_bg" />

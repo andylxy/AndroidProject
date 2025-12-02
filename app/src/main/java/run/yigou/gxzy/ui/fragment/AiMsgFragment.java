@@ -590,6 +590,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     @Override
     public void onTitleClick(View view) {
         // 标题被点击
+
     }
 
     @Override
