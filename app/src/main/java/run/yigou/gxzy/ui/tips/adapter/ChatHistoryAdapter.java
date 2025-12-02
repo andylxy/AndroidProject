@@ -6,12 +6,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
 
 public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistoryItem> {
     private Context context;
+    private OnChatHistoryItemClickListener listener;
+    private int selectedPosition = -1;
 
     public ChatHistoryAdapter(Context context) {
         super(context);
@@ -30,20 +33,42 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
     }
 
     private final class ViewHolder extends AppAdapter<?>.ViewHolder {
+        private TextView tvChatTitle;
+        private TextView tvChatPreview;
+        private TextView tvChatTime;
+        private TextView tvMessageCount;
 
         private ViewHolder(int viewlayout) {
             super(viewlayout);
+            
+            tvChatTitle = findViewById(R.id.tv_chat_title);
+            tvChatPreview = findViewById(R.id.tv_chat_preview);
+            tvChatTime = findViewById(R.id.tv_chat_time);
+            tvMessageCount = findViewById(R.id.tv_message_count);
+            
+            // 设置点击事件
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        // 更新选中状态
+                        selectedPosition = position;
+                        notifyDataSetChanged();
+                        
+                        // 回调接口通知外部
+                        if (listener != null) {
+                            listener.onChatHistoryItemClick(position, getItem(position));
+                        }
+                    }
+                }
+            });
         }
 
         @Override
         public void onBindView(int position) {
             ChatHistoryItem item = getItem(position);
             
-            TextView tvChatTitle = findViewById(R.id.tv_chat_title);
-            TextView tvChatPreview = findViewById(R.id.tv_chat_preview);
-            TextView tvChatTime = findViewById(R.id.tv_chat_time);
-            TextView tvMessageCount = findViewById(R.id.tv_message_count);
-
             if (tvChatTitle != null) {
                 tvChatTitle.setText(item.getTitle());
             }
@@ -60,8 +85,10 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
                 tvMessageCount.setText(item.getMessageCount());
             }
             
-            // 设置斑马纹背景
-            if (position % 2 == 0) {
+            // 设置选中状态背景
+            if (position == selectedPosition) {
+                itemView.setBackgroundResource(R.drawable.chat_history_item_bg_selected);
+            } else if (position % 2 == 0) {
                 itemView.setBackgroundResource(R.drawable.chat_history_item_bg_even);
             } else {
                 itemView.setBackgroundResource(R.drawable.chat_history_item_bg_odd);
@@ -97,5 +124,26 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
         public String getMessageCount() {
             return messageCount;
         }
+    }
+    
+    // 设置监听器
+    public void setOnChatHistoryItemClickListener(OnChatHistoryItemClickListener listener) {
+        this.listener = listener;
+    }
+    
+    // 选中指定位置的项
+    public void setSelectedPosition(int position) {
+        this.selectedPosition = position;
+        notifyDataSetChanged();
+    }
+    
+    // 获取选中位置
+    public int getSelectedPosition() {
+        return selectedPosition;
+    }
+    
+    // 定义点击事件接口
+    public interface OnChatHistoryItemClickListener {
+        void onChatHistoryItemClick(int position, ChatHistoryItem item);
     }
 }

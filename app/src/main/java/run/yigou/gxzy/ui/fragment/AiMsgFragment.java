@@ -58,6 +58,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
     private int scrollState = 0;
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 1;
+    
+    // 模拟会话数据
+    private List<ChatSession> chatSessions = new ArrayList<>();
 
     public static AiMsgFragment newInstance() {
         return new AiMsgFragment();
@@ -88,6 +91,20 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         chatHistoryList.setAdapter(chatHistoryAdapter);
         chatHistoryList.setLayoutManager(new LinearLayoutManager(getContext()));
         
+        // 设置聊天历史记录项点击监听
+        chatHistoryAdapter.setOnChatHistoryItemClickListener(new ChatHistoryAdapter.OnChatHistoryItemClickListener() {
+            @Override
+            public void onChatHistoryItemClick(int position, ChatHistoryAdapter.ChatHistoryItem item) {
+                // 加载选中会话的所有聊天数据
+                loadChatDataForSession(position);
+                
+                // 关闭侧边栏
+                if (drawerLayout != null) {
+                    drawerLayout.closeDrawers();
+                }
+            }
+        });
+        
         // 设置标题栏点击监听
         if (getTitleBar() != null) {
             getTitleBar().setOnTitleBarListener(this);
@@ -106,7 +123,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         rv_chat.setLayoutManager(layoutManager);
         rv_chat.setAdapter(mChatAdapter);
-        setTitle("Ai对话");
+        
         // 注册事件
         XEventBus.getDefault().register(AiMsgFragment.this);
         // 初始化消息数据
@@ -199,17 +216,35 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
      */
     private void populateChatWithTestData() {
         Log.d(TAG, "populateChatWithTestData: Starting to populate test data");
-        // 创建一些测试消息
-        ArrayList<ChatMessageBean> testData = new ArrayList<>();
+        
+        // 如果还没有初始化会话数据，则先初始化
+        if (chatSessions.isEmpty()) {
+            initChatSessions();
+        }
+        
+        // 加载第一个会话的数据
+        if (!chatSessions.isEmpty()) {
+            loadChatDataForSession(0);
+        }
+    }
+    
+    /**
+     * 初始化聊天会话数据
+     */
+    private void initChatSessions() {
+        chatSessions.clear();
+        
+        // 创建会话1: 中医基本理论
+        List<ChatMessageBean> session1Messages = new ArrayList<>();
         
         // 添加系统消息
-        ChatMessageBean systemMessage = new ChatMessageBean(
+        ChatMessageBean systemMessage1 = new ChatMessageBean(
                 ChatMessageBean.TYPE_SYSTEM, 
                 null, 
                 null, 
                 "欢迎使用AI助手！今天是 " + new SimpleDateFormat("MM月dd日").format(new Date()));
-        systemMessage.setCreateDate(DateHelper.getSeconds1());
-        testData.add(systemMessage);
+        systemMessage1.setCreateDate(DateHelper.getSeconds1());
+        session1Messages.add(systemMessage1);
         
         // 添加接收消息（AI回复）
         ChatMessageBean receiveMessage1 = new ChatMessageBean(
@@ -218,7 +253,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 "", 
                 "您好！我是您的AI助手，我可以帮您解答关于中医、健康等方面的问题。请问有什么我可以帮您的吗？");
         receiveMessage1.setCreateDate(DateHelper.getSeconds1());
-        testData.add(receiveMessage1);
+        session1Messages.add(receiveMessage1);
         
         // 添加发送消息（用户）
         ChatMessageBean sendMessage1 = new ChatMessageBean(
@@ -227,7 +262,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 "", 
                 "你好，我想了解一下中医的基本理论");
         sendMessage1.setCreateDate(DateHelper.getSeconds1());
-        testData.add(sendMessage1);
+        session1Messages.add(sendMessage1);
         
         // 添加接收消息（AI回复）
         ChatMessageBean receiveMessage2 = new ChatMessageBean(
@@ -238,7 +273,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 "阴阳学说认为，宇宙间一切事物都是由相互对立又相互关联的阴阳两方面组成。在人体中，阴阳平衡是健康的基础，失衡则会导致疾病。\n\n" +
                 "五行学说将自然界的事物分为木、火、土、金、水五大类，它们之间存在着相生相克的关系。在人体中，五脏（肝、心、脾、肺、肾）分别对应五行，通过五行关系来解释脏腑之间的相互关系。");
         receiveMessage2.setCreateDate(DateHelper.getSeconds1());
-        testData.add(receiveMessage2);
+        session1Messages.add(receiveMessage2);
         
         // 添加发送消息（用户）
         ChatMessageBean sendMessage2 = new ChatMessageBean(
@@ -247,7 +282,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 "", 
                 "那中医是如何诊断疾病的呢？");
         sendMessage2.setCreateDate(DateHelper.getSeconds1());
-        testData.add(sendMessage2);
+        session1Messages.add(sendMessage2);
         
         // 添加接收消息（AI回复）
         ChatMessageBean receiveMessage3 = new ChatMessageBean(
@@ -261,91 +296,249 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 "4. **切诊**：通过脉诊和触诊了解患者的身体状况\n\n" +
                 "通过四诊收集的信息，医生会进行综合分析，判断疾病的性质、部位、原因等，进而制定治疗方案。");
         receiveMessage3.setCreateDate(DateHelper.getSeconds1());
-        testData.add(receiveMessage3);
+        session1Messages.add(receiveMessage3);
         
-        // 设置测试数据到适配器
-        Log.d(TAG, "populateChatWithTestData: Setting data to adapter, size=" + testData.size());
-        Log.d(TAG, "populateChatWithTestData: rv_chat=" + rv_chat);
-        Log.d(TAG, "populateChatWithTestData: mChatAdapter=" + mChatAdapter);
+        ChatSession session1 = new ChatSession(
+                "与AI助手对话 - 中医基本理论", 
+                "我: 你好，我想了解一下中医的基本理论\nAI: 您好！我是您的AI助手，我可以帮您解答关于中医、健康等方面的问题...",
+                "2025-12-01",
+                session1Messages.size() + " 条消息",
+                session1Messages);
+        chatSessions.add(session1);
         
-        if (mChatAdapter != null && mChatAdapter.getData() != null) {
-            mChatAdapter.getData().addAll(testData);
-            Log.d(TAG, "populateChatWithTestData: Data set to adapter successfully");
-        } else {
-          //  mChatAdapter.setData(testData);
-            Log.e(TAG, "populateChatWithTestData: mChatAdapter is null!");
-        }
-
-//        // 强制刷新UI
-//        if (rv_chat != null) {
-//            rv_chat.post(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (mChatAdapter != null) {
-//                        mChatAdapter.notifyDataSetChanged();
-//                        Log.d(TAG, "populateChatWithTestData: notifyDataSetChanged called");
-//
-//                        // 检查 RecyclerView 是否正确设置
-//                        Log.d(TAG, "populateChatWithTestData: RecyclerView adapter=" + rv_chat.getAdapter());
-//                        Log.d(TAG, "populateChatWithTestData: Adapter item count=" + mChatAdapter.getItemCount());
-//                        Log.d(TAG, "populateChatWithTestData: RecyclerView child count=" + rv_chat.getChildCount());
-//
-//                        // 滚动到最新消息
-//                        if (testData.size() > 0) {
-//                            rv_chat.scrollToPosition(testData.size() - 1);
-//                            Log.d(TAG, "populateChatWithTestData: Scrolled to position " + (testData.size() - 1));
-//                        }
-//                    } else {
-//                        Log.e(TAG, "populateChatWithTestData: mChatAdapter is null in post!");
-//                    }
-//                }
-//            });
-//        } else {
-//            Log.e(TAG, "populateChatWithTestData: rv_chat is null!");
-//        }
-//
-//        Log.d(TAG, "populateChatWithTestData: Completed populating test data");
+        // 创建会话2: 脾胃调理咨询
+        List<ChatMessageBean> session2Messages = new ArrayList<>();
+        
+        // 添加系统消息
+        ChatMessageBean systemMessage2 = new ChatMessageBean(
+                ChatMessageBean.TYPE_SYSTEM, 
+                null, 
+                null, 
+                "会话记录：脾胃调理咨询");
+        systemMessage2.setCreateDate(DateHelper.getSeconds1());
+        session2Messages.add(systemMessage2);
+        
+        // 添加接收消息（AI回复）
+        ChatMessageBean receiveMessage4 = new ChatMessageBean(
+                ChatMessageBean.TYPE_RECEIVED, 
+                "AI助手", 
+                "", 
+                "您好！关于脾胃调理，我可以为您提供一些建议。");
+        receiveMessage4.setCreateDate(DateHelper.getSeconds1());
+        session2Messages.add(receiveMessage4);
+        
+        // 添加发送消息（用户）
+        ChatMessageBean sendMessage3 = new ChatMessageBean(
+                ChatMessageBean.TYPE_SEND, 
+                "", 
+                "", 
+                "请问如何调理脾胃?");
+        sendMessage3.setCreateDate(DateHelper.getSeconds1());
+        session2Messages.add(sendMessage3);
+        
+        // 添加接收消息（AI回复）
+        ChatMessageBean receiveMessage5 = new ChatMessageBean(
+                ChatMessageBean.TYPE_RECEIVED, 
+                "AI助手", 
+                "", 
+                "脾胃调理需要从饮食、作息等多方面入手:\n\n" +
+                "1. 饮食规律：定时定量，避免暴饮暴食\n" +
+                "2. 食物选择：多吃易消化的食物，如小米粥、山药等\n" +
+                "3. 生活习惯：保持充足睡眠，适量运动\n" +
+                "4. 情绪调节：避免过度焦虑和压力");
+        receiveMessage5.setCreateDate(DateHelper.getSeconds1());
+        session2Messages.add(receiveMessage5);
+        
+        ChatSession session2 = new ChatSession(
+                "脾胃调理咨询", 
+                "我: 请问如何调理脾胃?\nAI: 脾胃调理需要从饮食、作息等多方面入手...",
+                "2025-11-30", 
+                session2Messages.size() + " 条消息",
+                session2Messages);
+        chatSessions.add(session2);
+        
+        // 创建会话3: 失眠问题咨询
+        List<ChatMessageBean> session3Messages = new ArrayList<>();
+        
+        // 添加系统消息
+        ChatMessageBean systemMessage3 = new ChatMessageBean(
+                ChatMessageBean.TYPE_SYSTEM, 
+                null, 
+                null, 
+                "会话记录：失眠问题咨询");
+        systemMessage3.setCreateDate(DateHelper.getSeconds1());
+        session3Messages.add(systemMessage3);
+        
+        // 添加接收消息（AI回复）
+        ChatMessageBean receiveMessage6 = new ChatMessageBean(
+                ChatMessageBean.TYPE_RECEIVED, 
+                "AI助手", 
+                "", 
+                "您好！关于失眠问题，我可以为您提供一些建议。");
+        receiveMessage6.setCreateDate(DateHelper.getSeconds1());
+        session3Messages.add(receiveMessage6);
+        
+        // 添加发送消息（用户）
+        ChatMessageBean sendMessage4 = new ChatMessageBean(
+                ChatMessageBean.TYPE_SEND, 
+                "", 
+                "", 
+                "最近总是失眠怎么办?");
+        sendMessage4.setCreateDate(DateHelper.getSeconds1());
+        session3Messages.add(sendMessage4);
+        
+        // 添加接收消息（AI回复）
+        ChatMessageBean receiveMessage7 = new ChatMessageBean(
+                ChatMessageBean.TYPE_RECEIVED, 
+                "AI助手", 
+                "", 
+                "失眠可能与心脾两虚有关，建议您可以尝试以下方法:\n\n" +
+                "1. 睡前放松：避免刺激性活动，可以听轻音乐或冥想\n" +
+                "2. 饮食调节：晚餐不宜过饱，避免浓茶、咖啡\n" +
+                "3. 规律作息：尽量每天同一时间上床和起床\n" +
+                "4. 适度运动：白天进行适量运动，但睡前3小时内避免剧烈运动");
+        receiveMessage7.setCreateDate(DateHelper.getSeconds1());
+        session3Messages.add(receiveMessage7);
+        
+        ChatSession session3 = new ChatSession(
+                "失眠问题咨询", 
+                "我: 最近总是失眠怎么办?\nAI: 失眠可能与心脾两虚有关，建议您可以尝试以下方法...",
+                "2025-11-28", 
+                session3Messages.size() + " 条消息",
+                session3Messages);
+        chatSessions.add(session3);
+        
+        // 创建会话4: 感冒用药咨询
+        List<ChatMessageBean> session4Messages = new ArrayList<>();
+        
+        // 添加系统消息
+        ChatMessageBean systemMessage4 = new ChatMessageBean(
+                ChatMessageBean.TYPE_SYSTEM, 
+                null, 
+                null, 
+                "会话记录：感冒用药咨询");
+        systemMessage4.setCreateDate(DateHelper.getSeconds1());
+        session4Messages.add(systemMessage4);
+        
+        // 添加接收消息（AI回复）
+        ChatMessageBean receiveMessage8 = new ChatMessageBean(
+                ChatMessageBean.TYPE_RECEIVED, 
+                "AI助手", 
+                "", 
+                "您好！关于感冒用药，我可以为您提供一些建议。");
+        receiveMessage8.setCreateDate(DateHelper.getSeconds1());
+        session4Messages.add(receiveMessage8);
+        
+        // 添加发送消息（用户）
+        ChatMessageBean sendMessage5 = new ChatMessageBean(
+                ChatMessageBean.TYPE_SEND, 
+                "", 
+                "", 
+                "感冒了可以用哪些中药?");
+        sendMessage5.setCreateDate(DateHelper.getSeconds1());
+        session4Messages.add(sendMessage5);
+        
+        // 添加接收消息（AI回复）
+        ChatMessageBean receiveMessage9 = new ChatMessageBean(
+                ChatMessageBean.TYPE_RECEIVED, 
+                "AI助手", 
+                "", 
+                "感冒通常分为风寒感冒和风热感冒:\n\n" +
+                "1. **风寒感冒**：症状为恶寒重、发热轻、无汗、头痛、鼻塞流清涕等，可用麻黄汤、桂枝汤等方剂\n" +
+                "2. **风热感冒**：症状为发热重、恶寒轻、有汗、咽喉肿痛、鼻塞流黄涕等，可用银翘散、桑菊饮等方剂\n\n" +
+                "建议在专业中医师指导下使用中药，以确保用药安全和疗效。");
+        receiveMessage9.setCreateDate(DateHelper.getSeconds1());
+        session4Messages.add(receiveMessage9);
+        
+        ChatSession session4 = new ChatSession(
+                "感冒用药咨询", 
+                "我: 感冒了可以用哪些中药?\nAI: 感冒通常分为风寒感冒和风热感冒...",
+                "2025-11-25", 
+                session4Messages.size() + " 条消息",
+                session4Messages);
+        chatSessions.add(session4);
+        
+        // 创建会话5: 养生茶推荐
+        List<ChatMessageBean> session5Messages = new ArrayList<>();
+        
+        // 添加系统消息
+        ChatMessageBean systemMessage5 = new ChatMessageBean(
+                ChatMessageBean.TYPE_SYSTEM, 
+                null, 
+                null, 
+                "会话记录：养生茶推荐");
+        systemMessage5.setCreateDate(DateHelper.getSeconds1());
+        session5Messages.add(systemMessage5);
+        
+        // 添加接收消息（AI回复）
+        ChatMessageBean receiveMessage10 = new ChatMessageBean(
+                ChatMessageBean.TYPE_RECEIVED, 
+                "AI助手", 
+                "", 
+                "您好！关于养生茶，我可以为您推荐几种。");
+        receiveMessage10.setCreateDate(DateHelper.getSeconds1());
+        session5Messages.add(receiveMessage10);
+        
+        // 添加发送消息（用户）
+        ChatMessageBean sendMessage6 = new ChatMessageBean(
+                ChatMessageBean.TYPE_SEND, 
+                "", 
+                "", 
+                "有什么推荐的养生茶吗?");
+        sendMessage6.setCreateDate(DateHelper.getSeconds1());
+        session5Messages.add(sendMessage6);
+        
+        // 添加接收消息（AI回复）
+        ChatMessageBean receiveMessage11 = new ChatMessageBean(
+                ChatMessageBean.TYPE_RECEIVED, 
+                "AI助手", 
+                "", 
+                "根据常见的养生需求，我推荐以下几种养生茶:\n\n" +
+                "1. **枸杞菊花茶**：养肝明目，适合长期用眼的人群\n" +
+                "2. **玫瑰花茶**：疏肝解郁，美容养颜，适合女性饮用\n" +
+                "3. **山楂荷叶茶**：降脂减肥，适合肥胖人群\n" +
+                "4. **红枣桂圆茶**：补气养血，适合气血不足的人群\n\n" +
+                "建议根据个人体质选择合适的养生茶，并注意适量饮用。");
+        receiveMessage11.setCreateDate(DateHelper.getSeconds1());
+        session5Messages.add(receiveMessage11);
+        
+        ChatSession session5 = new ChatSession(
+                "养生茶推荐", 
+                "我: 有什么推荐的养生茶吗?\nAI: 根据您的体质，我推荐以下几种养生茶...",
+                "2025-11-20", 
+                session5Messages.size() + " 条消息",
+                session5Messages);
+        chatSessions.add(session5);
     }
 
     /**
      * 填充聊天历史记录列表测试数据
      */
     private void populateChatHistoryWithTestData() {
+        // 如果还没有初始化会话数据，则先初始化
+        if (chatSessions.isEmpty()) {
+            initChatSessions();
+        }
+        
         List<ChatHistoryAdapter.ChatHistoryItem> historyItems = new ArrayList<>();
         
-        // 添加测试数据
-        historyItems.add(new ChatHistoryAdapter.ChatHistoryItem(
-                "与AI助手对话", 
-                "我: 你好，我想了解一下中医\nAI: 您好！我很乐意为您介绍中医的相关知识...",
-                "2025-12-01",
-                "12 条消息"));
-        
-        historyItems.add(new ChatHistoryAdapter.ChatHistoryItem(
-                "脾胃调理咨询", 
-                "我: 请问如何调理脾胃?\nAI: 脾胃调理需要从饮食、作息等多方面入手...",
-                "2025-11-30", 
-                "8 条消息"));
-        
-        historyItems.add(new ChatHistoryAdapter.ChatHistoryItem(
-                "失眠问题咨询", 
-                "我: 最近总是失眠怎么办?\nAI: 失眠可能与心脾两虚有关，建议您可以尝试以下方法...",
-                "2025-11-28", 
-                "15 条消息"));
-        
-        historyItems.add(new ChatHistoryAdapter.ChatHistoryItem(
-                "感冒用药咨询", 
-                "我: 感冒了可以用哪些中药?\nAI: 感冒通常分为风寒感冒和风热感冒...",
-                "2025-11-25", 
-                "6 条消息"));
-        
-        historyItems.add(new ChatHistoryAdapter.ChatHistoryItem(
-                "养生茶推荐", 
-                "我: 有什么推荐的养生茶吗?\nAI: 根据您的体质，我推荐以下几种养生茶...",
-                "2025-11-20", 
-                "10 条消息"));
+        // 根据会话数据创建历史记录项
+        for (ChatSession session : chatSessions) {
+            historyItems.add(new ChatHistoryAdapter.ChatHistoryItem(
+                    session.getTitle(), 
+                    session.getPreview(),
+                    session.getTime(),
+                    session.getMessageCount()));
+        }
 
         // 更新适配器数据
         chatHistoryAdapter.setData(historyItems);
+        
+        // 默认选中第一个会话并加载其数据
+        if (!historyItems.isEmpty()) {
+            chatHistoryAdapter.setSelectedPosition(0);
+            loadChatDataForSession(0);
+        }
     }
 
     /**
@@ -432,6 +625,86 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         
         // 更新适配器数据
         chatHistoryAdapter.setData(historyItems);
+        
+        // 默认选中第一个会话并加载其数据
+        if (!historyItems.isEmpty()) {
+            chatHistoryAdapter.setSelectedPosition(0);
+            loadChatDataForSession(0);
+        }
+    }
+
+    /**
+     * 加载指定会话的聊天数据
+     *
+     * @param sessionPosition 会话位置
+     */
+    private void loadChatDataForSession(int sessionPosition) {
+        // 在实际应用中，这里应该根据会话ID从数据库加载对应的聊天记录
+        // 现在我们使用统一的会话数据来演示功能
+        
+        Log.d(TAG, "loadChatDataForSession: Loading data for session " + sessionPosition);
+        
+        // 确保会话数据已初始化
+        if (chatSessions.isEmpty()) {
+            initChatSessions();
+        }
+        
+        // 清空当前聊天数据
+        if (mChatAdapter != null) {
+            mChatAdapter.setData(new ArrayList<ChatMessageBean>());
+        }
+        
+        // 根据会话位置加载对应的聊天数据
+        if (sessionPosition >= 0 && sessionPosition < chatSessions.size()) {
+            ChatSession session = chatSessions.get(sessionPosition);
+            if (mChatAdapter != null) {
+                mChatAdapter.setData(new ArrayList<>(session.getMessages()));
+            }
+            
+            // 将会话标题同步设置到TitleBar标题显示
+            if (getTitleBar() != null) {
+                getTitleBar().setTitle(session.getTitle());
+            }
+        } else {
+            loadDefaultSessionData();
+            // 设置默认标题
+            if (getTitleBar() != null) {
+                getTitleBar().setTitle("Ai对话");
+            }
+        }
+        
+        // 滚动到聊天记录底部
+        if (rv_chat != null && mChatAdapter != null) {
+            rv_chat.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mChatAdapter.getItemCount() > 0) {
+                        rv_chat.scrollToPosition(mChatAdapter.getItemCount() - 1);
+                    }
+                }
+            });
+        }
+    }
+    
+    /**
+     * 加载默认会话数据
+     */
+    private void loadDefaultSessionData() {
+        ArrayList<ChatMessageBean> sessionData = new ArrayList<>();
+        
+        // 添加系统消息
+        ChatMessageBean systemMessage = new ChatMessageBean(
+                ChatMessageBean.TYPE_SYSTEM, 
+                null, 
+                null, 
+                "请选择一个会话或开始新的对话");
+        systemMessage.setCreateDate(DateHelper.getSeconds1());
+        sessionData.add(systemMessage);
+        
+        // 设置数据到适配器
+        if (mChatAdapter != null) {
+            mChatAdapter.setData(sessionData);
+        }
     }
 
     private int index = 0;
@@ -447,17 +720,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 //        bt_asr.setOnTouchListener(new View.OnTouchListener() {
 //            @Override
 //            public boolean onTouch(View view, MotionEvent event) {
-//                switch (event.getAction()) {
-//                    case MotionEvent.ACTION_DOWN:
-//                        LogUtils.e("按住结束");
-//                        asrUtil.onClick(1);
-//                        break;
-//                    case MotionEvent.ACTION_UP:
-//                        LogUtils.e("按住结束");
-//                        asrUtil.onClick(2);
-//                        break;
-//                }
-//                return true;
 //            }
 //        });
 
@@ -698,5 +960,44 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 注销事件
         XEventBus.getDefault().unregister(AiMsgFragment.this);
         super.onDestroy();
+    }
+    
+    /**
+     * 聊天会话数据类
+     */
+    private static class ChatSession {
+        private String title;
+        private String preview;
+        private String time;
+        private String messageCount;
+        private List<ChatMessageBean> messages;
+
+        public ChatSession(String title, String preview, String time, String messageCount, List<ChatMessageBean> messages) {
+            this.title = title;
+            this.preview = preview;
+            this.time = time;
+            this.messageCount = messageCount;
+            this.messages = messages;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getPreview() {
+            return preview;
+        }
+
+        public String getTime() {
+            return time;
+        }
+
+        public String getMessageCount() {
+            return messageCount;
+        }
+
+        public List<ChatMessageBean> getMessages() {
+            return messages;
+        }
     }
 }
