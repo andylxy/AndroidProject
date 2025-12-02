@@ -28,7 +28,7 @@
             android:id="@+id/iv_receive_picture"
             android:layout_width="@dimen/dp_36"
             android:layout_height="@dimen/dp_36"
-            android:background="@drawable/icon"
+            android:background="@drawable/chat_ai_default"
             android:scaleType="centerCrop" />
 
         <TextView

@@ -95,7 +95,7 @@
                         android:maxLines="6"
                         android:inputType="textMultiLine"
                         android:scrollbars="vertical"
-                        android:gravity="top|start"
+                        android:gravity="center_vertical|start"
                         android:singleLine="false"
                         android:overScrollMode="always" />
 

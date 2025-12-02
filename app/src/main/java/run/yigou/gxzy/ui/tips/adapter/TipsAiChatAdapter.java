@@ -109,9 +109,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     if (tv_receive_nick != null) {
                         tv_receive_nick.setText(bean.getNick());
                     }
-                    if (iv_receive_picture != null) {
-                        iv_receive_picture.setImageResource(R.drawable.ic_chatroom);
-                    }
+                    // 不再强制设置图片资源，使用布局文件中定义的背景
                     break;
 
                 case ChatMessageBean.TYPE_SEND:
@@ -121,7 +119,14 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                         tv_send_content.setText(bean.getContent());
                     }
                     if (iv_send_picture != null) {
-                        iv_send_picture.setImageResource(R.drawable.chat_user_default);
+                        // 检查是否有自定义头像URL，如果没有则使用默认头像
+                        if (bean.getPic_url() != null && !bean.getPic_url().isEmpty()) {
+                            // 这里应该加载网络图片，但由于缺少图片加载库，暂时使用默认图片
+                            // 在实际项目中，你可以使用 Glide、Picasso 等库来加载网络图片
+                            iv_send_picture.setImageResource(R.drawable.chat_user_default);
+                        } else {
+                            iv_send_picture.setImageResource(R.drawable.chat_user_default);
+                        }
                     }
                     break;
                 case ChatMessageBean.TYPE_SYSTEM:
