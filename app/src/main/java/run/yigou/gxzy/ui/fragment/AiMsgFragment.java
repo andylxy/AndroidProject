@@ -63,7 +63,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
     @Override
     protected int getLayoutId() {
-        //  return R.layout.tips_ai_msg_fragment;
+        // return R.layout.ai_msg_activity_chat;
         return R.layout.tips_ai_msg_activity_chat;
     }
 
@@ -112,21 +112,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         Log.d(TAG, "initView: rv_chat=" + rv_chat);
         Log.d(TAG, "initView: mChatAdapter=" + mChatAdapter);
         Log.d(TAG, "initView: layoutManager=" + layoutManager);
-        
-        // 填充聊天历史记录列表测试数据
-        populateChatHistoryWithTestData();
-        // 填充聊天界面测试数据
-        populateChatWithTestData();
-        Log.d(TAG, "initView: Completed initialization");
-        
-        // 添加调试代码，确保数据正确显示
-        rv_chat.post(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "RecyclerView post: child count = " + rv_chat.getChildCount());
-                Log.d(TAG, "RecyclerView post: adapter count = " + mChatAdapter.getItemCount());
-            }
-        });
+
+
     }
 
 
@@ -220,42 +207,43 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         Log.d(TAG, "populateChatWithTestData: rv_chat=" + rv_chat);
         Log.d(TAG, "populateChatWithTestData: mChatAdapter=" + mChatAdapter);
         
-        if (mChatAdapter != null) {
-            mChatAdapter.setData(testData);
+        if (mChatAdapter != null && mChatAdapter.getData() != null) {
+            mChatAdapter.getData().addAll(testData);
             Log.d(TAG, "populateChatWithTestData: Data set to adapter successfully");
         } else {
+          //  mChatAdapter.setData(testData);
             Log.e(TAG, "populateChatWithTestData: mChatAdapter is null!");
         }
-        
-        // 强制刷新UI
-        if (rv_chat != null) {
-            rv_chat.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mChatAdapter != null) {
-                        mChatAdapter.notifyDataSetChanged();
-                        Log.d(TAG, "populateChatWithTestData: notifyDataSetChanged called");
-                        
-                        // 检查 RecyclerView 是否正确设置
-                        Log.d(TAG, "populateChatWithTestData: RecyclerView adapter=" + rv_chat.getAdapter());
-                        Log.d(TAG, "populateChatWithTestData: Adapter item count=" + mChatAdapter.getItemCount());
-                        Log.d(TAG, "populateChatWithTestData: RecyclerView child count=" + rv_chat.getChildCount());
-                        
-                        // 滚动到最新消息
-                        if (testData.size() > 0) {
-                            rv_chat.scrollToPosition(testData.size() - 1);
-                            Log.d(TAG, "populateChatWithTestData: Scrolled to position " + (testData.size() - 1));
-                        }
-                    } else {
-                        Log.e(TAG, "populateChatWithTestData: mChatAdapter is null in post!");
-                    }
-                }
-            });
-        } else {
-            Log.e(TAG, "populateChatWithTestData: rv_chat is null!");
-        }
-        
-        Log.d(TAG, "populateChatWithTestData: Completed populating test data");
+
+//        // 强制刷新UI
+//        if (rv_chat != null) {
+//            rv_chat.post(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if (mChatAdapter != null) {
+//                        mChatAdapter.notifyDataSetChanged();
+//                        Log.d(TAG, "populateChatWithTestData: notifyDataSetChanged called");
+//
+//                        // 检查 RecyclerView 是否正确设置
+//                        Log.d(TAG, "populateChatWithTestData: RecyclerView adapter=" + rv_chat.getAdapter());
+//                        Log.d(TAG, "populateChatWithTestData: Adapter item count=" + mChatAdapter.getItemCount());
+//                        Log.d(TAG, "populateChatWithTestData: RecyclerView child count=" + rv_chat.getChildCount());
+//
+//                        // 滚动到最新消息
+//                        if (testData.size() > 0) {
+//                            rv_chat.scrollToPosition(testData.size() - 1);
+//                            Log.d(TAG, "populateChatWithTestData: Scrolled to position " + (testData.size() - 1));
+//                        }
+//                    } else {
+//                        Log.e(TAG, "populateChatWithTestData: mChatAdapter is null in post!");
+//                    }
+//                }
+//            });
+//        } else {
+//            Log.e(TAG, "populateChatWithTestData: rv_chat is null!");
+//        }
+//
+//        Log.d(TAG, "populateChatWithTestData: Completed populating test data");
     }
 
     /**
@@ -605,6 +593,20 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             }
 
         }
+        // 填充聊天历史记录列表测试数据
+        populateChatHistoryWithTestData();
+        // 填充聊天界面测试数据
+        populateChatWithTestData();
+        Log.d(TAG, "initView: Completed initialization");
+
+        // 添加调试代码，确保数据正确显示
+        rv_chat.post(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "RecyclerView post: child count = " + rv_chat.getChildCount());
+                Log.d(TAG, "RecyclerView post: adapter count = " + mChatAdapter.getItemCount());
+            }
+        });
 
         Log.d(TAG, "initData: Completed data initialization");
     }
