@@ -17,6 +17,7 @@ import run.yigou.gxzy.greendao.entity.BookChapter;
 import run.yigou.gxzy.greendao.entity.BookChapterBody;
 import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
+import run.yigou.gxzy.greendao.entity.ChatSessionBean;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.entity.TabNav;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
@@ -35,6 +36,7 @@ import run.yigou.gxzy.greendao.gen.BookChapterDao;
 import run.yigou.gxzy.greendao.gen.BookChapterBodyDao;
 import run.yigou.gxzy.greendao.gen.ChapterDao;
 import run.yigou.gxzy.greendao.gen.ChatMessageBeanDao;
+import run.yigou.gxzy.greendao.gen.ChatSessionBeanDao;
 import run.yigou.gxzy.greendao.gen.SearchHistoryDao;
 import run.yigou.gxzy.greendao.gen.TabNavDao;
 import run.yigou.gxzy.greendao.gen.TabNavBodyDao;
@@ -62,6 +64,7 @@ public class DaoSession extends AbstractDaoSession {
     private final DaoConfig bookChapterBodyDaoConfig;
     private final DaoConfig chapterDaoConfig;
     private final DaoConfig chatMessageBeanDaoConfig;
+    private final DaoConfig chatSessionBeanDaoConfig;
     private final DaoConfig searchHistoryDaoConfig;
     private final DaoConfig tabNavDaoConfig;
     private final DaoConfig tabNavBodyDaoConfig;
@@ -80,6 +83,7 @@ public class DaoSession extends AbstractDaoSession {
     private final BookChapterBodyDao bookChapterBodyDao;
     private final ChapterDao chapterDao;
     private final ChatMessageBeanDao chatMessageBeanDao;
+    private final ChatSessionBeanDao chatSessionBeanDao;
     private final SearchHistoryDao searchHistoryDao;
     private final TabNavDao tabNavDao;
     private final TabNavBodyDao tabNavBodyDao;
@@ -120,6 +124,9 @@ public class DaoSession extends AbstractDaoSession {
         chatMessageBeanDaoConfig = daoConfigMap.get(ChatMessageBeanDao.class).clone();
         chatMessageBeanDaoConfig.initIdentityScope(type);
 
+        chatSessionBeanDaoConfig = daoConfigMap.get(ChatSessionBeanDao.class).clone();
+        chatSessionBeanDaoConfig.initIdentityScope(type);
+
         searchHistoryDaoConfig = daoConfigMap.get(SearchHistoryDao.class).clone();
         searchHistoryDaoConfig.initIdentityScope(type);
 
@@ -153,6 +160,7 @@ public class DaoSession extends AbstractDaoSession {
         bookChapterBodyDao = new BookChapterBodyDao(bookChapterBodyDaoConfig, this);
         chapterDao = new ChapterDao(chapterDaoConfig, this);
         chatMessageBeanDao = new ChatMessageBeanDao(chatMessageBeanDaoConfig, this);
+        chatSessionBeanDao = new ChatSessionBeanDao(chatSessionBeanDaoConfig, this);
         searchHistoryDao = new SearchHistoryDao(searchHistoryDaoConfig, this);
         tabNavDao = new TabNavDao(tabNavDaoConfig, this);
         tabNavBodyDao = new TabNavBodyDao(tabNavBodyDaoConfig, this);
@@ -171,6 +179,7 @@ public class DaoSession extends AbstractDaoSession {
         registerDao(BookChapterBody.class, bookChapterBodyDao);
         registerDao(Chapter.class, chapterDao);
         registerDao(ChatMessageBean.class, chatMessageBeanDao);
+        registerDao(ChatSessionBean.class, chatSessionBeanDao);
         registerDao(SearchHistory.class, searchHistoryDao);
         registerDao(TabNav.class, tabNavDao);
         registerDao(TabNavBody.class, tabNavBodyDao);
@@ -191,6 +200,7 @@ public class DaoSession extends AbstractDaoSession {
         bookChapterBodyDaoConfig.clearIdentityScope();
         chapterDaoConfig.clearIdentityScope();
         chatMessageBeanDaoConfig.clearIdentityScope();
+        chatSessionBeanDaoConfig.clearIdentityScope();
         searchHistoryDaoConfig.clearIdentityScope();
         tabNavDaoConfig.clearIdentityScope();
         tabNavBodyDaoConfig.clearIdentityScope();
@@ -235,6 +245,10 @@ public class DaoSession extends AbstractDaoSession {
 
     public ChatMessageBeanDao getChatMessageBeanDao() {
         return chatMessageBeanDao;
+    }
+
+    public ChatSessionBeanDao getChatSessionBeanDao() {
+        return chatSessionBeanDao;
     }
 
     public SearchHistoryDao getSearchHistoryDao() {

@@ -1,5 +1,6 @@
 package run.yigou.gxzy.greendao.gen;
 
+import java.util.List;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 
@@ -8,6 +9,8 @@ import org.greenrobot.greendao.Property;
 import org.greenrobot.greendao.internal.DaoConfig;
 import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.database.DatabaseStatement;
+import org.greenrobot.greendao.query.Query;
+import org.greenrobot.greendao.query.QueryBuilder;
 
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
 
@@ -25,14 +28,16 @@ public class ChatMessageBeanDao extends AbstractDao<ChatMessageBean, Long> {
      */
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "Id", true, "_id");
-        public final static Property Nick = new Property(1, String.class, "nick", false, "NICK");
-        public final static Property Pic_url = new Property(2, String.class, "pic_url", false, "PIC_URL");
-        public final static Property Content = new Property(3, String.class, "content", false, "CONTENT");
-        public final static Property Type = new Property(4, int.class, "type", false, "TYPE");
-        public final static Property CreateDate = new Property(5, String.class, "createDate", false, "CREATE_DATE");
-        public final static Property IsDelete = new Property(6, int.class, "isDelete", false, "IS_DELETE");
+        public final static Property SessionId = new Property(1, Long.class, "sessionId", false, "SESSION_ID");
+        public final static Property Nick = new Property(2, String.class, "nick", false, "NICK");
+        public final static Property Pic_url = new Property(3, String.class, "pic_url", false, "PIC_URL");
+        public final static Property Content = new Property(4, String.class, "content", false, "CONTENT");
+        public final static Property Type = new Property(5, int.class, "type", false, "TYPE");
+        public final static Property CreateDate = new Property(6, String.class, "createDate", false, "CREATE_DATE");
+        public final static Property IsDelete = new Property(7, int.class, "isDelete", false, "IS_DELETE");
     }
 
+    private Query<ChatMessageBean> chatSessionBean_MessagesQuery;
 
     public ChatMessageBeanDao(DaoConfig config) {
         super(config);
@@ -47,12 +52,13 @@ public class ChatMessageBeanDao extends AbstractDao<ChatMessageBean, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"CHAT_MESSAGE_BEAN\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: Id
-                "\"NICK\" TEXT," + // 1: nick
-                "\"PIC_URL\" TEXT," + // 2: pic_url
-                "\"CONTENT\" TEXT," + // 3: content
-                "\"TYPE\" INTEGER NOT NULL ," + // 4: type
-                "\"CREATE_DATE\" TEXT NOT NULL ," + // 5: createDate
-                "\"IS_DELETE\" INTEGER NOT NULL );"); // 6: isDelete
+                "\"SESSION_ID\" INTEGER," + // 1: sessionId
+                "\"NICK\" TEXT," + // 2: nick
+                "\"PIC_URL\" TEXT," + // 3: pic_url
+                "\"CONTENT\" TEXT," + // 4: content
+                "\"TYPE\" INTEGER NOT NULL ," + // 5: type
+                "\"CREATE_DATE\" TEXT NOT NULL ," + // 6: createDate
+                "\"IS_DELETE\" INTEGER NOT NULL );"); // 7: isDelete
     }
 
     /** Drops the underlying database table. */
@@ -70,23 +76,28 @@ public class ChatMessageBeanDao extends AbstractDao<ChatMessageBean, Long> {
             stmt.bindLong(1, Id);
         }
  
+        Long sessionId = entity.getSessionId();
+        if (sessionId != null) {
+            stmt.bindLong(2, sessionId);
+        }
+ 
         String nick = entity.getNick();
         if (nick != null) {
-            stmt.bindString(2, nick);
+            stmt.bindString(3, nick);
         }
  
         String pic_url = entity.getPic_url();
         if (pic_url != null) {
-            stmt.bindString(3, pic_url);
+            stmt.bindString(4, pic_url);
         }
  
         String content = entity.getContent();
         if (content != null) {
-            stmt.bindString(4, content);
+            stmt.bindString(5, content);
         }
-        stmt.bindLong(5, entity.getType());
-        stmt.bindString(6, entity.getCreateDate());
-        stmt.bindLong(7, entity.getIsDelete());
+        stmt.bindLong(6, entity.getType());
+        stmt.bindString(7, entity.getCreateDate());
+        stmt.bindLong(8, entity.getIsDelete());
     }
 
     @Override
@@ -98,23 +109,28 @@ public class ChatMessageBeanDao extends AbstractDao<ChatMessageBean, Long> {
             stmt.bindLong(1, Id);
         }
  
+        Long sessionId = entity.getSessionId();
+        if (sessionId != null) {
+            stmt.bindLong(2, sessionId);
+        }
+ 
         String nick = entity.getNick();
         if (nick != null) {
-            stmt.bindString(2, nick);
+            stmt.bindString(3, nick);
         }
  
         String pic_url = entity.getPic_url();
         if (pic_url != null) {
-            stmt.bindString(3, pic_url);
+            stmt.bindString(4, pic_url);
         }
  
         String content = entity.getContent();
         if (content != null) {
-            stmt.bindString(4, content);
+            stmt.bindString(5, content);
         }
-        stmt.bindLong(5, entity.getType());
-        stmt.bindString(6, entity.getCreateDate());
-        stmt.bindLong(7, entity.getIsDelete());
+        stmt.bindLong(6, entity.getType());
+        stmt.bindString(7, entity.getCreateDate());
+        stmt.bindLong(8, entity.getIsDelete());
     }
 
     @Override
@@ -126,12 +142,13 @@ public class ChatMessageBeanDao extends AbstractDao<ChatMessageBean, Long> {
     public ChatMessageBean readEntity(Cursor cursor, int offset) {
         ChatMessageBean entity = new ChatMessageBean( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // Id
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // nick
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // pic_url
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // content
-            cursor.getInt(offset + 4), // type
-            cursor.getString(offset + 5), // createDate
-            cursor.getInt(offset + 6) // isDelete
+            cursor.isNull(offset + 1) ? null : cursor.getLong(offset + 1), // sessionId
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // nick
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // pic_url
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // content
+            cursor.getInt(offset + 5), // type
+            cursor.getString(offset + 6), // createDate
+            cursor.getInt(offset + 7) // isDelete
         );
         return entity;
     }
@@ -139,12 +156,13 @@ public class ChatMessageBeanDao extends AbstractDao<ChatMessageBean, Long> {
     @Override
     public void readEntity(Cursor cursor, ChatMessageBean entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
-        entity.setNick(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setPic_url(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setContent(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setType(cursor.getInt(offset + 4));
-        entity.setCreateDate(cursor.getString(offset + 5));
-        entity.setIsDelete(cursor.getInt(offset + 6));
+        entity.setSessionId(cursor.isNull(offset + 1) ? null : cursor.getLong(offset + 1));
+        entity.setNick(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setPic_url(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setContent(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setType(cursor.getInt(offset + 5));
+        entity.setCreateDate(cursor.getString(offset + 6));
+        entity.setIsDelete(cursor.getInt(offset + 7));
      }
     
     @Override
@@ -172,4 +190,18 @@ public class ChatMessageBeanDao extends AbstractDao<ChatMessageBean, Long> {
         return true;
     }
     
+    /** Internal query to resolve the "messages" to-many relationship of ChatSessionBean. */
+    public List<ChatMessageBean> _queryChatSessionBean_Messages(Long sessionId) {
+        synchronized (this) {
+            if (chatSessionBean_MessagesQuery == null) {
+                QueryBuilder<ChatMessageBean> queryBuilder = queryBuilder();
+                queryBuilder.where(Properties.SessionId.eq(null));
+                chatSessionBean_MessagesQuery = queryBuilder.build();
+            }
+        }
+        Query<ChatMessageBean> query = chatSessionBean_MessagesQuery.forCurrentThread();
+        query.setParameter(0, sessionId);
+        return query.list();
+    }
+
 }

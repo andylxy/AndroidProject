@@ -19,6 +19,7 @@ import run.yigou.gxzy.greendao.service.BookChapterService;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.service.ChapterService;
 import run.yigou.gxzy.greendao.service.ChatMessageBeanService;
+import run.yigou.gxzy.greendao.service.ChatSessionBeanService;
 import run.yigou.gxzy.greendao.service.SearchHistoryService;
 import run.yigou.gxzy.greendao.service.TabNavBodyService;
 import run.yigou.gxzy.greendao.service.TabNavService;
@@ -48,6 +49,7 @@ public class DbService {
     public YaoAliasService  mYaoAliasService;
     public ChapterService mChapterService;
     public ChatMessageBeanService mChatMessageBeanService;
+    public ChatSessionBeanService mChatSessionBeanService;
     public AiConfigService mAiConfigService;
     public AiConfigBodyService mAiConfigBodyService;
 
@@ -71,6 +73,7 @@ public class DbService {
         mYaoAliasService =  YaoAliasService.getInstance();
         mChapterService =  ChapterService.getInstance();
         mChatMessageBeanService =  ChatMessageBeanService.getInstance();
+        mChatSessionBeanService =  ChatSessionBeanService.getInstance();
         mAiConfigService =  AiConfigService.getInstance();
         mAiConfigBodyService =  AiConfigBodyService.getInstance();
     }

@@ -3,11 +3,13 @@ package run.yigou.gxzy.greendao.entity;
 
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.Keep;
 import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.Transient;
 
 import java.io.Serializable;
 import org.greenrobot.greendao.annotation.Generated;
+
 
 
 @Entity
@@ -17,6 +19,12 @@ public class ChatMessageBean implements Serializable {
 
     @Id(autoincrement = true)
     private Long Id;
+    
+    /**
+     * 关联的会话ID
+     */
+    private Long sessionId;
+    
     /**
      * 发送的消息 msg
      */
@@ -95,25 +103,12 @@ public class ChatMessageBean implements Serializable {
      *  是否删除
      */
     private  int isDelete;
-    /**
-     * 构造方法
-     *
-     * @param type    消息类型
-     * @param nick    昵称
-     * @param pic_url 头像url
-     * @param content 内容
-     */
-    public ChatMessageBean(int type, String nick, String pic_url, String content) {
-        this.type = type;
-        this.content = content;
-        this.nick = nick;
-        this.pic_url = pic_url;
-    }
 
-    @Generated(hash = 800729120)
-    public ChatMessageBean(Long Id, String nick, String pic_url, String content,
-            int type, @NotNull String createDate, int isDelete) {
+    @Generated(hash = 1215263979)
+    public ChatMessageBean(Long Id, Long sessionId, String nick, String pic_url,
+            String content, int type, @NotNull String createDate, int isDelete) {
         this.Id = Id;
+        this.sessionId = sessionId;
         this.nick = nick;
         this.pic_url = pic_url;
         this.content = content;
@@ -125,57 +120,41 @@ public class ChatMessageBean implements Serializable {
     @Generated(hash = 1557449535)
     public ChatMessageBean() {
     }
+    
+    /**
+     * 构造方法
+     *
+     * @param type    消息类型
+     * @param nick    昵称
+     * @param pic_url 头像url
+     * @param content 内容
+     */
+    @Keep
+    public ChatMessageBean(int type, String nick, String pic_url, String content) {
+        this.type = type;
+        this.content = content;
+        this.nick = nick;
+        this.pic_url = pic_url;
+    }
 
     public Long getId() {
-        return Id;
+        return this.Id;
     }
 
-    public void setId(Long id) {
-        Id = id;
+    public void setId(Long Id) {
+        this.Id = Id;
     }
 
-    public String getCreateDate() {
-        return createDate;
+    public Long getSessionId() {
+        return this.sessionId;
     }
 
-    public void setCreateDate(String createDate) {
-        this.createDate = createDate;
-    }
-
-    public int getIsDelete() {
-        return isDelete;
-    }
-
-    public void setIsDelete(int isDelete) {
-        this.isDelete = isDelete;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public boolean isMore() {
-        return isMore;
-    }
-
-    public void setMore(boolean more) {
-        isMore = more;
-    }
-
-    public boolean isGreyMode() {
-        return isGreyMode;
-    }
-
-    public void setGreyMode(boolean greyMode) {
-        isGreyMode = greyMode;
+    public void setSessionId(Long sessionId) {
+        this.sessionId = sessionId;
     }
 
     public String getNick() {
-        return nick;
+        return this.nick;
     }
 
     public void setNick(String nick) {
@@ -183,7 +162,7 @@ public class ChatMessageBean implements Serializable {
     }
 
     public String getPic_url() {
-        return pic_url;
+        return this.pic_url;
     }
 
     public void setPic_url(String pic_url) {
@@ -191,35 +170,35 @@ public class ChatMessageBean implements Serializable {
     }
 
     public String getContent() {
-        return content;
+        return this.content;
     }
 
     public void setContent(String content) {
         this.content = content;
     }
 
-    public boolean isSimpleQa() {
-        return simpleQa;
+    public int getType() {
+        return this.type;
     }
 
-    public void setSimpleQa(boolean simpleQa) {
-        this.simpleQa = simpleQa;
+    public void setType(int type) {
+        this.type = type;
     }
 
-    public boolean isSave() {
-        return save;
+    public String getCreateDate() {
+        return this.createDate;
     }
 
-    public void setSave(boolean save) {
-        this.save = save;
+    public void setCreateDate(String createDate) {
+        this.createDate = createDate;
     }
 
-    public boolean isContinuesListen() {
-        return continuesListen;
+    public int getIsDelete() {
+        return this.isDelete;
     }
 
-    public void setContinuesListen(boolean continuesListen) {
-        this.continuesListen = continuesListen;
+    public void setIsDelete(int isDelete) {
+        this.isDelete = isDelete;
     }
 
 

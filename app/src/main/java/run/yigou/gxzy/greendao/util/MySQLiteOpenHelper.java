@@ -8,6 +8,8 @@ import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.query.QueryBuilder;
 
 import run.yigou.gxzy.greendao.gen.BookDao;
+import run.yigou.gxzy.greendao.gen.ChatMessageBeanDao;
+import run.yigou.gxzy.greendao.gen.ChatSessionBeanDao;
 import run.yigou.gxzy.greendao.gen.DaoMaster;
 import run.yigou.gxzy.greendao.gen.SearchHistoryDao;
 import run.yigou.gxzy.greendao.gen.UserInfoDao;
@@ -36,7 +38,7 @@ public class MySQLiteOpenHelper extends DaoMaster.OpenHelper {
     @Override
     public void onUpgrade(Database db, int oldVersion, int newVersion) {
         //加入你要新建的或者修改的表的信息
-        GreenDaoUpgrade.getInstance().migrate(db, BookDao.class,  SearchHistoryDao.class, UserInfoDao.class);
+        GreenDaoUpgrade.getInstance().migrate(db, BookDao.class, ChatMessageBeanDao.class, ChatSessionBeanDao.class, SearchHistoryDao.class, UserInfoDao.class);
 
     }
 
