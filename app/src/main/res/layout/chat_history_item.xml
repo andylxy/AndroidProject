@@ -42,7 +42,8 @@
         android:textColor="#666666"
         android:textSize="@dimen/sp_14"
         android:maxLines="2"
-        android:ellipsize="end" />
+        android:ellipsize="end"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tv_message_count"

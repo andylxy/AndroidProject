@@ -20,7 +20,6 @@ import run.yigou.gxzy.ui.tips.adapter.ChatHistoryAdapter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -29,17 +28,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.LogUtils;
 import com.hjq.bar.OnTitleBarListener;
-import com.hjq.bar.TitleBar;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
 
