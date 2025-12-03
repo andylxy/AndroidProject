@@ -2,24 +2,15 @@ package run.yigou.gxzy.ui.tips.adapter;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
-import run.yigou.gxzy.greendao.util.DbService;
-import run.yigou.gxzy.greendao.entity.ChatSessionBean;
-import run.yigou.gxzy.utils.DateHelper;
 
 public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistoryItem> {
 
