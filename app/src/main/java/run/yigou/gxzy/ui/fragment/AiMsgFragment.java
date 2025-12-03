@@ -420,20 +420,23 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                             createNewSession("新对话");
                         } else {
 
-                            // 检查会话是否过期 6天 = 6 * 24 * 60 * 60 * 1000 毫秒
-                            long createTime = DateHelper.strDateToLong(currentSession.getCreateTime());
-                            long currentTime = System.currentTimeMillis();
-                            // 6天 = 6 * 24 * 60 * 60 * 1000 毫秒
-                            if (currentTime - createTime > 6 * 24 * 60 * 60 * 1000L) {
-                                // 会话已过期，重新申请会话Id， //有效期内才可以执行下面的代码逻辑，
-                                requestNewSessionId();
+                            // 检查会话创建时间是否为空或者会话是否过期
+                            if (currentSession.getCreateTime() == null) {
+                                // 如果会话创建时间为空，重新申请会话Id后再继续执行
+                                requestNewSessionIdAndContinue(result, time);
+                                return; // 暂停当前执行，等待会话ID申请完成后再继续
+                            } else {
+                                // 检查会话是否过期（会话有效期为6天）
+                                long createTime = DateHelper.strDateToLong(currentSession.getCreateTime());
+                                long currentTime = System.currentTimeMillis();
+                                // 6天 = 6 * 24 * 60 * 60 * 1000 毫秒
+                                if (currentTime - createTime > 6 * 24 * 60 * 60 * 1000L) {
+                                    // 会话已过期，重新申请会话Id后再继续执行
+                                    requestNewSessionIdAndContinue(result, time);
+                                    return; // 暂停当前执行，等待会话ID申请完成后再继续
+                                }
                             }
-
-
-
                         }
-
-
 
                         // 确保会话已保存到数据库
                         ensureSessionSaved();
@@ -896,5 +899,161 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     }
                 });
 
+    }
+    
+    // 保存用户输入的内容和时间，用于重新申请会话ID后继续执行
+    private String pendingMessageContent;
+    private String pendingMessageTime;
+
+    /**
+     * 请求新的会话ID并在完成后继续执行发送消息逻辑
+     */
+    private void requestNewSessionIdAndContinue(String messageContent, String messageTime) {
+        // 保存待发送的消息内容和时间
+        pendingMessageContent = messageContent;
+        pendingMessageTime = messageTime;
+        
+        //检测会话Id是否已过期
+        EasyHttp.get(AiMsgFragment.this)
+                .api(new AiSessionIdApi())
+                .request(new HttpCallback<HttpData<AiSessionIdApi.Bean>>(AiMsgFragment.this) {
+
+                    @Override
+                    public void onSucceed(HttpData<AiSessionIdApi.Bean> data) {
+
+                        if (data != null && data.isRequestSucceed()) {
+                            AiSessionIdApi.Bean bean = data.getData();
+                            if (currentSession != null && bean != null) {
+                                // 设置会话Id
+                                currentSession.setConversationId(bean.getRealConversationId());
+                                currentSession.setEndUserId(bean.getEndUserId());
+                                currentSession.setCreateTime(DateHelper.getSeconds1());
+                                Log.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
+                                
+                                // 会话ID申请成功后，继续执行发送消息的逻辑
+                                continueSendingMessage();
+                            }
+                        } else {
+                            EasyLog.print("过期会话Id申请失败：" + data.getMessage());
+                            // 清除待发送消息
+                            pendingMessageContent = null;
+                            pendingMessageTime = null;
+                        }
+
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        super.onFail(e);
+
+                        EasyLog.print("过期会话Id申请失败：" + e.getMessage());
+                        // 清除待发送消息
+                        pendingMessageContent = null;
+                        pendingMessageTime = null;
+                    }
+                });
+    }
+    
+    /**
+     * 继续执行发送消息的逻辑
+     */
+    private void continueSendingMessage() {
+        // 确保会话已保存到数据库
+        ensureSessionSaved();
+
+        // 处理系统消息
+        handleSystemMessage(pendingMessageTime);
+
+        // 添加发送消息
+        ChatMessageBean chatMessageBeanSend = new ChatMessageBean(ChatMessageBean.TYPE_SEND, "", "", pendingMessageContent);
+        chatMessageBeanSend.setSessionId(currentSession.getId());
+        chatMessageBeanSend.setCreateDate(DateHelper.getSeconds1());
+        chatMessageBeanSend.setIsDelete(ChatMessageBean.IS_Delete_NO);
+        // 保存发送消息到数据库
+        long sendMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(chatMessageBeanSend);
+        chatMessageBeanSend.setId(sendMsgId);
+        mChatAdapter.addItem(chatMessageBeanSend);
+        Log.d(TAG, "Saved sent message to database with ID: " + sendMsgId + " and session ID: " + currentSession.getId());
+
+        // 更新会话预览和时间
+        currentSession.setPreview("我: " + pendingMessageContent);
+        currentSession.setUpdateTime(DateHelper.getSeconds1());
+        DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
+
+        // 添加收到的消息占位符
+        final ChatMessageBean receivedMessage = new ChatMessageBean(ChatMessageBean.TYPE_RECEIVED, AiConfigHelper.getAssistantName(), "", "请稍等...");
+        receivedMessage.setSessionId(currentSession.getId());
+        receivedMessage.setCreateDate(DateHelper.getSeconds1());
+        receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+        // 先保存占位符消息到数据库
+        long receivedMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(receivedMessage);
+        receivedMessage.setId(receivedMsgId);
+        mChatAdapter.addItem(receivedMessage);
+        Log.d(TAG, "Saved placeholder received message to database with ID: " + receivedMsgId);
+
+        // 滚动到最后一条消息
+        if (rv_chat != null) {
+            rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+            rv_chat.clearOnScrollListeners();
+            rv_chat.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    scrollState = newState;
+                }
+            });
+        }
+
+        // 发送消息给GPT
+        EasyHttp.post(AiMsgFragment.this)
+                .api(new AiSessionApi().setQuery(pendingMessageContent).setConversationId(currentSession.getConversationId()))
+                .request(new HttpCallback<HttpData<AiSessionApi.Bean>>(AiMsgFragment.this) {
+
+                    @Override
+                    public void onSucceed(HttpData<AiSessionApi.Bean> data) {
+
+                        if (data != null && data.isRequestSucceed()) {
+                            AiSessionApi.Bean bean = data.getData();
+                            if (bean != null) {
+                                // 设置会话返回内容
+                                // 打印调试信息
+                                LogUtils.d("gptResponse", bean.getAnswer());
+
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        receivedMessage.setContent(bean.getAnswer());
+
+                                        // 根据滚动状态决定是否更新数据
+                                        if ((scrollState == 0 && index % 3 == 0)) {
+                                            mChatAdapter.updateData();
+                                            rv_chat.scrollBy(0, 15);
+                                        }
+                                        // 更新数据库中的回复消息
+                                        receivedMessage.setCreateDate(DateHelper.getSeconds1());
+                                        receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+                                        DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
+                                        Log.d(TAG, "Updated received message in database with ID: " + receivedMessage.getId());
+                                    }
+                                });
+                            }
+                        } else {
+                            EasyLog.print("获取会话失败：" + data.getMessage());
+                        }
+
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        super.onFail(e);
+                        EasyLog.print("获取内容失败：" + e.getMessage());
+                    }
+                });
+                
+        // 清除待发送消息
+        pendingMessageContent = null;
+        pendingMessageTime = null;
+        
+        // 清空输入框
+        ((EditText) findViewById(R.id.chat_content)).getText().clear();
     }
 }
