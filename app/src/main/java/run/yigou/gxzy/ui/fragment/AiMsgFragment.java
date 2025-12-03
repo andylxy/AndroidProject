@@ -420,6 +420,46 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                             createNewSession("新对话");
                         }
 
+//                        else {
+//                            if (currentSession.getCreateTime() == null) {
+//                                //currentSession.getCreateTime() 获取时间字符串，转换为时间戳，和 当前时间戳比较
+//                                //如果 时间戳小于当前时间戳，则继续执行，否则，重新申请会 话Id
+//
+//
+//                            }
+//                          //检测会话Id是否已过期
+//                            EasyHttp.get(AiMsgFragment.this)
+//                                    .api(new AiSessionIdApi())
+//                                    .request(new HttpCallback<HttpData<AiSessionIdApi.Bean>>(AiMsgFragment.this) {
+//
+//                                        @Override
+//                                        public void onSucceed(HttpData<AiSessionIdApi.Bean> data) {
+//
+//                                            if (data != null && data.isRequestSucceed()) {
+//                                                AiSessionIdApi.Bean bean = data.getData();
+//                                                if (currentSession != null) {
+//                                                    // 设置会话Id
+//                                                    currentSession.setConversationId(bean.getRealConversationId());
+//                                                    currentSession.setEndUserId(bean.getEndUserId());
+//                                                    currentSession.setCreateTime(DateHelper.getSeconds1());
+//                                                    Log.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
+//                                                }
+//                                            } else {
+//                                                EasyLog.print("过期会话Id申请失败：" + data.getMessage());
+//                                            }
+//
+//                                        }
+//
+//                                        @Override
+//                                        public void onFail(Exception e) {
+//                                            super.onFail(e);
+//
+//                                            EasyLog.print("过期会话Id申请失败：" + e.getMessage());
+//                                        }
+//                                    });
+//
+//                        }
+
                         // 确保会话已保存到数据库
                         ensureSessionSaved();
 
@@ -497,14 +537,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                         receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
                                                         DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
                                                         Log.d(TAG, "Updated received message in database with ID: " + receivedMessage.getId());
-
-                                                        // 更新会话预览和时间
-                                                        //currentSession.setPreview("AI: " +  bean.getAnswer().substring(0, Math.min(result.length(), 50)) + "...");
-                                                        //currentSession.setUpdateTime(DateHelper.getSeconds1());
-                                                        //DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
-
-                                                        // 更新聊天历史记录
-                                                        //populateChatHistoryWithTestData();
                                                     }
                                                 });
                                             }
@@ -520,73 +552,12 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                         EasyLog.print("获取内容失败：" + e.getMessage());
                                     }
                                 });
-
-
-//
-//                        AiHelper.chat(result, new AiHelper.CallBack() {
-//                            @Override
-//                            public void onCallBack(final String result, final boolean isLast) {
-//                                // 打印调试信息
-//                                LogUtils.d("gptResponse", result);
-//
-//                                runOnUiThread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        receivedMessage.setContent(result);
-//
-//                                        // 根据滚动状态决定是否更新数据
-//                                        if ((scrollState == 0 && index % 3 == 0) || isLast) {
-//                                            mChatAdapter.updateData();
-//                                            rv_chat.scrollBy(0, 15);
-//                                        }
-//
-//                                        // 滚动到最后一条消息
-////                                        if ((scrollState == 0 && ++index % 20 == 0) || isLast) {
-////                                            EasyLog.print("scrollState: "+scrollState);
-////                                            if (rv_chat != null) {
-////                                                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
-////
-////                                            }
-////
-////                                        }
-//
-//                                        if (isLast) {
-//                                            // 更新数据库中的回复消息
-//                                            receivedMessage.setCreateDate(DateHelper.getSeconds1());
-//                                            receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-//                                            DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
-//                                            Log.d(TAG, "Updated received message in database with ID: " + receivedMessage.getId());
-//
-//                                            // 更新会话预览和时间
-//                                            currentSession.setPreview("AI: " + result.substring(0, Math.min(result.length(), 50)) + "...");
-//                                            currentSession.setUpdateTime(DateHelper.getSeconds1());
-//                                            DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
-//
-//                                            // 更新聊天历史记录
-//                                            populateChatHistoryWithTestData();
-//                                        }
-//                                    }
-//                                });
-//                            }
-//                        });
-//
-//
-//
-
-
                     }
                     ((EditText) findViewById(R.id.chat_content)).getText().clear();
                 }
             }
         });
 
-        //   设置点击事件
-//        findViewById(R.id.tv_title).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                startActivity(new Intent(getActivity(), AiConfigActivity.class));
-//            }
-//        });
         //setRightTitle("...");
         //getTitleBar().setRightTitleSize(26);
         //getTitleBar().setRightTitleColor(Color.BLACK);
