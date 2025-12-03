@@ -1082,9 +1082,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
         if (!sessions.isEmpty()) {
             // 初始化会话数据
-            initChatSessions();
+           //initChatSessions();
             
-            // 加载会话历史记录
+            // 加载历史会话历史记录
             populateChatHistoryWithTestData();
             
             // 如果当前没有会话，加载第一个会话的数据
