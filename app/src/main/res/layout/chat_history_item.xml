@@ -20,7 +20,7 @@
             android:layout_weight="1"
             android:text="聊天记录标题"
             android:textColor="#212121"
-            android:textSize="@dimen/sp_14"
+            android:textSize="@dimen/chat_subtitle_text_size"
             android:textStyle="normal" />
 
         <TextView
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:text="时间"
             android:textColor="#757575"
-            android:textSize="@dimen/sp_11"
+            android:textSize="@dimen/chat_tiny_text_size"
             android:layout_marginEnd="@dimen/dp_10" />
 
         <ImageButton
@@ -75,7 +75,7 @@
         android:layout_marginTop="@dimen/dp_3"
         android:text="聊天内容预览"
         android:textColor="#757575"
-        android:textSize="@dimen/sp_13"
+        android:textSize="@dimen/chat_content_text_size"
         android:maxLines="2"
         android:ellipsize="end"
         android:visibility="gone" />
@@ -87,7 +87,7 @@
         android:layout_marginTop="@dimen/dp_3"
         android:text="消息数量"
         android:textColor="#9E9E9E"
-        android:textSize="@dimen/sp_11"
+        android:textSize="@dimen/chat_tiny_text_size"
         android:gravity="end" />
 
 </LinearLayout>

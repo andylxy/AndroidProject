@@ -39,6 +39,12 @@
 
     <dimen name="setting_start_font_size">13sp</dimen>
     <dimen name="setting_end_font_size">13sp</dimen>
-
+    
+    <!-- 聊天界面统一字体大小 -->
+    <dimen name="chat_title_text_size">15sp</dimen>
+    <dimen name="chat_subtitle_text_size">14sp</dimen>
+    <dimen name="chat_content_text_size">13sp</dimen>
+    <dimen name="chat_meta_text_size">12sp</dimen>
+    <dimen name="chat_tiny_text_size">11sp</dimen>
 
 </resources>
