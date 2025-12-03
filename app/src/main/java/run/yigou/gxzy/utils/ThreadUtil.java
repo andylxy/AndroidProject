@@ -11,28 +11,45 @@
 package run.yigou.gxzy.utils;
 
 import android.os.Handler;
+import android.os.Looper;
 
 import run.yigou.gxzy.manager.ThreadPoolManager;
 
+/**
+ * 线程工具类
+ */
 public class ThreadUtil {
 
-    private static Handler handler = new Handler();
+    private static final Handler handler = new Handler(Looper.getMainLooper());
+
     /**
-     * 主线程执行 runOnUiThread
+     * 在主线程执行任务
      *
      * @param runnable 传入要执行的任务
      */
     public static void runOnUiThread(Runnable runnable) {
-        handler.post(runnable);
+        if (runnable == null) {
+            return;
+        }
+        
+        // 如果当前已经在主线程，则直接执行
+        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+            runnable.run();
+        } else {
+            handler.post(runnable);
+        }
     }
 
     /**
-     * 子线程中执行任务 ThreadPoolManager
+     * 在子线程中执行任务
+     *
      * @param runnable 传入要执行的任务
      */
     public static void runInBackground(Runnable runnable) {
+        if (runnable == null) {
+            return;
+        }
+        
         ThreadPoolManager.getInstance().execute(runnable);
     }
-
-
 }
