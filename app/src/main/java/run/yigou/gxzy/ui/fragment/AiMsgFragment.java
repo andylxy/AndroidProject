@@ -418,47 +418,22 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                         // 如果当前没有会话，创建一个新的会话
                         if (currentSession == null) {
                             createNewSession("新对话");
+                        } else {
+
+                            // 检查会话是否过期 6天 = 6 * 24 * 60 * 60 * 1000 毫秒
+                            long createTime = DateHelper.strDateToLong(currentSession.getCreateTime());
+                            long currentTime = System.currentTimeMillis();
+                            // 6天 = 6 * 24 * 60 * 60 * 1000 毫秒
+                            if (currentTime - createTime > 6 * 24 * 60 * 60 * 1000L) {
+                                // 会话已过期，重新申请会话Id， //有效期内才可以执行下面的代码逻辑，
+                                requestNewSessionId();
+                            }
+
+
+
                         }
 
-//                        else {
-//                            if (currentSession.getCreateTime() == null) {
-//                                //currentSession.getCreateTime() 获取时间字符串，转换为时间戳，和 当前时间戳比较
-//                                //如果 时间戳小于当前时间戳，则继续执行，否则，重新申请会 话Id
-//
-//
-//                            }
-//                          //检测会话Id是否已过期
-//                            EasyHttp.get(AiMsgFragment.this)
-//                                    .api(new AiSessionIdApi())
-//                                    .request(new HttpCallback<HttpData<AiSessionIdApi.Bean>>(AiMsgFragment.this) {
-//
-//                                        @Override
-//                                        public void onSucceed(HttpData<AiSessionIdApi.Bean> data) {
-//
-//                                            if (data != null && data.isRequestSucceed()) {
-//                                                AiSessionIdApi.Bean bean = data.getData();
-//                                                if (currentSession != null) {
-//                                                    // 设置会话Id
-//                                                    currentSession.setConversationId(bean.getRealConversationId());
-//                                                    currentSession.setEndUserId(bean.getEndUserId());
-//                                                    currentSession.setCreateTime(DateHelper.getSeconds1());
-//                                                    Log.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
-//                                                }
-//                                            } else {
-//                                                EasyLog.print("过期会话Id申请失败：" + data.getMessage());
-//                                            }
-//
-//                                        }
-//
-//                                        @Override
-//                                        public void onFail(Exception e) {
-//                                            super.onFail(e);
-//
-//                                            EasyLog.print("过期会话Id申请失败：" + e.getMessage());
-//                                        }
-//                                    });
-//
-//                        }
+
 
                         // 确保会话已保存到数据库
                         ensureSessionSaved();
@@ -525,10 +500,10 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                 runOnUiThread(new Runnable() {
                                                     @Override
                                                     public void run() {
-                                                        receivedMessage.setContent( bean.getAnswer());
+                                                        receivedMessage.setContent(bean.getAnswer());
 
                                                         // 根据滚动状态决定是否更新数据
-                                                        if ((scrollState == 0 && index % 3 == 0) ) {
+                                                        if ((scrollState == 0 && index % 3 == 0)) {
                                                             mChatAdapter.updateData();
                                                             rv_chat.scrollBy(0, 15);
                                                         }
@@ -884,5 +859,42 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         }
 
         showEditSessionTitleDialog(currentSession);
+    }
+
+    /**
+     * 请求新的会话ID
+     */
+    private void requestNewSessionId() {
+        //检测会话Id是否已过期
+        EasyHttp.get(AiMsgFragment.this)
+                .api(new AiSessionIdApi())
+                .request(new HttpCallback<HttpData<AiSessionIdApi.Bean>>(AiMsgFragment.this) {
+
+                    @Override
+                    public void onSucceed(HttpData<AiSessionIdApi.Bean> data) {
+
+                        if (data != null && data.isRequestSucceed()) {
+                            AiSessionIdApi.Bean bean = data.getData();
+                            if (currentSession != null) {
+                                // 设置会话Id
+                                currentSession.setConversationId(bean.getRealConversationId());
+                                currentSession.setEndUserId(bean.getEndUserId());
+                                currentSession.setCreateTime(DateHelper.getSeconds1());
+                                Log.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
+                            }
+                        } else {
+                            EasyLog.print("过期会话Id申请失败：" + data.getMessage());
+                        }
+
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        super.onFail(e);
+
+                        EasyLog.print("过期会话Id申请失败：" + e.getMessage());
+                    }
+                });
+
     }
 }
