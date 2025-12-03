@@ -8,16 +8,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import io.noties.markwon.Markwon;
+import io.noties.markwon.core.CorePlugin;
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
+import io.noties.markwon.ext.tables.TablePlugin;
+import io.noties.markwon.ext.tasklist.TaskListPlugin;
+import io.noties.markwon.html.HtmlPlugin;
+import io.noties.markwon.image.ImagesPlugin;
+import io.noties.markwon.linkify.LinkifyPlugin;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
 import timber.log.Timber;
-
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.Markwon;
-import io.noties.markwon.MarkwonConfiguration;
-import io.noties.markwon.MarkwonVisitor;
-
 
 public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
 
@@ -29,14 +30,25 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
     private static final int LAYOUT_DEFAULT = R.layout.tips_ai_msg_chat_system; // 默认布局资源ID
 
     // 初始化 Markwon
-   private   Markwon markwon ;
+    private Markwon markwon;
 
     public TipsAiChatAdapter(Context context) {
         super(context);
-        // 初始化 Markwon
-        markwon = Markwon.create(context);
+        // 初始化 Markwon - 使用更完整的配置
+        initMarkwon(context);
         Timber.tag("TipsAiChatAdapter").d("Adapter created");
+    }
 
+    private void initMarkwon(Context context) {
+        markwon = Markwon.builder(context)
+                .usePlugin(CorePlugin.create()) // 核心插件
+                .usePlugin(HtmlPlugin.create()) // HTML 支持
+                .usePlugin(LinkifyPlugin.create()) // 链接识别
+                .usePlugin(StrikethroughPlugin.create()) // 删除线支持
+                .usePlugin(TablePlugin.create(context)) // 表格支持
+                .usePlugin(TaskListPlugin.create(context)) // 任务列表支持
+                .usePlugin(ImagesPlugin.create()) // 图片支持
+                .build();
     }
 
     @Override
