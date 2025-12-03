@@ -159,7 +159,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:orientation="vertical"
-        android:background="@color/common_window_background_color"
+        android:background="#F5F5F5"
         android:elevation="4dp"
         android:translationZ="4dp">
 
@@ -172,7 +172,7 @@
             android:paddingEnd="@dimen/dp_8"
             android:gravity="center"
             android:orientation="horizontal"
-            android:background="#e0e0e0">
+            android:background="#E0E0E0">
 
             <TextView
                 android:id="@+id/tv_chat_history"
@@ -181,9 +181,20 @@
                 android:layout_weight="1"
                 android:text="【历史会话】"
                 android:gravity="center"
-                android:textColor="@color/sys_protect_eye_word"
-                android:textSize="@dimen/sp_18"
-                android:textStyle="bold" />
+                android:textColor="#424242"
+                android:textSize="@dimen/sp_15"
+                android:textStyle="normal" />
+
+            <ImageButton
+                android:id="@+id/btn_edit_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/dp_8"
+                android:contentDescription="编辑标题"
+                android:minWidth="@dimen/dp_40"
+                android:minHeight="@dimen/dp_40" />
 
         </LinearLayout>
 
@@ -196,7 +207,8 @@
             android:paddingStart="@dimen/dp_3"
             android:paddingEnd="@dimen/dp_3"
             android:paddingTop="@dimen/dp_1"
-            android:clipToPadding="false" />
+            android:clipToPadding="false"
+            android:background="#FFFFFF" />
 
     </LinearLayout>
 </androidx.drawerlayout.widget.DrawerLayout>

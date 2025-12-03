@@ -2,6 +2,11 @@ package run.yigou.gxzy.ui.fragment;
 
 import static com.blankj.utilcode.util.ThreadUtils.runOnUiThread;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.view.WindowManager;
+import android.widget.Toast;
+
 import run.yigou.gxzy.EventBus.ChatMessageBeanEvent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.TitleBarFragment;
@@ -27,6 +32,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -136,6 +142,20 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             }
         });
         
+        // 设置聊天历史记录项编辑标题监听
+        chatHistoryAdapter.setOnChatHistoryItemEditTitleListener(new ChatHistoryAdapter.OnChatHistoryItemEditTitleListener() {
+            @Override
+            public void onChatHistoryItemEditTitle(int position, ChatHistoryAdapter.ChatHistoryItem item) {
+                // 获取会话列表
+                List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
+                // 确保位置有效
+                if (position >= 0 && position < sessions.size()) {
+                    ChatSessionBean sessionToEdit = sessions.get(position);
+                    showEditSessionTitleDialog(sessionToEdit);
+                }
+            }
+        });
+        
         // 设置标题栏点击监听
         if (getTitleBar() != null) {
             getTitleBar().setOnTitleBarListener(this);
@@ -226,6 +246,15 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                         clearButton.setVisibility(View.GONE);
                     }
                 }
+            }
+        });
+        
+        // 设置侧边栏标题编辑按钮点击事件
+        ImageButton editTitleButton = findViewById(R.id.btn_edit_title);
+        editTitleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showEditTitleDialog();
             }
         });
     }
@@ -1104,5 +1133,76 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 注销事件
         XEventBus.getDefault().unregister(AiMsgFragment.this);
         super.onDestroy();
+    }
+    
+    /**
+     * 显示编辑会话标题对话框
+     *
+     * @param session 要编辑的会话
+     */
+    private void showEditSessionTitleDialog(ChatSessionBean session) {
+        if (session == null) {
+            Toast.makeText(getContext(), "会话不存在", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("编辑会话标题");
+
+        final EditText input = new EditText(getContext());
+        input.setText(session.getTitle());
+        input.setSelectAllOnFocus(true);
+        builder.setView(input);
+
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String newTitle = input.getText().toString().trim();
+                if (!newTitle.isEmpty() && !newTitle.equals(session.getTitle())) {
+                    // 更新会话标题
+                    session.setTitle(newTitle);
+                    // 保存到数据库
+                    session.setUpdateTime(DateHelper.getSeconds1());
+                    DbService.getInstance().mChatSessionBeanService.updateEntity(session);
+                    
+                    // 如果是当前会话，更新标题栏显示
+                    if (currentSession != null && currentSession.getId().equals(session.getId())) {
+                        if (getTitleBar() != null) {
+                            getTitleBar().setTitle(newTitle);
+                        }
+                    }
+                    
+                    // 重新加载侧边栏数据
+                    populateChatHistoryWithTestData();
+                    Toast.makeText(getContext(), "标题已更新", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // 自动弹出键盘
+        input.requestFocus();
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+    }
+
+    /**
+     * 显示编辑当前会话标题对话框
+     */
+    private void showEditTitleDialog() {
+        if (currentSession == null) {
+            Toast.makeText(getContext(), "当前没有选中的会话", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        showEditSessionTitleDialog(currentSession);
     }
 }

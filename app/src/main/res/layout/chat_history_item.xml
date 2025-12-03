@@ -19,18 +19,35 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="聊天记录标题"
-            android:textColor="#313031"
-            android:textSize="@dimen/sp_16"
-            android:textStyle="bold" />
+            android:textColor="#212121"
+            android:textSize="@dimen/sp_14"
+            android:textStyle="normal" />
 
         <TextView
             android:id="@+id/tv_chat_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="时间"
-            android:textColor="#666666"
-            android:textSize="@dimen/sp_12"
+            android:textColor="#757575"
+            android:textSize="@dimen/sp_11"
             android:layout_marginEnd="@dimen/dp_10" />
+
+        <ImageButton
+            android:id="@+id/btn_edit_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_edit"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:paddingStart="@dimen/dp_8"
+            android:paddingEnd="@dimen/dp_8"
+            android:paddingTop="@dimen/dp_4"
+            android:paddingBottom="@dimen/dp_4"
+            android:contentDescription="编辑标题"
+            android:scaleType="centerInside"
+            android:maxWidth="@dimen/dp_32"
+            android:maxHeight="@dimen/dp_32" />
 
         <ImageButton
             android:id="@+id/btn_delete"
@@ -40,14 +57,14 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:minHeight="0dp"
             android:minWidth="0dp"
-            android:paddingStart="@dimen/dp_12"
-            android:paddingEnd="@dimen/dp_12"
-            android:paddingTop="@dimen/dp_8"
-            android:paddingBottom="@dimen/dp_8"
+            android:paddingStart="@dimen/dp_8"
+            android:paddingEnd="@dimen/dp_8"
+            android:paddingTop="@dimen/dp_4"
+            android:paddingBottom="@dimen/dp_4"
             android:contentDescription="删除会话"
             android:scaleType="centerInside"
-            android:maxWidth="@dimen/dp_40"
-            android:maxHeight="@dimen/dp_40" />
+            android:maxWidth="@dimen/dp_32"
+            android:maxHeight="@dimen/dp_32" />
 
     </LinearLayout>
 
@@ -57,8 +74,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dp_3"
         android:text="聊天内容预览"
-        android:textColor="#666666"
-        android:textSize="@dimen/sp_14"
+        android:textColor="#757575"
+        android:textSize="@dimen/sp_13"
         android:maxLines="2"
         android:ellipsize="end"
         android:visibility="gone" />
@@ -69,8 +86,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dp_3"
         android:text="消息数量"
-        android:textColor="#999999"
-        android:textSize="@dimen/sp_12"
+        android:textColor="#9E9E9E"
+        android:textSize="@dimen/sp_11"
         android:gravity="end" />
 
 </LinearLayout>

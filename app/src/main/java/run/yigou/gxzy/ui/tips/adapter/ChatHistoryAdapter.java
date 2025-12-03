@@ -2,24 +2,31 @@ package run.yigou.gxzy.ui.tips.adapter;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.res.ColorStateList;
+import android.content.DialogInterface;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
+import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.greendao.entity.ChatSessionBean;
+import run.yigou.gxzy.utils.DateHelper;
 
 public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistoryItem> {
 
     private int selectedPosition = -1;
     private OnChatHistoryItemClickListener mListener;
     private OnChatHistoryItemDeleteListener mDeleteListener;
+    private OnChatHistoryItemEditTitleListener mEditTitleListener;
 
     public ChatHistoryAdapter(Context context) {
         super(context);
@@ -43,6 +50,10 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
     public void setOnChatHistoryItemDeleteListener(OnChatHistoryItemDeleteListener listener) {
         mDeleteListener = listener;
     }
+    
+    public void setOnChatHistoryItemEditTitleListener(OnChatHistoryItemEditTitleListener listener) {
+        mEditTitleListener = listener;
+    }
 
     private final class ViewHolder extends AppAdapter<?>.ViewHolder {
         private TextView tvTitle;
@@ -50,6 +61,7 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
         private TextView tvTime;
         private TextView tvMessageCount;
         private ImageButton btnDelete;
+        private ImageButton btnEditTitle;
 
         private ViewHolder(int viewLayout) {
             super(viewLayout);
@@ -58,6 +70,7 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
             tvTime = findViewById(R.id.tv_chat_time);
             tvMessageCount = findViewById(R.id.tv_message_count);
             btnDelete = findViewById(R.id.btn_delete);
+            btnEditTitle = findViewById(R.id.btn_edit_title);
         }
 
         @Override
@@ -91,6 +104,16 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
                     showDeleteConfirmationDialog(position, item);
                 }
             });
+            
+            // 设置编辑标题按钮点击事件
+            btnEditTitle.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mEditTitleListener != null) {
+                        mEditTitleListener.onChatHistoryItemEditTitle(position, item);
+                    }
+                }
+            });
 
             getItemView().setOnClickListener(v -> {
                 if (mListener != null) {
@@ -120,6 +143,10 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
 
     public interface OnChatHistoryItemDeleteListener {
         void onChatHistoryItemDelete(int position, ChatHistoryItem item);
+    }
+    
+    public interface OnChatHistoryItemEditTitleListener {
+        void onChatHistoryItemEditTitle(int position, ChatHistoryItem item);
     }
 
     public static class ChatHistoryItem {
