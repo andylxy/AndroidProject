@@ -1061,7 +1061,12 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             // 如果当前没有会话，加载第一个会话的数据
             if (currentSession == null) {
                 loadChatDataForSession(sessions.get(0).getId());
+
+            }else {
+                // 新会话不加载旧的 数据
+                handleAddNewSession();
             }
+
         } else {
             // 没有会话数据时不加载任何内容，保持界面空白
             Log.d(TAG, "No session data found in database, not loading any content");
