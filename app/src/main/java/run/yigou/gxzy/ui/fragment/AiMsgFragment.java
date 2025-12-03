@@ -504,7 +504,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                         //DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
 
                                                         // 更新聊天历史记录
-                                                        populateChatHistoryWithTestData();
+                                                        //populateChatHistoryWithTestData();
                                                     }
                                                 });
                                             }
