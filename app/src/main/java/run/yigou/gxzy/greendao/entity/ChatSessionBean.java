@@ -1,5 +1,7 @@
 package run.yigou.gxzy.greendao.entity;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.NotNull;
@@ -22,6 +24,11 @@ public class ChatSessionBean {
      */
     @NotNull
     private String title;
+
+    /// 会话ID
+    private String conversationId;
+    /// 会话用户ID
+    private String endUserId;
 
     /**
      * 会话预览内容
@@ -68,11 +75,13 @@ public class ChatSessionBean {
     @Generated(hash = 1492390832)
     private transient ChatSessionBeanDao myDao;
 
-    @Generated(hash = 992195672)
-    public ChatSessionBean(Long id, @NotNull String title, String preview,
-            @NotNull String createTime, @NotNull String updateTime, int isDelete) {
+    @Generated(hash = 1164894089)
+    public ChatSessionBean(Long id, @NotNull String title, String conversationId, String endUserId,
+            String preview, @NotNull String createTime, @NotNull String updateTime, int isDelete) {
         this.id = id;
         this.title = title;
+        this.conversationId = conversationId;
+        this.endUserId = endUserId;
         this.preview = preview;
         this.createTime = createTime;
         this.updateTime = updateTime;
@@ -201,6 +210,22 @@ public class ChatSessionBean {
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getChatSessionBeanDao() : null;
+    }
+
+    public String getConversationId() {
+        return this.conversationId;
+    }
+
+    public void setConversationId(String conversationId) {
+        this.conversationId = conversationId;
+    }
+
+    public String getEndUserId() {
+        return this.endUserId;
+    }
+
+    public void setEndUserId(String endUserId) {
+        this.endUserId = endUserId;
     }
 
 }

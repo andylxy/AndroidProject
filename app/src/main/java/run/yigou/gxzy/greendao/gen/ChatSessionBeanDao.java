@@ -26,10 +26,12 @@ public class ChatSessionBeanDao extends AbstractDao<ChatSessionBean, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property Title = new Property(1, String.class, "title", false, "TITLE");
-        public final static Property Preview = new Property(2, String.class, "preview", false, "PREVIEW");
-        public final static Property CreateTime = new Property(3, String.class, "createTime", false, "CREATE_TIME");
-        public final static Property UpdateTime = new Property(4, String.class, "updateTime", false, "UPDATE_TIME");
-        public final static Property IsDelete = new Property(5, int.class, "isDelete", false, "IS_DELETE");
+        public final static Property ConversationId = new Property(2, String.class, "conversationId", false, "CONVERSATION_ID");
+        public final static Property EndUserId = new Property(3, String.class, "endUserId", false, "END_USER_ID");
+        public final static Property Preview = new Property(4, String.class, "preview", false, "PREVIEW");
+        public final static Property CreateTime = new Property(5, String.class, "createTime", false, "CREATE_TIME");
+        public final static Property UpdateTime = new Property(6, String.class, "updateTime", false, "UPDATE_TIME");
+        public final static Property IsDelete = new Property(7, int.class, "isDelete", false, "IS_DELETE");
     }
 
     private DaoSession daoSession;
@@ -50,10 +52,12 @@ public class ChatSessionBeanDao extends AbstractDao<ChatSessionBean, Long> {
         db.execSQL("CREATE TABLE " + constraint + "\"CHAT_SESSION_BEAN\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
                 "\"TITLE\" TEXT NOT NULL ," + // 1: title
-                "\"PREVIEW\" TEXT," + // 2: preview
-                "\"CREATE_TIME\" TEXT NOT NULL ," + // 3: createTime
-                "\"UPDATE_TIME\" TEXT NOT NULL ," + // 4: updateTime
-                "\"IS_DELETE\" INTEGER NOT NULL );"); // 5: isDelete
+                "\"CONVERSATION_ID\" TEXT," + // 2: conversationId
+                "\"END_USER_ID\" TEXT," + // 3: endUserId
+                "\"PREVIEW\" TEXT," + // 4: preview
+                "\"CREATE_TIME\" TEXT NOT NULL ," + // 5: createTime
+                "\"UPDATE_TIME\" TEXT NOT NULL ," + // 6: updateTime
+                "\"IS_DELETE\" INTEGER NOT NULL );"); // 7: isDelete
     }
 
     /** Drops the underlying database table. */
@@ -72,13 +76,23 @@ public class ChatSessionBeanDao extends AbstractDao<ChatSessionBean, Long> {
         }
         stmt.bindString(2, entity.getTitle());
  
+        String conversationId = entity.getConversationId();
+        if (conversationId != null) {
+            stmt.bindString(3, conversationId);
+        }
+ 
+        String endUserId = entity.getEndUserId();
+        if (endUserId != null) {
+            stmt.bindString(4, endUserId);
+        }
+ 
         String preview = entity.getPreview();
         if (preview != null) {
-            stmt.bindString(3, preview);
+            stmt.bindString(5, preview);
         }
-        stmt.bindString(4, entity.getCreateTime());
-        stmt.bindString(5, entity.getUpdateTime());
-        stmt.bindLong(6, entity.getIsDelete());
+        stmt.bindString(6, entity.getCreateTime());
+        stmt.bindString(7, entity.getUpdateTime());
+        stmt.bindLong(8, entity.getIsDelete());
     }
 
     @Override
@@ -91,13 +105,23 @@ public class ChatSessionBeanDao extends AbstractDao<ChatSessionBean, Long> {
         }
         stmt.bindString(2, entity.getTitle());
  
+        String conversationId = entity.getConversationId();
+        if (conversationId != null) {
+            stmt.bindString(3, conversationId);
+        }
+ 
+        String endUserId = entity.getEndUserId();
+        if (endUserId != null) {
+            stmt.bindString(4, endUserId);
+        }
+ 
         String preview = entity.getPreview();
         if (preview != null) {
-            stmt.bindString(3, preview);
+            stmt.bindString(5, preview);
         }
-        stmt.bindString(4, entity.getCreateTime());
-        stmt.bindString(5, entity.getUpdateTime());
-        stmt.bindLong(6, entity.getIsDelete());
+        stmt.bindString(6, entity.getCreateTime());
+        stmt.bindString(7, entity.getUpdateTime());
+        stmt.bindLong(8, entity.getIsDelete());
     }
 
     @Override
@@ -116,10 +140,12 @@ public class ChatSessionBeanDao extends AbstractDao<ChatSessionBean, Long> {
         ChatSessionBean entity = new ChatSessionBean( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.getString(offset + 1), // title
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // preview
-            cursor.getString(offset + 3), // createTime
-            cursor.getString(offset + 4), // updateTime
-            cursor.getInt(offset + 5) // isDelete
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // conversationId
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // endUserId
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // preview
+            cursor.getString(offset + 5), // createTime
+            cursor.getString(offset + 6), // updateTime
+            cursor.getInt(offset + 7) // isDelete
         );
         return entity;
     }
@@ -128,10 +154,12 @@ public class ChatSessionBeanDao extends AbstractDao<ChatSessionBean, Long> {
     public void readEntity(Cursor cursor, ChatSessionBean entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setTitle(cursor.getString(offset + 1));
-        entity.setPreview(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setCreateTime(cursor.getString(offset + 3));
-        entity.setUpdateTime(cursor.getString(offset + 4));
-        entity.setIsDelete(cursor.getInt(offset + 5));
+        entity.setConversationId(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setEndUserId(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setPreview(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setCreateTime(cursor.getString(offset + 5));
+        entity.setUpdateTime(cursor.getString(offset + 6));
+        entity.setIsDelete(cursor.getInt(offset + 7));
      }
     
     @Override
