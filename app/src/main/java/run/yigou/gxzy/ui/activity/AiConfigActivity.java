@@ -543,7 +543,7 @@ public final class AiConfigActivity extends AppActivity {
     private void showShareDialog() {
         Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND);
-        shareIntent.setType(ShareUtil.TEXT);
+        shareIntent.setType(ShareUtil.TYPE_TEXT);
         shareIntent.putExtra(Intent.EXTRA_TEXT, "我发现一个非常好用的聊天程序，文档地址: https://github.com/worktool/chatgpt-android");
 
         Intent chooserIntent = Intent.createChooser(shareIntent, "分享");
