@@ -39,6 +39,9 @@ import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.Server.RequestHandler;
 import run.yigou.gxzy.http.Server.RequestServer;
+import run.yigou.gxzy.http.security.InterceptorHelper;
+import run.yigou.gxzy.http.security.SecurityConfig;
+import run.yigou.gxzy.http.security.RequestHelper;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.other.AppConfig;
 import run.yigou.gxzy.other.CrashHandler;
@@ -53,6 +56,8 @@ import com.hjq.gson.factory.GsonFactory;
 import com.hjq.gson.factory.ParseExceptionCallback;
 import com.hjq.http.EasyConfig;
 import com.hjq.http.EasyLog;
+import com.hjq.http.config.IRequestApi;
+import com.hjq.http.model.BodyType;
 import com.hjq.toast.ToastUtils;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
@@ -64,6 +69,9 @@ import okhttp3.OkHttpClient;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import run.yigou.gxzy.utils.SerialUtil;
 import timber.log.Timber;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * author : Android 轮子哥
@@ -231,8 +239,7 @@ public final class AppApplication extends Application {
         MMKV.initialize(application);
 
         // 网络请求框架初始化
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .build();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
 
         EasyConfig.with(okHttpClient)
                 // 是否打印日志
@@ -245,20 +252,7 @@ public final class AppApplication extends Application {
                 // 设置请求重试次数
                 .setRetryCount(1)
                 .setInterceptor((api, params, headers) -> {
-                    // 添加全局请求头
-                    if (mUserInfoToken != null)
-                        headers.put("Authorization", mUserInfoToken.getToken());
-                    //如果是全局开启，并且没有登陆就添加可获取全部的数据
-                    if (global_openness && mUserInfoToken == null)
-                        headers.put("Authorization", AppConst.AllowAnonymous_Token);
-                    headers.put("app", "2");
-                    headers.put("SessionId", SerialUtil.getSerial());
-                   // headers.put("versionName", AppConfig.getVersionName());
-                  //  headers.put("versionCode", String.valueOf(AppConfig.getVersionCode()));
-                    headers.put("Content-Type", "application/json;charset=UTF-8");
-                    headers.put("Accept", "application/json, text/plain, */*");
-                    // 添加全局请求参数
-                    // params.put("6666666", "6666666");
+                    InterceptorHelper.handleIntercept(api, params, headers, this);
                 })
                 .into();
 
