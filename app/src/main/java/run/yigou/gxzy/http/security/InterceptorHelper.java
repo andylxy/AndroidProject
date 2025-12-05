@@ -69,8 +69,5 @@ public class InterceptorHelper {
                 headers.put("X-Nonce", SecurityConfig.generateNonce());
             }
         }
-
-        // 添加全局请求参数
-        // params.put("6666666", "6666666");
     }
 }
