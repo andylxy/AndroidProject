@@ -31,12 +31,10 @@ public class InterceptorHelper {
         if (appApplication.mUserInfoToken != null)
             headers.put("Authorization", appApplication.mUserInfoToken.getToken());
         //如果是全局开启，并且没有登陆就添加可获取全部的数据
-        if (appApplication.global_openness && appApplication.mUserInfoToken == null)
-            headers.put("Authorization", AppConst.AllowAnonymous_Token);
+        //if (appApplication.global_openness && appApplication.mUserInfoToken == null)
+        //    headers.put("Authorization", AppConst.AllowAnonymous_Token);
         headers.put("app", "2");
         headers.put("SessionId", SerialUtil.getSerial());
-        // headers.put("versionName", AppConfig.getVersionName());
-        // headers.put("versionCode", String.valueOf(AppConfig.getVersionCode()));
         headers.put("Content-Type", "application/json;charset=UTF-8");
         headers.put("Accept", "application/json, text/plain, */*");
 
@@ -53,20 +51,19 @@ public class InterceptorHelper {
                 String method = RequestHelper.getRequestMethod(api, params);
                 String host = RequestHelper.getHost();
                 String path = RequestHelper.getPath(api);
-                String queryString = SecurityConfig.buildQueryString(api, params);
-
-                // 构建请求体
-                BodyType bodyType = RequestHelper.getBodyType();
-                String bodyString = SecurityConfig.buildBodyString(api, params, bodyType);
+                
+                // 生成时间戳和Nonce (根据2025-12变更，签名仅包含Method/Host/Path/Timestamp/Nonce)
+                String timestamp = SecurityConfig.getCurrentTimestamp();
+                String nonce = SecurityConfig.generateNonce();
 
                 // 生成签名
-                String signature = SecurityConfig.generateSignature(api, method, host, path, queryString, bodyString);
+                String signature = SecurityConfig.generateSignature(api, method, host, path, timestamp, nonce);
 
                 // 添加防重放攻击头部
                 headers.put("Signature", "Signature " + signature);
                 headers.put("X-AccessKeyId", accessKeyId);
-                headers.put("X-Timestamp", SecurityConfig.getCurrentTimestamp());
-                headers.put("X-Nonce", SecurityConfig.generateNonce());
+                headers.put("X-Timestamp", timestamp);
+                headers.put("X-Nonce", nonce);
             }
         }
     }

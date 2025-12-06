@@ -72,6 +72,7 @@ import timber.log.Timber;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * author : Android 轮子哥
@@ -102,7 +103,7 @@ public final class AppApplication extends Application {
         return application;
     }
 
-   // @Log("启动耗时")
+    // @Log("启动耗时")
     @Override
     public void onCreate() {
         super.onCreate();
@@ -120,7 +121,6 @@ public final class AppApplication extends Application {
     }
 
     public FragmentSetting fragmentSetting;
-
 
 
     private void initUserLogin() {
@@ -146,6 +146,7 @@ public final class AppApplication extends Application {
     public void registryByReflect() {
         XEventBus.getDefault().register(this);
     }
+
     @Subscribe
     public void onDummyEvent(Object event) {
         // 空实现，仅为满足XEventBus注册要求
@@ -239,8 +240,12 @@ public final class AppApplication extends Application {
         MMKV.initialize(application);
 
         // 网络请求框架初始化
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
-
+        // OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(60, TimeUnit.SECONDS)  // 连接超时时间
+                .readTimeout(120, TimeUnit.SECONDS)     // 读取超时时间
+                .writeTimeout(120, TimeUnit.SECONDS)    // 写入超时时间
+                .build();
         EasyConfig.with(okHttpClient)
                 // 是否打印日志
                 .setLogEnabled(AppConfig.isLogEnable())
@@ -250,7 +255,7 @@ public final class AppApplication extends Application {
                 // 设置请求处理策略
                 .setHandler(new RequestHandler(application))
                 // 设置请求重试次数
-                .setRetryCount(1)
+                .setRetryCount(2)
                 .setInterceptor((api, params, headers) -> {
                     InterceptorHelper.handleIntercept(api, params, headers, this);
                 })

@@ -24,12 +24,12 @@ public class SecurityConfig {
     /**
      * AccessKey ID
      */
-    private static String sAccessKeyId = "12345";
+    private static String sAccessKeyId = "3xl81vfcZMFoFWks14d1iMXzCNmOxyyX";
     
     /**
      * AccessKey 密钥
      */
-    private static String sAccessKeySecret = "1234";
+    private static String sAccessKeySecret = "KZbbYBtUeMXbIimx";
     
     /**
      * 是否启用防重放攻击功能
@@ -120,26 +120,20 @@ public class SecurityConfig {
      * @param method HTTP方法 (GET, POST, etc.)
      * @param host 请求主机
      * @param path 请求路径
-     * @param queryString 查询字符串
-     * @param bodyString 请求体内容
+     * @param timestamp 时间戳
+     * @param nonce 随机数
      * @return 签名字符串
      */
     public static String generateSignature(IRequestApi api, String method, String host, String path, 
-                                         String queryString, String bodyString) {
+                                         String timestamp, String nonce) {
         if (!sEnableAntiReplayAttack || sAccessKeyId.isEmpty() || sAccessKeySecret.isEmpty()) {
             return "";
         }
         
-        // 生成时间戳和Nonce
-        String timestamp = getCurrentTimestamp();
-        String nonce = generateNonce();
-        
-        // 构造签名字符串
+        // 构造签名字符串 (根据2025-12变更，仅包含Method/Host/Path/Timestamp/Nonce)
         String stringToSign = method + "\n" +
                 host + "\n" +
                 path + "\n" +
-                queryString + "\n" +
-                bodyString + "\n" +
                 timestamp + "\n" +
                 nonce;
         
