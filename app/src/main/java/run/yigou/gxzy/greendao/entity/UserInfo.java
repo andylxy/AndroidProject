@@ -24,19 +24,24 @@ import org.greenrobot.greendao.annotation.NotNull;
 public class UserInfo  {
     @Id
     private  String  id;
-
+    private  String  accessKeyId;
+    private  String  accessKeySecret;
     //jwt
     private String token;
     //用户名
     private String userName;
     //头像
     private String img;
+
     @NotNull
     private String userLoginAccount;
-    @Generated(hash = 569043903)
-    public UserInfo(String id, String token, String userName, String img,
+    @Generated(hash = 962021086)
+    public UserInfo(String id, String accessKeyId, String accessKeySecret,
+            String token, String userName, String img,
             @NotNull String userLoginAccount) {
         this.id = id;
+        this.accessKeyId = accessKeyId;
+        this.accessKeySecret = accessKeySecret;
         this.token = token;
         this.userName = userName;
         this.img = img;
@@ -74,6 +79,18 @@ public class UserInfo  {
     }
     public void setUserLoginAccount(String userLoginAccount) {
         this.userLoginAccount = userLoginAccount;
+    }
+    public String getAccessKeyId() {
+        return this.accessKeyId;
+    }
+    public void setAccessKeyId(String accessKeyId) {
+        this.accessKeyId = accessKeyId;
+    }
+    public String getAccessKeySecret() {
+        return this.accessKeySecret;
+    }
+    public void setAccessKeySecret(String accessKeySecret) {
+        this.accessKeySecret = accessKeySecret;
     }
     
 }

@@ -25,10 +25,12 @@ public class UserInfoDao extends AbstractDao<UserInfo, String> {
      */
     public static class Properties {
         public final static Property Id = new Property(0, String.class, "id", true, "ID");
-        public final static Property Token = new Property(1, String.class, "token", false, "TOKEN");
-        public final static Property UserName = new Property(2, String.class, "userName", false, "USER_NAME");
-        public final static Property Img = new Property(3, String.class, "img", false, "IMG");
-        public final static Property UserLoginAccount = new Property(4, String.class, "userLoginAccount", false, "USER_LOGIN_ACCOUNT");
+        public final static Property AccessKeyId = new Property(1, String.class, "accessKeyId", false, "ACCESS_KEY_ID");
+        public final static Property AccessKeySecret = new Property(2, String.class, "accessKeySecret", false, "ACCESS_KEY_SECRET");
+        public final static Property Token = new Property(3, String.class, "token", false, "TOKEN");
+        public final static Property UserName = new Property(4, String.class, "userName", false, "USER_NAME");
+        public final static Property Img = new Property(5, String.class, "img", false, "IMG");
+        public final static Property UserLoginAccount = new Property(6, String.class, "userLoginAccount", false, "USER_LOGIN_ACCOUNT");
     }
 
 
@@ -45,10 +47,12 @@ public class UserInfoDao extends AbstractDao<UserInfo, String> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"USER_INFO\" (" + //
                 "\"ID\" TEXT PRIMARY KEY NOT NULL ," + // 0: id
-                "\"TOKEN\" TEXT," + // 1: token
-                "\"USER_NAME\" TEXT," + // 2: userName
-                "\"IMG\" TEXT," + // 3: img
-                "\"USER_LOGIN_ACCOUNT\" TEXT NOT NULL );"); // 4: userLoginAccount
+                "\"ACCESS_KEY_ID\" TEXT," + // 1: accessKeyId
+                "\"ACCESS_KEY_SECRET\" TEXT," + // 2: accessKeySecret
+                "\"TOKEN\" TEXT," + // 3: token
+                "\"USER_NAME\" TEXT," + // 4: userName
+                "\"IMG\" TEXT," + // 5: img
+                "\"USER_LOGIN_ACCOUNT\" TEXT NOT NULL );"); // 6: userLoginAccount
     }
 
     /** Drops the underlying database table. */
@@ -66,21 +70,31 @@ public class UserInfoDao extends AbstractDao<UserInfo, String> {
             stmt.bindString(1, id);
         }
  
+        String accessKeyId = entity.getAccessKeyId();
+        if (accessKeyId != null) {
+            stmt.bindString(2, accessKeyId);
+        }
+ 
+        String accessKeySecret = entity.getAccessKeySecret();
+        if (accessKeySecret != null) {
+            stmt.bindString(3, accessKeySecret);
+        }
+ 
         String token = entity.getToken();
         if (token != null) {
-            stmt.bindString(2, token);
+            stmt.bindString(4, token);
         }
  
         String userName = entity.getUserName();
         if (userName != null) {
-            stmt.bindString(3, userName);
+            stmt.bindString(5, userName);
         }
  
         String img = entity.getImg();
         if (img != null) {
-            stmt.bindString(4, img);
+            stmt.bindString(6, img);
         }
-        stmt.bindString(5, entity.getUserLoginAccount());
+        stmt.bindString(7, entity.getUserLoginAccount());
     }
 
     @Override
@@ -92,21 +106,31 @@ public class UserInfoDao extends AbstractDao<UserInfo, String> {
             stmt.bindString(1, id);
         }
  
+        String accessKeyId = entity.getAccessKeyId();
+        if (accessKeyId != null) {
+            stmt.bindString(2, accessKeyId);
+        }
+ 
+        String accessKeySecret = entity.getAccessKeySecret();
+        if (accessKeySecret != null) {
+            stmt.bindString(3, accessKeySecret);
+        }
+ 
         String token = entity.getToken();
         if (token != null) {
-            stmt.bindString(2, token);
+            stmt.bindString(4, token);
         }
  
         String userName = entity.getUserName();
         if (userName != null) {
-            stmt.bindString(3, userName);
+            stmt.bindString(5, userName);
         }
  
         String img = entity.getImg();
         if (img != null) {
-            stmt.bindString(4, img);
+            stmt.bindString(6, img);
         }
-        stmt.bindString(5, entity.getUserLoginAccount());
+        stmt.bindString(7, entity.getUserLoginAccount());
     }
 
     @Override
@@ -118,10 +142,12 @@ public class UserInfoDao extends AbstractDao<UserInfo, String> {
     public UserInfo readEntity(Cursor cursor, int offset) {
         UserInfo entity = new UserInfo( //
             cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0), // id
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // token
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // userName
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // img
-            cursor.getString(offset + 4) // userLoginAccount
+            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // accessKeyId
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // accessKeySecret
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // token
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // userName
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // img
+            cursor.getString(offset + 6) // userLoginAccount
         );
         return entity;
     }
@@ -129,10 +155,12 @@ public class UserInfoDao extends AbstractDao<UserInfo, String> {
     @Override
     public void readEntity(Cursor cursor, UserInfo entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0));
-        entity.setToken(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setUserName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setImg(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setUserLoginAccount(cursor.getString(offset + 4));
+        entity.setAccessKeyId(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
+        entity.setAccessKeySecret(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setToken(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setUserName(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setImg(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
+        entity.setUserLoginAccount(cursor.getString(offset + 6));
      }
     
     @Override
