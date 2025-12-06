@@ -36,6 +36,7 @@ import run.yigou.gxzy.common.ManagerSetting;
 import run.yigou.gxzy.greendao.entity.UserInfo;
 import run.yigou.gxzy.greendao.service.UserInfoService;
 import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.greendao.util.MigrationOrchestrator;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.Server.RequestHandler;
 import run.yigou.gxzy.http.Server.RequestServer;
@@ -108,6 +109,7 @@ public final class AppApplication extends Application {
     public void onCreate() {
         super.onCreate();
         application = this;
+        MigrationOrchestrator.ensureUpToDate(this);
         mUserInfoService = DbService.getInstance().mUserInfoService;
         initUserLogin();
         fragmentSetting = ManagerSetting.getFragmentSetting();
