@@ -27,9 +27,7 @@ public class InterceptorHelper {
      * @param appApplication 应用实例
      */
     public static void handleIntercept(IRequestApi api, HttpParams params, HttpHeaders headers, AppApplication appApplication) {
-        // 添加全局请求头
-        if (appApplication.mUserInfoToken != null)
-            headers.put("Authorization", appApplication.mUserInfoToken.getToken());
+
         //如果是全局开启，并且没有登陆就添加可获取全部的数据
         //if (appApplication.global_openness && appApplication.mUserInfoToken == null)
         //    headers.put("Authorization", AppConst.AllowAnonymous_Token);
@@ -42,7 +40,11 @@ public class InterceptorHelper {
         if (SecurityConfig.isAntiReplayAttackEnabled()) {
             String accessKeyId = SecurityConfig.getAccessKeyId();
             String accessKeySecret = SecurityConfig.getAccessKeySecret();
-
+            // 如果 用登陆用户的AccessKeyId和AccessKeySecret
+            if (appApplication.mUserInfoToken != null){
+                accessKeyId = appApplication.mUserInfoToken.getAccessKeyId();
+                accessKeySecret = appApplication.mUserInfoToken.getAccessKeySecret();
+            }
             // 只有当配置了AccessKey时才添加相关头部
             if (accessKeyId != null && !accessKeyId.isEmpty() &&
                     accessKeySecret != null && !accessKeySecret.isEmpty()) {

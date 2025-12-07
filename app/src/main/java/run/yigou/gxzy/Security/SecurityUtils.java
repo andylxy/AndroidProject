@@ -39,8 +39,7 @@ public final class SecurityUtils {
 
     // 方式3：使用完整公钥形式初始化SM2公钥
     // 这种方式最符合Android客户端的使用场景
-    private static final String DEFAULT_PUBLIC_KEY = "041234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef" +
-            "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321";
+    private static final String DEFAULT_PUBLIC_KEY = "04CF658C65FB80CB5C7B91D3BD881521C2BD421202D29812785322F6366B8856B62D38D3AB5B5C299B03DD2EC0033370875A2787C6222E801AF87DDA53093322E2";
 
     static {
         // 添加BouncyCastleProvider提供者

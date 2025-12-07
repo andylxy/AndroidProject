@@ -34,6 +34,7 @@ import com.gyf.immersionbar.ImmersionBar;
 
 import run.yigou.gxzy.EventBus.LoginEventNotification;
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.Security.SecurityUtils;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
@@ -188,7 +189,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         mPhoneView.setText(getString(INTENT_KEY_IN_PHONE));
         mPasswordView.setText(getString(INTENT_KEY_IN_PASSWORD));
 
-    //    XEventBus.getDefault().register(LoginActivity.this);
+        //    XEventBus.getDefault().register(LoginActivity.this);
     }
 
     /**
@@ -282,9 +283,14 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             //登陆逻辑处理
             LoginApi requestApi = null;
             if (mLongInType == LoginType.mLoginAccount) {
+
+                if (mPhoneView.getText().toString() == null || mPasswordView.getText() .toString()== null) {
+                    toast("请输入账号和密码");
+                }
+                String passwd = SecurityUtils.doSm2Encrypt(mPasswordView.getText().toString()) ;
                 requestApi = new LoginApi()
                         .setUserName(mPhoneView.getText().toString())
-                        .setPassword(mPasswordView.getText().toString());
+                        .setPassword(passwd);
 
                 if (mVierificationCode.isCode()) {
                     requestApi.setVerificationCode(mEtLoginTextCode.getText().toString())
@@ -341,7 +347,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                         AppApplication.getApplication().mUserInfoToken = data.getData().getData();
 
                         // 更新 Token
-                        String token = data.getData().getData().getToken();
+                        String token = data.getData().getData().getAccessKeyId();
                         if (token != null && !token.isEmpty()) {
                             EasyConfig.getInstance().addHeader("Authorization", token);
                         } else {
@@ -356,7 +362,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                         String userLoginAccount = data.getData().getData().getUserLoginAccount();
                         if (userLoginAccount != null && !userLoginAccount.isEmpty()) {
                             UserInfo userInfo = DbService.getInstance().mUserInfoService.findUserInfoByLoginAccount(userLoginAccount);
-                            AppApplication.application.isLogin=true;
+                            AppApplication.application.isLogin = true;
                             try {
                                 if (userInfo == null) {
                                     DbService.getInstance().mUserInfoService.addEntity(data.getData().getData());
@@ -369,7 +375,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                                 toast("登陆信息,保存失败");
                             }
                         }
-                      //  XEventBus.getDefault().post(new LoginEventNotification(true));
+                        //  XEventBus.getDefault().post(new LoginEventNotification(true));
                         HomeActivityStart();
 
                     }
@@ -395,7 +401,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     @Override
     protected void onDestroy() {
         super.onDestroy();
-      //  XEventBus.getDefault().unregister(LoginActivity.this);
+        //  XEventBus.getDefault().unregister(LoginActivity.this);
     }
 
     private void getLoginVcode() {

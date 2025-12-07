@@ -125,10 +125,9 @@ public final class AppApplication extends Application {
             UserInfo userInfo = mUserInfoService.getLoginUserInfo();
             if (userInfo != null) {
                 mUserInfoToken = userInfo; // 直接赋值，避免重复调用
-                if (mUserInfoToken.getToken() != null) {
+                if (mUserInfoToken.getAccessKeyId() != null && mUserInfoToken.getAccessKeySecret() != null) {
                     // 添加 http 请求 Token
                     isLogin = true;
-                    EasyConfig.getInstance().addHeader("Authorization", mUserInfoToken.getToken());
                 }
             }
         } catch (Exception e) {
