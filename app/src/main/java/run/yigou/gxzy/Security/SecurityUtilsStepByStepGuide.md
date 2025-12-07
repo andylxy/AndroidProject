@@ -1,18 +1,20 @@
-# Android 国密 SM2/SM4 加密使用详细指南
+# Android 安全工具类使用详细指南
 
-本文档旨在提供关于如何在 Android 项目中使用国密 SM2 和 SM4 算法的详细步骤说明。
+本文档旨在提供关于如何在 Android 项目中使用 SecurityUtils 类进行各种安全操作的详细步骤说明，包括国密 SM2/SM4 算法、MD5 哈希算法和 AES 加密算法。
 
 ## 目录
 
 1. [准备工作](#准备工作)
 2. [SM2 公钥加密使用指南](#sm2-公钥加密使用指南)
 3. [SM4 对称加密使用指南](#sm4-对称加密使用指南)
-4. [工具类说明](#工具类说明)
-5. [常见问题](#常见问题)
+4. [MD5 哈希算法使用指南](#md5-哈希算法使用指南)
+5. [AES 对称加密使用指南](#aes-对称加密使用指南)
+6. [工具类说明](#工具类说明)
+7. [常见问题](#常见问题)
 
 ## 准备工作
 
-在开始使用 SM2/SM4 加密之前，请确保你的项目已经正确配置了 Bouncy Castle 加密库。
+在开始使用 SecurityUtils 加密功能之前，请确保你的项目已经正确配置了 Bouncy Castle 加密库。
 
 ### 添加依赖
 
@@ -52,14 +54,14 @@ SM2 是一种基于椭圆曲线的公钥加密算法，在 Android 客户端通�
 如果你拥有公钥的 x 和 y 坐标，可以使用以下方式初始化：
 
 ```java
-import run.yigou.gxzy.utils.SM2Util;
+import run.yigou.gxzy.security.SecurityUtils;
 
 // 假设你已经有了公钥的 x 和 y 坐标（十六进制字符串）
 String publicKeyX = "your_public_key_x_coordinate";
 String publicKeyY = "your_public_key_y_coordinate";
 
-// 初始化 SM2 工具类
-SM2Util sm2Util = SM2Util.initSM2KeysWithXY(publicKeyX, publicKeyY);
+// 初始化 SM2 公钥
+SecurityUtils.initSM2PublicKey(publicKeyX, publicKeyY);
 ```
 
 #### 方式二：使用完整公钥形式初始化
@@ -67,13 +69,13 @@ SM2Util sm2Util = SM2Util.initSM2KeysWithXY(publicKeyX, publicKeyY);
 如果你拥有完整格式的公钥（即 ASN.1 编码的公钥），可以使用以下方式初始化：
 
 ```java
-import run.yigou.gxzy.utils.SM2Util;
+import run.yigou.gxzy.security.SecurityUtils;
 
 // 假设你已经有了完整格式的公钥（十六进制字符串）
 String fullPublicKey = "your_full_public_key";
 
-// 初始化 SM2 工具类
-SM2Util sm2Util = SM2Util.initSM2KeysWithFullPublicKey(fullPublicKey);
+// 初始化 SM2 公钥
+SecurityUtils.initSM2PublicKeyWithFullFormat(fullPublicKey);
 ```
 
 ### 第二步：使用 SM2 进行数据加密
@@ -83,11 +85,8 @@ SM2Util sm2Util = SM2Util.initSM2KeysWithFullPublicKey(fullPublicKey);
 ```java
 try {
     String plainText = "需要加密的数据";
-    byte[] encryptedData = sm2Util.encrypt(plainText.getBytes("UTF-8"));
-    
-    // 将加密结果转换为十六进制字符串以便传输或存储
-    String encryptedHex = bytesToHex(encryptedData);
-    System.out.println("加密后的数据：" + encryptedHex);
+    String encryptedData = SecurityUtils.doSm2Encrypt(plainText);
+    System.out.println("加密后的数据：" + encryptedData);
 } catch (Exception e) {
     e.printStackTrace();
 }
@@ -102,7 +101,7 @@ try {
     String data = "需要验证签名的数据";
     String signature = "数据的签名值（十六进制字符串）";
     
-    boolean isValid = sm2Util.verify(data.getBytes("UTF-8"), hexToBytes(signature));
+    boolean isValid = SecurityUtils.doVerifySignature(data, signature);
     if (isValid) {
         System.out.println("签名验证成功");
     } else {
@@ -124,11 +123,11 @@ SM4 是一种分组对称加密算法，支持 ECB 和 CBC 两种工作模式。
 ECB 模式是最简单的加密模式，相同明文会产生相同密文：
 
 ```java
-import run.yigou.gxzy.http.security.SecurityConfig;
+import run.yigou.gxzy.security.SecurityUtils;
 
 // 使用默认密钥进行 ECB 模式加密
 String plainText = "需要加密的数据";
-String encrypted = SecurityConfig.sm4EcbEncrypt(plainText);
+String encrypted = SecurityUtils.doSm4Encrypt(plainText);
 System.out.println("ECB加密结果：" + encrypted);
 ```
 
@@ -137,11 +136,11 @@ System.out.println("ECB加密结果：" + encrypted);
 CBC 模式更安全，每次加密即使相同明文也会产生不同的密文：
 
 ```java
-import run.yigou.gxzy.http.security.SecurityConfig;
+import run.yigou.gxzy.security.SecurityUtils;
 
 // 使用默认密钥和IV进行 CBC 模式加密
 String plainText = "需要加密的数据";
-String encrypted = SecurityConfig.sm4CbcEncrypt(plainText);
+String encrypted = SecurityUtils.doSm4CbcEncrypt(plainText);
 System.out.println("CBC加密结果：" + encrypted);
 ```
 
@@ -150,7 +149,7 @@ System.out.println("CBC加密结果：" + encrypted);
 你可以使用自定义的密钥和初始向量（IV）进行加密：
 
 ```java
-import run.yigou.gxzy.http.security.SecurityConfig;
+import run.yigou.gxzy.security.SecurityUtils;
 
 // 自定义密钥和 IV（均为16字节）
 String key = "your_custom_key_16bytes";
@@ -158,7 +157,7 @@ String iv = "your_custom_iv_16bytes";
 String plainText = "需要加密的数据";
 
 // 使用自定义密钥和 IV 进行 CBC 模式加密
-String encrypted = SecurityConfig.sm4CbcEncrypt(plainText, key, iv);
+String encrypted = SecurityUtils.doSm4CbcEncrypt(plainText, key, iv);
 System.out.println("自定义密钥CBC加密结果：" + encrypted);
 ```
 
@@ -167,42 +166,109 @@ System.out.println("自定义密钥CBC加密结果：" + encrypted);
 对于服务端返回的 SM4 加密数据，你可以使用相应的方法进行解密：
 
 ```java
-import run.yigou.gxzy.http.security.SecurityConfig;
+import run.yigou.gxzy.security.SecurityUtils;
 
 // 解密 ECB 模式加密的数据
 String encryptedEcb = "ECB模式加密的数据";
-String decryptedEcb = SecurityConfig.sm4EcbDecrypt(encryptedEcb);
+String decryptedEcb = SecurityUtils.doSm4Decrypt(encryptedEcb);
 System.out.println("ECB解密结果：" + decryptedEcb);
 
 // 解密 CBC 模式加密的数据
 String encryptedCbc = "CBC模式加密的数据";
-String decryptedCbc = SecurityConfig.sm4CbcDecrypt(encryptedCbc);
+String decryptedCbc = SecurityUtils.doSm4CbcDecrypt(encryptedCbc);
 System.out.println("CBC解密结果：" + decryptedCbc);
+```
+
+## MD5 哈希算法使用指南
+
+MD5 是一种广泛使用的哈希算法，可用于生成数据摘要。
+
+### 计算字符串的 MD5 值
+
+```java
+import run.yigou.gxzy.security.SecurityUtils;
+
+String text = "需要计算MD5的数据";
+String md5Value = SecurityUtils.calcMd5(text);
+System.out.println("MD5值：" + md5Value);
+```
+
+## AES 对称加密使用指南
+
+AES 是一种广泛使用的对称加密算法，安全性高。
+
+### 第一步：使用默认密钥进行 AES 加密/解密
+
+```java
+import run.yigou.gxzy.security.SecurityUtils;
+
+// 使用默认密钥进行 AES 加密
+String plainText = "需要加密的数据";
+String encrypted = SecurityUtils.aesEncrypt(plainText);
+System.out.println("AES加密结果：" + encrypted);
+
+// 使用默认密钥进行 AES 解密
+String decrypted = SecurityUtils.aesDecrypt(encrypted);
+System.out.println("AES解密结果：" + decrypted);
+```
+
+### 第二步：使用自定义密钥进行 AES 加密/解密
+
+```java
+import run.yigou.gxzy.security.SecurityUtils;
+
+// 使用自定义密钥进行 AES 加密
+String plainText = "需要加密的数据";
+String key = "your_custom_key_16bytes";
+String encrypted = SecurityUtils.aesEncrypt(plainText, key);
+System.out.println("自定义密钥AES加密结果：" + encrypted);
+
+// 使用自定义密钥进行 AES 解密
+String decrypted = SecurityUtils.aesDecrypt(encrypted, key);
+System.out.println("自定义密钥AES解密结果：" + decrypted);
+```
+
+### 第三步：文件加密/解密
+
+```java
+import run.yigou.gxzy.security.SecurityUtils;
+import java.io.File;
+
+// 加密文件
+File sourceFile = new File("/path/to/source/file.txt");
+File encryptedFile = SecurityUtils.aesEncryptFile(sourceFile, "/path/to/output/", "encrypted_file.txt", "your_key");
+
+// 解密文件
+File decryptedFile = SecurityUtils.aesDecryptFile(encryptedFile, "/path/to/output/", "decrypted_file.txt", "your_key");
 ```
 
 ## 工具类说明
 
-### SecurityConfig 类
+### SecurityUtils 类
 
-这是主要的加密配置类，提供了便捷的 SM4 加密/解密方法：
+这是主要的安全工具类，提供了所有加密/解密、签名/验签等相关功能：
 
-- `sm4EcbEncrypt(String plainText)` - 使用默认密钥进行 ECB 模式加密
-- `sm4EcbDecrypt(String cipherText)` - 使用默认密钥进行 ECB 模式解密
-- `sm4CbcEncrypt(String plainText)` - 使用默认密钥和 IV 进行 CBC 模式加密
-- `sm4CbcDecrypt(String cipherText)` - 使用默认密钥和 IV 进行 CBC 模式解密
-- `sm4EcbEncrypt(String plainText, String key)` - 使用指定密钥进行 ECB 模式加密
-- `sm4EcbDecrypt(String cipherText, String key)` - 使用指定密钥进行 ECB 模式解密
-- `sm4CbcEncrypt(String plainText, String key, String iv)` - 使用指定密钥和 IV 进行 CBC 模式加密
-- `sm4CbcDecrypt(String cipherText, String key, String iv)` - 使用指定密钥和 IV 进行 CBC 模式解密
-
-### SM2Util 类
-
-SM2 工具类提供了 SM2 公钥加密的相关功能：
-
-- `initSM2KeysWithXY(String pubX, String pubY)` - 使用公钥坐标初始化
-- `initSM2KeysWithFullPublicKey(String pubKey)` - 使用完整公钥初始化
-- `encrypt(byte[] data)` - 公钥加密
-- `verify(byte[] data, byte[] signature)` - 签名验证
+- `initSM2PublicKey(String publicKeyX, String publicKeyY)` - 使用公钥坐标初始化SM2公钥
+- `initSM2PublicKeyWithFullFormat(String fullPublicKey)` - 使用完整公钥初始化SM2公钥
+- `doSm2Encrypt(String msgString)` - SM2公钥加密
+- `doSm2Decrypt(String encryptedData)` - SM2私钥解密（仅服务端使用）
+- `doSignature(String data)` - SM2私钥签名（仅服务端使用）
+- `doVerifySignature(String data, String signature)` - SM2公钥验签
+- `doSm4Encrypt(String msgString)` - SM4 ECB模式加密（使用默认密钥）
+- `doSm4Decrypt(String encryptedData)` - SM4 ECB模式解密（使用默认密钥）
+- `doSm4CbcEncrypt(String msgString)` - SM4 CBC模式加密（使用默认密钥和IV）
+- `doSm4CbcDecrypt(String encryptedData)` - SM4 CBC模式解密（使用默认密钥和IV）
+- `doSm4Encrypt(String msgString, String key)` - SM4 ECB模式加密（使用自定义密钥）
+- `doSm4Decrypt(String encryptedData, String key)` - SM4 ECB模式解密（使用自定义密钥）
+- `doSm4CbcEncrypt(String msgString, String key, String iv)` - SM4 CBC模式加密（使用自定义密钥和IV）
+- `doSm4CbcDecrypt(String encryptedData, String key, String iv)` - SM4 CBC模式解密（使用自定义密钥和IV）
+- `calcMd5(String originString)` - 计算字符串的MD5值
+- `aesEncrypt(String data)` - AES加密（使用默认密钥）
+- `aesDecrypt(String base64Data)` - AES解密（使用默认密钥）
+- `aesEncrypt(String data, String secretKey)` - AES加密（使用自定义密钥）
+- `aesDecrypt(String base64Data, String secretKey)` - AES解密（使用自定义密钥）
+- `aesEncryptFile(File sourceFile, String dir, String toFileName, String secretKey)` - AES文件加密
+- `aesDecryptFile(File sourceFile, String dir, String toFileName, String secretKey)` - AES文件解密
 
 ## 常见问题
 
@@ -236,50 +302,42 @@ SM2 工具类提供了 SM2 公钥加密的相关功能：
 下面是一个完整的使用示例：
 
 ```java
-public class CryptoExample {
+public class SecurityExample {
     public static void main(String[] args) {
         try {
-            // SM2 加密示例
-            String publicKeyX = "your_public_key_x";
-            String publicKeyY = "your_public_key_y";
+            // 初始化SM2公钥
+            String fullPublicKey = "041234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef" +
+                                  "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321";
+            SecurityUtils.initSM2PublicKeyWithFullFormat(fullPublicKey);
             
-            SM2Util sm2Util = SM2Util.initSM2KeysWithXY(publicKeyX, publicKeyY);
+            // SM2 加密示例
             String plainText = "Hello, SM2!";
-            byte[] encrypted = sm2Util.encrypt(plainText.getBytes("UTF-8"));
-            String encryptedHex = bytesToHex(encrypted);
-            System.out.println("SM2 加密结果: " + encryptedHex);
+            String encrypted = SecurityUtils.doSm2Encrypt(plainText);
+            System.out.println("SM2 加密结果: " + encrypted);
             
             // SM4 加密示例
             String text = "Hello, SM4!";
-            String encryptedText = SecurityConfig.sm4CbcEncrypt(text);
-            String decryptedText = SecurityConfig.sm4CbcDecrypt(encryptedText);
+            String encryptedText = SecurityUtils.doSm4CbcEncrypt(text);
+            String decryptedText = SecurityUtils.doSm4CbcDecrypt(encryptedText);
             System.out.println("SM4 原文: " + text);
             System.out.println("SM4 解密结果: " + decryptedText);
+            
+            // MD5 示例
+            String md5Text = "Hello, MD5!";
+            String md5Value = SecurityUtils.calcMd5(md5Text);
+            System.out.println("MD5 值: " + md5Value);
+            
+            // AES 示例
+            String aesText = "Hello, AES!";
+            String aesEncrypted = SecurityUtils.aesEncrypt(aesText);
+            String aesDecrypted = SecurityUtils.aesDecrypt(aesEncrypted);
+            System.out.println("AES 原文: " + aesText);
+            System.out.println("AES 解密结果: " + aesDecrypted);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
-    // 辅助方法：字节数组转十六进制字符串
-    private static String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
-    }
-    
-    // 辅助方法：十六进制字符串转字节数组
-    private static byte[] hexToBytes(String hex) {
-        int len = hex.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
-                                + Character.digit(hex.charAt(i+1), 16));
-        }
-        return data;
-    }
 }
 ```
 
-以上就是在 Android 项目中使用国密 SM2/SM4 算法的详细步骤。如有任何疑问，请参考源代码或联系技术支持。
+以上就是在 Android 项目中使用 SecurityUtils 类进行各种安全操作的详细步骤。如有任何疑问，请参考源代码或联系技术支持。
