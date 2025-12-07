@@ -152,6 +152,9 @@ dependencies {
     //Android平台通用的RSA算法工具类及其例子 https://github.com/gzu-liyujiang/RSAUtils
     implementation 'com.github.gzu-liyujiang:RSAUtils:2.0.0'
 
+    // 添加Bouncy Castle库以支持国密SM2算法
+    implementation 'org.bouncycastle:bcprov-jdk15to18:1.76'
+
     //AndroidUtilCode 是一个强大易用的安卓工具类库，它合理地封装了安卓开发中常用的函数，具有完善的 Demo 和单元测试
     implementation 'com.blankj:utilcodex:1.31.1'
     // Markwon dependencies for Markdown rendering

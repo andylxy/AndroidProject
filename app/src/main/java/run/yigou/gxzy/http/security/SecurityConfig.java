@@ -1,10 +1,12 @@
 package run.yigou.gxzy.http.security;
 
 import android.util.Base64;
+import android.util.Log;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 import java.util.Map;
 
 import javax.crypto.Mac;
@@ -15,11 +17,19 @@ import com.hjq.http.config.IRequestApi;
 import com.hjq.http.model.BodyType;
 import com.hjq.http.model.HttpParams;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+
+import run.yigou.gxzy.utils.SM2Util;
+
 /**
  * author : Android 轮子哥
  * desc   : 安全配置类，用于管理防重放攻击相关的配置信息
  */
 public class SecurityConfig {
+    
+    private static final String TAG = "SecurityConfig";
     
     /**
      * AccessKey ID
@@ -35,6 +45,28 @@ public class SecurityConfig {
      * 是否启用防重放攻击功能
      */
     private static boolean sEnableAntiReplayAttack = true;
+    
+    /**
+     * SM2公钥参数
+     */
+    private static ECPublicKeyParameters sSm2PublicKey;
+    
+    /**
+     * SM2私钥参数
+     */
+    private static ECPrivateKeyParameters sSm2PrivateKey;
+    
+    /**
+     * 是否启用SM2国密算法
+     */
+    private static boolean sEnableSM2 = false;
+
+    static {
+        // 添加BouncyCastleProvider提供者
+        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
+        Security.addProvider(new BouncyCastleProvider());
+        Log.i(TAG, "BouncyCastleProvider registered in SecurityConfig");
+    }
 
     /**
      * 设置 AccessKey ID
@@ -69,6 +101,38 @@ public class SecurityConfig {
     }
 
     /**
+     * 启用SM2国密算法
+     */
+    public static void enableSM2() {
+        sEnableSM2 = true;
+    }
+
+    /**
+     * 禁用SM2国密算法
+     */
+    public static void disableSM2() {
+        sEnableSM2 = false;
+    }
+
+    /**
+     * 设置SM2公钥
+     * 
+     * @param publicKey SM2公钥参数
+     */
+    public static void setSM2PublicKey(ECPublicKeyParameters publicKey) {
+        sSm2PublicKey = publicKey;
+    }
+
+    /**
+     * 设置SM2私钥
+     * 
+     * @param privateKey SM2私钥参数
+     */
+    public static void setSM2PrivateKey(ECPrivateKeyParameters privateKey) {
+        sSm2PrivateKey = privateKey;
+    }
+
+    /**
      * 获取 AccessKey ID
      * 
      * @return AccessKey ID
@@ -93,6 +157,33 @@ public class SecurityConfig {
      */
     public static boolean isAntiReplayAttackEnabled() {
         return sEnableAntiReplayAttack;
+    }
+    
+    /**
+     * 是否启用了SM2国密算法
+     * 
+     * @return true表示已启用，false表示未启用
+     */
+    public static boolean isSM2Enabled() {
+        return sEnableSM2;
+    }
+    
+    /**
+     * 获取SM2公钥
+     * 
+     * @return SM2公钥参数
+     */
+    public static ECPublicKeyParameters getSM2PublicKey() {
+        return sSm2PublicKey;
+    }
+    
+    /**
+     * 获取SM2私钥
+     * 
+     * @return SM2私钥参数
+     */
+    public static ECPrivateKeyParameters getSM2PrivateKey() {
+        return sSm2PrivateKey;
     }
     
     /**
@@ -137,7 +228,24 @@ public class SecurityConfig {
                 timestamp + "\n" +
                 nonce;
         
-        // 生成签名
+        // 如果启用了SM2，则使用SM2签名，否则使用HMAC-SHA256
+        if (sEnableSM2 && sSm2PrivateKey != null) {
+            // 使用SM2签名
+            try {
+                byte[] signatureBytes = SM2Util.sign(sSm2PrivateKey, stringToSign.getBytes(StandardCharsets.UTF_8));
+                if (signatureBytes != null) {
+                    String signature = Base64.encodeToString(signatureBytes, Base64.NO_WRAP);
+                    EasyLog.print("SM2签名字符串：\n" + stringToSign);
+                    EasyLog.print("SM2签名结果：" + signature);
+                    return signature;
+                }
+            } catch (Exception e) {
+                EasyLog.print("SM2签名过程出现异常：" + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        
+        // 使用默认的HmacSHA256签名
         String signature = hmacSha256(stringToSign, sAccessKeySecret);
         
         EasyLog.print("签名字符串：\n" + stringToSign);

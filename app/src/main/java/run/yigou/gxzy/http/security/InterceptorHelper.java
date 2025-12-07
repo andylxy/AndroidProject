@@ -64,6 +64,11 @@ public class InterceptorHelper {
                 headers.put("X-AccessKeyId", accessKeyId);
                 headers.put("X-Timestamp", timestamp);
                 headers.put("X-Nonce", nonce);
+                
+                // 如果启用了SM2算法，则添加相应标识
+                if (SecurityConfig.isSM2Enabled()) {
+                    headers.put("X-Encryption-Algorithm", "SM2");
+                }
             }
         }
     }
