@@ -227,24 +227,7 @@ public class SecurityConfig {
                 path + "\n" +
                 timestamp + "\n" +
                 nonce;
-        
-        // 如果启用了SM2，则使用SM2签名，否则使用HMAC-SHA256
-        if (sEnableSM2 && sSm2PrivateKey != null) {
-            // 使用SM2签名
-            try {
-                byte[] signatureBytes = SM2Util.sign(sSm2PrivateKey, stringToSign.getBytes(StandardCharsets.UTF_8));
-                if (signatureBytes != null) {
-                    String signature = Base64.encodeToString(signatureBytes, Base64.NO_WRAP);
-                    EasyLog.print("SM2签名字符串：\n" + stringToSign);
-                    EasyLog.print("SM2签名结果：" + signature);
-                    return signature;
-                }
-            } catch (Exception e) {
-                EasyLog.print("SM2签名过程出现异常：" + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-        
+
         // 使用默认的HmacSHA256签名
         String signature = hmacSha256(stringToSign, sAccessKeySecret);
         

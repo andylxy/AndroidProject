@@ -4,13 +4,40 @@ package run.yigou.gxzy.utils;
  * 统一的国密工具类，整合SM2和SM4功能
  * 类似于前端sm-crypto库的使用方式
  * 封装了SM2和SM4常用操作，简化了API调用
+ * 
+ * 注意：在Android客户端场景下，通常只有公钥，主要用于加密数据发送给服务端
  */
 public class CryptoUtil {
     
     // SM2相关方法
     
     /**
-     * 初始化SM2密钥（使用分离的坐标形式）
+     * 初始化SM2公钥（适用于Android客户端场景）
+     * @param publicKeyX 公钥X坐标
+     * @param publicKeyY 公钥Y坐标
+     */
+    public static void initSM2PublicKey(String publicKeyX, String publicKeyY) {
+        SM2Util.getInstance().initPublicKey(publicKeyX, publicKeyY);
+    }
+    
+    /**
+     * 初始化SM2公钥（使用组合公钥格式）
+     * @param publicKey 公钥字符串，格式为"x,y"
+     */
+    public static void initSM2PublicKey(String publicKey) {
+        SM2Util.getInstance().initPublicKeyWithCombinedFormat(publicKey);
+    }
+    
+    /**
+     * 初始化SM2公钥（使用完整公钥格式，类似sm-crypto）
+     * @param fullPublicKey 完整公钥（十六进制字符串，以04开头）
+     */
+    public static void initSM2PublicKeyWithFullFormat(String fullPublicKey) {
+        SM2Util.getInstance().initPublicKeyWithFullFormat(fullPublicKey);
+    }
+    
+    /**
+     * 初始化SM2密钥对（仅在需要完整密钥对时使用）
      * @param publicKeyX 公钥X坐标
      * @param publicKeyY 公钥Y坐标
      * @param privateKeyD 私钥D值
@@ -20,7 +47,7 @@ public class CryptoUtil {
     }
     
     /**
-     * 初始化SM2密钥（使用组合公钥格式）
+     * 初始化SM2密钥对（使用组合公钥格式）
      * @param publicKey 公钥字符串，格式为"x,y"
      * @param privateKeyD 私钥D值
      */
@@ -29,7 +56,7 @@ public class CryptoUtil {
     }
     
     /**
-     * 初始化SM2密钥（使用完整公钥格式，类似sm-crypto）
+     * 初始化SM2密钥对（使用完整公钥格式，类似sm-crypto）
      * @param fullPublicKey 完整公钥（十六进制字符串，以04开头）
      * @param privateKeyD 私钥D值
      */
@@ -38,7 +65,7 @@ public class CryptoUtil {
     }
     
     /**
-     * SM2加密
+     * SM2加密（使用公钥加密，适用于Android客户端场景）
      * @param msgString 待加密消息
      * @return 加密结果（十六进制字符串）
      */
@@ -47,7 +74,7 @@ public class CryptoUtil {
     }
     
     /**
-     * SM2解密
+     * SM2解密（需要私钥，Android客户端通常无法使用）
      * @param encryptedData 加密数据（十六进制字符串）
      * @return 解密结果
      */
@@ -56,7 +83,7 @@ public class CryptoUtil {
     }
     
     /**
-     * SM2签名
+     * SM2签名（需要私钥，Android客户端通常无法使用）
      * @param data 待签名数据
      * @return 签名值（十六进制字符串）
      */
@@ -65,7 +92,7 @@ public class CryptoUtil {
     }
     
     /**
-     * SM2验签
+     * SM2验签（只需要公钥，适用于Android客户端场景）
      * @param data 原始数据
      * @param signature 签名值（十六进制字符串）
      * @return 验签结果

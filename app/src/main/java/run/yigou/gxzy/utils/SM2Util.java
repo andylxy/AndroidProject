@@ -17,6 +17,8 @@ import java.security.Security;
  * Android平台下类似于sm-crypto库的SM2工具类
  * 提供便捷的SM2加密、解密、签名、验签功能
  * 支持两种密钥初始化方式（分离坐标形式和完整公钥形式）
+ * 
+ * 注意：在Android客户端场景下，通常只有公钥，主要用于加密数据发送给服务端
  */
 public class SM2Util {
     private static final String ALGORITHM_NAME = "SM2";
@@ -62,7 +64,47 @@ public class SM2Util {
     }
     
     /**
-     * 初始化密钥对（使用分离的坐标形式）
+     * 初始化公钥（适用于Android客户端场景）
+     * @param publicKeyX 公钥X坐标（十六进制字符串）
+     * @param publicKeyY 公钥Y坐标（十六进制字符串）
+     */
+    public void initPublicKey(String publicKeyX, String publicKeyY) {
+        // 初始化公钥
+        BigInteger x = new BigInteger(publicKeyX, 16);
+        BigInteger y = new BigInteger(publicKeyY, 16);
+        ECPoint pubPoint = curve.createPoint(x, y);
+        this.publicKey = new ECPublicKeyParameters(pubPoint, domainParams);
+    }
+    
+    /**
+     * 初始化公钥（使用组合公钥形式，格式为"x,y"）
+     * @param publicKey 公钥字符串，格式为"x,y"
+     */
+    public void initPublicKeyWithCombinedFormat(String publicKey) {
+        if (publicKey == null || !publicKey.contains(",")) {
+            throw new IllegalArgumentException("Invalid public key format. Expected format: \"x,y\"");
+        }
+        
+        String[] parts = publicKey.split(",", 2);
+        String publicKeyX = parts[0];
+        String publicKeyY = parts[1];
+        initPublicKey(publicKeyX, publicKeyY);
+    }
+    
+    /**
+     * 初始化公钥（使用完整公钥形式，类似sm-crypto）
+     * @param publicKey 完整公钥（十六进制字符串，以04开头）
+     */
+    public void initPublicKeyWithFullFormat(String publicKey) {
+        // 解析完整公钥（去掉04前缀）
+        String pubKeyData = publicKey.startsWith("04") ? publicKey.substring(2) : publicKey;
+        String publicKeyX = pubKeyData.substring(0, 64);
+        String publicKeyY = pubKeyData.substring(64, 128);
+        initPublicKey(publicKeyX, publicKeyY);
+    }
+    
+    /**
+     * 初始化密钥对（使用分离的坐标形式）- 仅在需要完整密钥对时使用
      * @param publicKeyX 公钥X坐标（十六进制字符串）
      * @param publicKeyY 公钥Y坐标（十六进制字符串）
      * @param privateKeyD 私钥D值（十六进制字符串）
@@ -80,7 +122,7 @@ public class SM2Util {
     }
     
     /**
-     * 初始化密钥对（使用组合公钥形式，格式为"x,y"）
+     * 初始化密钥对（使用组合公钥形式，格式为"x,y"）- 仅在需要完整密钥对时使用
      * @param publicKey 公钥字符串，格式为"x,y"
      * @param privateKeyD 私钥D值（十六进制字符串）
      */
@@ -96,7 +138,7 @@ public class SM2Util {
     }
     
     /**
-     * 初始化密钥对（使用完整公钥形式，类似sm-crypto）
+     * 初始化密钥对（使用完整公钥形式，类似sm-crypto）- 仅在需要完整密钥对时使用
      * @param publicKey 完整公钥（十六进制字符串，以04开头）
      * @param privateKeyD 私钥D值（十六进制字符串）
      */
@@ -109,13 +151,13 @@ public class SM2Util {
     }
     
     /**
-     * SM2加密
+     * SM2加密（使用公钥加密，适用于Android客户端场景）
      * @param data 待加密数据
      * @return 加密后的数据（十六进制字符串）
      */
     public String doEncrypt(String data) {
         if (publicKey == null) {
-            throw new IllegalStateException("请先初始化公钥");
+            throw new IllegalStateException("加密需要公钥，请先初始化公钥");
         }
         
         try {
@@ -129,13 +171,13 @@ public class SM2Util {
     }
     
     /**
-     * SM2解密
+     * SM2解密（需要私钥，Android客户端通常无法使用）
      * @param encryptedData 加密数据（十六进制字符串）
      * @return 解密后的原始数据
      */
     public String doDecrypt(String encryptedData) {
         if (privateKey == null) {
-            throw new IllegalStateException("请先初始化私钥");
+            throw new IllegalStateException("解密需要私钥，Android客户端通常无权访问私钥");
         }
         
         try {
@@ -149,13 +191,13 @@ public class SM2Util {
     }
     
     /**
-     * SM2签名
+     * SM2签名（需要私钥，Android客户端通常无法使用）
      * @param data 待签名数据
      * @return 签名值（十六进制字符串）
      */
     public String doSignature(String data) {
         if (privateKey == null) {
-            throw new IllegalStateException("请先初始化私钥");
+            throw new IllegalStateException("签名需要私钥，Android客户端通常无权访问私钥");
         }
         
         try {
@@ -171,14 +213,31 @@ public class SM2Util {
     }
     
     /**
-     * SM2验签
+     * SM2签名（静态方法，用于兼容旧版本调用）
+     * @param privateKey 私钥参数
+     * @param dataBytes 待签名数据字节数组
+     * @return 签名值字节数组
+     */
+    public static byte[] sign(ECPrivateKeyParameters privateKey, byte[] dataBytes) {
+        try {
+            org.bouncycastle.crypto.signers.SM2Signer signer = new org.bouncycastle.crypto.signers.SM2Signer();
+            signer.init(true, new ParametersWithRandom(privateKey));
+            signer.update(dataBytes, 0, dataBytes.length);
+            return signer.generateSignature();
+        } catch (Exception e) {
+            throw new RuntimeException("SM2签名失败", e);
+        }
+    }
+    
+    /**
+     * SM2验签（只需要公钥，适用于Android客户端场景）
      * @param data 原始数据
      * @param signature 签名值（十六进制字符串）
      * @return 验签结果
      */
     public boolean doVerifySignature(String data, String signature) {
         if (publicKey == null) {
-            throw new IllegalStateException("请先初始化公钥");
+            throw new IllegalStateException("验签需要公钥，请先初始化公钥");
         }
         
         try {
@@ -235,5 +294,21 @@ public class SM2Util {
     
     public ECPrivateKeyParameters getPrivateKey() {
         return privateKey;
+    }
+    
+    /**
+     * 检查是否已设置公钥
+     * @return true表示已设置公钥，false表示未设置
+     */
+    public boolean hasPublicKey() {
+        return publicKey != null;
+    }
+    
+    /**
+     * 检查是否已设置私钥
+     * @return true表示已设置私钥，false表示未设置
+     */
+    public boolean hasPrivateKey() {
+        return privateKey != null;
     }
 }
