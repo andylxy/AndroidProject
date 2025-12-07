@@ -21,8 +21,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 
-import run.yigou.gxzy.utils.SM2Util;
-
 /**
  * author : Android 轮子哥
  * desc   : 安全配置类，用于管理防重放攻击相关的配置信息
@@ -227,7 +225,7 @@ public class SecurityConfig {
                 path + "\n" +
                 timestamp + "\n" +
                 nonce;
-
+        
         // 使用默认的HmacSHA256签名
         String signature = hmacSha256(stringToSign, sAccessKeySecret);
         
