@@ -48,7 +48,6 @@ import run.yigou.gxzy.utils.ThreadUtil;
 
 public class ConvertEntity {
 
-
     /**
      * 初始化单个数据的提示信息
      * 该方法用于从数据库中加载导航信息和相关书籍内容，并将它们存储在内存中以便快速访问
@@ -118,9 +117,6 @@ public class ConvertEntity {
     private static void loadBookContent(TipsSingleData tipsSingleData, TabNavBody item) {
         // 获取书籍章节列表
         List<HH2SectionData> bookChapterList = ConvertEntity.getBookChapterDetailList(item.getBookNo());
-//        if (item.getBookNo() ==10001){
-//            EasyLog.print("加载了10001");
-//        }
         // 检查章节列表是否已加载
         if (bookChapterList != null && !bookChapterList.isEmpty()) {
             // 将章节列表存储在内存中
@@ -147,7 +143,6 @@ public class ConvertEntity {
         }
     }
 
-
     public static void saveYaoAlia(List<YaoAlia> yaoAliaList) {
         DbService.getInstance().mYaoAliasService.deleteAll();
         for (YaoAlia yaoAlia : yaoAliaList) {
@@ -159,9 +154,7 @@ public class ConvertEntity {
     }
 
     public static List<ZhongYaoAlia> getYaoAlia() {
-
         return DbService.getInstance().mYaoAliasService.findAll();
-
     }
 
     public static void saveAbout(List<About> aboutList) {
@@ -172,15 +165,10 @@ public class ConvertEntity {
     }
 
     public static List<About> getAbout() {
-
-
         return DbService.getInstance().mAboutService.findAll();
-
     }
 
-
     public static void saveTabNvaInDb(List<TabNav> bookNavList, HomeFragment homeFragment) {
-
         int order = 0;
         for (TabNav nav : bookNavList) {
             // 内容列表存在才添加
@@ -197,16 +185,12 @@ public class ConvertEntity {
                     } catch (Exception e) {
                         // 处理异常，比如记录日志、通知管理员等
                         EasyLog.print("Failed to addEntity: " + e.getMessage());
-                        // 根据具体情况决定是否需要重新抛出异常
-                        //throw e;
                     }
-
                 } else {
                     tabNavId = navList.get(0).getTabNavId();
                 }
 
                 for (TabNavBody item : nav.getNavList()) {
-
                     if (item.getBookNo() > 0)
                         TipsSingleData.getInstance().getNavTabBodyMap().put(item.getBookNo(), item);
                     // 当前数据不存则,添加到数据库
@@ -220,29 +204,19 @@ public class ConvertEntity {
                             // 处理异常，比如记录日志、通知管理员等
                             EasyLog.print("Failed to addEntity: " + e.getMessage());
                             return;
-                            // 根据具体情况决定是否需要重新抛出异常
-                            //throw e;
                         }
                         // 获取章节列表
                         //todo 添加延时执行
-                        ThreadUtil.runInBackground(() -> {
-                            getChapterList(homeFragment, item);
-                        });
-
+                        ThreadUtil.runInBackground(() -> getChapterList(homeFragment, item));
                     }
                 }
-
             }
-
-
         }
     }
 
     public static void getChapterList(HomeFragment homeFragment, TabNavBody item) {
-
         EasyHttp.get(homeFragment)
                 .api(new ChapterListApi().setBookId(item.getBookNo()))
-
                 .request(new HttpCallback<HttpData<List<Chapter>>>(homeFragment) {
                     @Override
                     public void onSucceed(HttpData<List<Chapter>> data) {
@@ -258,8 +232,6 @@ public class ConvertEntity {
                                         // 处理异常，比如记录日志、通知管理员等
                                         EasyLog.print("Failed to addEntity: " + e.getMessage());
                                         return;
-                                        // 根据具体情况决定是否需要重新抛出异常
-                                        //throw e;
                                     }
                                 }
                             }
@@ -269,10 +241,8 @@ public class ConvertEntity {
                     @Override
                     public void onFail(Exception e) {
                         super.onFail(e);
-
                     }
                 });
-
     }
 
     public static void saveMingCiContent(List<MingCiContent> detailList) {
@@ -286,19 +256,14 @@ public class ConvertEntity {
             beiMingCi.setSignatureId(mingCiContent.getSignatureId());
             beiMingCi.setImageUrl(mingCiContent.getImageUrl());
             beiMingCi.setID(mingCiContent.getID());
-            //yao1.setHeight(yao.getHeight());
             try {
                 DbService.getInstance().mBeiMingCiService.addEntity(beiMingCi);
             } catch (Exception e) {
                 // 处理异常，比如记录日志、通知管理员等
                 EasyLog.print("Failed to add entity: " + e.getMessage());
-                // 根据具体情况决定是否需要重新抛出异常
-                //throw e;
             }
-
         }
     }
-
 
     public static void saveYaoData(List<Yao> detailList) {
         //保存内容
@@ -316,14 +281,9 @@ public class ConvertEntity {
             } catch (Exception e) {
                 // 处理异常，比如记录日志、通知管理员等
                 EasyLog.print("Failed to add entity: " + e.getMessage());
-                // 根据具体情况决定是否需要重新抛出异常
-                //throw e;
             }
-
-
         }
     }
-
 
     public static void getFangDetailList(List<Fang> netFangDetailList, int bookId) {
         if (netFangDetailList == null || netFangDetailList.isEmpty() || bookId <= 0) {
@@ -331,19 +291,15 @@ public class ConvertEntity {
             return;
         }
 
-        StringBuilder chapterId = new StringBuilder();
         try {
-
             ArrayList<YaoFang> yaoFangList = DbService.getInstance().mYaoFangService.find(YaoFangDao.Properties.BookId.eq(bookId));
             for (YaoFang fang : yaoFangList) {
-
                 DbService.getInstance().mYaoFangBodyService.deleteAll(YaoFangBodyDao.Properties.YaoFangID.eq(fang.getYaoFangID()));
                 DbService.getInstance().mYaoFangService.deleteEntity(fang);
             }
 
             for (Fang fang : netFangDetailList) {
-                chapterId.setLength(0);
-                chapterId.append(StringHelper.getUuid());
+                StringBuilder chapterId = new StringBuilder(StringHelper.getUuid());
                 YaoFang yaoFang = new YaoFang();
                 yaoFang.setYaoCount(fang.getYaoCount());
                 yaoFang.setName(fang.getName());
@@ -367,7 +323,6 @@ public class ConvertEntity {
             EasyLog.print("Error processing detail list: " + e.getMessage());
             throw e;
         }
-
     }
 
     private static @NonNull YaoFangBody getYaoFangBody(YaoUse content, StringBuilder chapterId) {
@@ -385,9 +340,7 @@ public class ConvertEntity {
         return yaoFangBody;
     }
 
-
     public static List<DataItem> getBookChapterDetailList(Chapter chapter) {
-
         ArrayList<BookChapter> bookChapterList = DbService.getInstance().mBookChapterService.find(BookChapterDao.Properties.SignatureId.eq(chapter.getSignatureId()));
 
         List<DataItem> dataList = new ArrayList<>();
@@ -405,11 +358,10 @@ public class ConvertEntity {
                     content.setFangList(
                             (bookChapterBody.getFangList() != null && !bookChapterBody.getFangList().isEmpty())
                                     ? Arrays.asList(bookChapterBody.getFangList().split(","))
-                                    : Arrays.asList()
+                                    : new ArrayList<>()
                     );
                     dataList.add(content);
                 }
-
             }
             return dataList;
         } catch (Exception e) {
@@ -424,30 +376,26 @@ public class ConvertEntity {
             EasyLog.print("AiConfig is empty or null.");
             return false;
         }
-        StringBuilder aiConfigId = new StringBuilder();
+        
         try {
-
             DbService.getInstance().mAiConfigService.deleteAll();
             DbService.getInstance().mAiConfigBodyService.deleteAll();
 
             for (AiConfig aiConfig : aiConfigs) {
-                aiConfigId.setLength(0);
-                aiConfigId.append(StringHelper.getUuid());
-                aiConfig.setAiConfigId(aiConfigId.toString());
+                String aiConfigId = StringHelper.getUuid();
+                aiConfig.setAiConfigId(aiConfigId);
                 if (aiConfig.getApiKey() != null && !aiConfig.getApiKey().isEmpty())
                     aiConfig.setApiKey(SecurityUtils.rc4Encrypt(aiConfig.getApiKey()));
                 DbService.getInstance().mAiConfigService.addEntity(aiConfig);
 
                 for (AiConfigBody aiConfigBody : aiConfig.getModelList()) {
                     aiConfigBody.setAiConfigBodyId(StringHelper.getUuid());
-                    aiConfigBody.setAiConfigId(aiConfigId.toString());
+                    aiConfigBody.setAiConfigId(aiConfigId);
                     DbService.getInstance().mAiConfigBodyService.addEntity(aiConfigBody);
                 }
             }
-
         } catch (Exception e) {
             EasyLog.print("Error processing detail list: " + e.getMessage());
-            //  throw e;
             return false;
         }
         return true;
@@ -458,9 +406,8 @@ public class ConvertEntity {
             EasyLog.print("BookDetailList is empty or null. or  bookId <=0 .");
             return false;
         }
-        StringBuilder chapterId = new StringBuilder();
+        
         try {
-
             ArrayList<BookChapter> bookChapterList = DbService.getInstance().mBookChapterService
                     .find(BookChapterDao.Properties.SignatureId.eq(chapter.getSignatureId()));
             for (BookChapter bookChapter : bookChapterList) {
@@ -470,24 +417,22 @@ public class ConvertEntity {
             }
 
             for (HH2SectionData hh2SectionData : netDetailList) {
-                chapterId.setLength(0);
-                chapterId.append(StringHelper.getUuid());
+                String chapterId = StringHelper.getUuid();
 
                 BookChapter bookChapter = new BookChapter();
                 bookChapter.setSection(hh2SectionData.getSection());
                 bookChapter.setHeader(hh2SectionData.getHeader());
                 bookChapter.setBookId(chapter.getBookId());
-                bookChapter.setBookChapterId(chapterId.toString());
+                bookChapter.setBookChapterId(chapterId);
                 bookChapter.setSignature(hh2SectionData.getSignature());
                 bookChapter.setSignatureId(hh2SectionData.getSignatureId());
                 DbService.getInstance().mBookChapterService.addEntity(bookChapter);
 
                 for (DataItem content : hh2SectionData.getData()) {
-
                     // 获取章节内容
                     BookChapterBody bookChapterBody = new BookChapterBody();
                     bookChapterBody.setBookChapterBodyId(StringHelper.getUuid());
-                    bookChapterBody.setBookChapterId(chapterId.toString());
+                    bookChapterBody.setBookChapterId(chapterId);
                     bookChapterBody.setText(SecurityUtils.rc4Encrypt(content.getText()));
                     bookChapterBody.setNote(SecurityUtils.rc4Encrypt(content.getNote()));
                     bookChapterBody.setSectionvideo(SecurityUtils.rc4Encrypt(content.getSectionvideo()));
@@ -498,10 +443,8 @@ public class ConvertEntity {
                     DbService.getInstance().mBookChapterBodyService.addEntity(bookChapterBody);
                 }
             }
-
         } catch (Exception e) {
             EasyLog.print("Error processing detail list: " + e.getMessage());
-            //  throw e;
             return false;
         }
         return true;
@@ -512,9 +455,8 @@ public class ConvertEntity {
             EasyLog.print("BookDetailList is empty or null. or  bookId <=0 .");
             return false;
         }
-        StringBuilder chapterId = new StringBuilder();
+        
         try {
-
             ArrayList<BookChapter> bookChapterList = DbService.getInstance().mBookChapterService.find(BookChapterDao.Properties.BookId.eq(bookId));
             for (BookChapter bookChapter : bookChapterList) {
                 DbService.getInstance().mBookChapterBodyService.deleteAll(BookChapterBodyDao.Properties.BookChapterId.eq(bookChapter.getBookChapterId()));
@@ -522,24 +464,22 @@ public class ConvertEntity {
             }
 
             for (HH2SectionData hh2SectionData : netDetailList) {
-                chapterId.setLength(0);
-                chapterId.append(StringHelper.getUuid());
+                String chapterId = StringHelper.getUuid();
 
                 BookChapter bookChapter = new BookChapter();
                 bookChapter.setSection(hh2SectionData.getSection());
                 bookChapter.setHeader(hh2SectionData.getHeader());
                 bookChapter.setBookId(bookId);
-                bookChapter.setBookChapterId(chapterId.toString());
+                bookChapter.setBookChapterId(chapterId);
                 bookChapter.setSignature(hh2SectionData.getSignature());
                 bookChapter.setSignatureId(hh2SectionData.getSignatureId());
                 DbService.getInstance().mBookChapterService.addEntity(bookChapter);
 
                 for (DataItem content : hh2SectionData.getData()) {
-
                     // 获取章节内容
                     BookChapterBody bookChapterBody = new BookChapterBody();
                     bookChapterBody.setBookChapterBodyId(StringHelper.getUuid());
-                    bookChapterBody.setBookChapterId(chapterId.toString());
+                    bookChapterBody.setBookChapterId(chapterId);
                     bookChapterBody.setText(SecurityUtils.rc4Encrypt(content.getText()));
                     bookChapterBody.setNote(SecurityUtils.rc4Encrypt(content.getNote()));
                     bookChapterBody.setSectionvideo(SecurityUtils.rc4Encrypt(content.getSectionvideo()));
@@ -550,17 +490,14 @@ public class ConvertEntity {
                     DbService.getInstance().mBookChapterBodyService.addEntity(bookChapterBody);
                 }
             }
-
         } catch (Exception e) {
             EasyLog.print("Error processing detail list: " + e.getMessage());
-            //  throw e;
             return false;
         }
         return true;
     }
 
     public static List<HH2SectionData> getBookChapterDetailList(int bookId) {
-
         ArrayList<BookChapter> bookChapterList = DbService.getInstance().mBookChapterService.find(BookChapterDao.Properties.BookId.eq(bookId));
 
         List<HH2SectionData> detailList = new ArrayList<>();
@@ -580,7 +517,7 @@ public class ConvertEntity {
                     content.setFangList(
                             (bookChapterBody.getFangList() != null && !bookChapterBody.getFangList().isEmpty())
                                     ? Arrays.asList(bookChapterBody.getFangList().split(","))
-                                    : Arrays.asList()
+                                    : new ArrayList<>()
                     );
                     dataList.add(content);
                 }
@@ -614,12 +551,12 @@ public class ConvertEntity {
                 fang.setText(SecurityUtils.rc4Decrypt(yaoFang.getText()));
                 fang.setFangList((yaoFang.getFangList() != null && !yaoFang.getFangList().isEmpty())
                         ? Arrays.asList(yaoFang.getFangList().split(","))
-                        : Arrays.asList());
+                        : new ArrayList<>());
                 fang.setYaoList((yaoFang.getYaoList() != null && !yaoFang.getYaoList().isEmpty())
                         ? Arrays.asList(yaoFang.getYaoList().split(","))
-                        : Arrays.asList());
+                        : new ArrayList<>());
                 fang.setID(yaoFang.getID());
-                //
+                
                 for (YaoFangBody content : yaoFang.getStandardYaoList()) {
                     // 获取章节内容
                     YaoUse yaoUse = new YaoUse();
@@ -641,7 +578,6 @@ public class ConvertEntity {
     }
 
     public static ArrayList<Yao> getYaoData() {
-
         ArrayList<Yao> detailList = new ArrayList<>();
         ArrayList<ZhongYao> yaoList = DbService.getInstance().mYaoService.findAll();
         for (ZhongYao yao : yaoList) {
@@ -650,12 +586,10 @@ public class ConvertEntity {
             yao1.setName(yao.getName());
 
             if (yao.getYaoList() != null && !yao.getYaoList().isEmpty()) {
-                //List<String> yaliasList =  Arrays.asList(yao.getYaoList().split("[,，。、.;]"));
                 yao1.setYaoList(Arrays.asList(yao.getYaoList().split("[,，。、.;]")));
             }
 
             yao1.setID(yao.getID());
-            //yao1.setHeight(yao.getHeight());
             detailList.add(yao1);
         }
 
@@ -663,26 +597,20 @@ public class ConvertEntity {
     }
 
     public static ArrayList<MingCiContent> getMingCi() {
-
         ArrayList<MingCiContent> detailList = new ArrayList<>();
         ArrayList<BeiMingCi> beiMingCiList = DbService.getInstance().mBeiMingCiService.findAll();
         for (BeiMingCi beiMingCi : beiMingCiList) {
             MingCiContent birdContent = new MingCiContent();
-            birdContent.setText(SecurityUtils.rc4Decrypt((beiMingCi.getText())));
+            birdContent.setText(SecurityUtils.rc4Decrypt(beiMingCi.getText()));
             birdContent.setName(beiMingCi.getName());
-            //birdContent.setMingCiList(String.join(",", beiMingCi.getMingCiList()));
             birdContent.setYaoList(
                     (beiMingCi.getMingCiList() != null && !beiMingCi.getMingCiList().isEmpty())
                             ? Arrays.asList(beiMingCi.getMingCiList().split(","))
-                            : Arrays.asList()
-
+                            : new ArrayList<>()
             );
             birdContent.setID(beiMingCi.getID());
-            //yao1.setHeight(yao.getHeight());
             detailList.add(birdContent);
         }
         return detailList;
     }
-
-
 }
