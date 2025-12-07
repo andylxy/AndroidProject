@@ -45,7 +45,7 @@
             android:hint="@string/common_phone_input_hint"
             android:inputType="textVisiblePassword"
             android:singleLine="true"
-            app:regexType="mobile" />
+            app:regexType="name" />
 
         <View
             style="@style/HorizontalLineStyle"

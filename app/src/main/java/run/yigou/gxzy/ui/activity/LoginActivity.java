@@ -270,12 +270,14 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             return;
         }
         if (view == mCommitView) {
-            if (mPhoneView.getText().toString().length() != 11) {
-                mPhoneView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.shake_anim));
-                mCommitView.showError(3000);
-                toast(R.string.common_phone_input_error);
-                return;
-            }
+            // 判断账号，手机都可以登陆，注释掉以下手机号判断
+            // 判断手机号格式是否正确
+//            if (mPhoneView.getText().toString().length() != 11) {
+//                mPhoneView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.shake_anim));
+//                mCommitView.showError(3000);
+//                toast(R.string.common_phone_input_error);
+//                return;
+//            }
 
             // 隐藏软键盘
             hideKeyboard(getCurrentFocus());
@@ -284,10 +286,10 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             LoginApi requestApi = null;
             if (mLongInType == LoginType.mLoginAccount) {
 
-                if (mPhoneView.getText().toString() == null || mPasswordView.getText() .toString()== null) {
+                if (mPhoneView.getText().toString() == null || mPasswordView.getText().toString() == null) {
                     toast("请输入账号和密码");
                 }
-                String passwd = SecurityUtils.doSm2Encrypt(mPasswordView.getText().toString()) ;
+                String passwd = SecurityUtils.doSm2Encrypt(mPasswordView.getText().toString());
                 requestApi = new LoginApi()
                         .setUserName(mPhoneView.getText().toString())
                         .setPassword(passwd);

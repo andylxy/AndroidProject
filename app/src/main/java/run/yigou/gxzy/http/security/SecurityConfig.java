@@ -199,9 +199,10 @@ public class SecurityConfig {
      * @return 当前时间戳（毫秒）
      */
     public static String getCurrentTimestamp() {
+        // 获取当前时间戳,它是什么格式的。utc时间戳还是now？
         return String.valueOf(System.currentTimeMillis());
     }
-    
+
     /**
      * 为请求生成签名
      * 
