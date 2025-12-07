@@ -11,7 +11,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import run.yigou.gxzy.utils.RC4Helper;
+import run.yigou.gxzy.Security.SecurityUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class AiHelper {
             return;
         }
 
-        String  apiKey = "Bearer " + RC4Helper.decrypt(AiConfigHelper.getApiKey());
+        String  apiKey = "Bearer " + SecurityUtils.rc4Decrypt(AiConfigHelper.getApiKey());
 
         // 如果不使用上下文（历史消息），则清空历史记录
         if (!AiConfigHelper.getUseContext()) {

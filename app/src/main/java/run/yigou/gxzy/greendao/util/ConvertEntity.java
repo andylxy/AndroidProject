@@ -42,7 +42,7 @@ import run.yigou.gxzy.ui.tips.DataBeans.YaoUse;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
-import run.yigou.gxzy.utils.RC4Helper;
+import run.yigou.gxzy.Security.SecurityUtils;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
@@ -275,117 +275,6 @@ public class ConvertEntity {
 
     }
 
-    public static void saveMingCiContent(List<MingCiContent> detailList) {
-        DbService.getInstance().mBeiMingCiService.deleteAll();
-        for (MingCiContent mingCiContent : detailList) {
-            BeiMingCi beiMingCi = new BeiMingCi();
-            beiMingCi.setText(RC4Helper.encrypt(mingCiContent.getText()));
-            beiMingCi.setName(mingCiContent.getName());
-            beiMingCi.setMingCiList(String.join(",", mingCiContent.getYaoList()));
-            beiMingCi.setSignature(mingCiContent.getSignature());
-            beiMingCi.setSignatureId(mingCiContent.getSignatureId());
-            beiMingCi.setImageUrl(mingCiContent.getImageUrl());
-            beiMingCi.setID(mingCiContent.getID());
-            //yao1.setHeight(yao.getHeight());
-            try {
-                DbService.getInstance().mBeiMingCiService.addEntity(beiMingCi);
-            } catch (Exception e) {
-                // 处理异常，比如记录日志、通知管理员等
-                EasyLog.print("Failed to add entity: " + e.getMessage());
-                // 根据具体情况决定是否需要重新抛出异常
-                //throw e;
-            }
-
-        }
-    }
-
-
-    public static void saveYaoData(List<Yao> detailList) {
-        //保存内容
-        DbService.getInstance().mYaoService.deleteAll();
-        for (Yao yao : detailList) {
-            ZhongYao yao1 = new ZhongYao();
-            yao1.setText(RC4Helper.encrypt(yao.getText()));
-            yao1.setName(yao.getName());
-            yao1.setYaoList(String.join(",", yao.getYaoList()));
-            yao1.setID(yao.getID());
-            yao1.setSignature(yao.getSignature());
-            yao1.setSignatureId(yao.getSignatureId());
-            try {
-                DbService.getInstance().mYaoService.addEntity(yao1);
-            } catch (Exception e) {
-                // 处理异常，比如记录日志、通知管理员等
-                EasyLog.print("Failed to add entity: " + e.getMessage());
-                // 根据具体情况决定是否需要重新抛出异常
-                //throw e;
-            }
-
-
-        }
-    }
-
-
-    public static void getFangDetailList(List<Fang> netFangDetailList, int bookId) {
-        if (netFangDetailList == null || netFangDetailList.isEmpty() || bookId <= 0) {
-            EasyLog.print("FangDetailList is empty or null.or  bookId <=0 .");
-            return;
-        }
-
-        StringBuilder chapterId = new StringBuilder();
-        try {
-
-            ArrayList<YaoFang> yaoFangList = DbService.getInstance().mYaoFangService.find(YaoFangDao.Properties.BookId.eq(bookId));
-            for (YaoFang fang : yaoFangList) {
-
-                DbService.getInstance().mYaoFangBodyService.deleteAll(YaoFangBodyDao.Properties.YaoFangID.eq(fang.getYaoFangID()));
-                DbService.getInstance().mYaoFangService.deleteEntity(fang);
-            }
-
-            for (Fang fang : netFangDetailList) {
-                chapterId.setLength(0);
-                chapterId.append(StringHelper.getUuid());
-                YaoFang yaoFang = new YaoFang();
-                yaoFang.setYaoCount(fang.getYaoCount());
-                yaoFang.setName(fang.getName());
-                yaoFang.setBookId(bookId);
-                yaoFang.setID(fang.getID());
-                yaoFang.setDrinkNum(fang.getDrinkNum());
-                yaoFang.setText(RC4Helper.encrypt(fang.getText()));
-                yaoFang.setFangList(String.join(",", fang.getFangList()));
-                yaoFang.setYaoList(String.join(",", fang.getYaoList()));
-                yaoFang.setYaoFangID(chapterId.toString());
-                yaoFang.setSignature(fang.getSignature());
-                yaoFang.setSignatureId(fang.getSignatureId());
-                DbService.getInstance().mYaoFangService.addEntity(yaoFang);
-
-                for (YaoUse content : fang.getStandardYaoList()) {
-                    YaoFangBody yaoFangBody = getYaoFangBody(content, chapterId);
-                    DbService.getInstance().mYaoFangBodyService.addEntity(yaoFangBody);
-                }
-            }
-        } catch (Exception e) {
-            EasyLog.print("Error processing detail list: " + e.getMessage());
-            throw e;
-        }
-
-    }
-
-    private static @NonNull YaoFangBody getYaoFangBody(YaoUse content, StringBuilder chapterId) {
-        YaoFangBody yaoFangBody = new YaoFangBody();
-        yaoFangBody.setYaoFangBodyId(StringHelper.getUuid());
-        yaoFangBody.setYaoFangID(chapterId.toString());
-        yaoFangBody.setSuffix(content.getSuffix());
-        yaoFangBody.setAmount(content.getAmount());
-        yaoFangBody.setYaoID(content.getYaoID());
-        yaoFangBody.setWeight(content.getWeight());
-        yaoFangBody.setShowName(content.getShowName());
-        yaoFangBody.setExtraProcess(content.getExtraProcess());
-        yaoFangBody.setSignatureId(content.getSignatureId());
-        yaoFangBody.setSignature(content.getSignature());
-        return yaoFangBody;
-    }
-
-
     public static List<DataItem> getBookChapterDetailList(Chapter chapter) {
 
         ArrayList<BookChapter> bookChapterList = DbService.getInstance().mBookChapterService.find(BookChapterDao.Properties.SignatureId.eq(chapter.getSignatureId()));
@@ -398,9 +287,9 @@ public class ConvertEntity {
                 }
                 for (BookChapterBody bookChapterBody : bookChapter.getData()) {
                     DataItem content = new DataItem();
-                    content.setText(RC4Helper.decrypt(bookChapterBody.getText()));
-                    content.setNote(RC4Helper.decrypt(bookChapterBody.getNote()));
-                    content.setSectionvideo(RC4Helper.decrypt(bookChapterBody.getSectionvideo()));
+                    content.setText(SecurityUtils.rc4Decrypt(bookChapterBody.getText()));
+                    content.setNote(SecurityUtils.rc4Decrypt(bookChapterBody.getNote()));
+                    content.setSectionvideo(SecurityUtils.rc4Decrypt(bookChapterBody.getSectionvideo()));
                     content.setID(bookChapterBody.getID());
                     content.setFangList(
                             (bookChapterBody.getFangList() != null && !bookChapterBody.getFangList().isEmpty())
@@ -435,7 +324,7 @@ public class ConvertEntity {
                 aiConfigId.append(StringHelper.getUuid());
                 aiConfig.setAiConfigId(aiConfigId.toString());
                 if (aiConfig.getApiKey() != null && !aiConfig.getApiKey().isEmpty())
-                    aiConfig.setApiKey(RC4Helper.encrypt(aiConfig.getApiKey()));
+                    aiConfig.setApiKey(SecurityUtils.rc4Encrypt(aiConfig.getApiKey()));
                 DbService.getInstance().mAiConfigService.addEntity(aiConfig);
 
                 for (AiConfigBody aiConfigBody : aiConfig.getModelList()) {
@@ -488,9 +377,9 @@ public class ConvertEntity {
                     BookChapterBody bookChapterBody = new BookChapterBody();
                     bookChapterBody.setBookChapterBodyId(StringHelper.getUuid());
                     bookChapterBody.setBookChapterId(chapterId.toString());
-                    bookChapterBody.setText(RC4Helper.encrypt(content.getText()));
-                    bookChapterBody.setNote(RC4Helper.encrypt(content.getNote()));
-                    bookChapterBody.setSectionvideo(RC4Helper.encrypt(content.getSectionvideo()));
+                    bookChapterBody.setText(SecurityUtils.rc4Encrypt(content.getText()));
+                    bookChapterBody.setNote(SecurityUtils.rc4Encrypt(content.getNote()));
+                    bookChapterBody.setSectionvideo(SecurityUtils.rc4Encrypt(content.getSectionvideo()));
                     bookChapterBody.setID(content.getID());
                     bookChapterBody.setFangList(String.join(",", content.getFangList()));
                     bookChapterBody.setSignature(content.getSignature());
@@ -540,9 +429,9 @@ public class ConvertEntity {
                     BookChapterBody bookChapterBody = new BookChapterBody();
                     bookChapterBody.setBookChapterBodyId(StringHelper.getUuid());
                     bookChapterBody.setBookChapterId(chapterId.toString());
-                    bookChapterBody.setText(RC4Helper.encrypt(content.getText()));
-                    bookChapterBody.setNote(RC4Helper.encrypt(content.getNote()));
-                    bookChapterBody.setSectionvideo(RC4Helper.encrypt(content.getSectionvideo()));
+                    bookChapterBody.setText(SecurityUtils.rc4Encrypt(content.getText()));
+                    bookChapterBody.setNote(SecurityUtils.rc4Encrypt(content.getNote()));
+                    bookChapterBody.setSectionvideo(SecurityUtils.rc4Encrypt(content.getSectionvideo()));
                     bookChapterBody.setID(content.getID());
                     bookChapterBody.setFangList(String.join(",", content.getFangList()));
                     bookChapterBody.setSignature(content.getSignature());
@@ -573,9 +462,9 @@ public class ConvertEntity {
                 List<DataItem> dataList = new ArrayList<>();
                 for (BookChapterBody bookChapterBody : bookChapter.getData()) {
                     DataItem content = new DataItem();
-                    content.setText(RC4Helper.decrypt(bookChapterBody.getText()));
-                    content.setNote(RC4Helper.decrypt(bookChapterBody.getNote()));
-                    content.setSectionvideo(RC4Helper.decrypt(bookChapterBody.getSectionvideo()));
+                    content.setText(SecurityUtils.rc4Decrypt(bookChapterBody.getText()));
+                    content.setNote(SecurityUtils.rc4Decrypt(bookChapterBody.getNote()));
+                    content.setSectionvideo(SecurityUtils.rc4Decrypt(bookChapterBody.getSectionvideo()));
                     content.setID(bookChapterBody.getID());
                     content.setFangList(
                             (bookChapterBody.getFangList() != null && !bookChapterBody.getFangList().isEmpty())
@@ -611,7 +500,7 @@ public class ConvertEntity {
                 fang.setName(yaoFang.getName());
                 fang.setID(yaoFang.getID());
                 fang.setDrinkNum(yaoFang.getDrinkNum());
-                fang.setText(RC4Helper.decrypt(yaoFang.getText()));
+                fang.setText(SecurityUtils.rc4Decrypt(yaoFang.getText()));
                 fang.setFangList((yaoFang.getFangList() != null && !yaoFang.getFangList().isEmpty())
                         ? Arrays.asList(yaoFang.getFangList().split(","))
                         : Arrays.asList());
@@ -646,7 +535,7 @@ public class ConvertEntity {
         ArrayList<ZhongYao> yaoList = DbService.getInstance().mYaoService.findAll();
         for (ZhongYao yao : yaoList) {
             Yao yao1 = new Yao();
-            yao1.setText(RC4Helper.decrypt(yao.getText()));
+            yao1.setText(SecurityUtils.rc4Decrypt(yao.getText()));
             yao1.setName(yao.getName());
 
             if (yao.getYaoList() != null && !yao.getYaoList().isEmpty()) {
@@ -668,7 +557,7 @@ public class ConvertEntity {
         ArrayList<BeiMingCi> beiMingCiList = DbService.getInstance().mBeiMingCiService.findAll();
         for (BeiMingCi beiMingCi : beiMingCiList) {
             MingCiContent birdContent = new MingCiContent();
-            birdContent.setText(RC4Helper.decrypt((beiMingCi.getText())));
+            birdContent.setText(SecurityUtils.rc4Decrypt((beiMingCi.getText())));
             birdContent.setName(beiMingCi.getName());
             //birdContent.setMingCiList(String.join(",", beiMingCi.getMingCiList()));
             birdContent.setYaoList(

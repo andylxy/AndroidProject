@@ -43,7 +43,7 @@ import run.yigou.gxzy.ui.tips.aimsg.AiConfigHelper;
 import run.yigou.gxzy.ui.tips.aimsg.AiHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import run.yigou.gxzy.utils.DateHelper;
-import run.yigou.gxzy.utils.RC4Helper;
+import run.yigou.gxzy.Security.SecurityUtils;
 import run.yigou.gxzy.utils.ShareUtil;
 import run.yigou.gxzy.utils.ThreadUtil;
 
@@ -114,7 +114,7 @@ public final class AiConfigActivity extends AppActivity {
             }
         });
         if (AiConfigHelper.getApiKey() != null && !AiConfigHelper.getApiKey().isEmpty()) {
-            tv_api_key.setText(apiKeyShow(RC4Helper.decrypt(AiConfigHelper.getApiKey())));
+            tv_api_key.setText(apiKeyShow(SecurityUtils.rc4Decrypt(AiConfigHelper.getApiKey())));
         } else {
             tv_api_key.setText("设置API_KEY（如sk-xxx）");
         }
@@ -312,7 +312,7 @@ public final class AiConfigActivity extends AppActivity {
 
                                 if (aiConfig.getApiKey() != null && !aiConfig.getApiKey().isEmpty()) {
                                     AiConfigHelper.setApiKey(aiConfig.getApiKey());
-                                    tv_api_key.setText(apiKeyShow(RC4Helper.decrypt(aiConfig.getApiKey())));
+                                    tv_api_key.setText(apiKeyShow(SecurityUtils.rc4Decrypt(aiConfig.getApiKey())));
                                 } else {
                                     AiConfigHelper.setApiKey("");
                                 }
@@ -411,7 +411,7 @@ public final class AiConfigActivity extends AppActivity {
                 // 标题可以不用填写
                 .setTitle("API_KEY")
                 // 内容可以不用填写
-                .setContent((AiConfigHelper.getApiKey() != null && !AiConfigHelper.getApiKey().isEmpty()) ? apiKeyShow(RC4Helper.decrypt(AiConfigHelper.getApiKey())) : "设置API_KEY（如sk-xxx）")
+                .setContent((AiConfigHelper.getApiKey() != null && !AiConfigHelper.getApiKey().isEmpty()) ? apiKeyShow(SecurityUtils.rc4Decrypt(AiConfigHelper.getApiKey())) : "设置API_KEY（如sk-xxx）")
                 // 提示可以不用填写
                 .setHint("xx-xxxxxx")
                 // 确定按钮文本
@@ -425,7 +425,7 @@ public final class AiConfigActivity extends AppActivity {
                     @Override
                     public void onConfirm(BaseDialog dialog, String content) {
                         if (content != null && !content.isEmpty()) {
-                            AiConfigHelper.setApiKey(RC4Helper.encrypt(AiConfigHelper.getApiKey()));
+                            AiConfigHelper.setApiKey(SecurityUtils.rc4Encrypt(AiConfigHelper.getApiKey()));
                             tv_api_key.setText(content);
                             ToastUtils.showLong("API_KEY设置成功！");
                         }

@@ -20,7 +20,7 @@ import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
-import run.yigou.gxzy.utils.AESUtil;
+
 
 import com.github.gzuliyujiang.rsautils.AESUtils;
 import com.github.gzuliyujiang.rsautils.RC4Utils;
