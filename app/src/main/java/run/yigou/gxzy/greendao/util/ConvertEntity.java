@@ -42,7 +42,7 @@ import run.yigou.gxzy.ui.tips.DataBeans.YaoUse;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
-import run.yigou.gxzy.utils.RC4Helper;
+import run.yigou.gxzy.Security.SecurityUtils;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
@@ -279,7 +279,7 @@ public class ConvertEntity {
         DbService.getInstance().mBeiMingCiService.deleteAll();
         for (MingCiContent mingCiContent : detailList) {
             BeiMingCi beiMingCi = new BeiMingCi();
-            beiMingCi.setText(RC4Helper.encrypt(mingCiContent.getText()));
+            beiMingCi.setText(SecurityUtils.rc4Encrypt(mingCiContent.getText()));
             beiMingCi.setName(mingCiContent.getName());
             beiMingCi.setMingCiList(String.join(",", mingCiContent.getYaoList()));
             beiMingCi.setSignature(mingCiContent.getSignature());
@@ -305,7 +305,7 @@ public class ConvertEntity {
         DbService.getInstance().mYaoService.deleteAll();
         for (Yao yao : detailList) {
             ZhongYao yao1 = new ZhongYao();
-            yao1.setText(RC4Helper.encrypt(yao.getText()));
+            yao1.setText(SecurityUtils.rc4Encrypt(yao.getText()));
             yao1.setName(yao.getName());
             yao1.setYaoList(String.join(",", yao.getYaoList()));
             yao1.setID(yao.getID());
@@ -350,7 +350,7 @@ public class ConvertEntity {
                 yaoFang.setBookId(bookId);
                 yaoFang.setID(fang.getID());
                 yaoFang.setDrinkNum(fang.getDrinkNum());
-                yaoFang.setText(RC4Helper.encrypt(fang.getText()));
+                yaoFang.setText(SecurityUtils.rc4Encrypt(fang.getText()));
                 yaoFang.setFangList(String.join(",", fang.getFangList()));
                 yaoFang.setYaoList(String.join(",", fang.getYaoList()));
                 yaoFang.setYaoFangID(chapterId.toString());
@@ -398,9 +398,9 @@ public class ConvertEntity {
                 }
                 for (BookChapterBody bookChapterBody : bookChapter.getData()) {
                     DataItem content = new DataItem();
-                    content.setText(RC4Helper.decrypt(bookChapterBody.getText()));
-                    content.setNote(RC4Helper.decrypt(bookChapterBody.getNote()));
-                    content.setSectionvideo(RC4Helper.decrypt(bookChapterBody.getSectionvideo()));
+                    content.setText(SecurityUtils.rc4Decrypt(bookChapterBody.getText()));
+                    content.setNote(SecurityUtils.rc4Decrypt(bookChapterBody.getNote()));
+                    content.setSectionvideo(SecurityUtils.rc4Decrypt(bookChapterBody.getSectionvideo()));
                     content.setID(bookChapterBody.getID());
                     content.setFangList(
                             (bookChapterBody.getFangList() != null && !bookChapterBody.getFangList().isEmpty())
@@ -435,7 +435,7 @@ public class ConvertEntity {
                 aiConfigId.append(StringHelper.getUuid());
                 aiConfig.setAiConfigId(aiConfigId.toString());
                 if (aiConfig.getApiKey() != null && !aiConfig.getApiKey().isEmpty())
-                    aiConfig.setApiKey(RC4Helper.encrypt(aiConfig.getApiKey()));
+                    aiConfig.setApiKey(SecurityUtils.rc4Encrypt(aiConfig.getApiKey()));
                 DbService.getInstance().mAiConfigService.addEntity(aiConfig);
 
                 for (AiConfigBody aiConfigBody : aiConfig.getModelList()) {
@@ -488,9 +488,9 @@ public class ConvertEntity {
                     BookChapterBody bookChapterBody = new BookChapterBody();
                     bookChapterBody.setBookChapterBodyId(StringHelper.getUuid());
                     bookChapterBody.setBookChapterId(chapterId.toString());
-                    bookChapterBody.setText(RC4Helper.encrypt(content.getText()));
-                    bookChapterBody.setNote(RC4Helper.encrypt(content.getNote()));
-                    bookChapterBody.setSectionvideo(RC4Helper.encrypt(content.getSectionvideo()));
+                    bookChapterBody.setText(SecurityUtils.rc4Encrypt(content.getText()));
+                    bookChapterBody.setNote(SecurityUtils.rc4Encrypt(content.getNote()));
+                    bookChapterBody.setSectionvideo(SecurityUtils.rc4Encrypt(content.getSectionvideo()));
                     bookChapterBody.setID(content.getID());
                     bookChapterBody.setFangList(String.join(",", content.getFangList()));
                     bookChapterBody.setSignature(content.getSignature());
@@ -540,9 +540,9 @@ public class ConvertEntity {
                     BookChapterBody bookChapterBody = new BookChapterBody();
                     bookChapterBody.setBookChapterBodyId(StringHelper.getUuid());
                     bookChapterBody.setBookChapterId(chapterId.toString());
-                    bookChapterBody.setText(RC4Helper.encrypt(content.getText()));
-                    bookChapterBody.setNote(RC4Helper.encrypt(content.getNote()));
-                    bookChapterBody.setSectionvideo(RC4Helper.encrypt(content.getSectionvideo()));
+                    bookChapterBody.setText(SecurityUtils.rc4Encrypt(content.getText()));
+                    bookChapterBody.setNote(SecurityUtils.rc4Encrypt(content.getNote()));
+                    bookChapterBody.setSectionvideo(SecurityUtils.rc4Encrypt(content.getSectionvideo()));
                     bookChapterBody.setID(content.getID());
                     bookChapterBody.setFangList(String.join(",", content.getFangList()));
                     bookChapterBody.setSignature(content.getSignature());
@@ -573,9 +573,9 @@ public class ConvertEntity {
                 List<DataItem> dataList = new ArrayList<>();
                 for (BookChapterBody bookChapterBody : bookChapter.getData()) {
                     DataItem content = new DataItem();
-                    content.setText(RC4Helper.decrypt(bookChapterBody.getText()));
-                    content.setNote(RC4Helper.decrypt(bookChapterBody.getNote()));
-                    content.setSectionvideo(RC4Helper.decrypt(bookChapterBody.getSectionvideo()));
+                    content.setText(SecurityUtils.rc4Decrypt(bookChapterBody.getText()));
+                    content.setNote(SecurityUtils.rc4Decrypt(bookChapterBody.getNote()));
+                    content.setSectionvideo(SecurityUtils.rc4Decrypt(bookChapterBody.getSectionvideo()));
                     content.setID(bookChapterBody.getID());
                     content.setFangList(
                             (bookChapterBody.getFangList() != null && !bookChapterBody.getFangList().isEmpty())
@@ -611,7 +611,7 @@ public class ConvertEntity {
                 fang.setName(yaoFang.getName());
                 fang.setID(yaoFang.getID());
                 fang.setDrinkNum(yaoFang.getDrinkNum());
-                fang.setText(RC4Helper.decrypt(yaoFang.getText()));
+                fang.setText(SecurityUtils.rc4Decrypt(yaoFang.getText()));
                 fang.setFangList((yaoFang.getFangList() != null && !yaoFang.getFangList().isEmpty())
                         ? Arrays.asList(yaoFang.getFangList().split(","))
                         : Arrays.asList());
@@ -646,7 +646,7 @@ public class ConvertEntity {
         ArrayList<ZhongYao> yaoList = DbService.getInstance().mYaoService.findAll();
         for (ZhongYao yao : yaoList) {
             Yao yao1 = new Yao();
-            yao1.setText(RC4Helper.decrypt(yao.getText()));
+            yao1.setText(SecurityUtils.rc4Decrypt(yao.getText()));
             yao1.setName(yao.getName());
 
             if (yao.getYaoList() != null && !yao.getYaoList().isEmpty()) {
@@ -668,7 +668,7 @@ public class ConvertEntity {
         ArrayList<BeiMingCi> beiMingCiList = DbService.getInstance().mBeiMingCiService.findAll();
         for (BeiMingCi beiMingCi : beiMingCiList) {
             MingCiContent birdContent = new MingCiContent();
-            birdContent.setText(RC4Helper.decrypt((beiMingCi.getText())));
+            birdContent.setText(SecurityUtils.rc4Decrypt((beiMingCi.getText())));
             birdContent.setName(beiMingCi.getName());
             //birdContent.setMingCiList(String.join(",", beiMingCi.getMingCiList()));
             birdContent.setYaoList(
