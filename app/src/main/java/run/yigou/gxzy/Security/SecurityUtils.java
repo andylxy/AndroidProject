@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -21,6 +22,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 import run.yigou.gxzy.utils.SM2Util;
 import run.yigou.gxzy.utils.SM4Util;
+import run.yigou.gxzy.common.AppConst;
+
+import com.github.gzuliyujiang.rsautils.RC4Utils;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * 安全管理器类，用于全局初始化和管理加密功能
@@ -35,6 +41,13 @@ public final class SecurityUtils {
     // 这种方式最符合Android客户端的使用场景
     private static final String DEFAULT_PUBLIC_KEY = "041234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef" +
             "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321";
+
+    static {
+        // 添加BouncyCastleProvider提供者
+        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
+        Security.addProvider(new BouncyCastleProvider());
+        Log.i(TAG, "BouncyCastleProvider registered in SecurityUtils");
+    }
 
     private SecurityUtils() {
         sm2Util = SM2Util.getInstance();
@@ -607,5 +620,73 @@ public final class SecurityUtils {
      */
     public boolean hasSM2PrivateKey() {
         return sm2Util.hasPrivateKey();
+    }
+
+    // RC4相关方法
+
+    /**
+     * RC4解密Base64字符串
+     *
+     * @param encryptedData 解密Base64字符串
+     * @return 返回解密数据，解密失败则返回null
+     */
+    public static String rc4Decrypt(String encryptedData) {
+        if (encryptedData == null) {
+            return null;
+        }
+
+        byte[] decryptedData = RC4Utils.decryptFromBase64(encryptedData, AppConst.rc4_SecretKey);
+        if (decryptedData == null) {
+            return null;
+        }
+        return new String(decryptedData, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * RC4加密数据
+     *
+     * @param encryptData 加密数据
+     * @return 返回加密后Base64字符串，加密失败则返回null
+     */
+    public static String rc4Encrypt(String encryptData) {
+        if (encryptData == null) {
+            return null;
+        }
+
+        return RC4Utils.encryptToBase64(encryptData.getBytes(StandardCharsets.UTF_8), AppConst.rc4_SecretKey);
+    }
+
+    /**
+     * RC4解密Base64字符串（使用自定义密钥）
+     *
+     * @param encryptedData 解密Base64字符串
+     * @param secretKey     RC4密钥
+     * @return 返回解密数据，解密失败则返回null
+     */
+    public static String rc4Decrypt(String encryptedData, String secretKey) {
+        if (encryptedData == null) {
+            return null;
+        }
+
+        byte[] decryptedData = RC4Utils.decryptFromBase64(encryptedData, secretKey);
+        if (decryptedData == null) {
+            return null;
+        }
+        return new String(decryptedData, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * RC4加密数据（使用自定义密钥）
+     *
+     * @param encryptData 加密数据
+     * @param secretKey   RC4密钥
+     * @return 返回加密后Base64字符串，加密失败则返回null
+     */
+    public static String rc4Encrypt(String encryptData, String secretKey) {
+        if (encryptData == null) {
+            return null;
+        }
+
+        return RC4Utils.encryptToBase64(encryptData.getBytes(StandardCharsets.UTF_8), secretKey);
     }
 }

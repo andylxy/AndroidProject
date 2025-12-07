@@ -1,6 +1,6 @@
 # Android 安全工具类使用详细指南
 
-本文档旨在提供关于如何在 Android 项目中使用 SecurityUtils 类进行各种安全操作的详细步骤说明，包括国密 SM2/SM4 算法、MD5 哈希算法和 AES 加密算法。
+本文档旨在提供关于如何在 Android 项目中使用 SecurityUtils 类进行各种安全操作的详细步骤说明，包括国密 SM2/SM4 算法、MD5 哈希算法、AES 加密算法和 RC4 加密算法。
 
 ## 目录
 
@@ -9,8 +9,9 @@
 3. [SM4 对称加密使用指南](#sm4-对称加密使用指南)
 4. [MD5 哈希算法使用指南](#md5-哈希算法使用指南)
 5. [AES 对称加密使用指南](#aes-对称加密使用指南)
-6. [工具类说明](#工具类说明)
-7. [常见问题](#常见问题)
+6. [RC4 对称加密使用指南](#rc4-对称加密使用指南)
+7. [工具类说明](#工具类说明)
+8. [常见问题](#常见问题)
 
 ## 准备工作
 
@@ -23,6 +24,7 @@
 ```gradle
 dependencies {
     implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    implementation 'com.github.gzu-liyujiang:RSAUtils:2.0.0'
 }
 ```
 
@@ -242,6 +244,41 @@ File encryptedFile = SecurityUtils.aesEncryptFile(sourceFile, "/path/to/output/"
 File decryptedFile = SecurityUtils.aesDecryptFile(encryptedFile, "/path/to/output/", "decrypted_file.txt", "your_key");
 ```
 
+## RC4 对称加密使用指南
+
+RC4 是一种流加密算法，速度快，适合实时通信场景。
+
+### 第一步：使用默认密钥进行 RC4 加密/解密
+
+```java
+import run.yigou.gxzy.security.SecurityUtils;
+
+// 使用默认密钥进行 RC4 加密
+String plainText = "需要加密的数据";
+String encrypted = SecurityUtils.rc4Encrypt(plainText);
+System.out.println("RC4加密结果：" + encrypted);
+
+// 使用默认密钥进行 RC4 解密
+String decrypted = SecurityUtils.rc4Decrypt(encrypted);
+System.out.println("RC4解密结果：" + decrypted);
+```
+
+### 第二步：使用自定义密钥进行 RC4 加密/解密
+
+```java
+import run.yigou.gxzy.security.SecurityUtils;
+
+// 使用自定义密钥进行 RC4 加密
+String plainText = "需要加密的数据";
+String key = "your_custom_rc4_key";
+String encrypted = SecurityUtils.rc4Encrypt(plainText, key);
+System.out.println("自定义密钥RC4加密结果：" + encrypted);
+
+// 使用自定义密钥进行 RC4 解密
+String decrypted = SecurityUtils.rc4Decrypt(encrypted, key);
+System.out.println("自定义密钥RC4解密结果：" + decrypted);
+```
+
 ## 工具类说明
 
 ### SecurityUtils 类
@@ -269,6 +306,10 @@ File decryptedFile = SecurityUtils.aesDecryptFile(encryptedFile, "/path/to/outpu
 - `aesDecrypt(String base64Data, String secretKey)` - AES解密（使用自定义密钥）
 - `aesEncryptFile(File sourceFile, String dir, String toFileName, String secretKey)` - AES文件加密
 - `aesDecryptFile(File sourceFile, String dir, String toFileName, String secretKey)` - AES文件解密
+- `rc4Encrypt(String data)` - RC4加密（使用默认密钥）
+- `rc4Decrypt(String base64Data)` - RC4解密（使用默认密钥）
+- `rc4Encrypt(String data, String secretKey)` - RC4加密（使用自定义密钥）
+- `rc4Decrypt(String base64Data, String secretKey)` - RC4解密（使用自定义密钥）
 
 ## 常见问题
 
@@ -333,6 +374,13 @@ public class SecurityExample {
             String aesDecrypted = SecurityUtils.aesDecrypt(aesEncrypted);
             System.out.println("AES 原文: " + aesText);
             System.out.println("AES 解密结果: " + aesDecrypted);
+            
+            // RC4 示例
+            String rc4Text = "Hello, RC4!";
+            String rc4Encrypted = SecurityUtils.rc4Encrypt(rc4Text);
+            String rc4Decrypted = SecurityUtils.rc4Decrypt(rc4Encrypted);
+            System.out.println("RC4 原文: " + rc4Text);
+            System.out.println("RC4 解密结果: " + rc4Decrypted);
         } catch (Exception e) {
             e.printStackTrace();
         }
