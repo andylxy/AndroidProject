@@ -24,7 +24,10 @@ public final class BookFangApi implements IRequestApi {
         this.bookId = bookId;
         return this;
     }
-
+    // 明确指定请求方法
+    public String getMethod() {
+        return "GET"; // 或 "POST", "PUT" 等
+    }
     private int bookId;
     public final static class Bean extends HH2SectionData{
 

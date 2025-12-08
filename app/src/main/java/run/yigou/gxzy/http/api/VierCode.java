@@ -14,7 +14,10 @@ public final class VierCode implements IRequestApi {
     public String getApi() {
         return "getPicCaptcha";
     }
-
+    // 明确指定请求方法
+    public String getMethod() {
+        return "GET"; // 或 "POST", "PUT" 等
+    }
     public final static class Bean {
         private String validCodeBase64;
         private boolean isCode;

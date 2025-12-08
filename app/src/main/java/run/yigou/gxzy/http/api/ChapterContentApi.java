@@ -14,7 +14,10 @@ public final class ChapterContentApi implements IRequestApi {
     public String getApi() {
         return "GetChapterContent";
     }
-
+    // 明确指定请求方法
+    public String getMethod() {
+        return "GET"; // 或 "POST", "PUT" 等
+    }
     public int getContentId() {
         return contentId;
     }

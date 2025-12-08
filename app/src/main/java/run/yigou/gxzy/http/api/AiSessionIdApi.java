@@ -26,7 +26,10 @@ public final class AiSessionIdApi implements IRequestApi {
     public String getApi() {
         return "GetConversationId";
     }
-
+    // 明确指定请求方法
+    public String getMethod() {
+        return "GET"; // 或 "POST", "PUT" 等
+    }
     public final static class Bean {
         @SerializedName("conversation_id")
         private String conversationIdJson;

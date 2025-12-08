@@ -14,4 +14,8 @@ public final class LogoutApi implements IRequestApi {
     public String getApi() {
         return "user/logout";
     }
+    // 明确指定请求方法
+    public String getMethod() {
+        return "GET"; // 或 "POST", "PUT" 等
+    }
 }

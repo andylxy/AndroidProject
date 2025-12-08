@@ -17,7 +17,10 @@ public final class LoginApi implements IRequestApi {
     public String getApi() {
         return "login";
     }
-
+    // 明确指定请求方法
+    public String getMethod() {
+        return "POST"; // 或 "POST", "PUT" 等
+    }
     /** 手机号 */
     private String userName;
     /** 登录密码 */

@@ -14,7 +14,10 @@ public final class RegisterApi implements IRequestApi {
     public String getApi() {
         return "user/register";
     }
-
+    // 明确指定请求方法
+    public String getMethod() {
+        return "POST"; // 或 "POST", "PUT" 等
+    }
     /** 手机号 */
     private String phone;
     /** 验证码 */

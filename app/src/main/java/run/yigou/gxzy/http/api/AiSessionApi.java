@@ -31,7 +31,10 @@ public final class AiSessionApi implements IRequestApi, IRequestClient {
     public String getApi() {
         return "GetConversation";
     }
-
+    // 明确指定请求方法
+    public String getMethod() {
+        return "POST"; // 或 "POST", "PUT" 等
+    }
     private String appId;
     private String query;
     private String conversationId;

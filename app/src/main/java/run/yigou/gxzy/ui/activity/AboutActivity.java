@@ -3,8 +3,6 @@ package run.yigou.gxzy.ui.activity;
 import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Looper;
-import android.text.SpannableStringBuilder;
-import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatTextView;
 
@@ -19,14 +17,9 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.greendao.entity.About;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
-import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.AboutApi;
-import run.yigou.gxzy.http.api.YaoContentApi;
 import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.ui.tips.DataBeans.Yao;
-import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 /**

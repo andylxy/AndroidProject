@@ -11,4 +11,8 @@ public final class AboutApi implements IRequestApi {
     public String getApi() {
         return "getAboutInfo";
     }
+    // 明确指定请求方法
+    public String getMethod() {
+        return "GET"; // 或 "POST", "PUT" 等
+    }
 }

@@ -13,6 +13,9 @@ public class AiConfigApi implements IRequestApi     {
     }
 
 
-
+    // 明确指定请求方法
+    public String getMethod() {
+        return "GET"; // 或 "POST", "PUT" 等
+    }
 
 }

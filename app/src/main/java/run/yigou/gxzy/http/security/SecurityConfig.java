@@ -231,7 +231,7 @@ public class SecurityConfig {
         String signature = hmacSha256(stringToSign, sAccessKeySecret);
         
         EasyLog.print("签名字符串：\n" + stringToSign);
-        EasyLog.print("签名结果：" + signature);
+        EasyLog.print("签名结果：" + signature +"签名密匙：" + sAccessKeySecret);
         
         return signature;
     }

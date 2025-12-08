@@ -12,12 +12,8 @@ import com.gyf.immersionbar.BarHide;
 import com.gyf.immersionbar.ImmersionBar;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.http.api.UserInfoApi;
-import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.other.AppConfig;
 
-import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.view.SlantedTextView;
 
 /**

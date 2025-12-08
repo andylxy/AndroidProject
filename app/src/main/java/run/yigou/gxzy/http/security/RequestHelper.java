@@ -5,7 +5,7 @@ import com.hjq.http.config.IRequestServer;
 import com.hjq.http.model.BodyType;
 import com.hjq.http.model.HttpParams;
 
-import java.util.Map;
+import java.lang.reflect.Method;
 
 import run.yigou.gxzy.http.Server.RequestServer;
 
@@ -20,10 +20,24 @@ public class RequestHelper {
      * 
      * @param api IRequestApi对象
      * @param params 请求参数
-     * @return 请求方法（GET/POST）
+     * @return 请求方法（GET/POST/PUT/DELETE等）
      */
     public static String getRequestMethod(IRequestApi api, HttpParams params) {
-        // 根据参数判断请求方法
+        // 首先尝试通过反射检查是否有特定的方法注解
+        try {
+            // 检查是否有自定义的getMethod方法
+            Method getMethod = api.getClass().getMethod("getMethod");
+            if (getMethod != null) {
+                Object result = getMethod.invoke(api);
+                if (result instanceof String) {
+                    return (String) result;
+                }
+            }
+        } catch (Exception e) {
+            // 如果没有自定义getMethod方法，则继续下面的逻辑
+        }
+        
+        // 根据参数判断请求方法（默认逻辑）
         if (params != null && !params.isEmpty()) {
             return "POST";
         }

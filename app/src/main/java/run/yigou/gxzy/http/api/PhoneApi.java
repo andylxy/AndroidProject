@@ -14,7 +14,10 @@ public final class PhoneApi implements IRequestApi {
     public String getApi() {
         return "user/phone";
     }
-
+    // 明确指定请求方法
+    public String getMethod() {
+        return "POST"; // 或 "POST", "PUT" 等
+    }
     /** 旧手机号验证码（没有绑定情况下可不传） */
     private String preCode;
 
