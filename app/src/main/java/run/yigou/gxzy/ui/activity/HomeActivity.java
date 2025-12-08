@@ -79,8 +79,8 @@ public final class HomeActivity extends AppActivity
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_found),
                 ContextCompat.getDrawable(this, R.drawable.home_found_selector)));
 
-        //开放全部功能
-        if (AppApplication.application.global_openness) {
+        //开放Ai聊天功能
+        if (AppApplication.application.isLogin) {
 //            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_message),
 //                    ContextCompat.getDrawable(this, R.drawable.home_message_selector)));
 
@@ -102,7 +102,7 @@ public final class HomeActivity extends AppActivity
         mPagerAdapter.addFragment(homeFragment);
 
         //开放全部功能
-        if (AppApplication.application.global_openness) {
+        if (AppApplication.application.isLogin) {
             mPagerAdapter.addFragment(AiMsgFragment.newInstance());
         }
         mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());
@@ -228,7 +228,18 @@ public final class HomeActivity extends AppActivity
             // System.exit(0);
         }, 300);
     }
+    /**
+     * 重新激活时调用
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        initView();
+        initData();
+        mNavigationAdapter.notifyDataSetChanged();
 
+        //     toast("onResume");
+    }
     @Override
     protected boolean isStatusBarEnabled() {
         return super.isStatusBarEnabled();
