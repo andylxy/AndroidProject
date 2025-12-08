@@ -55,7 +55,7 @@ public class UserInfoService extends BaseService<UserInfo,UserInfoDao> {
     }
 
     public UserInfo getLoginUserInfo() {
-         if (getQueryBuilder().list() .size() ==1){
+         if (!getQueryBuilder().list().isEmpty()){
              return getQueryBuilder().list().get(0);
          }else return null;
     }

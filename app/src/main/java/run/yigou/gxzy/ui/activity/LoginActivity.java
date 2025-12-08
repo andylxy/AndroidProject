@@ -355,8 +355,12 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                             AppApplication.application.isLogin = true;
                             try {
                                 if (userInfo == null) {
+                                    // 插入数据库前删除所有数据
+                                    DbService.getInstance().mUserInfoService.deleteAll();
+                                    // 插入数据库
                                     DbService.getInstance().mUserInfoService.addEntity(data.getData());
                                 } else {
+                                    // 更新数据库
                                     DbService.getInstance().mUserInfoService.deleteEntity(data.getData());
                                 }
                             } catch (Exception e) {
