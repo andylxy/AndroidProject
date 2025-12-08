@@ -44,6 +44,9 @@ public class InterceptorHelper {
             if (appApplication.mUserInfoToken != null){
                 accessKeyId = appApplication.mUserInfoToken.getAccessKeyId();
                 accessKeySecret = appApplication.mUserInfoToken.getAccessKeySecret();
+                //同一用户，则用登陆用户的AccessKeyId和AccessKeySecret
+                SecurityConfig.setAccessKeyId(accessKeyId);
+                SecurityConfig.setAccessKeySecret(accessKeySecret);
             }
             // 只有当配置了AccessKey时才添加相关头部
             if (accessKeyId != null && !accessKeyId.isEmpty() &&
