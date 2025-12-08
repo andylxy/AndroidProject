@@ -52,7 +52,7 @@ public class UserInfoDao extends AbstractDao<UserInfo, String> {
                 "\"TOKEN\" TEXT," + // 3: token
                 "\"USER_NAME\" TEXT," + // 4: userName
                 "\"IMG\" TEXT," + // 5: img
-                "\"USER_LOGIN_ACCOUNT\" TEXT NOT NULL );"); // 6: userLoginAccount
+                "\"USER_LOGIN_ACCOUNT\" TEXT);"); // 6: userLoginAccount
     }
 
     /** Drops the underlying database table. */
@@ -94,7 +94,11 @@ public class UserInfoDao extends AbstractDao<UserInfo, String> {
         if (img != null) {
             stmt.bindString(6, img);
         }
-        stmt.bindString(7, entity.getUserLoginAccount());
+ 
+        String userLoginAccount = entity.getUserLoginAccount();
+        if (userLoginAccount != null) {
+            stmt.bindString(7, userLoginAccount);
+        }
     }
 
     @Override
@@ -130,7 +134,11 @@ public class UserInfoDao extends AbstractDao<UserInfo, String> {
         if (img != null) {
             stmt.bindString(6, img);
         }
-        stmt.bindString(7, entity.getUserLoginAccount());
+ 
+        String userLoginAccount = entity.getUserLoginAccount();
+        if (userLoginAccount != null) {
+            stmt.bindString(7, userLoginAccount);
+        }
     }
 
     @Override
@@ -147,7 +155,7 @@ public class UserInfoDao extends AbstractDao<UserInfo, String> {
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // token
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // userName
             cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // img
-            cursor.getString(offset + 6) // userLoginAccount
+            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6) // userLoginAccount
         );
         return entity;
     }
@@ -160,7 +168,7 @@ public class UserInfoDao extends AbstractDao<UserInfo, String> {
         entity.setToken(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setUserName(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
         entity.setImg(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setUserLoginAccount(cursor.getString(offset + 6));
+        entity.setUserLoginAccount(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
      }
     
     @Override

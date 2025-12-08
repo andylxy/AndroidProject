@@ -32,13 +32,11 @@ public class UserInfo  {
     private String userName;
     //头像
     private String img;
-
-    @NotNull
+    
     private String userLoginAccount;
-    @Generated(hash = 962021086)
+    @Generated(hash = 805363686)
     public UserInfo(String id, String accessKeyId, String accessKeySecret,
-            String token, String userName, String img,
-            @NotNull String userLoginAccount) {
+            String token, String userName, String img, String userLoginAccount) {
         this.id = id;
         this.accessKeyId = accessKeyId;
         this.accessKeySecret = accessKeySecret;

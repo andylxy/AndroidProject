@@ -286,6 +286,8 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             LoginApi requestApi = null;
             if (mLongInType == LoginType.mLoginAccount) {
 
+                //String pwd = mPasswordView.getText().toString();
+               // String user = mPhoneView.getText().toString();
                 if (mPhoneView.getText().toString() == null || mPasswordView.getText().toString() == null) {
                     toast("请输入账号和密码");
                 }
@@ -330,7 +332,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     private void login(IRequestApi requestApi) {
         EasyHttp.post(this)
                 .api(requestApi)
-                .request(new HttpCallback<HttpData<WebResponseContent<LoginApi.Bean>>>(this) {
+                .request(new HttpCallback<HttpData<LoginApi.Bean>>(this) {
 
                     @Override
                     public void onStart(Call call) {
@@ -338,38 +340,24 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                     }
 
                     @Override
-                    public void onSucceed(HttpData<WebResponseContent<LoginApi.Bean>> data) {
-                        if (data == null || data.getData() == null || data.getData().getData() == null) {
+                    public void onSucceed(HttpData<LoginApi.Bean> data) {
+                        if (data == null || data.getData() == null || data.getData() == null) {
                             // System.out.println("data is empty or null");
                             toast("登陆失败，请检查账号密码是否正确");
                             return;
                         }
-
                         // 保存登陆信息
-                        AppApplication.getApplication().mUserInfoToken = data.getData().getData();
-
-                        // 更新 Token
-                        String token = data.getData().getData().getAccessKeyId();
-                        if (token != null && !token.isEmpty()) {
-                            EasyConfig.getInstance().addHeader("Authorization", token);
-                        } else {
-                            // 处理 Token 为空的情况
-                            // System.out.println( "login"+ "Token is empty or null");
-                            // System.out.println( "token "+ token);
-                            toast("登陆失败，请检查账号密码是否正确,获取token不正确");
-                            return;
-                        }
-
+                        AppApplication.getApplication().mUserInfoToken = data.getData();
                         // 保存登陆信息到数据库
-                        String userLoginAccount = data.getData().getData().getUserLoginAccount();
+                        String userLoginAccount = data.getData().getAccessKeyId();
                         if (userLoginAccount != null && !userLoginAccount.isEmpty()) {
                             UserInfo userInfo = DbService.getInstance().mUserInfoService.findUserInfoByLoginAccount(userLoginAccount);
                             AppApplication.application.isLogin = true;
                             try {
                                 if (userInfo == null) {
-                                    DbService.getInstance().mUserInfoService.addEntity(data.getData().getData());
+                                    DbService.getInstance().mUserInfoService.addEntity(data.getData());
                                 } else {
-                                    DbService.getInstance().mUserInfoService.deleteEntity(data.getData().getData());
+                                    DbService.getInstance().mUserInfoService.deleteEntity(data.getData());
                                 }
                             } catch (Exception e) {
                                 // 记录异常日志
