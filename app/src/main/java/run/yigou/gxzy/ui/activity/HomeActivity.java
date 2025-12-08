@@ -218,7 +218,7 @@ public final class HomeActivity extends AppActivity
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        switchFragment(intent.getIntExtra(INTENT_KEY_IN_FRAGMENT_INDEX, 0));
+        switchFragment(intent.getIntExtra(INTENT_KEY_IN_FRAGMENT_INDEX, 1));
         //switchFragment(0); // 默认显示书架
     }
 
