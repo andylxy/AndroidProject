@@ -36,7 +36,8 @@ public class TabNavBodyDao extends AbstractDao<TabNavBody, String> {
         public final static Property ChengShu = new Property(6, String.class, "chengShu", false, "CHENG_SHU");
         public final static Property Author = new Property(7, String.class, "author", false, "AUTHOR");
         public final static Property Desc = new Property(8, String.class, "desc", false, "DESC");
-        public final static Property ChapterCount = new Property(9, int.class, "chapterCount", false, "CHAPTER_COUNT");
+        public final static Property CaseTag = new Property(9, int.class, "caseTag", false, "CASE_TAG");
+        public final static Property ChapterCount = new Property(10, int.class, "chapterCount", false, "CHAPTER_COUNT");
     }
 
     private Query<TabNavBody> tabNav_NavListQuery;
@@ -62,7 +63,8 @@ public class TabNavBodyDao extends AbstractDao<TabNavBody, String> {
                 "\"CHENG_SHU\" TEXT," + // 6: chengShu
                 "\"AUTHOR\" TEXT," + // 7: author
                 "\"DESC\" TEXT," + // 8: desc
-                "\"CHAPTER_COUNT\" INTEGER NOT NULL );"); // 9: chapterCount
+                "\"CASE_TAG\" INTEGER NOT NULL ," + // 9: caseTag
+                "\"CHAPTER_COUNT\" INTEGER NOT NULL );"); // 10: chapterCount
     }
 
     /** Drops the underlying database table. */
@@ -115,7 +117,8 @@ public class TabNavBodyDao extends AbstractDao<TabNavBody, String> {
         if (desc != null) {
             stmt.bindString(9, desc);
         }
-        stmt.bindLong(10, entity.getChapterCount());
+        stmt.bindLong(10, entity.getCaseTag());
+        stmt.bindLong(11, entity.getChapterCount());
     }
 
     @Override
@@ -162,7 +165,8 @@ public class TabNavBodyDao extends AbstractDao<TabNavBody, String> {
         if (desc != null) {
             stmt.bindString(9, desc);
         }
-        stmt.bindLong(10, entity.getChapterCount());
+        stmt.bindLong(10, entity.getCaseTag());
+        stmt.bindLong(11, entity.getChapterCount());
     }
 
     @Override
@@ -182,7 +186,8 @@ public class TabNavBodyDao extends AbstractDao<TabNavBody, String> {
             cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // chengShu
             cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // author
             cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // desc
-            cursor.getInt(offset + 9) // chapterCount
+            cursor.getInt(offset + 9), // caseTag
+            cursor.getInt(offset + 10) // chapterCount
         );
         return entity;
     }
@@ -198,7 +203,8 @@ public class TabNavBodyDao extends AbstractDao<TabNavBody, String> {
         entity.setChengShu(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
         entity.setAuthor(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
         entity.setDesc(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
-        entity.setChapterCount(cursor.getInt(offset + 9));
+        entity.setCaseTag(cursor.getInt(offset + 9));
+        entity.setChapterCount(cursor.getInt(offset + 10));
      }
     
     @Override

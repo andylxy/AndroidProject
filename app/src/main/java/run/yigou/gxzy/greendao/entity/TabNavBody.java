@@ -20,11 +20,12 @@ public class TabNavBody  implements Serializable {
     private String chengShu;
     private String author;
     private String desc;
+    private int caseTag;
     private int chapterCount;
-    @Generated(hash = 381308413)
+    @Generated(hash = 528953577)
     public TabNavBody(String tabNavBodyId, String tabNavId, Long Id, int bookNo,
             String imageUrl, String bookName, String chengShu, String author,
-            String desc, int chapterCount) {
+            String desc, int caseTag, int chapterCount) {
         this.tabNavBodyId = tabNavBodyId;
         this.tabNavId = tabNavId;
         this.Id = Id;
@@ -34,11 +35,28 @@ public class TabNavBody  implements Serializable {
         this.chengShu = chengShu;
         this.author = author;
         this.desc = desc;
+        this.caseTag = caseTag;
         this.chapterCount = chapterCount;
     }
     @Generated(hash = 1918260576)
     public TabNavBody() {
     }
+
+    /**
+    *
+    * 1	针灸
+    * 2	内经
+    * 3	本草
+    *
+    */
+    public int getCaseTag() {
+        return caseTag;
+    }
+
+    public void setCaseTag(int caseTag) {
+        this.caseTag = caseTag;
+    }
+
     public String getTabNavBodyId() {
         return this.tabNavBodyId;
     }

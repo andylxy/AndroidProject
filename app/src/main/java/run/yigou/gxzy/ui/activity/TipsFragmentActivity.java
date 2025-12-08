@@ -17,7 +17,6 @@ import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.BookArgs;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.ui.adapter.NavigationAdapter;
-import run.yigou.gxzy.ui.fragment.AiMsgFragment;
 import run.yigou.gxzy.ui.fragment.TipsBookNetReadFragment;
 import run.yigou.gxzy.ui.fragment.TipsFangYaoFragment;
 import run.yigou.gxzy.ui.fragment.TipsSettingFragment;
@@ -35,6 +34,8 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
     protected int getLayoutId() {
         return R.layout.tips_fragment_tab_net_list;
     }
+
+    TabNavBody bookInfo = null;
 
     @Override
     protected void initView() {
@@ -55,35 +56,29 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
 
         mNavigationAdapter = new NavigationAdapter(this);
 
-        TabNavBody tabNav = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
-        if (tabNav == null) {
+        bookInfo = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
+        if (bookInfo == null) {
             toast("获取书籍信息错误");
             return;
         }
-        String bookName = tabNav.getBookName().split("[.,・]").length == 0 ? tabNav.getBookName() : tabNav.getBookName().split("[.,・]")[0];
+        String bookName = bookInfo.getBookName().split("[.,・]").length == 0 ? bookInfo.getBookName() : bookInfo.getBookName().split("[.,・]")[0];
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(bookName,
                 ContextCompat.getDrawable(this, R.drawable.list_selector)));
 
         /*
             如果是黄帝内经和本草类型，则不显示方药和药单位
          */
-        {
+        if (bookInfo.getCaseTag() != 1 && bookInfo.getCaseTag() != 2 && bookInfo.getCaseTag() != 3) {
 
             mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(bookName + getString(R.string.tips_nav_fang),
                     ContextCompat.getDrawable(this, R.drawable.list_fang_selector)));
 
             mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_yao),
                     ContextCompat.getDrawable(this, R.drawable.ruler_yao_selector)));
-
+        }
+        if (bookInfo.getCaseTag() == 5)
             mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_unit),
                     ContextCompat.getDrawable(this, R.drawable.ruler_selector)));
-        }
-//        /*
-//         * 智能消息 --暂时不开发
-//         */
-//         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_aimsg),
-//                 ContextCompat.getDrawable(this, R.drawable.ruler_selector_msg)));
-
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_set),
                 ContextCompat.getDrawable(this, R.drawable.settings_selector)));
         mNavigationAdapter.setOnNavigationListener(this);
@@ -104,22 +99,12 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
          /*
             如果是黄帝内经和本草类型，则不显示方药和药单位
         */
-        {
-            /*
-             *  true 为方
-             */
+        if (bookInfo.getCaseTag() != 1 && bookInfo.getCaseTag() != 2 && bookInfo.getCaseTag() != 3) {
             mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(1));
-
-            /*
-             *  false 为药
-             */
             mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(2));
-            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(3));
         }
-        /*
-         * 智能消息 --暂时不开发
-         */
-       // mPagerAdapter.addFragment(AiMsgFragment.newInstance());
+        if (bookInfo.getCaseTag() == 5)
+            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(3));
         mPagerAdapter.addFragment(TipsSettingFragment.newInstance(bookArgs));
         mViewPager.setAdapter(mPagerAdapter);
         onNewIntent(getIntent());
@@ -156,7 +141,7 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
             case 2:
             case 3:
             case 4:
-           // case 5:
+                // case 5:
                 mViewPager.setCurrentItem(fragmentIndex);
                 mNavigationAdapter.setSelectedPosition(fragmentIndex);
                 break;
@@ -177,7 +162,7 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
             case 2:
             case 3:
             case 4:
-            //case 5:
+                //case 5:
                 mViewPager.setCurrentItem(position);
                 return true;
             default:
