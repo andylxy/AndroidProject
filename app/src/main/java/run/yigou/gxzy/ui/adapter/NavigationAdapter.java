@@ -45,7 +45,24 @@ public final class NavigationAdapter extends AppAdapter<NavigationAdapter.MenuIt
 
     @Override
     protected RecyclerView.LayoutManager generateDefaultLayoutManager(Context context) {
-        return new GridLayoutManager(context, getCount(), RecyclerView.VERTICAL, false);
+        // 动态列数：根据实际数据项数量设置列数
+        // 未登录时3个图标 -> 3列，登录后4个图标 -> 4列
+        int spanCount = getCount() > 0 ? getCount() : 4;
+        return new GridLayoutManager(context, spanCount, RecyclerView.VERTICAL, false);
+    }
+
+    /**
+     * 更新布局管理器的列数
+     * 当数据变化时（如登录/登出），需要重新设置列数
+     */
+    public void updateLayoutManager(RecyclerView recyclerView) {
+        if (recyclerView == null) {
+            return;
+        }
+        int spanCount = getCount() > 0 ? getCount() : 4;
+        GridLayoutManager layoutManager = new GridLayoutManager(
+                recyclerView.getContext(), spanCount, RecyclerView.VERTICAL, false);
+        recyclerView.setLayoutManager(layoutManager);
     }
 
     public int getSelectedPosition() {

@@ -58,6 +58,13 @@ public final class FragmentPagerAdapter<F extends Fragment> extends androidx.fra
     }
 
     @Override
+    public int getItemPosition(@NonNull Object object) {
+        // 返回POSITION_NONE强制ViewPager在notifyDataSetChanged()时重新创建所有Fragment
+        // 这是处理动态添加/移除Fragment的标准做法
+        return POSITION_NONE;
+    }
+
+    @Override
     public int getCount() {
         return mFragmentSet.size();
     }
