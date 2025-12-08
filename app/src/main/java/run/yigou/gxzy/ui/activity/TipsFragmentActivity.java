@@ -78,11 +78,11 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
             mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_unit),
                     ContextCompat.getDrawable(this, R.drawable.ruler_selector)));
         }
-        /*
-         * 智能消息 --暂时不开发
-         */
-         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_aimsg),
-                 ContextCompat.getDrawable(this, R.drawable.ruler_selector_msg)));
+//        /*
+//         * 智能消息 --暂时不开发
+//         */
+//         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_aimsg),
+//                 ContextCompat.getDrawable(this, R.drawable.ruler_selector_msg)));
 
         mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_set),
                 ContextCompat.getDrawable(this, R.drawable.settings_selector)));
@@ -119,7 +119,7 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
         /*
          * 智能消息 --暂时不开发
          */
-        mPagerAdapter.addFragment(AiMsgFragment.newInstance());
+       // mPagerAdapter.addFragment(AiMsgFragment.newInstance());
         mPagerAdapter.addFragment(TipsSettingFragment.newInstance(bookArgs));
         mViewPager.setAdapter(mPagerAdapter);
         onNewIntent(getIntent());
@@ -156,7 +156,7 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
             case 2:
             case 3:
             case 4:
-            case 5:
+           // case 5:
                 mViewPager.setCurrentItem(fragmentIndex);
                 mNavigationAdapter.setSelectedPosition(fragmentIndex);
                 break;
@@ -177,7 +177,7 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
             case 2:
             case 3:
             case 4:
-            case 5:
+            //case 5:
                 mViewPager.setCurrentItem(position);
                 return true;
             default:
