@@ -17,6 +17,18 @@
 -keep class run.yigou.gxzy.http.model.** {
     <fields>;
 }
+
+# 保护国密算法相关类，防止混淆导致运行时找不到类
+-keep class run.yigou.gxzy.Security.** {
+    *;
+}
+-keep class run.yigou.gxzy.Security.Cryptogram.** {
+    *;
+}
+-keep class run.yigou.gxzy.Security.Cryptogram.Sm.** {
+    *;
+}
+
 #-keep class run.yigou.gxzy.ui.fragment.noproguard.** {
 #    <fields>;
 #}

@@ -8,11 +8,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.Security;
+import java.util.Locale;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -20,13 +23,23 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import run.yigou.gxzy.utils.SM2Util;
-import run.yigou.gxzy.utils.SM4Util;
+import run.yigou.gxzy.Security.Cryptogram.CryptogramUtil;
+import run.yigou.gxzy.Security.Cryptogram.SM2Util;
+import run.yigou.gxzy.Security.Cryptogram.SM4Util;
+import run.yigou.gxzy.Security.Cryptogram.SM4Util.Sm4CryptoEnum;
+import run.yigou.gxzy.Security.Cryptogram.Sm.SM2CryptoUtil;
 import run.yigou.gxzy.common.AppConst;
 
 import com.github.gzuliyujiang.rsautils.RC4Utils;
 
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.crypto.signers.SM2Signer;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.encoders.Hex;
 
 /**
  * 安全管理器类，用于全局初始化和管理加密功能
@@ -34,8 +47,14 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  */
 public final class SecurityUtils {
     private static final String TAG = "SecurityUtils";
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static SecurityUtils instance;
-    private SM2Util sm2Util;
+
+    /**
+     * 缓存一次配置好的 SM2 公私钥，便于签名、验签直接复用。
+     */
+    private String sm2PublicKeyHex = "";
+    private String sm2PrivateKeyHex = "";
 
     // 方式3：使用完整公钥形式初始化SM2公钥
     // 这种方式最符合Android客户端的使用场景
@@ -49,7 +68,8 @@ public final class SecurityUtils {
     }
 
     private SecurityUtils() {
-        sm2Util = SM2Util.getInstance();
+        // 初始化时同步一次默认密钥配置，避免首次调用找不到公钥
+        // 注意：此时实例字段还是空字符串，真正的密钥配置在 initSecurityManager() 中完成
     }
 
     /**
@@ -75,8 +95,8 @@ public final class SecurityUtils {
     public static void initSecurityManager() {
         try {
             // 获取安全管理器实例
-            SecurityUtils securityManager = SecurityUtils.getInstance();
-            securityManager.initSM2PublicKeyWithFullFormat(DEFAULT_PUBLIC_KEY);
+            //SecurityUtils securityManager = SecurityUtils.getInstance();
+            SecurityUtils.initSM2PublicKeyWithFullFormat(DEFAULT_PUBLIC_KEY);
 
             Log.d(TAG, "安全管理器初始化成功");
         } catch (Exception e) {
@@ -93,7 +113,7 @@ public final class SecurityUtils {
      * @param publicKeyY 公钥Y坐标
      */
     public static void initSM2PublicKey(String publicKeyX, String publicKeyY) {
-        getInstance().sm2Util.initPublicKey(publicKeyX, publicKeyY);
+        getInstance().configureSm2Keys(buildFullPublicKey(publicKeyX, publicKeyY), null);
     }
 
     /**
@@ -102,7 +122,12 @@ public final class SecurityUtils {
      * @param publicKey 公钥字符串，格式为"x,y"
      */
     public static void initSM2PublicKeyWithCombinedFormat(String publicKey) {
-        getInstance().sm2Util.initPublicKeyWithCombinedFormat(publicKey);
+        if (publicKey == null || !publicKey.contains(",")) {
+            Log.e(TAG, "initSM2PublicKeyWithCombinedFormat failed: format must be x,y");
+            return;
+        }
+        String[] parts = publicKey.split(",", 2);
+        initSM2PublicKey(parts[0], parts[1]);
     }
 
     /**
@@ -111,7 +136,7 @@ public final class SecurityUtils {
      * @param fullPublicKey 完整公钥（十六进制字符串，以04开头）
      */
     public static void initSM2PublicKeyWithFullFormat(String fullPublicKey) {
-        getInstance().sm2Util.initPublicKeyWithFullFormat(fullPublicKey);
+        getInstance().configureSm2Keys(normalizeFullPublicKey(fullPublicKey), null);
     }
 
     /**
@@ -122,7 +147,7 @@ public final class SecurityUtils {
      * @param privateKeyD 私钥D值
      */
     public static void initSM2Keys(String publicKeyX, String publicKeyY, String privateKeyD) {
-        getInstance().sm2Util.initKeys(publicKeyX, publicKeyY, privateKeyD);
+        getInstance().configureSm2Keys(buildFullPublicKey(publicKeyX, publicKeyY), privateKeyD);
     }
 
     /**
@@ -132,7 +157,12 @@ public final class SecurityUtils {
      * @param privateKeyD 私钥D值
      */
     public static void initSM2KeysWithCombinedPublicKey(String publicKey, String privateKeyD) {
-        getInstance().sm2Util.initKeysWithCombinedPublicKey(publicKey, privateKeyD);
+        if (publicKey == null || !publicKey.contains(",")) {
+            Log.e(TAG, "initSM2KeysWithCombinedPublicKey failed: format must be x,y");
+            return;
+        }
+        String[] parts = publicKey.split(",", 2);
+        initSM2Keys(parts[0], parts[1], privateKeyD);
     }
 
     /**
@@ -142,7 +172,7 @@ public final class SecurityUtils {
      * @param privateKeyD   私钥D值
      */
     public static void initSM2KeysWithFullPublicKey(String fullPublicKey, String privateKeyD) {
-        getInstance().sm2Util.initKeysWithFullPublicKey(fullPublicKey, privateKeyD);
+        getInstance().configureSm2Keys(normalizeFullPublicKey(fullPublicKey), privateKeyD);
     }
 
     /**
@@ -152,7 +182,7 @@ public final class SecurityUtils {
      * @return 加密结果（十六进制字符串）
      */
     public static String doSm2Encrypt(String msgString) {
-        return getInstance().sm2Util.doEncrypt(msgString);
+        return CryptogramUtil.sm2Encrypt(msgString);
     }
 
     /**
@@ -162,7 +192,7 @@ public final class SecurityUtils {
      * @return 解密结果
      */
     public static String doSm2Decrypt(String encryptedData) {
-        return getInstance().sm2Util.doDecrypt(encryptedData);
+        return CryptogramUtil.sm2Decrypt(encryptedData);
     }
 
     /**
@@ -172,7 +202,7 @@ public final class SecurityUtils {
      * @return 签名值（十六进制字符串）
      */
     public static String doSignature(String data) {
-        return getInstance().sm2Util.doSignature(data);
+        return getInstance().signWithSm2PrivateKey(data);
     }
 
     /**
@@ -183,7 +213,7 @@ public final class SecurityUtils {
      * @return 验签结果
      */
     public static boolean doVerifySignature(String data, String signature) {
-        return getInstance().sm2Util.doVerifySignature(data, signature);
+        return getInstance().verifyWithSm2PublicKey(data, signature);
     }
 
     // SM4相关静态方法（兼容CryptoUtil使用方式）
@@ -195,7 +225,7 @@ public final class SecurityUtils {
      * @return 加密结果（十六进制字符串）
      */
     public static String doSm4Encrypt(String msgString) {
-        return SM4Util.encryptECB(msgString);
+        return CryptogramUtil.sm4Encrypt(msgString);
     }
 
     /**
@@ -205,7 +235,7 @@ public final class SecurityUtils {
      * @return 解密结果
      */
     public static String doSm4Decrypt(String encryptedData) {
-        return SM4Util.decryptECB(encryptedData);
+        return CryptogramUtil.sm4Decrypt(encryptedData);
     }
 
     /**
@@ -215,7 +245,7 @@ public final class SecurityUtils {
      * @return 加密结果（十六进制字符串）
      */
     public static String doSm4CbcEncrypt(String msgString) {
-        return SM4Util.encryptCBC(msgString);
+        return SM4Util.encrypt(msgString, null, null, false, Sm4CryptoEnum.CBC);
     }
 
     /**
@@ -225,7 +255,7 @@ public final class SecurityUtils {
      * @return 解密结果
      */
     public static String doSm4CbcDecrypt(String encryptedData) {
-        return SM4Util.decryptCBC(encryptedData);
+        return SM4Util.decrypt(encryptedData, null, null, false, Sm4CryptoEnum.CBC);
     }
 
     /**
@@ -236,7 +266,7 @@ public final class SecurityUtils {
      * @return 加密结果（十六进制字符串）
      */
     public static String doSm4Encrypt(String msgString, String key) {
-        return SM4Util.encryptECB(msgString, key);
+        return SM4Util.encrypt(msgString, key, null, false, Sm4CryptoEnum.ECB);
     }
 
     /**
@@ -247,7 +277,7 @@ public final class SecurityUtils {
      * @return 解密结果
      */
     public static String doSm4Decrypt(String encryptedData, String key) {
-        return SM4Util.decryptECB(encryptedData, key);
+        return SM4Util.decrypt(encryptedData, key, null, false, Sm4CryptoEnum.ECB);
     }
 
     /**
@@ -259,7 +289,7 @@ public final class SecurityUtils {
      * @return 加密结果（十六进制字符串）
      */
     public static String doSm4CbcEncrypt(String msgString, String key, String iv) {
-        return SM4Util.encryptCBC(msgString, key, iv);
+        return SM4Util.encrypt(msgString, key, iv, false, Sm4CryptoEnum.CBC);
     }
 
     /**
@@ -271,7 +301,7 @@ public final class SecurityUtils {
      * @return 解密结果
      */
     public static String doSm4CbcDecrypt(String encryptedData, String key, String iv) {
-        return SM4Util.decryptCBC(encryptedData, key, iv);
+        return SM4Util.decrypt(encryptedData, key, iv, false, Sm4CryptoEnum.CBC);
     }
 
     // MD5相关方法
@@ -595,30 +625,122 @@ public final class SecurityUtils {
     }
 
     /**
-     * 获取SM2工具类实例
-     *
-     * @return SM2Util实例
-     */
-    public SM2Util getSM2Util() {
-        return sm2Util;
-    }
-
-    /**
      * 检查是否已设置SM2公钥
-     *
-     * @return true表示已设置公钥，false表示未设置
      */
     public boolean hasSM2PublicKey() {
-        return sm2Util.hasPublicKey();
+        return !isBlank(sm2PublicKeyHex);
     }
 
     /**
      * 检查是否已设置SM2私钥
-     *
-     * @return true表示已设置私钥，false表示未设置
      */
     public boolean hasSM2PrivateKey() {
-        return sm2Util.hasPrivateKey();
+        return !isBlank(sm2PrivateKeyHex);
+    }
+
+    private void configureSm2Keys(String publicKeyHex, String privateKeyHex) {
+        if (!isBlank(publicKeyHex)) {
+            sm2PublicKeyHex = publicKeyHex.toUpperCase(Locale.ROOT);
+        }
+        if (!isBlank(privateKeyHex)) {
+            sm2PrivateKeyHex = privateKeyHex.toUpperCase(Locale.ROOT);
+        }
+        SM2Util.configureKeys(sm2PublicKeyHex, sm2PrivateKeyHex);
+    }
+
+    private static String buildFullPublicKey(String publicKeyX, String publicKeyY) {
+        return "04" + padCoordinate(publicKeyX) + padCoordinate(publicKeyY);
+    }
+
+    private static String normalizeFullPublicKey(String fullPublicKey) {
+        if (isBlank(fullPublicKey)) {
+            return "";
+        }
+        String sanitized = fullPublicKey.trim();
+        return sanitized.startsWith("04") ? sanitized.toUpperCase(Locale.ROOT)
+                : ("04" + sanitized).toUpperCase(Locale.ROOT);
+    }
+
+    private static String padCoordinate(String coordinate) {
+        if (coordinate == null) {
+            return "";
+        }
+        String sanitized = coordinate.trim();
+        if (sanitized.startsWith("0x") || sanitized.startsWith("0X")) {
+            sanitized = sanitized.substring(2);
+        }
+        sanitized = sanitized.replaceAll("[^0-9a-fA-F]", "");
+        if (sanitized.length() > 64) {
+            sanitized = sanitized.substring(sanitized.length() - 64);
+        }
+        return String.format(Locale.ROOT, "%64s", sanitized.toUpperCase(Locale.ROOT)).replace(' ', '0');
+    }
+
+    private String signWithSm2PrivateKey(String data) {
+        if (isBlank(data)) {
+            return "";
+        }
+        ECPrivateKeyParameters privateKeyParameters = buildPrivateKeyParameters();
+        if (privateKeyParameters == null) {
+            Log.e(TAG, "SM2 signature skipped: private key missing");
+            return "";
+        }
+        try {
+            SM2Signer signer = new SM2Signer();
+            signer.init(true, new ParametersWithRandom(privateKeyParameters, SECURE_RANDOM));
+            byte[] message = data.getBytes(StandardCharsets.UTF_8);
+            signer.update(message, 0, message.length);
+            byte[] signature = signer.generateSignature();
+            return Hex.toHexString(signature).toUpperCase(Locale.ROOT);
+        } catch (Exception e) {
+            Log.e(TAG, "SM2 signature failed", e);
+            return "";
+        }
+    }
+
+    private boolean verifyWithSm2PublicKey(String data, String signature) {
+        if (isBlank(data) || isBlank(signature)) {
+            return false;
+        }
+        ECPublicKeyParameters publicKeyParameters = buildPublicKeyParameters();
+        if (publicKeyParameters == null) {
+            Log.e(TAG, "SM2 verify skipped: public key missing");
+            return false;
+        }
+        try {
+            SM2Signer signer = new SM2Signer();
+            signer.init(false, publicKeyParameters);
+            byte[] message = data.getBytes(StandardCharsets.UTF_8);
+            signer.update(message, 0, message.length);
+            byte[] signatureBytes = Hex.decode(signature);
+            return signer.verifySignature(signatureBytes);
+        } catch (Exception e) {
+            Log.e(TAG, "SM2 verify failed", e);
+            return false;
+        }
+    }
+
+    private ECPrivateKeyParameters buildPrivateKeyParameters() {
+        if (isBlank(sm2PrivateKeyHex)) {
+            return null;
+        }
+        BigInteger d = new BigInteger(sm2PrivateKeyHex, 16);
+        ECDomainParameters domainParameters = SM2CryptoUtil.getDomainParameters();
+        return new ECPrivateKeyParameters(d, domainParameters);
+    }
+
+    private ECPublicKeyParameters buildPublicKeyParameters() {
+        if (isBlank(sm2PublicKeyHex)) {
+            return null;
+        }
+        String normalized = normalizeFullPublicKey(sm2PublicKeyHex);
+        ECPoint point = SM2CryptoUtil.getCurve().decodePoint(Hex.decode(normalized));
+        ECDomainParameters domainParameters = SM2CryptoUtil.getDomainParameters();
+        return new ECPublicKeyParameters(point, domainParameters);
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     // RC4相关方法

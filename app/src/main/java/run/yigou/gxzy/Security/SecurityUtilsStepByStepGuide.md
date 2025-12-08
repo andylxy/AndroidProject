@@ -311,6 +311,71 @@ System.out.println("自定义密钥RC4解密结果：" + decrypted);
 - `rc4Encrypt(String data, String secretKey)` - RC4加密（使用自定义密钥）
 - `rc4Decrypt(String base64Data, String secretKey)` - RC4解密（使用自定义密钥）
 
+## 国密算法技术架构说明
+
+### SM2/SM4 模块架构
+
+本项目采用模块化设计，将国密算法实现分为以下层次：
+
+#### 核心实现层 (`run.yigou.gxzy.Security.Cryptogram.Sm`)
+- **SM2CryptoUtil.java**: SM2 椭圆曲线加密核心算法实现
+  - 提供曲线参数配置（使用国密标准 SM2 曲线）
+  - 实现密钥生成、加密、解密功能
+  - 严格遵循 C# 原版实现逻辑
+  
+- **SM4CryptoUtil.java**: SM4 分组对称加密核心算法实现
+  - S盒变换、轮函数、密钥扩展
+  - 支持 ECB/CBC 工作模式
+  - 提供加密/解密、填充处理
+  
+- **Sm4Context.java**: SM4 加密上下文类
+  - 保存加密/解密状态
+  - 管理密钥和模式参数
+
+#### 包装门面层 (`run.yigou.gxzy.Security.Cryptogram`)
+- **SM2Util.java**: SM2 高级封装类
+  - 管理全局公私钥配置
+  - 提供简化的加密/解密接口
+  - 自动处理密文格式（04前缀）
+  
+- **SM4Util.java**: SM4 高级封装类
+  - 管理全局密钥和IV配置
+  - 支持多种输出格式（Hex/Base64）
+  - 提供ECB/CBC模式选择
+
+- **CryptogramUtil.java**: 统一加密门面
+  - 提供最高层次的简化接口
+  - 统一错误处理和日志记录
+  - 适配所有加密场景
+
+#### 统一管理层 (`SecurityUtils.java`)
+- 整合所有加密算法（国密SM2/SM4、AES、MD5、RC4）
+- 提供一致的API风格
+- 单例模式管理配置和状态
+
+### 从 C# 到 Java 的转换说明
+
+本次升级将 .NET 平台的 `SimpleEasy.Base.Cryptogram` 模块完整转换为 Android Java 实现：
+
+**转换文件映射：**
+- `Sm/SM2CryptoUtil.cs` → `Sm/SM2CryptoUtil.java` ✅
+- `Sm/SM4CryptoUtil.cs` → `Sm/SM4CryptoUtil.java` ✅
+- `Sm/Sm4Context.cs` → `Sm/Sm4Context.java` ✅
+- `SM2Util.cs` → `SM2Util.java` ✅
+- `SM4Util.cs` → `SM4Util.java` ✅
+- `CryptogramUtil.cs` → `CryptogramUtil.java` ✅
+
+**转换原则：**
+1. **功能对等**: 严格保持原 C# 版本的加密/解密逻辑，确保算法一致性
+2. **依赖替换**: 使用 BouncyCastle 替代 .NET 的加密库
+3. **平台适配**: 适配 Android 平台特性（日志、字符编码等）
+4. **代码规范**: 遵循 Java 编码规范，添加详细中文注释
+
+**已移除的旧实现：**
+- ❌ `app/src/main/java/run/yigou/gxzy/utils/CryptoUtil.java` (已删除)
+- ❌ `app/src/main/java/run/yigou/gxzy/utils/SM2Util.java` (已删除)
+- ❌ `app/src/main/java/run/yigou/gxzy/utils/SM4Util.java` (已删除)
+
 ## 常见问题
 
 ### 1. 为什么 SM2 只能使用公钥而不能使用私钥？
@@ -334,9 +399,41 @@ System.out.println("自定义密钥RC4解密结果：" + decrypted);
 
 请检查以下几点：
 - 是否正确初始化了 Bouncy Castle Provider
-- 密钥和 IV 的长度是否正确（应为16字节）
+- 密钥和 IV 的长度是否正确（SM4密钥应为32位十六进制字符串，即16字节）
 - 数据编码是否一致（建议统一使用 UTF-8）
 - 是否在网络传输过程中数据发生了改变
+- 检查 `SecurityUtils` 是否已正确初始化（调用 `initSecurityManager()`）
+
+### 6. 新版本与旧版本有什么区别？
+
+**新版本优势：**
+- ✅ 模块化设计，职责清晰，易于维护
+- ✅ 严格遵循国密标准算法实现
+- ✅ 完整的错误处理和日志记录
+- ✅ 详细的中文注释和文档
+- ✅ 与 .NET 服务端实现完全兼容
+
+**迁移指南：**
+旧代码：
+```java
+// 旧版本
+CryptoUtil.initSM2PublicKey(publicKeyX, publicKeyY);
+String encrypted = CryptoUtil.doSm2Encrypt(plainText);
+```
+
+新代码：
+```java
+// 新版本（API保持兼容）
+SecurityUtils.initSM2PublicKey(publicKeyX, publicKeyY);
+String encrypted = SecurityUtils.doSm2Encrypt(plainText);
+```
+
+### 7. 性能优化建议
+
+- 避免在主线程进行大量加密/解密操作
+- 对于批量数据处理，考虑使用线程池
+- SM2/SM4 算法计算密集，建议使用异步方式调用
+- 缓存配置好的密钥，避免重复初始化
 
 ## 示例代码
 
