@@ -12,6 +12,7 @@ package run.yigou.gxzy.ui.fragment;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
 import android.text.Editable;
@@ -74,7 +75,7 @@ import run.yigou.gxzy.utils.ThreadUtil;
 
 
 public class TipsBookNetReadFragment extends AppFragment<AppActivity> 
-        implements TipsBookReadContract.View {
+        implements TipsBookReadContract.View, ComponentCallbacks2 {
 
 
     private WrapRecyclerView rvList;
@@ -670,7 +671,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
     private void bookInitData() {
 
+        EasyLog.print("TipsBookNetReadFragment", "========== bookInitData 开始 ==========");
+        
         singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
+        EasyLog.print("TipsBookNetReadFragment", "singletonNetData=" + (singletonNetData != null ? "存在" : "null"));
+        
         if (singletonNetData.getYaoAliasDict() == null)
             singletonNetData.setYaoAliasDict(singletonNetData.getYaoAliasDict());
         if (singletonNetData.getFangAliasDict() == null)
@@ -679,8 +684,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         //加载书本相关的药方
 
         TabNavBody book = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
+        EasyLog.print("TipsBookNetReadFragment", "book=" + (book != null ? book.getBookName() : "null"));
+        
         if (book != null) {
             chapterList = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(book.getBookNo()));
+            EasyLog.print("TipsBookNetReadFragment", "chapterList size=" + (chapterList != null ? chapterList.size() : "null"));
             //加载书本相关的章节
             getBookData(book);
         } else {
@@ -694,14 +702,23 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      */
     public void getBookData(TabNavBody book) {
 
+        EasyLog.print("TipsBookNetReadFragment", "========== getBookData 开始 ==========");
+        EasyLog.print("TipsBookNetReadFragment", "book=" + (book != null ? book.getBookName() : "null"));
+        EasyLog.print("TipsBookNetReadFragment", "presenter=" + (presenter != null ? "存在" : "null"));
+        EasyLog.print("TipsBookNetReadFragment", "chapterList=" + (chapterList != null ? chapterList.size() : "null"));
 
         if (book != null) {
             //加载书本相关的章节（已移除旧的批量下载逻辑）
             // getBookChapter(); // ❌ 已移除：启动时不再批量下载
             
-            // ✅ 通过 Presenter 初始化下载缓存
+            // ✅ 通过 Presenter 加载书籍数据（新数据模型）
             if (presenter != null && chapterList != null) {
-                EasyLog.print("TipsBookNetReadFragment", "下载缓存初始化完成，共 " + chapterList.size() + " 个章节");
+                EasyLog.print("TipsBookNetReadFragment", "开始加载书籍数据，共 " + chapterList.size() + " 个章节");
+                // 调用 Presenter 初始化书籍数据（传递 TabNavBody 避免全局数据获取失败）
+                presenter.loadBookContent(book, bookId, bookLastReadPosition, isShowBookCollect);
+            } else {
+                EasyLog.print("TipsBookNetReadFragment", "跳过加载: presenter=" + (presenter != null) + 
+                    ", chapterList=" + (chapterList != null));
             }
             
             StringBuilder fangName = new StringBuilder("\n").append(book.getBookName());
@@ -1037,6 +1054,46 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             presenter = null;
         }
         super.onDestroyView();
+    }
+
+    // ==================== ComponentCallbacks2 实现 ====================
+
+    @Override
+    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // 配置变更处理
+    }
+
+    @Override
+    public void onLowMemory() {
+        EasyLog.print("TipsBookNetReadFragment", "低内存警告");
+        // 相当于 TRIM_MEMORY_COMPLETE
+        onTrimMemory(TRIM_MEMORY_COMPLETE);
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        EasyLog.print("TipsBookNetReadFragment", "内存压力回调: level=" + level);
+        
+        // 通知 Presenter 处理内存压力
+        if (presenter != null) {
+            presenter.onTrimMemory(level);
+        }
+        
+        // 根据内存压力级别采取不同策略
+        if (level >= TRIM_MEMORY_RUNNING_CRITICAL) {
+            // 极端情况：清除适配器缓存
+            if (adapter != null) {
+                EasyLog.print("TipsBookNetReadFragment", "清除适配器缓存");
+                // 可以在这里添加适配器缓存清理逻辑
+            }
+        } else if (level >= TRIM_MEMORY_RUNNING_MODERATE) {
+            // 中等压力：减少缓存
+            EasyLog.print("TipsBookNetReadFragment", "中等内存压力");
+        } else if (level >= TRIM_MEMORY_RUNNING_LOW) {
+            // 较低压力：预警
+            EasyLog.print("TipsBookNetReadFragment", "较低内存压力");
+        }
     }
 
 }

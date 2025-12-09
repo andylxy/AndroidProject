@@ -29,6 +29,12 @@ import run.yigou.gxzy.http.api.BookFangApi;
 import run.yigou.gxzy.http.api.ChapterContentApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.tips.DataBeans.Fang;
+import run.yigou.gxzy.ui.tips.data.BookData;
+import run.yigou.gxzy.ui.tips.data.BookDataManager;
+import run.yigou.gxzy.ui.tips.data.ChapterData;
+import run.yigou.gxzy.ui.tips.data.DataConverter;
+import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
+import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
@@ -44,6 +50,8 @@ import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 public class BookRepository {
 
     private final DbService dbService;
+    private final BookDataManager dataManager;
+    private final GlobalDataHolder globalData;
     
     // 书籍内容缓存（bookId -> 章节列表）
     private final Map<Integer, List<Chapter>> chapterCache = new HashMap<>();
@@ -58,6 +66,8 @@ public class BookRepository {
 
     public BookRepository() {
         this.dbService = DbService.getInstance();
+        this.dataManager = BookDataManager.getInstance();
+        this.globalData = GlobalDataHolder.getInstance();
     }
 
     /**
@@ -282,5 +292,273 @@ public class BookRepository {
     public void clearCacheForBook(int bookId) {
         chapterCache.remove(bookId);
         EasyLog.print("BookRepository", "书籍缓存已清除: bookId=" + bookId);
+    }
+
+    // ==================== 新数据模型 API ====================
+
+    /**
+     * 获取书籍数据（新模型）
+     * 优先从内存缓存获取，未命中则从数据库加载
+     * 
+     * @param bookId 书籍 ID
+     * @return 书籍数据（非 null）
+     */
+    public BookData getBookData(int bookId) {
+        // 1. 检查内存缓存
+        BookData cached = dataManager.getFromCache(bookId);
+        if (cached != null && cached.isFullyLoaded()) {
+            EasyLog.print("BookRepository", "从缓存加载书籍: bookId=" + bookId);
+            return cached;
+        }
+
+        // 2. 从数据库加载
+        EasyLog.print("BookRepository", "从数据库加载书籍: bookId=" + bookId);
+        BookData bookData = loadBookDataFromDb(bookId);
+        
+        // 3. 放入缓存
+        dataManager.putToCache(bookId, bookData);
+        
+        return bookData;
+    }
+
+    /**
+     * 从数据库加载书籍数据
+     */
+    private BookData loadBookDataFromDb(int bookId) {
+        BookData bookData = new BookData(bookId);
+        
+        try {
+            // 加载章节列表
+            List<Chapter> chapters = getChapters(bookId);
+            if (!chapters.isEmpty()) {
+                // 转换为新数据模型
+                List<ChapterData> chapterDataList = DataConverter.fromChapterEntities(chapters);
+                bookData.setChapters(chapterDataList);
+            }
+            
+            // 加载章节内容（从数据库已下载的内容）
+            for (Chapter chapter : chapters) {
+                if (chapter.getIsDownload()) {
+                    // 已下载，加载内容
+                    loadChapterContent(bookData, chapter);
+                }
+            }
+            
+            bookData.markAsFullyLoaded();
+            
+        } catch (Exception e) {
+            EasyLog.print("BookRepository", "加载书籍数据失败: " + e.getMessage());
+        }
+        
+        return bookData;
+    }
+
+    /**
+     * 加载章节内容
+     */
+    private void loadChapterContent(BookData bookData, Chapter chapter) {
+        try {
+            // 从数据库加载章节详细内容
+            List<DataItem> content = ConvertEntity.getBookChapterDetailList(chapter);
+            
+            Long signatureId = chapter.getSignatureId();
+            EasyLog.print("BookRepository", "加载章节内容: signatureId=" + signatureId + 
+                ", contentSize=" + (content != null ? content.size() : 0));
+            
+            if (content != null && !content.isEmpty()) {
+                // 查找对应的 ChapterData
+                ChapterData chapterData = bookData.findChapterBySignature(signatureId);
+                if (chapterData != null) {
+                    chapterData.setContent(content);
+                    EasyLog.print("BookRepository", "章节内容加载成功: signatureId=" + signatureId);
+                } else {
+                    EasyLog.print("BookRepository", "未找到对应的 ChapterData: signatureId=" + signatureId);
+                }
+            } else {
+                EasyLog.print("BookRepository", "数据库中无章节内容: signatureId=" + signatureId);
+            }
+        } catch (Exception e) {
+            EasyLog.print("BookRepository", "加载章节内容失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 异步下载章节内容（新模型）
+     * 
+     * @param chapter 章节对象
+     * @param bookData 书籍数据
+     * @param callback 下载回调
+     */
+    public void downloadChapterAsync(Chapter chapter, BookData bookData, 
+                                    DataCallback<ChapterData> callback) {
+        if (chapter == null) {
+            if (callback != null) {
+                callback.onFailure(new IllegalArgumentException("章节对象为空"));
+            }
+            return;
+        }
+
+        try {
+            EasyHttp.get(null)
+                .api(new ChapterContentApi()
+                    .setContentId(chapter.getChapterSection())
+                    .setSignatureId(chapter.getSignatureId())
+                    .setBookId(chapter.getBookId()))
+                .request(new HttpCallback<HttpData<List<HH2SectionData>>>(null) {
+                    @Override
+                    public void onSucceed(HttpData<List<HH2SectionData>> data) {
+                        if (data != null && !data.getData().isEmpty()) {
+                            HH2SectionData sectionData = data.getData().get(0);
+
+                            try {
+                                // 保存到数据库
+                                ConvertEntity.saveBookChapterDetailList(chapter, data.getData());
+                                chapter.setIsDownload(true);
+                                dbService.mChapterService.updateEntity(chapter);
+
+                                // 转换为新模型并更新到 BookData
+                                ChapterData chapterData = DataConverter.fromHH2SectionData(sectionData);
+                                
+                                // 更新到 BookData
+                                if (bookData != null) {
+                                    ChapterData existing = bookData.findChapterBySignature(chapter.getSignatureId());
+                                    if (existing != null) {
+                                        existing.setContent(chapterData.getContent());
+                                        chapterData = existing;
+                                    }
+                                }
+
+                                if (callback != null) {
+                                    callback.onSuccess(chapterData);
+                                }
+
+                            } catch (Exception e) {
+                                if (callback != null) {
+                                    callback.onFailure(e);
+                                }
+                            }
+                        } else {
+                            if (callback != null) {
+                                callback.onFailure(new Exception("章节数据为空"));
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        if (callback != null) {
+                            callback.onFailure(e);
+                        }
+                    }
+                });
+
+        } catch (Exception e) {
+            if (callback != null) {
+                callback.onFailure(e);
+            }
+        }
+    }
+
+    /**
+     * 懒加载章节内容
+     * 如果章节内容未加载，则从数据库或网络加载
+     * 
+     * @param bookId 书籍 ID
+     * @param position 章节位置
+     * @param callback 加载回调
+     */
+    public void loadChapterLazy(int bookId, int position, DataCallback<ChapterData> callback) {
+        try {
+            BookData bookData = getBookData(bookId);
+            ChapterData chapterData = bookData.getChapter(position);
+            
+            EasyLog.print("BookRepository", "懒加载章节: bookId=" + bookId + 
+                ", position=" + position + ", chapterData=" + (chapterData != null));
+            
+            if (chapterData == null) {
+                EasyLog.print("BookRepository", "懒加载失败: 章节不存在");
+                if (callback != null) {
+                    callback.onFailure(new Exception("章节不存在"));
+                }
+                return;
+            }
+            
+            // 检查是否已加载内容
+            if (chapterData.isContentLoaded() && !chapterData.isEmpty()) {
+                // 已加载，直接返回
+                EasyLog.print("BookRepository", "章节内容已加载: signatureId=" + chapterData.getSignatureId());
+                if (callback != null) {
+                    callback.onSuccess(chapterData);
+                }
+                return;
+            }
+            
+            EasyLog.print("BookRepository", "章节内容未加载，开始加载: signatureId=" + chapterData.getSignatureId());
+            
+            // 从数据库查找对应的 Chapter 实体
+            List<Chapter> chapters = getChapters(bookId);
+            Chapter targetChapter = null;
+            for (Chapter chapter : chapters) {
+                if (chapter.getSignatureId() != null && 
+                    chapter.getSignatureId() == chapterData.getSignatureId()) {
+                    targetChapter = chapter;
+                    break;
+                }
+            }
+            
+            if (targetChapter == null) {
+                EasyLog.print("BookRepository", "懒加载失败: 未找到章节实体");
+                if (callback != null) {
+                    callback.onFailure(new Exception("未找到章节实体"));
+                }
+                return;
+            }
+            
+            // 检查是否已下载
+            boolean isDownloaded = targetChapter.getIsDownload();
+            EasyLog.print("BookRepository", "章节下载状态: isDownloaded=" + isDownloaded);
+            
+            if (isDownloaded) {
+                // 已下载，从数据库加载
+                loadChapterContent(bookData, targetChapter);
+                if (callback != null) {
+                    callback.onSuccess(chapterData);
+                }
+            } else {
+                // 未下载，从网络下载
+                EasyLog.print("BookRepository", "章节未下载，开始网络下载");
+                downloadChapterAsync(targetChapter, bookData, callback);
+            }
+            
+        } catch (Exception e) {
+            EasyLog.print("BookRepository", "懒加载异常: " + e.getMessage());
+            if (callback != null) {
+                callback.onFailure(e);
+            }
+        }
+    }
+
+    /**
+     * 获取书籍信息（使用全局数据）
+     * 
+     * @param bookId 书籍 ID
+     * @return 书籍信息
+     */
+    public TabNavBody getBookInfoFromGlobal(int bookId) {
+        return globalData.getBookInfo(bookId);
+    }
+
+    /**
+     * 获取书籍数据管理器
+     */
+    public BookDataManager getDataManager() {
+        return dataManager;
+    }
+
+    /**
+     * 获取全局数据持有者
+     */
+    public GlobalDataHolder getGlobalData() {
+        return globalData;
     }
 }
