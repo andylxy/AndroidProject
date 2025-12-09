@@ -61,9 +61,9 @@ android {
             addManifestPlaceholders([
                     'app_name': '@string/app_name_debug'
             ])
-            // 调试模式支持32位和64位架构
+            // 调试模式下只保留一种架构的 so 库，提升打包速度
             ndk {
-                abiFilters 'armeabi-v7a', 'arm64-v8a'
+                abiFilters 'armeabi-v7a'
             }
         }
 
@@ -74,10 +74,6 @@ android {
             addManifestPlaceholders([
                     'app_name': '@string/app_name_preview'
             ])
-            // Preview版本支持32位和64位架构
-            ndk {
-                abiFilters 'armeabi-v7a', 'arm64-v8a'
-            }
         }
 
         release {
