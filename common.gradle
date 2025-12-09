@@ -1,14 +1,13 @@
 // 通用配置
 android {
 
-    // 编译源码版本
-    compileSdkVersion 30
+    // 编译源码版本（升级到 Android 14）
+    compileSdkVersion 34
     defaultConfig {
-        // 最低安装版本
+        // 最低安装版本（保持 Android 5.0+ 兼容性）
         minSdkVersion 21
-        // 目标适配版本
-        //noinspection ExpiredTargetSdkVersion
-        targetSdkVersion 26
+        // 目标适配版本（升级到 Android 14，符合 Google Play 要求）
+        targetSdkVersion 34
         versionName '1.4'
         versionCode 10
     }

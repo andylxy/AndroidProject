@@ -699,26 +699,43 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        adapter.setOnHeaderClickListener(null);
-        singletonNetData.setOnContentUpdateListener(null);
+        
+        // 清理适配器监听器
+        if (adapter != null) {
+            adapter.setOnHeaderClickListener(null);
+            adapter.setOnJumpSpecifiedItemListener(null);
+        }
+        
+        // 清理数据监听器
+        if (singletonNetData != null) {
+            singletonNetData.setOnContentUpdateListener(null);
+        }
 
-        singletonNetData.setOnContentUpdateListener(null);
-        adapter.setOnJumpSpecifiedItemListener(null);
-
+        // 清理 RecyclerView
         if (rvList != null) {
             rvList.setAdapter(null);
             rvList.setLayoutManager(null);
-            rvList.removeItemDecorationAt(0);
+            if (rvList.getItemDecorationCount() > 0) {
+                rvList.removeItemDecorationAt(0);
+            }
         }
+        
+        // 清理回调
+        if (onBackPressedCallback != null) {
+            onBackPressedCallback.remove();
+            onBackPressedCallback = null;
+        }
+        
+        // 注销 EventBus
+        XEventBus.getDefault().unregister(this);
+
+        
+        // 释放引用
         contentUpdateListener = null;
         onJumpSpecifiedItemListener = null;
         singletonNetData = null;
-        if (onBackPressedCallback != null) {
-            onBackPressedCallback.remove();
-        }
-        // instance = null;
-        // 注销事件
-        XEventBus.getDefault().unregister(TipsBookNetReadFragment.this);
+        adapter = null;
+        rvList = null;
     }
 
 

@@ -48,6 +48,11 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
         // 给这个 View 设置沉浸式，避免状态栏遮挡
         ImmersionBar.setTitleBar(this, findViewById(R.id.tips_fragment_pager));
         
+        // 防止重复初始化
+        if (mViewPager != null) {
+            return;
+        }
+        
         // 从意图中获取书籍ID
         bookId = getIntent().getIntExtra("bookId", 0);
         if (bookId == 0) {
@@ -110,14 +115,19 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         // 保存当前 Fragment 索引位置
-        outState.putInt(INTENT_KEY_IN_FRAGMENT_INDEX, mViewPager.getCurrentItem());
+        if (mViewPager != null) {
+            outState.putInt(INTENT_KEY_IN_FRAGMENT_INDEX, mViewPager.getCurrentItem());
+        }
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         // 恢复当前 Fragment 索引位置
-        switchFragment(savedInstanceState.getInt(INTENT_KEY_IN_FRAGMENT_INDEX));
+        if (savedInstanceState != null && mViewPager != null) {
+            int fragmentIndex = savedInstanceState.getInt(INTENT_KEY_IN_FRAGMENT_INDEX, 0);
+            switchFragment(fragmentIndex);
+        }
     }
 
     public void switchFragment(int fragmentIndex) {
@@ -152,27 +162,41 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
 
     @Override
     protected void onDestroy() {
-        // 先移除监听器，避免内存泄漏
+        // 第一步：注销所有监听器（防止回调触发）
         if (mNavigationAdapter != null) {
             mNavigationAdapter.setOnNavigationListener(null);
         }
         
-        // ViewPager2 清理
-        if (mViewPager != null && mPageChangeCallback != null) {
-            mViewPager.unregisterOnPageChangeCallback(mPageChangeCallback);
-            // ViewPager2 不需要手动 setAdapter(null)
+        // 第二步：清理 ViewPager2（按正确顺序）
+        if (mViewPager != null) {
+            // 2.1 先注销回调
+            if (mPageChangeCallback != null) {
+                mViewPager.unregisterOnPageChangeCallback(mPageChangeCallback);
+            }
+            // 2.2 设置 adapter 为 null，让 ViewPager2 释放 Fragment 引用
+            // 这对于防止内存泄漏是必要的
+            mViewPager.setAdapter(null);
         }
         
-        // 清理 RecyclerView
+        // 第三步：清理 Adapter 内部引用
+        if (mPagerAdapter != null) {
+            mPagerAdapter.clearFragments();
+        }
+        
+        // 第四步：清理 RecyclerView
         if (mNavigationView != null) {
             mNavigationView.setAdapter(null);
         }
         
-        // 释放引用
+        // 第五步：释放所有成员变量引用
         mPagerAdapter = null;
         mNavigationAdapter = null;
         mPageChangeCallback = null;
+        mViewPager = null;
+        mNavigationView = null;
+        bookInfo = null;
         
+        // 最后：调用父类
         super.onDestroy();
     }
 
@@ -215,6 +239,14 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
                 }
             }
             return false;
+        }
+        
+        /**
+         * 清理 Fragment 引用，帮助 GC 回收
+         * 在 Activity onDestroy 时调用
+         */
+        public void clearFragments() {
+            fragmentList.clear();
         }
     }
 
