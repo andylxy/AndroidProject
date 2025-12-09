@@ -724,9 +724,14 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             StringBuilder fangName = new StringBuilder("\n").append(book.getBookName());
             //书本相关的药方只加载一次
             if (!singletonNetData.getBookFang(bookId)){
-                getBookFang(bookId, fangName);
-                //标记书本是否已经下载过
-                singletonNetData.setBookFang(bookId);
+                // 延迟加载药方数据,避免与 Activity 启动生命周期冲突
+                postDelayed(() -> {
+                    if (isAdded() && !isDetached()) {  // 确保 Fragment 仍然附加
+                        getBookFang(bookId, fangName);
+                        //标记书本是否已经下载过
+                        singletonNetData.setBookFang(bookId);
+                    }
+                }, 300);  // 延迟 300ms,确保 Activity 完全启动
             }
         }
     }

@@ -331,8 +331,22 @@ public class BookRepository {
             // 加载章节列表
             List<Chapter> chapters = getChapters(bookId);
             if (!chapters.isEmpty()) {
-                // 转换为新数据模型
-                List<ChapterData> chapterDataList = DataConverter.fromChapterEntities(chapters);
+                // 为每个章节创建 ChapterData（不加载内容，等待懒加载）
+                List<ChapterData> chapterDataList = new ArrayList<>();
+                for (Chapter chapter : chapters) {
+                    Long signatureId = chapter.getSignatureId();
+                    String title = chapter.getChapterHeader() != null ? chapter.getChapterHeader() : "";
+                    Integer section = chapter.getChapterSection();
+                    
+                    ChapterData chapterData = new ChapterData(
+                        signatureId != null ? signatureId : 0,
+                        title,
+                        section != null ? section : 0
+                    );
+                    
+                    chapterDataList.add(chapterData);
+                }
+                
                 bookData.setChapters(chapterDataList);
             }
             
@@ -390,6 +404,7 @@ public class BookRepository {
      * @param callback 下载回调
      */
     public void downloadChapterAsync(Chapter chapter, BookData bookData, 
+                                    androidx.lifecycle.LifecycleOwner lifecycleOwner,
                                     DataCallback<ChapterData> callback) {
         if (chapter == null) {
             if (callback != null) {
@@ -416,16 +431,31 @@ public class BookRepository {
                                 chapter.setIsDownload(true);
                                 dbService.mChapterService.updateEntity(chapter);
 
-                                // 转换为新模型并更新到 BookData
-                                ChapterData chapterData = DataConverter.fromHH2SectionData(sectionData);
-                                
-                                // 更新到 BookData
+                                // 创建或更新 ChapterData
+                                ChapterData chapterData = null;
                                 if (bookData != null) {
-                                    ChapterData existing = bookData.findChapterBySignature(chapter.getSignatureId());
-                                    if (existing != null) {
-                                        existing.setContent(chapterData.getContent());
-                                        chapterData = existing;
+                                    chapterData = bookData.findChapterBySignature(chapter.getSignatureId());
+                                }
+                                
+                                if (chapterData == null) {
+                                    // 创建新的 ChapterData
+                                    Long signatureId = chapter.getSignatureId();
+                                    chapterData = new ChapterData(
+                                        signatureId != null ? signatureId : 0,
+                                        chapter.getChapterHeader() != null ? chapter.getChapterHeader() : "",
+                                        chapter.getChapterSection()
+                                    );
+                                }
+                                
+                                // 设置内容（从 HH2SectionData 获取）
+                                if (sectionData.getData() != null) {
+                                    List<DataItem> content = new ArrayList<>();
+                                    for (Object item : sectionData.getData()) {
+                                        if (item instanceof DataItem) {
+                                            content.add((DataItem) item);
+                                        }
                                     }
+                                    chapterData.setContent(content);
                                 }
 
                                 if (callback != null) {
@@ -465,9 +495,10 @@ public class BookRepository {
      * 
      * @param bookId 书籍 ID
      * @param position 章节位置
+     * @param lifecycleOwner 生命周期对象(Fragment/Activity),用于绑定网络请求
      * @param callback 加载回调
      */
-    public void loadChapterLazy(int bookId, int position, DataCallback<ChapterData> callback) {
+    public void loadChapterLazy(int bookId, int position, androidx.lifecycle.LifecycleOwner lifecycleOwner, DataCallback<ChapterData> callback) {
         try {
             BookData bookData = getBookData(bookId);
             ChapterData chapterData = bookData.getChapter(position);
@@ -527,7 +558,7 @@ public class BookRepository {
             } else {
                 // 未下载，从网络下载
                 EasyLog.print("BookRepository", "章节未下载，开始网络下载");
-                downloadChapterAsync(targetChapter, bookData, callback);
+                downloadChapterAsync(targetChapter, bookData, lifecycleOwner, callback);
             }
             
         } catch (Exception e) {

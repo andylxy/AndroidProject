@@ -9,6 +9,7 @@
 
 package run.yigou.gxzy.ui.tips.tipsutils;
 
+import androidx.lifecycle.LifecycleOwner;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.EasyLog;
 import com.hjq.http.listener.HttpCallback;
@@ -127,10 +128,11 @@ public class ChapterDownloadManager {
      * 3. 提交到高优先级队列立即下载
      * 4. 下载完成后回调通知
      * 
+     * @param lifecycleOwner Fragment/Activity 生命周期管理器
      * @param chapter 要下载的章节
      * @param callback 下载回调
      */
-    public void downloadChapter(Chapter chapter, DownloadCallback callback) {
+    public void downloadChapter(LifecycleOwner lifecycleOwner, Chapter chapter, DownloadCallback callback) {
         if (chapter == null) {
             EasyLog.print("ChapterDownloadManager", "章节为空，跳过下载");
             return;
@@ -157,7 +159,7 @@ public class ChapterDownloadManager {
 
         // 提交到高优先级线程池
         highPriorityExecutor.execute(() -> {
-            executeDownload(chapter, callback, true);
+            executeDownload(lifecycleOwner, chapter, callback, true);
         });
     }
 
@@ -172,8 +174,9 @@ public class ChapterDownloadManager {
      * 
      * @param allChapters 所有章节列表
      * @param currentIndex 当前章节索引
+     * @param lifecycleOwner 生命周期对象（可选,传 null 则不绑定生命周期）
      */
-    public void preloadChapters(List<Chapter> allChapters, int currentIndex) {
+    public void preloadChapters(List<Chapter> allChapters, int currentIndex, LifecycleOwner lifecycleOwner) {
         if (allChapters == null || allChapters.isEmpty()) {
             return;
         }
@@ -210,7 +213,8 @@ public class ChapterDownloadManager {
         // 批量提交到低优先级线程池
         for (Chapter chapter : chaptersToPreload) {
             lowPriorityExecutor.execute(() -> {
-                executeDownload(chapter, null, false);
+                // 预加载使用传入的 lifecycleOwner,如果为 null 则在后台执行(不绑定生命周期)
+                executeDownload(lifecycleOwner, chapter, null, false);
             });
         }
     }
@@ -253,13 +257,16 @@ public class ChapterDownloadManager {
      * 3. 更新下载状态缓存
      * 4. 回调通知（如果有）
      * 
+     * @param lifecycleOwner Fragment/Activity 生命周期管理器
      * @param chapter 要下载的章节
      * @param callback 下载回调（可选）
      * @param isHighPriority 是否高优先级下载
      */
-    private void executeDownload(Chapter chapter, DownloadCallback callback, boolean isHighPriority) {
+    private void executeDownload(LifecycleOwner lifecycleOwner, Chapter chapter, DownloadCallback callback, boolean isHighPriority) {
         try {
-            EasyHttp.get(null)
+            // EasyHttp.get(lifecycleOwner) 绑定生命周期,Fragment 销毁时自动取消请求
+            // HttpCallback 构造函数传递 null 即可,无需重复绑定
+            EasyHttp.get(lifecycleOwner)
                 .api(new ChapterContentApi()
                     .setContentId(chapter.getChapterSection())
                     .setSignatureId(chapter.getSignatureId())
