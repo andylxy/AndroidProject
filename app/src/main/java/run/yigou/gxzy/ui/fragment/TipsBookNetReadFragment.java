@@ -28,9 +28,7 @@ import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 
 import com.hjq.base.BaseDialog;
-import com.hjq.http.EasyHttp;
 import com.hjq.http.EasyLog;
-import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 import com.lucas.annotations.Subscribe;
@@ -52,20 +50,13 @@ import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.gen.BookDao;
 import run.yigou.gxzy.greendao.gen.ChapterDao;
-import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
-import run.yigou.gxzy.http.api.BookFangApi;
-import run.yigou.gxzy.http.api.ChapterContentApi;
-import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
-import run.yigou.gxzy.ui.tips.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
-import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import run.yigou.gxzy.ui.tips.contract.TipsBookReadContract;
@@ -105,12 +96,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      * 是否保存到书架
      */
     private boolean isShowBookCollect = false;
-    /**
-     * 数据传递
-     */
-
-    private SingletonNetData singletonNetData;
-
+    
     /**
      * MVP 架构组件
      */
@@ -330,11 +316,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             retrieveBookArguments(bookArgs);
 
             // 获取指定书籍数据
-            singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
-            // 兼容处理宋版伤寒
-            if (bookId == AppConst.ShangHanNo) {
-                setShanghanContentUpdateListener();
-            }
+            // ✅ 不再需要初始化 singletonNetData
+            // ✅ 宋版伤寒逻辑已移至 Presenter
+            
             // Fragment 处理返回键动作,是否保存阅读
 
             if (AppApplication.getApplication().fragmentSetting.isShuJie())
@@ -377,61 +361,16 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         }
     }
 
-    SingletonNetData.OnContentUpdateListener contentUpdateListener;
-
-    private void setShanghanContentUpdateListener() {
-
-        if (contentUpdateListener == null) {
-            contentUpdateListener = new SingletonNetData.OnContentUpdateListener() {
-                @Override
-                public ArrayList<HH2SectionData> contentDateUpdate(ArrayList<HH2SectionData> contentList) {
-                    if (contentList == null || contentList.isEmpty()) {
-                        return new ArrayList<>();
-                    }
-
-                    int size = contentList.size();
-
-                    int start = 0;
-                    int end = size;
-
-
-                    if (!AppApplication.getApplication().fragmentSetting.isSong_JinKui()) {
-                        if (!AppApplication.getApplication().fragmentSetting.isSong_ShangHan()) {
-                            start = 8;
-                            end = Math.min(18, size);
-                        } else {
-                            end = Math.min(26, size);
-                        }
-                    } else {
-                        if (!AppApplication.getApplication().fragmentSetting.isSong_ShangHan()) {
-                            start = 8;
-                        }
-                    }
-
-                    if (start < size) {
-                        return new ArrayList<>(contentList.subList(start, end));
-                    } else {
-                        return contentList;
-                    }
-                }
-            };
-            singletonNetData.setOnContentUpdateListener(contentUpdateListener);
-        }
-    }
+    // ✅ 宋版伤寒监听器已移至 Presenter 内部处理
+    // ✅ 不再需要 Fragment 中的监听器
 
     @Subscribe(priority = 1)
     public void onEvent(TipsFragmentSettingEventNotification event) {
         ThreadUtil.runOnUiThread(() -> {
-
-            // 兼容处理宋版伤寒
-            if (bookId == AppConst.ShangHanNo) {
-                setShanghanContentUpdateListener();
-            }
+            // ✅ 宋版伤寒逻辑已移至 Presenter，不需要 Fragment 中设置
             refreshData();
             // Fragment 处理返回键动作,是否保存阅读
             setBackPressedCallback();
-            // EasyLog.print("TipsBookNetReadFragment onEvent", "onEvent");
-
         });
     }
 
@@ -516,21 +455,19 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      * @param groupPosition 章节索引
      */
     private void reloadChapter(int groupPosition) {
-        if (singletonNetData == null || chapterList == null) {
+        if (chapterList == null || presenter == null) {
             toast("数据未加载，无法重新下载");
             return;
         }
 
         try {
-            ArrayList<HH2SectionData> contentList = singletonNetData.getContent();
-            if (contentList == null || groupPosition >= contentList.size()) {
+            // 边界检查
+            if (groupPosition < 0 || groupPosition >= chapterList.size()) {
                 toast("章节索引越界");
                 return;
             }
 
-            HH2SectionData section = contentList.get(groupPosition);
-            Chapter chapter = findChapterBySignatureId(section.getSignatureId());
-            
+            Chapter chapter = chapterList.get(groupPosition);
             if (chapter == null) {
                 toast("未找到章节信息");
                 return;
@@ -538,8 +475,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
             toast("开始重新下载: " + chapter.getChapterHeader());
             
-            // 使用旧的 getChapterList 方法重新下载
-            getChapterList(chapter, contentList);
+            // ✅ 通过 Presenter 重新下载章节
+            presenter.reloadChapter(groupPosition);
             
             // 重新下载完成后，重置标志
             postDelayed(() -> {
@@ -584,33 +521,13 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      * @param groupPosition 章节索引
      */
     private void triggerChapterDownload(int groupPosition) {
-        if (singletonNetData == null || chapterList == null) {
+        if (chapterList == null || presenter == null) {
             return;
         }
 
         try {
-            // 获取当前章节数据
-            ArrayList<HH2SectionData> contentList = singletonNetData.getContent();
-            if (contentList == null || groupPosition >= contentList.size()) {
-                return;
-            }
-
-            HH2SectionData section = contentList.get(groupPosition);
-            if (section == null) {
-                return;
-            }
-
-            // 查找对应的章节对象
-            Chapter chapter = findChapterBySignatureId(section.getSignatureId());
-            if (chapter == null) {
-                EasyLog.print("TipsBookNetReadFragment", "未找到章节: signatureId=" + section.getSignatureId());
-                return;
-            }
-
-            // 通过 Presenter 处理章节点击
-            if (presenter != null) {
-                presenter.onChapterClick(groupPosition);
-            }
+            // ✅ 直接通过 Presenter 处理章节点击（不再依赖 singletonNetData）
+            presenter.onChapterClick(groupPosition);
 
         } catch (Exception e) {
             EasyLog.print("TipsBookNetReadFragment", "触发下载异常: " + e.getMessage());
@@ -644,17 +561,13 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      * @param sectionData 章节数据
      */
     public void updateChapterContent(int groupPosition, HH2SectionData sectionData) {
-        if (singletonNetData == null || adapter == null || sectionData == null) {
+        if (adapter == null || sectionData == null) {
             return;
         }
 
         try {
-            ArrayList<HH2SectionData> contentList = singletonNetData.getContent();
-            if (contentList != null && groupPosition < contentList.size()) {
-                // 更新数据
-                contentList.set(groupPosition, sectionData);
-                
-                // 刷新 UI
+            // ✅ 直接更新 UI（数据已由 Presenter 管理）
+            if (groupPosition >= 0 && groupPosition < adapter.getmGroups().size()) {
                 ExpandableGroupEntity groupEntity = GroupModel.getExpandableGroupEntity(false, sectionData);
                 adapter.getmGroups().set(groupPosition, groupEntity);
                 adapter.notifyGroupChanged(groupPosition);
@@ -673,16 +586,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
         EasyLog.print("TipsBookNetReadFragment", "========== bookInitData 开始 ==========");
         
-        singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
-        EasyLog.print("TipsBookNetReadFragment", "singletonNetData=" + (singletonNetData != null ? "存在" : "null"));
-        
-        if (singletonNetData.getYaoAliasDict() == null)
-            singletonNetData.setYaoAliasDict(singletonNetData.getYaoAliasDict());
-        if (singletonNetData.getFangAliasDict() == null)
-            singletonNetData.setFangAliasDict(singletonNetData.getFangAliasDict());
+        // ✅ 不再需要初始化 singletonNetData
+        // ✅ 不再需要初始化别名字典（由 Repository/Presenter 处理）
 
         //加载书本相关的药方
-
         TabNavBody book = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
         EasyLog.print("TipsBookNetReadFragment", "book=" + (book != null ? book.getBookName() : "null"));
         
@@ -708,123 +615,21 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         EasyLog.print("TipsBookNetReadFragment", "chapterList=" + (chapterList != null ? chapterList.size() : "null"));
 
         if (book != null) {
-            //加载书本相关的章节（已移除旧的批量下载逻辑）
-            // getBookChapter(); // ❌ 已移除：启动时不再批量下载
-            
             // ✅ 通过 Presenter 加载书籍数据（新数据模型）
             if (presenter != null && chapterList != null) {
                 EasyLog.print("TipsBookNetReadFragment", "开始加载书籍数据，共 " + chapterList.size() + " 个章节");
                 // 调用 Presenter 初始化书籍数据（传递 TabNavBody 避免全局数据获取失败）
+                // Presenter 会自动加载药方数据
                 presenter.loadBookContent(book, bookId, bookLastReadPosition, isShowBookCollect);
             } else {
                 EasyLog.print("TipsBookNetReadFragment", "跳过加载: presenter=" + (presenter != null) + 
                     ", chapterList=" + (chapterList != null));
             }
-            
-            StringBuilder fangName = new StringBuilder("\n").append(book.getBookName());
-            //书本相关的药方只加载一次
-            if (!singletonNetData.getBookFang(bookId)){
-                // 延迟加载药方数据,避免与 Activity 启动生命周期冲突
-                postDelayed(() -> {
-                    if (isAdded() && !isDetached()) {  // 确保 Fragment 仍然附加
-                        getBookFang(bookId, fangName);
-                        //标记书本是否已经下载过
-                        singletonNetData.setBookFang(bookId);
-                    }
-                }, 300);  // 延迟 300ms,确保 Activity 完全启动
-            }
         }
     }
 
-    private void getBookChapter() {
-        int setp = 150;
-        for (Chapter chapter : chapterList) {
-            // 从数据库中获取数据,是否下载过
-            if (!chapter.getIsDownload()) {
-                postDelayed(() -> {
-                    getChapterList(chapter, singletonNetData.getContent());
-                }, setp);
-                setp += 500;
-            }
-        }
-    }
-
-    public void getChapterList(Chapter chapter, ArrayList<HH2SectionData> detailList) {
-
-        EasyHttp.get(this)
-                .api(new ChapterContentApi()
-                        .setContentId(chapter.getChapterSection())
-                        .setSignatureId(chapter.getSignatureId())
-                        .setBookId(chapter.getBookId())
-                )
-                .request(new HttpCallback<HttpData<List<HH2SectionData>>>(this) {
-                    @Override
-                    public void onSucceed(HttpData<List<HH2SectionData>> data) {
-                        if (data != null && !data.getData().isEmpty()) {
-                            //  ArrayList<Chapter> list = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(item.getBookNo()));
-                            for (int i = 0; i < detailList.size(); i++) {
-                                if (detailList.get(i).getSignatureId() == data.getData().get(0).getSignatureId()) {
-                                    HH2SectionData hh2SectionData = new HH2SectionData(data.getData().get(0).getData(), chapter.getChapterSection(), chapter.getChapterHeader());
-                                    hh2SectionData.setSignatureId(data.getData().get(0).getSignatureId());
-                                    ExpandableGroupEntity groupEntity = GroupModel.getExpandableGroupEntity(false, hh2SectionData);
-                                    // 更新数据
-                                    detailList.set(i, hh2SectionData);
-                                    adapter.getmGroups().set(i, groupEntity);
-                                    // 刷新列表
-                                    adapter.notifyGroupChanged(i);
-                                    //
-                                    if (!isShowUpdateNotification) {
-                                        isShowUpdateNotification = true;
-                                        toast("重新下载完成!!!!");
-                                    }
-                                    try {
-                                        // 更新数据库
-                                        chapter.setIsDownload(true);
-                                        DbService.getInstance().mChapterService.updateEntity(chapter);
-                                        //保存内容
-                                        ConvertEntity.saveBookChapterDetailList(chapter, data.getData());
-
-                                    } catch (Exception e) {
-                                        // 处理异常，比如记录日志、通知管理员等
-                                        EasyLog.print("Failed to updateEntity: " + e.getMessage());
-                                        return;
-                                        // 根据具体情况决定是否需要重新抛出异常
-                                        //throw e;
-                                    }
-                                }
-                            }
-
-
-                        }
-                    }
-
-//                    @Override
-//                    public void onFail(Exception e) {
-//                        super.onFail(e);
-//                        toast("onFail  getChapterList!!!");
-//                    }
-                });
-
-    }
-
-    private void getBookFang(int bookId, StringBuilder fangName) {
-        EasyHttp.get(this)
-                .api(new BookFangApi().setBookId(bookId))
-                .request(new HttpCallback<HttpData<List<Fang>>>(this) {
-                    @Override
-                    public void onSucceed(HttpData<List<Fang>> data) {
-                        if (data != null && !data.getData().isEmpty()) {
-                            List<Fang> detailList = data.getData();
-                            singletonNetData.setFang(new HH2SectionData(detailList, 0, fangName.toString()));
-                            //保存药方数据
-                            ThreadUtil.runInBackground(() -> {
-                                ConvertEntity.getFangDetailList(data.getData(), bookId);
-                            });
-
-                        }
-                    }
-                });
-    }
+    // ✅ 废弃方法已移除：getBookChapter(), getChapterList(), getBookFang()
+    // ✅ 这些功能已由 Presenter 和 Repository 接管
 
     private void refreshData() {
         bookInitData();
@@ -849,10 +654,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             adapter.setOnJumpSpecifiedItemListener(null);
         }
         
-        // 清理数据监听器
-        if (singletonNetData != null) {
-            singletonNetData.setOnContentUpdateListener(null);
-        }
+        // ✅ 不再需要清理 singletonNetData 监听器
 
         // 清理 RecyclerView
         if (rvList != null) {
@@ -872,11 +674,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         // 注销 EventBus
         XEventBus.getDefault().unregister(this);
 
-        
         // 释放引用
-        contentUpdateListener = null;
         onJumpSpecifiedItemListener = null;
-        singletonNetData = null;
         adapter = null;
         rvList = null;
     }
@@ -902,20 +701,18 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      * @param isExpand false 表头不展开, true 展开
      */
     private void reListAdapter(boolean init, boolean isExpand) {
-        if (bookId != 0) {
-
+        if (bookId != 0 && presenter != null) {
             if (init) {
-                adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getContent(), isExpand));
+                // ✅ 从 Presenter 获取章节内容列表
+                List<HH2SectionData> contentList = presenter.getChapterContentList();
+                adapter.setmGroups(GroupModel.getExpandableGroups(new ArrayList<>(contentList), isExpand));
                 //如果有上次阅读记录，则定位到上次阅读位置
                 if (isShowBookCollect) {
                     layoutManager.scrollToPositionWithOffset(bookLastReadPosition, 0);
                     adapter.expandGroup(bookLastReadPosition, true);
                 }
-            } else {
-                //搜索结果
-                // if (!singletonNetData.getSearchResList().isEmpty())
-                adapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData.getSearchResList(), isExpand));
             }
+            // 搜索结果已通过 presenter.search() -> view.showSearchResults() 回调处理
             adapter.notifyDataChanged();
         }
     }

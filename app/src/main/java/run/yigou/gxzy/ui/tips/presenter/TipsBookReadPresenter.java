@@ -59,6 +59,8 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     private List<Chapter> allChapters;
     private BookData currentBookData;  // 新数据模型
     private ChapterIndexBuilder indexBuilder;  // 搜索索引
+    private java.util.Set<Integer> loadedBookFangs = new java.util.HashSet<>();  // 已加载药方的书籍集合
+    private boolean isShanghanBook = false;  // 是否为宋版伤寒书籍
 
     public TipsBookReadPresenter(TipsBookReadContract.View view) {
         this.view = view;
@@ -605,7 +607,16 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
      * 加载药方数据
      */
     private void loadBookFang(TabNavBody book) {
+        // 检查是否已加载
+        if (loadedBookFangs.contains(currentBookId)) {
+            EasyLog.print("TipsBookReadPresenter", "药方已加载，跳过: bookId=" + currentBookId);
+            return;
+        }
+        
         String fangName = "\n" + book.getBookName();
+        
+        // 标记为已加载（预先标记，避免重复请求）
+        loadedBookFangs.add(currentBookId);
         
         repository.downloadBookFang(currentBookId, new BookRepository.DataCallback<List<run.yigou.gxzy.ui.tips.DataBeans.Fang>>() {
             @Override
@@ -618,6 +629,8 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             @Override
             public void onFailure(Exception e) {
                 EasyLog.print("TipsBookReadPresenter", "药方数据加载失败: " + e.getMessage());
+                // 失败时移除标记，允许重试
+                loadedBookFangs.remove(currentBookId);
             }
         });
     }
@@ -626,10 +639,67 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
      * 设置宋版伤寒内容监听器
      */
     private void setupShanghanContentListener() {
-        // 宋版伤寒的特殊逻辑已集成到章节列表显示中
-        // 宋版伤寒的特殊逻辑已集成到章节列表显示中
-        // 不再需要单独的监听器
+        // 标记为宋版伤寒书籍
+        isShanghanBook = true;
         EasyLog.print("TipsBookReadPresenter", "宋版伤寒内容监听器已设置");
+    }
+
+    /**
+     * 获取当前章节内容列表（转换为 HH2SectionData）
+     * 用于 Fragment UI 展示，支持宋版伤寒过滤
+     */
+    public List<HH2SectionData> getChapterContentList() {
+        if (currentBookData == null || allChapters == null) {
+            return new ArrayList<>();
+        }
+        
+        // 转换为 HH2SectionData
+        ArrayList<HH2SectionData> contentList = convertChaptersToSectionData(allChapters);
+        
+        // 如果是宋版伤寒，应用内容过滤
+        if (isShanghanBook) {
+            contentList = filterShanghanContent(contentList);
+        }
+        
+        return contentList;
+    }
+
+    /**
+     * 宋版伤寒内容过滤逻辑
+     */
+    private ArrayList<HH2SectionData> filterShanghanContent(ArrayList<HH2SectionData> contentList) {
+        if (contentList == null || contentList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        int size = contentList.size();
+        int start = 0;
+        int end = size;
+
+        // 读取设置
+        run.yigou.gxzy.app.AppApplication app = run.yigou.gxzy.app.AppApplication.getApplication();
+        if (app == null || app.fragmentSetting == null) {
+            return contentList;
+        }
+
+        if (!app.fragmentSetting.isSong_JinKui()) {
+            if (!app.fragmentSetting.isSong_ShangHan()) {
+                start = 8;
+                end = Math.min(18, size);
+            } else {
+                end = Math.min(26, size);
+            }
+        } else {
+            if (!app.fragmentSetting.isSong_ShangHan()) {
+                start = 8;
+            }
+        }
+
+        if (start < size) {
+            return new ArrayList<>(contentList.subList(start, end));
+        } else {
+            return contentList;
+        }
     }
 
     /**
