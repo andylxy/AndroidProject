@@ -63,6 +63,7 @@ import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
+import run.yigou.gxzy.ui.tips.tipsutils.ChapterDownloadManager;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
@@ -106,6 +107,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
     private SingletonNetData singletonNetData;
 
+    /**
+     * 章节下载管理器（智能下载 + 预加载）
+     */
+    private ChapterDownloadManager downloadManager;
 
 // 在 onDestroy 中释放资源
 
@@ -331,6 +336,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             if (AppApplication.getApplication().fragmentSetting.isShuJie())
                 fragmentOnBackPressed();
 
+            // 初始化下载管理器
+            downloadManager = new ChapterDownloadManager();
+
             // 加载到UI显示
             initializeAdapter();
             setHeaderClickListener();
@@ -457,18 +465,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 if (isShowBookCollect)
                     currentIndex = groupPosition;
 
-//                //加载数据
-//                HH2SectionData chapterHH2SectionData = singletonNetData.getContent().get(groupPosition);
-//
-//                for (Chapter chapter : chapterList) {
-//
-//                    if (chapterHH2SectionData.getData().isEmpty() ) {
-//                        if (chapterHH2SectionData.getSignatureId() == chapter.getSignatureId()) {
-//                            getChapterList(chapter, singletonNetData.getContent());
-//                        }
-//                    }
-//
-//                }
+                // ✅ 智能下载：按需下载 + 预加载
+                triggerChapterDownload(groupPosition);
 
             }
 
@@ -488,49 +486,66 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 if (adapter.getSearch()) return true;
                 TipsNetHelper.showListDialog(getContext(), AppConst.reData_Type)
                         .setListener((dialog, position, string) -> {
-//                            if (string.equals("重新下载全部数据")) {
-//                                //通知显示已经变更
-//                                ShowUpdateNotificationEvent showUpdateNotification = new ShowUpdateNotificationEvent();
-//                                if (isShowUpdateNotification) {
-//                                    // 标记正在重新下载数据
-//                                    showUpdateNotification.setUpdateNotification(true);
-//                                    showUpdateNotification.setAllChapterNotification(true);
-//                                    isShowUpdateNotification = false;
-//                                    XEventBus.getDefault().post(showUpdateNotification);
-//                                } else {
-//                                    toast("重新下载全部数据数据!!!!");
-//                                }
-//                            }
                             if (string.equals("重新下本章节")) {
-                                //通知显示已经变更
-                                // ShowUpdateNotificationEvent showUpdateNotification = new ShowUpdateNotificationEvent();
                                 if (isShowUpdateNotification) {
-                                    // 标记正在重新下载数据
-//                                    showUpdateNotification.setUpdateNotification(true);
-//                                    showUpdateNotification.setChapterNotification(true);
                                     isShowUpdateNotification = false;
-//                                    // HH2SectionData hh2Section =  singletonNetData.getContent().get(groupPosition);
-//                                    showUpdateNotification.setChapterId(singletonNetData.getContent().get(groupPosition).getSignatureId());
-//                                    XEventBus.getDefault().post(showUpdateNotification);
-
-
-                                    for (Chapter chapter : chapterList) {
-                                        if (chapter.getSignatureId() == singletonNetData.getContent().get(groupPosition).getSignatureId()) {
-                                            getChapterList(chapter, singletonNetData.getContent());
-                                        }
-                                    }
-
+                                    
+                                    // ✅ 使用新的下载管理器重新下载
+                                    reloadChapter(groupPosition);
                                 } else {
                                     toast("正在重新下本章节数据!!!!");
                                 }
                             }
-
                         })
                         .show();
 
                 return true;
             }
         });
+    }
+
+    /**
+     * 重新下载章节
+     * 用户长按选择"重新下本章节"时调用
+     * 
+     * @param groupPosition 章节索引
+     */
+    private void reloadChapter(int groupPosition) {
+        if (singletonNetData == null || chapterList == null) {
+            toast("数据未加载，无法重新下载");
+            return;
+        }
+
+        try {
+            ArrayList<HH2SectionData> contentList = singletonNetData.getContent();
+            if (contentList == null || groupPosition >= contentList.size()) {
+                toast("章节索引越界");
+                return;
+            }
+
+            HH2SectionData section = contentList.get(groupPosition);
+            Chapter chapter = findChapterBySignatureId(section.getSignatureId());
+            
+            if (chapter == null) {
+                toast("未找到章节信息");
+                return;
+            }
+
+            toast("开始重新下载: " + chapter.getChapterHeader());
+            
+            // 使用旧的 getChapterList 方法重新下载
+            getChapterList(chapter, contentList);
+            
+            // 重新下载完成后，重置标志
+            postDelayed(() -> {
+                isShowUpdateNotification = true;
+            }, 2000);
+
+        } catch (Exception e) {
+            EasyLog.print("TipsBookNetReadFragment", "重新下载章节异常: " + e.getMessage());
+            toast("重新下载失败: " + e.getMessage());
+            isShowUpdateNotification = true;
+        }
     }
 
     private ExpandableAdapter.OnJumpSpecifiedItemListener onJumpSpecifiedItemListener;
@@ -550,6 +565,133 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 }
             };
             adapter.setOnJumpSpecifiedItemListener(onJumpSpecifiedItemListener);
+        }
+    }
+
+    /**
+     * 触发章节智能下载
+     * 
+     * 流程：
+     * 1. 检查章节是否已下载
+     * 2. 未下载则高优先级下载
+     * 3. 下载完成后触发预加载
+     * 
+     * @param groupPosition 章节索引
+     */
+    private void triggerChapterDownload(int groupPosition) {
+        if (downloadManager == null || singletonNetData == null || chapterList == null) {
+            return;
+        }
+
+        try {
+            // 获取当前章节数据
+            ArrayList<HH2SectionData> contentList = singletonNetData.getContent();
+            if (contentList == null || groupPosition >= contentList.size()) {
+                return;
+            }
+
+            HH2SectionData section = contentList.get(groupPosition);
+            if (section == null) {
+                return;
+            }
+
+            // 查找对应的章节对象
+            Chapter chapter = findChapterBySignatureId(section.getSignatureId());
+            if (chapter == null) {
+                EasyLog.print("TipsBookNetReadFragment", "未找到章节: signatureId=" + section.getSignatureId());
+                return;
+            }
+
+            // 检查是否已下载
+            if (downloadManager.isChapterDownloaded(chapter)) {
+                EasyLog.print("TipsBookNetReadFragment", "章节已下载，直接触发预加载: " + chapter.getChapterHeader());
+                // 已下载，直接触发预加载
+                downloadManager.preloadChapters(chapterList, groupPosition);
+                return;
+            }
+
+            // 检查是否正在下载
+            if (downloadManager.isChapterDownloading(chapter)) {
+                EasyLog.print("TipsBookNetReadFragment", "章节正在下载中: " + chapter.getChapterHeader());
+                return;
+            }
+
+            // 高优先级下载
+            EasyLog.print("TipsBookNetReadFragment", "开始下载章节: " + chapter.getChapterHeader());
+            downloadManager.downloadChapter(chapter, new ChapterDownloadManager.DownloadCallback() {
+                @Override
+                public void onSuccess(Chapter chapter, HH2SectionData sectionData) {
+                    // 更新 UI（主线程）
+                    post(() -> {
+                        updateChapterContent(groupPosition, sectionData);
+                        toast("章节下载完成: " + chapter.getChapterHeader());
+                    });
+
+                    // 触发智能预加载
+                    downloadManager.preloadChapters(chapterList, groupPosition);
+                }
+
+                @Override
+                public void onFailure(Chapter chapter, Exception e) {
+                    // 显示错误信息（主线程）
+                    post(() -> {
+                        toast("下载失败: " + e.getMessage());
+                    });
+                }
+            });
+
+        } catch (Exception e) {
+            EasyLog.print("TipsBookNetReadFragment", "触发下载异常: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 根据 signatureId 查找章节对象
+     * 
+     * @param signatureId 章节签名 ID
+     * @return 章节对象，未找到返回 null
+     */
+    private Chapter findChapterBySignatureId(long signatureId) {
+        if (chapterList == null || chapterList.isEmpty()) {
+            return null;
+        }
+
+        for (Chapter chapter : chapterList) {
+            if (chapter != null && chapter.getSignatureId() == signatureId) {
+                return chapter;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 更新章节内容到 UI
+     * 
+     * @param groupPosition 章节索引
+     * @param sectionData 章节数据
+     */
+    private void updateChapterContent(int groupPosition, HH2SectionData sectionData) {
+        if (singletonNetData == null || adapter == null || sectionData == null) {
+            return;
+        }
+
+        try {
+            ArrayList<HH2SectionData> contentList = singletonNetData.getContent();
+            if (contentList != null && groupPosition < contentList.size()) {
+                // 更新数据
+                contentList.set(groupPosition, sectionData);
+                
+                // 刷新 UI
+                ExpandableGroupEntity groupEntity = GroupModel.getExpandableGroupEntity(false, sectionData);
+                adapter.getmGroups().set(groupPosition, groupEntity);
+                adapter.notifyGroupChanged(groupPosition);
+                
+                EasyLog.print("TipsBookNetReadFragment", "章节内容已更新: " + sectionData.getHeader());
+            }
+        } catch (Exception e) {
+            EasyLog.print("TipsBookNetReadFragment", "更新章节内容失败: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -583,8 +725,15 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
 
 
         if (book != null) {
-            //加载书本相关的章节
-            getBookChapter();
+            //加载书本相关的章节（已移除旧的批量下载逻辑）
+            // getBookChapter(); // ❌ 已移除：启动时不再批量下载
+            
+            // ✅ 初始化下载管理器缓存
+            if (downloadManager != null && chapterList != null) {
+                downloadManager.initDownloadedCache(chapterList);
+                EasyLog.print("TipsBookNetReadFragment", "下载缓存初始化完成，共 " + chapterList.size() + " 个章节");
+            }
+            
             StringBuilder fangName = new StringBuilder("\n").append(book.getBookName());
             //书本相关的药方只加载一次
             if (!singletonNetData.getBookFang(bookId)){
@@ -699,6 +848,12 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        
+        // ✅ 取消所有下载任务（优先清理，避免内存泄漏）
+        if (downloadManager != null) {
+            downloadManager.cancelAll();
+            downloadManager = null;
+        }
         
         // 清理适配器监听器
         if (adapter != null) {

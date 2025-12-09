@@ -39,3 +39,12 @@
 -keepclassmembernames class ** {
     @run.yigou.gxzy.aop.Log <methods>;
 }
+#
+## 保护新增的下载管理器和 MVP 相关类
+#-keep class run.yigou.gxzy.ui.tips.tipsutils.ChapterDownloadManager { *; }
+#-keep class run.yigou.gxzy.ui.tips.repository.BookRepository { *; }
+#-keep class run.yigou.gxzy.ui.tips.contract.** { *; }
+#-keep class run.yigou.gxzy.ui.tips.presenter.** { *; }
+#
+## 保护 Application 类（防止被移除）
+#-keep class run.yigou.gxzy.app.AppApplication { *; }

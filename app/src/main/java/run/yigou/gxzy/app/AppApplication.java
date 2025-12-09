@@ -21,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.multidex.MultiDex;
 
 import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.Utils;
@@ -117,6 +118,13 @@ public final class AppApplication extends Application {
         SecurityUtils.initSecurityManager();
     }
 
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        // 启用 MultiDex 支持
+        MultiDex.install(this);
+    }
+
     public FragmentSetting fragmentSetting;
 
 
@@ -165,11 +173,6 @@ public final class AppApplication extends Application {
         TipsSingleData.getInstance().onDestroy();
         // 注销事件总线
         XEventBus.getDefault().unregister(this);
-    }
-
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
     }
 
     @Override

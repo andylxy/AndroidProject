@@ -22,6 +22,9 @@ android {
         // 混淆配置
         proguardFiles 'proguard-sdk.pro', 'proguard-app.pro'
 
+        // 启用 MultiDex 支持（解决方法数超过 64K 限制）
+        multiDexEnabled true
+
         // 日志打印开关
         buildConfigField('boolean', 'LOG_ENABLE', '' + LOG_ENABLE + '')
         // 测试包下的 BuglyId
@@ -144,6 +147,9 @@ ext {
 }
 
 dependencies {
+    // MultiDex 支持（解决方法数超过 64K 限制）
+    implementation 'androidx.multidex:multidex:2.0.1'
+
     // 基类封装
     implementation project(':library:base')
     // 控件封装
