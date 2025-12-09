@@ -473,9 +473,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                 return;
             }
 
-            toast("开始重新下载: " + chapter.getChapterHeader());
-            
-            // ✅ 通过 Presenter 重新下载章节
+            // ✅ 通过 Presenter 重新下载章节 (Presenter 会显示提示)
             presenter.reloadChapter(groupPosition);
             
             // 重新下载完成后，重置标志
@@ -568,11 +566,15 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         try {
             // ✅ 直接更新 UI（数据已由 Presenter 管理）
             if (groupPosition >= 0 && groupPosition < adapter.getmGroups().size()) {
-                ExpandableGroupEntity groupEntity = GroupModel.getExpandableGroupEntity(false, sectionData);
+                // ✅ 保留当前的展开状态
+                boolean isCurrentlyExpanded = adapter.isExpand(groupPosition);
+                
+                // ✅ 使用当前展开状态创建新的 GroupEntity
+                ExpandableGroupEntity groupEntity = GroupModel.getExpandableGroupEntity(isCurrentlyExpanded, sectionData);
                 adapter.getmGroups().set(groupPosition, groupEntity);
                 adapter.notifyGroupChanged(groupPosition);
                 
-                EasyLog.print("TipsBookNetReadFragment", "章节内容已更新: " + sectionData.getHeader());
+                EasyLog.print("TipsBookNetReadFragment", "章节内容已更新: " + sectionData.getHeader() + ", isExpanded=" + isCurrentlyExpanded);
             }
         } catch (Exception e) {
             EasyLog.print("TipsBookNetReadFragment", "更新章节内容失败: " + e.getMessage());

@@ -123,9 +123,10 @@ public class BookRepository {
      * 下载章节内容
      * 
      * @param chapter 章节对象
+     * @param lifecycleOwner 生命周期拥有者
      * @param callback 下载回调
      */
-    public void downloadChapter(Chapter chapter, DataCallback<HH2SectionData> callback) {
+    public void downloadChapter(Chapter chapter, androidx.lifecycle.LifecycleOwner lifecycleOwner, DataCallback<HH2SectionData> callback) {
         if (chapter == null) {
             if (callback != null) {
                 callback.onFailure(new IllegalArgumentException("章节对象为空"));
@@ -134,7 +135,7 @@ public class BookRepository {
         }
 
         try {
-            EasyHttp.get(null)
+            EasyHttp.get(lifecycleOwner)
                 .api(new ChapterContentApi()
                     .setContentId(chapter.getChapterSection())
                     .setSignatureId(chapter.getSignatureId())
@@ -186,11 +187,12 @@ public class BookRepository {
      * 下载书籍药方数据
      * 
      * @param bookId 书籍 ID
+     * @param lifecycleOwner 生命周期拥有者
      * @param callback 下载回调
      */
-    public void downloadBookFang(int bookId, DataCallback<List<Fang>> callback) {
+    public void downloadBookFang(int bookId, androidx.lifecycle.LifecycleOwner lifecycleOwner, DataCallback<List<Fang>> callback) {
         try {
-            EasyHttp.get(null)
+            EasyHttp.get(lifecycleOwner)
                 .api(new BookFangApi().setBookId(bookId))
                 .request(new HttpCallback<HttpData<List<Fang>>>(null) {
                     @Override
@@ -368,9 +370,12 @@ public class BookRepository {
     }
 
     /**
-     * 加载章节内容
+     * 加载章节内容（从数据库）
+     * 
+     * @param bookData 书籍数据
+     * @param chapter 章节对象
      */
-    private void loadChapterContent(BookData bookData, Chapter chapter) {
+    public void loadChapterContent(BookData bookData, Chapter chapter) {
         try {
             // 从数据库加载章节详细内容
             List<DataItem> content = ConvertEntity.getBookChapterDetailList(chapter);
@@ -414,7 +419,7 @@ public class BookRepository {
         }
 
         try {
-            EasyHttp.get(null)
+            EasyHttp.get(lifecycleOwner)
                 .api(new ChapterContentApi()
                     .setContentId(chapter.getChapterSection())
                     .setSignatureId(chapter.getSignatureId())

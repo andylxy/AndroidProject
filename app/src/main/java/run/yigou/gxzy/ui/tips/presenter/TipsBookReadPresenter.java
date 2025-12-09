@@ -316,9 +316,25 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                 return;
             }
             
-            // 已下载且内容已加载，直接触发预加载
+            // 已下载的章节处理
             if (isDownloaded) {
-                EasyLog.print("TipsBookReadPresenter", "已下载且已加载，触发预加载");
+                EasyLog.print("TipsBookReadPresenter", "已下载章节，检查内容加载状态");
+                
+                // 确保内容已加载到内存
+                if (chapterData != null && !chapterData.isContentLoaded()) {
+                    // 从数据库加载内容
+                    EasyLog.print("TipsBookReadPresenter", "从数据库加载章节内容");
+                    repository.loadChapterContent(currentBookData, chapter);
+                }
+                
+                // 转换为 UI 格式
+                HH2SectionData sectionData = DataConverter.toHH2SectionData(chapterData, chapter);
+                
+                EasyLog.print("TipsBookReadPresenter", "更新章节内容: position=" + position + 
+                    ", contentSize=" + (sectionData != null && sectionData.getData() != null ? sectionData.getData().size() : 0));
+                
+                // 更新 UI（不强制展开，由 Fragment 控制展开/收缩）
+                view.updateChapterContent(position, sectionData);
                 
                 // 生命周期检查（预加载前）
                 if (!isViewActive()) {
@@ -326,6 +342,8 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                     return;
                 }
                 
+                // 触发预加载
+                EasyLog.print("TipsBookReadPresenter", "触发预加载");
                 androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
                 downloadManager.preloadChapters(allChapters, position, lifecycleOwner);
                 return;
@@ -412,15 +430,17 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                 androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
                 repository.downloadChapterAsync(chapter, currentBookData, lifecycleOwner, 
                     new BookRepository.DataCallback<ChapterData>() {
-                @Override
-                public void onSuccess(ChapterData data) {
-                    if (isViewActive()) {
-                        // 转换为旧格式供 View 使用（兼容）
-                        HH2SectionData sectionData = DataConverter.toHH2SectionData(data, chapter);
-                        view.updateChapterContent(position, sectionData);
-                        view.showToast("重新下载完成");
-                    }
-                }                        @Override
+                        @Override
+                        public void onSuccess(ChapterData data) {
+                            if (isViewActive()) {
+                                // 转换为旧格式供 View 使用（兼容）
+                                HH2SectionData sectionData = DataConverter.toHH2SectionData(data, chapter);
+                                view.updateChapterContent(position, sectionData);
+                                view.showToast("重新下载完成");
+                            }
+                        }
+                        
+                        @Override
                         public void onFailure(Exception e) {
                             if (isViewActive()) {
                                 view.showError("重新下载失败: " + e.getMessage());
@@ -428,8 +448,9 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                         }
                     });
             } else {
-                // 降级：使用旧 API
-                repository.downloadChapter(chapter, new BookRepository.DataCallback<HH2SectionData>() {
+                // 降级：使用旧 API（带生命周期绑定）
+                androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
+                repository.downloadChapter(chapter, lifecycleOwner, new BookRepository.DataCallback<HH2SectionData>() {
                     @Override
                     public void onSuccess(HH2SectionData data) {
                         if (isViewActive()) {
@@ -613,12 +634,19 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             return;
         }
         
+        // 生命周期检查
+        if (!isViewActive()) {
+            EasyLog.print("TipsBookReadPresenter", "View 未激活，取消药方加载");
+            return;
+        }
+        
         String fangName = "\n" + book.getBookName();
         
         // 标记为已加载（预先标记，避免重复请求）
         loadedBookFangs.add(currentBookId);
         
-        repository.downloadBookFang(currentBookId, new BookRepository.DataCallback<List<run.yigou.gxzy.ui.tips.DataBeans.Fang>>() {
+        androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
+        repository.downloadBookFang(currentBookId, lifecycleOwner, new BookRepository.DataCallback<List<run.yigou.gxzy.ui.tips.DataBeans.Fang>>() {
             @Override
             public void onSuccess(List<run.yigou.gxzy.ui.tips.DataBeans.Fang> data) {
                 EasyLog.print("TipsBookReadPresenter", "药方数据加载完成: " + data.size() + " 个");
