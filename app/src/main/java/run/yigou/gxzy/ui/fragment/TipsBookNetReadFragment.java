@@ -63,15 +63,18 @@ import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
-import run.yigou.gxzy.ui.tips.tipsutils.ChapterDownloadManager;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+import run.yigou.gxzy.ui.tips.contract.TipsBookReadContract;
+import run.yigou.gxzy.ui.tips.presenter.TipsBookReadPresenter;
+import run.yigou.gxzy.ui.tips.repository.BookRepository;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 
-public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
+public class TipsBookNetReadFragment extends AppFragment<AppActivity> 
+        implements TipsBookReadContract.View {
 
 
     private WrapRecyclerView rvList;
@@ -108,11 +111,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     private SingletonNetData singletonNetData;
 
     /**
-     * 章节下载管理器（智能下载 + 预加载）
+     * MVP 架构组件
      */
-    private ChapterDownloadManager downloadManager;
+    private TipsBookReadPresenter presenter;
 
-// 在 onDestroy 中释放资源
+    // 在 onDestroy 中释放资源
 
     private OnBackPressedCallback onBackPressedCallback;
 
@@ -336,8 +339,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             if (AppApplication.getApplication().fragmentSetting.isShuJie())
                 fragmentOnBackPressed();
 
-            // 初始化下载管理器
-            downloadManager = new ChapterDownloadManager();
+            // 初始化 MVP 架构
+            presenter = new TipsBookReadPresenter(this);
+            presenter.onViewCreated();
 
             // 加载到UI显示
             initializeAdapter();
@@ -579,7 +583,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
      * @param groupPosition 章节索引
      */
     private void triggerChapterDownload(int groupPosition) {
-        if (downloadManager == null || singletonNetData == null || chapterList == null) {
+        if (singletonNetData == null || chapterList == null) {
             return;
         }
 
@@ -602,43 +606,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
                 return;
             }
 
-            // 检查是否已下载
-            if (downloadManager.isChapterDownloaded(chapter)) {
-                EasyLog.print("TipsBookNetReadFragment", "章节已下载，直接触发预加载: " + chapter.getChapterHeader());
-                // 已下载，直接触发预加载
-                downloadManager.preloadChapters(chapterList, groupPosition);
-                return;
+            // 通过 Presenter 处理章节点击
+            if (presenter != null) {
+                presenter.onChapterClick(groupPosition);
             }
-
-            // 检查是否正在下载
-            if (downloadManager.isChapterDownloading(chapter)) {
-                EasyLog.print("TipsBookNetReadFragment", "章节正在下载中: " + chapter.getChapterHeader());
-                return;
-            }
-
-            // 高优先级下载
-            EasyLog.print("TipsBookNetReadFragment", "开始下载章节: " + chapter.getChapterHeader());
-            downloadManager.downloadChapter(chapter, new ChapterDownloadManager.DownloadCallback() {
-                @Override
-                public void onSuccess(Chapter chapter, HH2SectionData sectionData) {
-                    // 更新 UI（主线程）
-                    post(() -> {
-                        updateChapterContent(groupPosition, sectionData);
-                        toast("章节下载完成: " + chapter.getChapterHeader());
-                    });
-
-                    // 触发智能预加载
-                    downloadManager.preloadChapters(chapterList, groupPosition);
-                }
-
-                @Override
-                public void onFailure(Chapter chapter, Exception e) {
-                    // 显示错误信息（主线程）
-                    post(() -> {
-                        toast("下载失败: " + e.getMessage());
-                    });
-                }
-            });
 
         } catch (Exception e) {
             EasyLog.print("TipsBookNetReadFragment", "触发下载异常: " + e.getMessage());
@@ -671,7 +642,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
      * @param groupPosition 章节索引
      * @param sectionData 章节数据
      */
-    private void updateChapterContent(int groupPosition, HH2SectionData sectionData) {
+    public void updateChapterContent(int groupPosition, HH2SectionData sectionData) {
         if (singletonNetData == null || adapter == null || sectionData == null) {
             return;
         }
@@ -728,9 +699,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             //加载书本相关的章节（已移除旧的批量下载逻辑）
             // getBookChapter(); // ❌ 已移除：启动时不再批量下载
             
-            // ✅ 初始化下载管理器缓存
-            if (downloadManager != null && chapterList != null) {
-                downloadManager.initDownloadedCache(chapterList);
+            // ✅ 通过 Presenter 初始化下载缓存
+            if (presenter != null && chapterList != null) {
                 EasyLog.print("TipsBookNetReadFragment", "下载缓存初始化完成，共 " + chapterList.size() + " 个章节");
             }
             
@@ -849,11 +819,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     public void onDestroy() {
         super.onDestroy();
         
-        // ✅ 取消所有下载任务（优先清理，避免内存泄漏）
-        if (downloadManager != null) {
-            downloadManager.cancelAll();
-            downloadManager = null;
-        }
+        // Presenter 已在 onDestroyView 中清理
         
         // 清理适配器监听器
         if (adapter != null) {
@@ -950,25 +916,16 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
     @SuppressLint("DefaultLocale")
     public void setSearchText(String searchText) {
         this.searchText = searchText;
-        // 重置匹配结果数量
-        // 检查搜索文本是否有效（不为 null、不为空且不是数字）
-        if (searchText != null && !searchText.isEmpty() /*&& !TipsHelper.isNumeric(searchText)*/) {
-            SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(searchText));
-            ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity, singletonNetData);
-            // 更新展示的数据和结果
-            singletonNetData.setSearchResList(filteredData);
-            if (this.numTips != null) {
-                this.numTips.setText(String.format("%d个结果", searchKeyEntity.getSearchResTotalNum()));
-            }
-            if (this.adapter != null) {
-                reListAdapter(false, true);
-            }
+        
+        // 通过 Presenter 执行搜索
+        if (presenter != null && searchText != null && !searchText.isEmpty()) {
+            presenter.search(searchText);
         } else {
+            // 清空搜索，恢复原始列表
             if (this.adapter != null) {
                 reListAdapter(true, false);
             }
         }
-
     }
 
     public static void start(Context context) {
@@ -977,6 +934,109 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity> {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
         context.startActivity(intent);
+    }
+
+    // ==================== MVP View 接口实现 ====================
+
+    @Override
+    public void showChapterList(List<ExpandableGroupEntity> chapters) {
+        // 显示章节列表
+        if (adapter != null && chapters != null) {
+            post(() -> {
+                adapter.setmGroups(new ArrayList<>(chapters));
+                adapter.notifyDataChanged();
+            });
+        }
+    }
+
+    @Override
+    public void showSearchResults(List<ExpandableGroupEntity> results, int totalCount) {
+        // 显示搜索结果
+        post(() -> {
+            if (adapter != null && results != null) {
+                adapter.setmGroups(new ArrayList<>(results));
+                adapter.notifyDataChanged();
+            }
+            if (numTips != null) {
+                numTips.setText(String.format("%d个结果", totalCount));
+            }
+        });
+    }
+
+    @Override
+    public void showLoading(boolean isLoading) {
+        // 显示/隐藏加载中
+        if (isLoading) {
+            // 可以添加 loading 对话框
+        } else {
+            // 隐藏 loading
+        }
+    }
+
+    @Override
+    public void showError(String message) {
+        // 显示错误信息
+        post(() -> toast(message));
+    }
+
+    @Override
+    public void showToast(String message) {
+        // 显示提示信息
+        post(() -> toast(message));
+    }
+
+    @Override
+    public void showDownloadProgress(int position, String message) {
+        // 显示下载进度
+        EasyLog.print("Download", "Position " + position + ": " + message);
+    }
+
+    @Override
+    public void updateDownloadStatus(int position, boolean isDownloaded) {
+        // 更新下载状态
+        if (adapter != null) {
+            post(() -> adapter.notifyGroupChanged(position));
+        }
+    }
+
+    @Override
+    public void scrollToPosition(int position) {
+        // 滚动到指定位置
+        if (layoutManager != null) {
+            post(() -> layoutManager.scrollToPositionWithOffset(position, 0));
+        }
+    }
+
+    @Override
+    public void expandChapter(int position) {
+        // 展开章节
+        if (adapter != null) {
+            post(() -> adapter.expandGroup(position, true));
+        }
+    }
+
+    @Override
+    public void collapseChapter(int position) {
+        // 收起章节
+        if (adapter != null) {
+            post(() -> adapter.collapseGroup(position));
+        }
+    }
+
+    @Override
+    public boolean isActive() {
+        // 检查 View 是否处于活动状态
+        return isAdded() && !isDetached() && getActivity() != null;
+    }
+
+    @Override
+    public void onDestroyView() {
+        // 清理 Presenter
+        if (presenter != null) {
+            presenter.onViewDestroy();
+            presenter = null;
+        }
+        super.onDestroyView();
     }
 
 }
