@@ -42,27 +42,16 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
 
 
     private BookArgs bookArgs;
-    // 单例模式，确保实例的唯一性
-    private static volatile TipsSettingFragment instance;
-
     // 私有构造函数，防止外部直接实例化
     private TipsSettingFragment() {
-        try {
-            // 构造函数中的初始化逻辑
-            // 可以在这里添加一些基本的校验逻辑
-        } catch (Exception e) {
-            // 异常处理
-            throw new RuntimeException("Failed to create TipsSettingFragment instance", e);
-        }
+        // 构造函数中的初始化逻辑
     }
 
-    public static synchronized TipsSettingFragment newInstance(BookArgs bookArgs) {
-        if (instance == null) {
-            instance = new TipsSettingFragment();
-        }
+    public static TipsSettingFragment newInstance(BookArgs bookArgs) {
+        TipsSettingFragment fragment = new TipsSettingFragment();
         if (bookArgs != null)
-            instance.bookArgs = bookArgs;
-        return instance;
+            fragment.bookArgs = bookArgs;
+        return fragment;
     }
 
 
@@ -82,9 +71,6 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         sb_setting_shu_jie_switch = findViewById(R.id.sb_setting_shu_jie_switch);
         // 设置切换按钮的隐藏
         sb_setting_yao_uint.setVisibility(View.GONE);
-
-        // 注册事件
-        XEventBus.getDefault().register(TipsSettingFragment.this);
     }
 
     @Override
@@ -199,9 +185,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
 
     @Override
     public void onDestroy() {
-        instance =null;
-        // 注销事件
-        XEventBus.getDefault().unregister(TipsSettingFragment.this);
+        // Fragment 未注册 EventBus，无需注销
         super.onDestroy();
     }
 }

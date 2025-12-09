@@ -5,11 +5,16 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.gyf.immersionbar.ImmersionBar;
-import com.hjq.base.FragmentPagerAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
@@ -24,10 +29,11 @@ import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
 public final class TipsFragmentActivity extends AppActivity implements NavigationAdapter.OnNavigationListener {
     private static final String INTENT_KEY_IN_FRAGMENT_INDEX = "fragmentIndex";
-    private ViewPager mViewPager;
+    private ViewPager2 mViewPager;
     private RecyclerView mNavigationView;
     private NavigationAdapter mNavigationAdapter;
-    private FragmentPagerAdapter<AppFragment<?>> mPagerAdapter;
+    private TipsFragmentStateAdapter mPagerAdapter;
+    private ViewPager2.OnPageChangeCallback mPageChangeCallback;
     private int bookId = 0;
 
     @Override
@@ -41,72 +47,56 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
     protected void initView() {
         // 给这个 View 设置沉浸式，避免状态栏遮挡
         ImmersionBar.setTitleBar(this, findViewById(R.id.tips_fragment_pager));
-        // 注册事件
-        // XEventBus.getDefault().register(this);
+        
         // 从意图中获取书籍ID
         bookId = getIntent().getIntExtra("bookId", 0);
         if (bookId == 0) {
-            // 如果书籍ID为0，则显示提示信息并返回
             toast("获取书籍信息错误");
+            finish();
             return;
         }
 
         mViewPager = findViewById(R.id.tips_fragment_pager);
         mNavigationView = findViewById(R.id.tips_fragment_navigation);
-
-        mNavigationAdapter = new NavigationAdapter(this);
+        
+        // 禁用 ViewPager2 的用户滑动输入
+        mViewPager.setUserInputEnabled(false);
 
         bookInfo = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
         if (bookInfo == null) {
             toast("获取书籍信息错误");
+            finish();
             return;
         }
-        String bookName = bookInfo.getBookName().split("[.,・]").length == 0 ? bookInfo.getBookName() : bookInfo.getBookName().split("[.,・]")[0];
-        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(bookName,
-                ContextCompat.getDrawable(this, R.drawable.list_selector)));
-
-        /*
-            如果是黄帝内经和本草类型，则不显示方药和药单位
-         */
-        if (bookInfo.getCaseTag() != 1 && bookInfo.getCaseTag() != 2 && bookInfo.getCaseTag() != 3) {
-
-            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(bookName + getString(R.string.tips_nav_fang),
-                    ContextCompat.getDrawable(this, R.drawable.list_fang_selector)));
-
-            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_yao),
-                    ContextCompat.getDrawable(this, R.drawable.ruler_yao_selector)));
-        }
-        if (bookInfo.getCaseTag() == 5)
-            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_unit),
-                    ContextCompat.getDrawable(this, R.drawable.ruler_selector)));
-        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_set),
-                ContextCompat.getDrawable(this, R.drawable.settings_selector)));
-        mNavigationAdapter.setOnNavigationListener(this);
-        mNavigationView.setAdapter(mNavigationAdapter);
-
+        
+        // 初始化导航适配器
+        setupNavigationAdapter();
     }
 
 
     @Override
     protected void initData() {
-
         int bookLastReadPosition = getIntent().getIntExtra("bookLastReadPosition", 0);
         boolean isShow = getIntent().getBooleanExtra("bookCollect", false);
         BookArgs bookArgs = BookArgs.newInstance(bookId, bookLastReadPosition, isShow);
-        mPagerAdapter = new FragmentPagerAdapter<>(this);
-
-        mPagerAdapter.addFragment(TipsBookNetReadFragment.newInstance(bookArgs));
-         /*
-            如果是黄帝内经和本草类型，则不显示方药和药单位
-        */
-        if (bookInfo.getCaseTag() != 1 && bookInfo.getCaseTag() != 2 && bookInfo.getCaseTag() != 3) {
-            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(1));
-            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(2));
-        }
-        if (bookInfo.getCaseTag() == 5)
-            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(3));
-        mPagerAdapter.addFragment(TipsSettingFragment.newInstance(bookArgs));
+        
+        // 根据书籍类型动态创建 Fragment 列表
+        setupFragments(bookArgs);
+        
         mViewPager.setAdapter(mPagerAdapter);
+        
+        // ViewPager2 页面切换监听
+        mPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if (mNavigationAdapter != null) {
+                    mNavigationAdapter.setSelectedPosition(position);
+                }
+            }
+        };
+        mViewPager.registerOnPageChangeCallback(mPageChangeCallback);
+        
         onNewIntent(getIntent());
     }
 
@@ -131,55 +121,181 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
     }
 
     public void switchFragment(int fragmentIndex) {
-        if (fragmentIndex == -1) {
+        if (fragmentIndex == -1 || mPagerAdapter == null || mNavigationAdapter == null) {
             return;
         }
-
-        switch (fragmentIndex) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-                // case 5:
-                mViewPager.setCurrentItem(fragmentIndex);
-                mNavigationAdapter.setSelectedPosition(fragmentIndex);
-                break;
-            default:
-                break;
+        
+        // 动态边界检查（适应 1-5 个 Fragment）
+        if (fragmentIndex >= 0 && fragmentIndex < mPagerAdapter.getItemCount()) {
+            mViewPager.setCurrentItem(fragmentIndex, false); // false = 无动画切换
+            mNavigationAdapter.setSelectedPosition(fragmentIndex);
         }
     }
 
     /**
-     * @param position
-     * @return
+     * {@link NavigationAdapter.OnNavigationListener}
      */
     @Override
     public boolean onNavigationItemSelected(int position) {
-        switch (position) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-                //case 5:
-                mViewPager.setCurrentItem(position);
-                return true;
-            default:
-                return false;
+        if (mPagerAdapter == null) {
+            return false;
         }
+        
+        // 动态边界检查
+        if (position >= 0 && position < mPagerAdapter.getItemCount()) {
+            mViewPager.setCurrentItem(position, true); // true = 平滑动画
+            return true;
+        }
+        return false;
     }
 
 
     @Override
     protected void onDestroy() {
-        mViewPager.setAdapter(null);
-        mViewPager = null;
-        mNavigationView.setAdapter(null);
-        mNavigationView = null;
-        mNavigationAdapter.setOnNavigationListener(null);
+        // 先移除监听器，避免内存泄漏
+        if (mNavigationAdapter != null) {
+            mNavigationAdapter.setOnNavigationListener(null);
+        }
+        
+        // ViewPager2 清理
+        if (mViewPager != null && mPageChangeCallback != null) {
+            mViewPager.unregisterOnPageChangeCallback(mPageChangeCallback);
+            // ViewPager2 不需要手动 setAdapter(null)
+        }
+        
+        // 清理 RecyclerView
+        if (mNavigationView != null) {
+            mNavigationView.setAdapter(null);
+        }
+        
+        // 释放引用
+        mPagerAdapter = null;
         mNavigationAdapter = null;
+        mPageChangeCallback = null;
+        
         super.onDestroy();
+    }
+
+    /**
+     * ViewPager2 的 FragmentStateAdapter 实现
+     */
+    private class TipsFragmentStateAdapter extends FragmentStateAdapter {
+        private final List<AppFragment<?>> fragmentList = new ArrayList<>();
+        
+        public TipsFragmentStateAdapter(@NonNull FragmentActivity fragmentActivity) {
+            super(fragmentActivity);
+        }
+        
+        public void addFragment(AppFragment<?> fragment) {
+            fragmentList.add(fragment);
+        }
+        
+        @NonNull
+        @Override
+        public Fragment createFragment(int position) {
+            return fragmentList.get(position);
+        }
+        
+        @Override
+        public int getItemCount() {
+            return fragmentList.size();
+        }
+        
+        // ViewPager2 需要实现此方法以支持动态更新
+        @Override
+        public long getItemId(int position) {
+            return fragmentList.get(position).hashCode();
+        }
+        
+        @Override
+        public boolean containsItem(long itemId) {
+            for (AppFragment<?> fragment : fragmentList) {
+                if (fragment.hashCode() == itemId) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * 根据书籍类型动态创建 Fragment 列表
+     */
+    private void setupFragments(BookArgs bookArgs) {
+        mPagerAdapter = new TipsFragmentStateAdapter(this);
+        
+        // 1. 书籍阅读（必有）
+        mPagerAdapter.addFragment(TipsBookNetReadFragment.newInstance(bookArgs));
+        
+        // 2. 方药相关（根据书籍类型）
+        if (shouldShowFangYaoTabs()) {
+            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(1)); // 方
+            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(2)); // 药
+        }
+        
+        // 3. 单位（仅伤寒类书籍）
+        if (bookInfo.getCaseTag() == 5) {
+            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(3)); // 单位
+        }
+        
+        // 4. 设置（必有）
+        mPagerAdapter.addFragment(TipsSettingFragment.newInstance(bookArgs));
+    }
+
+    /**
+     * 判断是否显示方药标签
+     */
+    private boolean shouldShowFangYaoTabs() {
+        if (bookInfo == null) {
+            return false;
+        }
+        int caseTag = bookInfo.getCaseTag();
+        // 黄帝内经(1)、本草(2,3) 不显示方药
+        return caseTag != 1 && caseTag != 2 && caseTag != 3;
+    }
+
+    /**
+     * 设置导航适配器
+     */
+    private void setupNavigationAdapter() {
+        mNavigationAdapter = new NavigationAdapter(this);
+        
+        String bookName = extractBookName(bookInfo.getBookName());
+        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(bookName,
+                ContextCompat.getDrawable(this, R.drawable.list_selector)));
+
+        if (shouldShowFangYaoTabs()) {
+            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
+                    bookName + getString(R.string.tips_nav_fang),
+                    ContextCompat.getDrawable(this, R.drawable.list_fang_selector)));
+            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
+                    getString(R.string.tips_nav_yao),
+                    ContextCompat.getDrawable(this, R.drawable.ruler_yao_selector)));
+        }
+        
+        if (bookInfo.getCaseTag() == 5) {
+            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
+                    getString(R.string.tips_nav_unit),
+                    ContextCompat.getDrawable(this, R.drawable.ruler_selector)));
+        }
+        
+        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
+                getString(R.string.tips_nav_set),
+                ContextCompat.getDrawable(this, R.drawable.settings_selector)));
+        
+        mNavigationAdapter.setOnNavigationListener(this);
+        mNavigationView.setAdapter(mNavigationAdapter);
+    }
+
+    /**
+     * 提取书名（去除标点）
+     */
+    private String extractBookName(String fullName) {
+        if (fullName == null || fullName.isEmpty()) {
+            return "";
+        }
+        String[] parts = fullName.split("[.,・]");
+        return parts.length > 0 ? parts[0] : fullName;
     }
 
 }
