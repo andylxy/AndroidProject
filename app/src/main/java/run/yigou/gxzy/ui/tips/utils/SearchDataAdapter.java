@@ -1,8 +1,19 @@
 package run.yigou.gxzy.ui.tips.utils;
 
 import android.os.Build;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.TextPaint;
+import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.graphics.Typeface;
 import android.util.Pair;
+import android.view.View;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.hjq.http.EasyLog;
 
@@ -95,7 +106,7 @@ public class SearchDataAdapter {
                         groupDataList.add(groupData);
                         
                         List<ItemData> items = new ArrayList<>();
-                        items.add(convertDataItemToItemData(fangItem));
+                        items.add(convertDataItemToItemData(fangItem, true));
                         itemDataList.add(items);
                         
                         EasyLog.print("✅ 找到方剂配方: " + itemName);
@@ -173,7 +184,7 @@ public class SearchDataAdapter {
                 
                 List<ItemData> items = new ArrayList<>();
                 for (DataItem dataItem : matchedItems) {
-                    items.add(convertDataItemToItemData(dataItem));
+                    items.add(convertDataItemToItemData(dataItem, false));
                 }
                 itemDataList.add(items);
                 
@@ -291,7 +302,7 @@ public class SearchDataAdapter {
                 
                 List<ItemData> items = new ArrayList<>();
                 for (DataItem dataItem : matchedItems) {
-                    items.add(convertDataItemToItemData(dataItem));
+                    items.add(convertDataItemToItemData(dataItem, false));
                 }
                 itemDataList.add(items);
                 
@@ -395,13 +406,46 @@ public class SearchDataAdapter {
         }
     }
     
-    private ItemData convertDataItemToItemData(DataItem dataItem) {
+    private ItemData convertDataItemToItemData(DataItem dataItem, boolean isFangRecipe) {
         ItemData itemData = new ItemData();
         
-        if (dataItem.getAttributedText() != null) {
+        // 只在方剂配方时添加橙色标签【方剂配方】
+        if (isFangRecipe && dataItem.getAttributedText() != null) {
+            SpannableStringBuilder enhancedText = new SpannableStringBuilder();
+            
+            // 创建橙色标签
+            String  hint = "【" +  dataItem.getName() + "】";
+            SpannableString hintSpan = new SpannableString(hint);
+            
+            // 设置淡橙色 #FFB74D (ARGB: 0xFFFFB74D)
+            hintSpan.setSpan(new ForegroundColorSpan(0xFFFFB74D), 0, hint.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            
+            // 设置粗体
+            hintSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, hint.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            
+            // 设置点击事件
+//            hintSpan.setSpan(new ClickableSpan() {
+//                @Override
+//                public void onClick(@NonNull View widget) {
+//                    Toast.makeText(widget.getContext(), "方剂配方详情", Toast.LENGTH_SHORT).show();
+//                }
+//
+//                @Override
+//                public void updateDrawState(@NonNull TextPaint ds) {
+//                    super.updateDrawState(ds);
+//                    ds.setUnderlineText(false); // 不显示下划线
+//                }
+//            }, 0, hint.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            enhancedText.append(hintSpan);
+            enhancedText.append("\n\n");
+            enhancedText.append(dataItem.getAttributedText());
+
+            itemData.setAttributedText(enhancedText);
+        } else if (dataItem.getAttributedText() != null) {
+            // 其他情况直接设置,不添加橙色标签
             itemData.setAttributedText(dataItem.getAttributedText());
         }
-        
+
         if (dataItem.getAttributedNote() != null) {
             itemData.setAttributedNote(dataItem.getAttributedNote());
         }

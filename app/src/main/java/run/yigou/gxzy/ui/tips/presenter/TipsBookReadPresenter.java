@@ -36,7 +36,6 @@ import run.yigou.gxzy.ui.tips.tipsutils.ChapterDownloadManager;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
 /**
  * TipsBookRead Presenter 实现
@@ -629,12 +628,17 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     }
 
     /**
-     * 加载药方数据
+     * 加载药方数据（只在初始化时执行一次）
+     * 流程：
+     * 1. 检查是否已加载到内存
+     * 2. 检查数据库是否已有方剂数据
+     * 3. 如果数据库有数据，直接加载到BookData
+     * 4. 如果数据库无数据，从网络下载
      */
     private void loadBookFang(TabNavBody book) {
-        // 检查是否已加载
+        // 检查是否已加载到内存
         if (loadedBookFangs.contains(currentBookId)) {
-            EasyLog.print("TipsBookReadPresenter", "药方已加载，跳过: bookId=" + currentBookId);
+            EasyLog.print("TipsBookReadPresenter", "药方已加载到内存，跳过: bookId=" + currentBookId);
             return;
         }
         
@@ -644,16 +648,35 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             return;
         }
         
-        String fangName = "\n" + book.getBookName();
-        
         // 标记为已加载（预先标记，避免重复请求）
         loadedBookFangs.add(currentBookId);
+        
+        // 【优化】先检查数据库是否已有方剂数据
+        ArrayList<run.yigou.gxzy.ui.tips.DataBeans.Fang> cachedFangList = 
+            ConvertEntity.getFangDetailList(currentBookId);
+        
+        if (cachedFangList != null && !cachedFangList.isEmpty()) {
+            // 数据库已有方剂数据，直接加载到BookData
+            EasyLog.print("TipsBookReadPresenter", "从数据库加载方剂: " + cachedFangList.size() + " 个");
+            
+            List<DataItem> fangItemList = new ArrayList<>(cachedFangList);
+            ChapterData fangChapterData = new ChapterData(0L, book.getBookName() + "方", 0, fangItemList);
+            
+            if (currentBookData != null) {
+                currentBookData.setFangData(fangChapterData);
+                EasyLog.print("TipsBookReadPresenter", "✅ 方剂数据已从数据库加载到BookData: " + cachedFangList.size() + " 个");
+            }
+            return;
+        }
+        
+        // 数据库无数据，从网络下载
+        EasyLog.print("TipsBookReadPresenter", "数据库无方剂数据，开始从网络下载");
         
         androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
         repository.downloadBookFang(currentBookId, lifecycleOwner, new BookRepository.DataCallback<List<run.yigou.gxzy.ui.tips.DataBeans.Fang>>() {
             @Override
             public void onSuccess(List<run.yigou.gxzy.ui.tips.DataBeans.Fang> data) {
-                EasyLog.print("TipsBookReadPresenter", "药方数据加载完成: " + data.size() + " 个");
+                EasyLog.print("TipsBookReadPresenter", "药方数据网络下载完成: " + data.size() + " 个");
                 
                 // 【新架构】将方剂数据设置到BookData
                 if (data != null && !data.isEmpty() && currentBookData != null) {
@@ -663,11 +686,6 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                     
                     currentBookData.setFangData(fangChapterData);
                     EasyLog.print("TipsBookReadPresenter", "✅ 方剂数据已设置到BookData: " + data.size() + " 个");
-                    
-                    // 【兼容旧架构】同时设置到SingletonNetData（供其他旧代码使用）
-                    TipsSingleData tipsSingleData = TipsSingleData.getInstance();
-                    HH2SectionData fangSection = new HH2SectionData(data, 0, book.getBookName() + "方");
-                    tipsSingleData.getMapBookContent(currentBookId).setFang(fangSection);
                 }
             }
 

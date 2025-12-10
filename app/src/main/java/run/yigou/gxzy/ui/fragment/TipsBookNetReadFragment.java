@@ -59,6 +59,7 @@ import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+import run.yigou.gxzy.ui.tips.tipsutils.ChapterDownloadManager;
 import run.yigou.gxzy.ui.tips.contract.TipsBookReadContract;
 import run.yigou.gxzy.ui.tips.presenter.TipsBookReadPresenter;
 import run.yigou.gxzy.ui.tips.repository.BookRepository;
@@ -101,6 +102,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      * MVP 架构组件
      */
     private TipsBookReadPresenter presenter;
+    
+    /**
+     * 章节下载管理器
+     */
+    private ChapterDownloadManager chapterDownloadManager;
 
     // 在 onDestroy 中释放资源
 
@@ -636,10 +642,28 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                 // 调用 Presenter 初始化书籍数据（传递 TabNavBody 避免全局数据获取失败）
                 // Presenter 会自动加载药方数据
                 presenter.loadBookContent(book, bookId, bookLastReadPosition, isShowBookCollect);
+                
+                // 【新功能】初始化章节下载管理器并启动后台下载
+                initChapterDownloadManager();
             } else {
                 EasyLog.print("TipsBookNetReadFragment", "跳过加载: presenter=" + (presenter != null) + 
                     ", chapterList=" + (chapterList != null));
             }
+        }
+    }
+
+    /**
+     * 初始化章节下载管理器，启动后台低优先级下载
+     */
+    private void initChapterDownloadManager() {
+        if (chapterDownloadManager == null && chapterList != null) {
+            chapterDownloadManager = new ChapterDownloadManager();
+            chapterDownloadManager.initDownloadedCache(chapterList);
+            
+            EasyLog.print("TipsBookNetReadFragment", "章节下载管理器初始化完成");
+            
+            // 启动后台批量下载所有未下载章节（低优先级）
+            chapterDownloadManager.batchDownloadAllChapters(chapterList, this);
         }
     }
 
@@ -662,6 +686,12 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         super.onDestroy();
         
         // Presenter 已在 onDestroyView 中清理
+        
+        // 清理章节下载管理器
+        if (chapterDownloadManager != null) {
+            chapterDownloadManager.cancelAll();
+            chapterDownloadManager = null;
+        }
         
         // 清理适配器监听器
         if (adapter != null) {

@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
@@ -44,6 +46,9 @@ public class ChapterDownloadManager {
     
     // 低优先级线程池（3线程池，后台预加载）
     private final ExecutorService lowPriorityExecutor;
+    
+    // 定时调度器（用于后台慢速下载）
+    private final ScheduledExecutorService scheduler;
     
     // 下载中的章节 ID 集合（避免重复下载）
     private final Set<Long> downloadingChapters = new HashSet<>();
@@ -76,6 +81,9 @@ public class ChapterDownloadManager {
         
         // 低优先级：3线程池，并发预加载
         this.lowPriorityExecutor = Executors.newFixedThreadPool(3);
+        
+        // 定时调度器：单线程，用于后台慢速下载调度
+        this.scheduler = Executors.newSingleThreadScheduledExecutor();
         
         EasyLog.print("ChapterDownloadManager", "下载管理器初始化完成");
     }
@@ -161,6 +169,61 @@ public class ChapterDownloadManager {
         highPriorityExecutor.execute(() -> {
             executeDownload(lifecycleOwner, chapter, callback, true);
         });
+    }
+
+    /**
+     * 批量后台下载所有未下载章节（低优先级）
+     * Fragment 初始化时调用
+     * 
+     * @param allChapters 所有章节列表
+     * @param lifecycleOwner 生命周期对象（可选，传 null 则不绑定生命周期）
+     */
+    public void batchDownloadAllChapters(List<Chapter> allChapters, LifecycleOwner lifecycleOwner) {
+        if (allChapters == null || allChapters.isEmpty()) {
+            return;
+        }
+
+        List<Chapter> chaptersToDownload = new ArrayList<>();
+        
+        // 过滤未下载章节
+        synchronized (downloadingChapters) {
+            for (Chapter chapter : allChapters) {
+                if (chapter == null) continue;
+                
+                long signatureId = chapter.getSignatureId();
+                
+                // 只添加未下载且未在下载中的章节
+                if (!downloadedChapters.contains(signatureId) && !downloadingChapters.contains(signatureId)) {
+                    chaptersToDownload.add(chapter);
+                    downloadingChapters.add(signatureId);
+                }
+            }
+        }
+
+        if (chaptersToDownload.isEmpty()) {
+            EasyLog.print("ChapterDownloadManager", "所有章节已下载或下载中，无需后台下载");
+            return;
+        }
+
+        // 【优化】10分钟内均匀下载所有章节
+        int totalChapters = chaptersToDownload.size();
+        long totalDelayMillis = 10 * 60 * 1000; // 10分钟 = 600,000毫秒
+        long intervalMillis = totalChapters > 0 ? totalDelayMillis / totalChapters : 1000;
+        
+        EasyLog.print("ChapterDownloadManager", "开始后台批量下载 " + totalChapters + " 个未下载章节");
+        EasyLog.print("ChapterDownloadManager", "下载策略: 10分钟内完成，间隔 " + (intervalMillis / 1000.0) + " 秒/章节");
+
+        // 定时调度下载任务
+        for (int i = 0; i < totalChapters; i++) {
+            final Chapter chapter = chaptersToDownload.get(i);
+            final long delay = i * intervalMillis;
+            
+            scheduler.schedule(() -> {
+                lowPriorityExecutor.execute(() -> {
+                    executeDownload(lifecycleOwner, chapter, null, false);
+                });
+            }, delay, TimeUnit.MILLISECONDS);
+        }
     }
 
     /**
@@ -350,6 +413,10 @@ public class ChapterDownloadManager {
 
         if (lowPriorityExecutor != null && !lowPriorityExecutor.isShutdown()) {
             lowPriorityExecutor.shutdownNow();
+        }
+        
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdownNow();
         }
 
         synchronized (downloadingChapters) {
