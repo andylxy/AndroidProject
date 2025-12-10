@@ -723,9 +723,16 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             onBackPressedCallback.remove();
             onBackPressedCallback = null;
         }
-        
+
         // 注销 EventBus
-        XEventBus.getDefault().unregister(this);
+        try {
+            if (XEventBus.getDefault() != null) {
+                XEventBus.getDefault().unregister(this);
+                EasyLog.print("TipsBookNetReadFragment", "✅ EventBus 注销成功");
+            }
+        } catch (Exception e) {
+            EasyLog.print("TipsBookNetReadFragment", "⚠️ EventBus 注销异常: " + e.getMessage());
+        }
 
         // 释放引用
         onJumpSpecifiedItemListener = null;
