@@ -12,19 +12,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.http.EasyLog;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.tips.adapter.RefactoredPopupAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupData;
-import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 import run.yigou.gxzy.ui.tips.entity.ItemData;
-import run.yigou.gxzy.ui.tips.utils.PopupDataAdapter;
 
 /**
  * RecyclerView弹窗中间基类
- * 为带RecyclerView的弹窗提供通用功能
+ * 为带RecyclerView的弹窗提供通用功能（新架构）
  */
 public abstract class TipsLittleRecyclerViewWindow extends TipsLittleWindow {
 
@@ -32,6 +29,11 @@ public abstract class TipsLittleRecyclerViewWindow extends TipsLittleWindow {
     protected RefactoredPopupAdapter adapter;
     protected List<GroupData> groupDataList;
     protected List<List<ItemData>> itemDataList;
+    
+    // 新架构数据缓存
+    private Context cachedContext;
+    private List<GroupData> cachedGroupDataList;
+    private List<List<ItemData>> cachedItemDataList;
 
     @Override
     protected View createContentView(LayoutInflater inflater, ViewGroup container) {
@@ -49,55 +51,62 @@ public abstract class TipsLittleRecyclerViewWindow extends TipsLittleWindow {
     protected void bindData() {
         EasyLog.print("=== TipsLittleRecyclerViewWindow.bindData() ===");
 
-        if (adapter == null) {
-            EasyLog.print("❌ adapter为null! setAdapterSource未被调用");
+        // 检查是否有缓存的数据
+        if (cachedGroupDataList == null || cachedItemDataList == null) {
+            EasyLog.print("❌ 数据为null，setData未调用");
             return;
         }
 
-        EasyLog.print("✅ adapter不为null, itemCount: " + adapter.getItemCount());
-        recyclerView.setAdapter(adapter);
-        EasyLog.print("RecyclerView.setAdapter() 完成");
-    }
+        this.groupDataList = cachedGroupDataList;
+        this.itemDataList = cachedItemDataList;
 
-    /**
-     * 设置适配器数据源
-     * 将旧的GroupEntity数据转换为新架构的GroupData+ItemData
-     *
-     * @param context 上下文
-     * @param groups  旧架构的数据源
-     */
-    public void setAdapterSource(Context context, ArrayList<GroupEntity> groups) {
-        EasyLog.print("=== TipsLittleRecyclerViewWindow.setAdapterSource() ===");
-        EasyLog.print("Context: " + context);
-        EasyLog.print("groups size: " + (groups != null ? groups.size() : "null"));
-
-        if (groups == null || groups.isEmpty()) {
-            EasyLog.print("❌ groups为null或空");
-            return;
-        }
-
-        // 使用PopupDataAdapter转换数据
-        Pair<List<GroupData>, List<List<ItemData>>> convertedData = 
-                PopupDataAdapter.convert(groups);
-
-        this.groupDataList = convertedData.first;
-        this.itemDataList = convertedData.second;
-
-        EasyLog.print("数据转换完成:");
+        EasyLog.print("数据准备就绪:");
         EasyLog.print("  groupDataList size: " + groupDataList.size());
         EasyLog.print("  itemDataList size: " + itemDataList.size());
 
-        // 创建新的RefactoredPopupAdapter
+        // 创建adapter（此时recyclerView已经初始化）
         if (adapter == null) {
             EasyLog.print("创建RefactoredPopupAdapter");
-            adapter = new RefactoredPopupAdapter(context, groupDataList, itemDataList);
+            adapter = new RefactoredPopupAdapter(cachedContext, groupDataList, itemDataList);
             EasyLog.print("RefactoredPopupAdapter创建完成, itemCount: " + adapter.getItemCount());
         } else {
             EasyLog.print("adapter已存在, 更新数据");
             adapter.updateData(groupDataList, itemDataList);
         }
 
-        EasyLog.print("setAdapterSource() 完成");
+        EasyLog.print("✅ adapter准备就绪, itemCount: " + adapter.getItemCount());
+        EasyLog.print("✅ recyclerView状态: " + (recyclerView != null ? "已初始化" : "null"));
+        
+        recyclerView.setAdapter(adapter);
+        EasyLog.print("RecyclerView.setAdapter() 完成");
+    }
+
+    /**
+     * 设置数据源（新架构专用）
+     * 由于此方法在onCreateView()之前调用，recyclerView还未初始化
+     * 因此只缓存数据，实际的adapter创建延迟到bindData()中进行
+     *
+     * @param context 上下文
+     * @param data Pair<GroupData列表, ItemData二维列表>
+     */
+    public void setData(Context context, Pair<List<GroupData>, List<List<ItemData>>> data) {
+        EasyLog.print("=== TipsLittleRecyclerViewWindow.setData() ===");
+        EasyLog.print("Context: " + context);
+        EasyLog.print("GroupData size: " + (data.first != null ? data.first.size() : "null"));
+        EasyLog.print("ItemData size: " + (data.second != null ? data.second.size() : "null"));
+
+        if (data.first == null || data.second == null) {
+            EasyLog.print("❌ 数据为null");
+            return;
+        }
+
+        // 缓存数据，等待bindData()时处理
+        this.cachedContext = context;
+        this.cachedGroupDataList = data.first;
+        this.cachedItemDataList = data.second;
+        
+        EasyLog.print("✅ 数据已缓存，等待bindData()时创建adapter");
+        EasyLog.print("setData() 完成");
     }
 
     @Override
@@ -110,5 +119,8 @@ public abstract class TipsLittleRecyclerViewWindow extends TipsLittleWindow {
         adapter = null;
         groupDataList = null;
         itemDataList = null;
+        cachedContext = null;
+        cachedGroupDataList = null;
+        cachedItemDataList = null;
     }
 }

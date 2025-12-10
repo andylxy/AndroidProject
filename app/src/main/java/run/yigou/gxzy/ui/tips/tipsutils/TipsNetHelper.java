@@ -26,6 +26,7 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
+import android.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -50,17 +51,35 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import run.yigou.gxzy.ui.dialog.MenuDialog;
+import run.yigou.gxzy.ui.tips.entity.GroupData;
 import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
+import run.yigou.gxzy.ui.tips.entity.ItemData;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.repository.BookRepository;
+import run.yigou.gxzy.ui.tips.utils.SearchDataAdapter;
 import run.yigou.gxzy.ui.tips.widget.TipsLittleMingCiViewWindow;
 import run.yigou.gxzy.ui.tips.widget.TipsLittleTableViewWindow;
-import run.yigou.gxzy.ui.tips.widget.TipsLittleTextViewWindow;
 
 public class TipsNetHelper {
     private static final List<String> validSearchTerms = new ArrayList<>();
+    
+    // 【新架构】BookRepository上下文
+    private static BookRepository sBookRepository = null;
+    private static int sCurrentBookId = -1;
+    
+    /**
+     * 设置当前BookRepository上下文（在TipsBookReadPresenter中调用）
+     */
+    public static void setBookContext(BookRepository repository, int bookId) {
+        sBookRepository = repository;
+        sCurrentBookId = bookId;
+        EasyLog.print("=== TipsNetHelper.setBookContext ===");
+        EasyLog.print("BookId: " + bookId);
+        EasyLog.print("Repository: " + (repository != null ? "已设置" : "null"));
+    }
 
     public static @NonNull ArrayList<HH2SectionData> getSearchHh2SectionData(SearchKeyEntity searchKeyEntity,
                                                                              SingletonNetData singletonNetData) {
@@ -850,76 +869,124 @@ public class TipsNetHelper {
 
             @Override
             public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
-                String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
-                EasyLog.print("Yao--tapped:" + charSequence);
+                EasyLog.print("=== clickYaoLink() 新架构 ===");
+                
+                // 1. 提取点击文本
+                String keyword = textView.getText()
+                        .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
+                        .toString();
+                EasyLog.print("药物: " + keyword);
+                
+                // 2. 检查BookRepository上下文
+                if (sBookRepository == null || sCurrentBookId == -1) {
+                    EasyLog.print("❌ BookRepository未设置，无法搜索");
+                    return;
+                }
+                
+                // 3. 使用新搜索适配器（实例方法）
+                SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
+                Pair<List<GroupData>, List<List<ItemData>>> data = 
+                        adapter.searchYaoContent(keyword.trim());
+                
+                EasyLog.print("Groups: " + data.first.size());
+                
+                // 3. 获取位置
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-                TipsLittleTextViewWindow tipsLittleTextViewWindow = new TipsLittleTextViewWindow();
-                tipsLittleTextViewWindow.setYao(charSequence.trim());
-                tipsLittleTextViewWindow.setRect(textRect);
-                tipsLittleTextViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
+                
+                // 4. 创建RecyclerView弹窗（使用TableViewWindow显示搜索结果）
+                TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
+                window.setData(textView.getContext(), data);
+                window.setFang(keyword);  // 显示药名
+                window.setRect(textRect);
+                
+                // 5. 显示
+                if (textView.getContext() instanceof Activity) {
+                    window.show(((Activity) textView.getContext()).getFragmentManager());
+                }
+                
+                EasyLog.print("=== clickYaoLink() 完成 ===");
             }
 
             @Override
             public void clickFangLink(TextView textView, ClickableSpan clickableSpan) {
-                EasyLog.print("=== clickFangLink() 调用 ===");
-                String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
-                EasyLog.print("Fang--tapped:" + charSequence);
+                EasyLog.print("=== clickFangLink() 新架构 ===");
                 
-                EasyLog.print("步骤1: 调用showFangTwo");
-                List<HH2SectionData> mingCiList = ShowFanYaoMingCi.getInstance().showFangTwo(charSequence.trim());
-                EasyLog.print("mingCiList: " + (mingCiList != null ? mingCiList.size() + " items" : "null"));
+                // 1. 提取点击文本
+                String keyword = textView.getText()
+                        .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
+                        .toString();
+                EasyLog.print("方剂: " + keyword);
                 
-                EasyLog.print("步骤2: 调用GroupModel.getGroups");
-                ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence,true);
-                EasyLog.print("groups: " + (groups != null ? groups.size() + " items" : "null"));
+                // 2. 检查BookRepository上下文
+                if (sBookRepository == null || sCurrentBookId == -1) {
+                    EasyLog.print("❌ BookRepository未设置，无法搜索");
+                    return;
+                }
                 
-                EasyLog.print("步骤3: 获取文本矩形");
+                // 3. 使用新搜索适配器（实例方法）
+                SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
+                Pair<List<GroupData>, List<List<ItemData>>> data = 
+                        adapter.searchFangContent(keyword.trim());
+                
+                EasyLog.print("Groups: " + data.first.size());
+                
+                // 3. 获取文本位置
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-                EasyLog.print("textRect: " + textRect);
                 
-                EasyLog.print("步骤4: 创建TipsLittleTableViewWindow");
-                TipsLittleTableViewWindow tipsLittleTableViewWindow = new TipsLittleTableViewWindow();
-                EasyLog.print("TipsLittleTableViewWindow实例: " + tipsLittleTableViewWindow);
+                // 4. 创建弹窗并使用新方法
+                TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
+                window.setData(textView.getContext(), data);
+                window.setFang(keyword);
+                window.setRect(textRect);
                 
-                EasyLog.print("步骤5: 调用setAdapterSource");
-                tipsLittleTableViewWindow.setAdapterSource(textView.getContext(), groups);
-                
-                EasyLog.print("步骤6: 设置fang和rect");
-                tipsLittleTableViewWindow.setFang(charSequence);
-                tipsLittleTableViewWindow.setRect(textRect);
-                
-                EasyLog.print("步骤7: 获取FragmentManager并调用show()");
+                // 5. 显示弹窗
                 Context context = textView.getContext();
-                EasyLog.print("Context类型: " + context.getClass().getName());
                 if (context instanceof Activity) {
-                    FragmentManager fm = ((Activity) context).getFragmentManager();
-                    EasyLog.print("FragmentManager: " + fm);
-                    tipsLittleTableViewWindow.show(fm);
+                    window.show(((Activity) context).getFragmentManager());
                 } else {
                     EasyLog.print("❌ Context不是Activity!");
                 }
+                
                 EasyLog.print("=== clickFangLink() 完成 ===");
             }
 
-            /**
-             * @param textView
-             * @param clickableSpan
-             */
             @Override
             public void clickMingCiLink(TextView textView, ClickableSpan clickableSpan) {
-
-                String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
-                EasyLog.print("MingCi---tapped:" + charSequence);
-                List<HH2SectionData> mingCiList = ShowFanYaoMingCi.getInstance().showMingCiTwo(charSequence.trim());
-
-                ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence, false);
+                EasyLog.print("=== clickMingCiLink() 新架构 ===");
+                
+                // 1. 提取点击文本
+                String keyword = textView.getText()
+                        .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
+                        .toString();
+                EasyLog.print("名词: " + keyword);
+                
+                // 2. 检查BookRepository上下文
+                if (sBookRepository == null || sCurrentBookId == -1) {
+                    EasyLog.print("❌ BookRepository未设置，无法搜索");
+                    return;
+                }
+                
+                // 3. 使用新搜索适配器（实例方法）
+                SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
+                Pair<List<GroupData>, List<List<ItemData>>> data = 
+                        adapter.searchMingCiContent(keyword.trim());
+                
+                EasyLog.print("Groups: " + data.first.size());
+                
+                // 3. 获取位置
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-                TipsLittleMingCiViewWindow tipsLittleTableViewWindow = new TipsLittleMingCiViewWindow();
-                tipsLittleTableViewWindow.setAdapterSource(textView.getContext(), groups);
-                // tipsLittleTableViewWindow.setFang(charSequence);
-                tipsLittleTableViewWindow.setRect(textRect);
-                tipsLittleTableViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
-
+                
+                // 4. 创建弹窗
+                TipsLittleMingCiViewWindow window = new TipsLittleMingCiViewWindow();
+                window.setData(textView.getContext(), data);
+                window.setRect(textRect);
+                
+                // 5. 显示
+                if (textView.getContext() instanceof Activity) {
+                    window.show(((Activity) textView.getContext()).getFragmentManager());
+                }
+                
+                EasyLog.print("=== clickMingCiLink() 完成 ===");
             }
 
         });

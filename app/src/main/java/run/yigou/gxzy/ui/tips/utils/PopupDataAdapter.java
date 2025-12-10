@@ -65,35 +65,43 @@ public class PopupDataAdapter {
                     SpannableStringBuilder text = childEntity.getAttributed_child_section_text();
                     if (text != null && text.length() > 0) {
                         itemData.setAttributedText(text);
+                        if (childIndex < 2) {
+                            EasyLog.print("  child[" + childIndex + "] text长度: " + text.length() + 
+                                    ", 内容: " + text.toString().substring(0, Math.min(50, text.length())));
+                        }
                     }
                     
                     // 转换注释
                     SpannableStringBuilder note = childEntity.getAttributed_child_section_note();
                     if (note != null && note.length() > 0) {
                         itemData.setAttributedNote(note);
+                        if (childIndex < 2) {
+                            EasyLog.print("  child[" + childIndex + "] note长度: " + note.length());
+                        }
                     }
                     
                     // 转换视频
                     SpannableStringBuilder video = childEntity.getAttributed_child_section_video();
                     if (video != null && video.length() > 0) {
                         itemData.setAttributedVideo(video);
+                        if (childIndex < 2) {
+                            EasyLog.print("  child[" + childIndex + "] video长度: " + video.length());
+                        }
                     }
                     
                     // 转换图片
                     String image = childEntity.getChild_section_image();
                     if (image != null && !image.isEmpty()) {
                         itemData.setImageUrl(image);
+                        if (childIndex < 2) {
+                            EasyLog.print("  child[" + childIndex + "] image: " + image);
+                        }
                     }
                     
                     // 设置组位置
                     itemData.setGroupPosition(groupIndex);
 
                     items.add(itemData);
-
-                    if (childIndex < 3) { // 只打印前3个
-                        EasyLog.print("  child[" + childIndex + "]: " + 
-                                (text != null ? text.toString().substring(0, Math.min(50, text.length())) : "null"));
-                    }
                 }
             } else {
                 EasyLog.print("⚠️ children为null或空");

@@ -205,6 +205,9 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             return;
         }
         EasyLog.print("TipsBookReadPresenter", "BookData 加载成功，章节数=" + currentBookData.getChapterCount());
+        
+        // 【新架构】设置TipsNetHelper的BookRepository上下文，用于点击链接时搜索
+        TipsNetHelper.setBookContext(repository, bookId);
 
         // 获取章节列表
         allChapters = repository.getChapters(bookId);

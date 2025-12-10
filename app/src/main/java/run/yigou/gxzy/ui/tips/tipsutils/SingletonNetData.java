@@ -101,6 +101,17 @@ public void setBookFang(Integer bookFangId) {
         return this.content;
     }
 
+    /**
+     * 获取原始章节内容，绕过OnContentUpdateListener过滤
+     * 用于搜索功能，避免被监听器过滤掉数据
+     *
+     * @return 原始章节内容列表
+     */
+    public ArrayList<HH2SectionData> getContentRaw() {
+        if (this.content == null) this.content = new ArrayList<>();
+        return this.content;
+    }
+
     public void setContent(List<HH2SectionData> hh2SectionDataArrayList) {
         if (this.content == null) this.content = new ArrayList<>();
         this.content.clear();
