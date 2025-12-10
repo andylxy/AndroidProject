@@ -36,6 +36,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.ChapterDownloadManager;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
 /**
  * TipsBookRead Presenter 实现
@@ -653,8 +654,21 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             @Override
             public void onSuccess(List<run.yigou.gxzy.ui.tips.DataBeans.Fang> data) {
                 EasyLog.print("TipsBookReadPresenter", "药方数据加载完成: " + data.size() + " 个");
-                // 药方数据可以存储到 currentBookData 或单独处理
-                // TODO: 根据实际需求决定如何存储药方数据
+                
+                // 【新架构】将方剂数据设置到BookData
+                if (data != null && !data.isEmpty() && currentBookData != null) {
+                    // 创建ChapterData包装方剂列表
+                    List<DataItem> fangItemList = new ArrayList<>(data);
+                    ChapterData fangChapterData = new ChapterData(0L, book.getBookName() + "方", 0, fangItemList);
+                    
+                    currentBookData.setFangData(fangChapterData);
+                    EasyLog.print("TipsBookReadPresenter", "✅ 方剂数据已设置到BookData: " + data.size() + " 个");
+                    
+                    // 【兼容旧架构】同时设置到SingletonNetData（供其他旧代码使用）
+                    TipsSingleData tipsSingleData = TipsSingleData.getInstance();
+                    HH2SectionData fangSection = new HH2SectionData(data, 0, book.getBookName() + "方");
+                    tipsSingleData.getMapBookContent(currentBookId).setFang(fangSection);
+                }
             }
 
             @Override

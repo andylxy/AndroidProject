@@ -19,6 +19,7 @@ import run.yigou.gxzy.ui.tips.entity.GroupData;
 import run.yigou.gxzy.ui.tips.entity.ItemData;
 import run.yigou.gxzy.ui.tips.repository.BookRepository;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
+import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 
@@ -73,28 +74,32 @@ public class SearchDataAdapter {
         
         EasyLog.print("实际别名: " + aliasName);
         
-        // 【方剂详细信息】优先添加方剂配方（从伤寒金匮方章节）
-        ArrayList<HH2SectionData> fangSections = tipsSingleData.getMapBookContent(bookId).getFang();
-        if (fangSections != null && !fangSections.isEmpty()) {
-            for (HH2SectionData fangSection : fangSections) {
-                List<DataItem> fangItems = fangSection.getData();
-                if (fangItems != null) {
-                    for (DataItem fangItem : fangItems) {
-                        // 检查方剂名称是否匹配
-                        if (aliasName.equals(fangItem.getName())) {
-                            // 添加方剂配方信息
-                            GroupData groupData = new GroupData();
-                            groupData.setTitle(fangSection.getChapterHeader());
-                            groupData.setExpanded(true);
-                            groupDataList.add(groupData);
-                            
-                            List<ItemData> items = new ArrayList<>();
-                            items.add(convertDataItemToItemData(fangItem));
-                            itemDataList.add(items);
-                            
-                            EasyLog.print("✅ 找到方剂配方: " + fangItem.getName());
-                            break;
-                        }
+        // 【方剂详细信息】优先添加方剂配方（从BookData.getFangData()）
+        ChapterData fangChapterData = bookData.getFangData();
+        EasyLog.print("方剂数据: " + (fangChapterData != null && fangChapterData.isContentLoaded() ? "已加载" : "未加载"));
+        
+        if (fangChapterData != null && fangChapterData.isContentLoaded()) {
+            List<DataItem> fangItems = fangChapterData.getContent();
+            EasyLog.print("方剂条目数: " + (fangItems != null ? fangItems.size() : 0));
+            
+            if (fangItems != null) {
+                for (DataItem fangItem : fangItems) {
+                    // 检查方剂名称是否匹配
+                    String itemName = fangItem.getName();
+                    
+                    if (aliasName.equals(itemName)) {
+                        // 添加方剂配方信息
+                        GroupData groupData = new GroupData();
+                        groupData.setTitle(fangChapterData.getTitle());
+                        groupData.setExpanded(true);
+                        groupDataList.add(groupData);
+                        
+                        List<ItemData> items = new ArrayList<>();
+                        items.add(convertDataItemToItemData(fangItem));
+                        itemDataList.add(items);
+                        
+                        EasyLog.print("✅ 找到方剂配方: " + itemName);
+                        break;
                     }
                 }
             }
