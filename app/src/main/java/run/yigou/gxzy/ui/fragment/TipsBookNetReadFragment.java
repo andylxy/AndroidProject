@@ -107,6 +107,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      * 章节下载管理器
      */
     private ChapterDownloadManager chapterDownloadManager;
+    
+    /**
+     * 全局搜索协调器
+     */
+    private run.yigou.gxzy.ui.tips.utils.SearchCoordinator searchCoordinator;
 
     // 在 onDestroy 中释放资源
 
@@ -333,6 +338,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             // 初始化 MVP 架构
             presenter = new TipsBookReadPresenter(this);
             presenter.onViewCreated();
+            
+            // 初始化全局搜索协调器
+            searchCoordinator = new run.yigou.gxzy.ui.tips.utils.SearchCoordinator(bookId);
 
             // 加载到UI显示
             initializeAdapter();
@@ -745,6 +753,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      * @param init     true  初始化显示 ,false 搜索结果 显示
      * @param isExpand false 表头不展开, true 展开
      */
+
     private void reListAdapter(boolean init, boolean isExpand) {
         if (bookId != 0 && presenter != null) {
             if (init) {
@@ -781,14 +790,66 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
     public void setSearchText(String searchText) {
         this.searchText = searchText;
         
-        // 通过 Presenter 执行搜索
-        if (presenter != null && searchText != null && !searchText.isEmpty()) {
-            presenter.search(searchText);
-        } else {
+        if (searchText == null || searchText.trim().isEmpty()) {
             // 清空搜索，恢复原始列表
             if (this.adapter != null) {
                 reListAdapter(true, false);
             }
+            if (numTips != null) {
+                numTips.setText("");
+            }
+        } else {
+            // 执行全局搜索
+            performGlobalSearch(searchText.trim());
+        }
+    }
+    
+    /**
+     * 执行全局搜索
+     */
+    private void performGlobalSearch(String keyword) {
+        EasyLog.print("TipsBookNetReadFragment", "执行全局搜索: " + keyword);
+        
+        if (searchCoordinator == null) {
+            EasyLog.print("TipsBookNetReadFragment", "❌ searchCoordinator 未初始化");
+            return;
+        }
+        
+        // 使用 SearchCoordinator 进行全局搜索
+        android.util.Pair<List<run.yigou.gxzy.ui.tips.entity.GroupData>, 
+                          List<List<run.yigou.gxzy.ui.tips.entity.ItemData>>> result = 
+            searchCoordinator.searchGlobal(keyword);
+        
+        if (result == null) {
+            EasyLog.print("TipsBookNetReadFragment", "❌ 搜索结果为 null");
+            return;
+        }
+        
+        List<run.yigou.gxzy.ui.tips.entity.GroupData> groupDataList = result.first;
+        List<List<run.yigou.gxzy.ui.tips.entity.ItemData>> itemDataList = result.second;
+        
+        // 更新适配器显示搜索结果
+        if (adapter != null) {
+            adapter.setSearchData(groupDataList, itemDataList);
+            
+            // 统计匹配数量
+            int totalMatches = 0;
+            if (itemDataList != null) {
+                for (List<run.yigou.gxzy.ui.tips.entity.ItemData> items : itemDataList) {
+                    if (items != null) {
+                        totalMatches += items.size();
+                    }
+                }
+            }
+            
+            // 显示匹配数量
+            if (numTips != null) {
+                numTips.setText(String.format("%d个结果", totalMatches));
+            }
+            
+            EasyLog.print("TipsBookNetReadFragment", 
+                "✅ 搜索完成，匹配章节: " + (groupDataList != null ? groupDataList.size() : 0) + 
+                ", 总匹配数: " + totalMatches);
         }
     }
 

@@ -89,6 +89,70 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
     }
     
     /**
+     * 设置搜索结果数据（专用于全局搜索）
+     * 
+     * @param groupDataList 分组数据列表
+     * @param itemDataList 条目数据列表
+     */
+    public void setSearchData(
+            @NonNull List<run.yigou.gxzy.ui.tips.entity.GroupData> groupDataList,
+            @NonNull List<List<run.yigou.gxzy.ui.tips.entity.ItemData>> itemDataList) {
+        
+        EasyLog.print("RefactoredExpandableAdapter", "设置搜索结果数据");
+        EasyLog.print("RefactoredExpandableAdapter", "GroupData数量: " + groupDataList.size());
+        EasyLog.print("RefactoredExpandableAdapter", "ItemData列表数量: " + itemDataList.size());
+        
+        // 转换为 ExpandableGroupEntity 格式
+        ArrayList<ExpandableGroupEntity> convertedGroups = new ArrayList<>();
+        for (int i = 0; i < groupDataList.size() && i < itemDataList.size(); i++) {
+            run.yigou.gxzy.ui.tips.entity.GroupData sourceGroup = groupDataList.get(i);
+            List<run.yigou.gxzy.ui.tips.entity.ItemData> sourceItems = itemDataList.get(i);
+            
+            // 转换 ItemData 为 ChildEntity
+            ArrayList<run.yigou.gxzy.ui.tips.entity.ChildEntity> children = new ArrayList<>();
+            if (sourceItems != null) {
+                for (run.yigou.gxzy.ui.tips.entity.ItemData sourceItem : sourceItems) {
+                    run.yigou.gxzy.ui.tips.entity.ChildEntity child = 
+                        new run.yigou.gxzy.ui.tips.entity.ChildEntity();
+                    
+                    // 复制数据
+                    if (sourceItem.getAttributedText() != null) {
+                        child.setAttributed_child_section_text(sourceItem.getAttributedText());
+                    }
+                    if (sourceItem.getAttributedNote() != null) {
+                        child.setAttributed_child_section_note(sourceItem.getAttributedNote());
+                    }
+                    if (sourceItem.getAttributedVideo() != null) {
+                        child.setAttributed_child_section_video(sourceItem.getAttributedVideo());
+                    }
+                    if (sourceItem.getImageUrl() != null) {
+                        child.setChild_section_image(sourceItem.getImageUrl());
+                    }
+                    child.setGroupPosition(sourceItem.getGroupPosition());
+                    
+                    children.add(child);
+                }
+            }
+            
+            // 创建 ExpandableGroupEntity
+            ExpandableGroupEntity groupEntity = new ExpandableGroupEntity(
+                sourceGroup.getTitle(),  // header
+                null,  // spannableHeader
+                "",  // footer
+                true,  // isExpand - 搜索结果默认展开
+                children
+            );
+            
+            convertedGroups.add(groupEntity);
+        }
+        
+        // 使用现有的 setGroups 方法
+        setGroups(convertedGroups);
+        
+        EasyLog.print("RefactoredExpandableAdapter", "✅ 搜索结果数据设置完成");
+    }
+    
+    /**
      * 兼容旧接口 - 设置旧数据结构(自动转换)
      */
     @Override
