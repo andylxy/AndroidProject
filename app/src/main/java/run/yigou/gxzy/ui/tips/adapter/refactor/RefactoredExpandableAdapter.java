@@ -246,6 +246,12 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
      */
     public void expandGroup(int groupPosition, boolean animate) {
         expandStateManager.setExpandState(groupPosition, true);
+        
+        // ✅ 同步entity状态 - 保证状态管理器和entity一致
+        if (groupPosition >= 0 && groupPosition < groups.size()) {
+            groups.get(groupPosition).setExpand(true);
+        }
+        
         if (animate) {
             notifyChildrenInserted(groupPosition);
         } else {
@@ -265,6 +271,12 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
      */
     public void collapseGroup(int groupPosition, boolean animate) {
         expandStateManager.setExpandState(groupPosition, false);
+        
+        // ✅ 同步entity状态 - 保证状态管理器和entity一致
+        if (groupPosition >= 0 && groupPosition < groups.size()) {
+            groups.get(groupPosition).setExpand(false);
+        }
+        
         if (animate) {
             notifyChildrenRemoved(groupPosition);
         } else {
@@ -278,6 +290,10 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
     public void expandAll() {
         for (int i = 0; i < getGroupCount(); i++) {
             expandStateManager.setExpandState(i, true);
+            // ✅ 同步entity状态
+            if (i < groups.size()) {
+                groups.get(i).setExpand(true);
+            }
         }
         notifyDataSetChanged();
     }
@@ -288,8 +304,78 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
     public void collapseAll() {
         for (int i = 0; i < getGroupCount(); i++) {
             expandStateManager.setExpandState(i, false);
+            // ✅ 同步entity状态
+            if (i < groups.size()) {
+                groups.get(i).setExpand(false);
+            }
         }
         notifyDataSetChanged();
+    }
+
+    /**
+     * 更新指定位置的组数据（使用新的GroupData结构）
+     * 这是重构后的核心数据更新方法
+     * 
+     * @param position 组位置
+     * @param groupData 新的组数据
+     */
+    public void updateGroupData(int position, @NonNull GroupData groupData) {
+        if (position < 0 || position >= groupDataList.size()) {
+            com.hjq.http.EasyLog.print("RefactoredExpandableAdapter", 
+                "updateGroupData: 位置越界 position=" + position + ", size=" + groupDataList.size());
+            return;
+        }
+        
+        // 更新groupDataList（唯一数据源）
+        groupDataList.set(position, groupData);
+        
+        // 同步更新groups（兼容层 - 反向转换）
+        if (groups != null && position < groups.size()) {
+            // TODO: 如果需要反向转换GroupData -> ExpandableGroupEntity
+            // groups.set(position, convertToEntity(groupData));
+        }
+        
+        com.hjq.http.EasyLog.print("RefactoredExpandableAdapter", 
+            "updateGroupData: 已更新位置=" + position + ", 标题=" + groupData.getTitle());
+        
+        // 注意：不自动刷新界面，由调用者决定刷新策略
+    }
+
+    /**
+     * 更新指定位置的组数据（从旧的ExpandableGroupEntity转换）
+     * 兼容旧代码调用方式，自动转换为新的GroupData结构
+     * 
+     * @param position 组位置
+     * @param entity 旧的实体数据
+     */
+    public void updateGroupFromEntity(int position, @NonNull ExpandableGroupEntity entity) {
+        if (position < 0 || position >= groupDataList.size()) {
+            com.hjq.http.EasyLog.print("RefactoredExpandableAdapter", 
+                "updateGroupFromEntity: 位置越界 position=" + position + ", size=" + groupDataList.size());
+            return;
+        }
+        
+        // 1. 转换为新数据结构
+        GroupData groupData = DataAdapter.fromExpandableGroupEntity(entity);
+        
+        // 2. 更新groupDataList
+        groupDataList.set(position, groupData);
+        
+        // 3. 同步entity到groups（兼容层）
+        if (groups != null && position < groups.size()) {
+            groups.set(position, entity);
+        }
+        
+        // 4. 同步展开状态到状态管理器
+        expandStateManager.setExpandState(position, entity.isExpand());
+        
+        com.hjq.http.EasyLog.print("RefactoredExpandableAdapter", 
+            "updateGroupFromEntity: 已更新位置=" + position + 
+            ", 标题=" + entity.getHeader() + 
+            ", 展开=" + entity.isExpand() +
+            ", 子项数=" + (entity.getChildren() != null ? entity.getChildren().size() : 0));
+        
+        // 注意：不自动刷新界面，由调用者决定刷新策略
     }
 
     /**
@@ -342,7 +428,7 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
      * 设置旧数据结构(兼容旧代码)
      */
     public void setmGroups(ArrayList<ExpandableGroupEntity> groups) {
-        setGroups(groups);  // 委托给setGroups
+        setGroups(groups);  // 委托给setGroups，会自动同步状态
     }
     
     // ============ 实现接口方法 ============

@@ -571,10 +571,21 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                 
                 // ✅ 使用当前展开状态创建新的 GroupEntity
                 ExpandableGroupEntity groupEntity = GroupModel.getExpandableGroupEntity(isCurrentlyExpanded, sectionData);
-                adapter.getmGroups().set(groupPosition, groupEntity);
-                adapter.notifyGroupChanged(groupPosition);
                 
-                EasyLog.print("TipsBookNetReadFragment", "章节内容已更新: " + sectionData.getHeader() + ", isExpanded=" + isCurrentlyExpanded);
+                // ✅ 使用新的重构API更新数据（同步groups和groupDataList）
+                adapter.updateGroupFromEntity(groupPosition, groupEntity);
+                
+                // ✅ 关键修复: 根据展开状态决定刷新策略
+                if (isCurrentlyExpanded) {
+                    // 数据更新后重新展开，确保子项显示
+                    adapter.notifyDataChanged();  // 先刷新所有数据
+                    adapter.expandGroup(groupPosition, false);  // 再展开该组(无动画，避免闪烁)
+                    EasyLog.print("TipsBookNetReadFragment", "章节内容已更新并重新展开: " + sectionData.getHeader());
+                } else {
+                    // 如果是收起状态，只刷新组数据即可
+                    adapter.notifyGroupChanged(groupPosition);
+                    EasyLog.print("TipsBookNetReadFragment", "章节内容已更新(收起状态): " + sectionData.getHeader());
+                }
             }
         } catch (Exception e) {
             EasyLog.print("TipsBookNetReadFragment", "更新章节内容失败: " + e.getMessage());
