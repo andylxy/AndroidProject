@@ -30,6 +30,7 @@ import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.tips.adapter.NoFooterAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+import com.hjq.http.EasyLog;
 
 
 public class TipsLittleTableViewWindow extends TipsLittleWindow {
@@ -42,7 +43,13 @@ public class TipsLittleTableViewWindow extends TipsLittleWindow {
 
     @Override
     public void show(FragmentManager fragmentManager) {
+        EasyLog.print("=== TipsLittleTableViewWindow.show() 调用 ===");
+        EasyLog.print("FragmentManager: " + fragmentManager);
+        EasyLog.print("fang: " + fang);
+        EasyLog.print("rect: " + rect);
+        EasyLog.print("adapter: " + adapter);
         super.show(fragmentManager);
+        EasyLog.print("super.show() 完成");
         TipsSingleData.getInstance().tipsLittleWindowStack.add(this);
     }
 
@@ -67,11 +74,15 @@ public class TipsLittleTableViewWindow extends TipsLittleWindow {
 
 
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+        EasyLog.print("=== TipsLittleTableViewWindow.onCreateView() 调用 ===");
         // 获取当前活动，确保不为null
         Activity activity = getActivity();
+        EasyLog.print("Activity: " + activity);
         if (activity == null) {
-            throw new IllegalStateException("Activity cannot be null."); // 如果活动为null，则抛出异常
+            EasyLog.print("❌ Activity is null!");
+            throw new IllegalStateException("Activity cannot be null."); // 如果活动为null,则抛出异常
         }
+        EasyLog.print("✅ Activity获取成功");
 
         // 获取窗口的根视图和屏幕信息
         this.mGroup = (ViewGroup) activity.getWindow().getDecorView(); // 获取窗口的根视图
@@ -127,9 +138,18 @@ public class TipsLittleTableViewWindow extends TipsLittleWindow {
             //SingletonData.getInstance().popShowFang(); // 更新单例数据
         });
         // 初始化列表适配器
+        EasyLog.print("=== 初始化RecyclerView ===");
         rvList = this.view.findViewById(R.id.include_tips_windows_sticky_list).findViewById(R.id.sticky_rv_list);
+        EasyLog.print("rvList: " + rvList);
         rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
+        EasyLog.print("adapter在setAdapter前: " + adapter);
+        if (adapter == null) {
+            EasyLog.print("❌ adapter为null! setAdapterSource未被调用或执行失败");
+        } else {
+            EasyLog.print("✅ adapter不为null, itemCount: " + adapter.getItemCount());
+        }
         rvList.setAdapter(adapter);
+        EasyLog.print("RecyclerView.setAdapter() 完成");
 
 
         // 设置箭头方向
@@ -159,8 +179,13 @@ public class TipsLittleTableViewWindow extends TipsLittleWindow {
         // 配置Wrapper布局参数并添加视图
         LinearLayout wrapper = this.view.findViewById(R.id.wrapper); // 获取Wrapper布局
         wrapper.setLayoutParams(largeLayoutParams); // 设置布局参数
+        EasyLog.print("准备将view添加到mGroup");
+        EasyLog.print("mGroup: " + this.mGroup);
+        EasyLog.print("this.view: " + this.view);
         this.mGroup.addView(this.view); // 将视图添加到根视图中
+        EasyLog.print("✅ view已添加到mGroup");
 
+        EasyLog.print("=== TipsLittleTableViewWindow.onCreateView() 完成 ===");
         return super.onCreateView(layoutInflater, viewGroup, bundle); // 返回父类的视图
     }
 
@@ -170,20 +195,27 @@ public class TipsLittleTableViewWindow extends TipsLittleWindow {
      * @param groups 数据源
      */
     public void setAdapterSource(Context context, ArrayList<GroupEntity> groups) {
+        EasyLog.print("=== TipsLittleTableViewWindow.setAdapterSource() 调用 ===");
+        EasyLog.print("Context: " + context);
+        EasyLog.print("groups: " + groups);
+        EasyLog.print("groups size: " + (groups != null ? groups.size() : "null"));
 
         //检索所有的相关药方
         if (adapter == null) {
+            EasyLog.print("adapter为null, 创建新的NoFooterAdapter");
             adapter = new NoFooterAdapter(context, groups);
+            EasyLog.print("NoFooterAdapter创建完成, itemCount: " + adapter.getItemCount());
             adapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
                 @Override
                 public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
                                           int groupPosition) {
                 }
             });
-
-
+            EasyLog.print("OnHeaderClickListener设置完成");
+        } else {
+            EasyLog.print("adapter已存在, 跳过创建");
         }
-
+        EasyLog.print("setAdapterSource() 完成");
     }
 
     private RecyclerView rvList;

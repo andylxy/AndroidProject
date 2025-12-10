@@ -12,6 +12,7 @@ package run.yigou.gxzy.ui.tips.tipsutils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -860,17 +861,44 @@ public class TipsNetHelper {
 
             @Override
             public void clickFangLink(TextView textView, ClickableSpan clickableSpan) {
-
+                EasyLog.print("=== clickFangLink() 调用 ===");
                 String charSequence = textView.getText().subSequence(textView.getSelectionStart(), textView.getSelectionEnd()).toString();
                 EasyLog.print("Fang--tapped:" + charSequence);
+                
+                EasyLog.print("步骤1: 调用showFangTwo");
                 List<HH2SectionData> mingCiList = ShowFanYaoMingCi.getInstance().showFangTwo(charSequence.trim());
+                EasyLog.print("mingCiList: " + (mingCiList != null ? mingCiList.size() + " items" : "null"));
+                
+                EasyLog.print("步骤2: 调用GroupModel.getGroups");
                 ArrayList<GroupEntity> groups = GroupModel.getGroups(mingCiList, charSequence,true);
+                EasyLog.print("groups: " + (groups != null ? groups.size() + " items" : "null"));
+                
+                EasyLog.print("步骤3: 获取文本矩形");
                 Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
+                EasyLog.print("textRect: " + textRect);
+                
+                EasyLog.print("步骤4: 创建TipsLittleTableViewWindow");
                 TipsLittleTableViewWindow tipsLittleTableViewWindow = new TipsLittleTableViewWindow();
+                EasyLog.print("TipsLittleTableViewWindow实例: " + tipsLittleTableViewWindow);
+                
+                EasyLog.print("步骤5: 调用setAdapterSource");
                 tipsLittleTableViewWindow.setAdapterSource(textView.getContext(), groups);
+                
+                EasyLog.print("步骤6: 设置fang和rect");
                 tipsLittleTableViewWindow.setFang(charSequence);
                 tipsLittleTableViewWindow.setRect(textRect);
-                tipsLittleTableViewWindow.show(((Activity) textView.getContext()).getFragmentManager());
+                
+                EasyLog.print("步骤7: 获取FragmentManager并调用show()");
+                Context context = textView.getContext();
+                EasyLog.print("Context类型: " + context.getClass().getName());
+                if (context instanceof Activity) {
+                    FragmentManager fm = ((Activity) context).getFragmentManager();
+                    EasyLog.print("FragmentManager: " + fm);
+                    tipsLittleTableViewWindow.show(fm);
+                } else {
+                    EasyLog.print("❌ Context不是Activity!");
+                }
+                EasyLog.print("=== clickFangLink() 完成 ===");
             }
 
             /**

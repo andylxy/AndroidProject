@@ -47,6 +47,15 @@ public class NoFooterAdapter extends GroupedListAdapter {
 
     public NoFooterAdapter(Context context, ArrayList<GroupEntity> groups) {
         super(context, groups);
+        EasyLog.print("=== NoFooterAdapter构造函数 ===");
+        EasyLog.print("接收到groups: " + (groups != null ? groups.size() : "null"));
+        if (groups != null) {
+            for (int i = 0; i < groups.size(); i++) {
+                GroupEntity g = groups.get(i);
+                EasyLog.print("  Group[" + i + "]: header=" + g.getHeader() + ", children=" + (g.getChildren() != null ? g.getChildren().size() : "null"));
+            }
+        }
+        EasyLog.print("getItemCount(): " + getItemCount());
     }
 
     @Override
