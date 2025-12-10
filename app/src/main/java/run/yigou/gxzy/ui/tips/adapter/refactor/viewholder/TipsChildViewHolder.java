@@ -31,6 +31,9 @@ public class TipsChildViewHolder {
     private final TextView tvText;
     private final TextView tvNote;
     private final TextView tvVideo;
+    
+    // 状态标记: 用于管理note/video切换逻辑
+    private boolean isSectionvideo = true;
 
     /**
      * 构造函数
@@ -213,25 +216,21 @@ public class TipsChildViewHolder {
     
     /**
      * 切换正文可见性
+     * @param noteContent 笺注内容,用于判断是否可切换
      */
-    public void toggleTextVisibility(SpannableStringBuilder content) {
-        if (content == null || content.length() == 0) {
+    public void toggleTextVisibility(SpannableStringBuilder noteContent) {
+        // 检查是否点击了链接(由LocalLinkMovementMethod设置的tag)
+        Boolean isClick = (Boolean) tvText.getTag();
+        if (isClick != null && isClick) {
             return;
         }
-        if (tvText.getVisibility() == View.VISIBLE) {
-            tvText.setVisibility(View.GONE);
-        } else {
-            tvText.setVisibility(View.VISIBLE);
-        }
-    }
-    
-    /**
-     * 切换笺注可见性
-     */
-    public void toggleNoteVisibility(SpannableStringBuilder content) {
-        if (content == null || content.length() == 0) {
+        
+        // 检查笺注内容是否可用
+        if (noteContent == null || noteContent.length() == 0) {
             return;
         }
+        
+        // 切换笺注显示
         if (tvNote.getVisibility() == View.VISIBLE) {
             tvNote.setVisibility(View.GONE);
         } else {
@@ -240,16 +239,63 @@ public class TipsChildViewHolder {
     }
     
     /**
-     * 切换视频可见性
+     * 切换笺注可见性 - 复杂逻辑
+     * @param videoContent 视频内容,用于判断是否可切换
      */
-    public void toggleVideoVisibility(SpannableStringBuilder content) {
-        if (content == null || content.length() == 0) {
+    public void toggleNoteVisibility(SpannableStringBuilder videoContent) {
+        // 检查是否点击了链接(由LocalLinkMovementMethod设置的tag)
+        Boolean isClick = (Boolean) tvNote.getTag();
+        if (isClick != null && isClick) {
             return;
         }
+        
+        // 检查video是否可用
+        int videoLength = videoContent != null ? videoContent.length() : 0;
+        boolean isVideoAvailable = videoLength > 0;
+        
+        // 特殊逻辑: note显示且video隐藏时的处理
+        if (tvNote.getVisibility() == View.VISIBLE && 
+            tvVideo.getVisibility() == View.GONE && 
+            !isSectionvideo) {
+            tvNote.setVisibility(View.GONE);
+            isSectionvideo = true;
+            return;
+        }
+        
+        // 状态管理
+        if (isVideoAvailable) {
+            isSectionvideo = false;
+        } else {
+            tvNote.setVisibility(View.GONE);
+            isSectionvideo = true;
+            return;
+        }
+        
+        // 切换视频显示
         if (tvVideo.getVisibility() == View.VISIBLE) {
             tvVideo.setVisibility(View.GONE);
         } else {
             tvVideo.setVisibility(View.VISIBLE);
+        }
+    }
+    
+    /**
+     * 切换视频可见性
+     */
+    public void toggleVideoVisibility() {
+        // 检查是否点击了链接(由LocalLinkMovementMethod设置的tag)
+        Boolean isClick = (Boolean) tvVideo.getTag();
+        if (isClick != null && isClick) {
+            return;
+        }
+        
+        // 切换视频显示并更新状态
+        if (tvVideo.getVisibility() == View.VISIBLE) {
+            tvVideo.setVisibility(View.GONE);
+            isSectionvideo = true;
+        } else {
+            tvVideo.setVisibility(View.VISIBLE);
+            isSectionvideo = false;
         }
     }
 }

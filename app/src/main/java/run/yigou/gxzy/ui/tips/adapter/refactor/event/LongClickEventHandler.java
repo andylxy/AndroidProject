@@ -11,6 +11,7 @@ package run.yigou.gxzy.ui.tips.adapter.refactor.event;
 
 import androidx.annotation.NonNull;
 
+import run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemData;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
 
 /**
@@ -20,7 +21,7 @@ import run.yigou.gxzy.ui.tips.entity.ChildEntity;
 public interface LongClickEventHandler {
 
     /**
-     * Child长按事件
+     * Child长按事件 - 使用旧数据结构ChildEntity
      *
      * @param groupPosition 组位置
      * @param childPosition 子项位置
@@ -31,5 +32,19 @@ public interface LongClickEventHandler {
     boolean onChildLongClick(int groupPosition,
                               int childPosition,
                               @NonNull ChildEntity entity,
+                              @NonNull CharSequence text);
+    
+    /**
+     * Child长按事件 - 使用新数据结构ItemData
+     *
+     * @param groupPosition 组位置
+     * @param childPosition 子项位置
+     * @param itemData      数据实体(新结构)
+     * @param text          当前显示的文本(SpannableStringBuilder以保留格式)
+     * @return true表示消费事件
+     */
+    boolean onChildLongClick(int groupPosition,
+                              int childPosition,
+                              @NonNull ItemData itemData,
                               @NonNull CharSequence text);
 }

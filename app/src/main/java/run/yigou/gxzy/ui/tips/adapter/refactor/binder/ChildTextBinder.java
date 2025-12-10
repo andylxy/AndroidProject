@@ -10,6 +10,7 @@
 package run.yigou.gxzy.ui.tips.adapter.refactor.binder;
 
 import android.text.SpannableStringBuilder;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,6 +21,7 @@ import run.yigou.gxzy.ui.tips.adapter.refactor.utils.SpannableStringCache;
 import run.yigou.gxzy.ui.tips.adapter.refactor.utils.TextViewHelper;
 import run.yigou.gxzy.ui.tips.adapter.refactor.viewholder.TipsChildViewHolder;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
+import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.other.AppConfig;
 
@@ -135,6 +137,16 @@ public class ChildTextBinder implements DataBinder<ChildEntity, TipsChildViewHol
     public void bind(@NonNull ItemData data,
                      @NonNull TipsChildViewHolder viewHolder,
                      int position) {
+        // 设置LocalLinkMovementMethod以支持ClickableSpan点击
+        viewHolder.getTextView().setMovementMethod(LocalLinkMovementMethod.getInstance());
+        viewHolder.getNoteView().setMovementMethod(LocalLinkMovementMethod.getInstance());
+        viewHolder.getVideoView().setMovementMethod(LocalLinkMovementMethod.getInstance());
+        
+        // 设置初始可见性: text可见, note和video默认隐藏
+        viewHolder.getTextView().setVisibility(View.VISIBLE);
+        viewHolder.getNoteView().setVisibility(View.GONE);
+        viewHolder.getVideoView().setVisibility(View.GONE);
+        
         // 绑定正文
         if (data.hasTextSpan()) {
             viewHolder.getTextView().setText(data.getTextSpan());

@@ -78,6 +78,24 @@ public class SearchModeLongClickHandler implements LongClickEventHandler {
 
         return true;
     }
+    
+    /**
+     * Child长按事件 - 使用新数据结构ItemData
+     *
+     * @param groupPosition 组位置
+     * @param childPosition 子项位置
+     * @param itemData      数据实体(新结构)
+     * @param text          当前显示的文本
+     * @return true表示消费事件
+     */
+    @Override
+    public boolean onChildLongClick(int groupPosition,
+                                     int childPosition,
+                                     @NonNull ItemData itemData,
+                                     @NonNull CharSequence text) {
+        // 直接使用文本处理，无需entity信息
+        return onChildLongClick(groupPosition, childPosition, (ChildEntity) null, text);
+    }
 
     /**
      * 处理复制动作

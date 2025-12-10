@@ -183,47 +183,59 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
         
         if (sectionText != null) {
             sectionText.setOnClickListener(v -> 
-                childVH.toggleTextVisibility(itemData.getTextSpan())
+                childVH.toggleTextVisibility(itemData.getNoteSpan())
             );
             
-            sectionText.setOnLongClickListener(v -> 
-                longClickHandler.onChildLongClick(
+            sectionText.setOnLongClickListener(v -> {
+                // 优先使用SpannableStringBuilder以保留格式
+                CharSequence text = itemData.hasTextSpan() 
+                    ? itemData.getTextSpan() 
+                    : sectionText.getText();
+                return longClickHandler.onChildLongClick(
                     groupPosition, 
                     childPosition, 
                     itemData, 
-                    sectionText.getText().toString()
-                )
-            );
+                    text
+                );
+            });
         }
         
         if (sectionNote != null) {
             sectionNote.setOnClickListener(v -> 
-                childVH.toggleNoteVisibility(itemData.getNoteSpan())
+                childVH.toggleNoteVisibility(itemData.getVideoSpan())
             );
             
-            sectionNote.setOnLongClickListener(v -> 
-                longClickHandler.onChildLongClick(
+            sectionNote.setOnLongClickListener(v -> {
+                // 优先使用SpannableStringBuilder以保留格式
+                CharSequence text = itemData.hasNoteSpan() 
+                    ? itemData.getNoteSpan() 
+                    : sectionNote.getText();
+                return longClickHandler.onChildLongClick(
                     groupPosition, 
                     childPosition, 
                     itemData, 
-                    sectionNote.getText().toString()
-                )
-            );
+                    text
+                );
+            });
         }
         
         if (sectionVideo != null) {
             sectionVideo.setOnClickListener(v -> 
-                childVH.toggleVideoVisibility(itemData.getVideoSpan())
+                childVH.toggleVideoVisibility()
             );
             
-            sectionVideo.setOnLongClickListener(v -> 
-                longClickHandler.onChildLongClick(
+            sectionVideo.setOnLongClickListener(v -> {
+                // 优先使用SpannableStringBuilder以保留格式
+                CharSequence text = itemData.hasVideoSpan() 
+                    ? itemData.getVideoSpan() 
+                    : sectionVideo.getText();
+                return longClickHandler.onChildLongClick(
                     groupPosition, 
                     childPosition, 
                     itemData, 
-                    sectionVideo.getText().toString()
-                )
-            );
+                    text
+                );
+            });
         }
     }
 
