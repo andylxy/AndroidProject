@@ -41,7 +41,7 @@ import run.yigou.gxzy.ui.adapter.SearchBookAdapter;
 import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.Search.SearchKey;
-import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
+import run.yigou.gxzy.ui.tips.adapter.refactor.RefactoredSearchAdapter;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
@@ -69,7 +69,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     private SearchHistoryService mSearchHistoryService;
     private TabNavBodyService mTabNavBodyService;
     private SearchHistoryAdapter mSearchHistoryAdapter;
-    private ExpandableAdapter mSearchBookDetailAdapter;
+    private RefactoredSearchAdapter mSearchBookDetailAdapter;
     private SearchBookAdapter mSearchBookAdapter;
 
     public String getSearchKey() {
@@ -214,8 +214,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      * 初始化搜索列表
      */
     private void initSearchList() {
-        mSearchBookDetailAdapter = new ExpandableAdapter(getActivity());
-        mSearchBookDetailAdapter.setSearch(true);
+        mSearchBookDetailAdapter = new RefactoredSearchAdapter(getActivity());
+        // 搜索模式默认已开启,不需要setSearch
         lvSearchBooksList.setAdapter(mSearchBookDetailAdapter);
         layoutManager = new LinearLayoutManager(getContext());
         lvSearchBooksList.setLayoutManager(layoutManager);
@@ -227,7 +227,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                                       int groupPosition) {
 //                Toast.makeText(getContext(), "组头：groupPosition = " + groupPosition,
 //                        Toast.LENGTH_LONG).show();
-                ExpandableAdapter expandableAdapter = (ExpandableAdapter) adapter;
+                RefactoredSearchAdapter expandableAdapter = (RefactoredSearchAdapter) adapter;
                 if (expandableAdapter.isExpand(groupPosition)) {
                     expandableAdapter.collapseGroup(groupPosition);
                 } else {
@@ -236,10 +236,10 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             }
         });
         //跳转指定章节
-        mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener(new ExpandableAdapter.OnJumpSpecifiedItemListener() {
+        mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener(new RefactoredSearchAdapter.OnJumpSpecifiedItemListener() {
             @Override
             public void onJumpSpecifiedItem(int groupPosition, int childPosition) {
-                mSearchBookDetailAdapter.setSearch(false);
+                // 搜索模式已经默认开启,不需要setSearch
                 reListAdapter();
                 layoutManager.scrollToPositionWithOffset(groupPosition, 0);
                 mSearchBookDetailAdapter.expandGroup(groupPosition, true);

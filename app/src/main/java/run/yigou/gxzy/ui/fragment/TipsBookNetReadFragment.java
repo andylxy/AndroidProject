@@ -53,7 +53,7 @@ import run.yigou.gxzy.greendao.gen.ChapterDao;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
-import run.yigou.gxzy.ui.tips.adapter.ExpandableAdapter;
+import run.yigou.gxzy.ui.tips.adapter.refactor.RefactoredExpandableAdapter;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
@@ -71,7 +71,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
     private WrapRecyclerView rvList;
     private ClearEditText clearEditText;
-    private ExpandableAdapter adapter;
+    private RefactoredExpandableAdapter adapter;
     private BookArgs bookArgs;
 
     /**
@@ -389,7 +389,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
 
     private void initializeAdapter() {
-        adapter = new ExpandableAdapter(getContext());
+        adapter = new RefactoredExpandableAdapter(getContext());
     }
 
     private boolean isShowUpdateNotification = true;
@@ -399,7 +399,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             @Override
             public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
                                       int groupPosition) {
-                ExpandableAdapter expandableAdapter = (ExpandableAdapter) adapter;
+                RefactoredExpandableAdapter expandableAdapter = (RefactoredExpandableAdapter) adapter;
                 if (expandableAdapter.isExpand(groupPosition)) {
                     expandableAdapter.collapseGroup(groupPosition);
                 } else {
@@ -488,11 +488,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         }
     }
 
-    private ExpandableAdapter.OnJumpSpecifiedItemListener onJumpSpecifiedItemListener;
+    private RefactoredExpandableAdapter.OnJumpSpecifiedItemListener onJumpSpecifiedItemListener;
 
     private void setJumpSpecifiedItemListener() {
         if (onJumpSpecifiedItemListener == null) {
-            onJumpSpecifiedItemListener = new ExpandableAdapter.OnJumpSpecifiedItemListener() {
+            onJumpSpecifiedItemListener = new RefactoredExpandableAdapter.OnJumpSpecifiedItemListener() {
                 @Override
                 public void onJumpSpecifiedItem(int groupPosition, int childPosition) {
                     clearEditText.setText("");
