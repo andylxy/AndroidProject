@@ -31,6 +31,7 @@ public class SingletonNetData {
     private Map<String, String> yaoAliasDict;
 
     public Map<String, String> getYaoAliasDict() {
+        if (yaoAliasDict == null) yaoAliasDict = new HashMap<String, String>();
         return yaoAliasDict;
     }
 

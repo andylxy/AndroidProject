@@ -671,8 +671,23 @@ public class TipsNetHelper {
     }
 
     private static void copyAliasDictionaries(SingletonNetData target, SingletonNetData source) {
-        target.setYaoAliasDict(new HashMap<>(source.getYaoAliasDict()));
-        target.setFangAliasDict(new HashMap<>(source.getFangAliasDict()));
+        // 安全复制YaoAliasDict，防止null导致的NullPointerException
+        Map<String, String> yaoDict = source.getYaoAliasDict();
+        if (yaoDict != null) {
+            target.setYaoAliasDict(new HashMap<>(yaoDict));
+        } else {
+            target.setYaoAliasDict(new HashMap<String, String>());
+            EasyLog.print("警告: source.getYaoAliasDict() 为 null");
+        }
+        
+        // 安全复制FangAliasDict
+        Map<String, String> fangDict = source.getFangAliasDict();
+        if (fangDict != null) {
+            target.setFangAliasDict(new HashMap<>(fangDict));
+        } else {
+            target.setFangAliasDict(new HashMap<String, String>());
+            EasyLog.print("警告: source.getFangAliasDict() 为 null");
+        }
     }
 
     /**

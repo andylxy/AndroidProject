@@ -17,6 +17,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
+import com.hjq.http.EasyLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,11 +63,16 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
     public RefactoredExpandableAdapter(@NonNull Context context) {
         super(context);
         
+        EasyLog.print("========== RefactoredExpandableAdapter 构造函数 ==========");
+        EasyLog.print("实例创建: " + this);
+        
         // 初始化事件处理器
         this.clickHandler = new ReadModeClickHandler(context, this);
         this.longClickHandler = new ReadModeLongClickHandler(context, this);
         
         this.groupDataList = new ArrayList<>();
+        
+        EasyLog.print("RefactoredExpandableAdapter 初始化完成");
     }
 
     /**
@@ -141,7 +147,12 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
 
     @Override
     public void onBindHeaderViewHolder(BaseViewHolder holder, int groupPosition) {
+        EasyLog.print("=== RefactoredExpandableAdapter.onBindHeaderViewHolder 调用 ===");
+        EasyLog.print("groupPosition: " + groupPosition);
+        
         GroupData groupData = groupDataList.get(groupPosition);
+        
+        EasyLog.print("GroupData: title=" + groupData.getTitle() + ", itemCount=" + groupData.getItemCount());
         
         // 使用ViewHolder封装
         TipsHeaderViewHolder headerVH = ViewHolderFactory.createHeaderViewHolder(holder);
@@ -166,8 +177,13 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
 
     @Override
     public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {
+        EasyLog.print("=== RefactoredExpandableAdapter.onBindChildViewHolder 调用 ===");
+        EasyLog.print("groupPosition: " + groupPosition + ", childPosition: " + childPosition);
+        
         GroupData groupData = groupDataList.get(groupPosition);
         ItemData itemData = groupData.getItem(childPosition);
+        
+        EasyLog.print("ItemData: hasTextSpan=" + itemData.hasTextSpan());
         
         // 使用ViewHolder封装
         TipsChildViewHolder childVH = ViewHolderFactory.createChildViewHolder(holder);

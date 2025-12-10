@@ -11,6 +11,7 @@
 package run.yigou.gxzy.ui.tips.entity;
 
 import android.text.SpannableStringBuilder;
+import android.text.style.ClickableSpan;
 
 import com.hjq.http.EasyLog;
 
@@ -54,11 +55,38 @@ public class ChildEntity {
 
     public synchronized SpannableStringBuilder getAttributed_child_section_text() {
         if (attributed_child_section_text == null) {
+            EasyLog.print("=== ChildEntity.getAttributed_child_section_text() 诊断开始 ===");
+            
             if (child_section_text == null) {
+                EasyLog.print("⚠️ child_section_text 为 null，返回空 SpannableStringBuilder");
                 attributed_child_section_text = new SpannableStringBuilder();
             } else {
+                EasyLog.print("✅ child_section_text 不为空, length: " + child_section_text.length());
+                EasyLog.print("text preview: " + child_section_text.substring(0, Math.min(100, child_section_text.length())));
+                
+                // 调用 renderText 渲染富文本
                 attributed_child_section_text = TipsNetHelper.renderText(child_section_text.trim());
+                
+                EasyLog.print("renderText() 完成, attributed_child_section_text.length: " + attributed_child_section_text.length());
+                
+                // 检查 ClickableSpan
+                ClickableSpan[] spans = attributed_child_section_text.getSpans(0, attributed_child_section_text.length(), ClickableSpan.class);
+                EasyLog.print("ClickableSpan count: " + spans.length);
+                
+                if (spans.length > 0) {
+                    EasyLog.print("✅ renderText 创建了 ClickableSpan！");
+                    for (int i = 0; i < Math.min(spans.length, 3); i++) {
+                        int start = attributed_child_section_text.getSpanStart(spans[i]);
+                        int end = attributed_child_section_text.getSpanEnd(spans[i]);
+                        String clickText = attributed_child_section_text.subSequence(start, end).toString();
+                        EasyLog.print("  Span[" + i + "]: \"" + clickText + "\" (" + start + "-" + end + ")");
+                    }
+                } else {
+                    EasyLog.print("❌ renderText 没有创建 ClickableSpan！");
+                }
             }
+            
+            EasyLog.print("=== ChildEntity.getAttributed_child_section_text() 诊断结束 ===\n");
         }
         return attributed_child_section_text;
     }

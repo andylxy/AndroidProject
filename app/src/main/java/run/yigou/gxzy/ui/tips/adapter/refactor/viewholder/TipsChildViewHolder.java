@@ -10,6 +10,7 @@
 package run.yigou.gxzy.ui.tips.adapter.refactor.viewholder;
 
 import android.text.SpannableStringBuilder;
+import android.text.style.ClickableSpan;
 import android.view.View;
 import android.widget.TextView;
 
@@ -17,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
+import com.hjq.http.EasyLog;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.tips.adapter.refactor.utils.TextViewHelper;
@@ -68,14 +70,44 @@ public class TipsChildViewHolder {
      * @param entity 数据实体
      */
     private void bindText(@NonNull ChildEntity entity) {
+        EasyLog.print("=== TipsChildViewHolder.bindText() 诊断开始 ===");
+        
         SpannableStringBuilder spannableText = entity.getAttributed_child_section_text();
+        
         if (spannableText != null && spannableText.length() > 0) {
+            EasyLog.print("✅ spannableText 不为空, length: " + spannableText.length());
+            
+            // 检查 ClickableSpan 数量
+            ClickableSpan[] spans = spannableText.getSpans(0, spannableText.length(), ClickableSpan.class);
+            EasyLog.print("ClickableSpan count: " + spans.length);
+            
+            if (spans.length > 0) {
+                EasyLog.print("✅ ClickableSpan 存在！");
+                for (int i = 0; i < Math.min(spans.length, 5); i++) {
+                    int start = spannableText.getSpanStart(spans[i]);
+                    int end = spannableText.getSpanEnd(spans[i]);
+                    String clickText = spannableText.subSequence(start, end).toString();
+                    EasyLog.print("  Span[" + i + "]: \"" + clickText + "\" (" + start + "-" + end + ")");
+                }
+            } else {
+                EasyLog.print("❌ 没有 ClickableSpan！");
+            }
+            
             tvText.setText(spannableText);
+            EasyLog.print("setText() 完成");
+            
+            // 验证 MovementMethod
+            EasyLog.print("MovementMethod: " + tvText.getMovementMethod());
         } else if (entity.getChild_section_text() != null) {
+            EasyLog.print("⚠️ spannableText 为空，使用普通文本");
+            EasyLog.print("text: " + entity.getChild_section_text().substring(0, Math.min(50, entity.getChild_section_text().length())));
             tvText.setText(entity.getChild_section_text());
         } else {
+            EasyLog.print("⚠️ 所有文本都为空");
             tvText.setText("");
         }
+        
+        EasyLog.print("=== TipsChildViewHolder.bindText() 诊断结束 ===\n");
     }
 
     /**

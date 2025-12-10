@@ -390,6 +390,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
     private void initializeAdapter() {
         adapter = new RefactoredExpandableAdapter(getContext());
+        EasyLog.print("TipsBookNetReadFragment", "========== 初始化RefactoredExpandableAdapter ==========");
+        EasyLog.print("TipsBookNetReadFragment", "adapter实例: " + adapter);
     }
 
     private boolean isShowUpdateNotification = true;
