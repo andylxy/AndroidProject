@@ -17,10 +17,10 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="-4dp"
             android:layout_alignParentRight="true"
-            android:background="#636060"
+            android:background="#B4B0B0"
             android:gravity="center"
             android:text="搜索"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="16sp"
             tools:ignore="TouchTargetSizeCheck" />
             
@@ -28,7 +28,7 @@
             android:layout_gravity="center_vertical"
             android:orientation="horizontal"
             android:id="@+id/titlebar"
-            android:background="#636060"
+            android:background="#B4B0B0"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:layout_width="wrap_content"
@@ -40,7 +40,7 @@
                 android:id="@+id/et_search_key"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="@dimen/dp_8"
+                android:layout_margin="@dimen/dp_5"
                 android:background="@drawable/corners"
                 android:hint="输入关键词"
                 android:paddingLeft="@dimen/dp_10"
@@ -102,15 +102,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/titlebarwrapper">
-        
+
         <com.hjq.widget.layout.WrapRecyclerView
             android:id="@+id/lv_search_books_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#D3D3D3"
             android:layout_margin="@dimen/dp_2"
-            android:padding="@dimen/dp_2"/>
-            
+            android:background="#D3D3D3"
+            android:padding="@dimen/dp_2" />
+
     </com.donkingliang.groupedadapter.widget.StickyHeaderLayout>
     
     <!-- Simple search result list (used when not grouped?) -->
