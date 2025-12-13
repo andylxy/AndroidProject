@@ -210,6 +210,8 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         TipsNetHelper.setBookContext(repository, bookId);
 
         // 获取章节列表
+
+        // 获取章节列表
         allChapters = repository.getChapters(bookId);
         if (allChapters == null || allChapters.isEmpty()) {
             view.showLoading(false);
