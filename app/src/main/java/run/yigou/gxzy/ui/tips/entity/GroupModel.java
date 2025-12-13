@@ -34,18 +34,22 @@ public class GroupModel {
     public static ArrayList<GroupEntity> getGroups(List<HH2SectionData> showMingCiList, String charSequence, boolean isFang ) {
         EasyLog.print("=== GroupModel.getGroups() 调用 ===");
         EasyLog.print("showMingCiList: " + (showMingCiList != null ? showMingCiList.size() + " items" : "null"));
-        EasyLog.print("charSequence: " + charSequence);
-        EasyLog.print("isFang: " + isFang);
-
         try {
-            // 获取高亮匹配文本
-            SingletonNetData singletonNetData = TipsNetHelper.createSingleDataCopy(showMingCiList);
+            // 获取别名字典
+            run.yigou.gxzy.ui.tips.data.GlobalDataHolder globalData = run.yigou.gxzy.ui.tips.data.GlobalDataHolder.getInstance();
+            java.util.Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
+            java.util.Map<String, String> fangAliasDict = globalData.getFangAliasDict();
 
             // 创建搜索关键字实体
             SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(charSequence));
 
             // 获取过滤后的数据
-            ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity, singletonNetData);
+            ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(
+                    searchKeyEntity, 
+                    showMingCiList, 
+                    yaoAliasDict, 
+                    fangAliasDict
+            );
 
             // 初始化组列表
             ArrayList<GroupEntity> groups = new ArrayList<>();

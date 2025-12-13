@@ -46,10 +46,12 @@ import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
+import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
 import run.yigou.gxzy.utils.StringHelper;
+import run.yigou.gxzy.utils.ThreadUtil;
+import run.yigou.gxzy.greendao.util.ConvertEntity;
+import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 
 /**
  * 作者:  zhs
@@ -80,7 +82,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     private List<SearchHistory> mSearchHistories;
     private WrapRecyclerView mLvSearchBooks;
     private ArrayList<SearchKey> searchKeyTextList = new ArrayList<>();
-    private Map<Integer, SingletonNetData> singleDataMap;
+    // private Map<Integer, SingletonNetData> singleDataMap; // 移除
     private LinearLayoutManager layoutManager;
 
     @Override
@@ -184,7 +186,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         if (!StringHelper.isEmpty(searchKey)) {
             llHistoryView.setVisibility(View.GONE);
             //  setTitle("关键词: " + searchKey);
-            getData();
+            // 放到后台执行
+            startSearch(searchKey);
         }
     }
 
@@ -253,91 +256,104 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         mLvSearchBooks.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
     }
 
-    private void extHandleShangHanData(int bookId) {
-
-        // 默认初始化设置  宋版伤寒,金匮显示
-        // 加载数据处理监听
-        singleDataMap.get(bookId).setOnContentUpdateListener(new SingletonNetData.OnContentUpdateListener() {
-            @Override
-            public ArrayList<HH2SectionData> contentDateUpdate(ArrayList<HH2SectionData> contentList) {
-                if (contentList == null || contentList.isEmpty()) {
-                    return new ArrayList<>();
-                }
-                int size = contentList.size();
-
-                int start = 0;
-                int end = size;
-
-                if (!fragmentSetting.isSong_JinKui()) {
-                    if (!fragmentSetting.isSong_ShangHan()) {
-                        start = 8;
-                        end = Math.min(18, size);
-                    } else {
-                        end = Math.min(26, size);
-                    }
-                } else {
-                    if (!fragmentSetting.isSong_ShangHan()) {
-                        start = 8;
-                    }
-                }
-
-                if (start < size) {
-                    return new ArrayList<>(contentList.subList(start, end));
-                } else {
-                    return contentList;
-                }
-            }
-        });
-
-//        //宋版显示修改通知
-//        singleDataMap.get(bookId).setOnContentShowStatusNotification(new SingletonNetData.OnContentShowStatusNotification() {
-//            @Override
-//            public void contentShowStatusNotification(int status) {
-//                //刷新数据显示
-//                reListAdapter();
-//            }
-//        });
-    }
+    // 移除 extHandleShangHanData: 逻辑移至搜索内部
 
     /**
-     * 获取搜索数据
+     * 开始搜索 (异步)
      */
-    private void getData() {
-        searchKeyTextList.clear();
-        singleDataMap = TipsSingleData.getInstance().getMapBookContent();
-        // 遍历 Map
-        for (Map.Entry<Integer, SingletonNetData> entry : singleDataMap.entrySet()) {
-            Integer key = entry.getKey();
-            SingletonNetData value = entry.getValue();
-            //兼容处理宋版伤寒
-            if (key == AppConst.ShangHanNo)
-                extHandleShangHanData(key);
-            ArrayList<HH2SectionData> filteredData = new ArrayList<>();
-            // 处理键值对
-            // 检查搜索文本是否有效（不为 null、不为空且不是数字）
-            if (searchKey != null && !searchKey.isEmpty() && value != null) {
+    private void startSearch(String keyword) {
+        if (keyword == null || keyword.isEmpty()) {
+            return;
+        }
+
+        ThreadUtil.runInBackground(() -> {
+            searchKeyTextList.clear();
+            
+            // 1. 获取所有书籍信息
+            Map<Integer, TabNavBody> bookMap = GlobalDataHolder.getInstance().getNavTabBodyMap();
+            
+            // 2. 获取全局别名字典
+            GlobalDataHolder globalData = GlobalDataHolder.getInstance();
+            Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
+            Map<String, String> fangAliasDict = globalData.getFangAliasDict();
+            
+            // 3. 遍历书籍
+            for (Map.Entry<Integer, TabNavBody> entry : bookMap.entrySet()) {
+                int bookId = entry.getKey();
+                TabNavBody bookInfo = entry.getValue();
+                
                 try {
-                    SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(searchKey));
-                    List<HH2SectionData> searchResults = TipsNetHelper.getSearchHh2SectionData(searchKeyEntity, value);
-                    if (!searchResults.isEmpty()) {
-                        filteredData.addAll(searchResults);
+                    // 4. 获取书籍内容 (直接从数据库读取，不污染BookDataManager缓存)
+                    List<HH2SectionData> contentList = ConvertEntity.getBookChapterDetailList(bookId);
+                    
+                    if (contentList == null || contentList.isEmpty()) {
+                        continue;
                     }
+                    
+                    // 5. 伤寒论特殊过滤逻辑
+                    if (bookId == AppConst.ShangHanNo) {
+                         contentList = filterShangHanData(contentList);
+                    }
+                    
+                    // 6. 执行搜索
+                    SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(keyword));
+                    ArrayList<HH2SectionData> searchResults = TipsNetHelper.getSearchHh2SectionData(
+                            searchKeyEntity, 
+                            contentList, 
+                            yaoAliasDict, 
+                            fangAliasDict
+                    );
+                    
+                    if (!searchResults.isEmpty()) {
+                        searchKeyTextList.add(new SearchKey(
+                            keyword, 
+                            searchResults.size(), 
+                            bookInfo.getBookName(), 
+                            bookId, 
+                            searchResults
+                        ));
+                    }
+                    
                 } catch (Exception e) {
-                    // 处理异常，例如记录日志或返回默认值
-                    EasyLog.print("Error occurred while fetching search results", e.getMessage());
+                    EasyLog.print("Search error for book " + bookId + ": " + e.getMessage());
                 }
             }
-            if (!filteredData.isEmpty()) {
-                ArrayList<TabNavBody> keys = mTabNavBodyService.find(TabNavBodyDao.Properties.BookNo.eq(key));
-                if (!keys.isEmpty()) {
-                    TabNavBody tabNavBody = keys.get(0);
-                    if (tabNavBody != null)
-                        searchKeyTextList.add(new SearchKey(searchKey, filteredData.size(), tabNavBody.getBookName(), key, filteredData));
-                }
+            
+            // 7. 更新UI
+            ThreadUtil.runOnUiThread(() -> initSearchList());
+        });
+    }
+    
+    /**
+     * 伤寒论特殊过滤逻辑
+     */
+    private ArrayList<HH2SectionData> filterShangHanData(List<HH2SectionData> contentList) {
+        if (contentList == null || contentList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        int size = contentList.size();
+
+        int start = 0;
+        int end = size;
+
+        if (!fragmentSetting.isSong_JinKui()) {
+            if (!fragmentSetting.isSong_ShangHan()) {
+                start = 8;
+                end = Math.min(18, size);
+            } else {
+                end = Math.min(26, size);
+            }
+        } else {
+            if (!fragmentSetting.isSong_ShangHan()) {
+                start = 8;
             }
         }
 
-        initSearchList();
+        if (start < size) {
+            return new ArrayList<>(contentList.subList(start, end));
+        } else {
+            return new ArrayList<>(contentList);
+        }
     }
 
     @Override
@@ -355,8 +371,10 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     private SearchKey currentSearchKey;
 
     private void reListAdapter() {
-        ArrayList<HH2SectionData> singletonNetData = Objects.requireNonNull(singleDataMap.get(currentSearchKey.getBookNo()), "当前搜索对象:" + currentSearchKey.getBookName()).getContent();
-        mSearchBookDetailAdapter.setmGroups(GroupModel.getExpandableGroups(singletonNetData, false));
+        // 直接从 SearchKey 中获取 filteredData, 不再依赖 singleDataMap
+        List<HH2SectionData> resultList = currentSearchKey.getFilteredData();
+        // ArrayList<HH2SectionData> singletonNetData = Objects.requireNonNull(singleDataMap.get(currentSearchKey.getBookNo()), "当前搜索对象:" + currentSearchKey.getBookName()).getContent();
+        mSearchBookDetailAdapter.setmGroups(GroupModel.getExpandableGroups((ArrayList<HH2SectionData>) resultList, false));
 
         mSearchBookDetailAdapter.notifyDataChanged();
 
@@ -373,7 +391,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             lvSearchBooksList.setVisibility(View.VISIBLE);
             mLvSearchBooks.setVisibility(View.GONE);
             currentSearchKey = searchKeyTextList.get(position);
-            ArrayList<ExpandableGroupEntity> sectionData = GroupModel.getExpandableGroups(searchKeyTextList.get(position).getFilteredData(), true);
+            ArrayList<ExpandableGroupEntity> sectionData = GroupModel.getExpandableGroups(searchKeyTextList.get(position).getFilteredData(), false);
             mSearchBookDetailAdapter.setmGroups(sectionData);
             mSearchBookDetailAdapter.notifyDataChanged();
 
@@ -392,12 +410,13 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         }
 
 
-        if (singleDataMap != null && singleDataMap.containsKey(AppConst.ShangHanNo)) {
-            SingletonNetData singleData = singleDataMap.get(AppConst.ShangHanNo);
-            if (singleData != null) {
-                singleData.setOnContentUpdateListener(null);
-            }
-        }
+        // 移除 singleDataMap 清理逻辑，因为已经没有该字段了
+//        if (singleDataMap != null && singleDataMap.containsKey(AppConst.ShangHanNo)) {
+//            SingletonNetData singleData = singleDataMap.get(AppConst.ShangHanNo);
+//            if (singleData != null) {
+//                singleData.setOnContentUpdateListener(null);
+//            }
+//        }
 
     }
 }

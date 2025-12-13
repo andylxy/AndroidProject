@@ -95,7 +95,7 @@ public class RefactoredSearchAdapter extends BaseRefactoredAdapter
         this.groupDataList = DataAdapter.convertList(groups);
         // 搜索模式下默认全部展开
         for (int i = 0; i < groups.size(); i++) {
-            expandStateManager.setExpandState(i, true);
+            expandStateManager.setExpandState(i, groups.get(i).isExpand());
         }
         notifyDataSetChanged();
     }

@@ -87,8 +87,10 @@ public class TipsNetHelper {
     }
 
     public static @NonNull ArrayList<HH2SectionData> getSearchHh2SectionData(SearchKeyEntity searchKeyEntity,
-                                                                             SingletonNetData singletonNetData) {
-        if (singletonNetData.getContent().size() == 1) {
+                                                                             List<HH2SectionData> contentList,
+                                                                             Map<String, String> yaoAliasDict,
+                                                                             Map<String, String> fangAliasDict) {
+        if (contentList.size() == 1) {
             searchKeyEntity.getSearchKeyText().append(",未见");
         }
 
@@ -103,13 +105,9 @@ public class TipsNetHelper {
         }
         ArrayList<HH2SectionData> filteredData = new ArrayList<>(); // 用于保存过滤后的结果
 
-        // 从单例数据中获取必要的映射和列表
-        Map<String, String> yaoAliasDict = singletonNetData.getYaoAliasDict();
-        Map<String, String> fangAliasDict = singletonNetData.getFangAliasDict();
-
         // 遍历数据以进行过滤
         int index = 0;
-        for (HH2SectionData sectionData : singletonNetData.getContent()) {
+        for (HH2SectionData sectionData : contentList) {
             List<DataItem> matchedItems = new ArrayList<>(); // 用于保存当前部分中的匹配项
             boolean sectionHasMatches = false;
 
