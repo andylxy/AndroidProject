@@ -32,7 +32,7 @@ import run.yigou.gxzy.ui.tips.repository.BookRepository;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 
 /**
  * 搜索数据适配器 - 统一处理方剂/药物/名词搜索
@@ -79,8 +79,8 @@ public class SearchDataAdapter {
         }
         
         // 获取别名字典
-        TipsSingleData tipsSingleData = TipsSingleData.getInstance();
-        Map<String, String> fangAliasDict = tipsSingleData.getMapBookContent(bookId).getFangAliasDict();
+        GlobalDataHolder globalData = GlobalDataHolder.getInstance();
+        Map<String, String> fangAliasDict = globalData.getFangAliasDict();
         String aliasName = getAliasName(fangAliasDict, keyword);
         
         EasyLog.print("实际别名: " + aliasName);
@@ -221,12 +221,12 @@ public class SearchDataAdapter {
             return new Pair<>(groupDataList, itemDataList);
         }
         
-        TipsSingleData tipsSingleData = TipsSingleData.getInstance();
-        Map<String, String> yaoAliasDict = tipsSingleData.getMapBookContent(bookId).getYaoAliasDict();
+        GlobalDataHolder globalData = GlobalDataHolder.getInstance();
+        Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
         String aliasName = getAliasName(yaoAliasDict, keyword);
         
         // 添加药物信息
-        Map<String, Yao> yaoMap = tipsSingleData.getYaoMap();
+        Map<String, Yao> yaoMap = globalData.getYaoMap();
         Yao yao = yaoMap != null ? yaoMap.get(aliasName) : null;
         
         if (yao != null) {
@@ -325,8 +325,7 @@ public class SearchDataAdapter {
         List<List<ItemData>> itemDataList = new ArrayList<>();
         
         // 获取名词定义
-        TipsSingleData tipsSingleData = TipsSingleData.getInstance();
-        Map<String, MingCiContent> mingCiContentMap = tipsSingleData.getMingCiContentMap();
+        Map<String, MingCiContent> mingCiContentMap = GlobalDataHolder.getInstance().getMingCiContentMap();
         MingCiContent mingCiContent = mingCiContentMap != null ? mingCiContentMap.get(keyword) : null;
         
         if (mingCiContent != null) {

@@ -4,7 +4,9 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkInfo;
+import android.os.Build;
 
 import androidx.lifecycle.LifecycleOwner;
 
@@ -165,11 +167,20 @@ public final class RequestHandler implements IRequestHandler {
         }
 
         if (e instanceof UnknownHostException) {
-            NetworkInfo info = ((ConnectivityManager) mApplication.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
-            // 判断网络是否连接
-            if (info == null || !info.isConnected()) {
-                // 没有连接就是网络异常
-                return new NetworkException(mApplication.getString(R.string.http_network_error), e);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Network activeNetwork = ((ConnectivityManager) mApplication.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetwork();
+                if (activeNetwork == null || ((ConnectivityManager) mApplication.getSystemService(Context.CONNECTIVITY_SERVICE)).getNetworkCapabilities(activeNetwork) == null) {
+                    // 没有连接就是网络异常
+                    return new NetworkException(mApplication.getString(R.string.http_network_error), e);
+                }
+            } else {
+                // For older versions, use deprecated method but it still works
+                NetworkInfo info = ((ConnectivityManager) mApplication.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+                // 判断网络是否连接
+                if (info == null || !info.isConnected()) {
+                    // 没有连接就是网络异常
+                    return new NetworkException(mApplication.getString(R.string.http_network_error), e);
+                }
             }
 
             // 有连接就是服务器的问题
