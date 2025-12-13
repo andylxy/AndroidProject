@@ -1,123 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_55"
-        android:gravity="center"
-        android:id="@+id/ll_search_key"
-        android:layout_margin="@dimen/dp_5"
+    android:animateLayoutChanges="true">
+    
+    <RelativeLayout
         android:orientation="horizontal"
-        android:paddingLeft="@dimen/dp_5"
-        android:paddingTop="@dimen/dp_3"
-        android:paddingRight="@dimen/dp_5">
-
-        <com.hjq.widget.view.ClearEditText
-            android:id="@+id/et_search_key"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_30"
-            android:layout_marginRight="@dimen/dp_10"
-            android:layout_weight="2"
-            android:background="@drawable/search_et_backcolor"
-            android:hint="输入关键词"
-            android:imeOptions="actionSearch"
-            android:inputType="text"
-            android:paddingLeft="10dp"
-            android:textSize="18sp"
-            tools:ignore="TouchTargetSizeCheck" />
-
+        android:id="@+id/titlebarwrapper"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_44">
+        
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/tv_search_conform"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_30"
-            android:layout_weight="7"
-            android:background="@drawable/search_btn_backcolor"
+            android:layout_width="@dimen/dp_42"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="-4dp"
+            android:layout_alignParentRight="true"
+            android:background="#636060"
             android:gravity="center"
             android:text="搜索"
             android:textColor="@color/white"
             android:textSize="16sp"
             tools:ignore="TouchTargetSizeCheck" />
+            
+        <FrameLayout
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal"
+            android:id="@+id/titlebar"
+            android:background="#636060"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/dp_44"
+            android:layout_toLeftOf="@+id/tv_search_conform"
+            android:layout_alignParentLeft="true">
 
-    </LinearLayout>
-
+            <com.hjq.widget.view.ClearEditText
+                android:id="@+id/et_search_key"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/dp_8"
+                android:background="@drawable/corners"
+                android:hint="输入关键词"
+                android:paddingLeft="@dimen/dp_10"
+                android:paddingRight="@dimen/dp_9"
+                android:singleLine="true"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:textSize="@dimen/sp_15"
+                android:gravity="start|center"
+                tools:ignore="TouchTargetSizeCheck" />
+                
+        </FrameLayout>
+    </RelativeLayout>
+    
+    <!-- History View (Currently uses LinearLayout in Activity, keeping structure compatible) -->
     <LinearLayout
         android:id="@+id/ll_history_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:gravity="center"
+        android:layout_below="@+id/titlebarwrapper"
         android:orientation="vertical"
-        android:padding="@dimen/dp_5"
-        android:visibility="visible">
+        android:visibility="gone">
+        
+        <LinearLayout
+            android:id="@+id/ll_clear_history"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="10dp">
+             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="搜索历史"
+                android:textColor="#333333"
+                android:textSize="14sp" />
+                
+             <View
+                 android:layout_width="0dp"
+                 android:layout_height="0dp"
+                 android:layout_weight="1"/>
+                 
+             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="清除历史"
+                android:textColor="#666666"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <com.hjq.widget.layout.WrapRecyclerView
             android:id="@+id/lv_history_list"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:divider="@color/nothing"
-            android:fadingEdge="none"
-            android:overScrollMode="never"
-            android:scrollbars="none">
-
-        </com.hjq.widget.layout.WrapRecyclerView>
-
-        <LinearLayout
-            android:id="@+id/ll_clear_history"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@mipmap/clear" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="清空历史记录"
-                android:textColor="@color/black"
-                android:textSize="14sp" />
-        </LinearLayout>
-
+            android:layout_height="match_parent" />
+            
     </LinearLayout>
-
-    <com.hjq.widget.layout.WrapRecyclerView
-        android:id="@+id/lv_search_books"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fadingEdge="none"
-        android:overScrollMode="never"
-        android:scrollbars="none">
-    </com.hjq.widget.layout.WrapRecyclerView>
 
     <com.donkingliang.groupedadapter.widget.StickyHeaderLayout
         android:id="@+id/search_books_sticky_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
+        android:layout_height="match_parent"
+        android:layout_below="@+id/titlebarwrapper">
+        
         <com.hjq.widget.layout.WrapRecyclerView
             android:id="@+id/lv_search_books_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="#D3D3D3"
             android:layout_margin="@dimen/dp_2"
-            android:background="#D3D3D3" />
+            android:padding="@dimen/dp_2"/>
+            
     </com.donkingliang.groupedadapter.widget.StickyHeaderLayout>
+    
+    <!-- Simple search result list (used when not grouped?) -->
+    <com.hjq.widget.layout.WrapRecyclerView
+        android:id="@+id/lv_search_books"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/titlebarwrapper"
+        android:visibility="gone"/>
 
-
-    <ProgressBar
-        android:id="@+id/pb_loading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:visibility="gone" />
-
-
-</LinearLayout>
+</RelativeLayout>

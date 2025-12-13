@@ -265,18 +265,19 @@ public class TipsTextRenderer {
     }
     /**
      * 高亮匹配项
-     * 此方法用于在SpannableStringBuilder中查找匹配项，并将它们高亮显示为红色
+     * 此方法用于在SpannableStringBuilder中查找匹配项，并将它们高亮显示（黄色背景）
+     * 保持与 TipsBookNetReadFragment (TextHighlighter) 一致
      *
      * @param matcher   用于查找匹配项的Matcher对象
      * @param spannable 要进行高亮显示的SpannableStringBuilder对象
      */
     public static void highlightMatches(java.util.regex.Matcher matcher, SpannableStringBuilder spannable) {
-        // 定义高亮显示的颜色为红色
-        int color = 0xFFFF0000; // 红色
+        // 定义高亮显示的颜色为黄色 (与 TextHighlighter 一致)
+        int color = 0xFFFFFF00; 
         // 遍历所有匹配项并应用高亮
         while (matcher.find()) {
-            // 设置文本高亮颜色，从匹配项开始位置到结束位置（不包含结束位置）
-            spannable.setSpan(new ForegroundColorSpan(color), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            // 设置文本高亮背景颜色
+            spannable.setSpan(new android.text.style.BackgroundColorSpan(color), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
     }
 }

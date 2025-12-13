@@ -169,7 +169,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     private void init() {
         etSearchKey = findViewById(R.id.et_search_key);
         // 给这个 View 设置沉浸式，避免状态栏遮挡
-        ImmersionBar.setTitleBar(this, findViewById(R.id.ll_search_key));
+        // Updated to use the new titlebarwrapper ID from book_content_search.xml
+        ImmersionBar.setTitleBar(this, findViewById(R.id.titlebarwrapper));
         tvSearchConform = findViewById(R.id.tv_search_conform);
         lvSearchBooksList = findViewById(R.id.lv_search_books_list);
         lvHistoryList = findViewById(R.id.lv_history_list);
