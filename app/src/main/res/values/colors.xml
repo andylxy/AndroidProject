@@ -246,7 +246,7 @@
     <!--    分隔线 -->
     <color name="read_section_divider_line">#60B7E0</color>
     <!--  章节标题背景色  -->
-    <color name="read_section_title_background">#60B7E0</color>
+    <color name="read_section_title_background">#FFFFFF</color>
     <!--   获取到焦点背景色     -->
     <color name="read_cursor_background">#F78029</color>
     <!--   点击原文注解字体颜色     -->
@@ -260,6 +260,6 @@
     <color name="search_res_key_book_font">#797979</color>
 
     <!-- 全局统一风格颜色 (Phase 11) -->
-    <color name="color_title_bar_bg">#636060</color>
+    <color name="color_title_bar_bg">#F4F4F4</color>
     <color name="color_page_bg">#D3D3D3</color>
 </resources>
