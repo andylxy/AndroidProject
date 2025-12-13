@@ -56,7 +56,7 @@ ext {
         case SERVER_TYPE_PRODUCT:
             LOG_ENABLE = false
             BUGLY_ID = "4b99ab25ef"
-            HOST_URL = "https://apictwh.881019.xyz/"
+            HOST_URL = "https://shapi.881019.xyz:8443"
             break
     }
 }

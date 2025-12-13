@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">伤寒杂病论・桂林古本 v1.4</string>
-    <string name="app_name_debug">伤寒杂病论・桂林古本 Debug 版</string>
-    <string name="app_name_preview">伤寒杂病论・桂林古本 Preview 版</string>
+    <string name="app_name">伤寒杂病论・桂本 v1.5</string>
+    <string name="app_name_debug">伤寒杂病论・桂本 Debug 版</string>
+    <string name="app_name_preview">伤寒杂病论・桂本 Preview 版</string>
     <!--    <string name="app_name">知然中医查询</string>-->
 
     <string name="app_name_ai">AI小助手</string>
