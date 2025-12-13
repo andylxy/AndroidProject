@@ -31,9 +31,8 @@ import java.util.ArrayList;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.ui.fragment.TipsBookNetReadFragment;
-import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+
 import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;

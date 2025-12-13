@@ -63,7 +63,7 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.tencent.mmkv.MMKV;
 
 import okhttp3.OkHttpClient;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+
 import run.yigou.gxzy.utils.SerialUtil;
 import timber.log.Timber;
 
@@ -172,7 +172,7 @@ public final class AppApplication extends Application {
     public void onTerminate() {
         super.onTerminate();
         // 释放资源，例如关闭数据库、清理缓存等
-        TipsSingleData.getInstance().onDestroy();
+        // TipsSingleData.getInstance().onDestroy();
         // 注销事件总线
         XEventBus.getDefault().unregister(this);
     }

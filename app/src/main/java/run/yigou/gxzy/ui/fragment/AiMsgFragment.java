@@ -24,7 +24,7 @@ import run.yigou.gxzy.ui.tips.aimsg.AiConfigHelper;
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
 import run.yigou.gxzy.greendao.entity.ChatSessionBean;
 import run.yigou.gxzy.ui.tips.aimsg.AiHelper;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.ui.tips.adapter.ChatHistoryAdapter;

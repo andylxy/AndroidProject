@@ -41,107 +41,14 @@ import run.yigou.gxzy.ui.tips.DataBeans.YaoAlia;
 import run.yigou.gxzy.ui.tips.DataBeans.YaoUse;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+
 import run.yigou.gxzy.Security.SecurityUtils;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 public class ConvertEntity {
 
-    /**
-     * 初始化单个数据的提示信息
-     * 该方法用于从数据库中加载导航信息和相关书籍内容，并将它们存储在内存中以便快速访问
-     */
-    public static void tipsSingleDataInit() {
-        try {
-            // 获取数据库服务实例
-            DbService dbService = DbService.getInstance();
-            // 检查数据库服务和导航服务是否已初始化
-            if (dbService == null || dbService.mTabNavService == null) {
-                return;
-            }
-            // 加载常用药物
-            ArrayList<Yao> yaoData = ConvertEntity.getYaoData();
-            TipsSingleData.getInstance().setYaoData(new HH2SectionData(yaoData, 0, "常用本草药物"));
-            ArrayList<MingCiContent> mingCiContentList = ConvertEntity.getMingCi();
-            // 加载常用名词
-            TipsSingleData.getInstance().setMingCiData(new HH2SectionData(mingCiContentList, 0, "医书相关的名词说明"));
-            // 加载中药别名
-            Map<String, String> yaoAliasDict = TipsSingleData.getInstance().getYaoAliasDict();
-            for (ZhongYaoAlia yaoAlia : getYaoAlia()) {
-                yaoAliasDict.put(yaoAlia.getBieming(), yaoAlia.getName());
-            }
-            // 从数据库中加载所有导航信息
-            ArrayList<TabNav> navList = dbService.mTabNavService.findAll();
-            // 检查导航信息是否已加载
-            if (navList != null && !navList.isEmpty()) {
-                // 获取单例数据对象
-                TipsSingleData tipsSingleData = TipsSingleData.getInstance();
-                // 同步以确保线程安全
-                synchronized (tipsSingleData) {
-                    // 获取导航信息和书籍内容的映射
-                    Map<Integer, TabNav> navTabMap = tipsSingleData.getNavTabMap();
-                    Map<Integer, TabNavBody> navTabBodyMap = tipsSingleData.getNavTabBodyMap();
 
-                    // 遍历导航信息
-                    for (TabNav nav : navList) {
-                        // 将导航信息添加到映射中
-                        navTabMap.put(nav.getOrder(), nav);
-                        // 遍历导航下的书籍信息
-                        for (TabNavBody item : nav.getNavList()) {
-                            // 检查书籍编号是否有效
-                            if (item.getBookNo() > 0) {
-                                // 将书籍信息添加到映射中
-                                navTabBodyMap.put(item.getBookNo(), item);
-                                // 加载书籍内容和方剂数据
-                                loadBookContent(tipsSingleData, item);
-                                loadFangData(tipsSingleData, item);
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            // 记录日志或进行其他异常处理
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 加载书籍内容
-     * 该方法根据书籍编号获取书籍章节信息，并将其存储在内存中
-     *
-     * @param tipsSingleData 单例数据对象，用于存储书籍内容
-     * @param item           导航信息中的书籍项
-     */
-    private static void loadBookContent(TipsSingleData tipsSingleData, TabNavBody item) {
-        // 获取书籍章节列表
-        List<HH2SectionData> bookChapterList = ConvertEntity.getBookChapterDetailList(item.getBookNo());
-        // 检查章节列表是否已加载
-        if (bookChapterList != null && !bookChapterList.isEmpty()) {
-            // 将章节列表存储在内存中
-            tipsSingleData.getMapBookContent(item.getBookNo()).setContent(bookChapterList);
-            tipsSingleData.getMapBookContent(item.getBookNo()).setFangAliasDict(tipsSingleData.getFangAliasDict());
-            tipsSingleData.getMapBookContent(item.getBookNo()).setYaoAliasDict(tipsSingleData.getYaoAliasDict());
-        }
-    }
-
-    /**
-     * 加载方剂数据
-     * 该方法根据书籍编号获取方剂信息，并将其存储在内存中
-     *
-     * @param tipsSingleData 单例数据对象，用于存储方剂数据
-     * @param item           导航信息中的书籍项
-     */
-    private static void loadFangData(TipsSingleData tipsSingleData, TabNavBody item) {
-        // 获取方剂列表
-        ArrayList<Fang> fangList = ConvertEntity.getFangDetailList(item.getBookNo());
-        // 检查方剂列表是否已加载
-        if (!fangList.isEmpty()) {
-            // 将方剂列表存储在内存中
-            tipsSingleData.getMapBookContent(item.getBookNo()).setFang(new HH2SectionData(fangList, 0, item.getBookName() + "方"));
-        }
-    }
 
     public static void saveYaoAlia(List<YaoAlia> yaoAliaList) {
         DbService.getInstance().mYaoAliasService.deleteAll();
@@ -191,8 +98,8 @@ public class ConvertEntity {
                 }
 
                 for (TabNavBody item : nav.getNavList()) {
-                    if (item.getBookNo() > 0)
-                        TipsSingleData.getInstance().getNavTabBodyMap().put(item.getBookNo(), item);
+
+
                     // 当前数据不存则,添加到数据库
                     ArrayList<TabNavBody> list = DbService.getInstance().mTabNavBodyService.find(TabNavBodyDao.Properties.BookNo.eq(item.getBookNo()));
                     if (list == null || list.isEmpty() || list.get(0).getChapterCount() != item.getChapterCount()) {

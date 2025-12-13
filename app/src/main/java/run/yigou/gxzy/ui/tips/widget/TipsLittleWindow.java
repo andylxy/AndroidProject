@@ -22,7 +22,7 @@ import com.hjq.http.EasyLog;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+
 import timber.log.Timber;
 
 /**
@@ -58,6 +58,9 @@ public abstract class TipsLittleWindow extends Fragment {
     protected ViewGroup mGroup;
     protected Rect rect;
     protected View view;
+
+    // 静态窗口栈，替代 TipsSingleData 中的管理
+    public static final java.util.List<TipsLittleWindow> windowStack = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     /**
      * 获取Fragment的标签
@@ -98,7 +101,7 @@ public abstract class TipsLittleWindow extends Fragment {
         transaction.commitAllowingStateLoss();
 
         // 添加到弹窗栈
-        TipsSingleData.getInstance().tipsLittleWindowStack.add(this);
+        windowStack.add(this);
     }
 
     /**
@@ -108,7 +111,7 @@ public abstract class TipsLittleWindow extends Fragment {
      */
     public void dismiss() {
         // 从弹窗栈移除
-        TipsSingleData.getInstance().tipsLittleWindowStack.remove(this);
+        windowStack.remove(this);
 
         // 获取FragmentManager
         FragmentManager fragmentManager = getFragmentManager();

@@ -22,7 +22,7 @@ import java.util.List;
 import com.hjq.http.EasyLog;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
+
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 
 

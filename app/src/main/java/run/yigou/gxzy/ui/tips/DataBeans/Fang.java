@@ -20,7 +20,7 @@ import java.util.Locale;
 
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+
 
 
 public class Fang extends DataItem {
@@ -294,7 +294,7 @@ public class Fang extends DataItem {
     }
 
     public String getStandardYaoName(String str) {
-        String str2 = TipsSingleData.getInstance().getMapBookContent(TipsSingleData.getInstance().getCurBookId()).getYaoAliasDict().get(str);
+        String str2 = run.yigou.gxzy.ui.tips.data.GlobalDataHolder.getInstance().getYaoAliasDict().get(str);
         return str2 == null ? str : str2;
     }
 

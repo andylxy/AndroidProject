@@ -41,7 +41,7 @@ import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 import run.yigou.gxzy.ui.tips.aimsg.AiConfigHelper;
 import run.yigou.gxzy.ui.tips.aimsg.AiHelper;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.Security.SecurityUtils;
 import run.yigou.gxzy.utils.ShareUtil;

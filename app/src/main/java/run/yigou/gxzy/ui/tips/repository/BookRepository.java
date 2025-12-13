@@ -36,7 +36,7 @@ import run.yigou.gxzy.ui.tips.data.DataConverter;
 import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+
 
 /**
  * 书籍数据仓库
@@ -78,7 +78,7 @@ public class BookRepository {
      */
     public TabNavBody getBookInfo(int bookId) {
         try {
-            return TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
+            return globalData.getBookInfo(bookId);
         } catch (Exception e) {
             EasyLog.print("BookRepository", "获取书籍信息失败: " + e.getMessage());
             return null;
