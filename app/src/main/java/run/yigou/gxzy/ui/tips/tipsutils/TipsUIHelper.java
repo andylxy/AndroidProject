@@ -32,6 +32,23 @@ public class TipsUIHelper {
             throw new IllegalArgumentException("textView and clickableSpan cannot be null");
         }
 
+        // 1. 优先尝试获取精确的点击坐标 (修复弹窗位置偏移问题)
+        run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod method = run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod.getInstance();
+        if (method != null) {
+            android.graphics.Point touchPoint = method.getLastTouchPoint();
+            if (touchPoint != null) {
+                // 返还一个以点击点为中心的微小矩形，TipsLittleWindow 会基于此计算偏移
+                return new Rect(
+                        touchPoint.x,
+                        touchPoint.y,
+                        touchPoint.x + 1,
+                        touchPoint.y + 1
+                );
+            }
+        }
+
+        // 2. Fallback 到原有的基于文本布局的计算逻辑
+
         // 初始化矩形
         Rect textRect = new Rect();
         // 获取TextView的文本
