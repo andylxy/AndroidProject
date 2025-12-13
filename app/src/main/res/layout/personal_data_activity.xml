@@ -9,6 +9,8 @@
     <com.hjq.bar.TitleBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/color_title_bar_bg"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:leftIcon="@null"
         app:title="@string/personal_data_title" />
 

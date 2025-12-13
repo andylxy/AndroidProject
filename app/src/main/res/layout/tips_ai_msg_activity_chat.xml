@@ -15,10 +15,11 @@
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_35"
+            android:background="@color/color_title_bar_bg"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:leftIcon="@drawable/switch12832"
             app:rightIcon="@drawable/wx_add_chat_icon"
-            app:title="@string/app_name_ai"
-            android:background="@drawable/enhanced_title_bar_bg" />
+            app:title="@string/app_name_ai" />
 
         <LinearLayout
             android:layout_width="match_parent"
