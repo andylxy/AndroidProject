@@ -34,8 +34,7 @@ import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 
 /**
  * HomeFragment页面下
@@ -62,7 +61,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
     /**
      * 当前点击书本数据
      */
-    SingletonNetData singletonNetData;
+
 
     @Override
     protected int getLayoutId() {
@@ -113,10 +112,14 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
         bookId = mAdapter.getItem(position).getBookNo();
-        singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
-
-        getBookData(bookId);
-
+        
+        // 验证书籍信息是否存在
+        TabNavBody book = GlobalDataHolder.getInstance().getNavTabBodyMap().get(bookId);
+        if (book != null) {
+            startFragmentActivity();
+        } else {
+            toast("书籍信息错误,退出后重新打开!!!!");
+        }
     }
     private void startFragmentActivity() {
         // 获取 Activity 上下文，避免使用 getContext() 引发潜在问题
@@ -139,50 +142,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
 
         });
     }
-    /**
-     * 获取点击项的数据
-     *
-     * @param bookId 获取指定的编号的信息
-     */
-    public void getBookData(int bookId) {
 
-//        //加载书本相关的药方
-        TabNavBody book = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
-        if (book != null) {
-            //加载书本相关的章节
-            getBookChapter(book);
-        } else {
-            toast("书籍信息错误,退出后重新打开!!!!");
-        }
-
-    }
-
-
-
-    private void getBookChapter(TabNavBody book) {
-
-        List<HH2SectionData> detailList = new ArrayList<>();
-        ArrayList<Chapter> list = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(book.getBookNo()));
-
-        for (Chapter chapter : list) {
-
-            HH2SectionData section = null;
-            if (!chapter.getIsDownload()) {
-                section = new HH2SectionData(new ArrayList<>(), chapter.getChapterSection(), chapter.getChapterHeader());
-            } else {
-                // 从数据库中获取数据
-                List<DataItem> dataItem = ConvertEntity.getBookChapterDetailList(chapter);
-                // 创建HH2SectionData对象
-                section = new HH2SectionData(dataItem, chapter.getChapterSection(), chapter.getChapterHeader());
-            }
-            section.setSignatureId(chapter.getSignatureId());
-            detailList.add(section);
-        }
-        //加载书本内容
-        singletonNetData.setContent(detailList);
-        // 启动跳转到阅读窗口
-        startFragmentActivity();
-    }
 
     /**
      * {@link OnRefreshLoadMoreListener}

@@ -18,8 +18,7 @@ import run.yigou.gxzy.common.BookArgs;
 import run.yigou.gxzy.common.FragmentSetting;
 import run.yigou.gxzy.common.ManagerSetting;
 import run.yigou.gxzy.ui.activity.YaoUintActivity;
-import run.yigou.gxzy.ui.tips.tipsutils.SingletonNetData;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+
 
 
 public final class TipsSettingFragment extends AppFragment<AppActivity> implements SwitchButton.OnCheckedChangeListener {
@@ -29,7 +28,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
     private SettingBar sb_setting_yao_uint;
     private SwitchButton sb_setting_sh_switch;
     private SwitchButton sb_setting_jk_switch;
-   // private SingletonNetData singletonNetData;
+
 
     private SettingBar sb_setting_shu_jie;
     private SwitchButton sb_setting_shu_jie_switch;
@@ -82,7 +81,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
             bookId = bookArgs.getBookNo();
         }
 
-        //singletonNetData = TipsSingleData.getInstance().getMapBookContent(bookId);
+
         sb_setting_shu_jie.setLeftText("打开阅读后加入书架");
         // 设置切换按钮的监听
         sb_setting_shu_jie_switch.setOnCheckedChangeListener(this);

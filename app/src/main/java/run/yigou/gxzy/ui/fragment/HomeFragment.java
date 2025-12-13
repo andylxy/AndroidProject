@@ -73,8 +73,8 @@ import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.DataBeans.YaoAlia;
-import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
+import run.yigou.gxzy.app.AppDataInitializer;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.widget.XCollapsingToolbarLayout;
@@ -95,6 +95,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     private TextView mHomeSearchView;
     private ClearEditText mTvHomeSearchText;
     private AppCompatImageView mSearchView;
+    private AppCompatImageView mRefreshView;
     private List<TabNav> bookNavList;
     private RecyclerView mTabView;
     private ViewPager mViewPager;
@@ -174,23 +175,26 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mTvHomeSearchText = findViewById(R.id.tv_home_search_text);
 
         mSearchView = findViewById(R.id.iv_home_search);
+        mRefreshView = findViewById(R.id.iv_home_refresh);
 
         mTabView = findViewById(R.id.rv_home_tab);
         mViewPager = findViewById(R.id.vp_home_pager);
         llHistoryView = findViewById(R.id.include_book_content_search_ll_history_view).findViewById(R.id.ll_history_view);
         lvHistoryList = findViewById(R.id.include_book_content_search_ll_history_view).findViewById(R.id.lv_history_list);
         llClearHistory = findViewById(R.id.include_book_content_search_ll_history_view).findViewById(R.id.ll_clear_history);
+        
+        // 确保使用新的 adapter（避免单例模式下状态不一致）
         mPagerAdapter = new FragmentPagerAdapter<>(this);
+        mTabAdapter = new TabAdapter(getAttachActivity());
 
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.addOnPageChangeListener(this);
-        mTabAdapter = new TabAdapter(getAttachActivity());
         mTabView.setAdapter(mTabAdapter);
         // 给这个 ToolBar 设置顶部内边距，才能和 TitleBar 进行对齐
         ImmersionBar.setTitleBar(getAttachActivity(), mToolbar);
         //设置渐变监听
         mCollapsingToolbarLayout.setOnScrimsListener(this);
-        setOnClickListener(R.id.tv_home_search_text, R.id.iv_home_search);
+        setOnClickListener(R.id.tv_home_search_text, R.id.iv_home_search, R.id.iv_home_refresh);
         //搜索处理
         mTvHomeSearchText.setMaxLines(1);  // 设置最大行数为 1，限制为单行输入
         mTvHomeSearchText.setSingleLine(true);  // 确保只显示一行
@@ -268,15 +272,20 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
     @Override
     protected void initData() {
-        //加载本地数据
-        ConvertEntity.tipsSingleDataInit();
+        // 初始化服务（不再调用 tipsSingleDataInit，由 AppDataInitializer 统一处理）
         mTabNavService = DbService.getInstance().mTabNavService;
-        getBookInfoList();
+        // 优先加载本地数据
+        loadBookNavigation();
         mTabAdapter.setOnTabListener(this);
-        if (isGetYaoData)
-            ThreadUtil.runInBackground((this::getAllYaoData));
-        if (isGetMingCiData)
-            ThreadUtil.runInBackground((this::getAllMingCiData));
+        
+        // 只在本地无药物数据时才从网络获取
+        if (isGetYaoData && GlobalDataHolder.getInstance().getYaoMap().isEmpty()) {
+            ThreadUtil.runInBackground(this::getAllYaoData);
+        }
+        // 只在本地无名词数据时才从网络获取
+        if (isGetMingCiData && GlobalDataHolder.getInstance().getMingCiContentMap().isEmpty()) {
+            ThreadUtil.runInBackground(this::getAllMingCiData);
+        }
         mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
         // 搜索框默认失去焦点
         clearSearchTextFocus();
@@ -358,9 +367,59 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                 searchKey = Objects.requireNonNull(mTvHomeSearchText.getText()).toString();
                 search();
                 break;
+            case R.id.iv_home_refresh:
+                refreshDataFromNetwork();
+                break;
             default:
                 EasyLog.print("onClick value: " + view.getId());
         }
+    }
+
+    /**
+     * 加载导航数据（优先本地）
+     */
+    private void loadBookNavigation() {
+        // 检查本地数据
+        ArrayList<TabNav> localNavList = mTabNavService.findAll();
+        if (localNavList != null && !localNavList.isEmpty()) {
+            // 本地有数据，使用 post 延迟加载（确保 ViewPager 初始化完成，与网络回调行为一致）
+            mViewPager.post(() -> {
+                loadNavFromLocal(localNavList);
+                EasyLog.print("Loaded navigation from local database");
+            });
+        } else {
+            // 本地无数据，从网络获取（这是异步的）
+            getBookInfoList();
+        }
+    }
+
+    /**
+     * 从本地加载导航数据
+     */
+    private void loadNavFromLocal(List<TabNav> navList) {
+        for (TabNav nav : navList) {
+            if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
+                mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
+                mTabAdapter.addItem(nav.getName());
+            }
+        }
+    }
+
+    /**
+     * 手动刷新数据（从网络重新获取）
+     */
+    private void refreshDataFromNetwork() {
+        toast("正在刷新数据...");
+        // 清空现有数据
+        while (mPagerAdapter.getCount() > 0) {
+            mPagerAdapter.removeFragment(0);
+        }
+        mTabAdapter.clearData();
+        // 强制从网络获取
+        getBookInfoList();
+        // 同时刷新药物和名词数据
+        ThreadUtil.runInBackground(this::getAllYaoData);
+        ThreadUtil.runInBackground(this::getAllMingCiData);
     }
 
     private void getBookInfoList() {
@@ -400,7 +459,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     @Override
                     public void onFail(Exception e) {
                         super.onFail(e);
-                        Map<Integer, TabNav> tabNavMap = TipsSingleData.getInstance().getNavTabMap();
+                        Map<Integer, TabNav> tabNavMap = GlobalDataHolder.getInstance().getNavTabMap();
                         if (tabNavMap != null && !tabNavMap.isEmpty()) {
                             // 遍历 Map
                             for (Map.Entry<Integer, TabNav> entry : tabNavMap.entrySet()) {
@@ -427,8 +486,15 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     public void onSucceed(HttpData<List<Yao>> data) {
                         if (data != null && !data.getData().isEmpty()) {
                             List<Yao> detailList = data.getData();
-                            //加载所有药物的数据
-                            TipsSingleData.getInstance().setYaoData(new HH2SectionData(detailList, 0, "常用本草药物"));
+                            //加载所有药物的数据到 GlobalDataHolder
+                            for (Yao yao : detailList) {
+                                GlobalDataHolder.getInstance().putYao(yao.getName(), yao);
+                                if (yao.getYaoList() != null) {
+                                    for (String alias : yao.getYaoList()) {
+                                        GlobalDataHolder.getInstance().putYao(alias, yao);
+                                    }
+                                }
+                            }
                             isGetYaoData = false;
                             //保存内容
                             ThreadUtil.runInBackground(() -> {
@@ -457,7 +523,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             //保存内容
                             ThreadUtil.runInBackground(() -> {
                                 //加载额外的别名的数据
-                                Map<String, String> yaoAliasDict = TipsSingleData.getInstance().getYaoAliasDict();
+                                Map<String, String> yaoAliasDict = GlobalDataHolder.getInstance().getYaoAliasDict();
                                 for (YaoAlia yaoAlia : data.getData()) {
                                     yaoAliasDict.put(yaoAlia.getBieming(), yaoAlia.getName());
                                 }
@@ -487,8 +553,10 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                              public void onSucceed(HttpData<List<MingCiContent>> data) {
                                  if (data != null && !data.getData().isEmpty()) {
                                      List<MingCiContent> detailList = data.getData();
-                                     //加载所有药物的数据
-                                     TipsSingleData.getInstance().setMingCiData(new HH2SectionData(detailList, 0, "医书相关的名词说明"));
+                                     //加载所有名词数据到 GlobalDataHolder
+                                     for (MingCiContent mingCi : detailList) {
+                                         GlobalDataHolder.getInstance().putMingCiContent(mingCi.getName(), mingCi);
+                                     }
                                      isGetMingCiData = false;
                                      //保存内容
                                      ThreadUtil.runInBackground(() -> {
@@ -554,6 +622,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mTvHomeSearchText.setBackgroundResource(shown ? R.drawable.home_search_bar_gray_bg : R.drawable.home_search_bar_transparent_bg);
         mTvHomeSearchText.setTextColor(ContextCompat.getColor(getAttachActivity(), shown ? R.color.black60 : R.color.white60));
         mSearchView.setSupportImageTintList(ColorStateList.valueOf(getColor(shown ? R.color.common_icon_color : R.color.white)));
+        mRefreshView.setSupportImageTintList(ColorStateList.valueOf(getColor(shown ? R.color.common_icon_color : R.color.white)));
     }
 
     @Override

@@ -25,7 +25,7 @@ import run.yigou.gxzy.ui.adapter.NavigationAdapter;
 import run.yigou.gxzy.ui.fragment.TipsBookNetReadFragment;
 import run.yigou.gxzy.ui.fragment.TipsFangYaoFragment;
 import run.yigou.gxzy.ui.fragment.TipsSettingFragment;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 
 public final class TipsFragmentActivity extends AppActivity implements NavigationAdapter.OnNavigationListener {
     private static final String INTENT_KEY_IN_FRAGMENT_INDEX = "fragmentIndex";
@@ -67,7 +67,7 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
         // 禁用 ViewPager2 的用户滑动输入
         mViewPager.setUserInputEnabled(false);
 
-        bookInfo = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
+        bookInfo = GlobalDataHolder.getInstance().getNavTabBodyMap().get(bookId);
         if (bookInfo == null) {
             toast("获取书籍信息错误");
             finish();
@@ -261,13 +261,13 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
         
         // 2. 方药相关（根据书籍类型）
         if (shouldShowFangYaoTabs()) {
-            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(1)); // 方
-            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(2)); // 药
+            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(1, bookId)); // 方
+            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(2, bookId)); // 药
         }
         
         // 3. 单位（仅伤寒类书籍）
         if (bookInfo.getCaseTag() == 5) {
-            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(3)); // 单位
+            mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(3, bookId)); // 单位
         }
         
         // 4. 设置（必有）

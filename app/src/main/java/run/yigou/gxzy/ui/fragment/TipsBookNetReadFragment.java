@@ -58,7 +58,7 @@ import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsSingleData;
+import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 import run.yigou.gxzy.ui.tips.tipsutils.ChapterDownloadManager;
 import run.yigou.gxzy.ui.tips.contract.TipsBookReadContract;
 import run.yigou.gxzy.ui.tips.presenter.TipsBookReadPresenter;
@@ -219,7 +219,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             @Override
             public void handleOnBackPressed() {
                 // 处理自定义逻辑
-                TabNavBody navTabBody = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
+                TabNavBody navTabBody = GlobalDataHolder.getInstance().getNavTabBodyMap().get(bookId);
                 if (navTabBody == null) {
                     return;
                 }
@@ -619,7 +619,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         // ✅ 不再需要初始化别名字典（由 Repository/Presenter 处理）
 
         //加载书本相关的药方
-        TabNavBody book = TipsSingleData.getInstance().getNavTabBodyMap().get(bookId);
+        TabNavBody book = GlobalDataHolder.getInstance().getNavTabBodyMap().get(bookId);
         EasyLog.print("TipsBookNetReadFragment", "book=" + (book != null ? book.getBookName() : "null"));
         
         if (book != null) {

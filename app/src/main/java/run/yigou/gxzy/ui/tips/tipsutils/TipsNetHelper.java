@@ -59,6 +59,11 @@ import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.repository.BookRepository;
+import run.yigou.gxzy.ui.tips.data.BookData;
+import run.yigou.gxzy.ui.tips.data.BookDataManager;
+import run.yigou.gxzy.ui.tips.data.ChapterData;
+import run.yigou.gxzy.ui.tips.data.DataConverter;
+import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 import run.yigou.gxzy.ui.tips.utils.SearchDataAdapter;
 import run.yigou.gxzy.ui.tips.widget.TipsLittleMingCiViewWindow;
 import run.yigou.gxzy.ui.tips.widget.TipsLittleTableViewWindow;
@@ -667,18 +672,11 @@ public class TipsNetHelper {
 
         // 生成一个书本数据实例
         SingletonNetData singletonData = SingletonNetData.getInstance();
+        GlobalDataHolder globalData = GlobalDataHolder.getInstance();
 
-        // 深拷贝当前的书籍的药和药方数据
-        SingletonNetData singletonDataInstance = TipsSingleData.getInstance().getCurSingletonData();
-
-        // 如果当前单例数据实例不为null，则复制别名字典
-        if (singletonDataInstance != null) {
-            copyAliasDictionaries(singletonData, singletonDataInstance);
-            EasyLog.print("实例别名字典复制成功");
-        } else {
-            // 如果当前单例数据实例为null，则打印日志，表示无法设置别名字典
-            EasyLog.print("实例为null，无法设置别名字典");
-        }
+        // 复制别名字典
+        singletonData.setYaoAliasDict(globalData.getYaoAliasDict());
+        // 注意：FangAliasDict 在 GlobalDataHolder 中可能没有直接对应，这里暂时忽略或处理
 
         // 设置新的明词列表内容到单例数据实例中
         singletonData.setContent(mingCiList);
@@ -759,7 +757,7 @@ public class TipsNetHelper {
     public static SpannableStringBuilder getSpanString(String str) {
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
 
-        Map<String, String> yaoAliasDict = TipsSingleData.getInstance().getYaoAliasDict();
+        Map<String, String> yaoAliasDict = GlobalDataHolder.getInstance().getYaoAliasDict();
 
         // 获取药物的别名，若无则保留原名
         String alias = yaoAliasDict.get(str);
@@ -770,10 +768,10 @@ public class TipsNetHelper {
         if (true) {
             // 遍历药物数据
             // 空值检查
-            if (TipsSingleData.getInstance().getYaoMap() == null) {
-                throw new IllegalArgumentException("tipsSingleData or yaoMap is null");
+            if (GlobalDataHolder.getInstance().getYaoMap() == null) {
+                throw new IllegalArgumentException("GlobalDataHolder or yaoMap is null");
             }
-            Map<String, Yao> yaoMap = TipsSingleData.getInstance().getYaoMap();
+            Map<String, Yao> yaoMap = GlobalDataHolder.getInstance().getYaoMap();
             Yao yaoData = yaoMap.get(str);
             if (yaoData == null) {
                 // 处理 yaoData 为 null 的情况
@@ -801,7 +799,21 @@ public class TipsNetHelper {
 
         // 处理方剂数据
         int sectionCount = 0;
-        for (HH2SectionData sectionData : TipsSingleData.getInstance().getCurSingletonData().getFang()) {
+        
+        List<HH2SectionData> fangList = new ArrayList<>();
+        if (sCurrentBookId != -1) {
+            BookData bookData = BookDataManager.getInstance().getBookData(sCurrentBookId);
+            if (bookData != null && bookData.getFangData() != null) {
+                 // 转换 ChapterData 为 HH2SectionData
+                 // 注意：这里需要构造一个临时的 Chapter 对象来配合 DataConverter，或者直接使用 ChapterData 的内容
+                 // 简单起见，我们手动封装，因为 DataConverter.toHH2SectionData 需要 Chapter 对象
+                 ChapterData cd = bookData.getFangData();
+                 HH2SectionData section = new HH2SectionData(cd.getContent(), 0, cd.getTitle());
+                 fangList.add(section);
+            }
+        }
+        
+        for (HH2SectionData sectionData : fangList) {
             SpannableStringBuilder fangBuilder = new SpannableStringBuilder();
 
             // 筛选与药物相关的方剂

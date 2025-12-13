@@ -116,6 +116,8 @@ public final class AppApplication extends Application {
         GsonUtils.setGsonDelegate(new Gson());
         //初始化全局安全管理器
         SecurityUtils.initSecurityManager();
+        // 异步初始化应用数据（必须在 initSdk 之后，因为依赖 EasyLog）
+        run.yigou.gxzy.utils.ThreadUtil.runInBackground(() -> AppDataInitializer.initializeIfNeeded(this));
     }
 
     @Override
