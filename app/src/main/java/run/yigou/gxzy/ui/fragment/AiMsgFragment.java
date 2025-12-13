@@ -10,20 +10,16 @@ import android.widget.Toast;
 import run.yigou.gxzy.EventBus.ChatMessageBeanEvent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.TitleBarFragment;
-import run.yigou.gxzy.greendao.entity.TabNav;
-import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.AiSessionApi;
 import run.yigou.gxzy.http.api.AiSessionIdApi;
-import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.ui.activity.AiConfigActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.tips.adapter.TipsAiChatAdapter;
-import run.yigou.gxzy.ui.tips.aimsg.AiConfigHelper;
+
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
 import run.yigou.gxzy.greendao.entity.ChatSessionBean;
-import run.yigou.gxzy.ui.tips.aimsg.AiHelper;
+
 
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
@@ -31,7 +27,6 @@ import run.yigou.gxzy.ui.tips.adapter.ChatHistoryAdapter;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Intent;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -52,7 +47,6 @@ import com.hjq.bar.OnTitleBarListener;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.EasyLog;
 import com.hjq.http.listener.HttpCallback;
-import com.hjq.toast.ToastUtils;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
 
@@ -60,8 +54,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implements OnTitleBarListener {
@@ -96,8 +88,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     @Override
     protected void initView() {
         Log.d(TAG, "initView: Starting initialization");
-        if (AiConfigHelper.getAssistantName() != null)
-            setTitle(AiConfigHelper.getAssistantName());
         // 初始化状态栏,设置为沉浸式
         getStatusBarConfig().setTitleBar(this, findViewById(R.id.tv_title));
         getStatusBarConfig().setTitleBar(this, findViewById(R.id.side_panel));
@@ -281,12 +271,10 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             if (event.isClear()) {
                 initData();
                 mChatAdapter.notifyDataSetChanged();
-                AiHelper.clearHistory();
+
                 // 重新填充聊天历史记录测试数据
                 populateChatHistoryWithTestData();
             }
-            if (event.isAssistantName())
-                ((TextView) findViewById(R.id.tv_title)).setText(AiConfigHelper.getAssistantName());
         });
     }
 
@@ -461,7 +449,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                         DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
 
                         // 添加收到的消息占位符
-                        final ChatMessageBean receivedMessage = new ChatMessageBean(ChatMessageBean.TYPE_RECEIVED, AiConfigHelper.getAssistantName(), "", "请稍等...");
+                        final ChatMessageBean receivedMessage = new ChatMessageBean(ChatMessageBean.TYPE_RECEIVED, "Ai", "", "请稍等...");
                         receivedMessage.setSessionId(currentSession.getId());
                         receivedMessage.setCreateDate(DateHelper.getSeconds1());
                         receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
@@ -981,7 +969,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
 
         // 添加收到的消息占位符
-        final ChatMessageBean receivedMessage = new ChatMessageBean(ChatMessageBean.TYPE_RECEIVED, AiConfigHelper.getAssistantName(), "", "请稍等...");
+        final ChatMessageBean receivedMessage = new ChatMessageBean(ChatMessageBean.TYPE_RECEIVED,"Ai", "", "请稍等...");
         receivedMessage.setSessionId(currentSession.getId());
         receivedMessage.setCreateDate(DateHelper.getSeconds1());
         receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
