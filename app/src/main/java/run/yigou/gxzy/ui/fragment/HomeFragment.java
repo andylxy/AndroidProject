@@ -54,6 +54,7 @@ import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.greendao.entity.AiConfig;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.entity.TabNav;
+import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.service.SearchHistoryService;
 import run.yigou.gxzy.greendao.service.TabNavService;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
@@ -436,9 +437,24 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             }
 
                             bookNavList = new CopyOnWriteArrayList<>(data.getData());
+                            
+                            // 【修复】同时保存到 GlobalDataHolder
+                            Map<Integer, TabNav> navTabMap = GlobalDataHolder.getInstance().getNavTabMap();
+                            Map<Integer, TabNavBody> navTabBodyMap = GlobalDataHolder.getInstance().getNavTabBodyMap();
+                            int order = 0;
+                            
                             for (TabNav nav : bookNavList) {
                                 // 内容列表存在才添加
                                 if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
+
+                                    // 保存到 GlobalDataHolder
+                                    navTabMap.put(order, nav);
+                                    for (TabNavBody item : nav.getNavList()) {
+                                        if (item.getBookNo() > 0) {
+                                            navTabBodyMap.put(item.getBookNo(), item);
+                                        }
+                                    }
+                                    order++;
 
                                     // 添加到适配器
                                     mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));

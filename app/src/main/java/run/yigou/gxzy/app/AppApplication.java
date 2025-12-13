@@ -57,9 +57,12 @@ import com.hjq.gson.factory.ParseExceptionCallback;
 import com.hjq.http.EasyConfig;
 import com.hjq.http.EasyLog;
 import com.hjq.toast.ToastUtils;
+import com.hjq.umeng.UmengClient;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
+import com.lucas.xbus.XEventBus;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
+import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.mmkv.MMKV;
 
 import okhttp3.OkHttpClient;
@@ -229,7 +232,7 @@ public final class AppApplication extends Application {
         CrashHandler.register(application);
 
         // 友盟统计、登录、分享 SDK
-        // UmengClient.init(application, AppConfig.isLogEnable());
+       //  UmengClient.init(application, AppConfig.isLogEnable());
 
         // Bugly 异常捕捉
         // CrashReport.initCrashReport(application, AppConfig.getBuglyId(), AppConfig.isDebug());

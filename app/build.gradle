@@ -73,6 +73,8 @@ android {
         preview.initWith(debug)
         preview {
             applicationIdSuffix '.preview'
+            // 代码混淆开关
+            minifyEnabled true
             // 添加清单占位符
             addManifestPlaceholders([
                     'app_name': '@string/app_name_preview'

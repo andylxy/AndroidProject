@@ -49,8 +49,8 @@ ext {
 
                 HOST_URL = "https://shapi.881019.xyz:8443"
             } else {
-                HOST_URL = "http://andr.dgxjx.com:9991"
-               // HOST_URL = "https://shapi.881019.xyz:8443"
+               // HOST_URL = "http://andr.dgxjx.com:9991"
+                HOST_URL = "https://shapi.881019.xyz:8443"
             }
             break
         case SERVER_TYPE_PRODUCT:
