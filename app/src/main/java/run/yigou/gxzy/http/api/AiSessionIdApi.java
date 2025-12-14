@@ -15,6 +15,8 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 import com.hjq.http.config.IRequestApi;
 
+import java.io.Serializable;
+
 /**
  *  版本:  1.0
  *  描述: 在和AI对话前要获取sessionId才可以获取AI的答案
@@ -30,7 +32,7 @@ public final class AiSessionIdApi implements IRequestApi {
     public String getMethod() {
         return "GET"; // 或 "POST", "PUT" 等
     }
-    public final static class Bean {
+    public final static class Bean implements Serializable {
         @SerializedName("conversation_id")
         private String conversationIdJson;
         @SerializedName("end_user_id")

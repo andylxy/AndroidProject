@@ -16,6 +16,7 @@ import com.hjq.http.EasyConfig;
 import com.hjq.http.config.IRequestApi;
 import com.hjq.http.config.IRequestClient;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -75,7 +76,7 @@ public final class AiSessionApi implements IRequestApi, IRequestClient {
         return this;
     }
 
-    public final static class Bean {
+    public final static class Bean implements Serializable {
                 //answer
                 // quer
                 //status
