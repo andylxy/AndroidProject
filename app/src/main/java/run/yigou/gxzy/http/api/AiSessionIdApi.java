@@ -101,7 +101,8 @@ public final class AiSessionIdApi implements IRequestApi {
     }
     
     // 嵌套JSON对象的实体类
-    public static class ConversationData {
+    public static class ConversationData  implements Serializable{
+        private static final long serialVersionUID = 189044334L;
         @SerializedName("request_id")
         private String requestId;
         

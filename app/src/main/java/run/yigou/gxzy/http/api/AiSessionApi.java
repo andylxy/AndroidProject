@@ -15,19 +15,23 @@ import androidx.annotation.NonNull;
 import com.hjq.http.EasyConfig;
 import com.hjq.http.config.IRequestApi;
 import com.hjq.http.config.IRequestClient;
+import com.hjq.http.config.IRequestHost;
 
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
+import run.yigou.gxzy.app.AppApplication;
+import run.yigou.gxzy.other.AppConfig;
 
 /**
  * 版本:  1.0
  * 描述: 获取sessionId后通过GetConversation获取AI的答案
  *
  */
-public final class AiSessionApi implements IRequestApi, IRequestClient {
+public final class AiSessionApi implements IRequestApi, IRequestClient, IRequestHost {
 
+    private  String host = "http://aime.881019.xyz:8443/";
     @Override
     public String getApi() {
         return "GetConversation";
@@ -76,10 +80,19 @@ public final class AiSessionApi implements IRequestApi, IRequestClient {
         return this;
     }
 
+    @Override
+    public String getHost() {
+        if(AppApplication.application.global_openness){
+            return host;
+        }
+       return AppConfig.getHostUrl();
+    }
+
     public final static class Bean implements Serializable {
                 //answer
                 // quer
                 //status
+        private static final long serialVersionUID = 19085553L;
         private String answer;
         private String query;
         private boolean status;
