@@ -1,61 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:animateLayoutChanges="true">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true">
+
+    <!-- 搜索栏容器 - include 时 merge 内容会被放到这里 -->
     <RelativeLayout
-        android:orientation="horizontal"
         android:id="@+id/titlebarwrapper"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_44">
-        <Button
-            android:textSize="@dimen/sp_16"
-            android:id="@+id/tips_btn_search"
-            android:background="#B4B0B0"
-            android:layout_width="@dimen/dp_42"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="-4dp"
-            android:textColor="@color/black"
-            android:text="搜索"
-            android:layout_alignParentRight="true"/>
-        <FrameLayout
-            android:layout_gravity="center_vertical"
-            android:orientation="horizontal"
-            android:id="@+id/titlebar"
-            android:background="#B4B0B0"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/dp_44"
-            android:layout_toLeftOf="@+id/tips_btn_search"
-            android:layout_alignParentLeft="true">
+        android:layout_height="@dimen/dp_44"
+        android:orientation="horizontal">
 
-            <com.hjq.widget.view.ClearEditText
-                android:id="@+id/searchEditText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="@dimen/dp_5"
-                android:background="@drawable/corners"
-                android:hint="输入搜索关键字以定位到该条"
-                android:paddingLeft="@dimen/dp_10"
-                android:paddingRight="@dimen/dp_9"
-                android:singleLine="true"
-                android:inputType="text"
-                android:textSize="@dimen/sp_15"
-                android:gravity="start|center"
-                tools:ignore="TouchTargetSizeCheck" />
-            <TextView
-                android:textSize="@dimen/sp_12"
-                android:textColor="#888888"
-                android:gravity="center_vertical"
-                android:layout_gravity="right"
-                android:id="@+id/numTips"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginRight="@dimen/sp_38"
-                android:singleLine="true"/>
-        </FrameLayout>
+        <include layout="@layout/include_search_bar" />
     </RelativeLayout>
 
     <com.donkingliang.groupedadapter.widget.StickyHeaderLayout
@@ -63,14 +20,14 @@ android:animateLayoutChanges="true">
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/titlebarwrapper">
+
         <com.hjq.widget.layout.WrapRecyclerView
             android:id="@+id/tips_book_read_activity_group_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#D3D3D3"
+            android:layout_below="@+id/sticky_layout"
             android:layout_margin="@dimen/dp_2"
-            android:padding="@dimen/dp_2"
-            android:layout_below="@+id/sticky_layout"/>
+            android:background="#D3D3D3"
+            android:padding="@dimen/dp_2" />
     </com.donkingliang.groupedadapter.widget.StickyHeaderLayout>
 </RelativeLayout>
-

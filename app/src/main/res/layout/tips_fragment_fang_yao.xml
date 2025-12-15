@@ -5,66 +5,21 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <!-- 搜索栏容器 - 使用 include 引用可复用搜索栏 -->
     <RelativeLayout
+        android:id="@+id/search_bar_wrapper"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_44"
         android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/tips_btn_search"
-            android:layout_width="@dimen/dp_42"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:layout_marginLeft="-4dp"
-            android:background="#636060"
-            android:text="搜索"
-            android:textColor="#ffffff"
-            android:textSize="@dimen/sp_16" />
-
-        <FrameLayout
-            android:id="@+id/titlebar"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/dp_44"
-            android:layout_alignParentLeft="true"
-            android:layout_gravity="center_vertical"
-            android:layout_toLeftOf="@+id/tips_btn_search"
-            android:background="#636060"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:orientation="horizontal">
-
-            <com.hjq.widget.view.ClearEditText
-                android:id="@+id/searchEditText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="@dimen/dp_8"
-                android:background="@drawable/corners"
-                android:gravity="start|center"
-                android:hint="输入搜索关键字以定位到该条"
-                android:inputType="text"
-                android:paddingLeft="@dimen/dp_10"
-                android:paddingRight="@dimen/dp_9"
-                android:singleLine="true"
-                android:textSize="@dimen/sp_15"
-                tools:ignore="TouchTargetSizeCheck" />
-
-            <TextView
-                android:id="@+id/numTips"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="right"
-                android:layout_marginRight="@dimen/sp_38"
-                android:gravity="center_vertical"
-                android:singleLine="true"
-                android:textColor="#888888"
-                android:textSize="@dimen/sp_12" />
-        </FrameLayout>
+        <include layout="@layout/include_search_bar" />
     </RelativeLayout>
 
     <com.hjq.widget.layout.NestedLinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <com.hjq.widget.layout.WrapRecyclerView
             android:id="@+id/tips_book_fang_yao_list"
             android:layout_width="match_parent"
@@ -72,16 +27,17 @@
             android:layout_margin="@dimen/dp_2"
             android:background="#D3D3D3"
             android:padding="@dimen/dp_2" />
+
         <TextView
             android:id="@+id/ll_no_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_50"
             android:layout_marginLeft="@dimen/dp_100"
+            android:layout_marginTop="@dimen/dp_50"
             android:layout_marginRight="@dimen/dp_100"
-            android:visibility="gone"
-            android:textColor="@color/sys_dialog_setting_word_red"
             android:text="当前无任药方数据"
-            android:textSize="@dimen/sp_16" />
+            android:textColor="@color/sys_dialog_setting_word_red"
+            android:textSize="@dimen/sp_16"
+            android:visibility="gone" />
     </com.hjq.widget.layout.NestedLinearLayout>
 </LinearLayout>

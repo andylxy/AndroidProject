@@ -4,57 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true">
-    
+
+    <!-- 搜索栏容器 - 使用 include 引用可复用搜索栏 -->
     <RelativeLayout
-        android:orientation="horizontal"
         android:id="@+id/titlebarwrapper"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_44">
-        
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/tv_search_conform"
-            android:layout_width="@dimen/dp_42"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="-4dp"
-            android:layout_alignParentRight="true"
-            android:background="#B4B0B0"
-            android:gravity="center"
-            android:text="搜索"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            tools:ignore="TouchTargetSizeCheck" />
-            
-        <FrameLayout
-            android:layout_gravity="center_vertical"
-            android:orientation="horizontal"
-            android:id="@+id/titlebar"
-            android:background="#B4B0B0"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/dp_44"
-            android:layout_toLeftOf="@+id/tv_search_conform"
-            android:layout_alignParentLeft="true">
+        android:layout_height="@dimen/dp_44"
+        android:orientation="horizontal">
 
-            <com.hjq.widget.view.ClearEditText
-                android:id="@+id/et_search_key"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="@dimen/dp_5"
-                android:background="@drawable/corners"
-                android:hint="输入关键词"
-                android:paddingLeft="@dimen/dp_10"
-                android:paddingRight="@dimen/dp_9"
-                android:singleLine="true"
-                android:inputType="text"
-                android:imeOptions="actionSearch"
-                android:textSize="@dimen/sp_15"
-                android:gravity="start|center"
-                tools:ignore="TouchTargetSizeCheck" />
-                
-        </FrameLayout>
+        <include layout="@layout/include_search_bar" />
     </RelativeLayout>
-    
+
     <!-- History View (Currently uses LinearLayout in Activity, keeping structure compatible) -->
     <LinearLayout
         android:id="@+id/ll_history_view"
@@ -63,26 +23,27 @@
         android:layout_below="@+id/titlebarwrapper"
         android:orientation="vertical"
         android:visibility="gone">
-        
+
         <LinearLayout
             android:id="@+id/ll_clear_history"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="10dp">
-             <TextView
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="搜索历史"
                 android:textColor="#333333"
                 android:textSize="14sp" />
-                
-             <View
-                 android:layout_width="0dp"
-                 android:layout_height="0dp"
-                 android:layout_weight="1"/>
-                 
-             <TextView
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="清除历史"
@@ -94,7 +55,7 @@
             android:id="@+id/lv_history_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-            
+
     </LinearLayout>
 
     <com.donkingliang.groupedadapter.widget.StickyHeaderLayout
@@ -112,13 +73,13 @@
             android:padding="@dimen/dp_2" />
 
     </com.donkingliang.groupedadapter.widget.StickyHeaderLayout>
-    
+
     <!-- Simple search result list (used when not grouped?) -->
     <com.hjq.widget.layout.WrapRecyclerView
         android:id="@+id/lv_search_books"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/titlebarwrapper"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
 </RelativeLayout>

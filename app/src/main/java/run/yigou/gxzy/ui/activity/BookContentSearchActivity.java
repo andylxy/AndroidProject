@@ -1,12 +1,12 @@
 package run.yigou.gxzy.ui.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.widget.AppCompatButton;
@@ -24,7 +24,6 @@ import com.hjq.widget.view.ClearEditText;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
@@ -33,25 +32,23 @@ import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.FragmentSetting;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.greendao.gen.TabNavBodyDao;
 import run.yigou.gxzy.greendao.service.SearchHistoryService;
 import run.yigou.gxzy.greendao.service.TabNavBodyService;
+import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.ui.adapter.SearchBookAdapter;
 import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.Search.SearchKey;
 import run.yigou.gxzy.ui.tips.adapter.refactor.RefactoredSearchAdapter;
+import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
-import run.yigou.gxzy.greendao.util.ConvertEntity;
-import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 
 /**
  * 作者:  zhs
@@ -63,7 +60,8 @@ import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
  */
 public final class BookContentSearchActivity extends AppActivity implements BaseAdapter.OnItemClickListener {
     private ClearEditText etSearchKey;
-    private AppCompatButton tvSearchConform;
+    private Button tvSearchConform;
+    private android.widget.TextView numTips; // 搜索结果数量提示
     private WrapRecyclerView lvSearchBooksList;
     private WrapRecyclerView lvHistoryList;
     private LinearLayout llClearHistory;
@@ -139,6 +137,10 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                     lvSearchBooksList.setVisibility(View.GONE);
                     mLvSearchBooks.setVisibility(View.GONE);
                     mSearchBookDetailAdapter.setSearch(false);
+                    // 清空搜索结果数量提示
+                    if (numTips != null) {
+                        numTips.setText("");
+                    }
                 }
 
             }
@@ -167,11 +169,12 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     }
 
     private void init() {
-        etSearchKey = findViewById(R.id.et_search_key);
+        // 使用 include_search_bar 中的 ID
+        etSearchKey = findViewById(R.id.searchEditText);
+        tvSearchConform = findViewById(R.id.tips_btn_search);
+        numTips = findViewById(R.id.numTips);
         // 给这个 View 设置沉浸式，避免状态栏遮挡
-        // Updated to use the new titlebarwrapper ID from book_content_search.xml
         ImmersionBar.setTitleBar(this, findViewById(R.id.titlebarwrapper));
-        tvSearchConform = findViewById(R.id.tv_search_conform);
         lvSearchBooksList = findViewById(R.id.lv_search_books_list);
         lvHistoryList = findViewById(R.id.lv_history_list);
         llClearHistory = findViewById(R.id.ll_clear_history);
@@ -255,6 +258,19 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         mLvSearchBooks.setAdapter(mSearchBookAdapter);
         mLvSearchBooks.setVisibility(View.VISIBLE);
         mLvSearchBooks.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
+        
+        // 更新搜索结果数量提示
+        if (numTips != null) {
+            int totalResults = 0;
+            for (SearchKey key : searchKeyTextList) {
+                totalResults += key.getSearchResTotalNum();
+            }
+            if (totalResults > 0) {
+                numTips.setText(String.format("%d个结果", totalResults));
+            } else {
+                numTips.setText("无结果");
+            }
+        }
     }
 
     // 移除 extHandleShangHanData: 逻辑移至搜索内部

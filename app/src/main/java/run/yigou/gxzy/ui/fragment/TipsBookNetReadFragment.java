@@ -186,9 +186,13 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                 if (charSequenceIsEmpty(text)) {
                     reListAdapter(true, false);
                     numTips.setText("");
-                    adapter.setSearch(false);
+                    if (adapter != null) {
+                        adapter.setSearch(false);
+                    }
                 } else {
-                    adapter.setSearch(true);
+                    if (adapter != null) {
+                        adapter.setSearch(true);
+                    }
                     setSearchText(text);
                 }
             };
