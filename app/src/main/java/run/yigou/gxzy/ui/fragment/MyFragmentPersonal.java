@@ -142,28 +142,61 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
     @SingleClick
     @Override
     public void onClick(View view) {
+        // 处理无需登录的点击事件
+        if (handleNonLoginRequiredActions(view)) {
+            return;
+        }
 
+//        // 检查是否开放功能
+//        if (!AppApplication.application.global_openness) {
+//            toast(AppConst.Key_Window_Tips);
+//            return;
+//        }
+
+        // 检查是否需要登录但未登录
+        if (!AppApplication.application.isLogin && isLoginRequired(view)) {
+            startActivity(LoginActivity.class);
+            return;
+        }
+
+        // 处理需要登录的点击事件
+        handleLoginRequiredActions(view);
+    }
+
+    /**
+     * 处理不需要登录的点击操作
+     *
+     * @param view 被点击的视图
+     * @return 是否已处理该点击事件
+     */
+    private boolean handleNonLoginRequiredActions(View view) {
         if (view == mAboutView) {
-
             startActivity(AboutActivity.class);
-            return;
+            return true;
         } else if (view == mPermissionView) {
-
             XXPermissions.startPermissionActivity(this);
-            return;
+            return true;
         }
-        // 登陆功能后期开放
-        if (!AppApplication.application.global_openness) {
-            toast(AppConst.Key_Window_Tips);
-            return;
-        }else {
-            if (!AppApplication.application.isLogin) {
-                //跳登陆页面
-                startActivity(LoginActivity.class);
-                return;
-            }
-        }
-        // 以下功能需要 请先登录;
+        return false;
+    }
+
+    /**
+     * 判断点击操作是否需要登录
+     *
+     * @param view 被点击的视图
+     * @return 是否需要登录
+     */
+    private boolean isLoginRequired(View view) {
+        return view == mAvatarLayout || view == mAvatarView || view == mNameView || view == mMyLogin ||
+               view == mPersonDataSetting || view == mLoginExit;
+    }
+
+    /**
+     * 处理需要登录的点击操作
+     *
+     * @param view 被点击的视图
+     */
+    private void handleLoginRequiredActions(View view) {
         if (view == mAvatarLayout) {
             ImageSelectActivity.start(getAttachActivity(), data -> {
                 // 裁剪头像
@@ -179,74 +212,29 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
             }
         } else if (view == mNameView) {
             new InputDialog.Builder(getAttachActivity())
-                    // 标题可以不用填写
                     .setTitle(getString(R.string.personal_data_name_hint))
                     .setContent(mNameView.getRightText())
-                    //.setHint(getString(R.string.personal_data_name_hint))
-                    //.setConfirm("确定")
-                    // 设置 null 表示不显示取消按钮
-                    //.setCancel("取消")
-                    // 设置点击按钮后不关闭对话框
-                    //.setAutoDismiss(false)
                     .setListener((dialog, content) -> {
                         if (!mNameView.getRightText().equals(content)) {
                             mNameView.setRightText(content);
                         }
                     })
                     .show();
-        }
-//        else if (view == mAddressView) {
-//            new AddressDialog.Builder(getAttachActivity())
-//                    //.setTitle("选择地区")
-//                    // 设置默认省份
-//                    .setProvince(mProvince)
-//                    // 设置默认城市（必须要先设置默认省份）
-//                    .setCity(mCity)
-//                    // 不选择县级区域
-//                    //.setIgnoreArea()
-//                    .setListener((dialog, province, city, area) -> {
-//                        String address = province + city + area;
-//                        if (!mAddressView.getRightText().equals(address)) {
-//                            mProvince = province;
-//                            mCity = city;
-//                            mArea = area;
-//                            mAddressView.setRightText(address);
-//                        }
-//                    })
-//                    .show();
-//        }
-        else if (view == mPersonDataSetting) {
-
+        } else if (view == mPersonDataSetting) {
             startActivity(SettingActivity.class);
-
         } else if (view == mLoginExit) {
-
-            if (true) {
-
-                DbService.getInstance().mUserInfoService.deleteEntity(AppApplication.application.mUserInfoToken);
-                AppApplication.application.mUserInfoToken = null;
-                AppApplication.application.isLogin = false;
-                // startActivity(LoginActivity.class);
-                HomeActivity.start(getContext(), HomeFragment.class);
-                // 进行内存优化，销毁除登录页之外的所有界面
-                //ActivityManager.getInstance().finishAllActivities(LoginActivity.class);
-                return;
-            }
-
-//            // 退出登录
-//            EasyHttp.post(this)
-//                    .api(new LogoutApi())
-//                    .request(new HttpCallback<HttpData<Void>>(this) {
-//
-//                        @Override
-//                        public void onSucceed(HttpData<Void> data) {
-//                            startActivity(LoginActivity.class);
-//                            // 进行内存优化，销毁除登录页之外的所有界面
-//                            ActivityManager.getInstance().finishAllActivities(LoginActivity.class);
-//                        }
-//                    });
-
+            handleLogout();
         }
+    }
+
+    /**
+     * 处理用户登出逻辑
+     */
+    private void handleLogout() {
+        DbService.getInstance().mUserInfoService.deleteEntity(AppApplication.application.mUserInfoToken);
+        AppApplication.application.mUserInfoToken = null;
+        AppApplication.application.isLogin = false;
+        HomeActivity.start(getContext(), HomeFragment.class);
     }
 
     /**

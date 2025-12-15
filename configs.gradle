@@ -46,8 +46,8 @@ ext {
             LOG_ENABLE = true
             BUGLY_ID = "4b99ab25ef"
             if (serverType == SERVER_TYPE_PREVIEW) {
-                HOST_URL = "http://192.168.2.158:9991"
-               // HOST_URL = "https://shapi.881019.xyz:8443"
+               // HOST_URL = "http://192.168.2.158:9991"
+                HOST_URL = "https://shapi.881019.xyz:8443"
             } else {
                // HOST_URL = "http://192.168.2.158:9991"
                 HOST_URL = "https://shapi.881019.xyz:8443"

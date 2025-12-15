@@ -183,7 +183,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         llHistoryView = findViewById(R.id.include_book_content_search_ll_history_view).findViewById(R.id.ll_history_view);
         lvHistoryList = findViewById(R.id.include_book_content_search_ll_history_view).findViewById(R.id.lv_history_list);
         llClearHistory = findViewById(R.id.include_book_content_search_ll_history_view).findViewById(R.id.ll_clear_history);
-        
+
         // 确保使用新的 adapter（避免单例模式下状态不一致）
         mPagerAdapter = new FragmentPagerAdapter<>(this);
         mTabAdapter = new TabAdapter(getAttachActivity());
@@ -278,7 +278,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         // 优先加载本地数据
         loadBookNavigation();
         mTabAdapter.setOnTabListener(this);
-        
+
         // 只在本地无药物数据时才从网络获取
         if (isGetYaoData && GlobalDataHolder.getInstance().getYaoMap().isEmpty()) {
             ThreadUtil.runInBackground(this::getAllYaoData);
@@ -437,12 +437,12 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             }
 
                             bookNavList = new CopyOnWriteArrayList<>(data.getData());
-                            
+
                             // 【修复】同时保存到 GlobalDataHolder
                             Map<Integer, TabNav> navTabMap = GlobalDataHolder.getInstance().getNavTabMap();
                             Map<Integer, TabNavBody> navTabBodyMap = GlobalDataHolder.getInstance().getNavTabBodyMap();
                             int order = 0;
-                            
+
                             for (TabNav nav : bookNavList) {
                                 // 内容列表存在才添加
                                 if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
@@ -541,7 +541,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             for (YaoAlia yaoAlia : data.getData()) {
                                 yaoAliasDict.put(yaoAlia.getBieming(), yaoAlia.getName());
                             }
-                            
+
                             //保存内容
                             ThreadUtil.runInBackground(() -> {
                                 //保存数据

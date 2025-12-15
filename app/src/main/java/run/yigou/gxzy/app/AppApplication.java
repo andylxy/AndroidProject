@@ -82,10 +82,10 @@ public final class AppApplication extends Application {
 
     public static AppApplication application;
     /**
-     * 是否打开所有页面功能
+     * 是否打开全局搜索页面功能
      */
-    //public boolean global_openness = false;
-    public boolean global_openness = true;
+    public boolean global_openness = false;
+    //public boolean global_openness = true;
 
 
     //登陆信息
