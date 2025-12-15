@@ -157,21 +157,57 @@ public class SearchCoordinator {
     
     /**
      * 将 DataItem 转换为 ItemData (已高亮)
+     * 
+     * 注意：直接使用原始 CharSequence，不要创建新的 SpannableStringBuilder，
+     * 否则会丢失 ClickableSpan！
      */
     private ItemData convertDataItemToItemData(run.yigou.gxzy.ui.tips.tipsutils.DataItem dataItem) {
         ItemData itemData = new ItemData();
         
-        // 直接使用已高亮的文本 (TipsNetHelper 已经处理过)
+        // ✅ 直接使用原始对象，保留 ClickableSpan
+        // 不要使用 new SpannableStringBuilder()，那会丢失 Span！
         if (dataItem.getAttributedText() != null) {
-            itemData.setAttributedText(new android.text.SpannableStringBuilder(dataItem.getAttributedText()));
+            CharSequence text = dataItem.getAttributedText();
+            if (text instanceof android.text.SpannableStringBuilder) {
+                itemData.setAttributedText((android.text.SpannableStringBuilder) text);
+            } else {
+                // 如果不是 SpannableStringBuilder，需要复制并保留 Span
+                android.text.SpannableStringBuilder builder = new android.text.SpannableStringBuilder(text);
+                android.text.TextUtils.copySpansFrom(
+                    (android.text.Spanned) text, 0, text.length(),
+                    null, builder, 0);
+                itemData.setAttributedText(builder);
+            }
         }
         
         if (dataItem.getAttributedNote() != null) {
-            itemData.setAttributedNote(new android.text.SpannableStringBuilder(dataItem.getAttributedNote()));
+            CharSequence note = dataItem.getAttributedNote();
+            if (note instanceof android.text.SpannableStringBuilder) {
+                itemData.setAttributedNote((android.text.SpannableStringBuilder) note);
+            } else if (note instanceof android.text.Spanned) {
+                android.text.SpannableStringBuilder builder = new android.text.SpannableStringBuilder(note);
+                android.text.TextUtils.copySpansFrom(
+                    (android.text.Spanned) note, 0, note.length(),
+                    null, builder, 0);
+                itemData.setAttributedNote(builder);
+            } else {
+                itemData.setAttributedNote(new android.text.SpannableStringBuilder(note));
+            }
         }
         
         if (dataItem.getAttributedSectionVideo() != null) {
-            itemData.setAttributedVideo(new android.text.SpannableStringBuilder(dataItem.getAttributedSectionVideo()));
+            CharSequence video = dataItem.getAttributedSectionVideo();
+            if (video instanceof android.text.SpannableStringBuilder) {
+                itemData.setAttributedVideo((android.text.SpannableStringBuilder) video);
+            } else if (video instanceof android.text.Spanned) {
+                android.text.SpannableStringBuilder builder = new android.text.SpannableStringBuilder(video);
+                android.text.TextUtils.copySpansFrom(
+                    (android.text.Spanned) video, 0, video.length(),
+                    null, builder, 0);
+                itemData.setAttributedVideo(builder);
+            } else {
+                itemData.setAttributedVideo(new android.text.SpannableStringBuilder(video));
+            }
         }
         
         if (dataItem.getImageUrl() != null) {

@@ -164,6 +164,9 @@ public class TipsSearchEngine {
 
     /**
      * 高亮匹配的文本
+     * 
+     * 修复：使用 TipsNetHelper.renderText() 代替 TipsTextRenderer.createSpannable()
+     * 这样可以正确创建 ClickableSpan，支持 LocalLinkMovementMethod 点击
      */
     public static void createSingleDataCopy(DataItem dataItem, Pattern pattern) {
         // 检查模式是否为null，如果是null则直接返回
@@ -171,10 +174,12 @@ public class TipsSearchEngine {
             return;
         }
 
-        // 使用修改后的方法 - 调用 TipsTextRenderer
-        SpannableStringBuilder spannableText = TipsTextRenderer.createSpannable(dataItem.getText());
-        SpannableStringBuilder spannableNote = TipsTextRenderer.createSpannable(dataItem.getNote());
-        SpannableStringBuilder spannableSectionVideo = TipsTextRenderer.createSpannable(dataItem.getSectionvideo());
+        // ✅ 使用 TipsNetHelper.renderText() 代替 TipsTextRenderer.createSpannable()
+        // TipsNetHelper.renderText() 会创建带有 ClickLink 的 SpannableStringBuilder
+        // 这样 ClickableSpan 才能正常工作
+        SpannableStringBuilder spannableText = TipsNetHelper.renderText(dataItem.getText());
+        SpannableStringBuilder spannableNote = TipsNetHelper.renderText(dataItem.getNote());
+        SpannableStringBuilder spannableSectionVideo = TipsNetHelper.renderText(dataItem.getSectionvideo());
 
         // 创建Matcher对象，用于在各个部分中匹配模式
         Matcher matcherText = pattern.matcher(spannableText);

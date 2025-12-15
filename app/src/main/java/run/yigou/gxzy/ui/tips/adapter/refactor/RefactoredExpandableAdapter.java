@@ -91,8 +91,11 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
     /**
      * 设置搜索结果数据（专用于全局搜索）
      * 
-     * @param groupDataList 分组数据列表
-     * @param itemDataList 条目数据列表
+     * 修复: 直接转换为 model.GroupData/ItemData，不经过 ExpandableGroupEntity。
+     * 这样可以保留 ClickableSpan，因为避免了 DataAdapter.convertList 的二次转换。
+     * 
+     * @param groupDataList 分组数据列表 (entity.GroupData)
+     * @param itemDataList 条目数据列表 (entity.ItemData)
      */
     public void setSearchData(
             @NonNull List<run.yigou.gxzy.ui.tips.entity.GroupData> groupDataList,
@@ -102,54 +105,60 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
         EasyLog.print("RefactoredExpandableAdapter", "GroupData数量: " + groupDataList.size());
         EasyLog.print("RefactoredExpandableAdapter", "ItemData列表数量: " + itemDataList.size());
         
-        // 转换为 ExpandableGroupEntity 格式
-        ArrayList<ExpandableGroupEntity> convertedGroups = new ArrayList<>();
+        // ✅ 直接转换为 model.GroupData/model.ItemData (避免经过 ExpandableGroupEntity)
+        List<run.yigou.gxzy.ui.tips.adapter.refactor.model.GroupData> modelGroupList = new ArrayList<>();
+        
         for (int i = 0; i < groupDataList.size() && i < itemDataList.size(); i++) {
             run.yigou.gxzy.ui.tips.entity.GroupData sourceGroup = groupDataList.get(i);
             List<run.yigou.gxzy.ui.tips.entity.ItemData> sourceItems = itemDataList.get(i);
             
-            // 转换 ItemData 为 ChildEntity
-            ArrayList<run.yigou.gxzy.ui.tips.entity.ChildEntity> children = new ArrayList<>();
+            // 转换 entity.ItemData 为 model.ItemData (直接使用 SpannableStringBuilder，保留 ClickableSpan)
+            List<run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemData> modelItems = new ArrayList<>();
             if (sourceItems != null) {
                 for (run.yigou.gxzy.ui.tips.entity.ItemData sourceItem : sourceItems) {
-                    run.yigou.gxzy.ui.tips.entity.ChildEntity child = 
-                        new run.yigou.gxzy.ui.tips.entity.ChildEntity();
+                    // 获取富文本 (已经包含 ClickableSpan)
+                    android.text.SpannableStringBuilder textSpan = sourceItem.getAttributedText();
+                    android.text.SpannableStringBuilder noteSpan = sourceItem.getAttributedNote();
+                    android.text.SpannableStringBuilder videoSpan = sourceItem.getAttributedVideo();
                     
-                    // 复制数据
-                    if (sourceItem.getAttributedText() != null) {
-                        child.setAttributed_child_section_text(sourceItem.getAttributedText());
-                    }
-                    if (sourceItem.getAttributedNote() != null) {
-                        child.setAttributed_child_section_note(sourceItem.getAttributedNote());
-                    }
-                    if (sourceItem.getAttributedVideo() != null) {
-                        child.setAttributed_child_section_video(sourceItem.getAttributedVideo());
-                    }
-                    if (sourceItem.getImageUrl() != null) {
-                        child.setChild_section_image(sourceItem.getImageUrl());
-                    }
-                    child.setGroupPosition(sourceItem.getGroupPosition());
-                    
-                    children.add(child);
+                    // 创建 model.ItemData
+                    run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemData modelItem = 
+                        new run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemData(
+                            textSpan != null ? textSpan.toString() : "",  // text
+                            noteSpan != null ? noteSpan.toString() : null, // note
+                            videoSpan != null ? videoSpan.toString() : null, // videoUrl
+                            sourceItem.getImageUrl(),  // imageUrl
+                            textSpan,   // textSpan (保留 ClickableSpan!)
+                            noteSpan,   // noteSpan (保留 ClickableSpan!)
+                            videoSpan   // videoSpan (保留 ClickableSpan!)
+                        );
+                    modelItems.add(modelItem);
                 }
             }
             
-            // 创建 ExpandableGroupEntity
-            ExpandableGroupEntity groupEntity = new ExpandableGroupEntity(
-                sourceGroup.getTitle(),  // header
-                null,  // spannableHeader
-                "",  // footer
-                sourceGroup.isExpanded(),  // isExpand - 使用 GroupData 的状态，搜索结果默认折叠
-                children
-            );
-            
-            convertedGroups.add(groupEntity);
+            // 创建 model.GroupData
+            run.yigou.gxzy.ui.tips.adapter.refactor.model.GroupData modelGroup = 
+                new run.yigou.gxzy.ui.tips.adapter.refactor.model.GroupData(
+                    sourceGroup.getTitle(),
+                    modelItems
+                );
+            modelGroupList.add(modelGroup);
         }
         
-        // 使用现有的 setGroups 方法
-        setGroups(convertedGroups);
+        // ✅ 直接设置 groupDataList，不经过 setGroups
+        this.groupDataList = new ArrayList<>(modelGroupList);
         
-        EasyLog.print("RefactoredExpandableAdapter", "✅ 搜索结果数据设置完成");
+        // 同步展开状态 (默认收起)
+        expandStateManager.reset();
+        for (int i = 0; i < modelGroupList.size(); i++) {
+            // 使用 entity.GroupData 的展开状态
+            boolean isExpanded = i < groupDataList.size() && groupDataList.get(i).isExpanded();
+            expandStateManager.setExpandState(i, isExpanded);
+        }
+        
+        notifyDataSetChanged();
+        
+        EasyLog.print("RefactoredExpandableAdapter", "✅ 搜索结果数据设置完成 (直接路径)");
     }
     
     /**
