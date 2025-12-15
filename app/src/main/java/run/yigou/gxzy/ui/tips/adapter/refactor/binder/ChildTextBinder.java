@@ -10,6 +10,8 @@
 package run.yigou.gxzy.ui.tips.adapter.refactor.binder;
 
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.ClickableSpan;
 import android.view.View;
 
@@ -194,6 +196,10 @@ public class ChildTextBinder implements DataBinder<ChildEntity, TipsChildViewHol
         // 绑定笺注
         if (data.hasNoteSpan()) {
             viewHolder.getNoteView().setText(data.getNoteSpan());
+            // Fix: 如果有高亮关键字，强制显示
+            if (hasHighlight(data.getNoteSpan())) {
+                viewHolder.getNoteView().setVisibility(View.VISIBLE);
+            }
         } else if (data.hasNote()) {
             viewHolder.getNoteView().setText(data.getNote());
         }
@@ -201,6 +207,10 @@ public class ChildTextBinder implements DataBinder<ChildEntity, TipsChildViewHol
         // 绑定视频
         if (data.hasVideoSpan()) {
             viewHolder.getVideoView().setText(data.getVideoSpan());
+            // Fix: 如果有高亮关键字，强制显示
+            if (hasHighlight(data.getVideoSpan())) {
+                viewHolder.getVideoView().setVisibility(View.VISIBLE);
+            }
         } else if (data.hasVideo()) {
             viewHolder.getVideoView().setText(data.getVideoUrl());
         }
@@ -224,5 +234,19 @@ public class ChildTextBinder implements DataBinder<ChildEntity, TipsChildViewHol
                 }
             );
         }
+    }
+
+
+    /**
+     * 检查是否包含高亮Span
+     * 用于在搜索模式下自动展开包含关键字的隐藏字段
+     */
+    private boolean hasHighlight(CharSequence text) {
+        if (text instanceof Spanned) {
+            Spanned spanned = (Spanned) text;
+            Object[] spans = spanned.getSpans(0, spanned.length(), BackgroundColorSpan.class);
+            return spans != null && spans.length > 0;
+        }
+        return false;
     }
 }

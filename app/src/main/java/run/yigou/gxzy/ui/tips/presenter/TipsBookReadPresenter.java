@@ -15,6 +15,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.ComponentCallbacks2;
+import android.text.SpannableStringBuilder;
+
+import run.yigou.gxzy.ui.tips.utils.SearchMatcher;
+import run.yigou.gxzy.ui.tips.utils.TextHighlighter;
+
+import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
+import run.yigou.gxzy.ui.tips.data.DataConverter; // Kept existing
+
+import run.yigou.gxzy.app.AppApplication;
+import run.yigou.gxzy.common.FragmentSetting;
 
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.greendao.entity.Book;
@@ -24,18 +35,15 @@ import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.ui.tips.contract.TipsBookReadContract;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupModel;
-import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.data.BookData;
 import run.yigou.gxzy.ui.tips.data.BookDataManager;
 import run.yigou.gxzy.ui.tips.data.ChapterData;
 import run.yigou.gxzy.ui.tips.data.ChapterIndexBuilder;
-import run.yigou.gxzy.ui.tips.data.DataConverter;
 import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 import run.yigou.gxzy.ui.tips.repository.BookRepository;
 import run.yigou.gxzy.ui.tips.tipsutils.ChapterDownloadManager;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 
 /**
  * TipsBookRead Presenter 实现
@@ -478,6 +486,10 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         }
     }
 
+    // ==================== 注释掉未使用的搜索方法 ====================
+    // 说明: TipsBookNetReadFragment 实际使用 SearchCoordinator.searchGlobal
+    // 此方法从未被调用，保留代码以备参考
+    /*
     @Override
     public void search(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
@@ -490,69 +502,111 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         try {
             long startTime = System.currentTimeMillis();
             
-            // 优化：优先使用索引搜索（新方法，性能提升 10 倍）
-            if (indexBuilder != null && currentBookData != null) {
-                EasyLog.print("TipsBookReadPresenter", "使用索引搜索: " + keyword);
-                
-                // 使用索引搜索
-                List<Chapter> searchResults = indexBuilder.search(keyword);
-                
-                long searchTime = System.currentTimeMillis() - startTime;
-                EasyLog.print("TipsBookReadPresenter", "索引搜索完成: " + searchResults.size() + 
-                    " 个结果, 耗时 " + searchTime + "ms");
-                
-                // 转换为显示格式
-                ArrayList<HH2SectionData> filteredData = convertChaptersToSectionData(searchResults);
-                
-                // 转换为显示格式
-                ArrayList<ExpandableGroupEntity> groups = GroupModel.getExpandableGroups(filteredData, true);
-                
-                if (isViewActive()) {
-                    view.showSearchResults(groups, searchResults.size());
-                }
-                
-            } else {
-                // 降级：使用简单搜索方法
-                EasyLog.print("TipsBookReadPresenter", "使用简单搜索方法: " + keyword);
-                
-                ArrayList<HH2SectionData> filteredData = new ArrayList<>();
-                int matchCount = 0;
-                
-                for (Chapter chapter : allChapters) {
-                    if (chapter.getChapterHeader() != null && 
-                        chapter.getChapterHeader().contains(keyword)) {
-                        ChapterData chapterData = currentBookData.findChapterBySignature(
-                            chapter.getSignatureId());
-                        filteredData.add(DataConverter.toHH2SectionData(chapterData, chapter));
-                        matchCount++;
-                    }
-                }
-
-                // 转换为显示格式
-                ArrayList<ExpandableGroupEntity> groups = GroupModel.getExpandableGroups(filteredData, true);
-
-                if (isViewActive()) {
-                    view.showSearchResults(groups, matchCount);
-                }
-                
-                long searchTime = System.currentTimeMillis() - startTime;
-                EasyLog.print("TipsBookReadPresenter", "简单搜索完成, 耗时 " + searchTime + "ms");
+            EasyLog.print("TipsBookReadPresenter", "开始严格搜索(TipsNetHelper): " + keyword);
+            
+            // 1. 准备搜索关键字
+            SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(keyword));
+            
+            // 2. 从数据库获取整本书所有章节内容 (与 BookContentSearchActivity 一致)
+            // 使用 ConvertEntity 而非 DataConverter，确保搜索范围覆盖整本书
+            List<HH2SectionData> allContent = ConvertEntity.getBookChapterDetailList(currentBookId);
+            
+            // 2.1 针对伤寒论进行特殊过滤 (与 BookContentSearchActivity 逻辑保持一致)
+            if (currentBookId == AppConst.ShangHanNo) {
+                 allContent = filterShangHanData(allContent);
             }
+            
+            // 3. 获取全书别名映射（用于增强搜索）
+            run.yigou.gxzy.ui.tips.data.GlobalDataHolder globalData = run.yigou.gxzy.ui.tips.data.GlobalDataHolder.getInstance();
+            java.util.Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
+            java.util.Map<String, String> fangAliasDict = globalData.getFangAliasDict();
+            
+            // 4. 调用核心搜索方法 (Delegation to TipsNetHelper -> TipsSearchEngine)
+            // 该方法支持正则、多关键字、别名匹配和高亮生成
+            ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(
+                searchKeyEntity, 
+                allContent, 
+                yaoAliasDict, 
+                fangAliasDict
+            );
+
+            // 5. 转换为显示格式
+            // 注意：isExpand 参数设为 false (默认折叠，与用户要求一致)
+            ArrayList<ExpandableGroupEntity> groups = GroupModel.getExpandableGroups(filteredData, false);
+
+            int totalMatchCount = searchKeyEntity.getSearchResTotalNum();
+            if (isViewActive()) {
+                view.showSearchResults(groups, totalMatchCount);
+            }
+            
+            long searchTime = System.currentTimeMillis() - startTime;
+            EasyLog.print("TipsBookReadPresenter", "搜索完成: " + totalMatchCount + 
+                " 个匹配项, 耗时 " + searchTime + "ms");
 
         } catch (Exception e) {
             view.showError("搜索失败: " + e.getMessage());
             EasyLog.print("TipsBookReadPresenter", "搜索异常: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
+    private List<HH2SectionData> filterShangHanData(List<HH2SectionData> contentList) {
+        if (contentList == null || contentList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        FragmentSetting fragmentSetting = AppApplication.getApplication().fragmentSetting;
+        if (fragmentSetting == null) {
+            return contentList;
+        }
+
+        int size = contentList.size();
+
+        int start = 0;
+        int end = size;
+
+        if (!fragmentSetting.isSong_JinKui()) {
+            if (!fragmentSetting.isSong_ShangHan()) {
+                start = 8;
+                end = Math.min(18, size);
+            } else {
+                end = Math.min(26, size);
+            }
+        } else {
+            if (!fragmentSetting.isSong_ShangHan()) {
+                start = 8;
+            }
+        }
+
+        if (start < size) {
+            return new ArrayList<>(contentList.subList(start, end));
+        } else {
+            return new ArrayList<>(contentList);
+        }
+    }
+    */
+    
+    // 空实现：搜索逻辑已移至 SearchCoordinator
+    @Override
+    public void search(String keyword) {
+        // 搜索由 SearchCoordinator.searchGlobal 处理
+        // 此方法保留以满足接口契约
+        EasyLog.print("TipsBookReadPresenter", "search() 已弃用，使用 SearchCoordinator");
+    }
+
+    // ==================== 以下接口方法未被 Fragment 调用，保留空实现 ====================
+    
     @Override
     public void clearSearch() {
-        isSearchMode = false;
-        displayChapterList();
+        // 未使用：搜索由 SearchCoordinator 处理
+        // isSearchMode = false;
+        // displayChapterList();
     }
 
     @Override
     public void onBackPressed(boolean shouldSave) {
+        // 未使用：返回键逻辑由 Fragment 直接处理
+        /*
         if (!isViewActive()) {
             return;
         }
@@ -587,20 +641,24 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         } catch (Exception e) {
             EasyLog.print("TipsBookReadPresenter", "保存阅读进度失败: " + e.getMessage());
         }
+        */
     }
 
     @Override
     public void onSettingChanged() {
-        // 设置变更时刷新数据
-        refreshData();
+        // 未使用：设置变更由 Fragment 的 EventBus 处理
+        // refreshData();
     }
 
     @Override
     public void onJumpToPosition(int groupPosition, int childPosition) {
+        // 未使用：跳转逻辑由 Fragment 直接处理
+        /*
         if (isViewActive()) {
             view.scrollToPosition(groupPosition);
             view.expandChapter(groupPosition);
         }
+        */
     }
 
     // ==================== 私有辅助方法 ====================

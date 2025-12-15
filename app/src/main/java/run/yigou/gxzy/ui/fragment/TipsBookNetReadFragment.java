@@ -415,18 +415,55 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             @Override
             public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
                                       int groupPosition) {
+                // UI 操作：始终允许折叠/展开
                 RefactoredExpandableAdapter expandableAdapter = (RefactoredExpandableAdapter) adapter;
                 if (expandableAdapter.isExpand(groupPosition)) {
                     expandableAdapter.collapseGroup(groupPosition);
                 } else {
                     expandableAdapter.expandGroup(groupPosition);
                 }
-                // 记录当前点击位置,0则表示没有点击,或者点击了第一章.
-                if (isShowBookCollect)
-                    currentIndex = groupPosition;
 
-                // ✅ 智能下载：按需下载 + 预加载
-                triggerChapterDownload(groupPosition);
+                // 核心逻辑：获取真实索引并触发下载
+                // Fix: 搜索模式下 groupPosition 是过滤后的索引，需映射回 chapterList 的真实索引
+                int realIndex = groupPosition;
+                boolean isSearchMode = searchText != null && searchText.length() > 0;
+
+                if (isSearchMode) {
+                    try {
+                        // 获取当前显示的 Group Entity
+                        // 注意：getmGroups() 返回的是当前 Adapter 持有的数据源（可能是过滤后的）
+                        if (groupPosition >= 0 && groupPosition < expandableAdapter.getmGroups().size()) {
+                            ExpandableGroupEntity group = expandableAdapter.getmGroups().get(groupPosition);
+                            if (group != null) {
+                                String headerTitle = group.getHeader();
+                                int foundIndex = findChapterIndexByTitle(headerTitle);
+                                if (foundIndex != -1) {
+                                    realIndex = foundIndex;
+                                    EasyLog.print("TipsBookNetReadFragment", "Search mapped: UI pos " + groupPosition + " -> Real pos " + realIndex);
+                                } else {
+                                    EasyLog.print("TipsBookNetReadFragment", "Search mode: Title not found for mapping: " + headerTitle);
+                                    // 没找到对应章节，不触发后续逻辑以防错乱
+                                    return;
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        EasyLog.print("TipsBookNetReadFragment", "Search index mapping error: " + e.getMessage());
+                    }
+                }
+                
+                // 记录当前点击位置 (使用真实索引)
+                if (isShowBookCollect)
+                    currentIndex = realIndex;
+
+                // ✅ 搜索模式下：只允许展开/收起，不触发下载逻辑（防止数据被覆盖）
+                if (isSearchMode) {
+                    EasyLog.print("TipsBookNetReadFragment", "搜索模式：跳过章节下载，仅展开/收起");
+                    return;
+                }
+
+                // ✅ 非搜索模式：智能下载 + 预加载 (使用真实索引)
+                triggerChapterDownload(realIndex);
 
             }
 
@@ -525,6 +562,27 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
     }
 
     /**
+     * 根据章节标题查找真实索引
+     * 用于搜索模式下将 UI 索引映射回原始数据索引
+     *
+     * @param title 章节标题
+     * @return 真实索引，未找到返回 -1
+     */
+    private int findChapterIndexByTitle(String title) {
+        if (chapterList == null || title == null) {
+            return -1;
+        }
+        for (int i = 0; i < chapterList.size(); i++) {
+            Chapter chapter = chapterList.get(i);
+            // 比对标题，注意处理 null
+            if (chapter != null && title.equals(chapter.getChapterHeader())) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
      * 触发章节智能下载
      * 
      * 流程：
@@ -549,12 +607,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         }
     }
 
-    /**
-     * 根据 signatureId 查找章节对象
-     * 
-     * @param signatureId 章节签名 ID
-     * @return 章节对象，未找到返回 null
-     */
+    // ==================== 以下方法未使用，已注释 ====================
+    /*
     private Chapter findChapterBySignatureId(long signatureId) {
         if (chapterList == null || chapterList.isEmpty()) {
             return null;
@@ -567,6 +621,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         }
         return null;
     }
+    */
 
     /**
      * 更新章节内容到 UI
@@ -860,6 +915,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         }
     }
 
+    // 未使用：Fragment 通过 Activity 生命周期管理启动，不需要此静态方法
+    /*
     public static void start(Context context) {
         Intent intent = new Intent(context, TipsBookNetReadFragment.class);
         if (!(context instanceof Activity)) {
@@ -867,6 +924,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         }
         context.startActivity(intent);
     }
+    */
 
     // ==================== MVP View 接口实现 ====================
 

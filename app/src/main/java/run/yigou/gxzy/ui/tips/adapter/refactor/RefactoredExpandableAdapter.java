@@ -139,7 +139,7 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
                 sourceGroup.getTitle(),  // header
                 null,  // spannableHeader
                 "",  // footer
-                true,  // isExpand - 搜索结果默认展开
+                sourceGroup.isExpanded(),  // isExpand - 使用 GroupData 的状态，搜索结果默认折叠
                 children
             );
             
