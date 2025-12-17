@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 解决 Android P 禁用 http 请求的问题 -->
 <network-security-config>
-    <!-- 允许明文通信 -->
-    <base-config cleartextTrafficPermitted="true" />
+    <!-- 默认配置 - 信任系统证书 -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    
+    <!-- 开发环境 - 信任 aime.881019.xyz 的所有证书（包括自签名证书） -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">aime.881019.xyz</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
 </network-security-config>

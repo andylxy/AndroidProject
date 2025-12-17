@@ -510,7 +510,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                     }
                                                     receivedMessage.setContent(currentContent + (chunk.getContent() != null ? chunk.getContent() : ""));
                                                     
-                                                    // 更新 UI
+                                                    // 更新 UI（不更新数据库）
                                                     if (scrollState == 0 && index % 3 == 0) {
                                                         mChatAdapter.updateData();
                                                         rv_chat.scrollBy(0, 15);
@@ -1077,7 +1077,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                     }
                                     receivedMessage.setContent(currentContent + (chunk.getContent() != null ? chunk.getContent() : ""));
                                     
-                                    // 更新 UI
+                                    // 更新 UI（不更新数据库）
                                     if (scrollState == 0 && index % 3 == 0) {
                                         mChatAdapter.updateData();
                                         rv_chat.scrollBy(0, 15);
