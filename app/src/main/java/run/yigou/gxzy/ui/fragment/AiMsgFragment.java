@@ -190,6 +190,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 设置 RecyclerView 的动画时长
         //rv_chat.getItemAnimator().setChangeDuration(0);
         rv_chat.setItemAnimator(null); // 禁用动画
+        rv_chat.setNestedScrollingEnabled(false); // 禁用嵌套滚动，让内部 ScrollView 可以滚动
         // 设置 RecyclerView 的布局管理器和适配器
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         rv_chat.setLayoutManager(layoutManager);
@@ -430,10 +431,14 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
      * 读取最后选中的会话ID
      */
     private Long getLastSessionId() {
-        if (getContext() == null) return null;
+        if (getContext() == null) {
+            Log.w(TAG, "getLastSessionId: Context is null");
+            return null;
+        }
         
         SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         long sessionId = prefs.getLong(KEY_LAST_SESSION_ID, -1L);
+        Log.d(TAG, "getLastSessionId: Read session ID from SharedPreferences: " + sessionId);
         return sessionId > 0 ? sessionId : null;
     }
 
@@ -521,6 +526,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
      */
     private void initMsgs() {
         Log.d(TAG, "initMsgs: Initializing messages");
+        
+        // 加载会话列表并恢复上次选中的会话
+        populateChatHistoryWithTestData();
 
         Button chat_send = findViewById(R.id.chat_send);
         chat_send.setOnClickListener(new View.OnClickListener() {
@@ -685,15 +693,19 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                     if (answerMessageRef[0] != null) {
                                                         String current = answerMessageRef[0].getContent();
                                                         answerMessageRef[0].setContent(current + (chunk.getContent() != null ? chunk.getContent() : ""));
+                                                        index++;
                                                         
-                                                        // 刷新回答消息 UI - 使用局部刷新避免闪烁
-                                                        int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
-                                                        if (answerPos != -1) {
-                                                            mChatAdapter.notifyItemChanged(answerPos);
+                                                        // 刷新回答消息 UI - 降低刷新频率避免闪烁
+                                                        // 每 3 个字符刷新一次，或者内容较短时每次都刷新
+                                                        if (index % 3 == 0 || answerMessageRef[0].getContent().length() < 50) {
+                                                            int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
+                                                            if (answerPos != -1) {
+                                                                mChatAdapter.notifyItemChanged(answerPos);
+                                                            }
                                                             
-                                                            // 自动滚动 - 只在用户未手动滚动时触发
+                                                            // 自动滚动 - 使用 scrollBy 实现打字机效果
                                                             if (scrollState == 0) {
-                                                                rv_chat.smoothScrollToPosition(mChatAdapter.getData().size() - 1);
+                                                                rv_chat.scrollBy(0, 30); // 增量滚动
                                                             }
                                                         }
                                                     }
@@ -809,16 +821,58 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             currentSession.setId(sessionId);
             Log.d(TAG, "Saved new session to database with ID: " + sessionId);
 
+            // 保存当前会话ID到 SharedPreferences（确保下次不会被覆盖）
+            saveLastSessionId(sessionId);
+
             // 更新标题栏标题
             if (getTitleBar() != null) {
                 getTitleBar().setTitle(currentSession.getTitle());
             }
 
-            // 会话保存到数据库后，重新加载侧边栏数据
-            populateChatHistoryWithTestData();
+            // 会话保存到数据库后，只刷新侧边栏UI（不重新加载会话数据）
+            refreshChatHistorySidebar();
         } else {
             Log.d(TAG, "Session already exists in database with ID: " + currentSession.getId());
         }
+    }
+    
+    /**
+     * 只刷新聊天历史侧边栏UI，不重新加载会话数据
+     */
+    private void refreshChatHistorySidebar() {
+        List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
+        
+        // 按更新时间倒序排序
+        sessions.sort((s1, s2) -> {
+            String time1 = s1.getUpdateTime() != null ? s1.getUpdateTime() : "";
+            String time2 = s2.getUpdateTime() != null ? s2.getUpdateTime() : "";
+            return time2.compareTo(time1);
+        });
+        
+        List<ChatHistoryAdapter.ChatHistoryItem> historyItems = new ArrayList<>();
+        int currentSessionPosition = 0;
+        
+        for (int i = 0; i < sessions.size(); i++) {
+            ChatSessionBean session = sessions.get(i);
+            List<ChatMessageBean> messages = session.getMessages();
+            String messageCount = messages.size() + " 条消息";
+
+            historyItems.add(new ChatHistoryAdapter.ChatHistoryItem(
+                    session.getTitle(),
+                    session.getPreview(),
+                    session.getUpdateTime().substring(0, 10),
+                    messageCount));
+            
+            // 找到当前会话的位置
+            if (currentSession != null && session.getId().equals(currentSession.getId())) {
+                currentSessionPosition = i;
+            }
+        }
+
+        // 更新适配器数据
+        chatHistoryAdapter.setData(historyItems);
+        chatHistoryAdapter.setSelectedPosition(currentSessionPosition);
+        Log.d(TAG, "Refreshed sidebar, current session at position: " + currentSessionPosition);
     }
 
     /**
@@ -990,15 +1044,14 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             //初始化聊天会话数据
             // 加载历史会话历史记录
             populateChatHistoryWithTestData();
-        }
-        if (sessions.isEmpty()) {
-            // 没有会话数据时不加载任何内容，保持界面空白
-            Log.d(TAG, "No session data found in database, not loading any content");
+        } else {
+            // 没有会话数据时，创建新会话
+            Log.d(TAG, "No session data found in database, creating new session");
             // 清空侧边栏
             chatHistoryAdapter.setData(new ArrayList<ChatHistoryAdapter.ChatHistoryItem>());
-            // 显示默认空内容
+            // 创建新会话
+            handleAddNewSession();
         }
-        handleAddNewSession();
         Log.d(TAG, "initData: Completed data initialization");
     }
 
@@ -1324,15 +1377,18 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                     if (answerMessageRef[0] != null) {
                                         String current = answerMessageRef[0].getContent();
                                         answerMessageRef[0].setContent(current + (chunk.getContent() != null ? chunk.getContent() : ""));
+                                        index++;
                                         
-                                        // 刷新回答消息 UI - 使用局部刷新避免闪烁
-                                        int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
-                                        if (answerPos != -1) {
-                                            mChatAdapter.notifyItemChanged(answerPos);
+                                        // 刷新回答消息 UI - 降低刷新频率避免闪烁
+                                        if (index % 3 == 0 || answerMessageRef[0].getContent().length() < 50) {
+                                            int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
+                                            if (answerPos != -1) {
+                                                mChatAdapter.notifyItemChanged(answerPos);
+                                            }
                                             
-                                            // 自动滚动 - 只在用户未手动滚动时触发
+                                            // 自动滚动 - 使用 scrollBy 实现打字机效果
                                             if (scrollState == 0) {
-                                                rv_chat.smoothScrollToPosition(mChatAdapter.getData().size() - 1);
+                                                rv_chat.scrollBy(0, 30);
                                             }
                                         }
                                     }

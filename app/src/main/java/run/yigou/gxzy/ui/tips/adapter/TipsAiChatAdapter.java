@@ -156,7 +156,9 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     TextView tv_thinking_content = findViewById(R.id.tv_thinking_content);
                     android.view.View ll_thinking_header = findViewById(R.id.ll_thinking_header);
                     TextView tv_thinking_arrow = findViewById(R.id.tv_thinking_arrow);
-                    androidx.core.widget.NestedScrollView sv_thinking_content = findViewById(R.id.sv_thinking_content);
+                    // 使用自定义的 InterceptableScrollView
+                    run.yigou.gxzy.widget.InterceptableScrollView sv_thinking_content = findViewById(R.id.sv_thinking_content);
+                    android.view.View v_separator = findViewById(R.id.v_separator);
                     
                     if (markwon != null && tv_thinking_content != null && bean.getContent() != null) {
                         markwon.setMarkdown(tv_thinking_content, bean.getContent());
@@ -166,15 +168,19 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     if (sv_thinking_content != null && tv_thinking_arrow != null) {
                         if (bean.isThinkingCollapsed()) {
                             sv_thinking_content.setVisibility(android.view.View.GONE);
+                            if (v_separator != null) v_separator.setVisibility(android.view.View.GONE);
                             tv_thinking_arrow.setRotation(-90); // 旋转箭头表示折叠
                         } else {
                             sv_thinking_content.setVisibility(android.view.View.VISIBLE);
+                            if (v_separator != null) v_separator.setVisibility(android.view.View.VISIBLE);
                             tv_thinking_arrow.setRotation(0); // 默认箭头向下
 
-                            // 如果正在生成思考内容（通常是最后一条消息），尝试滚动到底部
-                            // 通过检查是否是列表的最后一个位置来简化判断(或者交由 Fragment 控制)
-                            // 这里做一个通用的自动滚动: 当内容更新时, ScrollView 滚动到底部
-                            sv_thinking_content.post(() -> sv_thinking_content.fullScroll(android.view.View.FOCUS_DOWN));
+                            // 只在最后一个位置（正在生成时）自动滚动到底部
+                            if (position == getItemCount() - 1 || position == getItemCount() - 2) {
+                                sv_thinking_content.post(() -> {
+                                    sv_thinking_content.fullScroll(android.view.View.FOCUS_DOWN);
+                                });
+                            }
                         }
                     }
                     
