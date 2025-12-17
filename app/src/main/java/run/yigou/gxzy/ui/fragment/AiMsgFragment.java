@@ -452,18 +452,23 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                         currentSession.setUpdateTime(DateHelper.getSeconds1());
                         DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
 
-                        // 添加收到的消息占位符
-                        final ChatMessageBean receivedMessage = new ChatMessageBean(ChatMessageBean.TYPE_RECEIVED, "Ai", "", "请稍等...");
-                        receivedMessage.setSessionId(currentSession.getId());
-                        receivedMessage.setCreateDate(DateHelper.getSeconds1());
-                        receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-                        // 先保存占位符消息到数据库
-                        long receivedMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(receivedMessage);
-                        receivedMessage.setId(receivedMsgId);
-                        mChatAdapter.addItem(receivedMessage);
-                        Log.d(TAG, "Saved placeholder received message to database with ID: " + receivedMsgId);
+                        // 1. 先创建并添加 "思考中" 消息
+                        final ChatMessageBean thinkingMessage = new ChatMessageBean(ChatMessageBean.TYPE_THINKING, "Ai", "", "正在思考...");
+                        thinkingMessage.setSessionId(currentSession.getId());
+                        thinkingMessage.setCreateDate(DateHelper.getSeconds1());
+                        thinkingMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+                        
+                        // 保存思考消息到数据库
+                        long thinkingMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(thinkingMessage);
+                        thinkingMessage.setId(thinkingMsgId);
+                        mChatAdapter.addItem(thinkingMessage);
+                        Log.d(TAG, "Added thinking message with ID: " + thinkingMsgId);
 
-                        // 滚动到最后一条消息
+                        // 准备 "回答" 消息的引用（初始为空，等到有回答时再创建）
+                        final ChatMessageBean[] answerMessageRef = {null};
+                        final boolean[] isThinkingPhase = {true}; // 标记当前是否处于思考阶段
+
+                        // 滚动到最后
                         if (rv_chat != null) {
                             rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
                             rv_chat.clearOnScrollListeners();
@@ -494,34 +499,89 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                             return;
                                         }
                                         
-                                        LogUtils.d(TAG, "SSE 数据块: type=" + chunk.getType() + 
-                                                ", content length=" + (chunk.getContent() != null ? chunk.getContent().length() : 0));
+                                        // LogUtils.d(TAG, "SSE 数据块: type=" + chunk.getType());
                                         
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                // 根据类型处理不同的数据块
-                                                if ("chunk".equals(chunk.getType()) || "answer".equals(chunk.getType())) {
-                                                    // 累加内容到 receivedMessage
-                                                    String currentContent = receivedMessage.getContent();
-                                                    if ("请稍等...".equals(currentContent)) {
-                                                        // 第一次接收数据，清空占位符
+                                                // 判断是否是思考过程
+                                                boolean isThinkingChunk = "thinking".equals(chunk.getType()) || chunk.isThinking();
+                                                
+                                                if (isThinkingChunk) {
+                                                    // === 处理思考过程 ===
+                                                    String currentContent = thinkingMessage.getContent();
+                                                    if ("正在思考...".equals(currentContent)) {
                                                         currentContent = "";
                                                     }
-                                                    receivedMessage.setContent(currentContent + (chunk.getContent() != null ? chunk.getContent() : ""));
+                                                    thinkingMessage.setContent(currentContent + (chunk.getContent() != null ? chunk.getContent() : ""));
                                                     
-                                                    // 更新 UI（不更新数据库）
-                                                    if (scrollState == 0 && index % 3 == 0) {
-                                                        mChatAdapter.updateData();
-                                                        rv_chat.scrollBy(0, 15);
+                                                    // 刷新思考消息 UI
+                                                    // 找到 adapter 中的位置并刷新
+                                                    int pos = mChatAdapter.getData().indexOf(thinkingMessage);
+                                                    if (pos != -1) {
+                                                        mChatAdapter.notifyItemChanged(pos); // 局部刷新
                                                     }
-                                                    index++;
+                                                    
+                                                    // 自动滚动
+                                                    if (scrollState == 0) {
+                                                        rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                                                    }
+                                                    
+                                                } else if ("chunk".equals(chunk.getType()) || "answer".equals(chunk.getType())) {
+                                                    // === 处理正式回答 ===
+                                                    
+                                                    // 如果是第一次从思考切换到回答
+                                                    if (isThinkingPhase[0]) {
+                                                        isThinkingPhase[0] = false;
+                                                        
+                                                        // 1. 折叠思考消息
+                                                        thinkingMessage.setThinkingCollapsed(true);
+                                                        int thinkPos = mChatAdapter.getData().indexOf(thinkingMessage);
+                                                        if (thinkPos != -1) {
+                                                            mChatAdapter.notifyItemChanged(thinkPos);
+                                                        }
+                                                        // 更新数据库中的思考消息（保存完整思考过程）
+                                                        DbService.getInstance().mChatMessageBeanService.updateEntity(thinkingMessage);
+                                                        
+                                                        // 2. 创建正式回答消息
+                                                        ChatMessageBean answerMsg = new ChatMessageBean(ChatMessageBean.TYPE_RECEIVED, "Ai", "", "");
+                                                        answerMsg.setSessionId(currentSession.getId());
+                                                        answerMsg.setCreateDate(DateHelper.getSeconds1());
+                                                        answerMsg.setIsDelete(ChatMessageBean.IS_Delete_NO);
+                                                        
+                                                        long answerId = DbService.getInstance().mChatMessageBeanService.addEntity(answerMsg);
+                                                        answerMsg.setId(answerId);
+                                                        answerMessageRef[0] = answerMsg;
+                                                        
+                                                        mChatAdapter.addItem(answerMsg);
+                                                    }
+                                                    
+                                                    // 追加回答内容
+                                                    if (answerMessageRef[0] != null) {
+                                                        String current = answerMessageRef[0].getContent();
+                                                        answerMessageRef[0].setContent(current + (chunk.getContent() != null ? chunk.getContent() : ""));
+                                                        
+                                                        // 刷新回答消息 UI
+                                                        // 优化：每收到几个字刷新一次，或者直接刷新
+                                                        if (index % 3 == 0) { // 简单限频
+                                                            mChatAdapter.updateData();
+                                                            if (scrollState == 0) {
+                                                                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                                                            }
+                                                        }
+                                                        index++;
+                                                    }
                                                     
                                                 } else if ("error".equals(chunk.getType())) {
                                                     // 错误处理
                                                     LogUtils.e(TAG, "SSE 错误: " + chunk.getError());
-                                                    receivedMessage.setContent("请求失败: " + chunk.getError());
-                                                    mChatAdapter.updateData();
+                                                    if (answerMessageRef[0] != null) {
+                                                        answerMessageRef[0].setContent(answerMessageRef[0].getContent() + "\n[错误: " + chunk.getError() + "]");
+                                                        mChatAdapter.updateData();
+                                                    } else {
+                                                        thinkingMessage.setContent(thinkingMessage.getContent() + "\n[错误: " + chunk.getError() + "]");
+                                                        mChatAdapter.notifyDataSetChanged();
+                                                    }
                                                 }
                                             }
                                         });
@@ -533,23 +593,30 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                // 最终更新 UI
+                                                // 最终刷新
                                                 mChatAdapter.updateData();
                                                 
-                                                // 保存最终消息到数据库
-                                                receivedMessage.setCreateDate(DateHelper.getSeconds1());
-                                                receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-                                                DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
-                                                LogUtils.d(TAG, "已保存完整的 AI 回复到数据库，ID: " + receivedMessage.getId());
-                                                
-                                                // 更新会话预览
-                                                String preview = receivedMessage.getContent();
-                                                if (preview.length() > 30) {
-                                                    preview = preview.substring(0, 30) + "...";
+                                                // 保存最终回答到数据库
+                                                if (answerMessageRef[0] != null) {
+                                                    answerMessageRef[0].setCreateDate(DateHelper.getSeconds1());
+                                                    DbService.getInstance().mChatMessageBeanService.updateEntity(answerMessageRef[0]);
+                                                    
+                                                    // 更新会话预览
+                                                    String preview = answerMessageRef[0].getContent();
+                                                    if (preview.length() > 30) {
+                                                        preview = preview.substring(0, 30) + "...";
+                                                    }
+                                                    currentSession.setPreview("AI: " + preview);
+                                                    currentSession.setUpdateTime(DateHelper.getSeconds1());
+                                                    DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
+                                                } else {
+                                                    // 如果没有回答（可能只有思考或出错了），更新思考消息
+                                                    DbService.getInstance().mChatMessageBeanService.updateEntity(thinkingMessage);
                                                 }
-                                                currentSession.setPreview("AI: " + preview);
-                                                currentSession.setUpdateTime(DateHelper.getSeconds1());
-                                                DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
+                                                // 强制折叠思考
+                                                thinkingMessage.setThinkingCollapsed(true);
+                                                int thinkPos = mChatAdapter.getData().indexOf(thinkingMessage);
+                                                if (thinkPos != -1) mChatAdapter.notifyItemChanged(thinkPos);
                                             }
                                         });
                                     }
@@ -560,11 +627,15 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                receivedMessage.setContent("网络请求失败: " + e.getMessage());
+                                                String errStr = "网络请求失败: " + e.getMessage();
+                                                if (answerMessageRef[0] != null) {
+                                                    answerMessageRef[0].setContent(answerMessageRef[0].getContent() + "\n" + errStr);
+                                                    DbService.getInstance().mChatMessageBeanService.updateEntity(answerMessageRef[0]);
+                                                } else {
+                                                    thinkingMessage.setContent(thinkingMessage.getContent() + "\n" + errStr);
+                                                    DbService.getInstance().mChatMessageBeanService.updateEntity(thinkingMessage);
+                                                }
                                                 mChatAdapter.updateData();
-                                                
-                                                // 保存错误消息到数据库
-                                                DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
                                             }
                                         });
                                     }
@@ -1019,16 +1090,21 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         currentSession.setUpdateTime(DateHelper.getSeconds1());
         DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
 
-        // 添加收到的消息占位符
-        final ChatMessageBean receivedMessage = new ChatMessageBean(ChatMessageBean.TYPE_RECEIVED,"Ai", "", "请稍等...");
-        receivedMessage.setSessionId(currentSession.getId());
-        receivedMessage.setCreateDate(DateHelper.getSeconds1());
-        receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-        // 先保存占位符消息到数据库
-        long receivedMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(receivedMessage);
-        receivedMessage.setId(receivedMsgId);
-        mChatAdapter.addItem(receivedMessage);
-        Log.d(TAG, "Saved placeholder received message to database with ID: " + receivedMsgId);
+        // 1. 先创建并添加 "思考中" 消息
+        final ChatMessageBean thinkingMessage = new ChatMessageBean(ChatMessageBean.TYPE_THINKING, "Ai", "", "正在思考...");
+        thinkingMessage.setSessionId(currentSession.getId());
+        thinkingMessage.setCreateDate(DateHelper.getSeconds1());
+        thinkingMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+        
+        // 保存思考消息到数据库
+        long thinkingMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(thinkingMessage);
+        thinkingMessage.setId(thinkingMsgId);
+        mChatAdapter.addItem(thinkingMessage);
+        Log.d(TAG, "Added thinking message with ID: " + thinkingMsgId);
+
+        // 准备 "回答" 消息的引用（初始为空，等到有回答时再创建）
+        final ChatMessageBean[] answerMessageRef = {null};
+        final boolean[] isThinkingPhase = {true}; // 标记当前是否处于思考阶段
 
         // 滚动到最后一条消息
         if (rv_chat != null) {
@@ -1067,28 +1143,82 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                // 根据类型处理不同的数据块
-                                if ("chunk".equals(chunk.getType()) || "answer".equals(chunk.getType())) {
-                                    // 累加内容到 receivedMessage
-                                    String currentContent = receivedMessage.getContent();
-                                    if ("请稍等...".equals(currentContent)) {
-                                        // 第一次接收数据，清空占位符
+                                // 判断是否是思考过程
+                                boolean isThinkingChunk = "thinking".equals(chunk.getType()) || chunk.isThinking();
+                                
+                                if (isThinkingChunk) {
+                                    // === 处理思考过程 ===
+                                    String currentContent = thinkingMessage.getContent();
+                                    if ("正在思考...".equals(currentContent)) {
                                         currentContent = "";
                                     }
-                                    receivedMessage.setContent(currentContent + (chunk.getContent() != null ? chunk.getContent() : ""));
+                                    thinkingMessage.setContent(currentContent + (chunk.getContent() != null ? chunk.getContent() : ""));
                                     
-                                    // 更新 UI（不更新数据库）
-                                    if (scrollState == 0 && index % 3 == 0) {
-                                        mChatAdapter.updateData();
-                                        rv_chat.scrollBy(0, 15);
+                                    // 刷新思考消息 UI
+                                    int pos = mChatAdapter.getData().indexOf(thinkingMessage);
+                                    if (pos != -1) {
+                                        mChatAdapter.notifyItemChanged(pos); // 局部刷新
                                     }
-                                    index++;
+                                    
+                                    // 自动滚动
+                                    if (scrollState == 0) {
+                                        rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                                    }
+                                    
+                                } else if ("chunk".equals(chunk.getType()) || "answer".equals(chunk.getType())) {
+                                    // === 处理正式回答 ===
+                                    
+                                    // 如果是第一次从思考切换到回答
+                                    if (isThinkingPhase[0]) {
+                                        isThinkingPhase[0] = false;
+                                        
+                                        // 1. 折叠思考消息
+                                        thinkingMessage.setThinkingCollapsed(true);
+                                        int thinkPos = mChatAdapter.getData().indexOf(thinkingMessage);
+                                        if (thinkPos != -1) {
+                                            mChatAdapter.notifyItemChanged(thinkPos);
+                                        }
+                                        // 更新数据库中的思考消息
+                                        DbService.getInstance().mChatMessageBeanService.updateEntity(thinkingMessage);
+                                        
+                                        // 2. 创建正式回答消息
+                                        ChatMessageBean answerMsg = new ChatMessageBean(ChatMessageBean.TYPE_RECEIVED, "Ai", "", "");
+                                        answerMsg.setSessionId(currentSession.getId());
+                                        answerMsg.setCreateDate(DateHelper.getSeconds1());
+                                        answerMsg.setIsDelete(ChatMessageBean.IS_Delete_NO);
+                                        
+                                        long answerId = DbService.getInstance().mChatMessageBeanService.addEntity(answerMsg);
+                                        answerMsg.setId(answerId);
+                                        answerMessageRef[0] = answerMsg;
+                                        
+                                        mChatAdapter.addItem(answerMsg);
+                                    }
+                                    
+                                    // 追加回答内容
+                                    if (answerMessageRef[0] != null) {
+                                        String current = answerMessageRef[0].getContent();
+                                        answerMessageRef[0].setContent(current + (chunk.getContent() != null ? chunk.getContent() : ""));
+                                        
+                                        // 刷新回答消息 UI
+                                        if (index % 3 == 0) { 
+                                            mChatAdapter.updateData();
+                                            if (scrollState == 0) {
+                                                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                                            }
+                                        }
+                                        index++;
+                                    }
                                     
                                 } else if ("error".equals(chunk.getType())) {
                                     // 错误处理
                                     LogUtils.e(TAG, "SSE 错误: " + chunk.getError());
-                                    receivedMessage.setContent("请求失败: " + chunk.getError());
-                                    mChatAdapter.updateData();
+                                    if (answerMessageRef[0] != null) {
+                                        answerMessageRef[0].setContent(answerMessageRef[0].getContent() + "\n[错误: " + chunk.getError() + "]");
+                                        mChatAdapter.updateData();
+                                    } else {
+                                        thinkingMessage.setContent(thinkingMessage.getContent() + "\n[错误: " + chunk.getError() + "]");
+                                        mChatAdapter.notifyDataSetChanged();
+                                    }
                                 }
                             }
                         });
@@ -1103,20 +1233,27 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                 // 最终更新 UI
                                 mChatAdapter.updateData();
                                 
-                                // 保存最终消息到数据库
-                                receivedMessage.setCreateDate(DateHelper.getSeconds1());
-                                receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-                                DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
-                                LogUtils.d(TAG, "已保存完整的 AI 回复到数据库，ID: " + receivedMessage.getId());
-                                
-                                // 更新会话预览
-                                String preview = receivedMessage.getContent();
-                                if (preview.length() > 30) {
-                                    preview = preview.substring(0, 30) + "...";
+                                // 保存最终回答到数据库
+                                if (answerMessageRef[0] != null) {
+                                    answerMessageRef[0].setCreateDate(DateHelper.getSeconds1());
+                                    DbService.getInstance().mChatMessageBeanService.updateEntity(answerMessageRef[0]);
+                                    
+                                    // 更新会话预览
+                                    String preview = answerMessageRef[0].getContent();
+                                    if (preview.length() > 30) {
+                                        preview = preview.substring(0, 30) + "...";
+                                    }
+                                    currentSession.setPreview("AI: " + preview);
+                                    currentSession.setUpdateTime(DateHelper.getSeconds1());
+                                    DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
+                                } else {
+                                    // 更新思考消息
+                                    DbService.getInstance().mChatMessageBeanService.updateEntity(thinkingMessage);
                                 }
-                                currentSession.setPreview("AI: " + preview);
-                                currentSession.setUpdateTime(DateHelper.getSeconds1());
-                                DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
+                                // 强制折叠思考
+                                thinkingMessage.setThinkingCollapsed(true);
+                                int thinkPos = mChatAdapter.getData().indexOf(thinkingMessage);
+                                if (thinkPos != -1) mChatAdapter.notifyItemChanged(thinkPos);
                             }
                         });
                     }
@@ -1127,11 +1264,15 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                receivedMessage.setContent("网络请求失败: " + e.getMessage());
+                                String errStr = "网络请求失败: " + e.getMessage();
+                                if (answerMessageRef[0] != null) {
+                                    answerMessageRef[0].setContent(answerMessageRef[0].getContent() + "\n" + errStr);
+                                    DbService.getInstance().mChatMessageBeanService.updateEntity(answerMessageRef[0]);
+                                } else {
+                                    thinkingMessage.setContent(thinkingMessage.getContent() + "\n" + errStr);
+                                    DbService.getInstance().mChatMessageBeanService.updateEntity(thinkingMessage);
+                                }
                                 mChatAdapter.updateData();
-                                
-                                // 保存错误消息到数据库
-                                DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
                             }
                         });
                     }

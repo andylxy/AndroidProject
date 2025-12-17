@@ -40,6 +40,11 @@ public class ChatMessageBean implements Serializable {
      */
     @Transient
     public static final int TYPE_SYSTEM = 3;
+    /**
+     * 思考过程
+     */
+    @Transient
+    public static final int TYPE_THINKING = 4;
 
     /**
      * 已删除
@@ -93,6 +98,20 @@ public class ChatMessageBean implements Serializable {
      */
     @Transient
     private boolean continuesListen = false;
+    /**
+     * 是否折叠思考过程
+     */
+    @Transient
+    private boolean isThinkingCollapsed = false;
+
+    public boolean isThinkingCollapsed() {
+        return isThinkingCollapsed;
+    }
+
+    public void setThinkingCollapsed(boolean thinkingCollapsed) {
+        isThinkingCollapsed = thinkingCollapsed;
+    }
+
     /**
      * 创建时间
      */

@@ -27,6 +27,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
     private static final int LAYOUT_RECEIVED = R.layout.tips_ai_msg_chat_receive;
     private static final int LAYOUT_SEND = R.layout.tips_ai_msg_chat_send;
     private static final int LAYOUT_SYSTEM = R.layout.tips_ai_msg_chat_system;
+    private static final int LAYOUT_THINKING = R.layout.tips_ai_msg_chat_thinking;
     private static final int LAYOUT_DEFAULT = R.layout.tips_ai_msg_chat_system; // 默认布局资源ID
 
     // 初始化 Markwon
@@ -84,6 +85,9 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                 break;
             case ChatMessageBean.TYPE_SYSTEM:
                 viewTypeLayout = LAYOUT_SYSTEM;
+                break;
+            case ChatMessageBean.TYPE_THINKING:
+                viewTypeLayout = LAYOUT_THINKING;
                 break;
             default:
                 // 记录日志并使用默认布局
@@ -145,6 +149,35 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     TextView tv_system_content = findViewById(R.id.tv_system_content);
                     if (tv_system_content != null) {
                         tv_system_content.setText(bean.getContent());
+                    }
+                    break;
+                    
+                case ChatMessageBean.TYPE_THINKING:
+                    TextView tv_thinking_content = findViewById(R.id.tv_thinking_content);
+                    android.view.View ll_thinking_header = findViewById(R.id.ll_thinking_header);
+                    TextView tv_thinking_arrow = findViewById(R.id.tv_thinking_arrow);
+                    
+                    if (markwon != null && tv_thinking_content != null && bean.getContent() != null) {
+                        markwon.setMarkdown(tv_thinking_content, bean.getContent());
+                    }
+                    
+                    // 设置折叠状态
+                    if (tv_thinking_content != null && tv_thinking_arrow != null) {
+                        if (bean.isThinkingCollapsed()) {
+                            tv_thinking_content.setVisibility(android.view.View.GONE);
+                            tv_thinking_arrow.setRotation(-90); // 旋转箭头表示折叠
+                        } else {
+                            tv_thinking_content.setVisibility(android.view.View.VISIBLE);
+                            tv_thinking_arrow.setRotation(0); // 默认箭头向下
+                        }
+                    }
+                    
+                    // 点击切换折叠状态
+                    if (ll_thinking_header != null) {
+                        ll_thinking_header.setOnClickListener(v -> {
+                            bean.setThinkingCollapsed(!bean.isThinkingCollapsed());
+                            notifyItemChanged(position); // 局部刷新
+                        });
                     }
                     break;
             }
