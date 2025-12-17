@@ -3,7 +3,9 @@ package run.yigou.gxzy.ui.fragment;
 import static com.blankj.utilcode.util.ThreadUtils.runOnUiThread;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -63,6 +65,9 @@ import run.yigou.gxzy.http.model.SseChunk;
 public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implements OnTitleBarListener {
 
     private static final String TAG = "AiMsgFragment";
+    private static final String PREFS_NAME = "AiChatPrefs";
+    private static final String KEY_LAST_SESSION_ID = "last_session_id";
+    
     private RecyclerView rv_chat;
     private DrawerLayout drawerLayout;
     private RecyclerView chatHistoryList;
@@ -112,8 +117,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
                 // 确保位置有效
                 if (position >= 0 && position < sessions.size()) {
+                    ChatSessionBean selectedSession = sessions.get(position);
+                    // 保存最后选中的会话ID
+                    saveLastSessionId(selectedSession.getId());
                     // 加载选中会话的所有聊天数据
-                    loadChatDataForSession(sessions.get(position).getId());
+                    loadChatDataForSession(selectedSession.getId());
 
                     // 关闭侧边栏
                     if (drawerLayout != null) {
@@ -288,6 +296,14 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
      */
     private void populateChatHistoryWithTestData() {
         List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
+        
+        // 按更新时间倒序排序（最新的在最前面）
+        sessions.sort((s1, s2) -> {
+            String time1 = s1.getUpdateTime() != null ? s1.getUpdateTime() : "";
+            String time2 = s2.getUpdateTime() != null ? s2.getUpdateTime() : "";
+            return time2.compareTo(time1); // 倒序：time2 - time1
+        });
+        
         List<ChatHistoryAdapter.ChatHistoryItem> historyItems = new ArrayList<>();
 
         // 根据会话数据创建历史记录项
@@ -307,13 +323,118 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 更新适配器数据
         chatHistoryAdapter.setData(historyItems);
 
-        // 默认选中第一个会话并加载其数据
-        if (!historyItems.isEmpty()) {
-            chatHistoryAdapter.setSelectedPosition(0);
-            if (!sessions.isEmpty()) {
-                loadChatDataForSession(sessions.get(0).getId());
+        // 恢复上次选中的会话
+        loadLastSelectedSession(sessions);
+    }
+    
+    /**
+     * 加载上次选中的会话
+     */
+    private void loadLastSelectedSession(List<ChatSessionBean> sessions) {
+        // 如果会话列表为空，创建一个新会话
+        if (sessions.isEmpty()) {
+            Log.d(TAG, "Session list is empty, creating new session");
+            createNewSessionWithId();
+            return;
+        }
+        
+        // 读取保存的最后选中会话ID
+        Long lastSessionId = getLastSessionId();
+        
+        // 查找对应的会话位置
+        int selectedPosition = 0; // 默认选中第一个
+        if (lastSessionId != null && lastSessionId > 0) {
+            for (int i = 0; i < sessions.size(); i++) {
+                if (sessions.get(i).getId().equals(lastSessionId)) {
+                    selectedPosition = i;
+                    Log.d(TAG, "Found last selected session at position: " + i);
+                    break;
+                }
             }
         }
+        
+        // 选中并加载会话
+        chatHistoryAdapter.setSelectedPosition(selectedPosition);
+        loadChatDataForSession(sessions.get(selectedPosition).getId());
+        Log.d(TAG, "Auto-loaded session: " + sessions.get(selectedPosition).getTitle());
+    }
+    
+    /**
+     * 创建新会话并申请会话ID
+     */
+    private void createNewSessionWithId() {
+        // 创建新会话
+        ChatSessionBean newSession = new ChatSessionBean();
+        newSession.setTitle("新对话");
+        newSession.setPreview("开始新的对话");
+        newSession.setUpdateTime(DateHelper.getSeconds1());
+        newSession.setCreateTime(null); // 初始为空，等待申请会话ID后设置
+        
+        // 保存到数据库
+        long sessionId = DbService.getInstance().mChatSessionBeanService.addEntity(newSession);
+        newSession.setId(sessionId);
+        currentSession = newSession;
+        
+        Log.d(TAG, "Created new session with ID: " + sessionId);
+        
+        // 申请会话ID
+        EasyHttp.get(AiMsgFragment.this)
+                .api(new AiSessionIdApi())
+                .request(new HttpCallback<HttpData<AiSessionIdApi.Bean>>(AiMsgFragment.this) {
+                    
+                    @Override
+                    public void onSucceed(HttpData<AiSessionIdApi.Bean> data) {
+                        if (data != null && data.isRequestSucceed()) {
+                            AiSessionIdApi.Bean bean = data.getData();
+                            if (bean != null && currentSession != null) {
+                                // 设置会话Id
+                                currentSession.setConversationId(bean.getRealConversationId());
+                                currentSession.setEndUserId(bean.getEndUserId());
+                                currentSession.setCreateTime(DateHelper.getSeconds1());
+                                
+                                // 更新数据库
+                                DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
+                                
+                                Log.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
+                                
+                                // 刷新会话列表UI
+                                populateChatHistoryWithTestData();
+                            }
+                        } else {
+                            Log.e(TAG, "Failed to obtain session ID: " + (data != null ? data.getMessage() : "null response"));
+                            Toast.makeText(getContext(), "会话创建失败，请重试", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    
+                    @Override
+                    public void onFail(Exception e) {
+                        super.onFail(e);
+                        Log.e(TAG, "Failed to request session ID: " + e.getMessage());
+                        Toast.makeText(getContext(), "网络请求失败，请检查网络连接", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    
+    /**
+     * 保存最后选中的会话ID
+     */
+    private void saveLastSessionId(Long sessionId) {
+        if (getContext() == null) return;
+        
+        SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putLong(KEY_LAST_SESSION_ID, sessionId).apply();
+        Log.d(TAG, "Saved last session ID: " + sessionId);
+    }
+    
+    /**
+     * 读取最后选中的会话ID
+     */
+    private Long getLastSessionId() {
+        if (getContext() == null) return null;
+        
+        SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        long sessionId = prefs.getLong(KEY_LAST_SESSION_ID, -1L);
+        return sessionId > 0 ? sessionId : null;
     }
 
     /**
@@ -324,6 +445,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     private void loadChatDataForSession(Long sessionId) {
         Log.d(TAG, "loadChatDataForSession: Loading data for session " + sessionId);
 
+        // 保存最后选中的会话ID
+        saveLastSessionId(sessionId);
+        
         // 获取会话信息
         ChatSessionBean session = DbService.getInstance().mChatSessionBeanService.findById(sessionId);
         if (session == null) {
@@ -520,11 +644,12 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                     int pos = mChatAdapter.getData().indexOf(thinkingMessage);
                                                     if (pos != -1) {
                                                         mChatAdapter.notifyItemChanged(pos); // 局部刷新
-                                                    }
-                                                    
-                                                    // 自动滚动
-                                                    if (scrollState == 0) {
-                                                        rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                                                        
+                                                        // 自动滚动 (思考阶段也需要保持在底部，以便用户看到正在生成的内容)
+                                                        if (scrollState == 0) {
+                                                            // 使用 smoothScrollToPosition 可能更流畅，但在快速更新时 scrollToPosition 更稳定
+                                                            rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                                                        }
                                                     }
                                                     
                                                 } else if ("chunk".equals(chunk.getType()) || "answer".equals(chunk.getType())) {
@@ -561,15 +686,16 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                         String current = answerMessageRef[0].getContent();
                                                         answerMessageRef[0].setContent(current + (chunk.getContent() != null ? chunk.getContent() : ""));
                                                         
-                                                        // 刷新回答消息 UI
-                                                        // 优化：每收到几个字刷新一次，或者直接刷新
-                                                        if (index % 3 == 0) { // 简单限频
-                                                            mChatAdapter.updateData();
+                                                        // 刷新回答消息 UI - 使用局部刷新避免闪烁
+                                                        int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
+                                                        if (answerPos != -1) {
+                                                            mChatAdapter.notifyItemChanged(answerPos);
+                                                            
+                                                            // 自动滚动 - 只在用户未手动滚动时触发
                                                             if (scrollState == 0) {
-                                                                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                                                                rv_chat.smoothScrollToPosition(mChatAdapter.getData().size() - 1);
                                                             }
                                                         }
-                                                        index++;
                                                     }
                                                     
                                                 } else if ("error".equals(chunk.getType())) {
@@ -1158,11 +1284,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                     int pos = mChatAdapter.getData().indexOf(thinkingMessage);
                                     if (pos != -1) {
                                         mChatAdapter.notifyItemChanged(pos); // 局部刷新
-                                    }
-                                    
-                                    // 自动滚动
-                                    if (scrollState == 0) {
-                                        rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                                        
+                                        // 自动滚动
+                                        if (scrollState == 0) {
+                                            rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                                        }
                                     }
                                     
                                 } else if ("chunk".equals(chunk.getType()) || "answer".equals(chunk.getType())) {
@@ -1199,14 +1325,16 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                         String current = answerMessageRef[0].getContent();
                                         answerMessageRef[0].setContent(current + (chunk.getContent() != null ? chunk.getContent() : ""));
                                         
-                                        // 刷新回答消息 UI
-                                        if (index % 3 == 0) { 
-                                            mChatAdapter.updateData();
+                                        // 刷新回答消息 UI - 使用局部刷新避免闪烁
+                                        int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
+                                        if (answerPos != -1) {
+                                            mChatAdapter.notifyItemChanged(answerPos);
+                                            
+                                            // 自动滚动 - 只在用户未手动滚动时触发
                                             if (scrollState == 0) {
-                                                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                                                rv_chat.smoothScrollToPosition(mChatAdapter.getData().size() - 1);
                                             }
                                         }
-                                        index++;
                                     }
                                     
                                 } else if ("error".equals(chunk.getType())) {

@@ -156,19 +156,25 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     TextView tv_thinking_content = findViewById(R.id.tv_thinking_content);
                     android.view.View ll_thinking_header = findViewById(R.id.ll_thinking_header);
                     TextView tv_thinking_arrow = findViewById(R.id.tv_thinking_arrow);
+                    androidx.core.widget.NestedScrollView sv_thinking_content = findViewById(R.id.sv_thinking_content);
                     
                     if (markwon != null && tv_thinking_content != null && bean.getContent() != null) {
                         markwon.setMarkdown(tv_thinking_content, bean.getContent());
                     }
                     
                     // 设置折叠状态
-                    if (tv_thinking_content != null && tv_thinking_arrow != null) {
+                    if (sv_thinking_content != null && tv_thinking_arrow != null) {
                         if (bean.isThinkingCollapsed()) {
-                            tv_thinking_content.setVisibility(android.view.View.GONE);
+                            sv_thinking_content.setVisibility(android.view.View.GONE);
                             tv_thinking_arrow.setRotation(-90); // 旋转箭头表示折叠
                         } else {
-                            tv_thinking_content.setVisibility(android.view.View.VISIBLE);
+                            sv_thinking_content.setVisibility(android.view.View.VISIBLE);
                             tv_thinking_arrow.setRotation(0); // 默认箭头向下
+
+                            // 如果正在生成思考内容（通常是最后一条消息），尝试滚动到底部
+                            // 通过检查是否是列表的最后一个位置来简化判断(或者交由 Fragment 控制)
+                            // 这里做一个通用的自动滚动: 当内容更新时, ScrollView 滚动到底部
+                            sv_thinking_content.post(() -> sv_thinking_content.fullScroll(android.view.View.FOCUS_DOWN));
                         }
                     }
                     
