@@ -74,7 +74,7 @@ android {
         preview {
             applicationIdSuffix '.preview'
             // 代码混淆开关
-            minifyEnabled true
+            //minifyEnabled true
             // 添加清单占位符
             addManifestPlaceholders([
                     'app_name': '@string/app_name_preview'
@@ -194,6 +194,8 @@ dependencies {
     // OkHttp 框架：https://github.com/square/okhttp
     // noinspection GradleDependency
     implementation 'com.squareup.okhttp3:okhttp:3.12.13'
+    // 添加 SSE 扩展库
+    implementation 'com.squareup.okhttp3:okhttp-sse:3.12.13'
 
     // Json 解析框架：https://github.com/google/gson
     implementation 'com.google.code.gson:gson:2.8.8'

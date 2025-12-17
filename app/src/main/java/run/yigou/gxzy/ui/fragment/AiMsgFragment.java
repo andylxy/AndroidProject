@@ -55,6 +55,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import run.yigou.gxzy.http.api.AiStreamApi;
+import run.yigou.gxzy.http.callback.SseStreamCallback;
+import run.yigou.gxzy.http.model.SseChunk;
+
 
 public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implements OnTitleBarListener {
 
@@ -471,51 +475,98 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                             });
                         }
 
-                        // 发送消息给GPT
-
-                        EasyHttp.post(AiMsgFragment.this)
-                                .api(new AiSessionApi().setQuery(result).setConversationId(currentSession.getConversationId()))
-
-                                .request(new HttpCallback<HttpData<AiSessionApi.Bean>>(AiMsgFragment.this) {
-
+                        // 发送消息给GPT - 使用 SSE 流式请求
+                        new AiStreamApi()
+                                .setQuery(result)
+                                .setConversationId(currentSession.getConversationId())
+                                .setEndUserId(currentSession.getEndUserId())
+                                .execute(new SseStreamCallback() {
+                                    
                                     @Override
-                                    public void onSucceed(HttpData<AiSessionApi.Bean> data) {
-
-                                        if (data != null && data.isRequestSucceed()) {
-                                            AiSessionApi.Bean bean = data.getData();
-                                            if (bean != null) {
-                                                // 设置会话返回内容
-                                                // 打印调试信息
-                                                LogUtils.d("gptResponse", bean.getAnswer());
-
-                                                runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        receivedMessage.setContent(bean.getAnswer());
-
-                                                        // 根据滚动状态决定是否更新数据
-                                                        if ((scrollState == 0 && index % 3 == 0)) {
-                                                            mChatAdapter.updateData();
-                                                            rv_chat.scrollBy(0, 15);
-                                                        }
-                                                        // 更新数据库中的回复消息
-                                                        receivedMessage.setCreateDate(DateHelper.getSeconds1());
-                                                        receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-                                                        DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
-                                                        Log.d(TAG, "Updated received message in database with ID: " + receivedMessage.getId());
-                                                    }
-                                                });
-                                            }
-                                        } else {
-                                            EasyLog.print("获取会话失败：" + data.getMessage());
-                                        }
-
+                                    public void onOpen() {
+                                        LogUtils.d(TAG, "SSE 连接已建立");
                                     }
-
+                                    
                                     @Override
-                                    public void onFail(Exception e) {
-                                        super.onFail(e);
-                                        EasyLog.print("获取内容失败：" + e.getMessage());
+                                    public void onChunk(SseChunk chunk) {
+                                        if (chunk == null) {
+                                            LogUtils.w(TAG, "接收到空数据块");
+                                            return;
+                                        }
+                                        
+                                        LogUtils.d(TAG, "SSE 数据块: type=" + chunk.getType() + 
+                                                ", content length=" + (chunk.getContent() != null ? chunk.getContent().length() : 0));
+                                        
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                // 根据类型处理不同的数据块
+                                                if ("chunk".equals(chunk.getType()) || "answer".equals(chunk.getType())) {
+                                                    // 累加内容到 receivedMessage
+                                                    String currentContent = receivedMessage.getContent();
+                                                    if ("请稍等...".equals(currentContent)) {
+                                                        // 第一次接收数据，清空占位符
+                                                        currentContent = "";
+                                                    }
+                                                    receivedMessage.setContent(currentContent + (chunk.getContent() != null ? chunk.getContent() : ""));
+                                                    
+                                                    // 更新 UI
+                                                    if (scrollState == 0 && index % 3 == 0) {
+                                                        mChatAdapter.updateData();
+                                                        rv_chat.scrollBy(0, 15);
+                                                    }
+                                                    index++;
+                                                    
+                                                } else if ("error".equals(chunk.getType())) {
+                                                    // 错误处理
+                                                    LogUtils.e(TAG, "SSE 错误: " + chunk.getError());
+                                                    receivedMessage.setContent("请求失败: " + chunk.getError());
+                                                    mChatAdapter.updateData();
+                                                }
+                                            }
+                                        });
+                                    }
+                                    
+                                    @Override
+                                    public void onComplete() {
+                                        LogUtils.d(TAG, "SSE 流式对话完成");
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                // 最终更新 UI
+                                                mChatAdapter.updateData();
+                                                
+                                                // 保存最终消息到数据库
+                                                receivedMessage.setCreateDate(DateHelper.getSeconds1());
+                                                receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+                                                DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
+                                                LogUtils.d(TAG, "已保存完整的 AI 回复到数据库，ID: " + receivedMessage.getId());
+                                                
+                                                // 更新会话预览
+                                                String preview = receivedMessage.getContent();
+                                                if (preview.length() > 30) {
+                                                    preview = preview.substring(0, 30) + "...";
+                                                }
+                                                currentSession.setPreview("AI: " + preview);
+                                                currentSession.setUpdateTime(DateHelper.getSeconds1());
+                                                DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
+                                            }
+                                        });
+                                    }
+                                    
+                                    @Override
+                                    public void onError(Exception e) {
+                                        LogUtils.e(TAG, "SSE 请求失败: " + e.getMessage());
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                receivedMessage.setContent("网络请求失败: " + e.getMessage());
+                                                mChatAdapter.updateData();
+                                                
+                                                // 保存错误消息到数据库
+                                                DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
+                                            }
+                                        });
                                     }
                                 });
                     }
@@ -991,49 +1042,98 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             });
         }
 
-        // 发送消息给GPT
-        EasyHttp.post(AiMsgFragment.this)
-                .api(new AiSessionApi().setQuery(pendingMessageContent).setConversationId(currentSession.getConversationId()))
-                .request(new HttpCallback<HttpData<AiSessionApi.Bean>>(AiMsgFragment.this) {
-
+        // 发送消息给GPT - 使用 SSE 流式请求
+        new AiStreamApi()
+                .setQuery(pendingMessageContent)
+                .setConversationId(currentSession.getConversationId())
+                .setEndUserId(currentSession.getEndUserId())
+                .execute(new SseStreamCallback() {
+                    
                     @Override
-                    public void onSucceed(HttpData<AiSessionApi.Bean> data) {
-
-                        if (data != null && data.isRequestSucceed()) {
-                            AiSessionApi.Bean bean = data.getData();
-                            if (bean != null) {
-                                // 设置会话返回内容
-                                // 打印调试信息
-                                LogUtils.d("gptResponse", bean.getAnswer());
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        receivedMessage.setContent(bean.getAnswer());
-
-                                        // 根据滚动状态决定是否更新数据
-                                        if ((scrollState == 0 && index % 3 == 0)) {
-                                            mChatAdapter.updateData();
-                                            rv_chat.scrollBy(0, 15);
-                                        }
-                                        // 更新数据库中的回复消息
-                                        receivedMessage.setCreateDate(DateHelper.getSeconds1());
-                                        receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-                                        DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
-                                        Log.d(TAG, "Updated received message in database with ID: " + receivedMessage.getId());
-                                    }
-                                });
-                            }
-                        } else {
-                            EasyLog.print("获取会话失败：" + data.getMessage());
-                        }
-
+                    public void onOpen() {
+                        LogUtils.d(TAG, "SSE 连接已建立（继续发送）");
                     }
-
+                    
                     @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
-                        EasyLog.print("获取内容失败：" + e.getMessage());
+                    public void onChunk(SseChunk chunk) {
+                        if (chunk == null) {
+                            LogUtils.w(TAG, "接收到空数据块");
+                            return;
+                        }
+                        
+                        LogUtils.d(TAG, "SSE 数据块: type=" + chunk.getType() + 
+                                ", content length=" + (chunk.getContent() != null ? chunk.getContent().length() : 0));
+                        
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // 根据类型处理不同的数据块
+                                if ("chunk".equals(chunk.getType()) || "answer".equals(chunk.getType())) {
+                                    // 累加内容到 receivedMessage
+                                    String currentContent = receivedMessage.getContent();
+                                    if ("请稍等...".equals(currentContent)) {
+                                        // 第一次接收数据，清空占位符
+                                        currentContent = "";
+                                    }
+                                    receivedMessage.setContent(currentContent + (chunk.getContent() != null ? chunk.getContent() : ""));
+                                    
+                                    // 更新 UI
+                                    if (scrollState == 0 && index % 3 == 0) {
+                                        mChatAdapter.updateData();
+                                        rv_chat.scrollBy(0, 15);
+                                    }
+                                    index++;
+                                    
+                                } else if ("error".equals(chunk.getType())) {
+                                    // 错误处理
+                                    LogUtils.e(TAG, "SSE 错误: " + chunk.getError());
+                                    receivedMessage.setContent("请求失败: " + chunk.getError());
+                                    mChatAdapter.updateData();
+                                }
+                            }
+                        });
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        LogUtils.d(TAG, "SSE 流式对话完成（继续发送）");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // 最终更新 UI
+                                mChatAdapter.updateData();
+                                
+                                // 保存最终消息到数据库
+                                receivedMessage.setCreateDate(DateHelper.getSeconds1());
+                                receivedMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+                                DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
+                                LogUtils.d(TAG, "已保存完整的 AI 回复到数据库，ID: " + receivedMessage.getId());
+                                
+                                // 更新会话预览
+                                String preview = receivedMessage.getContent();
+                                if (preview.length() > 30) {
+                                    preview = preview.substring(0, 30) + "...";
+                                }
+                                currentSession.setPreview("AI: " + preview);
+                                currentSession.setUpdateTime(DateHelper.getSeconds1());
+                                DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
+                            }
+                        });
+                    }
+                    
+                    @Override
+                    public void onError(Exception e) {
+                        LogUtils.e(TAG, "SSE 请求失败: " + e.getMessage());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                receivedMessage.setContent("网络请求失败: " + e.getMessage());
+                                mChatAdapter.updateData();
+                                
+                                // 保存错误消息到数据库
+                                DbService.getInstance().mChatMessageBeanService.updateEntity(receivedMessage);
+                            }
+                        });
                     }
                 });
                 
