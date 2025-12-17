@@ -263,6 +263,10 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
                     
                     LogUtils.d(TAG, "签名参数: method=" + method + ", host=" + hostForSign + ", path=" + path);
                     
+                    // ⚠️ 重要：在生成签名前，确保 SecurityConfig 使用正确的密钥
+                    run.yigou.gxzy.http.security.SecurityConfig.setAccessKeyId(accessKeyId);
+                    run.yigou.gxzy.http.security.SecurityConfig.setAccessKeySecret(accessKeySecret);
+                    
                     // 生成签名
                     String signature = run.yigou.gxzy.http.security.SecurityConfig.generateSignature(
                             this, method, hostForSign, path, timestamp, nonce);

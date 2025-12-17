@@ -61,6 +61,15 @@ import run.yigou.gxzy.http.api.AiStreamApi;
 import run.yigou.gxzy.http.callback.SseStreamCallback;
 import run.yigou.gxzy.http.model.SseChunk;
 
+import io.noties.markwon.Markwon;
+import io.noties.markwon.core.CorePlugin;
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
+import io.noties.markwon.ext.tables.TablePlugin;
+import io.noties.markwon.ext.tasklist.TaskListPlugin;
+import io.noties.markwon.html.HtmlPlugin;
+import io.noties.markwon.image.ImagesPlugin;
+import io.noties.markwon.linkify.LinkifyPlugin;
+
 
 public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implements OnTitleBarListener {
 
@@ -93,10 +102,20 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
     // 创建并设置适配器
     private TipsAiChatAdapter mChatAdapter;
+    private Markwon mMarkwon;
 
     @Override
     protected void initView() {
         Log.d(TAG, "initView: Starting initialization");
+        mMarkwon = Markwon.builder(getContext())
+                .usePlugin(CorePlugin.create())
+                .usePlugin(HtmlPlugin.create())
+                .usePlugin(LinkifyPlugin.create())
+                .usePlugin(StrikethroughPlugin.create())
+                .usePlugin(TablePlugin.create(getContext()))
+                .usePlugin(TaskListPlugin.create(getContext()))
+                .usePlugin(ImagesPlugin.create())
+                .build();
         // 初始化状态栏,设置为沉浸式
         getStatusBarConfig().setTitleBar(this, findViewById(R.id.tv_title));
         getStatusBarConfig().setTitleBar(this, findViewById(R.id.side_panel));
@@ -474,6 +493,12 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
         // 加载会话消息
         if (mChatAdapter != null) {
+            // 确保所有 Thinking 消息是折叠状态
+            for (ChatMessageBean message : messages) {
+                if (message.getType() == ChatMessageBean.TYPE_THINKING) {
+                    message.setThinkingCollapsed(true);
+                }
+            }
             mChatAdapter.setData(new ArrayList<>(messages));
             Log.d(TAG, "Loaded " + messages.size() + " messages for session " + sessionId);
         }
@@ -544,6 +569,17 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                             createNewSession("新对话");
                         } else {
 
+                            // 检查会话ID是否存在（conversationId 或 endUserId 为空需要重新申请）
+                            if (currentSession.getConversationId() == null || 
+                                currentSession.getConversationId().isEmpty() ||
+                                currentSession.getEndUserId() == null ||
+                                currentSession.getEndUserId().isEmpty()) {
+                                // 会话ID缺失，重新申请
+                                Log.d(TAG, "Session missing conversationId or endUserId, requesting new ID");
+                                requestNewSessionIdAndContinue(result, time);
+                                return;
+                            }
+                            
                             // 检查会话创建时间是否为空或者会话是否过期
                             if (currentSession.getCreateTime() == null) {
                                 // 如果会话创建时间为空，重新申请会话Id后再继续执行
@@ -690,22 +726,18 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                     }
                                                     
                                                     // 追加回答内容
-                                                    if (answerMessageRef[0] != null) {
+                                                    if (answerMessageRef[0] != null && chunk.getContent() != null && !chunk.getContent().isEmpty()) {
                                                         String current = answerMessageRef[0].getContent();
-                                                        answerMessageRef[0].setContent(current + (chunk.getContent() != null ? chunk.getContent() : ""));
-                                                        index++;
+                                                        answerMessageRef[0].setContent(current + chunk.getContent());
                                                         
-                                                        // 刷新回答消息 UI - 降低刷新频率避免闪烁
-                                                        // 每 3 个字符刷新一次，或者内容较短时每次都刷新
-                                                        if (index % 3 == 0 || answerMessageRef[0].getContent().length() < 50) {
-                                                            int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
-                                                            if (answerPos != -1) {
-                                                                mChatAdapter.notifyItemChanged(answerPos);
-                                                            }
+                                                        // 刷新回答消息 UI（与思考链使用相同策略）
+                                                        int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
+                                                        if (answerPos != -1) {
+                                                            mChatAdapter.notifyItemChanged(answerPos); // 局部刷新
                                                             
-                                                            // 自动滚动 - 使用 scrollBy 实现打字机效果
+                                                            // 自动滚动（与思考链使用相同策略）
                                                             if (scrollState == 0) {
-                                                                rv_chat.scrollBy(0, 30); // 增量滚动
+                                                                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
                                                             }
                                                         }
                                                     }
@@ -1374,21 +1406,18 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                     }
                                     
                                     // 追加回答内容
-                                    if (answerMessageRef[0] != null) {
+                                    if (answerMessageRef[0] != null && chunk.getContent() != null && !chunk.getContent().isEmpty()) {
                                         String current = answerMessageRef[0].getContent();
-                                        answerMessageRef[0].setContent(current + (chunk.getContent() != null ? chunk.getContent() : ""));
-                                        index++;
+                                        answerMessageRef[0].setContent(current + chunk.getContent());
                                         
-                                        // 刷新回答消息 UI - 降低刷新频率避免闪烁
-                                        if (index % 3 == 0 || answerMessageRef[0].getContent().length() < 50) {
-                                            int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
-                                            if (answerPos != -1) {
-                                                mChatAdapter.notifyItemChanged(answerPos);
-                                            }
+                                        // 刷新回答消息 UI（与思考链使用相同策略）
+                                        int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
+                                        if (answerPos != -1) {
+                                            mChatAdapter.notifyItemChanged(answerPos); // 局部刷新
                                             
-                                            // 自动滚动 - 使用 scrollBy 实现打字机效果
+                                            // 自动滚动（与思考链使用相同策略）
                                             if (scrollState == 0) {
-                                                rv_chat.scrollBy(0, 30);
+                                                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
                                             }
                                         }
                                     }
