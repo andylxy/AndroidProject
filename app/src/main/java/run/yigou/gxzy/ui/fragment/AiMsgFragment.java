@@ -6,6 +6,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -85,6 +88,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
     private int scrollState = 0;
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 1;
+
+    // UI 更新节流相关
+    private Handler uiUpdateHandler = new Handler(Looper.getMainLooper());
+    private Runnable answerUpdateRunnable = null;
+    private static final long UI_UPDATE_INTERVAL = 200; // 200ms 批量更新一次
 
     // 当前会话
     private ChatSessionBean currentSession;
@@ -318,12 +326,14 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
         
         // 按更新时间倒序排序（最新的在最前面）
-        sessions.sort((s1, s2) -> {
-            String time1 = s1.getUpdateTime() != null ? s1.getUpdateTime() : "";
-            String time2 = s2.getUpdateTime() != null ? s2.getUpdateTime() : "";
-            return time2.compareTo(time1); // 倒序：time2 - time1
-        });
-        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            sessions.sort((s1, s2) -> {
+                String time1 = s1.getUpdateTime() != null ? s1.getUpdateTime() : "";
+                String time2 = s2.getUpdateTime() != null ? s2.getUpdateTime() : "";
+                return time2.compareTo(time1); // 倒序：time2 - time1
+            });
+        }
+
         List<ChatHistoryAdapter.ChatHistoryItem> historyItems = new ArrayList<>();
 
         // 根据会话数据创建历史记录项
@@ -731,15 +741,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                         String current = answerMessageRef[0].getContent();
                                                         answerMessageRef[0].setContent(current + chunk.getContent());
                                                         
-                                                         // 刷新回答消息 UI - 使用 Payload 避免无效重绘
-                                                         int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
-                                                         if (answerPos != -1) {
-                                                             // 标记流式状态
-                                                             if (!answerMessageRef[0].isStreaming()) {
-                                                                 answerMessageRef[0].setStreaming(true);
-                                                             }
-                                                             mChatAdapter.notifyItemChanged(answerPos, TipsAiChatAdapter.PAYLOAD_UPDATE_CONTENT);
-                                                         }
+                                                        // 使用节流更新 UI，减少重绘次数
+                                                        scheduleAnswerUIUpdate(answerMessageRef[0]);
                                                     }
                                                     
                                                 } else if ("error".equals(chunk.getType())) {
@@ -760,12 +763,16 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                     @Override
                                     public void onComplete() {
                                         LogUtils.d(TAG, "SSE 流式对话完成");
+                                        
+                                        // 移除待处理的 UI 更新任务
+                                        if (answerUpdateRunnable != null) {
+                                            uiUpdateHandler.removeCallbacks(answerUpdateRunnable);
+                                            answerUpdateRunnable = null;
+                                        }
+                                        
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                // 最终刷新
-                                                mChatAdapter.updateData();
-                                                
                                                 // 保存最终回答到数据库
                                                 if (answerMessageRef[0] != null) {
                                                     answerMessageRef[0].setCreateDate(DateHelper.getSeconds1());
@@ -784,12 +791,16 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                     // 如果没有回答（可能只有思考或出错了），更新思考消息
                                                     DbService.getInstance().mChatMessageBeanService.updateEntity(thinkingMessage);
                                                 }
+                                                
                                                 // 强制折叠思考
                                                 thinkingMessage.setThinkingCollapsed(true);
                                                 int thinkPos = mChatAdapter.getData().indexOf(thinkingMessage);
-                                                if (thinkPos != -1) mChatAdapter.notifyItemChanged(thinkPos);
+                                                if (thinkPos != -1) {
+                                                    mChatAdapter.notifyItemChanged(thinkPos);
+                                                }
                                                 
-                                                // 完成后滚动到底部（只滚动一次）
+                                                // 最终刷新并滚动
+                                                mChatAdapter.updateData();
                                                 if (rv_chat != null && mChatAdapter.getData().size() > 0) {
                                                     rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
                                                 }
@@ -827,6 +838,47 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         //getTitleBar().setRightTitleColor(Color.BLACK);
 
     }
+
+    /**
+     * 节流更新 AI 回答消息的 UI
+     * 通过延迟执行减少 RecyclerView 重绘次数，避免闪烁
+     * 
+     * @param answerMessage AI 回答消息
+     */
+    private void scheduleAnswerUIUpdate(ChatMessageBean answerMessage) {
+        // 移除之前待处理的更新任务
+        if (answerUpdateRunnable != null) {
+            uiUpdateHandler.removeCallbacks(answerUpdateRunnable);
+        }
+        
+        // 创建新的更新任务
+        answerUpdateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(() -> {
+                    int answerPos = mChatAdapter.getData().indexOf(answerMessage);
+                    if (answerPos != -1) {
+                        // 标记流式状态
+                        if (!answerMessage.isStreaming()) {
+                            answerMessage.setStreaming(true);
+                        }
+                        // 刷新 UI
+                        mChatAdapter.notifyItemChanged(answerPos, TipsAiChatAdapter.PAYLOAD_UPDATE_CONTENT);
+                        
+                        // 同时滚动到底部
+                        if (rv_chat != null && mChatAdapter.getData().size() > 0) {
+                            rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                        }
+                    }
+                    answerUpdateRunnable = null;
+                });
+            }
+        };
+        
+        // 延迟 200ms 执行，批量更新
+        uiUpdateHandler.postDelayed(answerUpdateRunnable, UI_UPDATE_INTERVAL);
+    }
+    
 
     /**
      * 创建新会话
@@ -881,12 +933,14 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
         
         // 按更新时间倒序排序
-        sessions.sort((s1, s2) -> {
-            String time1 = s1.getUpdateTime() != null ? s1.getUpdateTime() : "";
-            String time2 = s2.getUpdateTime() != null ? s2.getUpdateTime() : "";
-            return time2.compareTo(time1);
-        });
-        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            sessions.sort((s1, s2) -> {
+                String time1 = s1.getUpdateTime() != null ? s1.getUpdateTime() : "";
+                String time2 = s2.getUpdateTime() != null ? s2.getUpdateTime() : "";
+                return time2.compareTo(time1);
+            });
+        }
+
         List<ChatHistoryAdapter.ChatHistoryItem> historyItems = new ArrayList<>();
         int currentSessionPosition = 0;
         
@@ -1115,6 +1169,15 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
     @Override
     public void onDestroy() {
+        // 清理 UI 更新 Handler，防止内存泄漏
+        if (uiUpdateHandler != null) {
+            if (answerUpdateRunnable != null) {
+                uiUpdateHandler.removeCallbacks(answerUpdateRunnable);
+                answerUpdateRunnable = null;
+            }
+            uiUpdateHandler.removeCallbacksAndMessages(null);
+        }
+        
         // 注销事件
         XEventBus.getDefault().unregister(AiMsgFragment.this);
         super.onDestroy();
