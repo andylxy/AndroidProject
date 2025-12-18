@@ -730,15 +730,10 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                         String current = answerMessageRef[0].getContent();
                                                         answerMessageRef[0].setContent(current + chunk.getContent());
                                                         
-                                                        // 刷新回答消息 UI（与思考链使用相同策略）
+                                                        // 刷新回答消息 UI（不执行滚动，避免闪烁跳动）
                                                         int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
                                                         if (answerPos != -1) {
                                                             mChatAdapter.notifyItemChanged(answerPos); // 局部刷新
-                                                            
-                                                            // 自动滚动（与思考链使用相同策略）
-                                                            if (scrollState == 0) {
-                                                                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
-                                                            }
                                                         }
                                                     }
                                                     
@@ -1410,15 +1405,10 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                         String current = answerMessageRef[0].getContent();
                                         answerMessageRef[0].setContent(current + chunk.getContent());
                                         
-                                        // 刷新回答消息 UI（与思考链使用相同策略）
+                                        // 刷新回答消息 UI（不执行滚动，避免闪烁跳动）
                                         int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
                                         if (answerPos != -1) {
                                             mChatAdapter.notifyItemChanged(answerPos); // 局部刷新
-                                            
-                                            // 自动滚动（与思考链使用相同策略）
-                                            if (scrollState == 0) {
-                                                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
-                                            }
                                         }
                                     }
                                     

@@ -117,7 +117,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     TextView tv_receive_content = findViewById(R.id.tv_receive_content);
                     ImageView iv_receive_picture = findViewById(R.id.iv_receive_picture);
                     TextView tv_receive_nick = findViewById(R.id.tv_receive_nick);
-                    //tv_receive_content.setText(bean.getContent());
+                    
                     // 设置 Markdown 文本
                     if (markwon != null && tv_receive_content != null && bean.getContent() != null) {
                         markwon.setMarkdown(tv_receive_content, bean.getContent());
@@ -125,7 +125,6 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     if (tv_receive_nick != null) {
                         tv_receive_nick.setText(bean.getNick());
                     }
-                    // 不再强制设置图片资源，使用布局文件中定义的背景
                     break;
 
                 case ChatMessageBean.TYPE_SEND:
