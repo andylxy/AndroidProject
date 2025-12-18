@@ -801,9 +801,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                 
                                                 // 最终刷新并滚动
                                                 mChatAdapter.updateData();
-                                                if (rv_chat != null && mChatAdapter.getData().size() > 0) {
-                                                    rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
-                                                }
+                                                scrollToAbsoluteBottom();
                                             }
                                         });
                                     }
@@ -865,10 +863,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                         // 刷新 UI
                         mChatAdapter.notifyItemChanged(answerPos, TipsAiChatAdapter.PAYLOAD_UPDATE_CONTENT);
                         
-                        // 同时滚动到底部
-                        if (rv_chat != null && mChatAdapter.getData().size() > 0) {
-                            rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
-                        }
+                        // 滚动到底部：使用 scrollBy 直接滚动像素，避免动画冲突
+                        scrollToAbsoluteBottom();
                     }
                     answerUpdateRunnable = null;
                 });
@@ -877,6 +873,28 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         
         // 延迟 200ms 执行，批量更新
         uiUpdateHandler.postDelayed(answerUpdateRunnable, UI_UPDATE_INTERVAL);
+    }
+    
+    /**
+     * 滚动到 RecyclerView 的绝对底部
+     * 使用 scrollBy 直接滚动像素，不使用动画，避免冲突
+     */
+    private void scrollToAbsoluteBottom() {
+        if (rv_chat == null) return;
+        
+        rv_chat.post(() -> {
+            // 计算需要滚动的距离
+            int scrollRange = rv_chat.computeVerticalScrollRange();
+            int scrollOffset = rv_chat.computeVerticalScrollOffset();
+            int scrollExtent = rv_chat.computeVerticalScrollExtent();
+            int maxScrollY = scrollRange - scrollExtent;
+            int scrollDistance = maxScrollY - scrollOffset;
+            
+            // 如果还没到底部，直接滚动
+            if (scrollDistance > 0) {
+                rv_chat.scrollBy(0, scrollDistance);
+            }
+        });
     }
     
 
