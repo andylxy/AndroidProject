@@ -104,6 +104,20 @@ public class ChatMessageBean implements Serializable {
     @Transient
     private boolean isThinkingCollapsed = false;
 
+    /**
+     * 是否正在流式传输
+     */
+    @Transient
+    private boolean isStreaming = false;
+
+    public boolean isStreaming() {
+        return isStreaming;
+    }
+
+    public void setStreaming(boolean streaming) {
+        isStreaming = streaming;
+    }
+
     public boolean isThinkingCollapsed() {
         return isThinkingCollapsed;
     }

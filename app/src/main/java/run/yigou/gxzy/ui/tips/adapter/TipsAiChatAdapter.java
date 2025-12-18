@@ -17,10 +17,18 @@ import io.noties.markwon.image.ImagesPlugin;
 import io.noties.markwon.linkify.LinkifyPlugin;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
+import com.hjq.base.BaseAdapter;
+import android.os.Handler;
+import android.os.Looper;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
 import timber.log.Timber;
 
 public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
+    
+    public static final String PAYLOAD_UPDATE_CONTENT = "PAYLOAD_UPDATE_CONTENT";
 
 
     // 定义布局资源ID常量
@@ -32,6 +40,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
 
     // 初始化 Markwon
     private Markwon markwon;
+    private final Map<Long, TypewriterHelper> typewriterHelpers = new HashMap<>();
 
     public TipsAiChatAdapter(Context context) {
         super(context);
@@ -100,6 +109,45 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
         return new TipsAiChatAdapter.ViewHolder(viewTypeLayout);
     }
 
+    @Override
+    public void onBindViewHolder(@NonNull BaseAdapter<?>.ViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads);
+        } else {
+            boolean processed = false;
+            if (holder instanceof TipsAiChatAdapter.ViewHolder) {
+                 TipsAiChatAdapter.ViewHolder myHolder = (TipsAiChatAdapter.ViewHolder) holder;
+                 for (Object payload : payloads) {
+                    if (PAYLOAD_UPDATE_CONTENT.equals(payload)) {
+                        myHolder.onBindPayload(position);
+                        processed = true;
+                    }
+                }
+            }
+
+            if (!processed) {
+                super.onBindViewHolder(holder, position, payloads);
+            }
+        }
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull BaseAdapter<?>.ViewHolder holder) {
+        super.onViewRecycled(holder);
+        // 清理打字机 helper 防止内存泄漏
+        if (holder instanceof TipsAiChatAdapter.ViewHolder) {
+            int pos = holder.getAdapterPosition();
+            if (pos != androidx.recyclerview.widget.RecyclerView.NO_POSITION && pos < getCount()) {
+                ChatMessageBean bean = getItem(pos);
+                if (bean != null && typewriterHelpers.containsKey(bean.getId())) {
+                     TypewriterHelper helper = typewriterHelpers.get(bean.getId());
+                     if(helper != null) helper.stop();
+                     typewriterHelpers.remove(bean.getId());
+                }
+            }
+        }
+    }
+
     private final class ViewHolder extends AppAdapter<?>.ViewHolder {
 
         private ViewHolder(int viewlayout) {
@@ -107,10 +155,22 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
             Timber.tag("TipsAiChatAdapter").d("ViewHolder created with layout: %d", viewlayout);
         }
 
+        public void onBindPayload(int position) {
+            ChatMessageBean bean = getItem(position);
+            // 仅对流式消息进行增量更新
+            if (bean.getType() == ChatMessageBean.TYPE_RECEIVED && bean.isStreaming()) {
+                 TypewriterHelper helper = typewriterHelpers.get(bean.getId());
+                 if (helper != null) {
+                     helper.setContent(bean.getContent(), true);
+                 } else {
+                     onBindView(position);
+                 }
+            }
+        }
+
         @Override
         public void onBindView(int position) {
             ChatMessageBean bean = getItem(position);
-            Timber.tag("TipsAiChatAdapter").d("onBindView: position=%d, type=%d", position, bean.getType());
             
             switch (bean.getType()) {
                 case ChatMessageBean.TYPE_RECEIVED:
@@ -118,12 +178,27 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     ImageView iv_receive_picture = findViewById(R.id.iv_receive_picture);
                     TextView tv_receive_nick = findViewById(R.id.tv_receive_nick);
                     
-                    // 设置 Markdown 文本
-                    if (markwon != null && tv_receive_content != null && bean.getContent() != null) {
-                        markwon.setMarkdown(tv_receive_content, bean.getContent());
-                    }
                     if (tv_receive_nick != null) {
                         tv_receive_nick.setText(bean.getNick());
+                    }
+
+                    if (tv_receive_content != null) {
+                        if (bean.isStreaming()) {
+                            TypewriterHelper helper = typewriterHelpers.get(bean.getId());
+                            if (helper == null) {
+                                helper = new TypewriterHelper(tv_receive_content, markwon);
+                                typewriterHelpers.put(bean.getId(), helper);
+                            }
+                            helper.setContent(bean.getContent(), true);
+                        } else {
+                            // 流式传输结束
+                             TypewriterHelper helper = typewriterHelpers.remove(bean.getId());
+                             if (helper != null) helper.stop();
+                             
+                             if (markwon != null && bean.getContent() != null) {
+                                 markwon.setMarkdown(tv_receive_content, bean.getContent());
+                             }
+                        }
                     }
                     break;
 
@@ -134,10 +209,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                         tv_send_content.setText(bean.getContent());
                     }
                     if (iv_send_picture != null) {
-                        // 检查是否有自定义头像URL，如果没有则使用默认头像
                         if (bean.getPic_url() != null && !bean.getPic_url().isEmpty()) {
-                            // 这里应该加载网络图片，但由于缺少图片加载库，暂时使用默认图片
-                            // 在实际项目中，你可以使用 Glide、Picasso 等库来加载网络图片
                             iv_send_picture.setImageResource(R.drawable.chat_user_default);
                         } else {
                             iv_send_picture.setImageResource(R.drawable.chat_user_default);
@@ -191,6 +263,112 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                         });
                     }
                     break;
+            }
+        }
+    }
+
+
+    private static class TypewriterHelper {
+        private final TextView textView;
+        private final Markwon markwon;
+        private final Handler handler = new Handler(Looper.getMainLooper());
+        private String targetContent = "";
+        private int displayedLength = 0;
+        private boolean isTyping = false;
+        private boolean showCursor = true;
+        // 光标字符：使用 ▋ 或者 solid block
+        private static final String CURSOR_SYMBOL = " ▋";
+        
+        private final Runnable cursorBlinkRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (isTyping) {
+                    showCursor = !showCursor;
+                    render();
+                    handler.postDelayed(this, 500);
+                }
+            }
+        };
+
+        private final Runnable typingRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (displayedLength < targetContent.length()) {
+                    // 动态调整步长
+                    int remaining = targetContent.length() - displayedLength;
+                    // 如果剩余很多，步长加大，确保不会落后太多
+                    int increment = Math.max(1, remaining / 20); 
+                    // 也不要太快
+                    increment = Math.min(increment, 5);
+                    
+                    displayedLength = Math.min(displayedLength + increment, targetContent.length());
+                    render();
+                    
+                    // 降低渲染频率：80ms 一次，减少 Markdown 渲染次数
+                    handler.postDelayed(this, 80);
+                } else {
+                    // 内容追平了，但仍处于流式状态，保持光标闪烁
+                    render();
+                    // 这里不自动 stop，因为SSE可能还在传输，只是暂时没有新内容
+                    // 但 typingLoop 可以暂停，等待新内容唤醒
+                }
+            }
+        };
+
+        public TypewriterHelper(TextView textView, Markwon markwon) {
+            this.textView = textView;
+            this.markwon = markwon;
+        }
+
+        public void setContent(String content, boolean animate) {
+            this.targetContent = content;
+            if (animate) {
+                if (!isTyping) {
+                    isTyping = true;
+                    showCursor = true;
+                    handler.post(typingRunnable);
+                    handler.post(cursorBlinkRunnable);
+                } else {
+                    // 如果已经在 typing，只需更新 targetContent，typingRunnable 会自动发现并追赶
+                    // 确保 Runnable 正在运行 (防止之前追平停止了)
+                    handler.removeCallbacks(typingRunnable);
+                    handler.post(typingRunnable);
+                }
+            } else {
+                stop();
+                displayedLength = content.length();
+                isTyping = false;
+                showCursor = false;
+                render();
+            }
+        }
+        
+        private void render() {
+            if (textView == null) return;
+            
+            String textToShow = targetContent.substring(0, displayedLength);
+            if (isTyping && showCursor) {
+                textToShow += CURSOR_SYMBOL;
+            }
+            
+            // 使用 Markwon 渲染以保持格式
+            // 节流策略改进：通过减少渲染频率（50ms）而不是跳过 Markwon 调用
+            if (markwon != null) {
+                markwon.setMarkdown(textView, textToShow);
+            } else {
+                textView.setText(textToShow);
+            }
+        }
+
+        public void stop() {
+            isTyping = false;
+            handler.removeCallbacks(typingRunnable);
+            handler.removeCallbacks(cursorBlinkRunnable);
+            // 最后渲染一次无光标状态
+             if (markwon != null) {
+                markwon.setMarkdown(textView, targetContent);
+            } else {
+                textView.setText(targetContent);
             }
         }
     }

@@ -717,6 +717,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                         answerMsg.setSessionId(currentSession.getId());
                                                         answerMsg.setCreateDate(DateHelper.getSeconds1());
                                                         answerMsg.setIsDelete(ChatMessageBean.IS_Delete_NO);
+                                                        answerMsg.setStreaming(true); // 初始设为流式
                                                         
                                                         long answerId = DbService.getInstance().mChatMessageBeanService.addEntity(answerMsg);
                                                         answerMsg.setId(answerId);
@@ -730,11 +731,15 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                         String current = answerMessageRef[0].getContent();
                                                         answerMessageRef[0].setContent(current + chunk.getContent());
                                                         
-                                                        // 刷新回答消息 UI（不执行滚动，避免闪烁跳动）
-                                                        int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
-                                                        if (answerPos != -1) {
-                                                            mChatAdapter.notifyItemChanged(answerPos); // 局部刷新
-                                                        }
+                                                         // 刷新回答消息 UI - 使用 Payload 避免无效重绘
+                                                         int answerPos = mChatAdapter.getData().indexOf(answerMessageRef[0]);
+                                                         if (answerPos != -1) {
+                                                             // 标记流式状态
+                                                             if (!answerMessageRef[0].isStreaming()) {
+                                                                 answerMessageRef[0].setStreaming(true);
+                                                             }
+                                                             mChatAdapter.notifyItemChanged(answerPos, TipsAiChatAdapter.PAYLOAD_UPDATE_CONTENT);
+                                                         }
                                                     }
                                                     
                                                 } else if ("error".equals(chunk.getType())) {
@@ -764,6 +769,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                 // 保存最终回答到数据库
                                                 if (answerMessageRef[0] != null) {
                                                     answerMessageRef[0].setCreateDate(DateHelper.getSeconds1());
+                                                    answerMessageRef[0].setStreaming(false); // 结束流式状态
                                                     DbService.getInstance().mChatMessageBeanService.updateEntity(answerMessageRef[0]);
                                                     
                                                     // 更新会话预览
@@ -782,6 +788,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                 thinkingMessage.setThinkingCollapsed(true);
                                                 int thinkPos = mChatAdapter.getData().indexOf(thinkingMessage);
                                                 if (thinkPos != -1) mChatAdapter.notifyItemChanged(thinkPos);
+                                                
+                                                // 完成后滚动到底部（只滚动一次）
+                                                if (rv_chat != null && mChatAdapter.getData().size() > 0) {
+                                                    rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                                                }
                                             }
                                         });
                                     }
@@ -1392,6 +1403,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                         answerMsg.setSessionId(currentSession.getId());
                                         answerMsg.setCreateDate(DateHelper.getSeconds1());
                                         answerMsg.setIsDelete(ChatMessageBean.IS_Delete_NO);
+                                        answerMsg.setStreaming(true); // 设置为流式状态，启用打字机效果
                                         
                                         long answerId = DbService.getInstance().mChatMessageBeanService.addEntity(answerMsg);
                                         answerMsg.setId(answerId);
