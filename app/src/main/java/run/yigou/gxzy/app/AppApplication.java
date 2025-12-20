@@ -110,8 +110,6 @@ public final class AppApplication extends Application {
         mUserInfoService = DbService.getInstance().mUserInfoService;
         initUserLogin();
         fragmentSetting = ManagerSetting.getFragmentSetting();
-        //构造书籍数据/实现本地数据搜索
-        ///ThreadUtil.runInBackground(ConvertEntity::tipsSingleDataInit);
         registryByReflect();
         initSdk(this);
         //初始化工具类
@@ -235,7 +233,7 @@ public final class AppApplication extends Application {
        //  UmengClient.init(application, AppConfig.isLogEnable());
 
         // Bugly 异常捕捉
-         CrashReport.initCrashReport(application, AppConfig.getBuglyId(), AppConfig.isDebug());
+        // CrashReport.initCrashReport(application, AppConfig.getBuglyId(), AppConfig.isDebug());
 
         // Activity 栈管理初始化
         ActivityManager.getInstance().init(application);
@@ -288,7 +286,7 @@ public final class AppApplication extends Application {
                     throw new IllegalArgumentException(message);
                 } else {
                     // 上报到 Bugly 错误列表中
-                      CrashReport.postCatchedException(new IllegalArgumentException(message));
+                    //  CrashReport.postCatchedException(new IllegalArgumentException(message));
                 }
             }
         });

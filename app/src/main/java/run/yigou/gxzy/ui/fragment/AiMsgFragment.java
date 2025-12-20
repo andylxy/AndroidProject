@@ -297,12 +297,12 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             }
         });
 
-        // 设置侧边栏标题编辑按钮点击事件
-        ImageButton editTitleButton = findViewById(R.id.btn_edit_title);
-        editTitleButton.setOnClickListener(new View.OnClickListener() {
+        // 设置侧边栏清空所有会话按钮点击事件
+        ImageButton clearAllButton = findViewById(R.id.btn_edit_title);
+        clearAllButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showEditTitleDialog();
+                showClearAllSessionsDialog();
             }
         });
     }
@@ -401,8 +401,10 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         ChatSessionBean newSession = new ChatSessionBean();
         newSession.setTitle("新对话");
         newSession.setPreview("开始新的对话");
-        newSession.setUpdateTime(DateHelper.getSeconds1());
-        newSession.setCreateTime(null); // 初始为空，等待申请会话ID后设置
+        String currentTime = DateHelper.getSeconds1();
+        newSession.setUpdateTime(currentTime);
+        newSession.setCreateTime(currentTime); // 不能为null，因为是@NotNull字段
+        newSession.setIsDelete(ChatSessionBean.IS_Delete_NO);
         
         // 保存到数据库
         long sessionId = DbService.getInstance().mChatSessionBeanService.addEntity(newSession);
@@ -522,14 +524,17 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             getTitleBar().setTitle(session.getTitle());
         }
 
-        // 滚动到聊天记录底部
+        // 滚动到聊天记录的绝对底部
         if (rv_chat != null && mChatAdapter != null) {
             rv_chat.post(new Runnable() {
                 @Override
                 public void run() {
                     if (mChatAdapter.getItemCount() > 0) {
+                        // 先滚动到最后一条消息
                         rv_chat.scrollToPosition(mChatAdapter.getItemCount() - 1);
-                        Log.d(TAG, "Scrolled to position " + (mChatAdapter.getItemCount() - 1));
+                        // 再滚动到 item 的绝对底部
+                        rv_chat.post(() -> rv_chat.scrollBy(0, 10000));
+                        Log.d(TAG, "Scrolled to absolute bottom");
                     }
                 }
             });
@@ -1586,5 +1591,64 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         
         // 清空输入框
         ((EditText) findViewById(R.id.chat_content)).getText().clear();
+    }
+    
+    /**
+     * 显示清空所有会话的确认对话框
+     */
+    private void showClearAllSessionsDialog() {
+        new android.app.AlertDialog.Builder(getContext())
+                .setTitle("清空所有会话")
+                .setMessage("确定要删除所有聊天会话吗？此操作不可恢复！")
+                .setPositiveButton("确定", (dialog, which) -> {
+                    clearAllSessions();
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+    
+    /**
+     * 清空所有会话和消息
+     */
+    private void clearAllSessions() {
+        // 删除所有消息
+        DbService.getInstance().mChatMessageBeanService.deleteAll();
+        // 删除所有会话
+        DbService.getInstance().mChatSessionBeanService.deleteAll();
+        
+        // 清空当前会话
+        currentSession = null;
+        
+        // 清空聊天列表
+        if (mChatAdapter != null) {
+            mChatAdapter.setData(new ArrayList<>());
+        }
+        
+        // 清空 SharedPreferences 中的最后会话ID
+        if (getContext() != null) {
+            getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    .edit()
+                    .remove(KEY_LAST_SESSION_ID)
+                    .apply();
+        }
+        
+        // 刷新侧边栏历史列表
+        if (chatHistoryAdapter != null) {
+            chatHistoryAdapter.setData(new ArrayList<>());
+        }
+        
+        // 关闭侧边栏
+        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        if (drawerLayout != null) {
+            drawerLayout.closeDrawers();
+        }
+        
+        // 提示用户
+        toast("所有会话已清空");
+        
+        // 重置标题
+        if (getTitleBar() != null) {
+            getTitleBar().setTitle(getString(R.string.app_name_ai));
+        }
     }
 }

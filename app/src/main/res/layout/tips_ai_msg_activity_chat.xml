@@ -190,11 +190,11 @@
                 android:id="@+id/btn_edit_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_edit"
+                android:src="@drawable/ic_delete"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:padding="@dimen/dp_8"
-                android:contentDescription="编辑标题"
-                android:visibility="gone"
+                android:contentDescription="清空所有会话"
+                android:visibility="visible"
                 android:minWidth="@dimen/dp_40"
                 android:minHeight="@dimen/dp_40" />
 
