@@ -70,6 +70,12 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
     
     @Override
     public long getItemId(int position) {
+        ChatMessageBean bean = getItem(position);
+        // 返回消息的数据库 ID，如果没有则返回 position
+        // 这样 RecyclerView 可以正确追踪每条消息，避免重复 rebind
+        if (bean != null && bean.getId() != null) {
+            return bean.getId();
+        }
         return position;
     }
     
@@ -268,6 +274,17 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
     }
 
 
+    // 滚动回调接口
+    public interface OnTypewriterRenderCallback {
+        void onRender();
+    }
+    
+    private static OnTypewriterRenderCallback scrollCallback;
+    
+    public static void setScrollCallback(OnTypewriterRenderCallback callback) {
+        scrollCallback = callback;
+    }
+
     private static class TypewriterHelper {
         private final TextView textView;
         private final Markwon markwon;
@@ -275,43 +292,31 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
         private String targetContent = "";
         private int displayedLength = 0;
         private boolean isTyping = false;
-        private boolean showCursor = true;
-        // 光标字符：使用 ▋ 或者 solid block
-        private static final String CURSOR_SYMBOL = " ▋";
-        
-        private final Runnable cursorBlinkRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (isTyping) {
-                    showCursor = !showCursor;
-                    render();
-                    handler.postDelayed(this, 500);
-                }
-            }
-        };
+        private String lastRenderedText = ""; // 缓存上次渲染的文本，避免重复渲染
 
         private final Runnable typingRunnable = new Runnable() {
             @Override
             public void run() {
                 if (displayedLength < targetContent.length()) {
-                    // 动态调整步长
+                    // 动态调整步长 - 让效果更明显
                     int remaining = targetContent.length() - displayedLength;
-                    // 如果剩余很多，步长加大，确保不会落后太多
-                    int increment = Math.max(1, remaining / 20); 
-                    // 也不要太快
-                    increment = Math.min(increment, 5);
+                    int increment;
+                    if (remaining > 100) {
+                        increment = Math.min(remaining / 10, 8); // 快速追赶
+                    } else if (remaining > 30) {
+                        increment = 3; // 中速
+                    } else {
+                        increment = 1; // 慢速打字效果
+                    }
                     
                     displayedLength = Math.min(displayedLength + increment, targetContent.length());
                     render();
                     
-                    // 降低渲染频率：80ms 一次，减少 Markdown 渲染次数
-                    handler.postDelayed(this, 80);
-                } else {
-                    // 内容追平了，但仍处于流式状态，保持光标闪烁
-                    render();
-                    // 这里不自动 stop，因为SSE可能还在传输，只是暂时没有新内容
-                    // 但 typingLoop 可以暂停，等待新内容唤醒
+                    // 动态调整频率
+                    long delay = (remaining > 50) ? 50 : 100;
+                    handler.postDelayed(this, delay);
                 }
+                // 内容追平后不再执行任何操作
             }
         };
 
@@ -321,16 +326,14 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
         }
 
         public void setContent(String content, boolean animate) {
+            if (content == null) content = "";
             this.targetContent = content;
             if (animate) {
                 if (!isTyping) {
                     isTyping = true;
-                    showCursor = true;
                     handler.post(typingRunnable);
-                    handler.post(cursorBlinkRunnable);
                 } else {
-                    // 如果已经在 typing，只需更新 targetContent，typingRunnable 会自动发现并追赶
-                    // 确保 Runnable 正在运行 (防止之前追平停止了)
+                    // 如果已经在 typing，确保 Runnable 正在运行
                     handler.removeCallbacks(typingRunnable);
                     handler.post(typingRunnable);
                 }
@@ -338,7 +341,6 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                 stop();
                 displayedLength = content.length();
                 isTyping = false;
-                showCursor = false;
                 render();
             }
         }
@@ -347,25 +349,28 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
             if (textView == null) return;
             
             String textToShow = targetContent.substring(0, displayedLength);
-            if (isTyping && showCursor) {
-                textToShow += CURSOR_SYMBOL;
-            }
             
-            // 使用 Markwon 渲染以保持格式
-            // 节流策略改进：通过减少渲染频率（50ms）而不是跳过 Markwon 调用
-            if (markwon != null) {
-                markwon.setMarkdown(textView, textToShow);
-            } else {
-                textView.setText(textToShow);
+            // 只有内容变化时才重新渲染 Markdown，减少闪烁
+            if (!textToShow.equals(lastRenderedText)) {
+                lastRenderedText = textToShow;
+                if (markwon != null) {
+                    markwon.setMarkdown(textView, textToShow);
+                } else {
+                    textView.setText(textToShow);
+                }
+                // 触发滚动回调
+                if (scrollCallback != null) {
+                    scrollCallback.onRender();
+                }
             }
         }
 
         public void stop() {
             isTyping = false;
             handler.removeCallbacks(typingRunnable);
-            handler.removeCallbacks(cursorBlinkRunnable);
-            // 最后渲染一次无光标状态
-             if (markwon != null) {
+            // 最后渲染一次完整内容
+            lastRenderedText = "";
+            if (markwon != null) {
                 markwon.setMarkdown(textView, targetContent);
             } else {
                 textView.setText(targetContent);

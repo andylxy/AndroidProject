@@ -37,6 +37,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -222,6 +223,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         rv_chat.setLayoutManager(layoutManager);
         rv_chat.setAdapter(mChatAdapter);
+        
+        // 设置打字机渲染回调，实现打字时同步滚动
+        TipsAiChatAdapter.setScrollCallback(() -> scrollToAbsoluteBottom());
 
         // 注册事件
         XEventBus.getDefault().register(AiMsgFragment.this);
@@ -656,6 +660,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                     scrollState = newState;
                                 }
                             });
+                            // 阻止子 View 获取焦点，防止 notifyItemChanged 时 TextView 获取焦点导致滚动跳动
+                            rv_chat.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
                         }
 
                         // 发送消息给GPT - 使用 SSE 流式请求
@@ -802,6 +808,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                 // 最终刷新并滚动
                                                 mChatAdapter.updateData();
                                                 scrollToAbsoluteBottom();
+                                                
+                                                // 恢复焦点能力，允许用户选择文本
+                                                if (rv_chat != null) {
+                                                    rv_chat.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
+                                                }
                                             }
                                         });
                                     }
@@ -821,6 +832,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                     DbService.getInstance().mChatMessageBeanService.updateEntity(thinkingMessage);
                                                 }
                                                 mChatAdapter.updateData();
+                                                
+                                                // 恢复焦点能力
+                                                if (rv_chat != null) {
+                                                    rv_chat.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
+                                                }
                                             }
                                         });
                                     }
@@ -877,23 +893,15 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     
     /**
      * 滚动到 RecyclerView 的绝对底部
-     * 使用 scrollBy 直接滚动像素，不使用动画，避免冲突
+     * 使用 smoothScrollBy 平滑滚动，产生打字机效果
      */
     private void scrollToAbsoluteBottom() {
         if (rv_chat == null) return;
         
         rv_chat.post(() -> {
-            // 计算需要滚动的距离
-            int scrollRange = rv_chat.computeVerticalScrollRange();
-            int scrollOffset = rv_chat.computeVerticalScrollOffset();
-            int scrollExtent = rv_chat.computeVerticalScrollExtent();
-            int maxScrollY = scrollRange - scrollExtent;
-            int scrollDistance = maxScrollY - scrollOffset;
-            
-            // 如果还没到底部，直接滚动
-            if (scrollDistance > 0) {
-                rv_chat.scrollBy(0, scrollDistance);
-            }
+            // 使用 smoothScrollBy 平滑滚动到底部
+            // RecyclerView 会自动限制到实际最大可滚动距离
+            rv_chat.smoothScrollBy(0, 500);
         });
     }
     

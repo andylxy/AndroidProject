@@ -45,7 +45,6 @@
             android:layout_toStartOf="@id/iv_send_picture"
             android:background="@drawable/chat_bubble_send"
             android:editable="false"
-            android:textIsSelectable="true"
             android:textColor="#191919"
             android:text="hello"
             android:textSize="@dimen/sp_15" />

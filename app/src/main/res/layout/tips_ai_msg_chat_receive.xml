@@ -58,7 +58,6 @@
             android:paddingEnd="@dimen/dp_15"
             android:paddingBottom="@dimen/dp_10"
             android:editable="false"
-            android:textIsSelectable="true"
             android:text="hello"
             android:textColor="#191919"
             android:textSize="@dimen/sp_15" />

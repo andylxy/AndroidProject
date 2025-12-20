@@ -95,10 +95,7 @@
                 android:scrollbarStyle="outsideOverlay"
                 android:fadeScrollbars="false"
                 android:fillViewport="true"
-                android:overScrollMode="always"
-                android:clickable="true"
-                android:focusable="true"
-                android:focusableInTouchMode="true">
+                android:overScrollMode="always">
 
                 <TextView
                     android:id="@+id/tv_thinking_content"
