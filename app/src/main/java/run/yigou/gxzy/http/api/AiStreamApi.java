@@ -74,26 +74,34 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
     
     /**
      * 实现 IRequestHost - 返回 Host 地址
+     * 
+     * 开发环境(DEBUG): http://192.168.2.158:9991 (无 SSL)
+     * 正式/预览环境: https://aime.881019.xyz:8443 (需要 SSL)
      */
     @Override
     public String getHost() {
-        // 开发环境使用测试地址，生产环境使用配置地址
-        if (AppApplication.application.global_openness) {
+        if (run.yigou.gxzy.BuildConfig.DEBUG) {
+            // 开发环境：使用 HTTP
             return "http://192.168.2.158:9991";
+        } else {
+            // 正式/预览环境：使用 HTTPS
+            return "https://aime.881019.xyz:8443";
         }
-        return AppConfig.getHostUrl();
     }
     
     /**
      * 实现 IRequestClient - 返回配置好的 OkHttpClient
      * 
      * ✅ 从 EasyConfig 获取基础 client，自动应用拦截器
-     * ✅ 添加 SSE 特定配置（SSL、超时）
+     * ✅ 添加 SSE 特定配置（超时时间）
+     * ✅ HTTPS 使用 Let's Encrypt 证书，Android 默认信任，无需特殊配置
      */
     @NonNull
     @Override
     public OkHttpClient getClient() {
         EasyLog.print(TAG, "========== 构建 SSE OkHttpClient ==========");
+        EasyLog.print(TAG, "当前环境: " + (run.yigou.gxzy.BuildConfig.DEBUG ? "开发(HTTP)" : "正式(HTTPS-Let's Encrypt)"));
+        EasyLog.print(TAG, "目标地址: " + getHost());
         
         // ✅ 从 EasyConfig 获取基础 client（自动应用拦截器、签名等）
         OkHttpClient.Builder clientBuilder = EasyConfig.getInstance()
@@ -105,51 +113,12 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
         
         EasyLog.print(TAG, "已设置超时：读300秒，写300秒，连接30秒");
         
-        // ⚠️ 开发环境：强制信任所有 SSL 证书（仅用于测试）
-        try {
-            EasyLog.print(TAG, "========== 配置 SSL 信任 ==========");
-            
-            // 创建信任所有证书的 TrustManager
-            final javax.net.ssl.TrustManager[] trustAllCerts = new javax.net.ssl.TrustManager[]{
-                new javax.net.ssl.X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                        EasyLog.print(TAG, "✅ checkClientTrusted - 跳过验证");
-                    }
-                    
-                    @Override
-                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                        EasyLog.print(TAG, "✅ checkServerTrusted - 跳过验证");
-                    }
-                    
-                    @Override
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return new java.security.cert.X509Certificate[]{};
-                    }
-                }
-            };
-            
-            // 安装信任所有证书的 SSLContext
-            final javax.net.ssl.SSLContext sslContext = javax.net.ssl.SSLContext.getInstance("TLS");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            final javax.net.ssl.SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-            
-            EasyLog.print(TAG, "SSLContext 协议: " + sslContext.getProtocol());
-            
-            clientBuilder.sslSocketFactory(sslSocketFactory, (javax.net.ssl.X509TrustManager) trustAllCerts[0]);
-            clientBuilder.hostnameVerifier(new javax.net.ssl.HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, javax.net.ssl.SSLSession session) {
-                    EasyLog.print(TAG, "✅ hostnameVerifier - 跳过验证: " + hostname);
-                    return true;
-                }
-            });
-            
-            EasyLog.print(TAG, "========== ✅ SSL 信任配置完成 ==========");
-        } catch (Exception e) {
-            EasyLog.print(TAG, "❌ SSL 配置失败: " + e.getMessage());
-            e.printStackTrace();
-        }
+        // ✅ HTTPS 使用 Let's Encrypt 证书
+        // Let's Encrypt 是受信任的 CA，Android 系统默认信任，无需自定义 SSL 配置
+        // 系统会自动验证：
+        // 1. 证书是否由受信任的 CA 签发 ✓
+        // 2. 证书是否在有效期内 ✓
+        // 3. 证书域名是否与请求域名匹配 ✓
         
         return clientBuilder.build();
     }
