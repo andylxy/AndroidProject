@@ -67,6 +67,7 @@ import com.tencent.mmkv.MMKV;
 
 import okhttp3.OkHttpClient;
 
+import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.SerialUtil;
 import timber.log.Timber;
 
@@ -143,7 +144,7 @@ public final class AppApplication extends Application {
             }
         } catch (Exception e) {
             // 记录异常日志，或者进行其他错误处理
-            EasyLog.print("InitUserLogin", "Error initializing user login: " + e.getMessage());
+            DebugLog.print("InitUserLogin", "Error initializing user login: " + e.getMessage());
         }
     }
 

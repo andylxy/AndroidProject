@@ -26,6 +26,7 @@ import run.yigou.gxzy.ui.tips.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
+import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * 应用数据初始化器
@@ -52,7 +53,7 @@ public class AppDataInitializer {
      */
     public static void initializeIfNeeded(Context context) {
         if (isInitialized) {
-            EasyLog.print(TAG, "Already initialized, skipping");
+            DebugLog.print(TAG, "Already initialized, skipping");
             return;
         }
         
@@ -62,23 +63,23 @@ public class AppDataInitializer {
             }
             
             try {
-                EasyLog.print(TAG, "Starting data initialization...");
+                DebugLog.print(TAG, "Starting data initialization...");
                 long startTime = System.currentTimeMillis();
                 
                 // 检查本地是否已有数据
                 if (hasLocalData()) {
-                    EasyLog.print(TAG, "Local data found, loading from database");
+                    DebugLog.print(TAG, "Local data found, loading from database");
                     loadFromLocalDatabase();
                 } else {
-                    EasyLog.print(TAG, "No local data, will load from network later");
+                    DebugLog.print(TAG, "No local data, will load from network later");
                 }
                 
                 isInitialized = true;
                 long duration = System.currentTimeMillis() - startTime;
-                EasyLog.print(TAG, "Initialization completed in " + duration + "ms");
+                DebugLog.print(TAG, "Initialization completed in " + duration + "ms");
                 
             } catch (Exception e) {
-                EasyLog.print(TAG, "Initialization error: " + e.getMessage());
+                DebugLog.print(TAG, "Initialization error: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -98,7 +99,7 @@ public class AppDataInitializer {
             ArrayList<TabNav> navList = dbService.mTabNavService.findAll();
             return navList != null && !navList.isEmpty();
         } catch (Exception e) {
-            EasyLog.print(TAG, "Error checking local data: " + e.getMessage());
+            DebugLog.print(TAG, "Error checking local data: " + e.getMessage());
             return false;
         }
     }
@@ -123,10 +124,10 @@ public class AppDataInitializer {
             // 4. 加载导航数据
             loadNavigationData(dbService, globalData);
             
-            EasyLog.print(TAG, "Local data loaded successfully");
+            DebugLog.print(TAG, "Local data loaded successfully");
             
         } catch (Exception e) {
-            EasyLog.print(TAG, "Error loading local data: " + e.getMessage());
+            DebugLog.print(TAG, "Error loading local data: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -146,7 +147,7 @@ public class AppDataInitializer {
                     }
                 }
             }
-            EasyLog.print(TAG, "Loaded " + yaoList.size() + " Yao items");
+            DebugLog.print(TAG, "Loaded " + yaoList.size() + " Yao items");
         }
     }
     
@@ -159,7 +160,7 @@ public class AppDataInitializer {
             for (MingCiContent mingCi : mingCiList) {
                 globalData.putMingCiContent(mingCi.getName(), mingCi);
             }
-            EasyLog.print(TAG, "Loaded " + mingCiList.size() + " MingCi items");
+            DebugLog.print(TAG, "Loaded " + mingCiList.size() + " MingCi items");
         }
     }
     
@@ -173,7 +174,7 @@ public class AppDataInitializer {
             for (ZhongYaoAlia alias : aliasList) {
                 yaoAliasDict.put(alias.getBieming(), alias.getName());
             }
-            EasyLog.print(TAG, "Loaded " + aliasList.size() + " Yao aliases");
+            DebugLog.print(TAG, "Loaded " + aliasList.size() + " Yao aliases");
         }
     }
     
@@ -201,7 +202,7 @@ public class AppDataInitializer {
             }
         }
         
-        EasyLog.print(TAG, "Loaded " + navList.size() + " navigation tabs");
+        DebugLog.print(TAG, "Loaded " + navList.size() + " navigation tabs");
     }
     
     /**

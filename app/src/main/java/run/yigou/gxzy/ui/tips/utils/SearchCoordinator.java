@@ -15,6 +15,7 @@ import run.yigou.gxzy.ui.tips.data.BookData;
 import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.ui.tips.data.ChapterData;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
+import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * 搜索协调器
@@ -43,15 +44,15 @@ public class SearchCoordinator {
      * @return GroupData 和 ItemData 的配对列表
      */
     public Pair<List<GroupData>, List<List<ItemData>>> searchGlobal(String keyword) {
-        EasyLog.print("=== SearchCoordinator.searchGlobal() ===");
-        EasyLog.print("书籍ID: " + bookId + ", 关键字: " + keyword);
+        DebugLog.print("=== SearchCoordinator.searchGlobal() ===");
+        DebugLog.print("书籍ID: " + bookId + ", 关键字: " + keyword);
         
         List<GroupData> groupDataList = new ArrayList<>();
         List<List<ItemData>> itemDataList = new ArrayList<>();
         
         // 验证输入
         if (keyword == null || keyword.trim().isEmpty()) {
-            EasyLog.print("❌ 关键字为空");
+            DebugLog.print("❌ 关键字为空");
             return new Pair<>(groupDataList, itemDataList);
         }
         
@@ -62,11 +63,11 @@ public class SearchCoordinator {
             run.yigou.gxzy.greendao.util.ConvertEntity.getBookChapterDetailList(bookId);
         
         if (allContent == null || allContent.isEmpty()) {
-            EasyLog.print("❌ 无书籍数据");
+            DebugLog.print("❌ 无书籍数据");
             return new Pair<>(groupDataList, itemDataList);
         }
         
-        EasyLog.print("开始搜索，总章节数: " + allContent.size());
+        DebugLog.print("开始搜索，总章节数: " + allContent.size());
         
         // 2. 针对伤寒论进行特殊过滤
         if (bookId == run.yigou.gxzy.common.AppConst.ShangHanNo) {
@@ -110,8 +111,8 @@ public class SearchCoordinator {
         }
         
         int totalMatches = searchKeyEntity.getSearchResTotalNum();
-        EasyLog.print("=== 搜索完成 ===");
-        EasyLog.print("匹配章节: " + groupDataList.size() + ", 总匹配数: " + totalMatches);
+        DebugLog.print("=== 搜索完成 ===");
+        DebugLog.print("匹配章节: " + groupDataList.size() + ", 总匹配数: " + totalMatches);
         
         return new Pair<>(groupDataList, itemDataList);
     }

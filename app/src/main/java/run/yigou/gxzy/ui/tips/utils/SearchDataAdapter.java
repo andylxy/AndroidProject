@@ -33,6 +33,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
+import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * 搜索数据适配器 - 统一处理方剂/药物/名词搜索
@@ -56,24 +57,24 @@ public class SearchDataAdapter {
         this.bookData = bookRepository.getBookData(bookId);
         this.chapters = bookRepository.getChapters(bookId);
         
-        EasyLog.print("=== SearchDataAdapter 初始化 ===");
-        EasyLog.print("BookId: " + bookId);
-        EasyLog.print("BookData: " + (bookData != null ? "已加载" : "未加载"));
-        EasyLog.print("章节数: " + (chapters != null ? chapters.size() : 0));
+        DebugLog.print("=== SearchDataAdapter 初始化 ===");
+        DebugLog.print("BookId: " + bookId);
+        DebugLog.print("BookData: " + (bookData != null ? "已加载" : "未加载"));
+        DebugLog.print("章节数: " + (chapters != null ? chapters.size() : 0));
     }
     
     /**
      * 搜索方剂相关内容
      */
     public Pair<List<GroupData>, List<List<ItemData>>> searchFangContent(String keyword) {
-        EasyLog.print("=== SearchDataAdapter.searchFangContent() [新架构] ===");
-        EasyLog.print("方剂关键字: " + keyword);
+        DebugLog.print("=== SearchDataAdapter.searchFangContent() [新架构] ===");
+        DebugLog.print("方剂关键字: " + keyword);
         
         List<GroupData> groupDataList = new ArrayList<>();
         List<List<ItemData>> itemDataList = new ArrayList<>();
         
         if (bookData == null || chapters == null || chapters.isEmpty()) {
-            EasyLog.print("❌ 数据源不可用");
+            DebugLog.print("❌ 数据源不可用");
             addNotFoundFangResult(groupDataList, itemDataList);
             return new Pair<>(groupDataList, itemDataList);
         }
@@ -83,15 +84,15 @@ public class SearchDataAdapter {
         Map<String, String> fangAliasDict = globalData.getFangAliasDict();
         String aliasName = getAliasName(fangAliasDict, keyword);
         
-        EasyLog.print("实际别名: " + aliasName);
+        DebugLog.print("实际别名: " + aliasName);
         
         // 【方剂详细信息】优先添加方剂配方（从BookData.getFangData()）
         ChapterData fangChapterData = bookData.getFangData();
-        EasyLog.print("方剂数据: " + (fangChapterData != null && fangChapterData.isContentLoaded() ? "已加载" : "未加载"));
+        DebugLog.print("方剂数据: " + (fangChapterData != null && fangChapterData.isContentLoaded() ? "已加载" : "未加载"));
         
         if (fangChapterData != null && fangChapterData.isContentLoaded()) {
             List<DataItem> fangItems = fangChapterData.getContent();
-            EasyLog.print("方剂条目数: " + (fangItems != null ? fangItems.size() : 0));
+            DebugLog.print("方剂条目数: " + (fangItems != null ? fangItems.size() : 0));
             
             if (fangItems != null) {
                 for (DataItem fangItem : fangItems) {
@@ -109,7 +110,7 @@ public class SearchDataAdapter {
                         items.add(convertDataItemToItemData(fangItem, true));
                         itemDataList.add(items);
                         
-                        EasyLog.print("✅ 找到方剂配方: " + itemName);
+                        DebugLog.print("✅ 找到方剂配方: " + itemName);
                         break;
                     }
                 }
@@ -131,18 +132,18 @@ public class SearchDataAdapter {
             
             ChapterData chapterData = bookData.findChapterBySignature(chapter.getSignatureId());
             if (chapterData == null) {
-                EasyLog.print("⚠️ 章节 " + chapter.getChapterHeader() + " ChapterData为null");
+                DebugLog.print("⚠️ 章节 " + chapter.getChapterHeader() + " ChapterData为null");
                 continue;
             }
             
             // 【关键修复】如果内容未加载，主动触发加载
             if (!chapterData.isContentLoaded()) {
-                EasyLog.print("🔄 章节 " + chapter.getChapterHeader() + " 内容未加载，触发加载...");
+                DebugLog.print("🔄 章节 " + chapter.getChapterHeader() + " 内容未加载，触发加载...");
                 bookRepository.loadChapterContent(bookData, chapter);
                 
                 // 加载后再次检查
                 if (!chapterData.isContentLoaded()) {
-                    EasyLog.print("⚠️ 章节 " + chapter.getChapterHeader() + " 加载失败");
+                    DebugLog.print("⚠️ 章节 " + chapter.getChapterHeader() + " 加载失败");
                     continue;
                 }
             }
@@ -150,7 +151,7 @@ public class SearchDataAdapter {
             
             List<DataItem> content = chapterData.getContent();
             if (content == null || content.isEmpty()) {
-                EasyLog.print("⚠️ 章节 " + chapter.getChapterHeader() + " 内容为空");
+                DebugLog.print("⚠️ 章节 " + chapter.getChapterHeader() + " 内容为空");
                 continue;
             }
             
@@ -189,7 +190,7 @@ public class SearchDataAdapter {
                 itemDataList.add(items);
                 
                 matchedSections++;
-                EasyLog.print("✅ 章节: " + chapter.getChapterHeader() + ", 条目: " + matchedItems.size());
+                DebugLog.print("✅ 章节: " + chapter.getChapterHeader() + ", 条目: " + matchedItems.size());
             }
         }
         
@@ -198,9 +199,9 @@ public class SearchDataAdapter {
             addNotFoundFangResult(groupDataList, itemDataList);
         }
         
-        EasyLog.print("=== 搜索完成 ===");
-        EasyLog.print("已下载章节: " + downloadedChapters + ", 已加载内容: " + loadedChapters);
-        EasyLog.print("检查条目数: " + totalItems + ", 匹配章节: " + matchedSections);
+        DebugLog.print("=== 搜索完成 ===");
+        DebugLog.print("已下载章节: " + downloadedChapters + ", 已加载内容: " + loadedChapters);
+        DebugLog.print("检查条目数: " + totalItems + ", 匹配章节: " + matchedSections);
         
         return new Pair<>(groupDataList, itemDataList);
     }
@@ -209,14 +210,14 @@ public class SearchDataAdapter {
      * 搜索药物相关内容
      */
     public Pair<List<GroupData>, List<List<ItemData>>> searchYaoContent(String keyword) {
-        EasyLog.print("=== SearchDataAdapter.searchYaoContent() [新架构] ===");
-        EasyLog.print("药物关键字: " + keyword);
+        DebugLog.print("=== SearchDataAdapter.searchYaoContent() [新架构] ===");
+        DebugLog.print("药物关键字: " + keyword);
         
         List<GroupData> groupDataList = new ArrayList<>();
         List<List<ItemData>> itemDataList = new ArrayList<>();
         
         if (bookData == null || chapters == null) {
-            EasyLog.print("❌ 数据源不可用");
+            DebugLog.print("❌ 数据源不可用");
             addNotFoundYaoResult(groupDataList, itemDataList);
             return new Pair<>(groupDataList, itemDataList);
         }
@@ -247,7 +248,7 @@ public class SearchDataAdapter {
             items.add(itemData);
             itemDataList.add(items);
             
-            EasyLog.print("✅ 找到药物: " + yao.getName());
+            DebugLog.print("✅ 找到药物: " + yao.getName());
         } else {
             addNotFoundYaoResult(groupDataList, itemDataList);
         }

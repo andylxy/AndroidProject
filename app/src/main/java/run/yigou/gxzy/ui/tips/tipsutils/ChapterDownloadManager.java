@@ -28,6 +28,7 @@ import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.ChapterContentApi;
 import run.yigou.gxzy.http.model.HttpData;
+import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * 章节下载管理器
@@ -85,7 +86,7 @@ public class ChapterDownloadManager {
         // 定时调度器：单线程，用于后台慢速下载调度
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
         
-        EasyLog.print("ChapterDownloadManager", "下载管理器初始化完成");
+        DebugLog.print("ChapterDownloadManager", "下载管理器初始化完成");
     }
 
     /**
@@ -103,7 +104,7 @@ public class ChapterDownloadManager {
                 }
             }
         }
-        EasyLog.print("ChapterDownloadManager", "初始化缓存: " + downloadedChapters.size() + " 个已下载章节");
+        DebugLog.print("ChapterDownloadManager", "初始化缓存: " + downloadedChapters.size() + " 个已下载章节");
     }
 
     /**
@@ -142,7 +143,7 @@ public class ChapterDownloadManager {
      */
     public void downloadChapter(LifecycleOwner lifecycleOwner, Chapter chapter, DownloadCallback callback) {
         if (chapter == null) {
-            EasyLog.print("ChapterDownloadManager", "章节为空，跳过下载");
+            DebugLog.print("ChapterDownloadManager", "章节为空，跳过下载");
             return;
         }
 
@@ -150,20 +151,20 @@ public class ChapterDownloadManager {
 
         // 检查是否已下载
         if (downloadedChapters.contains(signatureId)) {
-            EasyLog.print("ChapterDownloadManager", "章节已下载，跳过: " + chapter.getChapterHeader());
+            DebugLog.print("ChapterDownloadManager", "章节已下载，跳过: " + chapter.getChapterHeader());
             return;
         }
 
         // 检查是否正在下载（线程安全）
         synchronized (downloadingChapters) {
             if (downloadingChapters.contains(signatureId)) {
-                EasyLog.print("ChapterDownloadManager", "章节正在下载，跳过: " + chapter.getChapterHeader());
+                DebugLog.print("ChapterDownloadManager", "章节正在下载，跳过: " + chapter.getChapterHeader());
                 return;
             }
             downloadingChapters.add(signatureId);
         }
 
-        EasyLog.print("ChapterDownloadManager", "开始下载章节（高优先级）: " + chapter.getChapterHeader());
+        DebugLog.print("ChapterDownloadManager", "开始下载章节（高优先级）: " + chapter.getChapterHeader());
 
         // 提交到高优先级线程池
         highPriorityExecutor.execute(() -> {
@@ -201,7 +202,7 @@ public class ChapterDownloadManager {
         }
 
         if (chaptersToDownload.isEmpty()) {
-            EasyLog.print("ChapterDownloadManager", "所有章节已下载或下载中，无需后台下载");
+            DebugLog.print("ChapterDownloadManager", "所有章节已下载或下载中，无需后台下载");
             return;
         }
 
@@ -210,8 +211,8 @@ public class ChapterDownloadManager {
         long totalDelayMillis = 10 * 60 * 1000; // 10分钟 = 600,000毫秒
         long intervalMillis = totalChapters > 0 ? totalDelayMillis / totalChapters : 1000;
         
-        EasyLog.print("ChapterDownloadManager", "开始后台批量下载 " + totalChapters + " 个未下载章节");
-        EasyLog.print("ChapterDownloadManager", "下载策略: 10分钟内完成，间隔 " + (intervalMillis / 1000.0) + " 秒/章节");
+        DebugLog.print("ChapterDownloadManager", "开始后台批量下载 " + totalChapters + " 个未下载章节");
+        DebugLog.print("ChapterDownloadManager", "下载策略: 10分钟内完成，间隔 " + (intervalMillis / 1000.0) + " 秒/章节");
 
         // 定时调度下载任务
         for (int i = 0; i < totalChapters; i++) {
@@ -245,7 +246,7 @@ public class ChapterDownloadManager {
         }
 
         if (currentIndex < 0 || currentIndex >= allChapters.size()) {
-            EasyLog.print("ChapterDownloadManager", "当前索引越界: " + currentIndex);
+            DebugLog.print("ChapterDownloadManager", "当前索引越界: " + currentIndex);
             return;
         }
 
@@ -267,11 +268,11 @@ public class ChapterDownloadManager {
         }
 
         if (chaptersToPreload.isEmpty()) {
-            EasyLog.print("ChapterDownloadManager", "预加载范围内所有章节已下载或下载中");
+            DebugLog.print("ChapterDownloadManager", "预加载范围内所有章节已下载或下载中");
             return;
         }
 
-        EasyLog.print("ChapterDownloadManager", "开始预加载 " + chaptersToPreload.size() + " 个章节");
+        DebugLog.print("ChapterDownloadManager", "开始预加载 " + chaptersToPreload.size() + " 个章节");
 
         // 批量提交到低优先级线程池
         for (Chapter chapter : chaptersToPreload) {

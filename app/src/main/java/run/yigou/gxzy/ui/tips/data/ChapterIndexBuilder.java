@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import run.yigou.gxzy.greendao.entity.Chapter;
+import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * 章节索引构建器
@@ -91,7 +92,7 @@ public class ChapterIndexBuilder {
         isBuilt = true;
         
         long elapsed = System.currentTimeMillis() - startTime;
-        EasyLog.print(TAG, String.format(
+        DebugLog.print(TAG, String.format(
             "Index built: %d chapters, %d signatures, %d keywords, time: %d ms",
             chapters.size(), 
             signatureIndex.size(), 
@@ -157,7 +158,7 @@ public class ChapterIndexBuilder {
     @Nullable
     public Chapter findBySignature(long signatureId) {
         if (!isBuilt) {
-            EasyLog.print(TAG, "Index not built yet!");
+            DebugLog.print(TAG, "Index not built yet!");
             return null;
         }
         
@@ -172,7 +173,7 @@ public class ChapterIndexBuilder {
     @Nullable
     public Chapter findByTitle(@NonNull String title) {
         if (!isBuilt) {
-            EasyLog.print(TAG, "Index not built yet!");
+            DebugLog.print(TAG, "Index not built yet!");
             return null;
         }
         

@@ -21,6 +21,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 
+import run.yigou.gxzy.utils.DebugLog;
+
 /**
  * author : Android 轮子哥
  * desc   : 安全配置类，用于管理防重放攻击相关的配置信息
@@ -230,8 +232,8 @@ public class SecurityConfig {
         // 使用默认的HmacSHA256签名
         String signature = hmacSha256(stringToSign, sAccessKeySecret);
         
-        EasyLog.print("签名字符串：\n" + stringToSign);
-        EasyLog.print("签名结果：" + signature +"签名密匙：" + sAccessKeySecret);
+        DebugLog.print("签名字符串：\n" + stringToSign);
+        DebugLog.print("签名结果：" + signature +"签名密匙：" + sAccessKeySecret);
         
         return signature;
     }
@@ -251,7 +253,7 @@ public class SecurityConfig {
             byte[] result = mac.doFinal(content.getBytes(StandardCharsets.UTF_8));
             return Base64.encodeToString(result, Base64.NO_WRAP);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            EasyLog.print("签名过程出现异常：" + e.getMessage());
+            DebugLog.print("签名过程出现异常：" + e.getMessage());
             e.printStackTrace();
             return "";
         }

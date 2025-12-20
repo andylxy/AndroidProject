@@ -1130,7 +1130,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                 DebugLog.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
                             }
                         } else {
-                            EasyLog.print("会话Id申请失败：" + data.getMessage());
+                            DebugLog.print("会话Id申请失败：" + data.getMessage());
                         }
 
                     }
@@ -1139,7 +1139,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     public void onFail(Exception e) {
                         super.onFail(e);
 
-                        EasyLog.print("会话Id申请失败：" + e.getMessage());
+                        DebugLog.print("会话Id申请失败：" + e.getMessage());
                     }
                 });
 
@@ -1329,7 +1329,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                 DebugLog.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
                             }
                         } else {
-                            EasyLog.print("过期会话Id申请失败：" + data.getMessage());
+                            DebugLog.print("过期会话Id申请失败：" + data.getMessage());
                         }
 
                     }
@@ -1338,7 +1338,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     public void onFail(Exception e) {
                         super.onFail(e);
 
-                        EasyLog.print("过期会话Id申请失败：" + e.getMessage());
+                        DebugLog.print("过期会话Id申请失败：" + e.getMessage());
                     }
                 });
 
@@ -1377,7 +1377,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                 continueSendingMessage();
                             }
                         } else {
-                            EasyLog.print("过期会话Id申请失败：" + data.getMessage());
+                            DebugLog.print("过期会话Id申请失败：" + data.getMessage());
                             // 清除待发送消息
                             pendingMessageContent = null;
                             pendingMessageTime = null;
@@ -1389,7 +1389,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     public void onFail(Exception e) {
                         super.onFail(e);
 
-                        EasyLog.print("过期会话Id申请失败：" + e.getMessage());
+                        DebugLog.print("过期会话Id申请失败：" + e.getMessage());
                         // 清除待发送消息
                         pendingMessageContent = null;
                         pendingMessageTime = null;

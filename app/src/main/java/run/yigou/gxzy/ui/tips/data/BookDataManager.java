@@ -20,6 +20,8 @@ import com.hjq.http.EasyLog;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import run.yigou.gxzy.utils.DebugLog;
+
 /**
  * 书籍数据管理器（核心组件）
  * 替代 TipsSingleData 的书籍内容管理部分
@@ -58,7 +60,7 @@ public class BookDataManager implements ComponentCallbacks2 {
             protected int sizeOf(Integer key, BookData value) {
                 // 返回书籍数据的内存占用（KB）
                 int size = value.estimateMemorySize();
-                EasyLog.print(TAG, "Book " + key + " size: " + size + " KB");
+                DebugLog.print(TAG, "Book " + key + " size: " + size + " KB");
                 return size;
             }
             
@@ -67,7 +69,7 @@ public class BookDataManager implements ComponentCallbacks2 {
                                        BookData oldValue, BookData newValue) {
                 if (evicted) {
                     // LRU 淘汰时清理数据
-                    EasyLog.print(TAG, "Book " + key + " evicted from cache");
+                    DebugLog.print(TAG, "Book " + key + " evicted from cache");
                     if (oldValue != null) {
                         oldValue.onEvicted();
                     }
@@ -115,11 +117,11 @@ public class BookDataManager implements ComponentCallbacks2 {
         
         if (bookData == null) {
             // 缓存未命中，创建新实例
-            EasyLog.print(TAG, "Cache miss for book " + bookId + ", creating new instance");
+            DebugLog.print(TAG, "Cache miss for book " + bookId + ", creating new instance");
             bookData = new BookData(bookId);
             bookCache.put(bookId, bookData);
         } else {
-            EasyLog.print(TAG, "Cache hit for book " + bookId);
+            DebugLog.print(TAG, "Cache hit for book " + bookId);
         }
         
         return bookData;
@@ -132,7 +134,7 @@ public class BookDataManager implements ComponentCallbacks2 {
      */
     public synchronized void putToCache(int bookId, @NonNull BookData bookData) {
         bookCache.put(bookId, bookData);
-        EasyLog.print(TAG, "Book " + bookId + " cached, cache size: " + 
+        DebugLog.print(TAG, "Book " + bookId + " cached, cache size: " + 
                      bookCache.size() + ", memory: " + bookCache.size() + " KB");
     }
     
@@ -144,7 +146,7 @@ public class BookDataManager implements ComponentCallbacks2 {
         BookData removed = bookCache.remove(bookId);
         if (removed != null) {
             removed.onEvicted();
-            EasyLog.print(TAG, "Book " + bookId + " removed from cache");
+            DebugLog.print(TAG, "Book " + bookId + " removed from cache");
         }
     }
     
@@ -155,7 +157,7 @@ public class BookDataManager implements ComponentCallbacks2 {
      */
     public void setCurrentBook(int bookId) {
         this.currentBookId = bookId;
-        EasyLog.print(TAG, "Current book set to: " + bookId);
+        DebugLog.print(TAG, "Current book set to: " + bookId);
     }
     
     /**
@@ -198,7 +200,7 @@ public class BookDataManager implements ComponentCallbacks2 {
         bookCache.evictAll();
         loadingStates.clear();
         currentBookId = -1;
-        EasyLog.print(TAG, "All cache cleared");
+        DebugLog.print(TAG, "All cache cleared");
     }
     
     /**
@@ -206,28 +208,28 @@ public class BookDataManager implements ComponentCallbacks2 {
      * @param level 内存级别（ComponentCallbacks2 定义的常量）
      */
     public synchronized void trimMemory(int level) {
-        EasyLog.print(TAG, "trimMemory called with level: " + level);
+        DebugLog.print(TAG, "trimMemory called with level: " + level);
         
         switch (level) {
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
                 // 内存极度紧张，清空所有缓存
                 clearAllCache();
-                EasyLog.print(TAG, "Critical memory, cleared all cache");
+                DebugLog.print(TAG, "Critical memory, cleared all cache");
                 break;
                 
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
             case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
                 // 内存紧张，清理非当前书籍
                 clearInactiveBooks();
-                EasyLog.print(TAG, "Low memory, cleared inactive books");
+                DebugLog.print(TAG, "Low memory, cleared inactive books");
                 break;
                 
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
             case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
                 // 中等压力，触发 GC 回收弱引用
                 System.gc();
-                EasyLog.print(TAG, "Moderate memory, triggered GC");
+                DebugLog.print(TAG, "Moderate memory, triggered GC");
                 break;
                 
             default:
@@ -273,7 +275,7 @@ public class BookDataManager implements ComponentCallbacks2 {
      * 打印缓存统计
      */
     public void printCacheStats() {
-        EasyLog.print(TAG, getCacheStats());
+        DebugLog.print(TAG, getCacheStats());
     }
     
     // ==================== ComponentCallbacks2 实现 ====================
@@ -291,7 +293,7 @@ public class BookDataManager implements ComponentCallbacks2 {
     @Override
     public void onLowMemory() {
         // 低内存警告，清理所有缓存
-        EasyLog.print(TAG, "onLowMemory called");
+        DebugLog.print(TAG, "onLowMemory called");
         clearAllCache();
     }
     

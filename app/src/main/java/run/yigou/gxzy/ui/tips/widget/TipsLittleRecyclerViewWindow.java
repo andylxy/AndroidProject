@@ -18,6 +18,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.tips.adapter.RefactoredPopupAdapter;
 import run.yigou.gxzy.ui.tips.entity.GroupData;
 import run.yigou.gxzy.ui.tips.entity.ItemData;
+import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * RecyclerView弹窗中间基类
@@ -49,36 +50,36 @@ public abstract class TipsLittleRecyclerViewWindow extends TipsLittleWindow {
 
     @Override
     protected void bindData() {
-        EasyLog.print("=== TipsLittleRecyclerViewWindow.bindData() ===");
+        DebugLog.print("=== TipsLittleRecyclerViewWindow.bindData() ===");
 
         // 检查是否有缓存的数据
         if (cachedGroupDataList == null || cachedItemDataList == null) {
-            EasyLog.print("❌ 数据为null，setData未调用");
+            DebugLog.print("❌ 数据为null，setData未调用");
             return;
         }
 
         this.groupDataList = cachedGroupDataList;
         this.itemDataList = cachedItemDataList;
 
-        EasyLog.print("数据准备就绪:");
-        EasyLog.print("  groupDataList size: " + groupDataList.size());
-        EasyLog.print("  itemDataList size: " + itemDataList.size());
+        DebugLog.print("数据准备就绪:");
+        DebugLog.print("  groupDataList size: " + groupDataList.size());
+        DebugLog.print("  itemDataList size: " + itemDataList.size());
 
         // 创建adapter（此时recyclerView已经初始化）
         if (adapter == null) {
-            EasyLog.print("创建RefactoredPopupAdapter");
+            DebugLog.print("创建RefactoredPopupAdapter");
             adapter = new RefactoredPopupAdapter(cachedContext, groupDataList, itemDataList);
-            EasyLog.print("RefactoredPopupAdapter创建完成, itemCount: " + adapter.getItemCount());
+            DebugLog.print("RefactoredPopupAdapter创建完成, itemCount: " + adapter.getItemCount());
         } else {
-            EasyLog.print("adapter已存在, 更新数据");
+            DebugLog.print("adapter已存在, 更新数据");
             adapter.updateData(groupDataList, itemDataList);
         }
 
-        EasyLog.print("✅ adapter准备就绪, itemCount: " + adapter.getItemCount());
-        EasyLog.print("✅ recyclerView状态: " + (recyclerView != null ? "已初始化" : "null"));
+        DebugLog.print("✅ adapter准备就绪, itemCount: " + adapter.getItemCount());
+        DebugLog.print("✅ recyclerView状态: " + (recyclerView != null ? "已初始化" : "null"));
         
         recyclerView.setAdapter(adapter);
-        EasyLog.print("RecyclerView.setAdapter() 完成");
+        DebugLog.print("RecyclerView.setAdapter() 完成");
     }
 
     /**
@@ -90,13 +91,13 @@ public abstract class TipsLittleRecyclerViewWindow extends TipsLittleWindow {
      * @param data Pair<GroupData列表, ItemData二维列表>
      */
     public void setData(Context context, Pair<List<GroupData>, List<List<ItemData>>> data) {
-        EasyLog.print("=== TipsLittleRecyclerViewWindow.setData() ===");
-        EasyLog.print("Context: " + context);
-        EasyLog.print("GroupData size: " + (data.first != null ? data.first.size() : "null"));
-        EasyLog.print("ItemData size: " + (data.second != null ? data.second.size() : "null"));
+        DebugLog.print("=== TipsLittleRecyclerViewWindow.setData() ===");
+        DebugLog.print("Context: " + context);
+        DebugLog.print("GroupData size: " + (data.first != null ? data.first.size() : "null"));
+        DebugLog.print("ItemData size: " + (data.second != null ? data.second.size() : "null"));
 
         if (data.first == null || data.second == null) {
-            EasyLog.print("❌ 数据为null");
+            DebugLog.print("❌ 数据为null");
             return;
         }
 
@@ -105,8 +106,8 @@ public abstract class TipsLittleRecyclerViewWindow extends TipsLittleWindow {
         this.cachedGroupDataList = data.first;
         this.cachedItemDataList = data.second;
         
-        EasyLog.print("✅ 数据已缓存，等待bindData()时创建adapter");
-        EasyLog.print("setData() 完成");
+        DebugLog.print("✅ 数据已缓存，等待bindData()时创建adapter");
+        DebugLog.print("setData() 完成");
     }
 
     @Override

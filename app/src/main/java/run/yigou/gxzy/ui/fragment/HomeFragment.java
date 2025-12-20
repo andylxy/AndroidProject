@@ -76,6 +76,7 @@ import run.yigou.gxzy.ui.tips.DataBeans.Yao;
 import run.yigou.gxzy.ui.tips.DataBeans.YaoAlia;
 import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 import run.yigou.gxzy.app.AppDataInitializer;
+import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.widget.XCollapsingToolbarLayout;
@@ -372,7 +373,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                 refreshDataFromNetwork();
                 break;
             default:
-                EasyLog.print("onClick value: " + view.getId());
+                DebugLog.print("onClick value: " + view.getId());
         }
     }
 
@@ -386,7 +387,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
             // 本地有数据，使用 post 延迟加载（确保 ViewPager 初始化完成，与网络回调行为一致）
             mViewPager.post(() -> {
                 loadNavFromLocal(localNavList);
-                EasyLog.print("Loaded navigation from local database");
+                DebugLog.print("Loaded navigation from local database");
             });
         } else {
             // 本地无数据，从网络获取（这是异步的）
@@ -486,7 +487,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             }
                         } else {
                             toast("获取数据失败：" + e.getMessage());
-                            EasyLog.print(e);
+                            DebugLog.print(e);
                         }
                     }
                 });

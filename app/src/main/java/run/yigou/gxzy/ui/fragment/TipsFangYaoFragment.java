@@ -26,6 +26,7 @@ import run.yigou.gxzy.ui.tips.data.BookDataManager;
 import run.yigou.gxzy.ui.tips.data.ChapterData;
 import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
+import run.yigou.gxzy.utils.DebugLog;
 
 
 public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
@@ -97,7 +98,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                EasyLog.print("clearEditText", "onTextChanged: " + s);
+                DebugLog.print("clearEditText", "onTextChanged: " + s);
                 removeCallbacks(runnable);
                 postDelayed(runnable, 300); // 延迟 300 毫秒执行
             }

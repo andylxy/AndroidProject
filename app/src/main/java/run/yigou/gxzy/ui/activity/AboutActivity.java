@@ -20,6 +20,7 @@ import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.http.api.AboutApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
+import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 /**
@@ -100,7 +101,7 @@ public final class AboutActivity extends AppActivity {
         }
 
         if (!isMainThread()) {
-            EasyLog.print("setAbout", "Method called from non-UI thread, posting to UI thread.");
+            DebugLog.print("setAbout", "Method called from non-UI thread, posting to UI thread.");
             post(() -> setAbout(detailList));
             return;
         }
@@ -127,7 +128,7 @@ public final class AboutActivity extends AppActivity {
                     setText(tv_author_book, TipsNetHelper.renderText(text));
                     break;
                 default:
-                    EasyLog.print("setAbout", "Unknown about name: " + name);
+                    DebugLog.print("setAbout", "Unknown about name: " + name);
                     break;
             }
         }
@@ -141,7 +142,7 @@ public final class AboutActivity extends AppActivity {
         if (textView != null) {
             textView.setText(text);
         } else {
-            EasyLog.print("setText", "TextView is null for text: " + text);
+            DebugLog.print("setText", "TextView is null for text: " + text);
         }
     }
 
@@ -156,7 +157,7 @@ public final class AboutActivity extends AppActivity {
             }
             textView.setText(TipsNetHelper.renderText(spannableStringBuilder.toString()));
         } else {
-            EasyLog.print("setSpannableText", "TextView is null for text: " + text);
+            DebugLog.print("setSpannableText", "TextView is null for text: " + text);
         }
     }
 

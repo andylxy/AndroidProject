@@ -24,6 +24,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
+import run.yigou.gxzy.utils.DebugLog;
 
 
 public class GroupModel {
@@ -32,8 +33,8 @@ public class GroupModel {
      * 获取组列表数据
      */
     public static ArrayList<GroupEntity> getGroups(List<HH2SectionData> showMingCiList, String charSequence, boolean isFang ) {
-        EasyLog.print("=== GroupModel.getGroups() 调用 ===");
-        EasyLog.print("showMingCiList: " + (showMingCiList != null ? showMingCiList.size() + " items" : "null"));
+        DebugLog.print("=== GroupModel.getGroups() 调用 ===");
+        DebugLog.print("showMingCiList: " + (showMingCiList != null ? showMingCiList.size() + " items" : "null"));
         try {
             // 获取别名字典
             run.yigou.gxzy.ui.tips.data.GlobalDataHolder globalData = run.yigou.gxzy.ui.tips.data.GlobalDataHolder.getInstance();
@@ -54,10 +55,10 @@ public class GroupModel {
             // 初始化组列表
             ArrayList<GroupEntity> groups = new ArrayList<>();
             boolean isFirst = true;
-            EasyLog.print("filteredData size: " + filteredData.size());
+            DebugLog.print("filteredData size: " + filteredData.size());
             // 遍历过滤后的数据
             for (HH2SectionData sectionData : filteredData) {
-                EasyLog.print("--- 处理sectionData: " + (sectionData != null ? sectionData.getHeader() : "null"));
+                DebugLog.print("--- 处理sectionData: " + (sectionData != null ? sectionData.getHeader() : "null"));
                 if (sectionData == null) {
                     continue; // 跳过空的数据
                 }
@@ -98,15 +99,15 @@ public class GroupModel {
                     header = ""; // 防止空指针异常
                 }
                 String footer = "第尾部"; // 可以改为配置文件或动态生成
-                EasyLog.print("创建GroupEntity - header: " + header + ", children size: " + children.size());
+                DebugLog.print("创建GroupEntity - header: " + header + ", children size: " + children.size());
                 groups.add(new GroupEntity(header, footer, children));
             }
 
-            EasyLog.print("=== GroupModel.getGroups() 完成 ===");
-            EasyLog.print("返回groups数量: " + groups.size());
+            DebugLog.print("=== GroupModel.getGroups() 完成 ===");
+            DebugLog.print("返回groups数量: " + groups.size());
             for (int i = 0; i < groups.size(); i++) {
                 GroupEntity g = groups.get(i);
-                EasyLog.print("  Group[" + i + "]: header=" + g.getHeader() + ", children=" + (g.getChildren() != null ? g.getChildren().size() : "null"));
+                DebugLog.print("  Group[" + i + "]: header=" + g.getHeader() + ", children=" + (g.getChildren() != null ? g.getChildren().size() : "null"));
             }
             return groups;
         } catch (NullPointerException e) {

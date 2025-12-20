@@ -19,6 +19,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.tips.entity.GroupData;
 import run.yigou.gxzy.ui.tips.entity.ItemData;
 import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
+import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * 重构后的弹窗适配器
@@ -80,9 +81,9 @@ public class RefactoredPopupAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             }
         }
 
-        EasyLog.print("=== RefactoredPopupAdapter.buildPositionMappings() ===");
-        EasyLog.print("总映射数量: " + positionMappings.size());
-        EasyLog.print("Groups: " + groupDataList.size());
+        DebugLog.print("=== RefactoredPopupAdapter.buildPositionMappings() ===");
+        DebugLog.print("总映射数量: " + positionMappings.size());
+        DebugLog.print("Groups: " + groupDataList.size());
     }
 
     /**
@@ -149,26 +150,26 @@ public class RefactoredPopupAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
 
         public void bind(@NonNull ItemData itemData) {
-            EasyLog.print("=== PopupChildViewHolder.bind() ===");
-            EasyLog.print("ItemData groupPosition: " + itemData.getGroupPosition());
+            DebugLog.print("=== PopupChildViewHolder.bind() ===");
+            DebugLog.print("ItemData groupPosition: " + itemData.getGroupPosition());
             
             // 绑定文本
             SpannableStringBuilder text = itemData.getAttributedText();
             if (text != null && text.length() > 0) {
-                EasyLog.print("✅ 绑定文本, 长度: " + text.length() + 
+                DebugLog.print("✅ 绑定文本, 长度: " + text.length() + 
                         ", 内容: " + text.toString().substring(0, Math.min(50, text.length())));
                 tvSectionText.setText(text);
                 tvSectionText.setMovementMethod(LocalLinkMovementMethod.getInstance());
                 tvSectionText.setVisibility(View.VISIBLE);
             } else {
-                EasyLog.print("⚠️ 文本为空，隐藏tvSectionText");
+                DebugLog.print("⚠️ 文本为空，隐藏tvSectionText");
                 tvSectionText.setVisibility(View.GONE);
             }
 
             // 绑定注释
             SpannableStringBuilder note = itemData.getAttributedNote();
             if (note != null && note.length() > 0) {
-                EasyLog.print("✅ 绑定注释, 长度: " + note.length());
+                DebugLog.print("✅ 绑定注释, 长度: " + note.length());
                 tvSectionNote.setText(note);
                 tvSectionNote.setMovementMethod(LocalLinkMovementMethod.getInstance());
                 tvSectionNote.setVisibility(View.VISIBLE);
@@ -179,7 +180,7 @@ public class RefactoredPopupAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             // 绑定视频
             SpannableStringBuilder video = itemData.getAttributedVideo();
             if (video != null && video.length() > 0) {
-                EasyLog.print("✅ 绑定视频, 长度: " + video.length());
+                DebugLog.print("✅ 绑定视频, 长度: " + video.length());
                 tvSectionVideo.setText(video);
                 tvSectionVideo.setMovementMethod(LocalLinkMovementMethod.getInstance());
                 tvSectionVideo.setVisibility(View.VISIBLE);
@@ -187,7 +188,7 @@ public class RefactoredPopupAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 tvSectionVideo.setVisibility(View.GONE);
             }
             
-            EasyLog.print("bind() 完成");
+            DebugLog.print("bind() 完成");
         }
     }
 }

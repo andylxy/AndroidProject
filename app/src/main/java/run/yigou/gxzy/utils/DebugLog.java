@@ -79,4 +79,33 @@ public final class DebugLog {
             LogUtils.e(tag, message, tr);
         }
     }
+    
+    /**
+     * 打印日志（单参数版本，兼容 EasyLog.print）
+     * 使用 Debug 级别输出
+     */
+    public static void print(String message) {
+        if (DEBUG) {
+            LogUtils.d(message);
+        }
+    }
+    
+    /**
+     * 打印日志（双参数版本，兼容 EasyLog.print）
+     * 使用 Debug 级别输出
+     */
+    public static void print(String tag, String message) {
+        if (DEBUG) {
+            LogUtils.d(tag, message);
+        }
+    }
+    
+    /**
+     * 打印异常（兼容 EasyLog.print）
+     */
+    public static void print(Throwable tr) {
+        if (DEBUG) {
+            LogUtils.e(tr);
+        }
+    }
 }

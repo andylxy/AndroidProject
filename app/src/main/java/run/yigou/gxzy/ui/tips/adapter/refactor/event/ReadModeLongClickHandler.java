@@ -20,6 +20,7 @@ import run.yigou.gxzy.ui.tips.adapter.refactor.utils.ClipboardHelper;
 import run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemData;
 import run.yigou.gxzy.ui.tips.entity.ChildEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
+import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * 阅读模式长按处理器
@@ -147,7 +148,7 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
                 break;
 
             default:
-                EasyLog.print("Unknown menu action: " + action);
+                DebugLog.print("Unknown menu action: " + action);
                 break;
         }
     }

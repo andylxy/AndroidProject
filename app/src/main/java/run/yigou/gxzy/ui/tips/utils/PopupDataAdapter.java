@@ -12,6 +12,7 @@ import run.yigou.gxzy.ui.tips.entity.ChildEntity;
 import run.yigou.gxzy.ui.tips.entity.GroupData;
 import run.yigou.gxzy.ui.tips.entity.GroupEntity;
 import run.yigou.gxzy.ui.tips.entity.ItemData;
+import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * 弹窗数据适配器
@@ -26,11 +27,11 @@ public class PopupDataAdapter {
      * @return Pair<GroupData列表, ItemData二维列表>
      */
     public static Pair<List<GroupData>, List<List<ItemData>>> convert(ArrayList<GroupEntity> groups) {
-        EasyLog.print("=== PopupDataAdapter.convert() 开始 ===");
-        EasyLog.print("输入 groups size: " + (groups != null ? groups.size() : "null"));
+        DebugLog.print("=== PopupDataAdapter.convert() 开始 ===");
+        DebugLog.print("输入 groups size: " + (groups != null ? groups.size() : "null"));
 
         if (groups == null || groups.isEmpty()) {
-            EasyLog.print("❌ groups为null或空，返回空列表");
+            DebugLog.print("❌ groups为null或空，返回空列表");
             return new Pair<>(new ArrayList<>(), new ArrayList<>());
         }
 
@@ -39,8 +40,8 @@ public class PopupDataAdapter {
 
         for (int groupIndex = 0; groupIndex < groups.size(); groupIndex++) {
             GroupEntity groupEntity = groups.get(groupIndex);
-            EasyLog.print("--- 转换 Group[" + groupIndex + "] ---");
-            EasyLog.print("header: " + groupEntity.getHeader());
+            DebugLog.print("--- 转换 Group[" + groupIndex + "] ---");
+            DebugLog.print("header: " + groupEntity.getHeader());
 
             // 创建GroupData
             GroupData groupData = new GroupData();
@@ -53,7 +54,7 @@ public class PopupDataAdapter {
             List<ItemData> items = new ArrayList<>();
 
             if (children != null && !children.isEmpty()) {
-                EasyLog.print("children size: " + children.size());
+                DebugLog.print("children size: " + children.size());
 
                 for (int childIndex = 0; childIndex < children.size(); childIndex++) {
                     ChildEntity childEntity = children.get(childIndex);
@@ -66,7 +67,7 @@ public class PopupDataAdapter {
                     if (text != null && text.length() > 0) {
                         itemData.setAttributedText(text);
                         if (childIndex < 2) {
-                            EasyLog.print("  child[" + childIndex + "] text长度: " + text.length() + 
+                            DebugLog.print("  child[" + childIndex + "] text长度: " + text.length() + 
                                     ", 内容: " + text.toString().substring(0, Math.min(50, text.length())));
                         }
                     }
@@ -76,7 +77,7 @@ public class PopupDataAdapter {
                     if (note != null && note.length() > 0) {
                         itemData.setAttributedNote(note);
                         if (childIndex < 2) {
-                            EasyLog.print("  child[" + childIndex + "] note长度: " + note.length());
+                            DebugLog.print("  child[" + childIndex + "] note长度: " + note.length());
                         }
                     }
                     
@@ -85,7 +86,7 @@ public class PopupDataAdapter {
                     if (video != null && video.length() > 0) {
                         itemData.setAttributedVideo(video);
                         if (childIndex < 2) {
-                            EasyLog.print("  child[" + childIndex + "] video长度: " + video.length());
+                            DebugLog.print("  child[" + childIndex + "] video长度: " + video.length());
                         }
                     }
                     
@@ -94,7 +95,7 @@ public class PopupDataAdapter {
                     if (image != null && !image.isEmpty()) {
                         itemData.setImageUrl(image);
                         if (childIndex < 2) {
-                            EasyLog.print("  child[" + childIndex + "] image: " + image);
+                            DebugLog.print("  child[" + childIndex + "] image: " + image);
                         }
                     }
                     
@@ -104,16 +105,16 @@ public class PopupDataAdapter {
                     items.add(itemData);
                 }
             } else {
-                EasyLog.print("⚠️ children为null或空");
+                DebugLog.print("⚠️ children为null或空");
             }
 
             itemDataList.add(items);
-            EasyLog.print("转换完成，items size: " + items.size());
+            DebugLog.print("转换完成，items size: " + items.size());
         }
 
-        EasyLog.print("=== PopupDataAdapter.convert() 完成 ===");
-        EasyLog.print("输出 groupDataList size: " + groupDataList.size());
-        EasyLog.print("输出 itemDataList size: " + itemDataList.size());
+        DebugLog.print("=== PopupDataAdapter.convert() 完成 ===");
+        DebugLog.print("输出 groupDataList size: " + groupDataList.size());
+        DebugLog.print("输出 itemDataList size: " + itemDataList.size());
 
         return new Pair<>(groupDataList, itemDataList);
     }

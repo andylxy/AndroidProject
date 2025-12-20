@@ -18,7 +18,7 @@ import run.yigou.gxzy.common.BookArgs;
 import run.yigou.gxzy.common.FragmentSetting;
 import run.yigou.gxzy.common.ManagerSetting;
 import run.yigou.gxzy.ui.activity.YaoUintActivity;
-
+import run.yigou.gxzy.utils.DebugLog;
 
 
 public final class TipsSettingFragment extends AppFragment<AppActivity> implements SwitchButton.OnCheckedChangeListener {
@@ -182,10 +182,10 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         try {
             if (XEventBus.getDefault() != null && tipsFragmentSettingEventNotification != null) {
                 XEventBus.getDefault().post(tipsFragmentSettingEventNotification);
-                EasyLog.print("TipsSettingFragment", "✅ EventBus 事件发送成功");
+                DebugLog.print("TipsSettingFragment", "✅ EventBus 事件发送成功");
             }
         } catch (Exception e) {
-            EasyLog.print("TipsSettingFragment", "⚠️ EventBus 事件发送异常: " + e.getMessage());
+            DebugLog.print("TipsSettingFragment", "⚠️ EventBus 事件发送异常: " + e.getMessage());
         }
 
     }

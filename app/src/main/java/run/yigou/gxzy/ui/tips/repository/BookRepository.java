@@ -36,6 +36,7 @@ import run.yigou.gxzy.ui.tips.data.DataConverter;
 import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
+import run.yigou.gxzy.utils.DebugLog;
 
 
 /**
@@ -80,7 +81,7 @@ public class BookRepository {
         try {
             return globalData.getBookInfo(bookId);
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "获取书籍信息失败: " + e.getMessage());
+            DebugLog.print("BookRepository", "获取书籍信息失败: " + e.getMessage());
             return null;
         }
     }
@@ -94,7 +95,7 @@ public class BookRepository {
     public List<Chapter> getChapters(int bookId) {
         // 检查缓存
         if (chapterCache.containsKey(bookId)) {
-            EasyLog.print("BookRepository", "从缓存加载章节: " + chapterCache.get(bookId).size() + " 个");
+            DebugLog.print("BookRepository", "从缓存加载章节: " + chapterCache.get(bookId).size() + " 个");
             return chapterCache.get(bookId);
         }
 
@@ -107,14 +108,14 @@ public class BookRepository {
             if (chapters != null) {
                 // 更新缓存
                 chapterCache.put(bookId, chapters);
-                EasyLog.print("BookRepository", "从数据库加载章节: " + chapters.size() + " 个");
+                DebugLog.print("BookRepository", "从数据库加载章节: " + chapters.size() + " 个");
                 return chapters;
             }
 
             return new ArrayList<>();
 
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "获取章节列表失败: " + e.getMessage());
+            DebugLog.print("BookRepository", "获取章节列表失败: " + e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -241,7 +242,7 @@ public class BookRepository {
         try {
             return dbService.mBookService.find(BookDao.Properties.BookNo.eq(bookNo));
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "查询书架失败: " + e.getMessage());
+            DebugLog.print("BookRepository", "查询书架失败: " + e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -257,7 +258,7 @@ public class BookRepository {
             dbService.mBookService.addEntity(book);
             return true;
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "添加书架失败: " + e.getMessage());
+            DebugLog.print("BookRepository", "添加书架失败: " + e.getMessage());
             return false;
         }
     }
@@ -273,7 +274,7 @@ public class BookRepository {
             dbService.mBookService.updateEntity(book);
             return true;
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "更新阅读进度失败: " + e.getMessage());
+            DebugLog.print("BookRepository", "更新阅读进度失败: " + e.getMessage());
             return false;
         }
     }
@@ -283,7 +284,7 @@ public class BookRepository {
      */
     public void clearCache() {
         chapterCache.clear();
-        EasyLog.print("BookRepository", "缓存已清除");
+        DebugLog.print("BookRepository", "缓存已清除");
     }
 
     /**
@@ -293,7 +294,7 @@ public class BookRepository {
      */
     public void clearCacheForBook(int bookId) {
         chapterCache.remove(bookId);
-        EasyLog.print("BookRepository", "书籍缓存已清除: bookId=" + bookId);
+        DebugLog.print("BookRepository", "书籍缓存已清除: bookId=" + bookId);
     }
 
     // ==================== 新数据模型 API ====================
@@ -309,12 +310,12 @@ public class BookRepository {
         // 1. 检查内存缓存
         BookData cached = dataManager.getFromCache(bookId);
         if (cached != null && cached.isFullyLoaded()) {
-            EasyLog.print("BookRepository", "从缓存加载书籍: bookId=" + bookId);
+            DebugLog.print("BookRepository", "从缓存加载书籍: bookId=" + bookId);
             return cached;
         }
 
         // 2. 从数据库加载
-        EasyLog.print("BookRepository", "从数据库加载书籍: bookId=" + bookId);
+        DebugLog.print("BookRepository", "从数据库加载书籍: bookId=" + bookId);
         BookData bookData = loadBookDataFromDb(bookId);
         
         // 3. 放入缓存
@@ -363,7 +364,7 @@ public class BookRepository {
             bookData.markAsFullyLoaded();
             
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "加载书籍数据失败: " + e.getMessage());
+            DebugLog.print("BookRepository", "加载书籍数据失败: " + e.getMessage());
         }
         
         return bookData;
@@ -381,7 +382,7 @@ public class BookRepository {
             List<DataItem> content = ConvertEntity.getBookChapterDetailList(chapter);
             
             Long signatureId = chapter.getSignatureId();
-            EasyLog.print("BookRepository", "加载章节内容: signatureId=" + signatureId + 
+            DebugLog.print("BookRepository", "加载章节内容: signatureId=" + signatureId + 
                 ", contentSize=" + (content != null ? content.size() : 0));
             
             if (content != null && !content.isEmpty()) {
@@ -389,15 +390,15 @@ public class BookRepository {
                 ChapterData chapterData = bookData.findChapterBySignature(signatureId);
                 if (chapterData != null) {
                     chapterData.setContent(content);
-                    EasyLog.print("BookRepository", "章节内容加载成功: signatureId=" + signatureId);
+                    DebugLog.print("BookRepository", "章节内容加载成功: signatureId=" + signatureId);
                 } else {
-                    EasyLog.print("BookRepository", "未找到对应的 ChapterData: signatureId=" + signatureId);
+                    DebugLog.print("BookRepository", "未找到对应的 ChapterData: signatureId=" + signatureId);
                 }
             } else {
-                EasyLog.print("BookRepository", "数据库中无章节内容: signatureId=" + signatureId);
+                DebugLog.print("BookRepository", "数据库中无章节内容: signatureId=" + signatureId);
             }
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "加载章节内容失败: " + e.getMessage());
+            DebugLog.print("BookRepository", "加载章节内容失败: " + e.getMessage());
         }
     }
 

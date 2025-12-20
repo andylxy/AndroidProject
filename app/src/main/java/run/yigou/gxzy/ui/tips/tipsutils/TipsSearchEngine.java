@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import run.yigou.gxzy.ui.tips.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
+import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * Tips 模块搜索引擎
@@ -99,7 +100,7 @@ public class TipsSearchEngine {
             pattern = Pattern.compile(sanitizedTerm);
         } catch (Exception e) {
             // 记录错误日志，并使用默认正则表达式
-            EasyLog.print("Error compiling regex: " + sanitizedTerm + ". Fallback to default.");
+            DebugLog.print("Error compiling regex: " + sanitizedTerm + ". Fallback to default.");
             pattern = Pattern.compile(".");
         }
         return pattern;

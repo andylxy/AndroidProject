@@ -47,6 +47,7 @@ import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
+import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
@@ -332,7 +333,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                     }
                     
                 } catch (Exception e) {
-                    EasyLog.print("Search error for book " + bookId + ": " + e.getMessage());
+                    DebugLog.print("Search error for book " + bookId + ": " + e.getMessage());
                 }
             }
             

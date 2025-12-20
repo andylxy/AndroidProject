@@ -43,6 +43,7 @@ import java.net.UnknownHostException;
 import okhttp3.Headers;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import run.yigou.gxzy.utils.DebugLog;
 
 /**
  *    author : Android 轮子哥
@@ -202,9 +203,9 @@ public final class RequestHandler implements IRequestHandler {
         if (cacheValue == null || "".equals(cacheValue) || "{}".equals(cacheValue)) {
             return null;
         }
-        EasyLog.print("---------- cacheKey ----------");
+        DebugLog.print("---------- cacheKey ----------");
         EasyLog.json(cacheKey);
-        EasyLog.print("---------- cacheValue ----------");
+        DebugLog.print("---------- cacheValue ----------");
         EasyLog.json(cacheValue);
         return GsonFactory.getSingletonGson().fromJson(cacheValue, type);
     }
@@ -216,9 +217,9 @@ public final class RequestHandler implements IRequestHandler {
         if (cacheValue == null || "".equals(cacheValue) || "{}".equals(cacheValue)) {
             return false;
         }
-        EasyLog.print("---------- cacheKey ----------");
+        DebugLog.print("---------- cacheKey ----------");
         EasyLog.json(cacheKey);
-        EasyLog.print("---------- cacheValue ----------");
+        DebugLog.print("---------- cacheValue ----------");
         EasyLog.json(cacheValue);
         return mMmkv.putString(cacheKey, cacheValue).commit();
     }
