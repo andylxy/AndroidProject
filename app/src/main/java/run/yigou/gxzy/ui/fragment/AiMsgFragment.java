@@ -48,7 +48,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.blankj.utilcode.util.LogUtils;
+
 import com.hjq.bar.OnTitleBarListener;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.EasyLog;
@@ -702,17 +702,17 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                     
                                     @Override
                                     public void onOpen() {
-                                        LogUtils.d(TAG, "SSE 连接已建立");
+                                        DebugLog.d(TAG, "SSE 连接已建立");
                                     }
                                     
                                     @Override
                                     public void onChunk(SseChunk chunk) {
                                         if (chunk == null) {
-                                            LogUtils.w(TAG, "接收到空数据块");
+                                            DebugLog.w(TAG, "接收到空数据块");
                                             return;
                                         }
                                         
-                                        // LogUtils.d(TAG, "SSE 数据块: type=" + chunk.getType());
+                                        // DebugLog.d(TAG, "SSE 数据块: type=" + chunk.getType());
                                         
                                         runOnUiThread(new Runnable() {
                                             @Override
@@ -782,7 +782,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                     
                                                 } else if ("error".equals(chunk.getType())) {
                                                     // 错误处理
-                                                    LogUtils.e(TAG, "SSE 错误: " + chunk.getError());
+                                                    DebugLog.e(TAG, "SSE 错误: " + chunk.getError());
                                                     if (answerMessageRef[0] != null) {
                                                         answerMessageRef[0].setContent(answerMessageRef[0].getContent() + "\n[错误: " + chunk.getError() + "]");
                                                         mChatAdapter.updateData();
@@ -797,7 +797,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                     
                                     @Override
                                     public void onComplete() {
-                                        LogUtils.d(TAG, "SSE 流式对话完成");
+                                        DebugLog.d(TAG, "SSE 流式对话完成");
                                         
                                         // 移除待处理的 UI 更新任务
                                         if (answerUpdateRunnable != null) {
@@ -848,7 +848,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                     
                                     @Override
                                     public void onError(Exception e) {
-                                        LogUtils.e(TAG, "SSE 请求失败: " + e.getMessage());
+                                        DebugLog.e(TAG, "SSE 请求失败: " + e.getMessage());
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
@@ -1460,17 +1460,17 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     
                     @Override
                     public void onOpen() {
-                        LogUtils.d(TAG, "SSE 连接已建立（继续发送）");
+                        DebugLog.d(TAG, "SSE 连接已建立（继续发送）");
                     }
                     
                     @Override
                     public void onChunk(SseChunk chunk) {
                         if (chunk == null) {
-                            LogUtils.w(TAG, "接收到空数据块");
+                            DebugLog.w(TAG, "接收到空数据块");
                             return;
                         }
                         
-                        LogUtils.d(TAG, "SSE 数据块: type=" + chunk.getType() + 
+                        DebugLog.d(TAG, "SSE 数据块: type=" + chunk.getType() + 
                                 ", content length=" + (chunk.getContent() != null ? chunk.getContent().length() : 0));
                         
                         runOnUiThread(new Runnable() {
@@ -1542,7 +1542,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                     
                                 } else if ("error".equals(chunk.getType())) {
                                     // 错误处理
-                                    LogUtils.e(TAG, "SSE 错误: " + chunk.getError());
+                                    DebugLog.e(TAG, "SSE 错误: " + chunk.getError());
                                     if (answerMessageRef[0] != null) {
                                         answerMessageRef[0].setContent(answerMessageRef[0].getContent() + "\n[错误: " + chunk.getError() + "]");
                                         mChatAdapter.updateData();
@@ -1557,7 +1557,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     
                     @Override
                     public void onComplete() {
-                        LogUtils.d(TAG, "SSE 流式对话完成（继续发送）");
+                        DebugLog.d(TAG, "SSE 流式对话完成（继续发送）");
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -1591,7 +1591,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     
                     @Override
                     public void onError(Exception e) {
-                        LogUtils.e(TAG, "SSE 请求失败: " + e.getMessage());
+                        DebugLog.e(TAG, "SSE 请求失败: " + e.getMessage());
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
