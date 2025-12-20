@@ -523,7 +523,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 设置当前会话
         currentSession = session;
 
-        // 获取会话中的所有消息
+        // ⚠️ 关键修复：强制重置消息缓存，从数据库重新加载
+        // GreenDAO 的 getMessages() 会缓存结果，必须先 reset 才能获取最新数据
+        session.resetMessages();
+        
+        // 获取会话中的所有消息（现在会从数据库重新查询）
         List<ChatMessageBean> messages = session.getMessages();
 
         // 清空当前聊天数据
@@ -903,10 +907,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 runOnUiThread(() -> {
                     int answerPos = mChatAdapter.getData().indexOf(answerMessage);
                     if (answerPos != -1) {
-                        // 标记流式状态
-                        if (!answerMessage.isStreaming()) {
-                            answerMessage.setStreaming(true);
-                        }
+                        // ⚠️ 移除重置 streaming=true 的逻辑，避免覆盖 onComplete 中的 false 值
                         // 刷新 UI
                         mChatAdapter.notifyItemChanged(answerPos, TipsAiChatAdapter.PAYLOAD_UPDATE_CONTENT);
                         
@@ -1569,6 +1570,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                 // 保存最终回答到数据库
                                 if (answerMessageRef[0] != null) {
                                     answerMessageRef[0].setCreateDate(DateHelper.getSeconds1());
+                                    answerMessageRef[0].setStreaming(false); // ⚠️ 结束流式状态，确保正确保存
                                     DbService.getInstance().mChatMessageBeanService.updateEntity(answerMessageRef[0]);
                                     
                                     // 更新会话预览
