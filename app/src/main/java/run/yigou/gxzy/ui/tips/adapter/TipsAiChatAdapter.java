@@ -190,6 +190,9 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
 
                     if (tv_receive_content != null) {
                         if (bean.isStreaming()) {
+                            // 流式期间禁用文本选择，避免焦点导致滚动跳动
+                            tv_receive_content.setTextIsSelectable(false);
+                            
                             TypewriterHelper helper = typewriterHelpers.get(bean.getId());
                             if (helper == null) {
                                 helper = new TypewriterHelper(tv_receive_content, markwon);
@@ -204,6 +207,9 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                              if (markwon != null && bean.getContent() != null) {
                                  markwon.setMarkdown(tv_receive_content, bean.getContent());
                              }
+                             
+                             // 流式结束后启用文本选择，允许复制
+                             tv_receive_content.setTextIsSelectable(true);
                         }
                     }
                     break;
@@ -213,6 +219,8 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     ImageView iv_send_picture = findViewById(R.id.iv_send_picture);
                     if (tv_send_content != null) {
                         tv_send_content.setText(bean.getContent());
+                        // 发送的消息始终可选择复制
+                        tv_send_content.setTextIsSelectable(true);
                     }
                     if (iv_send_picture != null) {
                         if (bean.getPic_url() != null && !bean.getPic_url().isEmpty()) {

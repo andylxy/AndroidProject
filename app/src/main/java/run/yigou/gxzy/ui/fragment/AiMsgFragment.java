@@ -893,15 +893,13 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     
     /**
      * 滚动到 RecyclerView 的绝对底部
-     * 使用 smoothScrollBy 平滑滚动，产生打字机效果
      */
     private void scrollToAbsoluteBottom() {
         if (rv_chat == null) return;
         
         rv_chat.post(() -> {
-            // 使用 smoothScrollBy 平滑滚动到底部
-            // RecyclerView 会自动限制到实际最大可滚动距离
-            rv_chat.smoothScrollBy(0, 500);
+            // 滚动一个很大的值，RecyclerView 会自动限制到实际最大可滚动距离
+            rv_chat.scrollBy(0, 10000);
         });
     }
     
