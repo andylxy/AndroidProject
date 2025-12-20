@@ -855,9 +855,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                                 String errStr = "网络请求失败: " + e.getMessage();
                                                 if (answerMessageRef[0] != null) {
                                                     answerMessageRef[0].setContent(answerMessageRef[0].getContent() + "\n" + errStr);
+                                                    answerMessageRef[0].setStreaming(false); // ⚠️ 结束流式状态，触发 Markdown 渲染
                                                     DbService.getInstance().mChatMessageBeanService.updateEntity(answerMessageRef[0]);
                                                 } else {
                                                     thinkingMessage.setContent(thinkingMessage.getContent() + "\n" + errStr);
+                                                    thinkingMessage.setStreaming(false); // ⚠️ 结束流式状态
                                                     DbService.getInstance().mChatMessageBeanService.updateEntity(thinkingMessage);
                                                 }
                                                 mChatAdapter.updateData();
@@ -1598,9 +1600,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                 String errStr = "网络请求失败: " + e.getMessage();
                                 if (answerMessageRef[0] != null) {
                                     answerMessageRef[0].setContent(answerMessageRef[0].getContent() + "\n" + errStr);
+                                    answerMessageRef[0].setStreaming(false); // ⚠️ 结束流式状态，触发 Markdown 渲染
                                     DbService.getInstance().mChatMessageBeanService.updateEntity(answerMessageRef[0]);
                                 } else {
                                     thinkingMessage.setContent(thinkingMessage.getContent() + "\n" + errStr);
+                                    thinkingMessage.setStreaming(false); // ⚠️ 结束流式状态
                                     DbService.getInstance().mChatMessageBeanService.updateEntity(thinkingMessage);
                                 }
                                 mChatAdapter.updateData();

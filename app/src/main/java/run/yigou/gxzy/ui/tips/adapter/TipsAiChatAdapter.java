@@ -163,14 +163,20 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
 
         public void onBindPayload(int position) {
             ChatMessageBean bean = getItem(position);
-            // 仅对流式消息进行增量更新
-            if (bean.getType() == ChatMessageBean.TYPE_RECEIVED && bean.isStreaming()) {
-                 TypewriterHelper helper = typewriterHelpers.get(bean.getId());
-                 if (helper != null) {
-                     helper.setContent(bean.getContent(), true);
-                 } else {
-                     onBindView(position);
-                 }
+            // 对 RECEIVED 类型消息进行更新
+            if (bean.getType() == ChatMessageBean.TYPE_RECEIVED) {
+                if (bean.isStreaming()) {
+                    // 流式中：增量更新
+                    TypewriterHelper helper = typewriterHelpers.get(bean.getId());
+                    if (helper != null) {
+                        helper.setContent(bean.getContent(), true);
+                    } else {
+                        onBindView(position);
+                    }
+                } else {
+                    // 流式结束：完整绑定以触发 Markdown 渲染
+                    onBindView(position);
+                }
             }
         }
 
@@ -190,8 +196,14 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
 
                     if (tv_receive_content != null) {
                         if (bean.isStreaming()) {
-                            // 流式期间禁用文本选择，避免焦点导致滚动跳动
+                            // ===== SSE 流式期间 =====
+                            // 1. 禁用文本选择，避免焦点导致滚动跳动
                             tv_receive_content.setTextIsSelectable(false);
+                            // 2. 禁止获取焦点
+                            tv_receive_content.setFocusable(false);
+                            tv_receive_content.setFocusableInTouchMode(false);
+                            // 3. 移除触摸监听器
+                            tv_receive_content.setOnTouchListener(null);
                             
                             TypewriterHelper helper = typewriterHelpers.get(bean.getId());
                             if (helper == null) {
@@ -200,16 +212,27 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                             }
                             helper.setContent(bean.getContent(), true);
                         } else {
-                            // 流式传输结束
-                             TypewriterHelper helper = typewriterHelpers.remove(bean.getId());
-                             if (helper != null) helper.stop();
+                            // ===== SSE 流式结束 或 从数据库加载的历史消息 =====
+                            TypewriterHelper helper = typewriterHelpers.remove(bean.getId());
+                            if (helper != null) helper.stop();
                              
-                             if (markwon != null && bean.getContent() != null) {
-                                 markwon.setMarkdown(tv_receive_content, bean.getContent());
-                             }
-                             
-                             // 流式结束后启用文本选择，允许复制
-                             tv_receive_content.setTextIsSelectable(true);
+                            if (markwon != null && bean.getContent() != null) {
+                                markwon.setMarkdown(tv_receive_content, bean.getContent());
+                            }
+                            
+                            // ⚠️ 彻底解决方案：不使用 setTextIsSelectable（它会导致焦点跳动）
+                            // 改用长按弹出可选择文字的对话框
+                            tv_receive_content.setTextIsSelectable(false);
+                            tv_receive_content.setFocusable(false);
+                            tv_receive_content.setFocusableInTouchMode(false);
+                            tv_receive_content.setOnTouchListener(null);
+                            
+                            // 长按弹出可选择文字的对话框
+                            final String contentToCopy = bean.getContent();
+                            tv_receive_content.setOnLongClickListener(v -> {
+                                showTextSelectionDialog(v.getContext(), contentToCopy);
+                                return true;
+                            });
                         }
                     }
                     break;
@@ -281,6 +304,59 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
         }
     }
 
+
+    /**
+     * 显示可选择文字的对话框
+     * 在对话框中可以自由选择和复制部分文字
+     */
+    private void showTextSelectionDialog(Context context, String content) {
+        // 创建可选择文字的 TextView
+        TextView textView = new TextView(context);
+        textView.setText(content);
+        textView.setTextIsSelectable(true);
+        textView.setPadding(48, 32, 48, 32);
+        textView.setTextSize(15);
+        textView.setLineSpacing(0, 1.3f);
+        
+        // 使用 Markwon 渲染 Markdown（如果可用）
+        if (markwon != null) {
+            markwon.setMarkdown(textView, content);
+        }
+        
+        // 包装在 ScrollView 中以支持长文本
+        android.widget.ScrollView scrollView = new android.widget.ScrollView(context);
+        scrollView.addView(textView);
+        
+        // 设置最大高度为屏幕高度的 70%
+        android.util.DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        int maxHeight = (int) (displayMetrics.heightPixels * 0.7);
+        scrollView.setLayoutParams(new android.view.ViewGroup.LayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT, 
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+        
+        // 创建对话框
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(context)
+            .setTitle("选择要复制的文字")
+            .setView(scrollView)
+            .setPositiveButton("复制全部", (d, which) -> {
+                android.content.ClipboardManager clipboard = 
+                    (android.content.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                android.content.ClipData clip = android.content.ClipData.newPlainText("AI回复", content);
+                clipboard.setPrimaryClip(clip);
+                android.widget.Toast.makeText(context, "已复制到剪贴板", android.widget.Toast.LENGTH_SHORT).show();
+            })
+            .setNegativeButton("关闭", null)
+            .create();
+        
+        dialog.show();
+        
+        // 限制对话框最大高度
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                Math.min(maxHeight, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+        }
+    }
 
     // 滚动回调接口
     public interface OnTypewriterRenderCallback {
