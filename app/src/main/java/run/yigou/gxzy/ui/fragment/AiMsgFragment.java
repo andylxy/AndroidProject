@@ -890,16 +890,16 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 延迟 200ms 执行，批量更新
         uiUpdateHandler.postDelayed(answerUpdateRunnable, UI_UPDATE_INTERVAL);
     }
-    
     /**
      * 滚动到 RecyclerView 的绝对底部
+     * 使用 smoothScrollBy 实现丝滑滚动
      */
     private void scrollToAbsoluteBottom() {
         if (rv_chat == null) return;
         
         rv_chat.post(() -> {
-            // 滚动一个很大的值，RecyclerView 会自动限制到实际最大可滚动距离
-            rv_chat.scrollBy(0, 10000);
+            // 使用 smoothScrollBy 丝滑滚动
+            rv_chat.smoothScrollBy(0, 200);
         });
     }
     

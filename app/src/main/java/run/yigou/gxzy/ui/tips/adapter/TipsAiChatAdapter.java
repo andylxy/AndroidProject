@@ -300,31 +300,31 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
         private String targetContent = "";
         private int displayedLength = 0;
         private boolean isTyping = false;
-        private String lastRenderedText = ""; // 缓存上次渲染的文本，避免重复渲染
+        private String lastRenderedText = "";
 
         private final Runnable typingRunnable = new Runnable() {
             @Override
             public void run() {
                 if (displayedLength < targetContent.length()) {
-                    // 动态调整步长 - 让效果更明显
                     int remaining = targetContent.length() - displayedLength;
+                    
+                    // 丝滑打字效果：每次只增加 1-2 个字符
                     int increment;
-                    if (remaining > 100) {
-                        increment = Math.min(remaining / 10, 8); // 快速追赶
-                    } else if (remaining > 30) {
-                        increment = 3; // 中速
+                    if (remaining > 200) {
+                        increment = 4; // 落后太多时快速追赶
+                    } else if (remaining > 50) {
+                        increment = 2; // 中等步长
                     } else {
-                        increment = 1; // 慢速打字效果
+                        increment = 1; // 丝滑单字符
                     }
                     
                     displayedLength = Math.min(displayedLength + increment, targetContent.length());
-                    render();
+                    renderRawText();
                     
-                    // 动态调整频率
-                    long delay = (remaining > 50) ? 50 : 100;
+                    // 短延迟实现丝滑效果
+                    long delay = 30; // 约 33fps
                     handler.postDelayed(this, delay);
                 }
-                // 内容追平后不再执行任何操作
             }
         };
 
@@ -341,31 +341,24 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     isTyping = true;
                     handler.post(typingRunnable);
                 } else {
-                    // 如果已经在 typing，确保 Runnable 正在运行
                     handler.removeCallbacks(typingRunnable);
                     handler.post(typingRunnable);
                 }
             } else {
                 stop();
-                displayedLength = content.length();
-                isTyping = false;
-                render();
             }
         }
         
-        private void render() {
+        // 流式期间只显示原始文本，不渲染 Markdown（避免闪烁）
+        private void renderRawText() {
             if (textView == null) return;
             
             String textToShow = targetContent.substring(0, displayedLength);
             
-            // 只有内容变化时才重新渲染 Markdown，减少闪烁
             if (!textToShow.equals(lastRenderedText)) {
                 lastRenderedText = textToShow;
-                if (markwon != null) {
-                    markwon.setMarkdown(textView, textToShow);
-                } else {
-                    textView.setText(textToShow);
-                }
+                textView.setText(textToShow); // 只用 setText，不用 Markwon
+                
                 // 触发滚动回调
                 if (scrollCallback != null) {
                     scrollCallback.onRender();
@@ -373,15 +366,20 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
             }
         }
 
+        // 停止流式时，用 Markwon 一次性渲染 Markdown
         public void stop() {
             isTyping = false;
             handler.removeCallbacks(typingRunnable);
-            // 最后渲染一次完整内容
+            displayedLength = targetContent.length();
             lastRenderedText = "";
-            if (markwon != null) {
-                markwon.setMarkdown(textView, targetContent);
-            } else {
-                textView.setText(targetContent);
+            
+            if (textView != null) {
+                // SSE 完成后，一次性渲染 Markdown
+                if (markwon != null) {
+                    markwon.setMarkdown(textView, targetContent);
+                } else {
+                    textView.setText(targetContent);
+                }
             }
         }
     }
