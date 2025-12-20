@@ -34,7 +34,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
+import run.yigou.gxzy.utils.DebugLog;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -115,7 +115,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
     @Override
     protected void initView() {
-        Log.d(TAG, "initView: Starting initialization");
+        DebugLog.d(TAG, "initView: Starting initialization");
         mMarkwon = Markwon.builder(getContext())
                 .usePlugin(CorePlugin.create())
                 .usePlugin(HtmlPlugin.create())
@@ -233,9 +233,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         initMsgs();
 
         // 添加调试日志，检查组件是否正确初始化
-        Log.d(TAG, "initView: rv_chat=" + rv_chat);
-        Log.d(TAG, "initView: mChatAdapter=" + mChatAdapter);
-        Log.d(TAG, "initView: layoutManager=" + layoutManager);
+        DebugLog.d(TAG, "initView: rv_chat=" + rv_chat);
+        DebugLog.d(TAG, "initView: mChatAdapter=" + mChatAdapter);
+        DebugLog.d(TAG, "initView: layoutManager=" + layoutManager);
 
         // 设置EditText的输入监听器，确保光标始终在最左侧
         EditText chatContent = findViewById(R.id.chat_content);
@@ -375,7 +375,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     session.getPreview(),
                     session.getUpdateTime().substring(0, 10), // 提取日期部分
                     messageCount));
-            Log.d(TAG, "Added session to sidebar: " + session.getTitle() + ", message count: " + messageCount);
+            DebugLog.d(TAG, "Added session to sidebar: " + session.getTitle() + ", message count: " + messageCount);
         }
 
         // 更新适配器数据
@@ -391,7 +391,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     private void loadLastSelectedSession(List<ChatSessionBean> sessions) {
         // 如果会话列表为空，创建一个新会话
         if (sessions.isEmpty()) {
-            Log.d(TAG, "Session list is empty, creating new session");
+            DebugLog.d(TAG, "Session list is empty, creating new session");
             createNewSessionWithId();
             return;
         }
@@ -405,7 +405,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             for (int i = 0; i < sessions.size(); i++) {
                 if (sessions.get(i).getId().equals(lastSessionId)) {
                     selectedPosition = i;
-                    Log.d(TAG, "Found last selected session at position: " + i);
+                    DebugLog.d(TAG, "Found last selected session at position: " + i);
                     break;
                 }
             }
@@ -414,7 +414,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 选中并加载会话
         chatHistoryAdapter.setSelectedPosition(selectedPosition);
         loadChatDataForSession(sessions.get(selectedPosition).getId());
-        Log.d(TAG, "Auto-loaded session: " + sessions.get(selectedPosition).getTitle());
+        DebugLog.d(TAG, "Auto-loaded session: " + sessions.get(selectedPosition).getTitle());
     }
     
     /**
@@ -435,7 +435,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         newSession.setId(sessionId);
         currentSession = newSession;
         
-        Log.d(TAG, "Created new session with ID: " + sessionId);
+        DebugLog.d(TAG, "Created new session with ID: " + sessionId);
         
         // 申请会话ID
         EasyHttp.get(AiMsgFragment.this)
@@ -455,13 +455,13 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                 // 更新数据库
                                 DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
                                 
-                                Log.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
+                                DebugLog.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
                                 
                                 // 刷新会话列表UI
                                 populateChatHistoryWithTestData();
                             }
                         } else {
-                            Log.e(TAG, "Failed to obtain session ID: " + (data != null ? data.getMessage() : "null response"));
+                            DebugLog.e(TAG, "Failed to obtain session ID: " + (data != null ? data.getMessage() : "null response"));
                             Toast.makeText(getContext(), "会话创建失败，请重试", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -469,7 +469,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     @Override
                     public void onFail(Exception e) {
                         super.onFail(e);
-                        Log.e(TAG, "Failed to request session ID: " + e.getMessage());
+                        DebugLog.e(TAG, "Failed to request session ID: " + e.getMessage());
                         Toast.makeText(getContext(), "网络请求失败，请检查网络连接", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -483,7 +483,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         
         SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit().putLong(KEY_LAST_SESSION_ID, sessionId).apply();
-        Log.d(TAG, "Saved last session ID: " + sessionId);
+        DebugLog.d(TAG, "Saved last session ID: " + sessionId);
     }
     
     /**
@@ -491,13 +491,13 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
      */
     private Long getLastSessionId() {
         if (getContext() == null) {
-            Log.w(TAG, "getLastSessionId: Context is null");
+            DebugLog.w(TAG, "getLastSessionId: Context is null");
             return null;
         }
         
         SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         long sessionId = prefs.getLong(KEY_LAST_SESSION_ID, -1L);
-        Log.d(TAG, "getLastSessionId: Read session ID from SharedPreferences: " + sessionId);
+        DebugLog.d(TAG, "getLastSessionId: Read session ID from SharedPreferences: " + sessionId);
         return sessionId > 0 ? sessionId : null;
     }
 
@@ -507,7 +507,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
      * @param sessionId 会话ID
      */
     private void loadChatDataForSession(Long sessionId) {
-        Log.d(TAG, "loadChatDataForSession: Loading data for session " + sessionId);
+        DebugLog.d(TAG, "loadChatDataForSession: Loading data for session " + sessionId);
 
         // 保存最后选中的会话ID
         saveLastSessionId(sessionId);
@@ -515,7 +515,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 获取会话信息
         ChatSessionBean session = DbService.getInstance().mChatSessionBeanService.findById(sessionId);
         if (session == null) {
-            Log.w(TAG, "Session not found for ID: " + sessionId);
+            DebugLog.w(TAG, "Session not found for ID: " + sessionId);
             loadDefaultSessionData();
             return;
         }
@@ -540,7 +540,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 }
             }
             mChatAdapter.setData(new ArrayList<>(messages));
-            Log.d(TAG, "Loaded " + messages.size() + " messages for session " + sessionId);
+            DebugLog.d(TAG, "Loaded " + messages.size() + " messages for session " + sessionId);
         }
 
         // 将会话标题同步设置到TitleBar标题显示
@@ -558,7 +558,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                         rv_chat.scrollToPosition(mChatAdapter.getItemCount() - 1);
                         // 再滚动到 item 的绝对底部
                         rv_chat.post(() -> rv_chat.scrollBy(0, 10000));
-                        Log.d(TAG, "Scrolled to absolute bottom");
+                        DebugLog.d(TAG, "Scrolled to absolute bottom");
                     }
                 }
             });
@@ -593,7 +593,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
      * 初始化聊天消息
      */
     private void initMsgs() {
-        Log.d(TAG, "initMsgs: Initializing messages");
+        DebugLog.d(TAG, "initMsgs: Initializing messages");
         
         // 加载会话列表并恢复上次选中的会话
         populateChatHistoryWithTestData();
@@ -618,7 +618,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                 currentSession.getEndUserId() == null ||
                                 currentSession.getEndUserId().isEmpty()) {
                                 // 会话ID缺失，重新申请
-                                Log.d(TAG, "Session missing conversationId or endUserId, requesting new ID");
+                                DebugLog.d(TAG, "Session missing conversationId or endUserId, requesting new ID");
                                 requestNewSessionIdAndContinue(result, time);
                                 return;
                             }
@@ -656,7 +656,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                         long sendMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(chatMessageBeanSend);
                         chatMessageBeanSend.setId(sendMsgId);
                         mChatAdapter.addItem(chatMessageBeanSend);
-                        Log.d(TAG, "Saved sent message to database with ID: " + sendMsgId + " and session ID: " + currentSession.getId());
+                        DebugLog.d(TAG, "Saved sent message to database with ID: " + sendMsgId + " and session ID: " + currentSession.getId());
 
                         // 更新会话预览和时间
                         currentSession.setPreview("我: " + result);
@@ -673,7 +673,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                         long thinkingMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(thinkingMessage);
                         thinkingMessage.setId(thinkingMsgId);
                         mChatAdapter.addItem(thinkingMessage);
-                        Log.d(TAG, "Added thinking message with ID: " + thinkingMsgId);
+                        DebugLog.d(TAG, "Added thinking message with ID: " + thinkingMsgId);
 
                         // 准备 "回答" 消息的引用（初始为空，等到有回答时再创建）
                         final ChatMessageBean[] answerMessageRef = {null};
@@ -949,7 +949,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 注意：这里不立即保存到数据库，等到用户第一次发送消息时再保存
         currentSession = newSession;
 
-        Log.d(TAG, "Created new session in memory only");
+        DebugLog.d(TAG, "Created new session in memory only");
     }
 
     /**
@@ -962,7 +962,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             currentSession.setUpdateTime(currentTime);
             long sessionId = DbService.getInstance().mChatSessionBeanService.addEntity(currentSession);
             currentSession.setId(sessionId);
-            Log.d(TAG, "Saved new session to database with ID: " + sessionId);
+            DebugLog.d(TAG, "Saved new session to database with ID: " + sessionId);
 
             // 保存当前会话ID到 SharedPreferences（确保下次不会被覆盖）
             saveLastSessionId(sessionId);
@@ -975,7 +975,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             // 会话保存到数据库后，只刷新侧边栏UI（不重新加载会话数据）
             refreshChatHistorySidebar();
         } else {
-            Log.d(TAG, "Session already exists in database with ID: " + currentSession.getId());
+            DebugLog.d(TAG, "Session already exists in database with ID: " + currentSession.getId());
         }
     }
     
@@ -1017,7 +1017,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 更新适配器数据
         chatHistoryAdapter.setData(historyItems);
         chatHistoryAdapter.setSelectedPosition(currentSessionPosition);
-        Log.d(TAG, "Refreshed sidebar, current session at position: " + currentSessionPosition);
+        DebugLog.d(TAG, "Refreshed sidebar, current session at position: " + currentSessionPosition);
     }
 
     /**
@@ -1043,7 +1043,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             onlySystemMessages = true;
         }
 
-        Log.d(TAG, "Checking if should save system message, onlySystemMessages: " + onlySystemMessages);
+        DebugLog.d(TAG, "Checking if should save system message, onlySystemMessages: " + onlySystemMessages);
 
         // 只有当消息列表中包含非系统消息时，才保存系统消息到数据库
         if (!onlySystemMessages) {
@@ -1065,7 +1065,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 long systemMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(chatMessageBeanSystem);
                 chatMessageBeanSystem.setId(systemMsgId);
                 mChatAdapter.addItem(chatMessageBeanSystem);
-                Log.d(TAG, "Saved system message to database with ID: " + systemMsgId + " and session ID: " + currentSession.getId());
+                DebugLog.d(TAG, "Saved system message to database with ID: " + systemMsgId + " and session ID: " + currentSession.getId());
             }
         } else {
             // 如果只有系统消息，添加系统消息但不保存到数据库
@@ -1084,7 +1084,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 chatMessageBeanSystem.setIsDelete(ChatMessageBean.IS_Delete_NO);
                 // 不保存系统消息到数据库，只添加到界面
                 mChatAdapter.addItem(chatMessageBeanSystem);
-                Log.d(TAG, "Added system message to UI only (not saved to database)");
+                DebugLog.d(TAG, "Added system message to UI only (not saved to database)");
             }
         }
     }
@@ -1127,7 +1127,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                 // 设置会话Id
                                 currentSession.setConversationId(bean.getRealConversationId());
                                 currentSession.setEndUserId(bean.getEndUserId());
-                                Log.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
+                                DebugLog.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
                             }
                         } else {
                             EasyLog.print("会话Id申请失败：" + data.getMessage());
@@ -1163,7 +1163,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             systemMessage.setCreateDate(DateHelper.getSeconds1());
             systemMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
             mChatAdapter.addItem(systemMessage);
-            Log.d(TAG, "Added system message to UI only (not saved to database yet)");
+            DebugLog.d(TAG, "Added system message to UI only (not saved to database yet)");
         }
 
         // 更新标题栏标题
@@ -1181,7 +1181,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
     @Override
     protected void initData() {
-        Log.d(TAG, "initData: Starting to initialize data");
+        DebugLog.d(TAG, "initData: Starting to initialize data");
 
         // 只有在数据库中有会话数据时才初始化
         List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
@@ -1191,28 +1191,28 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             populateChatHistoryWithTestData();
         } else {
             // 没有会话数据时，创建新会话
-            Log.d(TAG, "No session data found in database, creating new session");
+            DebugLog.d(TAG, "No session data found in database, creating new session");
             // 清空侧边栏
             chatHistoryAdapter.setData(new ArrayList<ChatHistoryAdapter.ChatHistoryItem>());
             // 创建新会话
             handleAddNewSession();
         }
-        Log.d(TAG, "initData: Completed data initialization");
+        DebugLog.d(TAG, "initData: Completed data initialization");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume: Fragment resumed");
+        DebugLog.d(TAG, "onResume: Fragment resumed");
         // 确保数据在恢复时也能正确显示
         if (mChatAdapter != null && rv_chat != null) {
             rv_chat.post(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(TAG, "onResume: Adapter item count = " + mChatAdapter.getItemCount());
-                    Log.d(TAG, "onResume: RecyclerView child count = " + rv_chat.getChildCount());
+                    DebugLog.d(TAG, "onResume: Adapter item count = " + mChatAdapter.getItemCount());
+                    DebugLog.d(TAG, "onResume: RecyclerView child count = " + rv_chat.getChildCount());
                     if (mChatAdapter.getItemCount() > 0 && rv_chat.getChildCount() == 0) {
-                        Log.w(TAG, "onResume: Data exists but not displayed, forcing refresh");
+                        DebugLog.w(TAG, "onResume: Data exists but not displayed, forcing refresh");
                         mChatAdapter.notifyDataSetChanged();
                     }
                 }
@@ -1326,7 +1326,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                 currentSession.setConversationId(bean.getRealConversationId());
                                 currentSession.setEndUserId(bean.getEndUserId());
                                 currentSession.setCreateTime(DateHelper.getSeconds1());
-                                Log.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
+                                DebugLog.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
                             }
                         } else {
                             EasyLog.print("过期会话Id申请失败：" + data.getMessage());
@@ -1371,7 +1371,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                 currentSession.setConversationId(bean.getRealConversationId());
                                 currentSession.setEndUserId(bean.getEndUserId());
                                 currentSession.setCreateTime(DateHelper.getSeconds1());
-                                Log.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
+                                DebugLog.d(TAG, "Session ID obtained: " + bean.getRealConversationId());
                                 
                                 // 会话ID申请成功后，继续执行发送消息的逻辑
                                 continueSendingMessage();
@@ -1416,7 +1416,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         long sendMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(chatMessageBeanSend);
         chatMessageBeanSend.setId(sendMsgId);
         mChatAdapter.addItem(chatMessageBeanSend);
-        Log.d(TAG, "Saved sent message to database with ID: " + sendMsgId + " and session ID: " + currentSession.getId());
+        DebugLog.d(TAG, "Saved sent message to database with ID: " + sendMsgId + " and session ID: " + currentSession.getId());
 
         // 更新会话预览和时间
         currentSession.setPreview("我: " + pendingMessageContent);
@@ -1433,7 +1433,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         long thinkingMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(thinkingMessage);
         thinkingMessage.setId(thinkingMsgId);
         mChatAdapter.addItem(thinkingMessage);
-        Log.d(TAG, "Added thinking message with ID: " + thinkingMsgId);
+        DebugLog.d(TAG, "Added thinking message with ID: " + thinkingMsgId);
 
         // 准备 "回答" 消息的引用（初始为空，等到有回答时再创建）
         final ChatMessageBean[] answerMessageRef = {null};
