@@ -296,6 +296,30 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 }
             }
         });
+        
+        // 设置键盘回车/发送键监听，按下时发送消息
+        chatContent.setOnKeyListener((v, keyCode, event) -> {
+            // 是否是回车键
+            if (keyCode == android.view.KeyEvent.KEYCODE_ENTER && event.getAction() == android.view.KeyEvent.ACTION_DOWN) {
+                String msg = chatContent.getText().toString().trim();
+                if (!msg.isEmpty()) {
+                    // 隐藏键盘
+                    android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) 
+                            requireActivity().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                    if (imm != null && requireActivity().getCurrentFocus() != null) {
+                        imm.hideSoftInputFromWindow(requireActivity().getCurrentFocus().getWindowToken(), 
+                                android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS);
+                    }
+                    // 触发发送消息（调用发送按钮的点击逻辑）
+                    Button sendButton = findViewById(R.id.chat_send);
+                    if (sendButton != null) {
+                        sendButton.performClick();
+                    }
+                }
+                return true; // 消费事件，防止换行
+            }
+            return false;
+        });
 
         // 设置侧边栏清空所有会话按钮点击事件
         ImageButton clearAllButton = findViewById(R.id.btn_edit_title);

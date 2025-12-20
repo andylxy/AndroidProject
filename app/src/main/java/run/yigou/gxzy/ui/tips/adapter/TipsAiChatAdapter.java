@@ -64,7 +64,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
     @Override
     public int getItemViewType(int position) {
         int type = getItem(position).getType();
-        Timber.tag("TipsAiChatAdapter").d("getItemViewType: position=%d, type=%d", position, type);
+       // Timber.tag("TipsAiChatAdapter").d("getItemViewType: position=%d, type=%d", position, type);
         return type;
     }
     
@@ -89,7 +89,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
     @NonNull
     @Override
     public TipsAiChatAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Timber.tag("TipsAiChatAdapter").d("onCreateViewHolder: viewType=%d", viewType);
+       //Timber.tag("TipsAiChatAdapter").d("onCreateViewHolder: viewType=%d", viewType);
 
         switch (viewType) {
             case ChatMessageBean.TYPE_RECEIVED:
@@ -106,12 +106,12 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                 break;
             default:
                 // 记录日志并使用默认布局
-                Timber.tag("TipsAiChatAdapter").w("Unknown view type: %s", viewType);
+                //Timber.tag("TipsAiChatAdapter").w("Unknown view type: %s", viewType);
                 viewTypeLayout = LAYOUT_DEFAULT;
                 break;
         }
 
-        Timber.tag("TipsAiChatAdapter").d("onCreateViewHolder: viewTypeLayout=%d", viewTypeLayout);
+      //  Timber.tag("TipsAiChatAdapter").d("onCreateViewHolder: viewTypeLayout=%d", viewTypeLayout);
         return new TipsAiChatAdapter.ViewHolder(viewTypeLayout);
     }
 
@@ -158,7 +158,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
 
         private ViewHolder(int viewlayout) {
             super(viewlayout);
-            Timber.tag("TipsAiChatAdapter").d("ViewHolder created with layout: %d", viewlayout);
+           // Timber.tag("TipsAiChatAdapter").d("ViewHolder created with layout: %d", viewlayout);
         }
 
         public void onBindPayload(int position) {
