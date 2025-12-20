@@ -333,7 +333,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                     }
                     
                 } catch (Exception e) {
-                    DebugLog.print("Search error for book " + bookId + ": " + e.getMessage());
+                    EasyLog.print("Search error for book " + bookId + ": " + e.getMessage());
                 }
             }
             

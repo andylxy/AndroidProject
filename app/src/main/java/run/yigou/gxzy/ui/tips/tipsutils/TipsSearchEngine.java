@@ -100,7 +100,7 @@ public class TipsSearchEngine {
             pattern = Pattern.compile(sanitizedTerm);
         } catch (Exception e) {
             // 记录错误日志，并使用默认正则表达式
-            DebugLog.print("Error compiling regex: " + sanitizedTerm + ". Fallback to default.");
+            EasyLog.print("Error compiling regex: " + sanitizedTerm + ". Fallback to default.");
             pattern = Pattern.compile(".");
         }
         return pattern;

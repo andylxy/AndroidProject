@@ -98,7 +98,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                DebugLog.print("clearEditText", "onTextChanged: " + s);
+                EasyLog.print("clearEditText", "onTextChanged: " + s);
                 removeCallbacks(runnable);
                 postDelayed(runnable, 300); // 延迟 300 毫秒执行
             }

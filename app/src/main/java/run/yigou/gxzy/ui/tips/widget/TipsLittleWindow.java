@@ -204,19 +204,19 @@ public abstract class TipsLittleWindow extends Fragment {
         setupButtons(config);
 
         // 创建内容视图（子类实现）
-        DebugLog.print("=== TipsLittleWindow.onCreateView() ===");
-        DebugLog.print("步骤1: 调用createContentView()");
+        EasyLog.print("=== TipsLittleWindow.onCreateView() ===");
+        EasyLog.print("步骤1: 调用createContentView()");
         View contentView = createContentView(inflater, container);
-        DebugLog.print("步骤2: createContentView()完成");
+        EasyLog.print("步骤2: createContentView()完成");
 
         // 绑定数据（子类实现）
-        DebugLog.print("步骤3: 调用bindData()");
+        EasyLog.print("步骤3: 调用bindData()");
         bindData();
-        DebugLog.print("步骤4: bindData()完成");
+        EasyLog.print("步骤4: bindData()完成");
 
         // 将视图添加到根视图中
         this.mGroup.addView(this.view);
-        DebugLog.print("步骤5: 视图已添加到根视图");
+        EasyLog.print("步骤5: 视图已添加到根视图");
 
         return super.onCreateView(inflater, container, savedInstanceState);
     }

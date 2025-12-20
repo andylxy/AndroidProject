@@ -64,8 +64,8 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
     public RefactoredExpandableAdapter(@NonNull Context context) {
         super(context);
         
-        DebugLog.print("========== RefactoredExpandableAdapter 构造函数 ==========");
-        DebugLog.print("实例创建: " + this);
+        EasyLog.print("========== RefactoredExpandableAdapter 构造函数 ==========");
+        EasyLog.print("实例创建: " + this);
         
         // 初始化事件处理器
         this.clickHandler = new ReadModeClickHandler(context, this);
@@ -73,7 +73,7 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
         
         this.groupDataList = new ArrayList<>();
         
-        DebugLog.print("RefactoredExpandableAdapter 初始化完成");
+        EasyLog.print("RefactoredExpandableAdapter 初始化完成");
     }
 
     /**
@@ -102,9 +102,9 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
             @NonNull List<run.yigou.gxzy.ui.tips.entity.GroupData> groupDataList,
             @NonNull List<List<run.yigou.gxzy.ui.tips.entity.ItemData>> itemDataList) {
         
-        DebugLog.print("RefactoredExpandableAdapter", "设置搜索结果数据");
-        DebugLog.print("RefactoredExpandableAdapter", "GroupData数量: " + groupDataList.size());
-        DebugLog.print("RefactoredExpandableAdapter", "ItemData列表数量: " + itemDataList.size());
+        EasyLog.print("RefactoredExpandableAdapter", "设置搜索结果数据");
+        EasyLog.print("RefactoredExpandableAdapter", "GroupData数量: " + groupDataList.size());
+        EasyLog.print("RefactoredExpandableAdapter", "ItemData列表数量: " + itemDataList.size());
         
         // ✅ 直接转换为 model.GroupData/model.ItemData (避免经过 ExpandableGroupEntity)
         List<run.yigou.gxzy.ui.tips.adapter.refactor.model.GroupData> modelGroupList = new ArrayList<>();
@@ -159,7 +159,7 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
         
         notifyDataSetChanged();
         
-        DebugLog.print("RefactoredExpandableAdapter", "✅ 搜索结果数据设置完成 (直接路径)");
+        EasyLog.print("RefactoredExpandableAdapter", "✅ 搜索结果数据设置完成 (直接路径)");
     }
     
     /**
@@ -221,12 +221,12 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
 
     @Override
     public void onBindHeaderViewHolder(BaseViewHolder holder, int groupPosition) {
-        DebugLog.print("=== RefactoredExpandableAdapter.onBindHeaderViewHolder 调用 ===");
-        DebugLog.print("groupPosition: " + groupPosition);
+        EasyLog.print("=== RefactoredExpandableAdapter.onBindHeaderViewHolder 调用 ===");
+        EasyLog.print("groupPosition: " + groupPosition);
         
         GroupData groupData = groupDataList.get(groupPosition);
         
-        DebugLog.print("GroupData: title=" + groupData.getTitle() + ", itemCount=" + groupData.getItemCount());
+        EasyLog.print("GroupData: title=" + groupData.getTitle() + ", itemCount=" + groupData.getItemCount());
         
         // 使用ViewHolder封装
         TipsHeaderViewHolder headerVH = ViewHolderFactory.createHeaderViewHolder(holder);
@@ -251,13 +251,13 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
 
     @Override
     public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {
-        DebugLog.print("=== RefactoredExpandableAdapter.onBindChildViewHolder 调用 ===");
-        DebugLog.print("groupPosition: " + groupPosition + ", childPosition: " + childPosition);
+        EasyLog.print("=== RefactoredExpandableAdapter.onBindChildViewHolder 调用 ===");
+        EasyLog.print("groupPosition: " + groupPosition + ", childPosition: " + childPosition);
         
         GroupData groupData = groupDataList.get(groupPosition);
         ItemData itemData = groupData.getItem(childPosition);
         
-        DebugLog.print("ItemData: hasTextSpan=" + itemData.hasTextSpan());
+        EasyLog.print("ItemData: hasTextSpan=" + itemData.hasTextSpan());
         
         // 使用ViewHolder封装
         TipsChildViewHolder childVH = ViewHolderFactory.createChildViewHolder(holder);
@@ -423,7 +423,7 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
      */
     public void updateGroupData(int position, @NonNull GroupData groupData) {
         if (position < 0 || position >= groupDataList.size()) {
-            DebugLog.print("RefactoredExpandableAdapter",
+            EasyLog.print("RefactoredExpandableAdapter",
                 "updateGroupData: 位置越界 position=" + position + ", size=" + groupDataList.size());
             return;
         }
@@ -437,7 +437,7 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
             // groups.set(position, convertToEntity(groupData));
         }
         
-        DebugLog.print("RefactoredExpandableAdapter",
+        EasyLog.print("RefactoredExpandableAdapter",
             "updateGroupData: 已更新位置=" + position + ", 标题=" + groupData.getTitle());
         
         // 注意：不自动刷新界面，由调用者决定刷新策略
@@ -452,7 +452,7 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
      */
     public void updateGroupFromEntity(int position, @NonNull ExpandableGroupEntity entity) {
         if (position < 0 || position >= groupDataList.size()) {
-            DebugLog.print("RefactoredExpandableAdapter",
+            EasyLog.print("RefactoredExpandableAdapter",
                 "updateGroupFromEntity: 位置越界 position=" + position + ", size=" + groupDataList.size());
             return;
         }
@@ -471,7 +471,7 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
         // 4. 同步展开状态到状态管理器
         expandStateManager.setExpandState(position, entity.isExpand());
         
-        DebugLog.print("RefactoredExpandableAdapter",
+        EasyLog.print("RefactoredExpandableAdapter",
             "updateGroupFromEntity: 已更新位置=" + position + 
             ", 标题=" + entity.getHeader() + 
             ", 展开=" + entity.isExpand() +

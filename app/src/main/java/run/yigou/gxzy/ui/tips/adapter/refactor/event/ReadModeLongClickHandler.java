@@ -148,7 +148,7 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
                 break;
 
             default:
-                DebugLog.print("Unknown menu action: " + action);
+                EasyLog.print("Unknown menu action: " + action);
                 break;
         }
     }

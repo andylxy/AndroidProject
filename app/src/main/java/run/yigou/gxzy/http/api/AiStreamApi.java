@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import run.yigou.gxzy.utils.DebugLog;
 import com.google.gson.Gson;
 import com.hjq.http.EasyConfig;
+import com.hjq.http.EasyLog;
 import com.hjq.http.config.IRequestApi;
 import com.hjq.http.config.IRequestClient;
 import com.hjq.http.config.IRequestHost;
@@ -92,7 +93,7 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
     @NonNull
     @Override
     public OkHttpClient getClient() {
-        DebugLog.d(TAG, "========== 构建 SSE OkHttpClient ==========");
+        EasyLog.print(TAG, "========== 构建 SSE OkHttpClient ==========");
         
         // ✅ 从 EasyConfig 获取基础 client（自动应用拦截器、签名等）
         OkHttpClient.Builder clientBuilder = EasyConfig.getInstance()
@@ -102,23 +103,23 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
                 .writeTimeout(300, TimeUnit.SECONDS)
                 .connectTimeout(30, TimeUnit.SECONDS);
         
-        DebugLog.d(TAG, "已设置超时：读300秒，写300秒，连接30秒");
+        EasyLog.print(TAG, "已设置超时：读300秒，写300秒，连接30秒");
         
         // ⚠️ 开发环境：强制信任所有 SSL 证书（仅用于测试）
         try {
-            DebugLog.d(TAG, "========== 配置 SSL 信任 ==========");
+            EasyLog.print(TAG, "========== 配置 SSL 信任 ==========");
             
             // 创建信任所有证书的 TrustManager
             final javax.net.ssl.TrustManager[] trustAllCerts = new javax.net.ssl.TrustManager[]{
                 new javax.net.ssl.X509TrustManager() {
                     @Override
                     public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                        DebugLog.d(TAG, "✅ checkClientTrusted - 跳过验证");
+                        EasyLog.print(TAG, "✅ checkClientTrusted - 跳过验证");
                     }
                     
                     @Override
                     public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                        DebugLog.d(TAG, "✅ checkServerTrusted - 跳过验证");
+                        EasyLog.print(TAG, "✅ checkServerTrusted - 跳过验证");
                     }
                     
                     @Override
@@ -133,20 +134,20 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
             sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
             final javax.net.ssl.SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
             
-            DebugLog.d(TAG, "SSLContext 协议: " + sslContext.getProtocol());
+            EasyLog.print(TAG, "SSLContext 协议: " + sslContext.getProtocol());
             
             clientBuilder.sslSocketFactory(sslSocketFactory, (javax.net.ssl.X509TrustManager) trustAllCerts[0]);
             clientBuilder.hostnameVerifier(new javax.net.ssl.HostnameVerifier() {
                 @Override
                 public boolean verify(String hostname, javax.net.ssl.SSLSession session) {
-                    DebugLog.d(TAG, "✅ hostnameVerifier - 跳过验证: " + hostname);
+                    EasyLog.print(TAG, "✅ hostnameVerifier - 跳过验证: " + hostname);
                     return true;
                 }
             });
             
-            DebugLog.d(TAG, "========== ✅ SSL 信任配置完成 ==========");
+            EasyLog.print(TAG, "========== ✅ SSL 信任配置完成 ==========");
         } catch (Exception e) {
-            DebugLog.e(TAG, "❌ SSL 配置失败: " + e.getMessage());
+            EasyLog.print(TAG, "❌ SSL 配置失败: " + e.getMessage());
             e.printStackTrace();
         }
         
@@ -193,10 +194,10 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
      * @param callback 流式数据回调
      */
     public void execute(@NonNull SseStreamCallback callback) {
-        DebugLog.d(TAG, "开始执行 SSE 流式请求");
-        DebugLog.d(TAG, "URL: " + getFullUrl());
-        DebugLog.d(TAG, "Query: " + query);
-        DebugLog.d(TAG, "ConversationId: " + conversationId);
+        EasyLog.print(TAG, "开始执行 SSE 流式请求");
+        EasyLog.print(TAG, "URL: " + getFullUrl());
+        EasyLog.print(TAG, "Query: " + query);
+        EasyLog.print(TAG, "ConversationId: " + conversationId);
         
         // 重置取消标记
         isCanceled = false;
@@ -208,7 +209,7 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
             
             // 构建请求体
             String jsonBody = buildRequestBody();
-            DebugLog.d(TAG, "请求体: " + jsonBody);
+            EasyLog.print(TAG, "请求体: " + jsonBody);
             
             RequestBody body = RequestBody.create(JSON, jsonBody);
             
@@ -261,7 +262,7 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
                     String timestamp = run.yigou.gxzy.http.security.SecurityConfig.getCurrentTimestamp();
                     String nonce = run.yigou.gxzy.http.security.SecurityConfig.generateNonce();
                     
-                    DebugLog.d(TAG, "签名参数: method=" + method + ", host=" + hostForSign + ", path=" + path);
+                    EasyLog.print(TAG, "签名参数: method=" + method + ", host=" + hostForSign + ", path=" + path);
                     
                     // ⚠️ 重要：在生成签名前，确保 SecurityConfig 使用正确的密钥
                     run.yigou.gxzy.http.security.SecurityConfig.setAccessKeyId(accessKeyId);
@@ -281,14 +282,14 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
 //                        requestBuilder.addHeader("X-Encryption-Algorithm", "SM2");
 //                    }
                     
-                    DebugLog.d(TAG, "✅ 已添加安全签名头部");
+                    EasyLog.print(TAG, "✅ 已添加安全签名头部");
                 }
             }
             
             Request request = requestBuilder.build();
             
-            DebugLog.d(TAG, "请求 URL: " + getFullUrl());
-            DebugLog.d(TAG, "请求方法: POST");
+            EasyLog.print(TAG, "请求 URL: " + getFullUrl());
+            EasyLog.print(TAG, "请求方法: POST");
             
             // 创建 EventSource
             EventSource.Factory factory = EventSources.createFactory(client);
@@ -296,13 +297,13 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
                 
                 @Override
                 public void onOpen(@NonNull EventSource eventSource, @NonNull Response response) {
-                    DebugLog.d(TAG, "SSE 连接已建立");
+                    EasyLog.print(TAG, "SSE 连接已建立");
                     callback.onOpen();
                 }
                 
                 @Override
                 public void onEvent(@NonNull EventSource eventSource, String id, String type, @NonNull String data) {
-                    DebugLog.d(TAG, "接收到 SSE 事件: " + data.substring(0, Math.min(data.length(), 100)));
+                    EasyLog.print(TAG, "接收到 SSE 事件: " + data.substring(0, Math.min(data.length(), 100)));
                     
                     try {
                         // 解析 JSON 数据
@@ -310,73 +311,73 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
                         SseChunk chunk = gson.fromJson(data, SseChunk.class);
                         
                         if (chunk != null) {
-                            DebugLog.d(TAG, "解析数据块: type=" + chunk.getType() + ", content length=" + 
+                            EasyLog.print(TAG, "解析数据块: type=" + chunk.getType() + ", content length=" + 
                                     (chunk.getContent() != null ? chunk.getContent().length() : 0));
                             callback.onChunk(chunk);
                             
                             // 如果是 done 或 error，关闭连接
                             if ("done".equals(chunk.getType())) {
-                                DebugLog.d(TAG, "收到完成信号，关闭连接");
+                                EasyLog.print(TAG, "收到完成信号，关闭连接");
                                 isCanceled = true; // ⚠️ 标记为主动取消，防止 onFailure 误报
                                 eventSource.cancel();
                                 callback.onComplete();
                             } else if ("error".equals(chunk.getType())) {
-                                DebugLog.e(TAG, "收到错误信号: " + chunk.getError());
+                                EasyLog.print(TAG, "收到错误信号: " + chunk.getError());
                                 isCanceled = true; // 错误也需要取消连接
                                 eventSource.cancel();
                                 callback.onError(new Exception(chunk.getError()));
                             }
                         } else {
-                            DebugLog.w(TAG, "无法解析数据块");
+                            EasyLog.print(TAG, "无法解析数据块");
                         }
                     } catch (Exception e) {
-                        DebugLog.e(TAG, "解析 SSE 数据失败: " + e.getMessage());
+                        EasyLog.print(TAG, "解析 SSE 数据失败: " + e.getMessage());
                         callback.onError(e);
                     }
                 }
                 
                 @Override
                 public void onClosed(@NonNull EventSource eventSource) {
-                    DebugLog.d(TAG, "SSE 连接已关闭");
+                    EasyLog.print(TAG, "SSE 连接已关闭");
                 }
                 
                 @Override
                 public void onFailure(@NonNull EventSource eventSource, Throwable t, Response response) {
                     // ⚠️ 如果是主动取消导致的 Socket closed，则忽略
                     if (isCanceled && t instanceof java.io.IOException && "Socket closed".equals(t.getMessage())) {
-                        DebugLog.d(TAG, "忽略主动取消连接后的 Socket closed");
+                        EasyLog.print(TAG, "忽略主动取消连接后的 Socket closed");
                         return;
                     }
 
                     String errorMsg = t != null ? t.getMessage() : "未知错误";
-                    DebugLog.e(TAG, "====== SSE 连接失败详情 ======");
-                    DebugLog.e(TAG, "错误消息: " + errorMsg);
+                    EasyLog.print(TAG, "====== SSE 连接失败详情 ======");
+                    EasyLog.print(TAG, "错误消息: " + errorMsg);
                     if (t != null) {
-                        DebugLog.e(TAG, "异常类型: " + t.getClass().getName());
-                        DebugLog.e(TAG, "堆栈跟踪: ");
+                        EasyLog.print(TAG, "异常类型: " + t.getClass().getName());
+                        EasyLog.print(TAG, "堆栈跟踪: ");
                         t.printStackTrace();
                     }
                     if (response != null) {
-                        DebugLog.e(TAG, "响应码: " + response.code());
-                        DebugLog.e(TAG, "响应消息: " + response.message());
+                        EasyLog.print(TAG, "响应码: " + response.code());
+                        EasyLog.print(TAG, "响应消息: " + response.message());
                         try {
                             String errorBody = response.body() != null ? response.body().string() : "无响应体";
-                            DebugLog.e(TAG, "错误响应体: " + errorBody);
+                            EasyLog.print(TAG, "错误响应体: " + errorBody);
                         } catch (IOException e) {
-                            DebugLog.e(TAG, "读取错误响应失败: " + e.getMessage());
+                            EasyLog.print(TAG, "读取错误响应失败: " + e.getMessage());
                         }
                     } else {
-                        DebugLog.e(TAG, "响应为 null");
+                        EasyLog.print(TAG, "响应为 null");
                     }
-                    DebugLog.e(TAG, "================================");
+                    EasyLog.print(TAG, "================================");
                     callback.onError(new Exception(errorMsg, t));
                 }
             });
             
-            DebugLog.d(TAG, "EventSource 已创建并启动");
+            EasyLog.print(TAG, "EventSource 已创建并启动");
             
         } catch (Exception e) {
-            DebugLog.e(TAG, "SSE 请求创建失败: " + e.getMessage());
+            EasyLog.print(TAG, "SSE 请求创建失败: " + e.getMessage());
             e.printStackTrace();
             callback.onError(e);
         }

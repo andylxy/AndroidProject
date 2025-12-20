@@ -373,7 +373,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                 refreshDataFromNetwork();
                 break;
             default:
-                DebugLog.print("onClick value: " + view.getId());
+                EasyLog.print("onClick value: " + view.getId());
         }
     }
 
@@ -387,7 +387,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
             // 本地有数据，使用 post 延迟加载（确保 ViewPager 初始化完成，与网络回调行为一致）
             mViewPager.post(() -> {
                 loadNavFromLocal(localNavList);
-                DebugLog.print("Loaded navigation from local database");
+                EasyLog.print("Loaded navigation from local database");
             });
         } else {
             // 本地无数据，从网络获取（这是异步的）
@@ -487,7 +487,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             }
                         } else {
                             toast("获取数据失败：" + e.getMessage());
-                            DebugLog.print(e);
+                            EasyLog.print(e);
                         }
                     }
                 });

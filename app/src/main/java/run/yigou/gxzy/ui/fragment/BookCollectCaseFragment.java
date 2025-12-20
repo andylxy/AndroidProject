@@ -101,9 +101,9 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
 
 //        String data = "你好";
 //        String password = "1qaz2wsx3edc4rfv";
-//        DebugLog.print("明文密码：" + password);
+//        EasyLog.print("明文密码：" + password);
 //        String encryptedData = RC4Utils.encryptToBase64(data.getBytes(CHARSET), password);
-//        DebugLog.print("RC4加密：" + encryptedData);
+//        EasyLog.print("RC4加密：" + encryptedData);
 
         int index = 1;
         // HomeActivity.start(getContext());

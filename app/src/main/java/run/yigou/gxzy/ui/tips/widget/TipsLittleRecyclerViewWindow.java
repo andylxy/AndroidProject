@@ -50,36 +50,36 @@ public abstract class TipsLittleRecyclerViewWindow extends TipsLittleWindow {
 
     @Override
     protected void bindData() {
-        DebugLog.print("=== TipsLittleRecyclerViewWindow.bindData() ===");
+        EasyLog.print("=== TipsLittleRecyclerViewWindow.bindData() ===");
 
         // 检查是否有缓存的数据
         if (cachedGroupDataList == null || cachedItemDataList == null) {
-            DebugLog.print("❌ 数据为null，setData未调用");
+            EasyLog.print("❌ 数据为null，setData未调用");
             return;
         }
 
         this.groupDataList = cachedGroupDataList;
         this.itemDataList = cachedItemDataList;
 
-        DebugLog.print("数据准备就绪:");
-        DebugLog.print("  groupDataList size: " + groupDataList.size());
-        DebugLog.print("  itemDataList size: " + itemDataList.size());
+        EasyLog.print("数据准备就绪:");
+        EasyLog.print("  groupDataList size: " + groupDataList.size());
+        EasyLog.print("  itemDataList size: " + itemDataList.size());
 
         // 创建adapter（此时recyclerView已经初始化）
         if (adapter == null) {
-            DebugLog.print("创建RefactoredPopupAdapter");
+            EasyLog.print("创建RefactoredPopupAdapter");
             adapter = new RefactoredPopupAdapter(cachedContext, groupDataList, itemDataList);
-            DebugLog.print("RefactoredPopupAdapter创建完成, itemCount: " + adapter.getItemCount());
+            EasyLog.print("RefactoredPopupAdapter创建完成, itemCount: " + adapter.getItemCount());
         } else {
-            DebugLog.print("adapter已存在, 更新数据");
+            EasyLog.print("adapter已存在, 更新数据");
             adapter.updateData(groupDataList, itemDataList);
         }
 
-        DebugLog.print("✅ adapter准备就绪, itemCount: " + adapter.getItemCount());
-        DebugLog.print("✅ recyclerView状态: " + (recyclerView != null ? "已初始化" : "null"));
+        EasyLog.print("✅ adapter准备就绪, itemCount: " + adapter.getItemCount());
+        EasyLog.print("✅ recyclerView状态: " + (recyclerView != null ? "已初始化" : "null"));
         
         recyclerView.setAdapter(adapter);
-        DebugLog.print("RecyclerView.setAdapter() 完成");
+        EasyLog.print("RecyclerView.setAdapter() 完成");
     }
 
     /**
@@ -91,13 +91,13 @@ public abstract class TipsLittleRecyclerViewWindow extends TipsLittleWindow {
      * @param data Pair<GroupData列表, ItemData二维列表>
      */
     public void setData(Context context, Pair<List<GroupData>, List<List<ItemData>>> data) {
-        DebugLog.print("=== TipsLittleRecyclerViewWindow.setData() ===");
-        DebugLog.print("Context: " + context);
-        DebugLog.print("GroupData size: " + (data.first != null ? data.first.size() : "null"));
-        DebugLog.print("ItemData size: " + (data.second != null ? data.second.size() : "null"));
+        EasyLog.print("=== TipsLittleRecyclerViewWindow.setData() ===");
+        EasyLog.print("Context: " + context);
+        EasyLog.print("GroupData size: " + (data.first != null ? data.first.size() : "null"));
+        EasyLog.print("ItemData size: " + (data.second != null ? data.second.size() : "null"));
 
         if (data.first == null || data.second == null) {
-            DebugLog.print("❌ 数据为null");
+            EasyLog.print("❌ 数据为null");
             return;
         }
 
@@ -106,8 +106,8 @@ public abstract class TipsLittleRecyclerViewWindow extends TipsLittleWindow {
         this.cachedGroupDataList = data.first;
         this.cachedItemDataList = data.second;
         
-        DebugLog.print("✅ 数据已缓存，等待bindData()时创建adapter");
-        DebugLog.print("setData() 完成");
+        EasyLog.print("✅ 数据已缓存，等待bindData()时创建adapter");
+        EasyLog.print("setData() 完成");
     }
 
     @Override

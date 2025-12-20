@@ -232,8 +232,8 @@ public class SecurityConfig {
         // 使用默认的HmacSHA256签名
         String signature = hmacSha256(stringToSign, sAccessKeySecret);
         
-        DebugLog.print("签名字符串：\n" + stringToSign);
-        DebugLog.print("签名结果：" + signature +"签名密匙：" + sAccessKeySecret);
+        EasyLog.print("签名字符串：\n" + stringToSign);
+        EasyLog.print("签名结果：" + signature +"签名密匙：" + sAccessKeySecret);
         
         return signature;
     }
@@ -253,7 +253,7 @@ public class SecurityConfig {
             byte[] result = mac.doFinal(content.getBytes(StandardCharsets.UTF_8));
             return Base64.encodeToString(result, Base64.NO_WRAP);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            DebugLog.print("签名过程出现异常：" + e.getMessage());
+            EasyLog.print("签名过程出现异常：" + e.getMessage());
             e.printStackTrace();
             return "";
         }

@@ -53,7 +53,7 @@ public class AppDataInitializer {
      */
     public static void initializeIfNeeded(Context context) {
         if (isInitialized) {
-            DebugLog.print(TAG, "Already initialized, skipping");
+            EasyLog.print(TAG, "Already initialized, skipping");
             return;
         }
         
@@ -63,23 +63,23 @@ public class AppDataInitializer {
             }
             
             try {
-                DebugLog.print(TAG, "Starting data initialization...");
+                EasyLog.print(TAG, "Starting data initialization...");
                 long startTime = System.currentTimeMillis();
                 
                 // 检查本地是否已有数据
                 if (hasLocalData()) {
-                    DebugLog.print(TAG, "Local data found, loading from database");
+                    EasyLog.print(TAG, "Local data found, loading from database");
                     loadFromLocalDatabase();
                 } else {
-                    DebugLog.print(TAG, "No local data, will load from network later");
+                    EasyLog.print(TAG, "No local data, will load from network later");
                 }
                 
                 isInitialized = true;
                 long duration = System.currentTimeMillis() - startTime;
-                DebugLog.print(TAG, "Initialization completed in " + duration + "ms");
+                EasyLog.print(TAG, "Initialization completed in " + duration + "ms");
                 
             } catch (Exception e) {
-                DebugLog.print(TAG, "Initialization error: " + e.getMessage());
+                EasyLog.print(TAG, "Initialization error: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -99,7 +99,7 @@ public class AppDataInitializer {
             ArrayList<TabNav> navList = dbService.mTabNavService.findAll();
             return navList != null && !navList.isEmpty();
         } catch (Exception e) {
-            DebugLog.print(TAG, "Error checking local data: " + e.getMessage());
+            EasyLog.print(TAG, "Error checking local data: " + e.getMessage());
             return false;
         }
     }
@@ -124,10 +124,10 @@ public class AppDataInitializer {
             // 4. 加载导航数据
             loadNavigationData(dbService, globalData);
             
-            DebugLog.print(TAG, "Local data loaded successfully");
+            EasyLog.print(TAG, "Local data loaded successfully");
             
         } catch (Exception e) {
-            DebugLog.print(TAG, "Error loading local data: " + e.getMessage());
+            EasyLog.print(TAG, "Error loading local data: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -147,7 +147,7 @@ public class AppDataInitializer {
                     }
                 }
             }
-            DebugLog.print(TAG, "Loaded " + yaoList.size() + " Yao items");
+            EasyLog.print(TAG, "Loaded " + yaoList.size() + " Yao items");
         }
     }
     
@@ -160,7 +160,7 @@ public class AppDataInitializer {
             for (MingCiContent mingCi : mingCiList) {
                 globalData.putMingCiContent(mingCi.getName(), mingCi);
             }
-            DebugLog.print(TAG, "Loaded " + mingCiList.size() + " MingCi items");
+            EasyLog.print(TAG, "Loaded " + mingCiList.size() + " MingCi items");
         }
     }
     
@@ -174,7 +174,7 @@ public class AppDataInitializer {
             for (ZhongYaoAlia alias : aliasList) {
                 yaoAliasDict.put(alias.getBieming(), alias.getName());
             }
-            DebugLog.print(TAG, "Loaded " + aliasList.size() + " Yao aliases");
+            EasyLog.print(TAG, "Loaded " + aliasList.size() + " Yao aliases");
         }
     }
     
@@ -202,7 +202,7 @@ public class AppDataInitializer {
             }
         }
         
-        DebugLog.print(TAG, "Loaded " + navList.size() + " navigation tabs");
+        EasyLog.print(TAG, "Loaded " + navList.size() + " navigation tabs");
     }
     
     /**

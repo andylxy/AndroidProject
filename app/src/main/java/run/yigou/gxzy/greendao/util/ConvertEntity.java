@@ -92,7 +92,7 @@ public class ConvertEntity {
                         DbService.getInstance().mTabNavService.addEntity(nav);
                     } catch (Exception e) {
                         // 处理异常，比如记录日志、通知管理员等
-                        DebugLog.print("Failed to addEntity: " + e.getMessage());
+                        EasyLog.print("Failed to addEntity: " + e.getMessage());
                     }
                 } else {
                     tabNavId = navList.get(0).getTabNavId();
@@ -110,7 +110,7 @@ public class ConvertEntity {
                             DbService.getInstance().mTabNavBodyService.addEntity(item);
                         } catch (Exception e) {
                             // 处理异常，比如记录日志、通知管理员等
-                            DebugLog.print("Failed to addEntity: " + e.getMessage());
+                            EasyLog.print("Failed to addEntity: " + e.getMessage());
                             return;
                         }
                         // 获取章节列表
@@ -138,7 +138,7 @@ public class ConvertEntity {
                                         DbService.getInstance().mChapterService.addEntity(chapter);
                                     } catch (Exception e) {
                                         // 处理异常，比如记录日志、通知管理员等
-                                        DebugLog.print("Failed to addEntity: " + e.getMessage());
+                                        EasyLog.print("Failed to addEntity: " + e.getMessage());
                                         return;
                                     }
                                 }
@@ -168,7 +168,7 @@ public class ConvertEntity {
                 DbService.getInstance().mBeiMingCiService.addEntity(beiMingCi);
             } catch (Exception e) {
                 // 处理异常，比如记录日志、通知管理员等
-                DebugLog.print("Failed to add entity: " + e.getMessage());
+                EasyLog.print("Failed to add entity: " + e.getMessage());
             }
         }
     }
@@ -188,14 +188,14 @@ public class ConvertEntity {
                 DbService.getInstance().mYaoService.addEntity(yao1);
             } catch (Exception e) {
                 // 处理异常，比如记录日志、通知管理员等
-                DebugLog.print("Failed to add entity: " + e.getMessage());
+                EasyLog.print("Failed to add entity: " + e.getMessage());
             }
         }
     }
 
     public static void getFangDetailList(List<Fang> netFangDetailList, int bookId) {
         if (netFangDetailList == null || netFangDetailList.isEmpty() || bookId <= 0) {
-            DebugLog.print("FangDetailList is empty or null.or  bookId <=0 .");
+            EasyLog.print("FangDetailList is empty or null.or  bookId <=0 .");
             return;
         }
 
@@ -228,7 +228,7 @@ public class ConvertEntity {
                 }
             }
         } catch (Exception e) {
-            DebugLog.print("Error processing detail list: " + e.getMessage());
+            EasyLog.print("Error processing detail list: " + e.getMessage());
             throw e;
         }
     }
@@ -274,14 +274,14 @@ public class ConvertEntity {
             return dataList;
         } catch (Exception e) {
             // 增加详细日志记录
-            DebugLog.print("Error processing detail list: " + e.getMessage() + ", bookChapterList size: " + bookChapterList.size());
+            EasyLog.print("Error processing detail list: " + e.getMessage() + ", bookChapterList size: " + bookChapterList.size());
             return dataList;
         }
     }
 
     public static boolean saveAiConfigList(List<AiConfig> aiConfigs) {
         if (aiConfigs == null || aiConfigs.isEmpty()) {
-            DebugLog.print("AiConfig is empty or null.");
+            EasyLog.print("AiConfig is empty or null.");
             return false;
         }
         
@@ -303,7 +303,7 @@ public class ConvertEntity {
                 }
             }
         } catch (Exception e) {
-            DebugLog.print("Error processing detail list: " + e.getMessage());
+            EasyLog.print("Error processing detail list: " + e.getMessage());
             return false;
         }
         return true;
@@ -311,7 +311,7 @@ public class ConvertEntity {
 
     public static boolean saveBookChapterDetailList(Chapter chapter, List<HH2SectionData> netDetailList) {
         if (netDetailList == null || netDetailList.isEmpty() || chapter.getBookId() <= 0) {
-            DebugLog.print("BookDetailList is empty or null. or  bookId <=0 .");
+            EasyLog.print("BookDetailList is empty or null. or  bookId <=0 .");
             return false;
         }
         
@@ -352,7 +352,7 @@ public class ConvertEntity {
                 }
             }
         } catch (Exception e) {
-            DebugLog.print("Error processing detail list: " + e.getMessage());
+            EasyLog.print("Error processing detail list: " + e.getMessage());
             return false;
         }
         return true;
@@ -360,7 +360,7 @@ public class ConvertEntity {
 
     public static boolean getBookDetailList(List<HH2SectionData> netDetailList, int bookId) {
         if (netDetailList == null || netDetailList.isEmpty() || bookId <= 0) {
-            DebugLog.print("BookDetailList is empty or null. or  bookId <=0 .");
+            EasyLog.print("BookDetailList is empty or null. or  bookId <=0 .");
             return false;
         }
         
@@ -399,7 +399,7 @@ public class ConvertEntity {
                 }
             }
         } catch (Exception e) {
-            DebugLog.print("Error processing detail list: " + e.getMessage());
+            EasyLog.print("Error processing detail list: " + e.getMessage());
             return false;
         }
         return true;
@@ -436,7 +436,7 @@ public class ConvertEntity {
             return detailList;
         } catch (Exception e) {
             // 增加详细日志记录
-            DebugLog.print("Error processing detail list: " + e.getMessage() + ", bookChapterList size: " + bookChapterList.size());
+            EasyLog.print("Error processing detail list: " + e.getMessage() + ", bookChapterList size: " + bookChapterList.size());
             return detailList;
         }
     }
@@ -445,7 +445,7 @@ public class ConvertEntity {
         ArrayList<YaoFang> fangList = DbService.getInstance().mYaoFangService.find(YaoFangDao.Properties.BookId.eq(bookId));
         ArrayList<Fang> detailList = new ArrayList<>();
         if (fangList == null || fangList.isEmpty()) {
-            DebugLog.print("FandetailList is empty or null.");
+            EasyLog.print("FandetailList is empty or null.");
             return detailList;
         }
 
@@ -479,7 +479,7 @@ public class ConvertEntity {
                 detailList.add(fang);
             }
         } catch (Exception e) {
-            DebugLog.print("Error processing detail list: " + e.getMessage());
+            EasyLog.print("Error processing detail list: " + e.getMessage());
             throw e;
         }
         return detailList;

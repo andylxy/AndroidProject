@@ -144,7 +144,7 @@ public final class AppApplication extends Application {
             }
         } catch (Exception e) {
             // 记录异常日志，或者进行其他错误处理
-            DebugLog.print("InitUserLogin", "Error initializing user login: " + e.getMessage());
+            EasyLog.print("InitUserLogin", "Error initializing user login: " + e.getMessage());
         }
     }
 

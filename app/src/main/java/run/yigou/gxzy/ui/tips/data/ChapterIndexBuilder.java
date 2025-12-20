@@ -92,7 +92,7 @@ public class ChapterIndexBuilder {
         isBuilt = true;
         
         long elapsed = System.currentTimeMillis() - startTime;
-        DebugLog.print(TAG, String.format(
+        EasyLog.print(TAG, String.format(
             "Index built: %d chapters, %d signatures, %d keywords, time: %d ms",
             chapters.size(), 
             signatureIndex.size(), 
@@ -158,7 +158,7 @@ public class ChapterIndexBuilder {
     @Nullable
     public Chapter findBySignature(long signatureId) {
         if (!isBuilt) {
-            DebugLog.print(TAG, "Index not built yet!");
+            EasyLog.print(TAG, "Index not built yet!");
             return null;
         }
         
@@ -173,7 +173,7 @@ public class ChapterIndexBuilder {
     @Nullable
     public Chapter findByTitle(@NonNull String title) {
         if (!isBuilt) {
-            DebugLog.print(TAG, "Index not built yet!");
+            EasyLog.print(TAG, "Index not built yet!");
             return null;
         }
         

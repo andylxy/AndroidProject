@@ -81,12 +81,12 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
 
     @Override
     public void onViewCreated() {
-        DebugLog.print("TipsBookReadPresenter", "View 创建完成");
+        EasyLog.print("TipsBookReadPresenter", "View 创建完成");
     }
 
     @Override
     public void onViewDestroy() {
-        DebugLog.print("TipsBookReadPresenter", "View 销毁");
+        EasyLog.print("TipsBookReadPresenter", "View 销毁");
         
         // 取消所有下载
         if (downloadManager != null) {
@@ -116,7 +116,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
      * @param level 内存压力级别
      */
     public void onTrimMemory(int level) {
-        DebugLog.print("TipsBookReadPresenter", "内存压力回调: level=" + level);
+        EasyLog.print("TipsBookReadPresenter", "内存压力回调: level=" + level);
         
         if (dataManager != null) {
             dataManager.trimMemory(level);
@@ -131,7 +131,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                         chapter.clearCache();
                     }
                 }
-                DebugLog.print("TipsBookReadPresenter", "释放当前书籍缓存");
+                EasyLog.print("TipsBookReadPresenter", "释放当前书籍缓存");
             }
         }
     }
@@ -154,7 +154,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             if (book == null) {
                 view.showLoading(false);
                 view.showError("书籍信息不存在");
-                DebugLog.print("TipsBookReadPresenter", "书籍信息获取失败: bookId=" + bookId);
+                EasyLog.print("TipsBookReadPresenter", "书籍信息获取失败: bookId=" + bookId);
                 return;
             }
 
@@ -164,7 +164,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         } catch (Exception e) {
             view.showLoading(false);
             view.showError("加载失败: " + e.getMessage());
-            DebugLog.print("TipsBookReadPresenter", "加载书籍内容失败: " + e.getMessage());
+            EasyLog.print("TipsBookReadPresenter", "加载书籍内容失败: " + e.getMessage());
         }
     }
 
@@ -186,7 +186,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             if (book == null) {
                 view.showLoading(false);
                 view.showError("书籍信息不存在");
-                DebugLog.print("TipsBookReadPresenter", "TabNavBody 为 null");
+                EasyLog.print("TipsBookReadPresenter", "TabNavBody 为 null");
                 return;
             }
 
@@ -196,7 +196,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         } catch (Exception e) {
             view.showLoading(false);
             view.showError("加载失败: " + e.getMessage());
-            DebugLog.print("TipsBookReadPresenter", "加载书籍内容失败: " + e.getMessage());
+            EasyLog.print("TipsBookReadPresenter", "加载书籍内容失败: " + e.getMessage());
         }
     }
 
@@ -204,7 +204,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
      * 内部实现：加载书籍内容
      */
     private void loadBookContentInternal(TabNavBody book, int bookId, int lastReadPosition, boolean isShowBookCollect) {
-        DebugLog.print("TipsBookReadPresenter", "开始加载书籍内容: " + book.getBookName());
+        EasyLog.print("TipsBookReadPresenter", "开始加载书籍内容: " + book.getBookName());
 
         // 加载书籍数据（新数据模型，使用 LRU 缓存）
         currentBookData = repository.getBookData(bookId);
@@ -213,7 +213,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             view.showError("书籍数据加载失败");
             return;
         }
-        DebugLog.print("TipsBookReadPresenter", "BookData 加载成功，章节数=" + currentBookData.getChapterCount());
+        EasyLog.print("TipsBookReadPresenter", "BookData 加载成功，章节数=" + currentBookData.getChapterCount());
         
         // 【新架构】设置TipsNetHelper的BookRepository上下文，用于点击链接时搜索
         TipsNetHelper.setBookContext(repository, bookId);
@@ -227,7 +227,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             view.showError("章节列表为空");
             return;
         }
-        DebugLog.print("TipsBookReadPresenter", "章节列表加载成功，共 " + allChapters.size() + " 个章节");
+        EasyLog.print("TipsBookReadPresenter", "章节列表加载成功，共 " + allChapters.size() + " 个章节");
 
         // 初始化下载管理器缓存
         downloadManager.initDownloadedCache(allChapters);
@@ -235,7 +235,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         // 构建搜索索引（新功能）
         indexBuilder = new ChapterIndexBuilder();
         indexBuilder.buildIndex(allChapters);
-        DebugLog.print("TipsBookReadPresenter", "搜索索引构建完成");
+        EasyLog.print("TipsBookReadPresenter", "搜索索引构建完成");
 
         // 兼容处理宋版伤寒
         if (bookId == AppConst.ShangHanNo) {
@@ -255,7 +255,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         }
 
         view.showLoading(false);
-        DebugLog.print("TipsBookReadPresenter", "书籍内容加载完成");
+        EasyLog.print("TipsBookReadPresenter", "书籍内容加载完成");
     }
 
     @Override
@@ -269,24 +269,24 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
 
     @Override
     public void onChapterClick(int position) {
-        DebugLog.print("TipsBookReadPresenter", "========== onChapterClick 开始 ==========");
-        DebugLog.print("TipsBookReadPresenter", "点击章节位置: position=" + position);
+        EasyLog.print("TipsBookReadPresenter", "========== onChapterClick 开始 ==========");
+        EasyLog.print("TipsBookReadPresenter", "点击章节位置: position=" + position);
         
         if (!isViewActive()) {
-            DebugLog.print("TipsBookReadPresenter", "前置检查失败: View 未激活");
+            EasyLog.print("TipsBookReadPresenter", "前置检查失败: View 未激活");
             return;
         }
         
         // 检查必要数据是否已加载
         if (currentBookData == null || allChapters == null) {
-            DebugLog.print("TipsBookReadPresenter", "数据未加载: currentBookData=" + (currentBookData != null) + 
+            EasyLog.print("TipsBookReadPresenter", "数据未加载: currentBookData=" + (currentBookData != null) + 
                 ", allChapters=" + (allChapters != null));
             return;
         }
         
         // 边界检查
         if (position < 0 || position >= allChapters.size()) {
-            DebugLog.print("TipsBookReadPresenter", "position 越界: " + position);
+            EasyLog.print("TipsBookReadPresenter", "position 越界: " + position);
             return;
         }
 
@@ -300,29 +300,29 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             Chapter chapter = allChapters.get(position);
             Long signatureId = chapter.getSignatureId();
             
-            DebugLog.print("TipsBookReadPresenter", "章节信息: signatureId=" + signatureId + 
+            EasyLog.print("TipsBookReadPresenter", "章节信息: signatureId=" + signatureId + 
                 ", header=" + chapter.getChapterHeader());
             
             // 查找 ChapterData
             ChapterData chapterData = currentBookData.findChapterBySignature(signatureId);
-            DebugLog.print("TipsBookReadPresenter", "ChapterData 查找结果: " + (chapterData != null ? "找到" : "未找到"));
+            EasyLog.print("TipsBookReadPresenter", "ChapterData 查找结果: " + (chapterData != null ? "找到" : "未找到"));
             
             // 检查章节下载状态
             boolean isDownloaded = chapter.getIsDownload();
             boolean isContentLoaded = chapterData != null && chapterData.isContentLoaded();
             
-            DebugLog.print("TipsBookReadPresenter", "章节状态检查: isDownloaded=" + isDownloaded + 
+            EasyLog.print("TipsBookReadPresenter", "章节状态检查: isDownloaded=" + isDownloaded + 
                 ", chapterData!=null=" + (chapterData != null) + 
                 ", isContentLoaded=" + isContentLoaded);
             
             // 懒加载逻辑：仅对已下载但内容未加载的章节生效
             if (isDownloaded && chapterData != null && !chapterData.isContentLoaded()) {
                 // 已下载但内容未加载，使用懒加载机制
-                DebugLog.print("TipsBookReadPresenter", "触发懒加载: position=" + position);
+                EasyLog.print("TipsBookReadPresenter", "触发懒加载: position=" + position);
                 
                 // 生命周期检查（懒加载前）
                 if (!isViewActive()) {
-                    DebugLog.print("TipsBookReadPresenter", "懒加载前检查：View 已销毁，取消懒加载");
+                    EasyLog.print("TipsBookReadPresenter", "懒加载前检查：View 已销毁，取消懒加载");
                     return;
                 }
                 
@@ -332,19 +332,19 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             
             // 已下载的章节处理
             if (isDownloaded) {
-                DebugLog.print("TipsBookReadPresenter", "已下载章节，检查内容加载状态");
+                EasyLog.print("TipsBookReadPresenter", "已下载章节，检查内容加载状态");
                 
                 // 确保内容已加载到内存
                 if (chapterData != null && !chapterData.isContentLoaded()) {
                     // 从数据库加载内容
-                    DebugLog.print("TipsBookReadPresenter", "从数据库加载章节内容");
+                    EasyLog.print("TipsBookReadPresenter", "从数据库加载章节内容");
                     repository.loadChapterContent(currentBookData, chapter);
                 }
                 
                 // 转换为 UI 格式
                 HH2SectionData sectionData = DataConverter.toHH2SectionData(chapterData, chapter);
                 
-                DebugLog.print("TipsBookReadPresenter", "更新章节内容: position=" + position + 
+                EasyLog.print("TipsBookReadPresenter", "更新章节内容: position=" + position + 
                     ", contentSize=" + (sectionData != null && sectionData.getData() != null ? sectionData.getData().size() : 0));
                 
                 // 更新 UI（不强制展开，由 Fragment 控制展开/收缩）
@@ -352,22 +352,22 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                 
                 // 生命周期检查（预加载前）
                 if (!isViewActive()) {
-                    DebugLog.print("TipsBookReadPresenter", "预加载前检查：View 已销毁，取消预加载");
+                    EasyLog.print("TipsBookReadPresenter", "预加载前检查：View 已销毁，取消预加载");
                     return;
                 }
                 
                 // 触发预加载
-                DebugLog.print("TipsBookReadPresenter", "触发预加载");
+                EasyLog.print("TipsBookReadPresenter", "触发预加载");
                 androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
                 downloadManager.preloadChapters(allChapters, position, lifecycleOwner);
                 return;
             }
             
-            DebugLog.print("TipsBookReadPresenter", "未下载章节，开始下载流程");
+            EasyLog.print("TipsBookReadPresenter", "未下载章节，开始下载流程");
 
             // 生命周期检查（下载前）
             if (!isViewActive()) {
-                DebugLog.print("TipsBookReadPresenter", "下载前检查：View 已销毁，取消下载");
+                EasyLog.print("TipsBookReadPresenter", "下载前检查：View 已销毁，取消下载");
                 return;
             }
 
@@ -389,7 +389,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                 public void onSuccess(Chapter chapter, HH2SectionData sectionData) {
                     // 生命周期检查（下载后）
                     if (!isViewActive()) {
-                        DebugLog.print("TipsBookReadPresenter", "下载后检查：View 已销毁，丢弃结果");
+                        EasyLog.print("TipsBookReadPresenter", "下载后检查：View 已销毁，丢弃结果");
                         return;
                     }
                     
@@ -405,7 +405,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                 public void onFailure(Chapter chapter, Exception e) {
                     // 生命周期检查（失败回调）
                     if (!isViewActive()) {
-                        DebugLog.print("TipsBookReadPresenter", "下载失败回调：View 已销毁，忽略错误");
+                        EasyLog.print("TipsBookReadPresenter", "下载失败回调：View 已销毁，忽略错误");
                         return;
                     }
                     view.showError("下载失败: " + e.getMessage());
@@ -414,7 +414,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
 
         } catch (Exception e) {
             view.showError("处理点击异常: " + e.getMessage());
-            DebugLog.print("TipsBookReadPresenter", "章节点击异常: " + e.getMessage());
+            EasyLog.print("TipsBookReadPresenter", "章节点击异常: " + e.getMessage());
         }
     }
 
@@ -503,7 +503,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         try {
             long startTime = System.currentTimeMillis();
             
-            DebugLog.print("TipsBookReadPresenter", "开始严格搜索(TipsNetHelper): " + keyword);
+            EasyLog.print("TipsBookReadPresenter", "开始严格搜索(TipsNetHelper): " + keyword);
             
             // 1. 准备搜索关键字
             SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(keyword));
@@ -541,12 +541,12 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             }
             
             long searchTime = System.currentTimeMillis() - startTime;
-            DebugLog.print("TipsBookReadPresenter", "搜索完成: " + totalMatchCount + 
+            EasyLog.print("TipsBookReadPresenter", "搜索完成: " + totalMatchCount + 
                 " 个匹配项, 耗时 " + searchTime + "ms");
 
         } catch (Exception e) {
             view.showError("搜索失败: " + e.getMessage());
-            DebugLog.print("TipsBookReadPresenter", "搜索异常: " + e.getMessage());
+            EasyLog.print("TipsBookReadPresenter", "搜索异常: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -592,7 +592,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     public void search(String keyword) {
         // 搜索由 SearchCoordinator.searchGlobal 处理
         // 此方法保留以满足接口契约
-        DebugLog.print("TipsBookReadPresenter", "search() 已弃用，使用 SearchCoordinator");
+        EasyLog.print("TipsBookReadPresenter", "search() 已弃用，使用 SearchCoordinator");
     }
 
     // ==================== 以下接口方法未被 Fragment 调用，保留空实现 ====================
@@ -640,7 +640,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             }
 
         } catch (Exception e) {
-            DebugLog.print("TipsBookReadPresenter", "保存阅读进度失败: " + e.getMessage());
+            EasyLog.print("TipsBookReadPresenter", "保存阅读进度失败: " + e.getMessage());
         }
         */
     }
@@ -684,7 +684,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             view.showChapterList(groups);
         } catch (Exception e) {
             view.showError("显示章节列表失败: " + e.getMessage());
-            DebugLog.print("TipsBookReadPresenter", "显示章节列表异常: " + e.getMessage());
+            EasyLog.print("TipsBookReadPresenter", "显示章节列表异常: " + e.getMessage());
         }
     }
 
@@ -699,13 +699,13 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     private void loadBookFang(TabNavBody book) {
         // 检查是否已加载到内存
         if (loadedBookFangs.contains(currentBookId)) {
-            DebugLog.print("TipsBookReadPresenter", "药方已加载到内存，跳过: bookId=" + currentBookId);
+            EasyLog.print("TipsBookReadPresenter", "药方已加载到内存，跳过: bookId=" + currentBookId);
             return;
         }
         
         // 生命周期检查
         if (!isViewActive()) {
-            DebugLog.print("TipsBookReadPresenter", "View 未激活，取消药方加载");
+            EasyLog.print("TipsBookReadPresenter", "View 未激活，取消药方加载");
             return;
         }
         
@@ -718,26 +718,26 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         
         if (cachedFangList != null && !cachedFangList.isEmpty()) {
             // 数据库已有方剂数据，直接加载到BookData
-            DebugLog.print("TipsBookReadPresenter", "从数据库加载方剂: " + cachedFangList.size() + " 个");
+            EasyLog.print("TipsBookReadPresenter", "从数据库加载方剂: " + cachedFangList.size() + " 个");
             
             List<DataItem> fangItemList = new ArrayList<>(cachedFangList);
             ChapterData fangChapterData = new ChapterData(0L, book.getBookName() + "方", 0, fangItemList);
             
             if (currentBookData != null) {
                 currentBookData.setFangData(fangChapterData);
-                DebugLog.print("TipsBookReadPresenter", "✅ 方剂数据已从数据库加载到BookData: " + cachedFangList.size() + " 个");
+                EasyLog.print("TipsBookReadPresenter", "✅ 方剂数据已从数据库加载到BookData: " + cachedFangList.size() + " 个");
             }
             return;
         }
         
         // 数据库无数据，从网络下载
-        DebugLog.print("TipsBookReadPresenter", "数据库无方剂数据，开始从网络下载");
+        EasyLog.print("TipsBookReadPresenter", "数据库无方剂数据，开始从网络下载");
         
         androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
         repository.downloadBookFang(currentBookId, lifecycleOwner, new BookRepository.DataCallback<List<run.yigou.gxzy.ui.tips.DataBeans.Fang>>() {
             @Override
             public void onSuccess(List<run.yigou.gxzy.ui.tips.DataBeans.Fang> data) {
-                DebugLog.print("TipsBookReadPresenter", "药方数据网络下载完成: " + data.size() + " 个");
+                EasyLog.print("TipsBookReadPresenter", "药方数据网络下载完成: " + data.size() + " 个");
                 
                 // 【新架构】将方剂数据设置到BookData
                 if (data != null && !data.isEmpty() && currentBookData != null) {
@@ -746,13 +746,13 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                     ChapterData fangChapterData = new ChapterData(0L, book.getBookName() + "方", 0, fangItemList);
                     
                     currentBookData.setFangData(fangChapterData);
-                    DebugLog.print("TipsBookReadPresenter", "✅ 方剂数据已设置到BookData: " + data.size() + " 个");
+                    EasyLog.print("TipsBookReadPresenter", "✅ 方剂数据已设置到BookData: " + data.size() + " 个");
                 }
             }
 
             @Override
             public void onFailure(Exception e) {
-                DebugLog.print("TipsBookReadPresenter", "药方数据加载失败: " + e.getMessage());
+                EasyLog.print("TipsBookReadPresenter", "药方数据加载失败: " + e.getMessage());
                 // 失败时移除标记，允许重试
                 loadedBookFangs.remove(currentBookId);
             }
@@ -765,7 +765,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     private void setupShanghanContentListener() {
         // 标记为宋版伤寒书籍
         isShanghanBook = true;
-        DebugLog.print("TipsBookReadPresenter", "宋版伤寒内容监听器已设置");
+        EasyLog.print("TipsBookReadPresenter", "宋版伤寒内容监听器已设置");
     }
 
     /**

@@ -143,15 +143,15 @@ public class ChildTextBinder implements DataBinder<ChildEntity, TipsChildViewHol
     public void bind(@NonNull ItemData data,
                      @NonNull TipsChildViewHolder viewHolder,
                      int position) {
-        DebugLog.print("=== ChildTextBinder.bind(ItemData) 诊断开始 ===");
-        DebugLog.print("position: " + position);
+        EasyLog.print("=== ChildTextBinder.bind(ItemData) 诊断开始 ===");
+        EasyLog.print("position: " + position);
         
         // 设置LocalLinkMovementMethod以支持ClickableSpan点击
         viewHolder.getTextView().setMovementMethod(LocalLinkMovementMethod.getInstance());
         viewHolder.getNoteView().setMovementMethod(LocalLinkMovementMethod.getInstance());
         viewHolder.getVideoView().setMovementMethod(LocalLinkMovementMethod.getInstance());
         
-        DebugLog.print("✅ MovementMethod已设置");
+        EasyLog.print("✅ MovementMethod已设置");
         
         // 设置初始可见性: text可见, note和video默认隐藏
         viewHolder.getTextView().setVisibility(View.VISIBLE);
@@ -159,40 +159,40 @@ public class ChildTextBinder implements DataBinder<ChildEntity, TipsChildViewHol
         viewHolder.getVideoView().setVisibility(View.GONE);
         
         // 诊断: 检查textSpan状态
-        DebugLog.print("hasTextSpan: " + data.hasTextSpan());
+        EasyLog.print("hasTextSpan: " + data.hasTextSpan());
         
         // 绑定正文
         if (data.hasTextSpan()) {
             SpannableStringBuilder textSpan = data.getTextSpan();
-            DebugLog.print("✅ textSpan不为空, length: " + textSpan.length());
+            EasyLog.print("✅ textSpan不为空, length: " + textSpan.length());
             
             // 检查ClickableSpan
             ClickableSpan[] spans = textSpan.getSpans(0, textSpan.length(), ClickableSpan.class);
-            DebugLog.print("ClickableSpan count: " + spans.length);
+            EasyLog.print("ClickableSpan count: " + spans.length);
             
             if (spans.length > 0) {
-                DebugLog.print("✅ ClickableSpan存在！");
+                EasyLog.print("✅ ClickableSpan存在！");
                 for (int i = 0; i < Math.min(spans.length, 5); i++) {
                     int start = textSpan.getSpanStart(spans[i]);
                     int end = textSpan.getSpanEnd(spans[i]);
                     String clickText = textSpan.subSequence(start, end).toString();
-                    DebugLog.print("  Span[" + i + "]: \"" + clickText + "\" (" + start + "-" + end + ")");
+                    EasyLog.print("  Span[" + i + "]: \"" + clickText + "\" (" + start + "-" + end + ")");
                 }
             } else {
-                DebugLog.print("❌ 没有ClickableSpan！");
+                EasyLog.print("❌ 没有ClickableSpan！");
             }
             
             viewHolder.getTextView().setText(textSpan);
-            DebugLog.print("setText(textSpan) 完成");
+            EasyLog.print("setText(textSpan) 完成");
             
             // 验证MovementMethod是否还在
-            DebugLog.print("MovementMethod after setText: " + viewHolder.getTextView().getMovementMethod());
+            EasyLog.print("MovementMethod after setText: " + viewHolder.getTextView().getMovementMethod());
         } else {
-            DebugLog.print("⚠️ textSpan为null，使用普通文本");
+            EasyLog.print("⚠️ textSpan为null，使用普通文本");
             viewHolder.getTextView().setText(data.getText());
         }
         
-        DebugLog.print("=== ChildTextBinder.bind(ItemData) 诊断结束 ===\n");
+        EasyLog.print("=== ChildTextBinder.bind(ItemData) 诊断结束 ===\n");
         
         // 绑定笺注
         if (data.hasNoteSpan()) {

@@ -182,10 +182,10 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         try {
             if (XEventBus.getDefault() != null && tipsFragmentSettingEventNotification != null) {
                 XEventBus.getDefault().post(tipsFragmentSettingEventNotification);
-                DebugLog.print("TipsSettingFragment", "✅ EventBus 事件发送成功");
+                EasyLog.print("TipsSettingFragment", "✅ EventBus 事件发送成功");
             }
         } catch (Exception e) {
-            DebugLog.print("TipsSettingFragment", "⚠️ EventBus 事件发送异常: " + e.getMessage());
+            EasyLog.print("TipsSettingFragment", "⚠️ EventBus 事件发送异常: " + e.getMessage());
         }
 
     }

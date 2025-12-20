@@ -71,44 +71,44 @@ public class TipsChildViewHolder {
      * @param entity 数据实体
      */
     private void bindText(@NonNull ChildEntity entity) {
-        DebugLog.print("=== TipsChildViewHolder.bindText() 诊断开始 ===");
+        EasyLog.print("=== TipsChildViewHolder.bindText() 诊断开始 ===");
         
         SpannableStringBuilder spannableText = entity.getAttributed_child_section_text();
         
         if (spannableText != null && spannableText.length() > 0) {
-            DebugLog.print("✅ spannableText 不为空, length: " + spannableText.length());
+            EasyLog.print("✅ spannableText 不为空, length: " + spannableText.length());
             
             // 检查 ClickableSpan 数量
             ClickableSpan[] spans = spannableText.getSpans(0, spannableText.length(), ClickableSpan.class);
-            DebugLog.print("ClickableSpan count: " + spans.length);
+            EasyLog.print("ClickableSpan count: " + spans.length);
             
             if (spans.length > 0) {
-                DebugLog.print("✅ ClickableSpan 存在！");
+                EasyLog.print("✅ ClickableSpan 存在！");
                 for (int i = 0; i < Math.min(spans.length, 5); i++) {
                     int start = spannableText.getSpanStart(spans[i]);
                     int end = spannableText.getSpanEnd(spans[i]);
                     String clickText = spannableText.subSequence(start, end).toString();
-                    DebugLog.print("  Span[" + i + "]: \"" + clickText + "\" (" + start + "-" + end + ")");
+                    EasyLog.print("  Span[" + i + "]: \"" + clickText + "\" (" + start + "-" + end + ")");
                 }
             } else {
-                DebugLog.print("❌ 没有 ClickableSpan！");
+                EasyLog.print("❌ 没有 ClickableSpan！");
             }
             
             tvText.setText(spannableText);
-            DebugLog.print("setText() 完成");
+            EasyLog.print("setText() 完成");
             
             // 验证 MovementMethod
-            DebugLog.print("MovementMethod: " + tvText.getMovementMethod());
+            EasyLog.print("MovementMethod: " + tvText.getMovementMethod());
         } else if (entity.getChild_section_text() != null) {
-            DebugLog.print("⚠️ spannableText 为空，使用普通文本");
-            DebugLog.print("text: " + entity.getChild_section_text().substring(0, Math.min(50, entity.getChild_section_text().length())));
+            EasyLog.print("⚠️ spannableText 为空，使用普通文本");
+            EasyLog.print("text: " + entity.getChild_section_text().substring(0, Math.min(50, entity.getChild_section_text().length())));
             tvText.setText(entity.getChild_section_text());
         } else {
-            DebugLog.print("⚠️ 所有文本都为空");
+            EasyLog.print("⚠️ 所有文本都为空");
             tvText.setText("");
         }
         
-        DebugLog.print("=== TipsChildViewHolder.bindText() 诊断结束 ===\n");
+        EasyLog.print("=== TipsChildViewHolder.bindText() 诊断结束 ===\n");
     }
 
     /**

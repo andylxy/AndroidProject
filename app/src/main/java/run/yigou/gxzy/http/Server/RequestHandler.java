@@ -203,9 +203,9 @@ public final class RequestHandler implements IRequestHandler {
         if (cacheValue == null || "".equals(cacheValue) || "{}".equals(cacheValue)) {
             return null;
         }
-        DebugLog.print("---------- cacheKey ----------");
+        EasyLog.print("---------- cacheKey ----------");
         EasyLog.json(cacheKey);
-        DebugLog.print("---------- cacheValue ----------");
+        EasyLog.print("---------- cacheValue ----------");
         EasyLog.json(cacheValue);
         return GsonFactory.getSingletonGson().fromJson(cacheValue, type);
     }
@@ -217,9 +217,9 @@ public final class RequestHandler implements IRequestHandler {
         if (cacheValue == null || "".equals(cacheValue) || "{}".equals(cacheValue)) {
             return false;
         }
-        DebugLog.print("---------- cacheKey ----------");
+        EasyLog.print("---------- cacheKey ----------");
         EasyLog.json(cacheKey);
-        DebugLog.print("---------- cacheValue ----------");
+        EasyLog.print("---------- cacheValue ----------");
         EasyLog.json(cacheValue);
         return mMmkv.putString(cacheKey, cacheValue).commit();
     }
