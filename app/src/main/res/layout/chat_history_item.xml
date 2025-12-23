@@ -50,6 +50,23 @@
             android:maxHeight="@dimen/dp_32" />
 
         <ImageButton
+            android:id="@+id/btn_summary_manage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/info_ic"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:paddingStart="@dimen/dp_8"
+            android:paddingEnd="@dimen/dp_8"
+            android:paddingTop="@dimen/dp_4"
+            android:paddingBottom="@dimen/dp_4"
+            android:contentDescription="管理总结"
+            android:scaleType="centerInside"
+            android:maxWidth="@dimen/dp_32"
+            android:maxHeight="@dimen/dp_32" />
+
+        <ImageButton
             android:id="@+id/btn_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

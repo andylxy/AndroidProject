@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="280dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#F5F5F5"
+    android:elevation="4dp">
+
+    <!-- 标题栏 - 参考侧边栏样式 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/dp_6"
+        android:paddingBottom="@dimen/dp_6"
+        android:paddingStart="@dimen/dp_8"
+        android:paddingEnd="@dimen/dp_8"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:background="#E0E0E0">
+
+        <TextView
+            android:id="@+id/tv_dialog_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="【会话总结】"
+            android:gravity="center"
+            android:textColor="#424242"
+            android:textSize="@dimen/chat_title_text_size"
+            android:textStyle="normal" />
+
+        <ImageButton
+            android:id="@+id/btn_close"
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:src="@drawable/close_icon"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:scaleType="fitCenter"
+            android:contentDescription="关闭" />
+
+    </LinearLayout>
+
+    <!-- 空状态提示 -->
+    <TextView
+        android:id="@+id/tv_empty_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="暂无会话总结"
+        android:textSize="@dimen/chat_content_text_size"
+        android:textColor="#9E9E9E"
+        android:gravity="center"
+        android:padding="@dimen/dp_24"
+        android:visibility="gone" />
+
+    <!-- 总结列表 - 参考侧边栏 RecyclerView 样式 -->
+    <com.hjq.widget.layout.WrapRecyclerView
+        android:id="@+id/rv_summary_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="#d0d0d0"
+        android:dividerHeight="0.5dp"
+        android:paddingStart="@dimen/dp_3"
+        android:paddingEnd="@dimen/dp_3"
+        android:paddingTop="@dimen/dp_1"
+        android:clipToPadding="false"
+        android:background="#FFFFFF" />
+
+</LinearLayout>

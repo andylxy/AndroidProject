@@ -24,11 +24,13 @@ import run.yigou.gxzy.ui.tips.adapter.TipsAiChatAdapter;
 
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
 import run.yigou.gxzy.greendao.entity.ChatSessionBean;
+import run.yigou.gxzy.greendao.entity.ChatSummaryBean;
 
 
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.ui.tips.adapter.ChatHistoryAdapter;
+import run.yigou.gxzy.ui.dialog.ChatSummaryListDialog;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -43,6 +45,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.CheckBox;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -97,6 +100,10 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
     // 当前会话
     private ChatSessionBean currentSession;
+    
+    // 总结功能相关
+    private CheckBox cbIncludeSummary;
+    private Button btnSummarize;
 
     public static AiMsgFragment newInstance() {
         return new AiMsgFragment();
@@ -169,6 +176,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 if (position >= 0 && position < sessions.size()) {
                     // 从数据库中删除会话
                     ChatSessionBean sessionToDelete = sessions.get(position);
+                    // 删除该会话的所有总结
+                    DbService.getInstance().mChatSummaryBeanService.deleteBySessionId(sessionToDelete.getId());
                     DbService.getInstance().mChatSessionBeanService.deleteEntity(sessionToDelete);
 
                     // 如果删除的是当前会话，清空聊天界面
@@ -195,6 +204,20 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 if (position >= 0 && position < sessions.size()) {
                     ChatSessionBean sessionToEdit = sessions.get(position);
                     showEditSessionTitleDialog(sessionToEdit);
+                }
+            }
+        });
+        
+        // 设置聊天历史记录项总结管理监听
+        chatHistoryAdapter.setOnChatHistoryItemSummaryListener(new ChatHistoryAdapter.OnChatHistoryItemSummaryListener() {
+            @Override
+            public void onChatHistoryItemSummary(int position, ChatHistoryAdapter.ChatHistoryItem item) {
+                // 获取会话列表
+                List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
+                // 确保位置有效
+                if (position >= 0 && position < sessions.size()) {
+                    ChatSessionBean session = sessions.get(position);
+                    showSummaryListDialog(session);
                 }
             }
         });
@@ -329,6 +352,13 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 showClearAllSessionsDialog();
             }
         });
+        
+        // 初始化总结功能 UI
+        cbIncludeSummary = findViewById(R.id.cb_include_summary);
+        btnSummarize = findViewById(R.id.btn_summarize);
+        if (btnSummarize != null) {
+            btnSummarize.setOnClickListener(v -> generateSessionSummary());
+        }
     }
 
 
@@ -1643,6 +1673,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     private void clearAllSessions() {
         // 删除所有消息
         DbService.getInstance().mChatMessageBeanService.deleteAll();
+        // 删除所有总结
+        DbService.getInstance().mChatSummaryBeanService.deleteAll();
         // 删除所有会话
         DbService.getInstance().mChatSessionBeanService.deleteAll();
         
@@ -1679,6 +1711,180 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 重置标题
         if (getTitleBar() != null) {
             getTitleBar().setTitle(getString(R.string.app_name_ai));
+        }
+    }
+    
+    /**
+     * 生成当前会话的总结
+     */
+    private void generateSessionSummary() {
+        if (currentSession == null) {
+            Toast.makeText(getContext(), "请先选择一个会话", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // 获取当前会话的所有消息
+        currentSession.resetMessages();
+        List<ChatMessageBean> messages = currentSession.getMessages();
+        if (messages == null || messages.isEmpty()) {
+            Toast.makeText(getContext(), "当前会话没有消息", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // 构建总结请求的 prompt
+        StringBuilder promptBuilder = new StringBuilder();
+        promptBuilder.append("请对以下对话内容进行总结，提取关键要点：\n\n");
+        
+        for (ChatMessageBean message : messages) {
+            if (message.getType() == ChatMessageBean.TYPE_SEND) {
+                promptBuilder.append("用户：").append(message.getContent()).append("\n");
+            } else if (message.getType() == ChatMessageBean.TYPE_RECEIVED) {
+                promptBuilder.append("AI：").append(message.getContent()).append("\n");
+            }
+        }
+        
+        promptBuilder.append("\n请用简洁的语言总结上述对话的主要内容和关键信息。");
+        
+        // 显示进度提示
+        Toast.makeText(getContext(), "正在生成总结...", Toast.LENGTH_SHORT).show();
+        
+        // 使用 SSE API 生成总结
+        final StringBuilder summaryContent = new StringBuilder();
+        
+        new AiStreamApi()
+                .setQuery(promptBuilder.toString())
+                .setConversationId(currentSession.getConversationId())
+                .setEndUserId(currentSession.getEndUserId())
+                .execute(new SseStreamCallback() {
+                    
+                    @Override
+                    public void onOpen() {
+                        EasyLog.print(TAG, "总结生成 SSE 连接已建立");
+                    }
+                    
+                    @Override
+                    public void onChunk(SseChunk chunk) {
+                        if (chunk != null && chunk.getContent() != null) {
+                            // 只收集回答内容，不包括思考过程
+                            if (!"thinking".equals(chunk.getType()) && !chunk.isThinking()) {
+                                summaryContent.append(chunk.getContent());
+                            }
+                        }
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        runOnUiThread(() -> {
+                            if (summaryContent.length() > 0) {
+                                // 保存总结到数据库
+                                saveSummary(summaryContent.toString());
+                            } else {
+                                Toast.makeText(getContext(), "生成总结失败", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                    
+                    @Override
+                    public void onError(Exception e) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(getContext(), "生成总结失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                });
+    }
+    
+    /**
+     * 保存总结到数据库并显示
+     */
+    private void saveSummary(String content) {
+        ChatSummaryBean summary = new ChatSummaryBean();
+        summary.setSessionId(currentSession.getId());
+        summary.setTitle("总结 " + sdf.format(new Date()));
+        summary.setContent(content);
+        summary.setCreateTime(DateHelper.getSeconds1());
+        summary.setIsDelete(ChatSummaryBean.IS_Delete_NO);
+        
+        long id = DbService.getInstance().mChatSummaryBeanService.addEntity(summary);
+        summary.setId(id);
+        
+        Toast.makeText(getContext(), "总结已保存", Toast.LENGTH_SHORT).show();
+        
+        // 显示总结内容
+        showSummaryContentDialog(summary);
+    }
+    
+    /**
+     * 显示会话的总结列表对话框
+     */
+    private void showSummaryListDialog(ChatSessionBean session) {
+        if (session == null) return;
+        
+        new ChatSummaryListDialog.Builder(getContext())
+                .setSession(session.getId(), session.getTitle())
+                .setMarkwon(mMarkwon)
+                .show();
+    }
+    
+    /**
+     * 显示总结内容对话框（支持复制）
+     */
+    private void showSummaryContentDialog(ChatSummaryBean summary) {
+        if (summary == null) return;
+        
+        // 创建可选择文字的 TextView
+        TextView textView = new TextView(getContext());
+        textView.setText(summary.getContent());
+        textView.setTextIsSelectable(true);
+        textView.setPadding(48, 32, 48, 32);
+        textView.setTextSize(15);
+        textView.setLineSpacing(0, 1.3f);
+        
+        // 使用 Markwon 渲染 Markdown
+        if (mMarkwon != null) {
+            mMarkwon.setMarkdown(textView, summary.getContent());
+        }
+        
+        // 包装在 ScrollView 中以支持长文本
+        android.widget.ScrollView scrollView = new android.widget.ScrollView(getContext());
+        scrollView.addView(textView);
+        
+        // 设置最大高度为屏幕高度的 70%
+        android.util.DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+        int maxHeight = (int) (displayMetrics.heightPixels * 0.7);
+        scrollView.setLayoutParams(new android.view.ViewGroup.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+        
+        // 创建对话框 - 保存 textView 引用用于复制
+        final TextView finalTextView = textView;
+        AlertDialog dialog = new AlertDialog.Builder(getContext())
+                .setTitle(summary.getTitle())
+                .setView(scrollView)
+                .setPositiveButton("复制全部", (d, which) -> {
+                    // 复制渲染后的纯文本，而非原始 Markdown
+                    String renderedText = finalTextView.getText().toString();
+                    android.content.ClipboardManager clipboard =
+                            (android.content.ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                    android.content.ClipData clip = android.content.ClipData.newPlainText("会话总结", renderedText);
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(getContext(), "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+                })
+                .setNeutralButton("删除", (d, which) -> {
+                    // 删除总结
+                    summary.setIsDelete(ChatSummaryBean.IS_Delete_YES);
+                    DbService.getInstance().mChatSummaryBeanService.updateEntity(summary);
+                    Toast.makeText(getContext(), "总结已删除", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("关闭", null)
+                .create();
+        
+        dialog.show();
+        
+        // 限制对话框最大高度
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    Math.min(maxHeight, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
         }
     }
 }

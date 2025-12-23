@@ -46,5 +46,6 @@
     <dimen name="chat_content_text_size">13sp</dimen>
     <dimen name="chat_meta_text_size">12sp</dimen>
     <dimen name="chat_tiny_text_size">11sp</dimen>
+    <dimen name="chat_hint_text_size">12sp</dimen>
 
 </resources>

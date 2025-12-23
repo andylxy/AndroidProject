@@ -18,6 +18,7 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
     private OnChatHistoryItemClickListener mListener;
     private OnChatHistoryItemDeleteListener mDeleteListener;
     private OnChatHistoryItemEditTitleListener mEditTitleListener;
+    private OnChatHistoryItemSummaryListener mSummaryListener;
 
     public ChatHistoryAdapter(Context context) {
         super(context);
@@ -46,6 +47,10 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
         mEditTitleListener = listener;
     }
 
+    public void setOnChatHistoryItemSummaryListener(OnChatHistoryItemSummaryListener listener) {
+        mSummaryListener = listener;
+    }
+
     private final class ViewHolder extends AppAdapter<?>.ViewHolder {
         private TextView tvTitle;
         private TextView tvPreview;
@@ -53,6 +58,7 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
         private TextView tvMessageCount;
         private ImageButton btnDelete;
         private ImageButton btnEditTitle;
+        private ImageButton btnSummaryManage;
 
         private ViewHolder(int viewLayout) {
             super(viewLayout);
@@ -62,6 +68,7 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
             tvMessageCount = findViewById(R.id.tv_message_count);
             btnDelete = findViewById(R.id.btn_delete);
             btnEditTitle = findViewById(R.id.btn_edit_title);
+            btnSummaryManage = findViewById(R.id.btn_summary_manage);
         }
 
         @Override
@@ -105,6 +112,16 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
                     }
                 }
             });
+            
+            // 设置总结管理按钮点击事件
+            btnSummaryManage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mSummaryListener != null) {
+                        mSummaryListener.onChatHistoryItemSummary(position, item);
+                    }
+                }
+            });
 
             getItemView().setOnClickListener(v -> {
                 if (mListener != null) {
@@ -138,6 +155,10 @@ public class ChatHistoryAdapter extends AppAdapter<ChatHistoryAdapter.ChatHistor
     
     public interface OnChatHistoryItemEditTitleListener {
         void onChatHistoryItemEditTitle(int position, ChatHistoryItem item);
+    }
+    
+    public interface OnChatHistoryItemSummaryListener {
+        void onChatHistoryItemSummary(int position, ChatHistoryItem item);
     }
 
     public static class ChatHistoryItem {
