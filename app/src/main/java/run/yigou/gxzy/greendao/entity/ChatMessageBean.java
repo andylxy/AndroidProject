@@ -45,6 +45,11 @@ public class ChatMessageBean implements Serializable {
      */
     @Transient
     public static final int TYPE_THINKING = 4;
+    /**
+     * 会话总结（临时消息，未保存到数据库）
+     */
+    @Transient
+    public static final int TYPE_SUMMARY = 5;
 
     /**
      * 已删除

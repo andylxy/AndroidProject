@@ -272,7 +272,7 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
                 
                 @Override
                 public void onEvent(@NonNull EventSource eventSource, String id, String type, @NonNull String data) {
-                    EasyLog.print(TAG, "接收到 SSE 事件: " + data.substring(0, Math.min(data.length(), 100)));
+                   // EasyLog.print(TAG, "接收到 SSE 事件: " + data.substring(0, Math.min(data.length(), 100)));
                     
                     try {
                         // 解析 JSON 数据
@@ -280,8 +280,8 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
                         SseChunk chunk = gson.fromJson(data, SseChunk.class);
                         
                         if (chunk != null) {
-                            EasyLog.print(TAG, "解析数据块: type=" + chunk.getType() + ", content length=" + 
-                                    (chunk.getContent() != null ? chunk.getContent().length() : 0));
+                        //    EasyLog.print(TAG, "解析数据块: type=" + chunk.getType() + ", content length=" +
+                        //            (chunk.getContent() != null ? chunk.getContent().length() : 0));
                             callback.onChunk(chunk);
                             
                             // 如果是 done 或 error，关闭连接

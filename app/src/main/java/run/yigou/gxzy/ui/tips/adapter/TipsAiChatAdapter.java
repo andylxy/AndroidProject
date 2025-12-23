@@ -36,7 +36,14 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
     private static final int LAYOUT_SEND = R.layout.tips_ai_msg_chat_send;
     private static final int LAYOUT_SYSTEM = R.layout.tips_ai_msg_chat_system;
     private static final int LAYOUT_THINKING = R.layout.tips_ai_msg_chat_thinking;
+    private static final int LAYOUT_SUMMARY = R.layout.tips_ai_msg_chat_receive; // 总结复用接收布局
     private static final int LAYOUT_DEFAULT = R.layout.tips_ai_msg_chat_system; // 默认布局资源ID
+
+    // 采用总结回调接口
+    public interface OnAdoptSummaryListener {
+        void onAdoptSummary(ChatMessageBean summaryMessage);
+    }
+    private OnAdoptSummaryListener adoptSummaryListener;
 
     // 初始化 Markwon
     private Markwon markwon;
@@ -47,6 +54,10 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
         // 初始化 Markwon - 使用更完整的配置
         initMarkwon(context);
         Timber.tag("TipsAiChatAdapter").d("Adapter created");
+    }
+
+    public void setOnAdoptSummaryListener(OnAdoptSummaryListener listener) {
+        this.adoptSummaryListener = listener;
     }
 
     private void initMarkwon(Context context) {
@@ -103,6 +114,9 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                 break;
             case ChatMessageBean.TYPE_THINKING:
                 viewTypeLayout = LAYOUT_THINKING;
+                break;
+            case ChatMessageBean.TYPE_SUMMARY:
+                viewTypeLayout = LAYOUT_SUMMARY;
                 break;
             default:
                 // 记录日志并使用默认布局
@@ -163,7 +177,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
 
         public void onBindPayload(int position) {
             ChatMessageBean bean = getItem(position);
-            // 对 RECEIVED 类型消息进行更新
+            // 对 RECEIVED 和 SUMMARY 类型消息进行更新
             if (bean.getType() == ChatMessageBean.TYPE_RECEIVED) {
                 if (bean.isStreaming()) {
                     // 流式中：增量更新
@@ -177,6 +191,9 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     // 流式结束：完整绑定以触发 Markdown 渲染
                     onBindView(position);
                 }
+            } else if (bean.getType() == ChatMessageBean.TYPE_SUMMARY) {
+                // 总结消息流式更新：直接重新绑定视图
+                onBindView(position);
             }
         }
 
@@ -300,6 +317,44 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                         });
                     }
                     break;
+                    
+                case ChatMessageBean.TYPE_SUMMARY:
+                    // 总结消息复用接收布局
+                    TextView tv_summary_content = findViewById(R.id.tv_receive_content);
+                    TextView tv_summary_nick = findViewById(R.id.tv_receive_nick);
+                    
+                    if (tv_summary_nick != null) {
+                        tv_summary_nick.setText("会话总结");
+                    }
+                    
+                    if (tv_summary_content != null) {
+                        if (bean.isStreaming()) {
+                            // 流式传输中：直接显示纯文本（打字机效果）
+                            tv_summary_content.setText(bean.getContent());
+                            tv_summary_content.setTextIsSelectable(false);
+                            tv_summary_content.setFocusable(false);
+                            tv_summary_content.setFocusableInTouchMode(false);
+                        } else {
+                            // 流式传输结束：渲染 Markdown
+                            if (markwon != null && bean.getContent() != null) {
+                                markwon.setMarkdown(tv_summary_content, bean.getContent());
+                            } else {
+                                tv_summary_content.setText(bean.getContent());
+                            }
+                            
+                            tv_summary_content.setTextIsSelectable(false);
+                            tv_summary_content.setFocusable(false);
+                            tv_summary_content.setFocusableInTouchMode(false);
+                            
+                            // 长按弹出对话框，包含"采用"按钮
+                            final ChatMessageBean summaryBean = bean;
+                            tv_summary_content.setOnLongClickListener(v -> {
+                                showTextSelectionDialogWithAdopt(v.getContext(), summaryBean);
+                                return true;
+                            });
+                        }
+                    }
+                    break;
             }
         }
     }
@@ -351,6 +406,68 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
         dialog.show();
         
         // 限制对话框最大高度
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                Math.min(maxHeight, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+        }
+    }
+    
+    /**
+     * 显示带"采用"按钮的文字选择对话框（仅用于总结消息）
+     */
+    private void showTextSelectionDialogWithAdopt(Context context, ChatMessageBean summaryMessage) {
+        String content = summaryMessage.getContent();
+        
+        // 创建可选择文字的 TextView
+        TextView textView = new TextView(context);
+        textView.setText(content);
+        textView.setTextIsSelectable(true);
+        textView.setPadding(48, 32, 48, 32);
+        textView.setTextSize(15);
+        textView.setLineSpacing(0, 1.3f);
+        
+        // 使用 Markwon 渲染 Markdown
+        if (markwon != null) {
+            markwon.setMarkdown(textView, content);
+        }
+        
+        // 包装在 ScrollView 中
+        android.widget.ScrollView scrollView = new android.widget.ScrollView(context);
+        scrollView.addView(textView);
+        
+        android.util.DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        int maxHeight = (int) (displayMetrics.heightPixels * 0.7);
+        scrollView.setLayoutParams(new android.view.ViewGroup.LayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT, 
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+        
+        // 获取渲染后的文本用于复制
+        final TextView finalTextView = textView;
+        
+        // 创建带"采用"按钮的对话框
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(context)
+            .setTitle("会话总结")
+            .setView(scrollView)
+            .setPositiveButton("采用", (d, which) -> {
+                // 采用总结
+                if (adoptSummaryListener != null) {
+                    adoptSummaryListener.onAdoptSummary(summaryMessage);
+                }
+            })
+            .setNeutralButton("复制", (d, which) -> {
+                String renderedText = finalTextView.getText().toString();
+                android.content.ClipboardManager clipboard = 
+                    (android.content.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                android.content.ClipData clip = android.content.ClipData.newPlainText("会话总结", renderedText);
+                clipboard.setPrimaryClip(clip);
+                android.widget.Toast.makeText(context, "已复制到剪贴板", android.widget.Toast.LENGTH_SHORT).show();
+            })
+            .setNegativeButton("关闭", null)
+            .create();
+        
+        dialog.show();
+        
         if (dialog.getWindow() != null) {
             dialog.getWindow().setLayout(
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT,

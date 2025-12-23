@@ -249,6 +249,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         
         // 设置打字机渲染回调，实现打字时同步滚动
         TipsAiChatAdapter.setScrollCallback(() -> scrollToAbsoluteBottom());
+        
+        // 设置采用总结回调
+        mChatAdapter.setOnAdoptSummaryListener(summaryMessage -> {
+            adoptSummary(summaryMessage);
+        });
 
         // 注册事件
         XEventBus.getDefault().register(AiMsgFragment.this);
@@ -1748,8 +1753,29 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 显示进度提示
         Toast.makeText(getContext(), "正在生成总结...", Toast.LENGTH_SHORT).show();
         
-        // 使用 SSE API 生成总结
+        // 使用 SSE API 生成总结 - 打字机效果
         final StringBuilder summaryContent = new StringBuilder();
+        
+        // 先创建总结消息并添加到列表（流式显示）
+        final ChatMessageBean summaryMessage = new ChatMessageBean();
+        summaryMessage.setType(ChatMessageBean.TYPE_SUMMARY);
+        summaryMessage.setContent("");
+        summaryMessage.setNick("会话总结");
+        summaryMessage.setCreateDate(DateHelper.getSeconds1());
+        summaryMessage.setSessionId(currentSession.getId());
+        summaryMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+        summaryMessage.setStreaming(true); // 标记为流式传输中
+        
+        // 添加到聊天列表
+        runOnUiThread(() -> {
+            if (mChatAdapter != null) {
+                mChatAdapter.addItem(summaryMessage);
+                // 滚动到底部
+                if (rv_chat != null) {
+                    rv_chat.scrollToPosition(mChatAdapter.getItemCount() - 1);
+                }
+            }
+        });
         
         new AiStreamApi()
                 .setQuery(promptBuilder.toString())
@@ -1768,6 +1794,19 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                             // 只收集回答内容，不包括思考过程
                             if (!"thinking".equals(chunk.getType()) && !chunk.isThinking()) {
                                 summaryContent.append(chunk.getContent());
+                                
+                                // 实时更新消息内容（打字机效果）
+                                runOnUiThread(() -> {
+                                    summaryMessage.setContent(summaryContent.toString());
+                                    if (mChatAdapter != null) {
+                                        int position = mChatAdapter.getData().indexOf(summaryMessage);
+                                        if (position >= 0) {
+                                            mChatAdapter.notifyItemChanged(position, TipsAiChatAdapter.PAYLOAD_UPDATE_CONTENT);
+                                        }
+                                    }
+                                    // 滚动到底部
+                                    scrollToAbsoluteBottom();
+                                });
                             }
                         }
                     }
@@ -1775,10 +1814,33 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     @Override
                     public void onComplete() {
                         runOnUiThread(() -> {
+                            // 标记流式传输结束
+                            summaryMessage.setStreaming(false);
+                            
                             if (summaryContent.length() > 0) {
-                                // 保存总结到数据库
-                                saveSummary(summaryContent.toString());
+                                summaryMessage.setContent(summaryContent.toString());
+                                
+                                // 保存到聊天消息数据库
+                                long msgId = DbService.getInstance().mChatMessageBeanService.addEntity(summaryMessage);
+                                summaryMessage.setId(msgId);
+                                
+                                // 刷新显示（应用 Markdown 渲染）
+                                if (mChatAdapter != null) {
+                                    int position = mChatAdapter.getData().indexOf(summaryMessage);
+                                    if (position >= 0) {
+                                        mChatAdapter.notifyItemChanged(position);
+                                    }
+                                }
+                                
+                                Toast.makeText(getContext(), "总结已生成，长按可选择采用", Toast.LENGTH_SHORT).show();
                             } else {
+                                // 生成失败，移除消息
+                                if (mChatAdapter != null) {
+                                    int position = mChatAdapter.getData().indexOf(summaryMessage);
+                                    if (position >= 0) {
+                                        mChatAdapter.removeItem(position);
+                                    }
+                                }
                                 Toast.makeText(getContext(), "生成总结失败", Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -1787,6 +1849,13 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     @Override
                     public void onError(Exception e) {
                         runOnUiThread(() -> {
+                            // 移除消息
+                            if (mChatAdapter != null) {
+                                int position = mChatAdapter.getData().indexOf(summaryMessage);
+                                if (position >= 0) {
+                                    mChatAdapter.removeItem(position);
+                                }
+                            }
                             Toast.makeText(getContext(), "生成总结失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         });
                     }
@@ -1886,5 +1955,66 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                     Math.min(maxHeight, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
         }
+    }
+    
+    /**
+     * 将总结显示在聊天框中并保存到聊天消息表
+     * 不点采用：总结保存到聊天消息表
+     * 点击采用：额外保存到总结表（ChatSummaryBean）
+     */
+    private void displaySummaryInChat(String content) {
+        if (currentSession == null) {
+            Toast.makeText(getContext(), "当前没有会话", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // 创建一个总结类型的消息
+        ChatMessageBean summaryMessage = new ChatMessageBean();
+        summaryMessage.setType(ChatMessageBean.TYPE_SUMMARY);
+        summaryMessage.setContent(content);
+        summaryMessage.setNick("会话总结");
+        summaryMessage.setCreateDate(DateHelper.getSeconds1());
+        summaryMessage.setSessionId(currentSession.getId());
+        summaryMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+        
+        // 保存到聊天消息数据库
+        long msgId = DbService.getInstance().mChatMessageBeanService.addEntity(summaryMessage);
+        summaryMessage.setId(msgId);
+        
+        // 添加到聊天列表显示
+        if (mChatAdapter != null) {
+            mChatAdapter.addItem(summaryMessage);
+            
+            // 滚动到底部
+            if (rv_chat != null) {
+                rv_chat.post(() -> {
+                    rv_chat.scrollToPosition(mChatAdapter.getItemCount() - 1);
+                    rv_chat.post(() -> rv_chat.scrollBy(0, 10000));
+                });
+            }
+        }
+        
+        Toast.makeText(getContext(), "总结已生成，长按可选择采用", Toast.LENGTH_LONG).show();
+    }
+    
+    /**
+     * 采用总结：将总结消息保存到数据库（消息保留在聊天列表中）
+     */
+    public void adoptSummary(ChatMessageBean summaryMessage) {
+        if (summaryMessage == null || currentSession == null) return;
+        
+        ChatSummaryBean summary = new ChatSummaryBean();
+        summary.setSessionId(currentSession.getId());
+        summary.setTitle("总结 " + sdf.format(new Date()));
+        summary.setContent(summaryMessage.getContent());
+        summary.setCreateTime(DateHelper.getSeconds1());
+        summary.setIsDelete(ChatSummaryBean.IS_Delete_NO);
+        
+        long id = DbService.getInstance().mChatSummaryBeanService.addEntity(summary);
+        summary.setId(id);
+        
+        Toast.makeText(getContext(), "总结已保存", Toast.LENGTH_SHORT).show();
+        
+        // 消息保留在聊天列表中，不移除
     }
 }
