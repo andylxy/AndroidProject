@@ -129,12 +129,22 @@
                         android:layout_marginTop="@dimen/dp_4"
                         android:layout_marginBottom="@dimen/dp_4">
 
-                        <!-- 历史总结 CheckBox -->
+                        <!-- 最近一次总结 CheckBox -->
                         <CheckBox
-                            android:id="@+id/cb_include_summary"
+                            android:id="@+id/cb_latest_summary"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="带总结,表示为新一轮对话"
+                            android:text="最近总结"
+                            android:textSize="@dimen/chat_hint_text_size"
+                            android:checked="false"
+                            android:layout_marginEnd="@dimen/dp_4" />
+
+                        <!-- 全部总结 CheckBox -->
+                        <CheckBox
+                            android:id="@+id/cb_all_summary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="全部总结"
                             android:textSize="@dimen/chat_hint_text_size"
                             android:checked="false"
                             android:layout_marginEnd="@dimen/dp_8" />

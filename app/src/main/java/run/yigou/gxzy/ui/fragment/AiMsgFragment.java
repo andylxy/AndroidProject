@@ -104,7 +104,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     private ChatSessionBean currentSession;
     
     // 总结功能相关
-    private CheckBox cbIncludeSummary;
+    private CheckBox cbLatestSummary;  // 最近一次总结
+    private CheckBox cbAllSummary;     // 全部总结
     private Button btnSummarize;
 
     public static AiMsgFragment newInstance() {
@@ -369,8 +370,26 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         });
         
         // 初始化总结功能 UI
-        cbIncludeSummary = findViewById(R.id.cb_include_summary);
+        cbLatestSummary = findViewById(R.id.cb_latest_summary);
+        cbAllSummary = findViewById(R.id.cb_all_summary);
         btnSummarize = findViewById(R.id.btn_summarize);
+        
+        // 两个 CheckBox 互斥（只能选一个）
+        if (cbLatestSummary != null) {
+            cbLatestSummary.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked && cbAllSummary != null) {
+                    cbAllSummary.setChecked(false);
+                }
+            });
+        }
+        if (cbAllSummary != null) {
+            cbAllSummary.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked && cbLatestSummary != null) {
+                    cbLatestSummary.setChecked(false);
+                }
+            });
+        }
+        
         if (btnSummarize != null) {
             btnSummarize.setOnClickListener(v -> generateSessionSummary());
         }
@@ -1807,21 +1826,47 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             // 处理系统消息
             handleSystemMessage(time);
             
-            // 检查是否选中了"带总结"，如果选中则获取总结并追加到问题后面
+            // 检查是否选中了总结 CheckBox，根据类型获取并追加总结
             String messageToSend = result;
-            if (cbIncludeSummary != null && cbIncludeSummary.isChecked()) {
-                EasyLog.print(TAG, "带总结发送：CheckBox 已选中，会话ID: " + currentSession.getId());
+            String summaryTag = null; // 用于显示的标记
+            
+            boolean useLatestSummary = cbLatestSummary != null && cbLatestSummary.isChecked();
+            boolean useAllSummary = cbAllSummary != null && cbAllSummary.isChecked();
+            
+            if (useLatestSummary || useAllSummary) {
+                EasyLog.print(TAG, "带总结发送：" + (useLatestSummary ? "最近" : "全部") + "，会话ID: " + currentSession.getId());
                 // 获取当前会话的总结
                 List<run.yigou.gxzy.greendao.entity.ChatSummaryBean> summaries = 
                     DbService.getInstance().mChatSummaryBeanService.findBySessionId(currentSession.getId());
                 EasyLog.print(TAG, "带总结发送：找到 " + (summaries != null ? summaries.size() : 0) + " 条总结");
+                
                 if (summaries != null && !summaries.isEmpty()) {
-                    // 获取最新的总结（列表按创建时间降序，最新的在第一个）
-                    run.yigou.gxzy.greendao.entity.ChatSummaryBean latestSummary = summaries.get(0);
-                    if (latestSummary.getContent() != null && !latestSummary.getContent().isEmpty()) {
-                        // 将总结追加到用户问题后面
-                        messageToSend = result + "\n\n[历史总结]:\n" + latestSummary.getContent();
-                        EasyLog.print(TAG, "带总结发送：已追加总结，总结内容长度: " + latestSummary.getContent().length());
+                    StringBuilder summaryContent = new StringBuilder();
+                    
+                    if (useLatestSummary) {
+                        // 只发送最近一次总结（列表按创建时间降序，最新的在第一个）
+                        run.yigou.gxzy.greendao.entity.ChatSummaryBean latestSummary = summaries.get(0);
+                        if (latestSummary.getContent() != null && !latestSummary.getContent().isEmpty()) {
+                            summaryContent.append(latestSummary.getContent());
+                        }
+                        summaryTag = "[最近历史总结]";
+                    } else {
+                        // 发送全部总结（按时间顺序，从旧到新）
+                        for (int i = summaries.size() - 1; i >= 0; i--) {
+                            run.yigou.gxzy.greendao.entity.ChatSummaryBean summary = summaries.get(i);
+                            if (summary.getContent() != null && !summary.getContent().isEmpty()) {
+                                if (summaryContent.length() > 0) {
+                                    summaryContent.append("\n\n---\n\n");
+                                }
+                                summaryContent.append(summary.getContent());
+                            }
+                        }
+                        summaryTag = "[全部历史总结]";
+                    }
+                    
+                    if (summaryContent.length() > 0) {
+                        messageToSend = result + "\n\n[历史总结]:\n" + summaryContent.toString();
+                        EasyLog.print(TAG, "带总结发送：已追加总结，总结内容长度: " + summaryContent.length());
                     }
                 } else {
                     EasyLog.print(TAG, "带总结发送：当前会话没有总结数据");
@@ -1830,8 +1875,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             
             // 确定显示在聊天框中的内容（如果带总结，添加标记）
             String displayContent = result;
-            if (cbIncludeSummary != null && cbIncludeSummary.isChecked() && !messageToSend.equals(result)) {
-                displayContent = result + "\n[带历史总结]";
+            if (summaryTag != null && !messageToSend.equals(result)) {
+                displayContent = result + "\n" + summaryTag;
             }
 
             // 添加发送消息（显示带标记的内容）
@@ -2031,9 +2076,12 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                         rv_chat.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
                                     }
                                     
-                                    // AI回复完成后，如果"带总结"被选中，则取消选中
-                                    if (cbIncludeSummary != null && cbIncludeSummary.isChecked()) {
-                                        cbIncludeSummary.setChecked(false);
+                                    // AI回复完成后，取消总结 CheckBox 的选中
+                                    if (cbLatestSummary != null && cbLatestSummary.isChecked()) {
+                                        cbLatestSummary.setChecked(false);
+                                    }
+                                    if (cbAllSummary != null && cbAllSummary.isChecked()) {
+                                        cbAllSummary.setChecked(false);
                                     }
                                 }
                             });
