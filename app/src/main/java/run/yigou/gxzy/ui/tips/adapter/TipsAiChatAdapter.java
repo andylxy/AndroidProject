@@ -39,7 +39,15 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
     private static final int LAYOUT_SUMMARY = R.layout.tips_ai_msg_chat_receive; // 总结复用接收布局
     private static final int LAYOUT_DEFAULT = R.layout.tips_ai_msg_chat_system; // 默认布局资源ID
 
-    // 采用总结回调接口
+    // 消息操作回调接口
+    public interface OnMessageActionListener {
+        void onMessageClick(android.view.View view, ChatMessageBean message, float x, float y);
+        void onAdoptSummary(ChatMessageBean summaryMessage); // 保留原有采用接口，也可以整合
+    }
+    private OnMessageActionListener actionListener;
+    private float lastTouchX, lastTouchY; // 记录最后触摸位置
+
+    // 采用总结回调接口 (Deprecated: 建议统一使用 OnMessageActionListener)
     public interface OnAdoptSummaryListener {
         void onAdoptSummary(ChatMessageBean summaryMessage);
     }
@@ -58,6 +66,10 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
 
     public void setOnAdoptSummaryListener(OnAdoptSummaryListener listener) {
         this.adoptSummaryListener = listener;
+    }
+
+    public void setOnMessageActionListener(OnMessageActionListener listener) {
+        this.actionListener = listener;
     }
 
     private void initMarkwon(Context context) {
@@ -221,6 +233,8 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                             tv_receive_content.setFocusableInTouchMode(false);
                             // 3. 移除触摸监听器
                             tv_receive_content.setOnTouchListener(null);
+                            // 4. 禁止点击事件
+                            tv_receive_content.setOnClickListener(null);
                             
                             TypewriterHelper helper = typewriterHelpers.get(bean.getId());
                             if (helper == null) {
@@ -238,13 +252,27 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                             }
                             
                             // ⚠️ 彻底解决方案：不使用 setTextIsSelectable（它会导致焦点跳动）
-                            // 改用长按弹出可选择文字的对话框
                             tv_receive_content.setTextIsSelectable(false);
                             tv_receive_content.setFocusable(false);
                             tv_receive_content.setFocusableInTouchMode(false);
                             tv_receive_content.setOnTouchListener(null);
                             
-                            // 长按弹出可选择文字的对话框
+                            // 设置触摸监听器记录点击位置
+                            final ChatMessageBean messageBean = bean;
+                            tv_receive_content.setOnTouchListener((v, event) -> {
+                                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                                    lastTouchX = event.getRawX();
+                                    lastTouchY = event.getRawY();
+                                }
+                                return false; // 不消费事件，继续传递给 onClick
+                            });
+                            tv_receive_content.setOnClickListener(v -> {
+                                if (actionListener != null) {
+                                    actionListener.onMessageClick(v, messageBean, lastTouchX, lastTouchY);
+                                }
+                            });
+
+                            // 保留长按弹出复制（可选，或整合到点击菜单中）
                             final String contentToCopy = bean.getContent();
                             tv_receive_content.setOnLongClickListener(v -> {
                                 showTextSelectionDialog(v.getContext(), contentToCopy);
@@ -259,8 +287,31 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     ImageView iv_send_picture = findViewById(R.id.iv_send_picture);
                     if (tv_send_content != null) {
                         tv_send_content.setText(bean.getContent());
-                        // 发送的消息始终可选择复制
-                        tv_send_content.setTextIsSelectable(true);
+                        tv_send_content.setText(bean.getContent());
+                        // 发送的消息设置为不可选择（避免冲突），改用点击弹出菜单
+                        tv_send_content.setTextIsSelectable(false);
+                        
+                        // 设置触摸监听器和点击事件
+                        final ChatMessageBean sendBean = bean;
+                        tv_send_content.setOnTouchListener((v, event) -> {
+                            if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                                lastTouchX = event.getRawX();
+                                lastTouchY = event.getRawY();
+                            }
+                            return false;
+                        });
+                        tv_send_content.setOnClickListener(v -> {
+                            if (actionListener != null) {
+                                actionListener.onMessageClick(v, sendBean, lastTouchX, lastTouchY);
+                            }
+                        });
+                        
+                        // 保留长按弹出复制对话框
+                        final String sendContentToCopy = bean.getContent();
+                        tv_send_content.setOnLongClickListener(v -> {
+                            showTextSelectionDialog(v.getContext(), sendContentToCopy);
+                            return true;
+                        });
                     }
                     if (iv_send_picture != null) {
                         if (bean.getPic_url() != null && !bean.getPic_url().isEmpty()) {
@@ -316,6 +367,23 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                             notifyItemChanged(position); // 局部刷新
                         });
                     }
+                    
+                    // 为思考消息内容添加单击弹出菜单（删除）
+                    if (tv_thinking_content != null) {
+                        final ChatMessageBean thinkingBean = bean;
+                        tv_thinking_content.setOnTouchListener((v, event) -> {
+                            if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                                lastTouchX = event.getRawX();
+                                lastTouchY = event.getRawY();
+                            }
+                            return false;
+                        });
+                        tv_thinking_content.setOnClickListener(v -> {
+                            if (actionListener != null) {
+                                actionListener.onMessageClick(v, thinkingBean, lastTouchX, lastTouchY);
+                            }
+                        });
+                    }
                     break;
                     
                 case ChatMessageBean.TYPE_SUMMARY:
@@ -334,6 +402,8 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                             tv_summary_content.setTextIsSelectable(false);
                             tv_summary_content.setFocusable(false);
                             tv_summary_content.setFocusableInTouchMode(false);
+                            // 流式传输中禁止点击
+                            tv_summary_content.setOnClickListener(null);
                         } else {
                             // 流式传输结束：渲染 Markdown
                             if (markwon != null && bean.getContent() != null) {
@@ -346,8 +416,25 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                             tv_summary_content.setFocusable(false);
                             tv_summary_content.setFocusableInTouchMode(false);
                             
-                            // 长按弹出对话框，包含"采用"按钮
+                            // 设置触摸监听器和点击事件（弹出操作菜单：采用/删除）
                             final ChatMessageBean summaryBean = bean;
+                            tv_summary_content.setOnTouchListener((v, event) -> {
+                                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                                    lastTouchX = event.getRawX();
+                                    lastTouchY = event.getRawY();
+                                }
+                                return false;
+                            });
+                            tv_summary_content.setOnClickListener(v -> {
+                                if (actionListener != null) {
+                                    actionListener.onMessageClick(v, summaryBean, lastTouchX, lastTouchY);
+                                } else {
+                                    // 兼容旧逻辑（如果没有设置 actionListener）
+                                    showTextSelectionDialogWithAdopt(v.getContext(), summaryBean);
+                                }
+                            });
+                            
+                            // 保留长按弹出带"采用"功能的文字选择对话框
                             tv_summary_content.setOnLongClickListener(v -> {
                                 showTextSelectionDialogWithAdopt(v.getContext(), summaryBean);
                                 return true;
