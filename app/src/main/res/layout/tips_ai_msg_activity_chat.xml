@@ -134,17 +134,18 @@
                             android:id="@+id/cb_include_summary"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="带总结"
+                            android:text="带总结,表示为新一轮对话"
                             android:textSize="@dimen/chat_hint_text_size"
                             android:checked="false"
                             android:layout_marginEnd="@dimen/dp_8" />
 
+                        <!-- 总结按钮 -->
                         <Button
-                            android:id="@+id/chat_send"
+                            android:id="@+id/btn_summarize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="#70A9F3"
-                            android:text="发送"
+                            android:text="总结"
                             android:textColor="@color/white"
                             android:textSize="@dimen/chat_content_text_size"
                             android:minWidth="@dimen/dp_40"
@@ -154,13 +155,13 @@
                             android:paddingTop="@dimen/dp_2"
                             android:paddingBottom="@dimen/dp_2" />
 
-                        <!-- 总结按钮 -->
+                        <!-- 发送按钮 -->
                         <Button
-                            android:id="@+id/btn_summarize"
+                            android:id="@+id/chat_send"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="#70A9F3"
-                            android:text="总结"
+                            android:text="发送"
                             android:textColor="@color/white"
                             android:textSize="@dimen/chat_content_text_size"
                             android:minWidth="@dimen/dp_40"

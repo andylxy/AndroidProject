@@ -1766,6 +1766,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     private void sendMsg(String result) {
         if (mChatAdapter != null) {
             String time = sdf.format(new Date());
+            
             // 如果当前没有会话，创建一个新的会话
             if (currentSession == null) {
                 createNewSession("新对话");
@@ -1805,9 +1806,36 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
             // 处理系统消息
             handleSystemMessage(time);
+            
+            // 检查是否选中了"带总结"，如果选中则获取总结并追加到问题后面
+            String messageToSend = result;
+            if (cbIncludeSummary != null && cbIncludeSummary.isChecked()) {
+                EasyLog.print(TAG, "带总结发送：CheckBox 已选中，会话ID: " + currentSession.getId());
+                // 获取当前会话的总结
+                List<run.yigou.gxzy.greendao.entity.ChatSummaryBean> summaries = 
+                    DbService.getInstance().mChatSummaryBeanService.findBySessionId(currentSession.getId());
+                EasyLog.print(TAG, "带总结发送：找到 " + (summaries != null ? summaries.size() : 0) + " 条总结");
+                if (summaries != null && !summaries.isEmpty()) {
+                    // 获取最新的总结（列表按创建时间降序，最新的在第一个）
+                    run.yigou.gxzy.greendao.entity.ChatSummaryBean latestSummary = summaries.get(0);
+                    if (latestSummary.getContent() != null && !latestSummary.getContent().isEmpty()) {
+                        // 将总结追加到用户问题后面
+                        messageToSend = result + "\n\n[历史总结]:\n" + latestSummary.getContent();
+                        EasyLog.print(TAG, "带总结发送：已追加总结，总结内容长度: " + latestSummary.getContent().length());
+                    }
+                } else {
+                    EasyLog.print(TAG, "带总结发送：当前会话没有总结数据");
+                }
+            }
+            
+            // 确定显示在聊天框中的内容（如果带总结，添加标记）
+            String displayContent = result;
+            if (cbIncludeSummary != null && cbIncludeSummary.isChecked() && !messageToSend.equals(result)) {
+                displayContent = result + "\n[带历史总结]";
+            }
 
-            // 添加发送消息
-            ChatMessageBean chatMessageBeanSend = new ChatMessageBean(ChatMessageBean.TYPE_SEND, "", "", result);
+            // 添加发送消息（显示带标记的内容）
+            ChatMessageBean chatMessageBeanSend = new ChatMessageBean(ChatMessageBean.TYPE_SEND, "", "", displayContent);
             chatMessageBeanSend.setSessionId(currentSession.getId());
             chatMessageBeanSend.setCreateDate(DateHelper.getSeconds1());
             chatMessageBeanSend.setIsDelete(ChatMessageBean.IS_Delete_NO);
@@ -1853,8 +1881,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             }
 
             // 发送消息给GPT - 使用 SSE 流式请求
+            // 注意：如果选中了"带总结"，发送的是追加了总结的内容
             new AiStreamApi()
-                    .setQuery(result)
+                    .setQuery(messageToSend)
                     .setConversationId(currentSession.getConversationId())
                     .setEndUserId(currentSession.getEndUserId())
                     .execute(new SseStreamCallback() {
@@ -2000,6 +2029,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                     // 恢复焦点能力，允许用户选择文本
                                     if (rv_chat != null) {
                                         rv_chat.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
+                                    }
+                                    
+                                    // AI回复完成后，如果"带总结"被选中，则取消选中
+                                    if (cbIncludeSummary != null && cbIncludeSummary.isChecked()) {
+                                        cbIncludeSummary.setChecked(false);
                                     }
                                 }
                             });
