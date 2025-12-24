@@ -412,10 +412,26 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
                 
                 @Override
                 public void onFailure(@NonNull EventSource eventSource, Throwable t, Response response) {
-                    // ⚠️ 如果是主动取消导致的 Socket closed，则忽略
-                    if (isCanceled && t instanceof java.io.IOException && "Socket closed".equals(t.getMessage())) {
-                        EasyLog.print(TAG, "忽略主动取消连接后的 Socket closed");
-                        return;
+                    // ⚠️ 如果是主动取消导致的错误，则忽略
+                    if (isCanceled) {
+                        String errMsg = t != null ? t.getMessage() : "";
+                        if (t instanceof java.io.IOException && "Socket closed".equals(errMsg)) {
+                            EasyLog.print(TAG, "忽略主动取消连接后的 Socket closed");
+                            return;
+                        }
+                        // 检查 StreamResetException: CANCEL
+                        if (errMsg != null && errMsg.contains("CANCEL")) {
+                            EasyLog.print(TAG, "忽略主动取消连接后的 stream was reset: CANCEL");
+                            return;
+                        }
+                        // 检查 cause 是否是 StreamResetException
+                        if (t != null && t.getCause() != null) {
+                            String causeMsg = t.getCause().getMessage();
+                            if (causeMsg != null && causeMsg.contains("CANCEL")) {
+                                EasyLog.print(TAG, "忽略主动取消连接后的 StreamResetException: CANCEL");
+                                return;
+                            }
+                        }
                     }
 
                     String errorMsg = t != null ? t.getMessage() : "未知错误";

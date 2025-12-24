@@ -82,11 +82,26 @@ public final class AiSessionIdApi implements IRequestApi {
         private void parseConversationData() {
             if (conversationIdJson != null && !conversationIdJson.isEmpty()) {
                 try {
+                    // 检查是否是有效的 JSON 对象格式（以 { 开头）
+                    String trimmed = conversationIdJson.trim();
+                    if (!trimmed.startsWith("{")) {
+                        // 如果不是 JSON 对象，可能直接是 conversation_id 字符串
+                        // 创建一个包含该值的 ConversationData 对象
+                        this.conversationData = new ConversationData();
+                        this.conversationData.setConversationId(conversationIdJson);
+                        this.parsed = true;
+                        return;
+                    }
+                    
                     Gson gson = new Gson();
                     this.conversationData = gson.fromJson(conversationIdJson, ConversationData.class);
                     this.parsed = true;
                 } catch (JsonSyntaxException e) {
+                    // 解析失败时，尝试将原始字符串作为 conversation_id 使用
                     e.printStackTrace();
+                    this.conversationData = new ConversationData();
+                    this.conversationData.setConversationId(conversationIdJson);
+                    this.parsed = true;
                 }
             }
         }
