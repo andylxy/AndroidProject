@@ -380,8 +380,8 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
                         SseChunk chunk = gson.fromJson(data, SseChunk.class);
                         
                         if (chunk != null) {
-                        //    EasyLog.print(TAG, "解析数据块: type=" + chunk.getType() + ", content length=" +
-                        //            (chunk.getContent() != null ? chunk.getContent().length() : 0));
+                           EasyLog.print(TAG, "解析数据块: type=" + chunk.getType() + ", content length=" +
+                                   (chunk.getContent() != null ? chunk.getContent().length() : 0));
                             callback.onChunk(chunk);
                             
                             // 如果是 done 或 error，关闭连接

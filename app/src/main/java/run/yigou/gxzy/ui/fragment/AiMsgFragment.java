@@ -1584,8 +1584,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                         mChatAdapter.notifyItemChanged(position);
                                     }
                                 }
-                                
-                                Toast.makeText(getContext(), "总结已生成，长按可选择采用", Toast.LENGTH_SHORT).show();
+
+                                toast("总结已生成，长按可选择采用");
                             } else {
                                 // 生成失败，移除消息
                                 if (mChatAdapter != null) {
@@ -1594,7 +1594,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                         mChatAdapter.removeItem(position);
                                     }
                                 }
-                                Toast.makeText(getContext(), "生成总结失败", Toast.LENGTH_SHORT).show();
+                                toast("生成总结失败");
                             }
                         });
                     }
@@ -1609,7 +1609,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                     mChatAdapter.removeItem(position);
                                 }
                             }
-                            Toast.makeText(getContext(), "生成总结失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            toast("生成总结失败: " + e.getMessage());
                         });
                     }
                 });
@@ -1628,8 +1628,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         
         long id = DbService.getInstance().mChatSummaryBeanService.addEntity(summary);
         summary.setId(id);
-        
-        Toast.makeText(getContext(), "总结已保存", Toast.LENGTH_SHORT).show();
+
+        toast("总结已保存");
         
         // 显示总结内容
         showSummaryContentDialog(summary);
@@ -1717,7 +1717,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
      */
     private void displaySummaryInChat(String content) {
         if (currentSession == null) {
-            Toast.makeText(getContext(), "当前没有会话", Toast.LENGTH_SHORT).show();
+            toast("当前没有会话");
             return;
         }
         
@@ -1746,8 +1746,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 });
             }
         }
-        
-        Toast.makeText(getContext(), "总结已生成，长按可选择采用", Toast.LENGTH_LONG).show();
+
+        toast("总结已生成，长按可选择采用");
     }
     
     /**
@@ -1943,8 +1943,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             case ChatMessageBean.TYPE_THINKING:
                 items = new String[]{"删除", "复制"};
                 break;
-            case ChatMessageBean.TYPE_SUMMARY: // 总结消息：复制、删除
-                items = new String[]{"复制", "删除"};
+            case ChatMessageBean.TYPE_SUMMARY: // 总结消息：复制、删除、采用
+                items = new String[]{"复制", "删除", "采用"};
                 break;
             default:
                 return;
@@ -1997,6 +1997,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     deleteMessage(message);
                 } else if ("复制".equals(clickedItem)) {
                     copyToClipboard(message.getContent());
+                } else if ("采用".equals(clickedItem)) {
+                    adoptSummary(message);
                 }
             });
         }
