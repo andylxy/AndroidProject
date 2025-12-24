@@ -2,6 +2,7 @@ package run.yigou.gxzy.ui.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 
@@ -10,6 +11,9 @@ import androidx.annotation.NonNull;
 import com.airbnb.lottie.LottieAnimationView;
 import com.gyf.immersionbar.BarHide;
 import com.gyf.immersionbar.ImmersionBar;
+import com.hjq.permissions.Permission;
+import com.hjq.permissions.XXPermissions;
+
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.other.AppConfig;
@@ -24,8 +28,19 @@ import com.hjq.widget.view.SlantedTextView;
  */
 public final class SplashActivity extends AppActivity {
 
+    /** 权限引导页请求码 */
+    private static final int REQUEST_CODE_PERMISSION_GUIDE = 1001;
+
     private LottieAnimationView mLottieView;
     private SlantedTextView mDebugView;
+
+    /** 是否已经完成权限检查 */
+    private boolean mPermissionChecked = false;
+
+    public static void start(Context context) {
+        Intent intent = new Intent(context, SplashActivity.class);
+        context.startActivity(intent);
+    }
 
     @Override
     protected int getLayoutId() {
@@ -36,16 +51,6 @@ public final class SplashActivity extends AppActivity {
     protected void initView() {
         mLottieView = findViewById(R.id.lav_splash_lottie);
         mDebugView = findViewById(R.id.iv_splash_debug);
-        // 设置动画监听
-        mLottieView.addAnimatorListener(new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mLottieView.removeAnimatorListener(this);
-                HomeActivity.start(getContext());
-                finish();
-            }
-        });
     }
 
     @Override
@@ -57,19 +62,25 @@ public final class SplashActivity extends AppActivity {
             mDebugView.setVisibility(View.INVISIBLE);
         }
 
-//        if (true) {
-//            return;
-//        }
-//        // 刷新用户信息
-//        EasyHttp.post(this)
-//                .api(new UserInfoApi())
-//                .request(new HttpCallback<HttpData<UserInfoApi.Bean>>(this) {
-//
-//                    @Override
-//                    public void onSucceed(HttpData<UserInfoApi.Bean> data) {
-//
-//                    }
-//                });
+        // 权限已授予，开始播放动画
+        if (mPermissionChecked) {
+            startLottieAnimation();
+        }
+    }
+
+    /**
+     * 开始播放 Lottie 动画
+     */
+    private void startLottieAnimation() {
+        mLottieView.addAnimatorListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mLottieView.removeAnimatorListener(this);
+                HomeActivity.start(getContext());
+                finish();
+            }
+        });
+        mLottieView.playAnimation();
     }
 
     @NonNull
@@ -100,7 +111,38 @@ public final class SplashActivity extends AppActivity {
                 return;
             }
         }
-        super.initActivity();
+
+        // 检查存储权限
+        checkStoragePermission();
+    }
+
+    /**
+     * 检查存储权限
+     */
+    private void checkStoragePermission() {
+        if (XXPermissions.isGranted(this, Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE)) {
+            // 已授权，继续初始化
+            mPermissionChecked = true;
+            super.initActivity();
+        } else {
+            // 未授权，打开权限引导页（对话框样式）
+            PermissionGuideActivity.start(this, REQUEST_CODE_PERMISSION_GUIDE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_PERMISSION_GUIDE) {
+            if (resultCode == RESULT_OK) {
+                // 权限已授予，继续初始化
+                mPermissionChecked = true;
+                super.initActivity();
+            } else {
+                // 用户拒绝或退出，关闭应用
+                finish();
+            }
+        }
     }
 
     @Deprecated

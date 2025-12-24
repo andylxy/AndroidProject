@@ -55,7 +55,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- 闪屏页 -->
+        <!-- 闪屏页（程序入口） -->
         <activity
             android:name=".ui.activity.SplashActivity"
             android:exported="true"
@@ -71,6 +71,13 @@
             </intent-filter>
 
         </activity>
+
+        <!-- 权限引导页（对话框样式） -->
+        <activity
+            android:name=".ui.activity.PermissionGuideActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/PermissionGuideDialogTheme" />
 
         <!-- 书本内容BookContentSearchActivity -->
         <activity

@@ -71,6 +71,80 @@
     <string name="common_permission_window">悬浮窗权限</string>
     <string name="common_permission_setting">系统设置权限</string>
 
+    <!-- 隐私权限申请 -->
+    <string name="permission_request_title">权限申请</string>
+    <string name="permission_request_storage_message">为了保证您正常使用本应用的阅读、下载等核心功能，需要授予存储权限。</string>
+    <string name="permission_denied_exit_message">您拒绝了必要权限，应用将无法正常使用，即将退出。</string>
+    <string name="permission_denied_goto_settings">您已拒绝授权，请前往设置手动开启权限，否则应用将退出。</string>
+    <string name="permission_btn_agree">同意并继续</string>
+    <string name="permission_btn_exit">退出应用</string>
+
+    <!-- 权限引导页面 -->
+    <string name="permission_guide_title">欢迎使用本应用</string>
+    <string name="permission_guide_desc">为了保证您正常使用阅读、下载等核心功能，我们需要获取存储权限。\n\n请您仔细阅读《隐私协议》和《免责声明》，点击"同意并继续"表示您已阅读并同意相关条款。</string>
+    <string name="permission_guide_privacy">隐私协议</string>
+    <string name="permission_guide_disclaimer">免责声明</string>
+
+    <!-- 隐私协议内容 -->
+    <string name="privacy_policy_content"><![CDATA[
+<b>隐私政策</b><br/><br/>
+
+更新日期：2024年12月<br/>
+生效日期：2024年12月<br/><br/>
+
+<b>引言</b><br/><br/>
+
+欢迎使用本应用！我们深知个人信息对您的重要性，并会尽全力保护您的个人信息安全。请您在使用我们的产品前，仔细阅读并了解本《隐私政策》。<br/><br/>
+
+<b>一、我们收集的信息</b><br/><br/>
+
+为了保障产品的正常运行，我们可能会收集和使用以下信息：<br/>
+1. 设备信息：包括设备型号、操作系统版本、唯一设备标识符等。<br/>
+2. 存储权限：为了实现书籍下载、缓存等功能，我们需要申请存储读写权限。<br/>
+3. 网络信息：用于书籍在线阅读和更新检查。<br/><br/>
+
+<b>二、信息的使用</b><br/><br/>
+
+收集的信息仅用于以下用途：<br/>
+1. 提供、维护和改进我们的服务；<br/>
+2. 开发新的服务或功能；<br/>
+3. 分析产品使用情况，以便改进用户体验。<br/><br/>
+
+<b>三、信息的存储</b><br/><br/>
+
+1. 您的个人信息存储于您的设备本地；<br/>
+2. 我们会采取合理的安全措施保护您的信息。<br/><br/>
+
+<b>四、联系我们</b><br/><br/>
+
+如您对本隐私政策有任何疑问，请通过应用内的反馈功能联系我们。
+    ]]></string>
+
+    <!-- 免责声明内容 -->
+    <string name="disclaimer_content"><![CDATA[
+<b>免责声明</b><br/><br/>
+
+更新日期：2024年12月<br/><br/>
+
+在使用本应用前，请仔细阅读以下免责声明。使用本应用即表示您已阅读、理解并同意接受以下条款的约束。<br/><br/>
+
+<b>一、内容声明</b><br/><br/>
+
+1. 本应用提供的所有内容仅供个人学习、研究使用。<br/>
+2. 本应用中的书籍内容来源于互联网公开资源，版权归原作者所有。<br/>
+3. 如您认为本应用侵犯了您的合法权益，请及时联系我们，我们将在核实后立即删除相关内容。<br/><br/>
+
+<b>二、使用声明</b><br/><br/>
+
+1. 本应用按"现状"提供，不作任何明示或暗示的保证。<br/>
+2. 对于因使用本应用而产生的任何直接或间接损失，我们不承担责任。<br/>
+3. 我们保留随时修改、暂停或终止服务的权利。<br/><br/>
+
+<b>三、联系我们</b><br/><br/>
+
+如您对以上内容有任何疑问，请通过应用内的反馈功能联系我们。
+    ]]></string>
+
     <string name="common_network_hint">当前没有网络连接，请检查网络设置</string>
     <string name="common_no_more_data">没有更多数据了</string>
 
