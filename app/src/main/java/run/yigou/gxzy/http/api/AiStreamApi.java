@@ -11,10 +11,25 @@ import com.hjq.http.config.IRequestClient;
 import com.hjq.http.config.IRequestHost;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import okhttp3.ConnectionSpec;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.TlsVersion;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -80,7 +95,7 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
      */
     @Override
     public String getHost() {
-        if (run.yigou.gxzy.BuildConfig.DEBUG) {
+        if (Objects.equals(AppConfig.getBuildType(), "debug")) {
             // 开发环境：使用 HTTP
             return "http://192.168.2.158:9991";
         } else {
@@ -94,13 +109,15 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
      * 
      * ✅ 从 EasyConfig 获取基础 client，自动应用拦截器
      * ✅ 添加 SSE 特定配置（超时时间）
-     * ✅ HTTPS 使用 Let's Encrypt 证书，Android 默认信任，无需特殊配置
+     * ✅ 为老版本 Android 添加 TLS 1.2 配置
      */
     @NonNull
     @Override
     public OkHttpClient getClient() {
         EasyLog.print(TAG, "========== 构建 SSE OkHttpClient ==========");
-        EasyLog.print(TAG, "当前环境: " + (run.yigou.gxzy.BuildConfig.DEBUG ? "开发(HTTP)" : "正式(HTTPS-Let's Encrypt)"));
+        
+        boolean isHttps = getHost().startsWith("https://");
+        EasyLog.print(TAG, "当前环境: " + (isHttps ? "HTTPS" : "HTTP"));
         EasyLog.print(TAG, "目标地址: " + getHost());
         
         // ✅ 从 EasyConfig 获取基础 client（自动应用拦截器、签名等）
@@ -113,15 +130,98 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
         
         EasyLog.print(TAG, "已设置超时：读300秒，写300秒，连接30秒");
         
-        // ✅ HTTPS 使用 Let's Encrypt 证书
-        // Let's Encrypt 是受信任的 CA，Android 系统默认信任，无需自定义 SSL 配置
-        // 系统会自动验证：
-        // 1. 证书是否由受信任的 CA 签发 ✓
-        // 2. 证书是否在有效期内 ✓
-        // 3. 证书域名是否与请求域名匹配 ✓
+        // ✅ 为 HTTPS 配置 TLS 1.2（服务器只支持 TLS 1.2，不接受降级）
+        if (isHttps) {
+            try {
+                // 只使用 TLS 1.2，不尝试降级（服务器有防降级保护）
+                ConnectionSpec tls12Only = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                        .tlsVersions(TlsVersion.TLS_1_2)
+                        .allEnabledCipherSuites()
+                        .build();
+                
+                clientBuilder.connectionSpecs(Arrays.asList(tls12Only, ConnectionSpec.CLEARTEXT));
+                
+                // 为所有 Android 版本强制启用 TLS 1.2
+                try {
+                    SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+                    sslContext.init(null, null, null);
+                    
+                    // 获取默认的 TrustManager
+                    javax.net.ssl.TrustManagerFactory tmf = javax.net.ssl.TrustManagerFactory.getInstance(
+                            javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm());
+                    tmf.init((java.security.KeyStore) null);
+                    X509TrustManager trustManager = (X509TrustManager) tmf.getTrustManagers()[0];
+                    
+                    clientBuilder.sslSocketFactory(new Tls12SocketFactory(sslContext.getSocketFactory()), trustManager);
+                    EasyLog.print(TAG, "已配置 TLS 1.2 SSLSocketFactory");
+                } catch (Exception e) {
+                    EasyLog.print(TAG, "TLS 1.2 SSLSocketFactory 配置失败: " + e.getMessage());
+                }
+                
+                EasyLog.print(TAG, "已配置 TLS 1.2 (仅)");
+            } catch (Exception e) {
+                EasyLog.print(TAG, "TLS配置异常: " + e.getMessage());
+            }
+        }
         
         return clientBuilder.build();
     }
+
+    
+    /**
+     * TLS 1.2 Socket Factory - 为老版本 Android 强制启用 TLS 1.2
+     */
+    private static class Tls12SocketFactory extends SSLSocketFactory {
+        private final SSLSocketFactory delegate;
+        
+        Tls12SocketFactory(SSLSocketFactory delegate) {
+            this.delegate = delegate;
+        }
+        
+        @Override
+        public String[] getDefaultCipherSuites() {
+            return delegate.getDefaultCipherSuites();
+        }
+        
+        @Override
+        public String[] getSupportedCipherSuites() {
+            return delegate.getSupportedCipherSuites();
+        }
+        
+        @Override
+        public java.net.Socket createSocket(java.net.Socket s, String host, int port, boolean autoClose) throws IOException {
+            return enableTls12(delegate.createSocket(s, host, port, autoClose));
+        }
+        
+        @Override
+        public java.net.Socket createSocket(String host, int port) throws IOException {
+            return enableTls12(delegate.createSocket(host, port));
+        }
+        
+        @Override
+        public java.net.Socket createSocket(String host, int port, java.net.InetAddress localHost, int localPort) throws IOException {
+            return enableTls12(delegate.createSocket(host, port, localHost, localPort));
+        }
+        
+        @Override
+        public java.net.Socket createSocket(java.net.InetAddress host, int port) throws IOException {
+            return enableTls12(delegate.createSocket(host, port));
+        }
+        
+        @Override
+        public java.net.Socket createSocket(java.net.InetAddress address, int port, java.net.InetAddress localAddress, int localPort) throws IOException {
+            return enableTls12(delegate.createSocket(address, port, localAddress, localPort));
+        }
+        
+        private java.net.Socket enableTls12(java.net.Socket socket) {
+            if (socket instanceof SSLSocket) {
+                // 只启用 TLS 1.2，服务器不接受降级
+                ((SSLSocket) socket).setEnabledProtocols(new String[]{"TLSv1.2"});
+            }
+            return socket;
+        }
+    }
+
     
     // ========== 工具方法 ==========
     

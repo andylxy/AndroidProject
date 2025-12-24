@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FAFAFA"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     tools:context=".ui.activity.AboutActivity">
@@ -15,117 +16,198 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:title="@string/about_title" />
 
+    <!-- App Logo -->
     <com.hjq.widget.view.ScaleImageView
         android:layout_width="@dimen/dp_100"
         android:layout_height="@dimen/dp_100"
-        android:layout_marginTop="@dimen/dp_10"
+        android:layout_marginTop="@dimen/dp_15"
         android:layout_marginBottom="@dimen/dp_10"
         app:scaleRatio="1.5"
         app:srcCompat="@drawable/launcher_ic" />
 
+    <!-- App 名称 -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_author_book"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/about_author"
+        android:textColor="#37474F"
+        android:textSize="@dimen/sp_18"
+        android:textStyle="bold" />
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:gravity="center_horizontal"
         android:orientation="vertical">
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_author_book"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_5"
-            android:text="@string/about_author"
-            android:textColor="#222222"
-            android:textSize="@dimen/sp_18" />
-
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:scrollbars="none">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="@dimen/dp_30"
-                android:orientation="vertical">
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/dp_20"
+                android:paddingTop="@dimen/dp_15"
+                android:paddingBottom="@dimen/dp_20">
+
+                <!-- 致谢区域 -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dp_5"
-                    android:gravity="center_horizontal|left"
-                    android:padding="@dimen/dp_5"
-                    android:text="@string/about_thks"
-                    android:textColor="#222222"
-                    android:textSize="@dimen/sp_16" />
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/tv_thks"
-                    android:layout_width="wrap_content"
+                    android:layout_marginBottom="@dimen/dp_12"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardCornerRadius="@dimen/dp_10"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/dp_15">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawableStart="@drawable/ic_heart"
+                            android:drawablePadding="@dimen/dp_6"
+                            android:text="@string/about_thks"
+                            android:textColor="#5D4037"
+                            android:textSize="@dimen/sp_15"
+                            android:textStyle="bold"
+                            tools:ignore="UseCompatTextViewDrawableXml" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="@dimen/dp_10"
+                            android:background="#E0E0E0" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tv_thks"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:lineSpacingExtra="@dimen/dp_4"
+                            android:text="@string/about_version"
+                            android:textColor="#616161"
+                            android:textSize="@dimen/sp_14" />
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- 免责声明区域 -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal|left"
-                    android:padding="@dimen/dp_5"
-                    android:text="@string/about_version"
-                    android:textColor="#222222"
-                    android:textSize="@dimen/sp_16" />
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:layout_width="wrap_content"
+                    android:layout_marginBottom="@dimen/dp_12"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardCornerRadius="@dimen/dp_10"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/dp_15">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawableStart="@drawable/ic_warning"
+                            android:drawablePadding="@dimen/dp_6"
+                            android:text="免责声明"
+                            android:textColor="#D84315"
+                            android:textSize="@dimen/sp_15"
+                            android:textStyle="bold"
+                            tools:ignore="UseCompatTextViewDrawableXml" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="@dimen/dp_10"
+                            android:background="#FFCCBC" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tv_disclaimer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:lineSpacingExtra="@dimen/dp_3"
+                            android:textColor="#5D4037"
+                            android:textSize="@dimen/sp_13" />
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- 更新日志区域 -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dp_5"
-                    android:gravity="center_horizontal|left"
-                    android:padding="@dimen/dp_5"
-                    android:text="@string/about_manual"
-                    android:textColor="#222222"
-                    android:textSize="@dimen/sp_16" />
+                    android:layout_marginBottom="@dimen/dp_12"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardCornerRadius="@dimen/dp_10"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/dp_15">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawableStart="@drawable/ic_update"
+                            android:drawablePadding="@dimen/dp_6"
+                            android:text="@string/about_updata"
+                            android:textColor="#1565C0"
+                            android:textSize="@dimen/sp_15"
+                            android:textStyle="bold"
+                            tools:ignore="UseCompatTextViewDrawableXml" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="@dimen/dp_10"
+                            android:background="#BBDEFB" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tv_updata_log"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:autoLink="web"
+                            android:lineSpacingExtra="@dimen/dp_4"
+                            android:text="@string/about_updata_log"
+                            android:textColor="#616161"
+                            android:textSize="@dimen/sp_14" />
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- 隐藏的原有控件（保持兼容性） -->
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tv_developer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:autoLink="all"
-                    android:gravity="center_horizontal|left"
-                    android:lineSpacingExtra="@dimen/dp_6"
-                    android:padding="@dimen/dp_5"
-                    android:text="@string/about_developer"
-                    android:textColor="#222222"
-                    android:textSize="@dimen/sp_14" />
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dp_5"
-                    android:gravity="center_horizontal|left"
-                    android:padding="@dimen/dp_5"
-                    android:text="@string/about_updata"
-                    android:textColor="#222222"
-                    android:textSize="@dimen/sp_16" />
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/tv_updata_log"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:autoLink="all"
-                    android:gravity="center_horizontal|left"
-                    android:lineSpacingExtra="@dimen/dp_6"
-                    android:padding="@dimen/dp_5"
-                    android:text="@string/about_updata_log"
-                    android:textColor="#222222"
-                    android:textSize="@dimen/sp_14" />
+                    android:visibility="gone" />
 
             </LinearLayout>
 
         </androidx.core.widget.NestedScrollView>
 
-
     </LinearLayout>
 
-
+    <!-- 版权信息 -->
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tv_copyright"
-        android:layout_width="196dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="@dimen/dp_15"
+        android:layout_marginVertical="@dimen/dp_12"
         android:text="@string/about_copyright"
-        android:textColor="#BDBDBD"
-        android:textSize="@dimen/sp_14" />
+        android:textColor="#9E9E9E"
+        android:textSize="@dimen/sp_12" />
 
 </LinearLayout>
