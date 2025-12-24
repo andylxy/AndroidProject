@@ -93,7 +93,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     @SuppressLint("SimpleDateFormat")
     private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
     private int scrollState = 0;
-    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 1;
 
     // UI 更新节流相关
     private Handler uiUpdateHandler = new Handler(Looper.getMainLooper());
@@ -1094,55 +1093,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
-    /**
-     * 显示编辑当前会话标题对话框
-     */
-    private void showEditTitleDialog() {
-        if (currentSession == null) {
-            Toast.makeText(getContext(), "当前没有选中的会话", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        showEditSessionTitleDialog(currentSession);
-    }
-
-    /**
-     * 请求新的会话ID
-     */
-    private void requestNewSessionId() {
-        //检测会话Id是否已过期
-        EasyHttp.get(AiMsgFragment.this)
-                .api(new AiSessionIdApi())
-                .request(new HttpCallback<HttpData<AiSessionIdApi.Bean>>(AiMsgFragment.this) {
-
-                    @Override
-                    public void onSucceed(HttpData<AiSessionIdApi.Bean> data) {
-
-                        if (data != null && data.isRequestSucceed()) {
-                            AiSessionIdApi.Bean bean = data.getData();
-                            if (currentSession != null) {
-                                // 设置会话Id
-                                currentSession.setConversationId(bean.getRealConversationId());
-                                currentSession.setEndUserId(bean.getEndUserId());
-                                currentSession.setCreateTime(DateHelper.getSeconds1());
-                                EasyLog.print(TAG, "Session ID obtained: " + bean.getRealConversationId());
-                            }
-                        } else {
-                            EasyLog.print("过期会话Id申请失败：" + data.getMessage());
-                        }
-
-                    }
-
-                    @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
-
-                        EasyLog.print("过期会话Id申请失败：" + e.getMessage());
-                    }
-                });
-
-    }
-    
     // 保存用户输入的内容和时间，用于重新申请会话ID后继续执行
     private String pendingMessageContent;
     private String pendingMessageTime;
@@ -2284,44 +2234,5 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         
         // 调用发送逻辑
         sendMsg(content);
-    }
-    
-    /**
-     * 重新生成（AI）
-     */
-    private void regenerateReply(ChatMessageBean aiMessage) {
-        if (mChatAdapter == null) return;
-        
-        // 1. 找到该 AI 消息之前的最后一条用户消息
-        int aiIndex = mChatAdapter.getData().indexOf(aiMessage);
-        if (aiIndex <= 0) {
-            Toast.makeText(getContext(), "找不到对应的提问", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        String userQuestion = null;
-        // 向前查找 TYPE_SEND
-        for (int i = aiIndex - 1; i >= 0; i--) {
-            ChatMessageBean prev = mChatAdapter.getItem(i);
-            if (prev.getType() == ChatMessageBean.TYPE_SEND) {
-                userQuestion = prev.getContent();
-                break;
-            }
-        }
-        
-        if (android.text.TextUtils.isEmpty(userQuestion)) {
-            Toast.makeText(getContext(), "找不到对应的提问", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        // 2. 重新发送该问题
-        // 注：这里选择保留旧的 AI 回复，直接生成新的。
-        // 如果需要删除旧的 AI 回复，可以在这里调用 deleteMessage(aiMessage);
-        // 根据 "重生回复" 通常意味着 retry，这里可以删除旧的。
-        // 用户需求: "2) AI 删除, 重新生成"。这两个是并列选项。
-        // 通常重新生成会替代当前的错误的回复。
-        // 让我们保留旧的，或者询问？
-        // 标准做法：Retry 也是生成新的在底部。
-        sendMsg(userQuestion);
     }
 }
