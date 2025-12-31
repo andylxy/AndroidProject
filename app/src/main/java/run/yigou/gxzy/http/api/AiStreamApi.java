@@ -472,8 +472,11 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
      * 请求数据模型
      */
     private static class RequestData {
+        @com.google.gson.annotations.SerializedName("conversationId")
         String conversationId;
+        @com.google.gson.annotations.SerializedName("endUserId")
         String endUserId;
+        @com.google.gson.annotations.SerializedName("query")
         String query;
     }
 }

@@ -1,5 +1,6 @@
 package run.yigou.gxzy.http.model;
 
+import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
 /**
@@ -23,18 +24,21 @@ public class SseChunk implements Serializable {
      * - "done": 传输完成
      * - "error": 发生错误
      */
+    @SerializedName("type")
     private String type;
     
     /**
      * 数据块的文本内容
      * 对于 "chunk", "thinking", "answer" 类型，包含实际文本
      */
+    @SerializedName("content")
     private String content;
     
     /**
      * 错误信息
      * 仅当 type 为 "error" 时有值
      */
+    @SerializedName("error")
     private String error;
     
     /**
@@ -42,6 +46,7 @@ public class SseChunk implements Serializable {
      * true: 表示这是 AI 的思考过程，通常需要折叠显示
      * false: 表示这是正式回答内容
      */
+    @SerializedName("isThinking")
     private boolean isThinking;
     
     // 构造函数

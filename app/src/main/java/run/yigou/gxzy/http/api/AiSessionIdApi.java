@@ -33,9 +33,9 @@ public final class AiSessionIdApi implements IRequestApi {
         return "GET"; // 或 "POST", "PUT" 等
     }
     public final static class Bean implements Serializable {
-        @SerializedName("conversation_id")
+        @SerializedName("ConversationId")
         private String conversationIdJson;
-        @SerializedName("end_user_id")
+        @SerializedName("EndUserId")
         private String endUserId;
         
         // 解析后的对象
@@ -118,10 +118,10 @@ public final class AiSessionIdApi implements IRequestApi {
     // 嵌套JSON对象的实体类
     public static class ConversationData  implements Serializable{
         private static final long serialVersionUID = 189044334L;
-        @SerializedName("request_id")
+        @SerializedName("RequestId")
         private String requestId;
         
-        @SerializedName("conversation_id")
+        @SerializedName("ConversationId")
         private String conversationId;
 
         public String getRequestId() {

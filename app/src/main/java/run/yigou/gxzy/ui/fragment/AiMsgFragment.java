@@ -593,6 +593,17 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 获取会话中的所有消息（现在会从数据库重新查询）
         List<ChatMessageBean> messages = session.getMessages();
 
+        // ⚠️ 修复：手动解密消息内容
+        for (ChatMessageBean msg : messages) {
+            String content = msg.getContent();
+            if (content != null && !content.isEmpty()) {
+                String decrypted = run.yigou.gxzy.Security.SecurityUtils.rc4Decrypt(content);
+                if (decrypted != null) {
+                    msg.setContent(decrypted);
+                }
+            }
+        }
+
         // 清空当前聊天数据
         if (mChatAdapter != null) {
             mChatAdapter.setData(new ArrayList<ChatMessageBean>());

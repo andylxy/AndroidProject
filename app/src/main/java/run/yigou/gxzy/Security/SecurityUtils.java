@@ -752,15 +752,44 @@ public final class SecurityUtils {
      * @return 返回解密数据，解密失败则返回null
      */
     public static String rc4Decrypt(String encryptedData) {
-        if (encryptedData == null) {
+        if (encryptedData == null || encryptedData.isEmpty()) {
             return null;
         }
 
-        byte[] decryptedData = RC4Utils.decryptFromBase64(encryptedData, AppConst.rc4_SecretKey);
-        if (decryptedData == null) {
+        try {
+            // 简单检查是否可能是 Base64 (避免对普通文本进行解密尝试导致异常)
+            // Base64 包含 A-Z, a-z, 0-9, +, /, =，且通常没有空格
+            if (!isBase64Like(encryptedData)) {
+                return null;
+            }
+
+            byte[] decryptedData = RC4Utils.decryptFromBase64(encryptedData, AppConst.rc4_SecretKey);
+            if (decryptedData == null) {
+                return null;
+            }
+            return new String(decryptedData, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            // 解密失败（可能是普通文本或密钥不匹配），返回 null
+            // Log.e(TAG, "RC4 Decrypt failed: " + e.getMessage());
             return null;
         }
-        return new String(decryptedData, StandardCharsets.UTF_8);
+    }
+
+    /**
+     *简单检查字符串是否像 Base64
+     */
+    private static boolean isBase64Like(String str) {
+        if (str == null) return false;
+        // 检查长度是否为4的倍数（严格 Base64）
+        // if (str.length() % 4 != 0) return false; 
+        // 放宽限制，只检查字符集
+        for (char c : str.toCharArray()) {
+            if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || 
+                  (c >= '0' && c <= '9') || c == '+' || c == '/' || c == '=')) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
