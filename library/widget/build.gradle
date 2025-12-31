@@ -1,6 +1,14 @@
 apply plugin : 'com.android.library'
 apply from : '../../common.gradle'
 
+android {
+    // 解决annotationType(): unrecognized Attribute name MODULE问题
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
 dependencies {
     // 基础库（不包任何第三方框架）
     implementation project(':library:base')

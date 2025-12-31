@@ -189,4 +189,17 @@ public final class FragmentPagerAdapter<F extends Fragment> extends androidx.fra
             mViewPager.setOffscreenPageLimit(1);
         }
     }
+    
+    /**
+     * 清空 Fragment 集合
+     */
+    public void clearFragments() {
+        mFragmentSet.clear();
+        mFragmentTitle.clear();
+        mShowFragment = null;
+        
+        if (mViewPager != null) {
+            notifyDataSetChanged();
+        }
+    }
 }

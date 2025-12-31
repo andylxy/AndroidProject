@@ -62,6 +62,7 @@
             android:name="com.tencent.connect.common.AssistActivity"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="false"
             tools:node="replace" />
 
     </application>
