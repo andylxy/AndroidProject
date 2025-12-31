@@ -776,16 +776,27 @@ public final class SecurityUtils {
     }
 
     /**
-     *简单检查字符串是否像 Base64
+     * 简单检查字符串是否像 Base64
+     * Base64 字符集: A-Z, a-z, 0-9, +, /, =
+     * 也允许换行符（某些 Base64 编码器会添加）
      */
     private static boolean isBase64Like(String str) {
-        if (str == null) return false;
-        // 检查长度是否为4的倍数（严格 Base64）
-        // if (str.length() % 4 != 0) return false; 
-        // 放宽限制，只检查字符集
+        if (str == null || str.isEmpty()) return false;
+        
+        // 快速检查：如果包含中文字符，肯定不是 Base64（已经是明文）
+        for (int i = 0; i < Math.min(str.length(), 50); i++) {
+            char c = str.charAt(i);
+            if (c > 127) {
+                // 包含非 ASCII 字符（如中文），说明已经是解密后的明文
+                return false;
+            }
+        }
+        
+        // 检查整个字符串是否符合 Base64 字符集
         for (char c : str.toCharArray()) {
             if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || 
-                  (c >= '0' && c <= '9') || c == '+' || c == '/' || c == '=')) {
+                  (c >= '0' && c <= '9') || c == '+' || c == '/' || c == '=' ||
+                  c == '\n' || c == '\r' || c == ' ')) {
                 return false;
             }
         }
