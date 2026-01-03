@@ -14,7 +14,7 @@ import android.text.style.ClickableSpan;
 
 import androidx.annotation.NonNull;
 
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 
 import java.util.ArrayList;
 import java.util.List;

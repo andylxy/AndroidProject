@@ -21,7 +21,7 @@ import run.yigou.gxzy.http.api.RegisterApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
+import com.hjq.http.listener.OnHttpListener;
 import com.hjq.widget.view.CountdownView;
 import com.hjq.widget.view.SubmitButton;
 
@@ -126,17 +126,17 @@ public final class RegisterActivity extends AppActivity
             EasyHttp.post(this)
                     .api(new GetCodeApi()
                             .setPhone(mPhoneView.getText().toString()))
-                    .request(new HttpCallback<HttpData<Void>>(this) {
+                    .request(new OnHttpListener<HttpData<Void>>() {
 
                         @Override
-                        public void onSucceed(HttpData<Void> data) {
+                        public void onHttpSuccess(HttpData<Void> data) {
                             toast(R.string.common_code_send_hint);
                             mCountdownView.start();
                         }
 
                         @Override
-                        public void onFail(Exception e) {
-                            super.onFail(e);
+                        public void onHttpFail(Throwable e) {
+                            // super.onFail(e);
                             mCountdownView.start();
                         }
                     });
@@ -186,18 +186,12 @@ public final class RegisterActivity extends AppActivity
                             .setPhone(mPhoneView.getText().toString())
                             .setCode(mCodeView.getText().toString())
                             .setPassword(mFirstPassword.getText().toString()))
-                    .request(new HttpCallback<HttpData<RegisterApi.Bean>>(this) {
+                    .request(new OnHttpListener<HttpData<RegisterApi.Bean>>() {
+
+
 
                         @Override
-                        public void onStart(Call call) {
-                            mCommitView.showProgress();
-                        }
-
-                        @Override
-                        public void onEnd(Call call) {}
-
-                        @Override
-                        public void onSucceed(HttpData<RegisterApi.Bean> data) {
+                        public void onHttpSuccess(HttpData<RegisterApi.Bean> data) {
                             postDelayed(() -> {
                                 mCommitView.showSucceed();
                                 postDelayed(() -> {
@@ -210,8 +204,8 @@ public final class RegisterActivity extends AppActivity
                         }
 
                         @Override
-                        public void onFail(Exception e) {
-                            super.onFail(e);
+                        public void onHttpFail(Throwable e) {
+                            // super.onFail(e);
                             postDelayed(() -> {
                                 mCommitView.showError(3000);
                             }, 1000);

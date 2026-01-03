@@ -53,13 +53,10 @@ public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A>
      * {@link OnHttpListener}
      */
 
-    @Override
-    public void onStart(Call call) {
-        showDialog();
-    }
+
 
     @Override
-    public void onSucceed(Object result) {
+    public void onHttpSuccess(Object result) {
         if (!(result instanceof HttpData)) {
             return;
         }
@@ -67,12 +64,9 @@ public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A>
     }
 
     @Override
-    public void onFail(Exception e) {
+    public void onHttpFail(Throwable e) {
         toast(e.getMessage());
     }
 
-    @Override
-    public void onEnd(Call call) {
-        hideDialog();
-    }
+
 }

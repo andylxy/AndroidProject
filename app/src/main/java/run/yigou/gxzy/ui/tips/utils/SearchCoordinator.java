@@ -3,7 +3,7 @@ package run.yigou.gxzy.ui.tips.utils;
 import android.text.SpannableStringBuilder;
 import android.util.Pair;
 
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 
 import java.util.ArrayList;
 import java.util.List;

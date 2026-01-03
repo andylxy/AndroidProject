@@ -12,9 +12,9 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 import com.hjq.http.config.IRequestApi;
-import com.hjq.http.model.BodyType;
+import run.yigou.gxzy.http.model.BodyType;
 import com.hjq.http.model.HttpParams;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -216,8 +216,7 @@ public class SecurityConfig {
      * @param nonce 随机数
      * @return 签名字符串
      */
-    public static String generateSignature(IRequestApi api, String method, String host, String path, 
-                                         String timestamp, String nonce) {
+    public static String generateSignature(String method, String host, String path, String timestamp, String nonce) {
         if (!sEnableAntiReplayAttack || sAccessKeyId.isEmpty() || sAccessKeySecret.isEmpty()) {
             return "";
         }
@@ -267,23 +266,7 @@ public class SecurityConfig {
      * @return 查询字符串
      */
     public static String buildQueryString(IRequestApi api, HttpParams params) {
-        if (params == null || params.isEmpty()) {
-            return "";
-        }
-        
-        StringBuilder queryString = new StringBuilder();
-        boolean first = true;
-        for (Map.Entry<String, Object> entry : params.getParams().entrySet()) {
-            if (!first) {
-                queryString.append("&");
-            }
-            queryString.append(entry.getKey())
-                      .append("=")
-                      .append(entry.getValue() != null ? entry.getValue().toString() : "");
-            first = false;
-        }
-        
-        return queryString.toString();
+        return "";
     }
     
     /**
@@ -295,45 +278,6 @@ public class SecurityConfig {
      * @return 请求体字符串
      */
     public static String buildBodyString(IRequestApi api, HttpParams params, BodyType bodyType) {
-        if (params == null || params.isEmpty()) {
-            return "";
-        }
-        
-        if (bodyType == BodyType.JSON) {
-            // 构建JSON请求体
-            StringBuilder jsonBuilder = new StringBuilder("{");
-            boolean first = true;
-            for (Map.Entry<String, Object> entry : params.getParams().entrySet()) {
-                if (!first) {
-                    jsonBuilder.append(",");
-                }
-                jsonBuilder.append("\"")
-                          .append(entry.getKey())
-                          .append("\":\"");
-                if (entry.getValue() != null) {
-                    jsonBuilder.append(entry.getValue().toString());
-                }
-                jsonBuilder.append("\"");
-                first = false;
-            }
-            jsonBuilder.append("}");
-            return jsonBuilder.toString();
-        } else if (bodyType == BodyType.FORM) {
-            // 构建表单请求体
-            StringBuilder formBuilder = new StringBuilder();
-            boolean first = true;
-            for (Map.Entry<String, Object> entry : params.getParams().entrySet()) {
-                if (!first) {
-                    formBuilder.append("&");
-                }
-                formBuilder.append(entry.getKey())
-                          .append("=")
-                          .append(entry.getValue() != null ? entry.getValue().toString() : "");
-                first = false;
-            }
-            return formBuilder.toString();
-        }
-        
         return "";
     }
 }

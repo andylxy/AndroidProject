@@ -10,8 +10,8 @@
 package run.yigou.gxzy.ui.tips.repository;
 
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
-import com.hjq.http.listener.HttpCallback;
+import run.yigou.gxzy.other.EasyLog;
+import com.hjq.http.listener.OnHttpListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +62,7 @@ public class BookRepository {
      */
     public interface DataCallback<T> {
         void onSuccess(T data);
-        void onFailure(Exception e);
+        void onFailure(Throwable e);
     }
 
     public BookRepository() {
@@ -141,9 +141,9 @@ public class BookRepository {
                     .setContentId(chapter.getChapterSection())
                     .setSignatureId(chapter.getSignatureId())
                     .setBookId(chapter.getBookId()))
-                .request(new HttpCallback<HttpData<List<HH2SectionData>>>(null) {
+                .request(new OnHttpListener<HttpData<List<HH2SectionData>>>() {
                     @Override
-                    public void onSucceed(HttpData<List<HH2SectionData>> data) {
+                    public void onHttpSuccess(HttpData<List<HH2SectionData>> data) {
                         if (data != null && !data.getData().isEmpty()) {
                             HH2SectionData sectionData = data.getData().get(0);
 
@@ -170,7 +170,7 @@ public class BookRepository {
                     }
 
                     @Override
-                    public void onFail(Exception e) {
+                    public void onHttpFail(Throwable e) {
                         if (callback != null) {
                             callback.onFailure(e);
                         }
@@ -195,9 +195,9 @@ public class BookRepository {
         try {
             EasyHttp.get(lifecycleOwner)
                 .api(new BookFangApi().setBookId(bookId))
-                .request(new HttpCallback<HttpData<List<Fang>>>(null) {
+                .request(new OnHttpListener<HttpData<List<Fang>>>() {
                     @Override
-                    public void onSucceed(HttpData<List<Fang>> data) {
+                    public void onHttpSuccess(HttpData<List<Fang>> data) {
                         if (data != null && !data.getData().isEmpty()) {
                             List<Fang> fangList = data.getData();
 
@@ -218,7 +218,7 @@ public class BookRepository {
                     }
 
                     @Override
-                    public void onFail(Exception e) {
+                    public void onHttpFail(Throwable e) {
                         if (callback != null) {
                             callback.onFailure(e);
                         }
@@ -425,9 +425,9 @@ public class BookRepository {
                     .setContentId(chapter.getChapterSection())
                     .setSignatureId(chapter.getSignatureId())
                     .setBookId(chapter.getBookId()))
-                .request(new HttpCallback<HttpData<List<HH2SectionData>>>(null) {
+                .request(new OnHttpListener<HttpData<List<HH2SectionData>>>() {
                     @Override
-                    public void onSucceed(HttpData<List<HH2SectionData>> data) {
+                    public void onHttpSuccess(HttpData<List<HH2SectionData>> data) {
                         if (data != null && !data.getData().isEmpty()) {
                             HH2SectionData sectionData = data.getData().get(0);
 
@@ -481,7 +481,7 @@ public class BookRepository {
                     }
 
                     @Override
-                    public void onFail(Exception e) {
+                    public void onHttpFail(Throwable e) {
                         if (callback != null) {
                             callback.onFailure(e);
                         }

@@ -17,7 +17,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 
 import java.util.ArrayList;
 import java.util.List;

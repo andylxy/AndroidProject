@@ -7,8 +7,8 @@ import android.os.Looper;
 import androidx.appcompat.widget.AppCompatTextView;
 
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
-import com.hjq.http.listener.HttpCallback;
+import run.yigou.gxzy.other.EasyLog;
+
 import com.hjq.widget.layout.WrapRecyclerView;
 
 import java.util.ArrayList;

@@ -34,8 +34,8 @@ import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BaseAdapter;
 import com.hjq.base.FragmentPagerAdapter;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
-import com.hjq.http.listener.HttpCallback;
+import run.yigou.gxzy.other.EasyLog;
+import com.hjq.http.listener.OnHttpListener;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 
@@ -359,21 +359,18 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     @Override
     public void onClick(View view) {
 
-        switch (view.getId()) {
-            case R.id.tv_home_search_text:
-                mTvHomeSearchText.setFocusable(true);
-                mTvHomeSearchText.setFocusableInTouchMode(true);
-                mTvHomeSearchText.requestFocus();
-                break;
-            case R.id.iv_home_search:
-                searchKey = Objects.requireNonNull(mTvHomeSearchText.getText()).toString();
-                search();
-                break;
-            case R.id.iv_home_refresh:
-                refreshDataFromNetwork();
-                break;
-            default:
-                EasyLog.print("onClick value: " + view.getId());
+        int id = view.getId();
+        if (id == R.id.tv_home_search_text) {
+            mTvHomeSearchText.setFocusable(true);
+            mTvHomeSearchText.setFocusableInTouchMode(true);
+            mTvHomeSearchText.requestFocus();
+        } else if (id == R.id.iv_home_search) {
+            searchKey = Objects.requireNonNull(mTvHomeSearchText.getText()).toString();
+            search();
+        } else if (id == R.id.iv_home_refresh) {
+            refreshDataFromNetwork();
+        } else {
+            EasyLog.print("onClick value: " + view.getId());
         }
     }
 
@@ -428,10 +425,10 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
         EasyHttp.get(this)
                 .api(new BookInfoNav())
-                .request(new HttpCallback<HttpData<List<TabNav>>>(this) {
+                .request(new OnHttpListener<HttpData<List<TabNav>>>() {
 
                     @Override
-                    public void onSucceed(HttpData<List<TabNav>> data) {
+                    public void onHttpSuccess(HttpData<List<TabNav>> data) {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             if (mTabNavService == null || mPagerAdapter == null || mTabAdapter == null) {
                                 throw new IllegalStateException("mTabNavService, mPagerAdapter, or mTabAdapter is not initialized");
@@ -474,8 +471,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
 
                     @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
+                    public void onHttpFail(Throwable e) {
+                        // super.onFail(e);
                         Map<Integer, TabNav> tabNavMap = GlobalDataHolder.getInstance().getNavTabMap();
                         if (tabNavMap != null && !tabNavMap.isEmpty()) {
                             // 遍历 Map
@@ -498,9 +495,9 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
         EasyHttp.get(this)
                 .api(new YaoContentApi())
-                .request(new HttpCallback<HttpData<List<Yao>>>(this) {
+                .request(new OnHttpListener<HttpData<List<Yao>>>() {
                     @Override
-                    public void onSucceed(HttpData<List<Yao>> data) {
+                    public void onHttpSuccess(HttpData<List<Yao>> data) {
                         if (data != null && !data.getData().isEmpty()) {
                             List<Yao> detailList = data.getData();
                             //加载所有药物的数据到 GlobalDataHolder
@@ -521,8 +518,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     }
 
                     @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
+                    public void onHttpFail(Throwable e) {
+                        // super.onFail(e);
                         isGetYaoData = false;
                     }
                 });
@@ -530,9 +527,9 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
         EasyHttp.get(this)
                 .api(new YaoAliaApi())
-                .request(new HttpCallback<HttpData<List<YaoAlia>>>(this) {
+                .request(new OnHttpListener<HttpData<List<YaoAlia>>>() {
                     @Override
-                    public void onSucceed(HttpData<List<YaoAlia>> data) {
+                    public void onHttpSuccess(HttpData<List<YaoAlia>> data) {
                         if (data != null && !data.getData().isEmpty()) {
 
                             //加载额外的别名的数据
@@ -552,8 +549,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     }
 
                     @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
+                    public void onHttpFail(Throwable e) {
+                        // super.onFail(e);
                         isGetYaoData = false;
                     }
                 });
@@ -563,12 +560,11 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
     public void getAllMingCiData() {
 
-
         EasyHttp.get(this)
                 .api(new MingCiContentApi())
-                .request(new HttpCallback<HttpData<List<MingCiContent>>>(this) {
+                .request(new OnHttpListener<HttpData<List<MingCiContent>>>() {
                              @Override
-                             public void onSucceed(HttpData<List<MingCiContent>> data) {
+                             public void onHttpSuccess(HttpData<List<MingCiContent>> data) {
                                  if (data != null && !data.getData().isEmpty()) {
                                      List<MingCiContent> detailList = data.getData();
                                      //加载所有名词数据到 GlobalDataHolder
@@ -584,8 +580,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                              }
 
                              @Override
-                             public void onFail(Exception e) {
-                                 super.onFail(e);
+                             public void onHttpFail(Throwable e) {
+                                 // super.onFail(e);
                                  isGetMingCiData = false;
                              }
                          }

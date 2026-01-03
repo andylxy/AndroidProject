@@ -18,7 +18,7 @@ import com.hjq.base.BaseDialog;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppAdapter;
-import com.hjq.toast.ToastUtils;
+import com.hjq.toast.Toaster;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -126,7 +126,7 @@ public final class SelectDialog {
                     }
                     mListener.onSelected(getDialog(), data);
                 } else {
-                    ToastUtils.show(String.format(getString(R.string.select_min_hint), mAdapter.getMinSelect()));
+                    Toaster.show(String.format(getString(R.string.select_min_hint), mAdapter.getMinSelect()));
                 }
             } else if (viewId == R.id.tv_ui_cancel) {
                 autoDismiss();
@@ -251,7 +251,7 @@ public final class SelectDialog {
                     mSelectSet.put(position, getItem(position));
                     notifyItemChanged(position);
                 } else {
-                    ToastUtils.show(String.format(getString(R.string.select_max_hint), mMaxSelect));
+                    Toaster.show(String.format(getString(R.string.select_max_hint), mMaxSelect));
                 }
             }
         }

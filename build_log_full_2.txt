@@ -1,0 +1,157 @@
+﻿
+> Configure project :
+GradleLog TaskNameOutput :app:compileDebugJavaWithJavac
+GradleLog ServerTypeOutput product
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:greendaoPrepare UP-TO-DATE
+> Task :app:greendao UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :library:base:preBuild UP-TO-DATE
+> Task :library:base:preDebugBuild UP-TO-DATE
+> Task :library:base:writeDebugAarMetadata UP-TO-DATE
+> Task :library:umeng:preBuild UP-TO-DATE
+> Task :library:umeng:preDebugBuild UP-TO-DATE
+> Task :library:umeng:writeDebugAarMetadata UP-TO-DATE
+> Task :library:widget:preBuild UP-TO-DATE
+> Task :library:widget:preDebugBuild UP-TO-DATE
+> Task :library:widget:writeDebugAarMetadata UP-TO-DATE
+> Task :library:xbus:preBuild UP-TO-DATE
+> Task :library:xbus:preDebugBuild UP-TO-DATE
+> Task :library:xbus:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :library:base:generateDebugResValues UP-TO-DATE
+> Task :library:base:generateDebugResources UP-TO-DATE
+> Task :library:base:packageDebugResources UP-TO-DATE
+> Task :library:umeng:generateDebugResValues UP-TO-DATE
+> Task :library:umeng:generateDebugResources UP-TO-DATE
+> Task :library:umeng:packageDebugResources UP-TO-DATE
+> Task :library:widget:generateDebugResValues UP-TO-DATE
+> Task :library:widget:generateDebugResources UP-TO-DATE
+> Task :library:widget:packageDebugResources UP-TO-DATE
+> Task :library:xbus:generateDebugResValues UP-TO-DATE
+> Task :library:xbus:generateDebugResources UP-TO-DATE
+> Task :library:xbus:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :library:base:extractDeepLinksDebug UP-TO-DATE
+> Task :library:base:processDebugManifest UP-TO-DATE
+> Task :library:umeng:extractDeepLinksDebug UP-TO-DATE
+> Task :library:umeng:processDebugManifest UP-TO-DATE
+> Task :library:widget:extractDeepLinksDebug UP-TO-DATE
+> Task :library:widget:processDebugManifest UP-TO-DATE
+> Task :library:xbus:extractDeepLinksDebug UP-TO-DATE
+> Task :library:xbus:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :library:base:compileDebugLibraryResources UP-TO-DATE
+> Task :library:base:parseDebugLocalResources UP-TO-DATE
+> Task :library:base:generateDebugRFile UP-TO-DATE
+> Task :library:umeng:compileDebugLibraryResources UP-TO-DATE
+> Task :library:umeng:parseDebugLocalResources UP-TO-DATE
+> Task :library:umeng:generateDebugRFile UP-TO-DATE
+> Task :library:widget:compileDebugLibraryResources UP-TO-DATE
+> Task :library:widget:parseDebugLocalResources UP-TO-DATE
+> Task :library:widget:generateDebugRFile UP-TO-DATE
+> Task :library:xbus:compileDebugLibraryResources UP-TO-DATE
+> Task :library:xbus:parseDebugLocalResources UP-TO-DATE
+> Task :library:xbus:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :library:base:javaPreCompileDebug UP-TO-DATE
+> Task :library:base:compileDebugJavaWithJavac UP-TO-DATE
+> Task :library:base:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :library:umeng:generateDebugBuildConfig UP-TO-DATE
+> Task :library:umeng:javaPreCompileDebug UP-TO-DATE
+> Task :library:umeng:compileDebugJavaWithJavac UP-TO-DATE
+> Task :library:umeng:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :library:widget:javaPreCompileDebug UP-TO-DATE
+> Task :library:widget:compileDebugJavaWithJavac UP-TO-DATE
+> Task :library:widget:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :library:xbus:javaPreCompileDebug UP-TO-DATE
+> Task :library:xbus:compileDebugJavaWithJavac UP-TO-DATE
+> Task :library:xbus:bundleLibCompileToJarDebug UP-TO-DATE
+
+> Task :app:compileDebugJavaWithJavac FAILED
+./gradlew : 注: [1] Wrote Genera
+tedAppGlideModule with: []
+所在位置 行:1 字符: 1
++ ./gradlew :app:compileDebugJa
+vaWithJavac 2>&1 | Out-File bui
+ld_log_fu ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
+    + CategoryInfo          :  
+   NotSpecified: (注: [1] Wrot  
+  e Ge...Module with: []:Str   
+ ing) [], RemoteException
+    + FullyQualifiedErrorId :  
+   NativeCommandError
+ 
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiSessionApi.java:17: 错误:
+ 找不到符号
+import com.hjq.http.config.IReq
+uestClient;
+                          ^
+  符号:   类 IRequestClient
+  位置: 程序包 com.hjq.http.config
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiSessionApi.java:32: 错误:
+ 找不到符号
+public final class AiSessionApi
+ implements IRequestApi, IReque
+stClient, IRequestHost {
+                               
+                         ^
+  符号: 类 IRequestClient
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:10: 错误: 
+找不到符号
+import com.hjq.http.config.IReq
+uestClient;
+                          ^
+  符号:   类 IRequestClient
+  位置: 程序包 com.hjq.http.config
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:53: 错误: 
+找不到符号
+public final class AiStreamApi 
+implements IRequestApi, IReques
+tClient, IRequestHost {
+                               
+                        ^
+  符号: 类 IRequestClient
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecati
+on 重新编译。
+4 个错误
+
+FAILURE: Build failed with an e
+xception.
+
+* What went wrong:
+Execution failed for task ':app
+:compileDebugJavaWithJavac'.
+> Compilation failed; see the c
+ompiler error output for detail
+s.
+
+* Try:
+> Run with --info option to get
+ more log output.
+> Run with --scan to get full i
+nsights.
+
+65 actionable tasks: 1 executed, 64 up-to-date
+BUILD FAILED in 2s

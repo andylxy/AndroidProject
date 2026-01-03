@@ -1,0 +1,1032 @@
+﻿
+> Configure project :
+GradleLog TaskNameOutput :app:compileDebugJavaWithJavac
+GradleLog ServerTypeOutput product
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:greendaoPrepare UP-TO-DATE
+> Task :app:greendao UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :library:base:preBuild UP-TO-DATE
+> Task :library:base:preDebugBuild UP-TO-DATE
+> Task :library:base:writeDebugAarMetadata UP-TO-DATE
+> Task :library:umeng:preBuild UP-TO-DATE
+> Task :library:umeng:preDebugBuild UP-TO-DATE
+> Task :library:umeng:writeDebugAarMetadata UP-TO-DATE
+> Task :library:widget:preBuild UP-TO-DATE
+> Task :library:widget:preDebugBuild UP-TO-DATE
+> Task :library:widget:writeDebugAarMetadata UP-TO-DATE
+> Task :library:xbus:preBuild UP-TO-DATE
+> Task :library:xbus:preDebugBuild UP-TO-DATE
+> Task :library:xbus:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :library:base:generateDebugResValues UP-TO-DATE
+> Task :library:base:generateDebugResources UP-TO-DATE
+> Task :library:base:packageDebugResources UP-TO-DATE
+> Task :library:umeng:generateDebugResValues UP-TO-DATE
+> Task :library:umeng:generateDebugResources UP-TO-DATE
+> Task :library:umeng:packageDebugResources UP-TO-DATE
+> Task :library:widget:generateDebugResValues UP-TO-DATE
+> Task :library:widget:generateDebugResources UP-TO-DATE
+> Task :library:widget:packageDebugResources UP-TO-DATE
+> Task :library:xbus:generateDebugResValues UP-TO-DATE
+> Task :library:xbus:generateDebugResources UP-TO-DATE
+> Task :library:xbus:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :library:base:extractDeepLinksDebug UP-TO-DATE
+> Task :library:base:processDebugManifest UP-TO-DATE
+> Task :library:umeng:extractDeepLinksDebug UP-TO-DATE
+> Task :library:umeng:processDebugManifest UP-TO-DATE
+> Task :library:widget:extractDeepLinksDebug UP-TO-DATE
+> Task :library:widget:processDebugManifest UP-TO-DATE
+> Task :library:xbus:extractDeepLinksDebug UP-TO-DATE
+> Task :library:xbus:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :library:base:compileDebugLibraryResources UP-TO-DATE
+> Task :library:base:parseDebugLocalResources UP-TO-DATE
+> Task :library:base:generateDebugRFile UP-TO-DATE
+> Task :library:umeng:compileDebugLibraryResources UP-TO-DATE
+> Task :library:umeng:parseDebugLocalResources UP-TO-DATE
+> Task :library:umeng:generateDebugRFile UP-TO-DATE
+> Task :library:widget:compileDebugLibraryResources UP-TO-DATE
+> Task :library:widget:parseDebugLocalResources UP-TO-DATE
+> Task :library:widget:generateDebugRFile UP-TO-DATE
+> Task :library:xbus:compileDebugLibraryResources UP-TO-DATE
+> Task :library:xbus:parseDebugLocalResources UP-TO-DATE
+> Task :library:xbus:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :library:base:javaPreCompileDebug UP-TO-DATE
+> Task :library:base:compileDebugJavaWithJavac UP-TO-DATE
+> Task :library:base:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :library:umeng:generateDebugBuildConfig UP-TO-DATE
+> Task :library:umeng:javaPreCompileDebug UP-TO-DATE
+> Task :library:umeng:compileDebugJavaWithJavac UP-TO-DATE
+> Task :library:umeng:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :library:widget:javaPreCompileDebug UP-TO-DATE
+> Task :library:widget:compileDebugJavaWithJavac UP-TO-DATE
+> Task :library:widget:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :library:xbus:javaPreCompileDebug UP-TO-DATE
+> Task :library:xbus:compileDebugJavaWithJavac UP-TO-DATE
+> Task :library:xbus:bundleLibCompileToJarDebug UP-TO-DATE
+
+> Task :app:compileDebugJavaWithJavac FAILED
+./gradlew : 注: [1] Wrote Genera
+tedAppGlideModule with: []
+所在位置 行:1 字符: 1
++ ./gradlew :app:compileDebugJa
+vaWithJavac 2>&1 | Out-File bui
+ld_log_er ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
+    + CategoryInfo          :  
+   NotSpecified: (注: [1] Wrot  
+  e Ge...Module with: []:Str   
+ ing) [], RemoteException
+    + FullyQualifiedErrorId :  
+   NativeCommandError
+ 
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\act
+ion\TitleBarAction.java:29: 错误:
+ 方法不会覆盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\act
+ion\TitleBarAction.java:37: 错误:
+ 方法不会覆盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\act
+ion\TitleBarAction.java:45: 错误:
+ 方法不会覆盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\act
+ion\ToastAction.java:20: 错误: 找不
+到符号
+        ToastUtils.show(id);
+        ^
+  符号:   变量 ToastUtils
+  位置: 接口 ToastAction
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\act
+ion\ToastAction.java:24: 错误: 找不
+到符号
+        ToastUtils.show(object)
+;
+        ^
+  符号:   变量 ToastUtils
+  位置: 接口 ToastAction
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppActivity.java:201: 错误: 方法不会
+覆盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppActivity.java:206: 错误: 方法不会
+覆盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppActivity.java:213: 错误: 方法不会
+覆盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppActivity.java:218: 错误: 方法不会
+覆盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppApplication.java:147: 错误: 找
+不到符号
+            EasyLog.print("Init
+UserLogin", "Error initializing
+ user login: " + e.getMessage()
+);
+                   ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppApplication.java:201: 错误: 找
+不到符号
+        TitleBar.setDefaultStyl
+e(new TitleBarStyle());
+                ^
+  符号:   方法 setDefaultStyle(Titl
+eBarStyle)
+  位置: 类 TitleBar
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppApplication.java:223: 错误: 找
+不到符号
+        ToastUtils.init(applica
+tion, new ToastStyle());
+        ^
+  符号:   变量 ToastUtils
+  位置: 类 AppApplication
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppApplication.java:225: 错误: 找
+不到符号
+        ToastUtils.setDebugMode
+(AppConfig.isDebug());
+        ^
+  符号:   变量 ToastUtils
+  位置: 类 AppApplication
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppApplication.java:227: 错误: 找
+不到符号
+        ToastUtils.setIntercept
+or(new ToastLogInterceptor());
+        ^
+  符号:   变量 ToastUtils
+  位置: 类 AppApplication
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppApplication.java:262: 错误: 不
+兼容的类型: IRequestInterceptor 不是函数
+接口
+                .setInterceptor
+((api, params, headers) -> {
+                ^
+    在 接口 IRequestInterceptor 中找
+不到抽象方法
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppApplication.java:316: 错误: 找
+不到符号
+                    ToastUtils.
+show(R.string.common_network_er
+ror);
+                    ^
+  符号: 变量 ToastUtils
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:56: 错误
+: 找不到符号
+            EasyLog.print(TAG, 
+"Already initialized, skipping"
+);
+                   ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:66: 错误
+: 找不到符号
+                EasyLog.print(T
+AG, "Starting data initializati
+on...");
+                       ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:71: 错误
+: 找不到符号
+                    EasyLog.pri
+nt(TAG, "Local data found, load
+ing from database");
+                           ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:74: 错误
+: 找不到符号
+                    EasyLog.pri
+nt(TAG, "No local data, will lo
+ad from network later");
+                           ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:79: 错误
+: 找不到符号
+                EasyLog.print(T
+AG, "Initialization completed i
+n " + duration + "ms");
+                       ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:82: 错误
+: 找不到符号
+                EasyLog.print(T
+AG, "Initialization error: " + 
+e.getMessage());
+                       ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:102: 错
+误: 找不到符号
+            EasyLog.print(TAG, 
+"Error checking local data: " +
+ e.getMessage());
+                   ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:127: 错
+误: 找不到符号
+            EasyLog.print(TAG, 
+"Local data loaded successfully
+");
+                   ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:130: 错
+误: 找不到符号
+            EasyLog.print(TAG, 
+"Error loading local data: " + 
+e.getMessage());
+                   ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:150: 错
+误: 找不到符号
+            EasyLog.print(TAG, 
+"Loaded " + yaoList.size() + " 
+Yao items");
+                   ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:163: 错
+误: 找不到符号
+            EasyLog.print(TAG, 
+"Loaded " + mingCiList.size() +
+ " MingCi items");
+                   ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:177: 错
+误: 找不到符号
+            EasyLog.print(TAG, 
+"Loaded " + aliasList.size() + 
+" Yao aliases");
+                   ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppDataInitializer.java:205: 错
+误: 找不到符号
+        EasyLog.print(TAG, "Loa
+ded " + navList.size() + " navi
+gation tabs");
+               ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppFragment.java:56: 错误: 方法不会覆
+盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppFragment.java:61: 错误: 方法不会覆
+盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppFragment.java:69: 错误: 方法不会覆
+盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\app
+\AppFragment.java:74: 错误: 方法不会覆
+盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:9
+5: 错误: 找不到符号
+                        EasyLog
+.print("Failed to addEntity: " 
++ e.getMessage());
+                               
+^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:1
+13: 错误: 找不到符号
+                            Eas
+yLog.print("Failed to addEntity
+: " + e.getMessage());
+                               
+    ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:1
+28: 错误: <匿名run.yigou.gxzy.green
+dao.util.ConvertEntity$1>不是抽象的,
+ 并且未覆盖OnHttpListener中的抽象方法onHtt
+pFail(Throwable)
+                .request(new On
+HttpListener<HttpData<List<Chap
+ter>>>() {
+                               
+                               
+         ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:1
+29: 错误: 方法不会覆盖或实现超类型的方法
+                    @Override
+                    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:1
+41: 错误: 找不到符号
+                               
+         EasyLog.print("Failed 
+to addEntity: " + e.getMessage(
+));
+                               
+                ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:1
+49: 错误: 方法不会覆盖或实现超类型的方法
+                    @Override
+                    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:1
+51: 错误: 找不到符号
+                        super.o
+nFail(e);
+                             ^
+  符号: 方法 onFail(Exception)
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:1
+71: 错误: 找不到符号
+                EasyLog.print("
+Failed to add entity: " + e.get
+Message());
+                       ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:1
+91: 错误: 找不到符号
+                EasyLog.print("
+Failed to add entity: " + e.get
+Message());
+                       ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:1
+98: 错误: 找不到符号
+            EasyLog.print("Fang
+DetailList is empty or null.or 
+ bookId <=0 .");
+                   ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:2
+31: 错误: 找不到符号
+            EasyLog.print("Erro
+r processing detail list: " + e
+.getMessage());
+                   ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:2
+77: 错误: 找不到符号
+            EasyLog.print("Erro
+r processing detail list: " + e
+.getMessage() + ", bookChapterL
+ist size: " + bookChapterList.s
+ize());
+                   ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:2
+84: 错误: 找不到符号
+            EasyLog.print("AiCo
+nfig is empty or null.");
+                   ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:3
+06: 错误: 找不到符号
+            EasyLog.print("Erro
+r processing detail list: " + e
+.getMessage());
+                   ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:3
+14: 错误: 找不到符号
+            EasyLog.print("Book
+DetailList is empty or null. or
+  bookId <=0 .");
+                   ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:3
+55: 错误: 找不到符号
+            EasyLog.print("Erro
+r processing detail list: " + e
+.getMessage());
+                   ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:3
+63: 错误: 找不到符号
+            EasyLog.print("Book
+DetailList is empty or null. or
+  bookId <=0 .");
+                   ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:4
+02: 错误: 找不到符号
+            EasyLog.print("Erro
+r processing detail list: " + e
+.getMessage());
+                   ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:4
+39: 错误: 找不到符号
+            EasyLog.print("Erro
+r processing detail list: " + e
+.getMessage() + ", bookChapterL
+ist size: " + bookChapterList.s
+ize());
+                   ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:4
+48: 错误: 找不到符号
+            EasyLog.print("Fand
+etailList is empty or null.");
+                   ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\gre
+endao\util\ConvertEntity.java:4
+82: 错误: 找不到符号
+            EasyLog.print("Erro
+r processing detail list: " + e
+.getMessage());
+                   ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:90: 
+错误: HomeFragment不是抽象的, 并且未覆盖OnH
+ttpListener中的抽象方法onHttpFail(Thr
+owable)
+public final class HomeFragment
+ extends TitleBarFragment<HomeA
+ctivity>
+             ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:363:
+ 错误: 需要常量表达式
+            case R.id.tv_home_s
+earch_text:
+                     ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:368:
+ 错误: 需要常量表达式
+            case R.id.iv_home_s
+earch:
+                     ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:372:
+ 错误: 需要常量表达式
+            case R.id.iv_home_r
+efresh:
+                     ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:376:
+ 错误: 找不到符号
+                EasyLog.print("
+onClick value: " + view.getId()
+);
+                       ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:390:
+ 错误: 找不到符号
+                EasyLog.print("
+Loaded navigation from local da
+tabase");
+                       ^
+  符号:   方法 print(String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:431:
+ 错误: <匿名run.yigou.gxzy.ui.fragm
+ent.HomeFragment$4>不是抽象的, 并且未覆盖
+OnHttpListener中的抽象方法onHttpFail(
+Throwable)
+                .request(new On
+HttpListener<HttpData<List<TabN
+av>>>() {
+                               
+                               
+        ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:433:
+ 错误: 方法不会覆盖或实现超类型的方法
+                    @Override
+                    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:476:
+ 错误: 方法不会覆盖或实现超类型的方法
+                    @Override
+                    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:478:
+ 错误: 找不到符号
+                        super.o
+nFail(e);
+                             ^
+  符号: 方法 onFail(Exception)
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:490:
+ 错误: 找不到符号
+                            Eas
+yLog.print(e);
+                               
+    ^
+  符号:   方法 print(Exception)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:501:
+ 错误: <匿名run.yigou.gxzy.ui.fragm
+ent.HomeFragment$5>不是抽象的, 并且未覆盖
+OnHttpListener中的抽象方法onHttpFail(
+Throwable)
+                .request(new On
+HttpListener<HttpData<List<Yao>
+>>() {
+                               
+                               
+     ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:502:
+ 错误: 方法不会覆盖或实现超类型的方法
+                    @Override
+                    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:523:
+ 错误: 方法不会覆盖或实现超类型的方法
+                    @Override
+                    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:525:
+ 错误: 找不到符号
+                        super.o
+nFail(e);
+                             ^
+  符号: 方法 onFail(Exception)
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:533:
+ 错误: <匿名run.yigou.gxzy.ui.fragm
+ent.HomeFragment$6>不是抽象的, 并且未覆盖
+OnHttpListener中的抽象方法onHttpFail(
+Throwable)
+                .request(new On
+HttpListener<HttpData<List<YaoA
+lia>>>() {
+                               
+                               
+         ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:534:
+ 错误: 方法不会覆盖或实现超类型的方法
+                    @Override
+                    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:554:
+ 错误: 方法不会覆盖或实现超类型的方法
+                    @Override
+                    ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:556:
+ 错误: 找不到符号
+                        super.o
+nFail(e);
+                             ^
+  符号: 方法 onFail(Exception)
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:569:
+ 错误: <匿名run.yigou.gxzy.ui.fragm
+ent.HomeFragment$7>不是抽象的, 并且未覆盖
+OnHttpListener中的抽象方法onHttpFail(
+Throwable)
+                .request(new On
+HttpListener<HttpData<List<Ming
+CiContent>>>() {
+                               
+                               
+               ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:570:
+ 错误: 方法不会覆盖或实现超类型的方法
+                             @O
+verride
+                             ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:586:
+ 错误: 方法不会覆盖或实现超类型的方法
+                             @O
+verride
+                             ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+fragment\HomeFragment.java:588:
+ 错误: 找不到符号
+                               
+  super.onFail(e);
+                               
+       ^
+  符号: 方法 onFail(Exception)
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\ui\
+activity\HomeActivity.java:36: 
+错误: HomeActivity不是抽象的, 并且未覆盖OnH
+ttpListener中的抽象方法onHttpFail(Thr
+owable)
+public final class HomeActivity
+ extends AppActivity
+             ^
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:117: 错误:
+ 找不到符号
+        EasyLog.print(TAG, "===
+======= 构建 SSE OkHttpClient ===
+=======");
+               ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:120: 错误:
+ 找不到符号
+        EasyLog.print(TAG, "当前环
+境: " + (isHttps ? "HTTPS" : "HT
+TP"));
+               ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:121: 错误:
+ 找不到符号
+        EasyLog.print(TAG, "目标地
+址: " + getHost());
+               ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:131: 错误:
+ 找不到符号
+        EasyLog.print(TAG, "已设置
+超时：读300秒，写300秒，连接30秒");
+               ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:156: 错误:
+ 找不到符号
+                    EasyLog.pri
+nt(TAG, "已配置 TLS 1.2 SSLSocketF
+actory");
+                           ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:158: 错误:
+ 找不到符号
+                    EasyLog.pri
+nt(TAG, "TLS 1.2 SSLSocketFacto
+ry 配置失败: " + e.getMessage());
+                           ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:161: 错误:
+ 找不到符号
+                EasyLog.print(T
+AG, "已配置 TLS 1.2 (仅)");
+                       ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:163: 错误:
+ 找不到符号
+65 actionable tasks: 1 executed, 64 up-to-date
+                EasyLog.print(T
+AG, "TLS配置异常: " + e.getMessage(
+));
+                       ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:266: 错误:
+ 找不到符号
+        EasyLog.print(TAG, "开始执
+行 SSE 流式请求");
+               ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:267: 错误:
+ 找不到符号
+        EasyLog.print(TAG, "URL
+: " + getFullUrl());
+               ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:268: 错误:
+ 找不到符号
+        EasyLog.print(TAG, "Que
+ry: " + query);
+               ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:269: 错误:
+ 找不到符号
+        EasyLog.print(TAG, "Con
+versationId: " + conversationId
+);
+               ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:281: 错误:
+ 找不到符号
+            EasyLog.print(TAG, 
+"请求体: " + jsonBody);
+                   ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:334: 错误:
+ 找不到符号
+                    EasyLog.pri
+nt(TAG, "签名参数: method=" + metho
+d + ", host=" + hostForSign + "
+, path=" + path);
+                           ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:354: 错误:
+ 找不到符号
+                    EasyLog.pri
+nt(TAG, "? 已添加安全签名头部");
+                           ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:360: 错误:
+ 找不到符号
+            EasyLog.print(TAG, 
+"请求 URL: " + getFullUrl());
+                   ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:361: 错误:
+ 找不到符号
+            EasyLog.print(TAG, 
+"请求方法: POST");
+                   ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:369: 错误:
+ 找不到符号
+                    EasyLog.pri
+nt(TAG, "SSE 连接已建立");
+                           ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:383: 错误:
+ 找不到符号
+                           Easy
+Log.print(TAG, "解析数据块: type=" +
+ chunk.getType() + ", content l
+ength=" +
+                               
+   ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:389: 错误:
+ 找不到符号
+                               
+ EasyLog.print(TAG, "收到完成信号，关闭连
+接");
+                               
+        ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:394: 错误:
+ 找不到符号
+                               
+ EasyLog.print(TAG, "收到错误信号: " 
++ chunk.getError());
+                               
+        ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+D:\git\app\AndroidProject\app\s
+rc\main\java\run\yigou\gxzy\htt
+p\api\AiStreamApi.java:400: 错误:
+ 找不到符号
+                            Eas
+yLog.print(TAG, "无法解析数据块");
+                               
+    ^
+  符号:   方法 print(String,String)
+  位置: 类 EasyLog
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecati
+on 重新编译。
+注: 某些输入文件使用了未经检查或不安全的操作。
+注: 有关详细信息, 请使用 -Xlint:unchecked
+ 重新编译。
+注: 某些消息已经过简化; 请使用 -Xdiags:verbo
+se 重新编译以获得完整输出
+100 个错误
+
+FAILURE: Build failed with an e
+xception.
+
+* What went wrong:
+Execution failed for task ':app
+:compileDebugJavaWithJavac'.
+> Compilation failed; see the c
+ompiler error output for detail
+s.
+
+* Try:
+> Run with --info option to get
+ more log output.
+> Run with --scan to get full i
+nsights.
+
+BUILD FAILED in 2s

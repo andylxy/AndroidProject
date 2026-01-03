@@ -18,7 +18,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;

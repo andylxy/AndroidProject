@@ -1,7 +1,7 @@
 package run.yigou.gxzy.http.security;
 
 import com.hjq.http.config.IRequestApi;
-import com.hjq.http.model.BodyType;
+import run.yigou.gxzy.http.model.BodyType;
 import com.hjq.http.model.HttpHeaders;
 import com.hjq.http.model.HttpParams;
 
@@ -26,7 +26,7 @@ public class InterceptorHelper {
      * @param headers        请求头
      * @param appApplication 应用实例
      */
-    public static void handleIntercept(IRequestApi api, HttpParams params, HttpHeaders headers, AppApplication appApplication) {
+    public static void handleIntercept(com.hjq.http.request.HttpRequest<?> request, HttpParams params, HttpHeaders headers, AppApplication appApplication) {
 
         //如果是全局开启，并且没有登陆就添加可获取全部的数据
         //if (appApplication.global_openness && appApplication.mUserInfoToken == null)
@@ -53,16 +53,16 @@ public class InterceptorHelper {
                     accessKeySecret != null && !accessKeySecret.isEmpty()) {
 
                 // 获取请求相关信息
-                String method = RequestHelper.getRequestMethod(api, params);
+                String method = RequestHelper.getRequestMethod(request, params);
                 String host = RequestHelper.getHost();
-                String path = RequestHelper.getPath(api);
+                String path = RequestHelper.getPath(request);
                 
                 // 生成时间戳和Nonce (根据2025-12变更，签名仅包含Method/Host/Path/Timestamp/Nonce)
                 String timestamp = SecurityConfig.getCurrentTimestamp();
                 String nonce = SecurityConfig.generateNonce();
 
                 // 生成签名
-                String signature = SecurityConfig.generateSignature(api, method, host, path, timestamp, nonce);
+                String signature = SecurityConfig.generateSignature(method, host, path, timestamp, nonce);
 
                 // 添加防重放攻击头部
                 headers.put("Signature", "Signature " + signature);

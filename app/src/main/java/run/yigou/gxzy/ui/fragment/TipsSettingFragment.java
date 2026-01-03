@@ -6,7 +6,7 @@ import android.view.View;
 import com.hjq.widget.layout.SettingBar;
 import com.hjq.widget.view.SwitchButton;
 import com.lucas.xbus.XEventBus;
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 
 import run.yigou.gxzy.EventBus.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.R;
@@ -94,13 +94,9 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
     @Override
     public void onClick(View view) {
         super.onClick(view);
-        switch (view.getId()) {
-            case R.id.sb_setting_yao_uint:
-                // 跳转到药单位设置页面
-                startActivityForResult(YaoUintActivity.class, null);
-                break;
-            default:
-                break;
+        if (view.getId() == R.id.sb_setting_yao_uint) {
+            // 跳转到药单位设置页面
+            startActivityForResult(YaoUintActivity.class, null);
         }
     }
 

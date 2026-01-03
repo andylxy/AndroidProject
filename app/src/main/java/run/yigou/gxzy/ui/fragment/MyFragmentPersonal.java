@@ -11,7 +11,7 @@ import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
+import com.hjq.http.listener.OnHttpListener;
 import com.hjq.http.model.FileContentResolver;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.widget.layout.SettingBar;
@@ -299,10 +299,10 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         EasyHttp.post(this)
                 .api(new UpdateImageApi()
                         .setImage(file))
-                .request(new HttpCallback<HttpData<String>>(this) {
+                .request(new OnHttpListener<HttpData<String>>() {
 
                     @Override
-                    public void onSucceed(HttpData<String> data) {
+                    public void onHttpSuccess(HttpData<String> data) {
                         mAvatarUrl = Uri.parse(data.getData());
                         GlideApp.with(getActivity())
                                 .load(mAvatarUrl)
@@ -311,6 +311,12 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
                         if (deleteFile) {
                             file.delete();
                         }
+                    }
+
+                    @Override
+                    public void onHttpFail(Throwable e) {
+                        // super.onFail(e);
+                        // toast(e.getMessage());
                     }
                 });
     }

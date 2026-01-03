@@ -1,59 +1,13 @@
-//apply plugin: 'com.android.library'
-//apply plugin: 'maven'
-//
-//android {
-//    compileSdkVersion 30
-//    buildToolsVersion "30.0.2"
-//
-//
-//    defaultConfig {
-//        minSdkVersion 21
-//        targetSdkVersion 30
-//        versionCode 1
-//        versionName "1.0"
-//
-//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-//        consumerProguardFiles 'consumer-rules.pro'
-//    }
-//
-//    buildTypes {
-//        release {
-//            minifyEnabled false
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-//        }
-//    }
-//    compileOptions {
-//        sourceCompatibility JavaVersion.VERSION_1_8
-//        targetCompatibility JavaVersion.VERSION_1_8
-//    }
-//
-//}
-//
-//sourceCompatibility = "8"
-//targetCompatibility = "8"
-//
-//dependencies {
-//    implementation fileTree(dir: 'libs', include: ['*.jar'])
-////    implementation project(path: ':annotations')
-////    implementation 'com.lucas:xbus-annotations:1.0.0'
-//}
-//
-//uploadArchives {
-//    repositories {
-//        mavenDeployer {
-//            repository(url: "file:///Users/a58/Downloads/lucas/maven-repository")
-//
-//            pom.groupId = 'com.lucas'
-//            pom.artifactId = 'xbus'
-//            pom.version = '1.0.0'
-//        }
-//    }
-//}
+plugins {
+    alias(libs.plugins.library)
+}
 
-apply plugin : 'com.android.library'
-apply from : '../../common.gradle'
+apply from: '../../common.gradle'
+
+android {
+    namespace 'com.lucas.xbus'
+}
 
 dependencies {
     // 基础库（不包任何第三方框架）
-
 }

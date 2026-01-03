@@ -1,20 +1,10 @@
-/*
- * 项目名: AndroidProject
- * 类名: RequestServer.java
- * 包名: com.intellij.copyright.JavaCopyrightVariablesProvider$1@41232cd1,qualifiedClassName
- * 作者 : Zhs (xiaoyang_02@qq.com)
- * 当前修改时间 : 2023年07月05日 19:20:00
- * 上次修改时间: 2023年07月05日 17:23:50
- * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
- */
-
 package run.yigou.gxzy.http.Server;
 
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.other.AppConfig;
 
 import com.hjq.http.config.IRequestServer;
-import com.hjq.http.model.BodyType;
+import run.yigou.gxzy.http.model.BodyType;
 
 /**
  * author : Android 轮子哥
@@ -29,17 +19,16 @@ public class RequestServer implements IRequestServer {
         return AppConfig.getHostUrl();
     }
 
-    @Override
     public String getPath() {
         return "/api/AppBookRequest/";
     }
 
     //    @Override
-//    public BodyType getType() {
-//        // 以表单的形式提交参数
-//        return BodyType.FORM;
-//    }
-    @Override
+    //    public BodyType getType() {
+    //        // 以表单的形式提交参数
+    //        return BodyType.FORM;
+    //    }
+    // @Override
     public BodyType getType() {
         return BodyType.JSON;
     }

@@ -3,8 +3,8 @@ package run.yigou.gxzy.greendao.util;
 import androidx.annotation.NonNull;
 
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
-import com.hjq.http.listener.HttpCallback;
+import run.yigou.gxzy.other.EasyLog;
+import com.hjq.http.listener.OnHttpListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -125,9 +125,9 @@ public class ConvertEntity {
     public static void getChapterList(HomeFragment homeFragment, TabNavBody item) {
         EasyHttp.get(homeFragment)
                 .api(new ChapterListApi().setBookId(item.getBookNo()))
-                .request(new HttpCallback<HttpData<List<Chapter>>>(homeFragment) {
+                .request(new OnHttpListener<HttpData<List<Chapter>>>() {
                     @Override
-                    public void onSucceed(HttpData<List<Chapter>> data) {
+                    public void onHttpSuccess(HttpData<List<Chapter>> data) {
                         if (data != null && !data.getData().isEmpty()) {
                             ArrayList<Chapter> list = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(item.getBookNo()));
                             if (list == null || list.isEmpty() || item.getChapterCount() != list.size()) {
@@ -146,9 +146,10 @@ public class ConvertEntity {
                         }
                     }
 
-                    @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
+                @Override
+                public void onHttpFail(Throwable e) {
+                        // super.onFail(e); 
+                        EasyLog.print(e);
                     }
                 });
     }

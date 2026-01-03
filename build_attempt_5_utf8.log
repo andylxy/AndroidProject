@@ -1,0 +1,233 @@
+﻿
+> Configure project :
+GradleLog TaskNameOutput clean
+GradleLog ServerTypeOutput product
+
+> Task :clean UP-TO-DATE
+> Task :app:clean
+> Task :library:base:clean
+> Task :library:umeng:clean
+> Task :library:widget:clean
+> Task :library:xbus:clean
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugBuildConfig
+> Task :app:greendaoPrepare
+
+> Task :app:greendao
+Kept source for 0 classes and 1 methods because of @Keep annotation
+
+> Task :library:base:preBuild UP-TO-DATE
+> Task :library:base:preDebugBuild UP-TO-DATE
+> Task :library:umeng:preBuild UP-TO-DATE
+> Task :library:umeng:preDebugBuild UP-TO-DATE
+> Task :library:base:writeDebugAarMetadata
+> Task :app:javaPreCompileDebug
+> Task :library:widget:preBuild UP-TO-DATE
+> Task :library:widget:preDebugBuild UP-TO-DATE
+> Task :library:umeng:writeDebugAarMetadata
+> Task :library:xbus:preBuild UP-TO-DATE
+> Task :library:xbus:preDebugBuild UP-TO-DATE
+> Task :library:widget:writeDebugAarMetadata
+> Task :library:xbus:writeDebugAarMetadata
+> Task :app:generateDebugResValues
+> Task :library:base:generateDebugResValues
+> Task :app:checkDebugAarMetadata
+> Task :library:base:generateDebugResources
+> Task :library:base:packageDebugResources
+> Task :library:umeng:generateDebugResValues
+> Task :library:umeng:generateDebugResources
+> Task :library:umeng:packageDebugResources
+> Task :library:widget:generateDebugResValues
+> Task :library:widget:generateDebugResources
+> Task :library:widget:packageDebugResources
+> Task :library:xbus:generateDebugResValues
+> Task :library:xbus:generateDebugResources
+> Task :library:xbus:packageDebugResources
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :library:base:extractDeepLinksDebug
+> Task :library:umeng:extractDeepLinksDebug
+> Task :library:widget:extractDeepLinksDebug
+> Task :library:xbus:extractDeepLinksDebug
+> Task :library:widget:processDebugManifest
+
+> Task :library:umeng:processDebugManifest
+D:\git\app\AndroidProject\library\umeng\src\main\AndroidManifest.xml:44:9-58:20 Warning:
+	activity#com.tencent.tauth.AuthActivity was tagged at AndroidManifest.xml:44 to replace another declaration but no other declaration present
+D:\git\app\AndroidProject\library\umeng\src\main\AndroidManifest.xml:60:9-65:36 Warning:
+	activity#com.tencent.connect.common.AssistActivity was tagged at AndroidManifest.xml:60 to replace another declaration but no other declaration present
+
+> Task :library:base:processDebugManifest
+> Task :library:xbus:processDebugManifest
+> Task :library:widget:parseDebugLocalResources
+> Task :library:umeng:parseDebugLocalResources
+> Task :library:umeng:compileDebugLibraryResources
+> Task :library:base:compileDebugLibraryResources
+> Task :library:widget:compileDebugLibraryResources
+> Task :library:base:parseDebugLocalResources
+
+> Task :app:processDebugMainManifest
+D:\git\app\AndroidProject\app\src\main\AndroidManifest.xml:24:5-265:19 Warning:
+	application@android:allowBackup was tagged at AndroidManifest.xml:24 to replace other declarations but no other declaration present
+D:\git\app\AndroidProject\app\src\main\AndroidManifest.xml:24:5-265:19 Warning:
+	application@android:supportsRtl was tagged at AndroidManifest.xml:24 to replace other declarations but no other declaration present
+
+> Task :app:processDebugManifest
+> Task :library:xbus:compileDebugLibraryResources
+> Task :library:xbus:parseDebugLocalResources
+> Task :library:base:javaPreCompileDebug
+> Task :library:umeng:generateDebugRFile
+> Task :library:umeng:generateDebugBuildConfig
+> Task :library:umeng:javaPreCompileDebug
+> Task :library:xbus:generateDebugRFile
+> Task :library:base:generateDebugRFile
+> Task :app:mergeDebugResources
+
+> Task :library:umeng:compileDebugJavaWithJavac
+注: D:\git\app\AndroidProject\library\umeng\src\main\java\com\hjq\umeng\UmengClient.java使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :library:widget:generateDebugRFile
+
+> Task :library:base:compileDebugJavaWithJavac
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :library:widget:javaPreCompileDebug
+> Task :library:umeng:bundleLibCompileToJarDebug
+> Task :library:xbus:javaPreCompileDebug
+> Task :library:base:bundleLibCompileToJarDebug
+> Task :app:mergeDebugShaders
+
+> Task :library:widget:compileDebugJavaWithJavac
+注: D:\git\app\AndroidProject\library\widget\src\main\java\com\hjq\widget\layout\SettingBar.java使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :library:widget:bundleLibCompileToJarDebug
+> Task :library:xbus:compileDebugJavaWithJavac
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :library:base:mergeDebugShaders
+> Task :library:base:compileDebugShaders NO-SOURCE
+> Task :library:base:generateDebugAssets UP-TO-DATE
+> Task :library:xbus:bundleLibCompileToJarDebug
+> Task :library:base:packageDebugAssets
+> Task :library:umeng:mergeDebugShaders
+> Task :library:umeng:compileDebugShaders NO-SOURCE
+> Task :library:umeng:generateDebugAssets UP-TO-DATE
+> Task :library:umeng:packageDebugAssets
+> Task :library:widget:mergeDebugShaders
+> Task :library:widget:compileDebugShaders NO-SOURCE
+> Task :library:widget:generateDebugAssets UP-TO-DATE
+> Task :library:widget:packageDebugAssets
+> Task :library:xbus:mergeDebugShaders
+> Task :library:xbus:compileDebugShaders NO-SOURCE
+> Task :library:xbus:generateDebugAssets UP-TO-DATE
+> Task :app:processDebugManifestForPackage
+> Task :library:xbus:packageDebugAssets
+> Task :app:mergeDebugAssets
+> Task :library:base:processDebugJavaRes NO-SOURCE
+> Task :library:umeng:processDebugJavaRes NO-SOURCE
+> Task :library:widget:processDebugJavaRes NO-SOURCE
+> Task :library:xbus:processDebugJavaRes NO-SOURCE
+> Task :app:compressDebugAssets
+> Task :library:widget:bundleLibRuntimeToJarDebug
+> Task :app:checkDebugDuplicateClasses
+> Task :library:xbus:bundleLibRuntimeToJarDebug
+> Task :library:umeng:bundleLibRuntimeToJarDebug
+> Task :app:mergeDebugJniLibFolders
+> Task :library:base:bundleLibRuntimeToJarDebug
+> Task :library:base:mergeDebugJniLibFolders
+> Task :library:base:mergeDebugNativeLibs NO-SOURCE
+> Task :library:base:copyDebugJniLibsProjectOnly
+> Task :library:umeng:mergeDebugJniLibFolders
+> Task :library:umeng:mergeDebugNativeLibs NO-SOURCE
+> Task :library:umeng:copyDebugJniLibsProjectOnly
+> Task :library:widget:mergeDebugJniLibFolders
+> Task :library:widget:mergeDebugNativeLibs NO-SOURCE
+> Task :library:widget:copyDebugJniLibsProjectOnly
+> Task :library:xbus:mergeDebugJniLibFolders
+> Task :library:xbus:mergeDebugNativeLibs NO-SOURCE
+> Task :library:xbus:copyDebugJniLibsProjectOnly
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :library:base:stripDebugDebugSymbols NO-SOURCE
+> Task :library:base:copyDebugJniLibsProjectAndLocalJars
+> Task :library:base:extractDebugAnnotations
+> Task :library:base:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :library:base:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :app:mergeDebugNativeLibs
+> Task :library:base:mergeDebugConsumerProguardFiles
+> Task :library:base:prepareDebugArtProfile UP-TO-DATE
+> Task :library:base:prepareLintJarForPublish UP-TO-DATE
+> Task :library:umeng:stripDebugDebugSymbols NO-SOURCE
+> Task :library:base:mergeDebugJavaResource
+> Task :library:umeng:copyDebugJniLibsProjectAndLocalJars
+> Task :library:base:syncDebugLibJars
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libBugly.so, libBugly_Native.so, libmmkv.so, libumeng-spy.so.
+
+> Task :app:desugarDebugFileDependencies
+> Task :library:base:bundleDebugAar
+> Task :library:base:assembleDebug
+> Task :library:umeng:extractDebugAnnotations
+> Task :library:umeng:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :library:umeng:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :library:umeng:mergeDebugConsumerProguardFiles
+> Task :library:umeng:prepareDebugArtProfile UP-TO-DATE
+> Task :library:umeng:prepareLintJarForPublish UP-TO-DATE
+> Task :library:widget:stripDebugDebugSymbols NO-SOURCE
+> Task :library:widget:copyDebugJniLibsProjectAndLocalJars
+> Task :library:umeng:mergeDebugJavaResource
+> Task :library:widget:extractDebugAnnotations
+> Task :library:umeng:syncDebugLibJars
+> Task :library:umeng:bundleDebugAar
+> Task :library:umeng:assembleDebug
+> Task :library:widget:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :library:widget:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :library:widget:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :library:widget:prepareDebugArtProfile UP-TO-DATE
+> Task :library:widget:prepareLintJarForPublish UP-TO-DATE
+> Task :library:xbus:stripDebugDebugSymbols NO-SOURCE
+> Task :library:widget:mergeDebugJavaResource
+> Task :library:xbus:copyDebugJniLibsProjectAndLocalJars
+> Task :library:widget:syncDebugLibJars
+> Task :library:widget:bundleDebugAar
+> Task :library:widget:assembleDebug
+> Task :library:xbus:extractDebugAnnotations
+> Task :library:xbus:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :library:xbus:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :library:xbus:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :library:xbus:prepareDebugArtProfile UP-TO-DATE
+> Task :library:xbus:prepareLintJarForPublish UP-TO-DATE
+> Task :library:xbus:mergeDebugJavaResource
+> Task :library:xbus:syncDebugLibJars
+> Task :library:xbus:bundleDebugAar
+> Task :library:xbus:assembleDebug
+> Task :app:mergeLibDexDebug
+> Task :app:processDebugResources
+> Task :app:mergeExtDexDebug
+
+> Task :app:compileDebugJavaWithJavac
+注: [1] Wrote GeneratedAppGlideModule with: []
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+注: 某些输入文件使用了未经检查或不安全的操作。
+注: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+
+> Task :app:processDebugJavaRes
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugJavaResource
+> Task :app:mergeProjectDexDebug
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+
+BUILD SUCCESSFUL in 22s
+150 actionable tasks: 131 executed, 19 up-to-date

@@ -56,7 +56,7 @@ import run.yigou.gxzy.wxapi.WXEntryActivity;
 import com.hjq.http.EasyConfig;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.config.IRequestApi;
-import com.hjq.http.listener.HttpCallback;
+import com.hjq.http.listener.OnHttpListener;
 import com.hjq.umeng.Platform;
 import com.hjq.umeng.UmengClient;
 import com.hjq.umeng.UmengLogin;
@@ -246,7 +246,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
 //            EasyHttp.post(this)
 //                    .api(new GetCodeApi()
 //                            .setPhone(mPhoneView.getText().toString()))
-//                    .request(new HttpCallback<HttpData<Void>>(this) {
+//                    .request(new OnHttpListener<HttpData<LoginBean>>() {
 //
 //                        @Override
 //                        public void onSucceed(HttpData<Void> data) {
@@ -332,15 +332,12 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     private void login(IRequestApi requestApi) {
         EasyHttp.post(this)
                 .api(requestApi)
-                .request(new HttpCallback<HttpData<LoginApi.Bean>>(this) {
+                .request(new OnHttpListener<HttpData<LoginApi.Bean>>() {
+
+
 
                     @Override
-                    public void onStart(Call call) {
-                        mCommitView.showProgress();
-                    }
-
-                    @Override
-                    public void onSucceed(HttpData<LoginApi.Bean> data) {
+                    public void onHttpSuccess(HttpData<LoginApi.Bean> data) {
                         if (data == null || data.getData() == null || data.getData() == null) {
                             // System.out.println("data is empty or null");
                             toast("登陆失败，请检查账号密码是否正确");
@@ -376,8 +373,8 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
 
 
                     @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
+                    public void onHttpFail(Throwable e) {
+                        // super.onFail(e);
                         postDelayed(() -> {
                             mCommitView.showError(3000);
                         }, 1000);
@@ -402,9 +399,9 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
 
         EasyHttp.get(this)
                 .api(new VierCode())
-                .request(new HttpCallback<HttpData<VierCode.Bean>>(this) {
+                .request(new OnHttpListener<HttpData<VierCode.Bean>>() {
                     @Override
-                    public void onSucceed(HttpData<VierCode.Bean> data) {
+                    public void onHttpSuccess(HttpData<VierCode.Bean> data) {
                         if (data.getData() != null && data.getData().isCode()) {
                             String img = data.getData().getImg();
                             if (!StringHelper.isEmpty(img)) {
@@ -414,6 +411,11 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                         }
                         mVierificationCode = data.getData();
                         setViewShow(mIvLoginAccount);
+                    }
+
+                    @Override
+                    public void onHttpFail(Throwable e) {
+                        toast(e.getMessage());
                     }
                 });
     }

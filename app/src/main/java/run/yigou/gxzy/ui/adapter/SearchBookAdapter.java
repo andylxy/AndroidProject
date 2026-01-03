@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
 
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;

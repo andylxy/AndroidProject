@@ -8,8 +8,8 @@ import android.text.Html;
 import androidx.appcompat.widget.AppCompatTextView;
 
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
-import com.hjq.http.listener.HttpCallback;
+import run.yigou.gxzy.other.EasyLog;
+import com.hjq.http.listener.OnHttpListener;
 
 import java.util.Calendar;
 import java.util.List;
@@ -123,9 +123,9 @@ public final class AboutActivity extends AppActivity {
         
         EasyHttp.get(this)
                 .api(new AboutApi())
-                .request(new HttpCallback<HttpData<List<About>>>(this) {
+                .request(new OnHttpListener<HttpData<List<About>>>() {
                     @Override
-                    public void onSucceed(HttpData<List<About>> data) {
+                    public void onHttpSuccess(HttpData<List<About>> data) {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             List<About> aboutList = data.getData();
                             
@@ -142,8 +142,8 @@ public final class AboutActivity extends AppActivity {
                     }
 
                     @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
+                    public void onHttpFail(Throwable e) {
+                        // super.onFail(e);
                         EasyLog.print("AboutActivity", "Network request failed: " + e.getMessage());
                         // 网络失败时，如果本地没有数据，再次尝试加载
                         List<About> localData = ConvertEntity.getAbout();

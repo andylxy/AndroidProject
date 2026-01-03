@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.tips.adapter.refactor.utils.TextViewHelper;

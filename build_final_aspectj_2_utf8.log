@@ -1,0 +1,32 @@
+﻿
+> Configure project :
+GradleLog TaskNameOutput clean
+GradleLog ServerTypeOutput product
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file 'D:\git\app\AndroidProject\app\build.gradle' line: 1
+
+* What went wrong:
+Plugin [id: 'io.freefair.aspectj.android', version: '8.10'] was not found in any of the following sources:
+
+- Gradle Core Plugins (plugin is not in 'org.gradle' namespace)
+- Included Builds (No included builds contain this plugin)
+- Plugin Repositories (could not resolve plugin artifact 'io.freefair.aspectj.android:io.freefair.aspectj.android.gradle.plugin:8.10')
+  Searched in the following repositories:
+    Gradle Central Plugin Repository
+    maven(https://maven.aliyun.com/repository/gradle-plugin)
+    maven2(https://maven.aliyun.com/repository/public)
+    maven3(https://maven.aliyun.com/repository/google)
+    maven4(https://jitpack.io)
+    MavenRepo
+    Google
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 13s

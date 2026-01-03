@@ -9,7 +9,7 @@
 
 package run.yigou.gxzy.ui.tips.presenter;
 
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -402,7 +402,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                 }
 
                 @Override
-                public void onFailure(Chapter chapter, Exception e) {
+                public void onFailure(Chapter chapter, Throwable e) {
                     // 生命周期检查（失败回调）
                     if (!isViewActive()) {
                         EasyLog.print("TipsBookReadPresenter", "下载失败回调：View 已销毁，忽略错误");
@@ -455,7 +455,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                         }
                         
                         @Override
-                        public void onFailure(Exception e) {
+                        public void onFailure(Throwable e) {
                             if (isViewActive()) {
                                 view.showError("重新下载失败: " + e.getMessage());
                             }
@@ -474,7 +474,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onFailure(Throwable e) {
                         if (isViewActive()) {
                             view.showError("重新下载失败: " + e.getMessage());
                         }
@@ -751,7 +751,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             }
 
             @Override
-            public void onFailure(Exception e) {
+            public void onFailure(Throwable e) {
                 EasyLog.print("TipsBookReadPresenter", "药方数据加载失败: " + e.getMessage());
                 // 失败时移除标记，允许重试
                 loadedBookFangs.remove(currentBookId);
@@ -880,7 +880,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                 }
 
                 @Override
-                public void onFailure(Exception e) {
+                public void onFailure(Throwable e) {
                     // 生命周期检查（懒加载失败回调）
                     if (!isViewActive()) {
                         EasyLog.print("TipsBookReadPresenter", "懒加载失败回调：View 已销毁，忽略错误");

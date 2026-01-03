@@ -1,0 +1,22 @@
+﻿
+> Configure project :
+GradleLog TaskNameOutput clean
+GradleLog ServerTypeOutput product
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file 'D:\git\app\AndroidProject\app\build.gradle' line: 1
+
+* What went wrong:
+An exception occurred applying plugin request [id: 'io.freefair.aspectj.post-compile-weaving', version: '8.10']
+> Failed to apply plugin 'io.freefair.aspectj.post-compile-weaving'.
+   > The 'io.freefair.aspectj.post-compile-weaving' plugin is not compatible with android projects
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2s

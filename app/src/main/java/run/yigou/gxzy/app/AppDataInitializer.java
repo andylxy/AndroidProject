@@ -11,7 +11,7 @@ package run.yigou.gxzy.app;
 
 import android.content.Context;
 
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 
 import java.util.ArrayList;
 import java.util.Map;

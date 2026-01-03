@@ -18,7 +18,7 @@ import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.dialog.AddressDialog;
 import run.yigou.gxzy.ui.dialog.InputDialog;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
+import com.hjq.http.listener.OnHttpListener;
 import com.hjq.http.model.FileContentResolver;
 import com.hjq.widget.layout.SettingBar;
 
@@ -187,10 +187,10 @@ public final class PersonalDataActivity extends AppActivity {
         EasyHttp.post(this)
                 .api(new UpdateImageApi()
                         .setImage(file))
-                .request(new HttpCallback<HttpData<String>>(this) {
+                .request(new OnHttpListener<HttpData<String>>() {
 
                     @Override
-                    public void onSucceed(HttpData<String> data) {
+                    public void onHttpSuccess(HttpData<String> data) {
                         mAvatarUrl = Uri.parse(data.getData());
                         GlideApp.with(getActivity())
                                 .load(mAvatarUrl)
@@ -199,6 +199,11 @@ public final class PersonalDataActivity extends AppActivity {
                         if (deleteFile) {
                             file.delete();
                         }
+                    }
+
+                    @Override
+                    public void onHttpFail(Throwable e) {
+                        // super.onFail(e);
                     }
                 });
     }

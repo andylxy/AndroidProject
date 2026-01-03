@@ -1,12 +1,11 @@
-apply plugin : 'com.android.library'
-apply from : '../../common.gradle'
+plugins {
+    alias(libs.plugins.library)
+}
+
+apply from: '../../common.gradle'
 
 android {
-    // 解决annotationType(): unrecognized Attribute name MODULE问题
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+    namespace 'com.hjq.widget'
 }
 
 dependencies {

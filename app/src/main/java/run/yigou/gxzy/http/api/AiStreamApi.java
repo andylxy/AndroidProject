@@ -5,9 +5,9 @@ import androidx.annotation.NonNull;
 import run.yigou.gxzy.utils.DebugLog;
 import com.google.gson.Gson;
 import com.hjq.http.EasyConfig;
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 import com.hjq.http.config.IRequestApi;
-import com.hjq.http.config.IRequestClient;
+
 import com.hjq.http.config.IRequestHost;
 
 import java.io.IOException;
@@ -50,7 +50,7 @@ import run.yigou.gxzy.other.AppConfig;
  * @author Zhs
  * @date 2025-12-17
  */
-public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestHost {
+public final class AiStreamApi implements IRequestApi, IRequestHost {
     
     private static final String TAG = "AiStreamApi";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -112,7 +112,7 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
      * ✅ 为老版本 Android 添加 TLS 1.2 配置
      */
     @NonNull
-    @Override
+
     public OkHttpClient getClient() {
         EasyLog.print(TAG, "========== 构建 SSE OkHttpClient ==========");
         
@@ -339,7 +339,7 @@ public final class AiStreamApi implements IRequestApi, IRequestClient, IRequestH
                     
                     // 生成签名
                     String signature = run.yigou.gxzy.http.security.SecurityConfig.generateSignature(
-                            this, method, hostForSign, path, timestamp, nonce);
+                            method, hostForSign, path, timestamp, nonce);
                     
                     // 添加安全头部
                     requestBuilder.addHeader("Signature", "Signature " + signature);

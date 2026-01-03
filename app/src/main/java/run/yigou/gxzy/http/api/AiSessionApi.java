@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 
 import com.hjq.http.EasyConfig;
 import com.hjq.http.config.IRequestApi;
-import com.hjq.http.config.IRequestClient;
+
 import com.hjq.http.config.IRequestHost;
 
 import java.io.Serializable;
@@ -29,7 +29,7 @@ import run.yigou.gxzy.other.AppConfig;
  * 描述: 获取sessionId后通过GetConversation获取AI的答案
  *
  */
-public final class AiSessionApi implements IRequestApi, IRequestClient, IRequestHost {
+public final class AiSessionApi implements IRequestApi, IRequestHost {
 
     private  String host = "http://aime.881019.xyz:8443/";
     @Override
@@ -47,7 +47,7 @@ public final class AiSessionApi implements IRequestApi, IRequestClient, IRequest
     private String endUserId;
 
     @NonNull
-    @Override
+
     public OkHttpClient getClient() {
         OkHttpClient.Builder builder = EasyConfig.getInstance().getClient().newBuilder();
         builder.readTimeout(300, TimeUnit.SECONDS);

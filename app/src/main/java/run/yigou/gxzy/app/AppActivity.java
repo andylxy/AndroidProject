@@ -198,27 +198,21 @@ public abstract class AppActivity extends BaseActivity
      * {@link OnHttpListener}
      */
 
-    @Override
-    public void onStart(Call call) {
-        showDialog();
-    }
+
 
     @Override
-    public void onSucceed(Object result) {
+    public void onHttpSuccess(Object result) {
         if (result instanceof HttpData) {
             toast(((HttpData<?>) result).getMessage());
         }
     }
 
     @Override
-    public void onFail(Exception e) {
+    public void onHttpFail(Throwable e) {
         toast(e.getMessage());
     }
 
-    @Override
-    public void onEnd(Call call) {
-        hideDialog();
-    }
+
 
     @Override
     protected void onDestroy() {

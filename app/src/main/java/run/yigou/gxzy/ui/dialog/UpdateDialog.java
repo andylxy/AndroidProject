@@ -197,7 +197,7 @@ public final class UpdateDialog {
                     .listener(new OnDownloadListener() {
 
                         @Override
-                        public void onStart(File file) {
+                        public void onDownloadStart(File file) {
                             // 标记为下载中
                             mDownloading = true;
                             // 标记成未下载完成
@@ -210,7 +210,7 @@ public final class UpdateDialog {
                         }
 
                         @Override
-                        public void onProgress(File file, int progress) {
+                        public void onDownloadProgressChange(File file, int progress) {
                             mUpdateView.setText(String.format(getString(R.string.update_status_running), progress));
                             mProgressView.setProgress(progress);
                             // 更新下载通知
@@ -228,7 +228,7 @@ public final class UpdateDialog {
                         }
 
                         @Override
-                        public void onComplete(File file) {
+                        public void onDownloadSuccess(File file) {
                             // 显示下载成功通知
                             notificationManager.notify(notificationId, notificationBuilder
                                     // 设置通知的文本
@@ -251,7 +251,7 @@ public final class UpdateDialog {
 
                         @SuppressWarnings("ResultOfMethodCallIgnored")
                         @Override
-                        public void onError(File file, Exception e) {
+                        public void onDownloadFail(File file, Throwable e) {
                             // 清除通知
                             notificationManager.cancel(notificationId);
                             mUpdateView.setText(R.string.update_status_failed);
@@ -260,7 +260,7 @@ public final class UpdateDialog {
                         }
 
                         @Override
-                        public void onEnd(File file) {
+                        public void onDownloadEnd(File file) {
                             // 更新进度条
                             mProgressView.setProgress(0);
                             mProgressView.setVisibility(View.GONE);

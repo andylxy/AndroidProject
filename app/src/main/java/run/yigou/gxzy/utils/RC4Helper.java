@@ -1,7 +1,7 @@
 package run.yigou.gxzy.utils;
 
 import com.github.gzuliyujiang.rsautils.RC4Utils;
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

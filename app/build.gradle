@@ -1,11 +1,18 @@
-apply plugin: 'com.android.application'
-apply plugin: 'android-aspectjx'
-apply plugin: 'org.greenrobot.greendao'//greendao插件dependencies
-apply from: '../common.gradle'
+plugins {
+    alias(libs.plugins.application)
+    id 'org.greenrobot.greendao'
+}
 
+apply from: '../common.gradle'
 
 // Android 代码规范文档：https://github.com/getActivity/AndroidCodeStandard
 android {
+    namespace 'run.yigou.gxzy'
+
+    buildFeatures {
+        // 是否生成 BuildConfig 类
+        buildConfig true
+    }
 
     // 资源目录存放指引：https://developer.android.google.cn/guide/topics/resources/providing-resources
     defaultConfig {
@@ -52,8 +59,6 @@ android {
             // 调试模式开关
             debuggable true
             jniDebuggable true
-            // 压缩对齐开关
-            zipAlignEnabled false
             // 移除无用的资源
             shrinkResources false
             // 代码混淆开关
@@ -89,8 +94,6 @@ android {
             // 调试模式开关
             debuggable false
             jniDebuggable false
-            // 压缩对齐开关
-            zipAlignEnabled true
             // 移除无用的资源
             shrinkResources true
             // 代码混淆开关
@@ -115,25 +118,18 @@ android {
         jniLibs.srcDir "libs/"
     }
 
-    packagingOptions {
+    packaging {
         // 剔除这个包下的所有文件（不会移除签名信息）
-        exclude 'META-INF/*******'
+        resources {
+            excludes += ['META-INF/*******']
+        }
     }
 
-    // AOP 配置（exclude 和 include 二选一）
-    // 需要进行配置，否则就会引发冲突，具体表现为：
-    // 第一种：编译不过去，报错：java.util.zip.ZipException：Cause: zip file is empty
-    // 第二种：编译能过去，但运行时报错：ClassNotFoundException: Didn't find class on path: DexPathList
-    aspectjx {
-        // 排除一些第三方库的包名（Gson、 LeakCanary 和 AOP 有冲突）
-        // exclude 'androidx', 'com.google', 'com.squareup', 'org.apache', 'com.alipay', 'com.taobao', 'versions.9'
-        // 只对以下包名做 AOP 处理
-        include android.defaultConfig.applicationId
-    }
+    // 注意：已从 AspectJX 迁移到 freefair.aspectj，无需额外配置
 
-    applicationVariants.all { variant ->
+    applicationVariants.configureEach { variant ->
         // apk 输出文件名配置
-        variant.outputs.all { output ->
+        variant.outputs.configureEach { output ->
             outputFileName = rootProject.getName() + '_v' + variant.versionName + '_' + variant.buildType.name
             if (variant.buildType.name == buildTypes.release.getName()) {
                 outputFileName += '_' + new Date().format('MMdd')
@@ -143,14 +139,9 @@ android {
     }
 }
 
-// Define versions
-ext {
-    markwon_version = '4.6.2'
-}
-
 dependencies {
     // MultiDex 支持（解决方法数超过 64K 限制）
-    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation libs.multidex
 
     // 基类封装
     implementation project(':library:base')
@@ -161,94 +152,90 @@ dependencies {
     // 轻量事件框架：https://github.com/LucasXu01/XBus
     implementation project(':library:xbus')
 
-    //Android平台通用的RSA算法工具类及其例子 https://github.com/gzu-liyujiang/RSAUtils
-    implementation 'com.github.gzu-liyujiang:RSAUtils:2.0.0'
+    // Android平台通用的RSA算法工具类及其例子 https://github.com/gzu-liyujiang/RSAUtils
+    implementation libs.rsaUtils
 
     // 添加Bouncy Castle库以支持国密SM2算法
-    implementation 'org.bouncycastle:bcprov-jdk15to18:1.76'
+    implementation libs.bouncyCastle
 
-    //AndroidUtilCode 是一个强大易用的安卓工具类库，它合理地封装了安卓开发中常用的函数，具有完善的 Demo 和单元测试
-    implementation 'com.blankj:utilcodex:1.31.1'
+    // AndroidUtilCode 是一个强大易用的安卓工具类库
+    implementation libs.utilCodex
+
     // Markwon dependencies for Markdown rendering
-    implementation "io.noties.markwon:core:$markwon_version"
-    implementation "io.noties.markwon:html:$markwon_version"
-    implementation "io.noties.markwon:image:$markwon_version"
-    implementation "io.noties.markwon:linkify:$markwon_version"
-    implementation "io.noties.markwon:ext-strikethrough:$markwon_version"
-    implementation "io.noties.markwon:ext-tables:$markwon_version"
-    implementation "io.noties.markwon:ext-tasklist:$markwon_version"
-    //安卓设备唯一标识解决方案 https://github.com/gzu-liyujiang/Android_CN_OAID
-    //implementation 'com.github.gzu-liyujiang:Android_CN_OAID:4.2.5'
+    implementation libs.markwonCore
+    implementation libs.markwonHtml
+    implementation libs.markwonImage
+    implementation libs.markwonLinkify
+    implementation libs.markwonStrikethrough
+    implementation libs.markwonTables
+    implementation libs.markwonTasklist
+
     // 权限请求框架：https://github.com/getActivity/XXPermissions
-    implementation 'com.github.getActivity:XXPermissions:12.3'
+    implementation libs.xxPermissions
 
     // 标题栏框架：https://github.com/getActivity/TitleBar
-    implementation 'com.github.getActivity:TitleBar:9.2'
+    implementation libs.titleBar
 
-    // 吐司框架：https://github.com/getActivity/ToastUtils
-    implementation 'com.github.getActivity:ToastUtils:9.5'
+    // 吐司框架：https://github.com/getActivity/Toaster
+    implementation libs.toaster
 
     // 网络请求框架：https://github.com/getActivity/EasyHttp
-    implementation 'com.github.getActivity:EasyHttp:10.2'
-    //implementation 'com.github.getActivity:EasyHttp:13.0'
+    implementation libs.easyHttp
     // OkHttp 框架：https://github.com/square/okhttp
-    // noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:okhttp:3.12.13'
+    implementation libs.okHttp
     // 添加 SSE 扩展库
-    implementation 'com.squareup.okhttp3:okhttp-sse:3.12.13'
+    implementation libs.okHttpSse
 
     // Json 解析框架：https://github.com/google/gson
-    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation libs.gson
     // Gson 解析容错：https://github.com/getActivity/GsonFactory
-    implementation 'com.github.getActivity:GsonFactory:9.6'
+    implementation libs.gsonFactory
 
-    // Shape 框架：https://github.com/getActivity/ShapeView
-    implementation 'com.github.getActivity:ShapeView:6.0'
+    implementation libs.shapeView
 
     // AOP 插件库：https://mvnrepository.com/artifact/org.aspectj/aspectjrt
-    implementation 'org.aspectj:aspectjrt:1.9.6'
+    implementation libs.aspectjrt
 
     // 图片加载框架：https://github.com/bumptech/glide
     // 官方使用文档：https://github.com/Muyangmin/glide-docs-cn
-    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    implementation libs.glide
+    annotationProcessor libs.glideCompiler
 
-    implementation 'com.github.donkingliang:GroupedRecyclerViewAdapter:2.4.3'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
+    implementation libs.groupedRecyclerViewAdapter
 
     // 沉浸式框架：https://github.com/gyf-dev/ImmersionBar
-    implementation 'com.gyf.immersionbar:immersionbar:3.0.0'
+    implementation libs.immersionBar
 
     // 手势 ImageView：https://github.com/Baseflow/PhotoView
-    implementation 'com.github.Baseflow:PhotoView:2.3.0'
+    implementation libs.photoView
 
     // Bugly 异常捕捉：https://bugly.qq.com/docs/user-guide/instruction-manual-android/?v=20190418140644
-    implementation 'com.tencent.bugly:crashreport:3.4.4'
-    implementation 'com.tencent.bugly:nativecrashreport:3.9.2'
+    implementation libs.bugly
+    implementation libs.buglyNative
 
     // 动画解析库：https://github.com/airbnb/lottie-android
     // 动画资源：https://lottiefiles.com、https://icons8.com/animated-icons
-    implementation 'com.airbnb.android:lottie:4.1.0'
+    implementation libs.lottie
 
     // 上拉刷新下拉加载框架：https://github.com/scwang90/SmartRefreshLayout
-    implementation 'com.scwang.smart:refresh-layout-kernel:2.0.3'
-    implementation 'com.scwang.smart:refresh-header-material:2.0.3'
+    implementation libs.refreshLayoutKernel
+    implementation libs.refreshHeaderMaterial
 
     // 日志打印框架：https://github.com/JakeWharton/timber
-    implementation 'com.jakewharton.timber:timber:4.7.1'
+    implementation libs.timber
 
     // 指示器框架：https://github.com/ongakuer/CircleIndicator
-    implementation 'me.relex:circleindicator:2.1.6'
+    implementation libs.circleIndicator
 
     // 腾讯 MMKV：https://github.com/Tencent/MMKV
-    implementation 'com.tencent:mmkv-static:1.2.10'
+    implementation libs.mmkvStatic
 
     // 内存泄漏监测框架：https://github.com/square/leakcanary
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
-    previewImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+    debugImplementation libs.leakCanary
+    previewImplementation libs.leakCanary
 
-    implementation 'org.greenrobot:greendao:3.3.0'
-
-    // implementation 'com.github.li-xiaojun:XPopup:2.10.0'
+    // GreenDAO 数据库
+    implementation libs.greenDao
 
     // 多语种：https://github.com/getActivity/MultiLanguages
     // 悬浮窗：https://github.com/getActivity/XToast
@@ -264,7 +251,6 @@ dependencies {
     // 嵌套滚动容器：https://github.com/donkingliang/ConsecutiveScroller
     // 隐私调用监控：https://github.com/huage2580/PermissionMonitor
 }
-
 
 greendao {
     schemaVersion 1

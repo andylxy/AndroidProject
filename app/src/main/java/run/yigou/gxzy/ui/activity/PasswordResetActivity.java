@@ -20,7 +20,7 @@ import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
 import run.yigou.gxzy.ui.dialog.TipsDialog;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
+import com.hjq.http.listener.OnHttpListener;
 
 /**
  *    author : Android 轮子哥
@@ -113,15 +113,24 @@ public final class PasswordResetActivity extends AppActivity
                             .setPhone(mPhoneNumber)
                             .setCode(mVerifyCode)
                             .setPassword(mFirstPassword.getText().toString()))
-                    .request(new HttpCallback<HttpData<Void>>(this) {
+                    .request(new OnHttpListener<HttpData<Void>>() {
 
                         @Override
-                        public void onSucceed(HttpData<Void> data) {
+                        public void onHttpSuccess(HttpData<Void> data) {
                             new TipsDialog.Builder(getActivity())
                                     .setIcon(TipsDialog.ICON_FINISH)
                                     .setMessage(R.string.password_reset_success)
                                     .setDuration(2000)
                                     .addOnDismissListener(dialog -> finish())
+                                    .show();
+                        }
+
+                        @Override
+                        public void onHttpFail(Throwable e) {
+                            new TipsDialog.Builder(getActivity())
+                                    .setIcon(TipsDialog.ICON_ERROR)
+                                    .setMessage("请求失败：" + e.getMessage())
+                                    .setDuration(2000)
                                     .show();
                         }
                     });

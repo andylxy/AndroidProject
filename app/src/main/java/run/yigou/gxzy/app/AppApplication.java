@@ -55,8 +55,8 @@ import run.yigou.gxzy.other.ToastStyle;
 import com.hjq.gson.factory.GsonFactory;
 import com.hjq.gson.factory.ParseExceptionCallback;
 import com.hjq.http.EasyConfig;
-import com.hjq.http.EasyLog;
-import com.hjq.toast.ToastUtils;
+import run.yigou.gxzy.other.EasyLog;
+import com.hjq.toast.Toaster;
 import com.hjq.umeng.UmengClient;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
@@ -114,7 +114,7 @@ public final class AppApplication extends Application {
         registryByReflect();
         initSdk(this);
         //初始化工具类
-        Utils.init(this);
+        Toaster.init(this);
         GsonUtils.setGsonDelegate(new Gson());
         //初始化全局安全管理器
         SecurityUtils.initSecurityManager();
@@ -198,7 +198,7 @@ public final class AppApplication extends Application {
      */
     public void initSdk(Application application) {
         // 设置标题栏初始化器
-        TitleBar.setDefaultStyle(new TitleBarStyle());
+        // TitleBar.setDefaultStyle(new TitleBarStyle());
 
         // 设置全局的 Header 构建器
         SmartRefreshLayout.setDefaultRefreshHeaderCreator((cx, layout) ->
@@ -220,11 +220,11 @@ public final class AppApplication extends Application {
         });
 
         // 初始化吐司
-        ToastUtils.init(application, new ToastStyle());
+        Toaster.init(application, new ToastStyle());
         // 设置调试模式
-        ToastUtils.setDebugMode(AppConfig.isDebug());
+        Toaster.setDebugMode(AppConfig.isDebug());
         // 设置 Toast 拦截器
-        ToastUtils.setInterceptor(new ToastLogInterceptor());
+        Toaster.setInterceptor(new ToastLogInterceptor());
         // 初始化序列化器
         SerialUtil.getInstance(application);
         // 本地异常捕捉
@@ -259,8 +259,10 @@ public final class AppApplication extends Application {
                 .setHandler(new RequestHandler(application))
                 // 设置请求重试次数
                 .setRetryCount(2)
-                .setInterceptor((api, params, headers) -> {
-                    InterceptorHelper.handleIntercept(api, params, headers, this);
+                .setInterceptor(new com.hjq.http.config.IRequestInterceptor() {
+                    public void intercept(com.hjq.http.request.HttpRequest<?> api, com.hjq.http.model.HttpParams params, com.hjq.http.model.HttpHeaders headers) {
+                        InterceptorHelper.handleIntercept(api, params, headers, AppApplication.this);
+                    }
                 })
                 .into();
 
@@ -313,7 +315,7 @@ public final class AppApplication extends Application {
                         return;
                     }
 
-                    ToastUtils.show(R.string.common_network_error);
+                    Toaster.show(R.string.common_network_error);
                 }
             });
         }

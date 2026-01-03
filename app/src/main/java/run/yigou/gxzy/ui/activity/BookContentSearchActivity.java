@@ -17,7 +17,7 @@ import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BaseAdapter;
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 

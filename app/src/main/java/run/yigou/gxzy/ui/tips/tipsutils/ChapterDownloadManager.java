@@ -11,8 +11,8 @@ package run.yigou.gxzy.ui.tips.tipsutils;
 
 import androidx.lifecycle.LifecycleOwner;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
-import com.hjq.http.listener.HttpCallback;
+import run.yigou.gxzy.other.EasyLog;
+import com.hjq.http.listener.OnHttpListener;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -73,7 +73,7 @@ public class ChapterDownloadManager {
          * @param chapter 章节对象
          * @param e 异常信息
          */
-        void onFailure(Chapter chapter, Exception e);
+        void onFailure(Chapter chapter, Throwable e);
     }
 
     public ChapterDownloadManager() {
@@ -335,9 +335,9 @@ public class ChapterDownloadManager {
                     .setContentId(chapter.getChapterSection())
                     .setSignatureId(chapter.getSignatureId())
                     .setBookId(chapter.getBookId()))
-                .request(new HttpCallback<HttpData<List<HH2SectionData>>>(null) {
+                .request(new OnHttpListener<HttpData<List<HH2SectionData>>>() {
                     @Override
-                    public void onSucceed(HttpData<List<HH2SectionData>> data) {
+                    public void onHttpSuccess(HttpData<List<HH2SectionData>> data) {
                         if (data != null && !data.getData().isEmpty()) {
                             HH2SectionData sectionData = data.getData().get(0);
 
@@ -372,7 +372,7 @@ public class ChapterDownloadManager {
                     }
 
                     @Override
-                    public void onFail(Exception e) {
+                    public void onHttpFail(Throwable e) {
                         handleDownloadFailure(chapter, e, callback);
                     }
                 });
@@ -389,7 +389,7 @@ public class ChapterDownloadManager {
      * @param e 异常信息
      * @param callback 下载回调
      */
-    private void handleDownloadFailure(Chapter chapter, Exception e, DownloadCallback callback) {
+    private void handleDownloadFailure(Chapter chapter, Throwable e, DownloadCallback callback) {
         synchronized (downloadingChapters) {
             downloadingChapters.remove(chapter.getSignatureId());
         }

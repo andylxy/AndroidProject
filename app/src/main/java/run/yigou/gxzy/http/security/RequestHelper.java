@@ -1,8 +1,9 @@
 package run.yigou.gxzy.http.security;
 
 import com.hjq.http.config.IRequestApi;
+import com.hjq.http.request.HttpRequest;
 import com.hjq.http.config.IRequestServer;
-import com.hjq.http.model.BodyType;
+import run.yigou.gxzy.http.model.BodyType;
 import com.hjq.http.model.HttpParams;
 
 import java.lang.reflect.Method;
@@ -15,33 +16,8 @@ import run.yigou.gxzy.http.Server.RequestServer;
  */
 public class RequestHelper {
     
-    /**
-     * 获取请求方法
-     * 
-     * @param api IRequestApi对象
-     * @param params 请求参数
-     * @return 请求方法（GET/POST/PUT/DELETE等）
-     */
-    public static String getRequestMethod(IRequestApi api, HttpParams params) {
-        // 首先尝试通过反射检查是否有特定的方法注解
-        try {
-            // 检查是否有自定义的getMethod方法
-            Method getMethod = api.getClass().getMethod("getMethod");
-            if (getMethod != null) {
-                Object result = getMethod.invoke(api);
-                if (result instanceof String) {
-                    return (String) result;
-                }
-            }
-        } catch (Exception e) {
-            // 如果没有自定义getMethod方法，则继续下面的逻辑
-        }
-        
-        // 根据参数判断请求方法（默认逻辑）
-        if (params != null && !params.isEmpty()) {
-            return "POST";
-        }
-        return "GET";
+    public static String getRequestMethod(HttpRequest<?> request, HttpParams params) {
+        return request.getRequestMethod();
     }
     
     /**
@@ -50,7 +26,7 @@ public class RequestHelper {
      * @return 主机地址
      */
     public static String getHost() {
-        IRequestServer server = new RequestServer();
+        RequestServer server = new RequestServer();
         String host = server.getHost();
         // 移除协议部分(http:// or https://)
         if (host.startsWith("http://")) {
@@ -71,9 +47,17 @@ public class RequestHelper {
      * @param api IRequestApi对象
      * @return 完整请求路径
      */
-    public static String getPath(IRequestApi api) {
-        IRequestServer server = new RequestServer();
+    public static String getPath(HttpRequest<?> request) {
+        RequestServer server = new RequestServer();
         String basePath = server.getPath();
+        IRequestApi api = null;
+        Object tag = request.getTag();
+        if (tag instanceof IRequestApi) {
+            api = (IRequestApi) tag;
+        }
+        if (api == null) {
+             return "";
+        }
         String apiPath = api.getApi();
         
         // 组合基础路径和API路径
@@ -92,7 +76,7 @@ public class RequestHelper {
      * @return 请求体类型
      */
     public static BodyType getBodyType() {
-        IRequestServer server = new RequestServer();
+        RequestServer server = new RequestServer();
         return server.getType();
     }
 }

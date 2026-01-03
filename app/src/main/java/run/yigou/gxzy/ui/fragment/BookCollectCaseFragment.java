@@ -26,7 +26,7 @@ import com.github.gzuliyujiang.rsautils.AESUtils;
 import com.github.gzuliyujiang.rsautils.RC4Utils;
 import com.hjq.base.BaseAdapter;
 import com.hjq.base.BaseDialog;
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.other.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;

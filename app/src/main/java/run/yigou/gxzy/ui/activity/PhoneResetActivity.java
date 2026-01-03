@@ -21,8 +21,8 @@ import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
 import run.yigou.gxzy.ui.dialog.TipsDialog;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
-import com.hjq.toast.ToastUtils;
+import com.hjq.http.listener.OnHttpListener;
+import com.hjq.toast.Toaster;
 import com.hjq.widget.view.CountdownView;
 
 /**
@@ -103,11 +103,17 @@ public final class PhoneResetActivity extends AppActivity
             EasyHttp.post(this)
                     .api(new GetCodeApi()
                             .setPhone(mPhoneView.getText().toString()))
-                    .request(new HttpCallback<HttpData<Void>>(this) {
+                    .request(new OnHttpListener<HttpData<Void>>() {
 
                         @Override
-                        public void onSucceed(HttpData<Void> data) {
+                        public void onHttpSuccess(HttpData<Void> data) {
                             toast(R.string.common_code_send_hint);
+                            mCountdownView.start();
+                        }
+
+                        @Override
+                        public void onHttpFail(Throwable e) {
+                            Toaster.show(e.getMessage());
                             mCountdownView.start();
                         }
                     });
@@ -120,7 +126,7 @@ public final class PhoneResetActivity extends AppActivity
             }
 
             if (mCodeView.getText().toString().length() != getResources().getInteger(R.integer.sms_code_length)) {
-                ToastUtils.show(R.string.common_code_error_hint);
+                Toaster.show(R.string.common_code_send_hint);
                 return;
             }
 
@@ -143,15 +149,24 @@ public final class PhoneResetActivity extends AppActivity
                             .setPreCode(mVerifyCode)
                             .setPhone(mPhoneView.getText().toString())
                             .setCode(mCodeView.getText().toString()))
-                    .request(new HttpCallback<HttpData<Void>>(this) {
+                    .request(new OnHttpListener<HttpData<Void>>() {
 
                         @Override
-                        public void onSucceed(HttpData<Void> data) {
+                        public void onHttpSuccess(HttpData<Void> data) {
                             new TipsDialog.Builder(getActivity())
                                     .setIcon(TipsDialog.ICON_FINISH)
                                     .setMessage(R.string.phone_reset_commit_succeed)
                                     .setDuration(2000)
                                     .addOnDismissListener(dialog -> finish())
+                                    .show();
+                        }
+
+                        @Override
+                        public void onHttpFail(Throwable e) {
+                            new TipsDialog.Builder(getActivity())
+                                    .setIcon(TipsDialog.ICON_ERROR)
+                                    .setMessage("请求失败：" + e.getMessage())
+                                    .setDuration(2000)
                                     .show();
                         }
                     });

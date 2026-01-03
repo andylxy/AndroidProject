@@ -16,18 +16,18 @@ import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.ui.activity.LoginActivity;
 import com.hjq.gson.factory.GsonFactory;
-import com.hjq.http.EasyLog;
-import com.hjq.http.config.IRequestApi;
+import run.yigou.gxzy.other.EasyLog;
+import com.hjq.http.request.HttpRequest;
 import com.hjq.http.config.IRequestHandler;
 import com.hjq.http.exception.CancelException;
 import com.hjq.http.exception.DataException;
 import com.hjq.http.exception.HttpException;
 import com.hjq.http.exception.NetworkException;
 import com.hjq.http.exception.ResponseException;
-import com.hjq.http.exception.ResultException;
 import com.hjq.http.exception.ServerException;
 import com.hjq.http.exception.TimeoutException;
-import com.hjq.http.exception.TokenException;
+import run.yigou.gxzy.http.exception.ResultException;
+import run.yigou.gxzy.http.exception.TokenException;
 import com.tencent.mmkv.MMKV;
 
 import org.json.JSONArray;
@@ -61,8 +61,7 @@ public final class RequestHandler implements IRequestHandler {
     }
 
     @Override
-    public Object requestSucceed(LifecycleOwner lifecycle, IRequestApi api, Response response, Type type) throws Exception {
-
+    public Object requestSuccess(HttpRequest<?> api, Response response, Type type) throws Exception {
         if (Response.class.equals(type)) {
             return response;
         }
@@ -147,7 +146,7 @@ public final class RequestHandler implements IRequestHandler {
     }
 
     @Override
-    public Exception requestFail(LifecycleOwner lifecycle, IRequestApi api, Exception e) {
+    public Throwable requestFail(HttpRequest<?> api, Throwable e) {
         // 判断这个异常是不是自己抛的
         if (e instanceof HttpException) {
             if (e instanceof TokenException) {
@@ -195,8 +194,7 @@ public final class RequestHandler implements IRequestHandler {
         return new HttpException(e.getMessage(), e);
     }
 
-    @Override
-    public Object readCache(LifecycleOwner lifecycle, IRequestApi api, Type type) {
+    public Object readCache(HttpRequest<?> api, Type type) {
         String cacheKey = GsonFactory.getSingletonGson().toJson(api);
         String cacheValue = mMmkv.getString(cacheKey, null);
         if (cacheValue == null || "".equals(cacheValue) || "{}".equals(cacheValue)) {
@@ -209,8 +207,7 @@ public final class RequestHandler implements IRequestHandler {
         return GsonFactory.getSingletonGson().fromJson(cacheValue, type);
     }
 
-    @Override
-    public boolean writeCache(LifecycleOwner lifecycle, IRequestApi api, Response response, Object result) {
+    public boolean writeCache(HttpRequest<?> api, Response response, Object result) {
         String cacheKey = GsonFactory.getSingletonGson().toJson(api);
         String cacheValue = GsonFactory.getSingletonGson().toJson(result);
         if (cacheValue == null || "".equals(cacheValue) || "{}".equals(cacheValue)) {

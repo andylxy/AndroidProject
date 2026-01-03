@@ -2,8 +2,9 @@ package run.yigou.gxzy.other;
 
 
 import run.yigou.gxzy.action.ToastAction;
-import com.hjq.toast.ToastUtils;
+import com.hjq.toast.Toaster;
 import com.hjq.toast.config.IToastInterceptor;
+import com.hjq.toast.ToastParams;
 
 import timber.log.Timber;
 
@@ -16,7 +17,7 @@ import timber.log.Timber;
 public final class ToastLogInterceptor implements IToastInterceptor {
 
     @Override
-    public boolean intercept(CharSequence text) {
+    public boolean intercept(ToastParams params) {
         if (AppConfig.isLogEnable()) {
             // 获取调用的堆栈信息
             StackTraceElement[] stackTrace = new Throwable().getStackTrace();
@@ -26,13 +27,13 @@ public final class ToastLogInterceptor implements IToastInterceptor {
                 int lineNumber = stackTrace[i].getLineNumber();
                 // 获取类的全路径
                 String className = stackTrace[i].getClassName();
-                if (lineNumber <= 0 || className.startsWith(ToastUtils.class.getName()) ||
+                 if (lineNumber <= 0 || className.startsWith(Toaster.class.getName()) ||
                         className.startsWith(ToastAction.class.getName())) {
                     continue;
                 }
 
-                Timber.tag("ToastUtils");
-                Timber.i("(" + stackTrace[i].getFileName() + ":" + lineNumber + ") " + text.toString());
+                Timber.tag("Toaster");
+                Timber.i("(" + stackTrace[i].getFileName() + ":" + lineNumber + ") " + params.text.toString());
                 break;
             }
         }

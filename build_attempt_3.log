@@ -1,0 +1,275 @@
+
+> Configure project :
+GradleLog TaskNameOutput clean
+GradleLog ServerTypeOutput product
+
+> Task :clean UP-TO-DATE
+> Task :app:clean
+> Task :library:base:clean
+> Task :library:umeng:clean
+> Task :library:widget:clean
+> Task :library:xbus:clean
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugBuildConfig
+> Task :app:greendaoPrepare
+
+> Task :app:greendao
+Kept source for 0 classes and 1 methods because of @Keep annotation
+
+> Task :library:base:preBuild UP-TO-DATE
+> Task :library:base:preDebugBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug
+> Task :library:umeng:preBuild UP-TO-DATE
+> Task :library:umeng:preDebugBuild UP-TO-DATE
+> Task :library:base:writeDebugAarMetadata
+> Task :library:widget:preBuild UP-TO-DATE
+> Task :library:widget:preDebugBuild UP-TO-DATE
+> Task :library:umeng:writeDebugAarMetadata
+> Task :library:xbus:preBuild UP-TO-DATE
+> Task :library:xbus:preDebugBuild UP-TO-DATE
+> Task :library:widget:writeDebugAarMetadata
+> Task :library:xbus:writeDebugAarMetadata
+> Task :app:generateDebugResValues
+> Task :library:base:generateDebugResValues
+> Task :app:checkDebugAarMetadata
+> Task :library:base:generateDebugResources
+> Task :library:base:packageDebugResources
+> Task :library:umeng:generateDebugResValues
+> Task :library:umeng:generateDebugResources
+> Task :library:umeng:packageDebugResources
+> Task :library:widget:generateDebugResValues
+> Task :library:widget:generateDebugResources
+> Task :library:widget:packageDebugResources
+> Task :library:xbus:generateDebugResValues
+> Task :library:xbus:generateDebugResources
+> Task :library:xbus:packageDebugResources
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :library:base:extractDeepLinksDebug
+> Task :library:umeng:extractDeepLinksDebug
+> Task :library:base:processDebugManifest
+> Task :library:widget:extractDeepLinksDebug
+
+> Task :library:umeng:processDebugManifest
+D:\git\app\AndroidProject\library\umeng\src\main\AndroidManifest.xml:44:9-58:20 Warning:
+	activity#com.tencent.tauth.AuthActivity was tagged at AndroidManifest.xml:44 to replace another declaration but no other declaration present
+D:\git\app\AndroidProject\library\umeng\src\main\AndroidManifest.xml:60:9-65:36 Warning:
+	activity#com.tencent.connect.common.AssistActivity was tagged at AndroidManifest.xml:60 to replace another declaration but no other declaration present
+
+> Task :library:xbus:extractDeepLinksDebug
+> Task :library:widget:processDebugManifest
+> Task :library:xbus:processDebugManifest
+> Task :library:base:compileDebugLibraryResources
+
+> Task :app:processDebugMainManifest
+D:\git\app\AndroidProject\app\src\main\AndroidManifest.xml:24:5-265:19 Warning:
+	application@android:allowBackup was tagged at AndroidManifest.xml:24 to replace other declarations but no other declaration present
+D:\git\app\AndroidProject\app\src\main\AndroidManifest.xml:24:5-265:19 Warning:
+	application@android:supportsRtl was tagged at AndroidManifest.xml:24 to replace other declarations but no other declaration present
+
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :library:umeng:compileDebugLibraryResources
+> Task :library:umeng:parseDebugLocalResources
+> Task :library:base:parseDebugLocalResources
+> Task :library:widget:compileDebugLibraryResources
+> Task :library:xbus:compileDebugLibraryResources
+> Task :library:widget:parseDebugLocalResources
+> Task :library:xbus:parseDebugLocalResources
+> Task :library:base:javaPreCompileDebug
+> Task :library:umeng:generateDebugRFile
+> Task :library:base:generateDebugRFile
+> Task :library:xbus:generateDebugRFile
+> Task :app:mergeDebugResources
+> Task :library:widget:generateDebugRFile
+
+> Task :library:base:compileDebugJavaWithJavac
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :library:umeng:generateDebugBuildConfig
+> Task :library:base:bundleLibCompileToJarDebug
+> Task :library:umeng:javaPreCompileDebug
+> Task :library:widget:javaPreCompileDebug
+
+> Task :library:umeng:compileDebugJavaWithJavac
+注: D:\git\app\AndroidProject\library\umeng\src\main\java\com\hjq\umeng\UmengClient.java使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :library:umeng:bundleLibCompileToJarDebug
+
+> Task :library:widget:compileDebugJavaWithJavac
+注: D:\git\app\AndroidProject\library\widget\src\main\java\com\hjq\widget\layout\SettingBar.java使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :library:xbus:javaPreCompileDebug
+> Task :library:widget:bundleLibCompileToJarDebug
+> Task :app:mergeDebugShaders
+> Task :library:xbus:compileDebugJavaWithJavac
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :library:base:mergeDebugShaders
+> Task :library:base:compileDebugShaders NO-SOURCE
+> Task :library:base:generateDebugAssets UP-TO-DATE
+> Task :library:xbus:bundleLibCompileToJarDebug
+> Task :library:base:packageDebugAssets
+> Task :library:umeng:mergeDebugShaders
+> Task :library:umeng:compileDebugShaders NO-SOURCE
+> Task :library:umeng:generateDebugAssets UP-TO-DATE
+> Task :library:umeng:packageDebugAssets
+> Task :library:widget:mergeDebugShaders
+> Task :library:widget:compileDebugShaders NO-SOURCE
+> Task :library:widget:generateDebugAssets UP-TO-DATE
+> Task :library:widget:packageDebugAssets
+> Task :library:xbus:mergeDebugShaders
+> Task :library:xbus:compileDebugShaders NO-SOURCE
+> Task :library:xbus:generateDebugAssets UP-TO-DATE
+> Task :library:xbus:packageDebugAssets
+> Task :app:mergeDebugAssets
+> Task :library:base:processDebugJavaRes NO-SOURCE
+> Task :library:umeng:processDebugJavaRes NO-SOURCE
+> Task :library:widget:processDebugJavaRes NO-SOURCE
+> Task :library:xbus:processDebugJavaRes NO-SOURCE
+> Task :app:compressDebugAssets
+> Task :app:checkDebugDuplicateClasses
+> Task :library:widget:bundleLibRuntimeToJarDebug
+> Task :library:umeng:bundleLibRuntimeToJarDebug
+> Task :library:base:bundleLibRuntimeToJarDebug
+> Task :app:mergeDebugJniLibFolders
+> Task :library:xbus:bundleLibRuntimeToJarDebug
+> Task :library:base:mergeDebugJniLibFolders
+> Task :library:base:mergeDebugNativeLibs NO-SOURCE
+> Task :library:base:copyDebugJniLibsProjectOnly
+> Task :library:umeng:mergeDebugJniLibFolders
+> Task :library:umeng:mergeDebugNativeLibs NO-SOURCE
+> Task :library:umeng:copyDebugJniLibsProjectOnly
+> Task :library:widget:mergeDebugJniLibFolders
+> Task :library:widget:mergeDebugNativeLibs NO-SOURCE
+> Task :library:widget:copyDebugJniLibsProjectOnly
+> Task :library:xbus:mergeDebugJniLibFolders
+> Task :app:desugarDebugFileDependencies
+> Task :library:xbus:mergeDebugNativeLibs NO-SOURCE
+> Task :library:xbus:copyDebugJniLibsProjectOnly
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :library:base:stripDebugDebugSymbols NO-SOURCE
+> Task :library:base:copyDebugJniLibsProjectAndLocalJars
+> Task :library:base:extractDebugAnnotations
+> Task :library:base:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :library:base:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :app:mergeDebugNativeLibs
+> Task :library:base:mergeDebugConsumerProguardFiles
+> Task :library:base:prepareDebugArtProfile UP-TO-DATE
+> Task :library:base:prepareLintJarForPublish UP-TO-DATE
+> Task :library:umeng:stripDebugDebugSymbols NO-SOURCE
+> Task :library:base:mergeDebugJavaResource
+> Task :library:umeng:copyDebugJniLibsProjectAndLocalJars
+> Task :library:umeng:extractDebugAnnotations
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libBugly.so, libBugly_Native.so, libmmkv.so, libumeng-spy.so.
+
+> Task :app:mergeLibDexDebug
+> Task :app:processDebugResources
+> Task :library:base:syncDebugLibJars
+
+> Task :app:compileDebugJavaWithJavac
+注: [1] Wrote GeneratedAppGlideModule with: []
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\app\AppApplication.java:263: 错误: 方法不会覆盖或实现超类型的方法
+                    @Override
+                    ^
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\security\InterceptorHelper.java:34: 错误: 找不到符号
+        request.addHeader("app", "2");
+               ^
+  符号:   方法 addHeader(String,String)
+  位置: 类型为HttpRequest<?>的变量 request
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\security\InterceptorHelper.java:35: 错误: 找不到符号
+        request.addHeader("SessionId", SerialUtil.getSerial());
+               ^
+  符号:   方法 addHeader(String,String)
+  位置: 类型为HttpRequest<?>的变量 request
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\security\InterceptorHelper.java:36: 错误: 找不到符号
+        request.addHeader("Content-Type", "application/json;charset=UTF-8");
+               ^
+  符号:   方法 addHeader(String,String)
+  位置: 类型为HttpRequest<?>的变量 request
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\security\InterceptorHelper.java:37: 错误: 找不到符号
+        request.addHeader("Accept", "application/json, text/plain, */*");
+               ^
+  符号:   方法 addHeader(String,String)
+  位置: 类型为HttpRequest<?>的变量 request
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\security\InterceptorHelper.java:55: 错误: 找不到符号
+                HttpParams params = request.getParams();
+                                           ^
+  符号:   方法 getParams()
+  位置: 类型为HttpRequest<?>的变量 request
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\security\InterceptorHelper.java:69: 错误: 找不到符号
+                request.addHeader("Signature", "Signature " + signature);
+                       ^
+  符号:   方法 addHeader(String,String)
+  位置: 类型为HttpRequest<?>的变量 request
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\security\InterceptorHelper.java:70: 错误: 找不到符号
+                request.addHeader("X-AccessKeyId", accessKeyId);
+                       ^
+  符号:   方法 addHeader(String,String)
+  位置: 类型为HttpRequest<?>的变量 request
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\security\InterceptorHelper.java:71: 错误: 找不到符号
+                request.addHeader("X-Timestamp", timestamp);
+                       ^
+  符号:   方法 addHeader(String,String)
+  位置: 类型为HttpRequest<?>的变量 request
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\security\InterceptorHelper.java:72: 错误: 找不到符号
+                request.addHeader("X-Nonce", nonce);
+                       ^
+  符号:   方法 addHeader(String,String)
+  位置: 类型为HttpRequest<?>的变量 request
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\security\InterceptorHelper.java:76: 错误: 找不到符号
+                    request.addHeader("X-Encryption-Algorithm", "SM2");
+                           ^
+  符号:   方法 addHeader(String,String)
+  位置: 类型为HttpRequest<?>的变量 request
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\Server\RequestHandler.java:53: 错误: RequestHandler不是抽象的, 并且未覆盖IRequestHandler中的抽象方法requestFail(HttpRequest<?>,Throwable)
+public final class RequestHandler implements IRequestHandler {
+             ^
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\Server\RequestHandler.java:150: 错误: RequestHandler中的requestFail(HttpRequest<?>,Throwable)无法实现IRequestHandler中的requestFail(HttpRequest<?>,Throwable)
+    public Object requestFail(HttpRequest<?> api, Throwable e) {
+                  ^
+  返回类型Object与Throwable不兼容
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\Server\RequestHandler.java:63: 错误: 方法不会覆盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\Server\RequestHandler.java:149: 错误: 方法不会覆盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\Server\RequestHandler.java:198: 错误: 方法不会覆盖或实现超类型的方法
+    @Override
+    ^
+D:\git\app\AndroidProject\app\src\main\java\run\yigou\gxzy\http\Server\RequestHandler.java:212: 错误: 方法不会覆盖或实现超类型的方法
+    @Override
+    ^
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+注: 某些输入文件使用了未经检查或不安全的操作。
+注: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+17 个错误
+
+> Task :app:compileDebugJavaWithJavac FAILED
+> Task :app:mergeExtDexDebug
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugJavaWithJavac'.
+> Compilation failed; see the compiler error output for details.
+
+* Try:
+> Run with --info option to get more log output.
+> Run with --scan to get full insights.
+
+BUILD FAILED in 11s
+115 actionable tasks: 110 executed, 5 up-to-date

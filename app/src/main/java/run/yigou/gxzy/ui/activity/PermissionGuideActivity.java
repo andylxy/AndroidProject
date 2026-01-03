@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
-import com.hjq.toast.ToastUtils;
+import com.hjq.toast.Toaster;
 
 import java.util.List;
 
@@ -139,7 +139,7 @@ public final class PermissionGuideActivity extends AppActivity {
                             showGoToSettingsDialog();
                         } else {
                             // 用户拒绝授权，提示
-                            ToastUtils.show(R.string.permission_denied_exit_message);
+                            Toaster.show(R.string.permission_denied_exit_message);
                         }
                     }
                 });

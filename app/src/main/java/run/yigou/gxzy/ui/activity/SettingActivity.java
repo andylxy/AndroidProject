@@ -4,6 +4,11 @@ import android.view.Gravity;
 import android.view.View;
 
 import com.hjq.base.BaseDialog;
+import com.hjq.http.listener.OnHttpListener;
+import com.hjq.permissions.XXPermissions;
+import com.hjq.widget.layout.SettingBar;
+import com.hjq.widget.view.SwitchButton;
+import com.lucas.xbus.XEventBus;
 
 import run.yigou.gxzy.EventBus.LoginEventNotification;
 import run.yigou.gxzy.R;
@@ -20,11 +25,6 @@ import run.yigou.gxzy.ui.dialog.SafeDialog;
 import run.yigou.gxzy.ui.dialog.UpdateDialog;
 import run.yigou.gxzy.ui.fragment.HomeFragment;
 import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
-
-import com.hjq.permissions.XXPermissions;
-import com.hjq.widget.layout.SettingBar;
-import com.hjq.widget.view.SwitchButton;
-import com.lucas.xbus.XEventBus;
 
 /**
  * author : Android 轮子哥
@@ -169,7 +169,7 @@ public final class SettingActivity extends AppActivity
 //            // 退出登录
 //            EasyHttp.post(this)
 //                    .api(new LogoutApi())
-//                    .request(new HttpCallback<HttpData<Void>>(this) {
+//                    .request(new OnHttpListener<HttpData<Void>>() {
 //
 //                        @Override
 //                        public void onSucceed(HttpData<Void> data) {

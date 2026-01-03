@@ -56,8 +56,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.bar.OnTitleBarListener;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
-import com.hjq.http.listener.HttpCallback;
+import run.yigou.gxzy.other.EasyLog;
+import com.hjq.http.listener.OnHttpListener;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
 
@@ -503,10 +503,10 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 申请会话ID
         EasyHttp.get(AiMsgFragment.this)
                 .api(new AiSessionIdApi())
-                .request(new HttpCallback<HttpData<AiSessionIdApi.Bean>>(AiMsgFragment.this) {
+                .request(new OnHttpListener<HttpData<AiSessionIdApi.Bean>>() {
                     
                     @Override
-                    public void onSucceed(HttpData<AiSessionIdApi.Bean> data) {
+                    public void onHttpSuccess(HttpData<AiSessionIdApi.Bean> data) {
                         if (data != null && data.isRequestSucceed()) {
                             AiSessionIdApi.Bean bean = data.getData();
                             if (bean != null && currentSession != null) {
@@ -530,8 +530,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     }
                     
                     @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
+                    public void onHttpFail(Throwable e) {
+                        // super.onFail(e);
                         EasyLog.print(TAG, "Failed to request session ID: " + e.getMessage());
                         Toast.makeText(getContext(), "网络请求失败，请检查网络连接", Toast.LENGTH_SHORT).show();
                     }
@@ -1121,10 +1121,10 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         //先后端请求会话Id
         EasyHttp.get(AiMsgFragment.this)
                 .api(new AiSessionIdApi())
-                .request(new HttpCallback<HttpData<AiSessionIdApi.Bean>>(AiMsgFragment.this) {
+                .request(new OnHttpListener<HttpData<AiSessionIdApi.Bean>>() {
 
                     @Override
-                    public void onSucceed(HttpData<AiSessionIdApi.Bean> data) {
+                    public void onHttpSuccess(HttpData<AiSessionIdApi.Bean> data) {
 
                         if (data != null && data.isRequestSucceed()) {
                             AiSessionIdApi.Bean bean = data.getData();
@@ -1141,8 +1141,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     }
 
                     @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
+                    public void onHttpFail(Throwable e) {
+                        // super.onFail(e);
 
                         EasyLog.print("会话Id申请失败：" + e.getMessage());
                     }
@@ -1315,10 +1315,10 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         //检测会话Id是否已过期
         EasyHttp.get(AiMsgFragment.this)
                 .api(new AiSessionIdApi())
-                .request(new HttpCallback<HttpData<AiSessionIdApi.Bean>>(AiMsgFragment.this) {
+                .request(new OnHttpListener<HttpData<AiSessionIdApi.Bean>>() {
 
                     @Override
-                    public void onSucceed(HttpData<AiSessionIdApi.Bean> data) {
+                    public void onHttpSuccess(HttpData<AiSessionIdApi.Bean> data) {
 
                         if (data != null && data.isRequestSucceed()) {
                             AiSessionIdApi.Bean bean = data.getData();
@@ -1342,8 +1342,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     }
 
                     @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
+                    public void onHttpFail(Throwable e) {
+                        // super.onFail(e);
 
                         EasyLog.print("过期会话Id申请失败：" + e.getMessage());
                         // 清除待发送消息
