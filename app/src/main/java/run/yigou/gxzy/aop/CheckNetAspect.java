@@ -8,7 +8,7 @@ import androidx.core.content.ContextCompat;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.manager.ActivityManager;
-import com.hjq.toast.ToastUtils;
+import com.hjq.toast.Toaster;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -42,7 +42,7 @@ public class CheckNetAspect {
                 NetworkInfo info = manager.getActiveNetworkInfo();
                 // 判断网络是否连接
                 if (info == null || !info.isConnected()) {
-                    ToastUtils.show(R.string.common_network_hint);
+                    Toaster.show(R.string.common_network_hint);
                     return;
                 }
             }

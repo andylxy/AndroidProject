@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
-import com.hjq.toast.ToastUtils;
+import com.hjq.toast.Toaster;
 
 import java.util.List;
 
@@ -117,11 +117,14 @@ public final class PermissionGuideActivity extends AppActivity {
 
     /**
      * 请求存储权限
+     * 注意：因为 targetSdkVersion >= 33，XXPermissions 强制要求使用 READ_MEDIA_* 权限
+     * 在旧版设备上，系统会自动处理向后兼容
      */
     private void requestStoragePermission() {
         XXPermissions.with(this)
-                .permission(Permission.READ_EXTERNAL_STORAGE)
-                .permission(Permission.WRITE_EXTERNAL_STORAGE)
+                .permission(Permission.READ_MEDIA_IMAGES)
+                .permission(Permission.READ_MEDIA_VIDEO)
+                .permission(Permission.READ_MEDIA_AUDIO)
                 .request(new OnPermissionCallback() {
                     @Override
                     public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
@@ -139,7 +142,7 @@ public final class PermissionGuideActivity extends AppActivity {
                             showGoToSettingsDialog();
                         } else {
                             // 用户拒绝授权，提示
-                            ToastUtils.show(R.string.permission_denied_exit_message);
+                            Toaster.show(R.string.permission_denied_exit_message);
                         }
                     }
                 });
@@ -159,7 +162,7 @@ public final class PermissionGuideActivity extends AppActivity {
                     @Override
                     public void onConfirm(com.hjq.base.BaseDialog dialog) {
                         XXPermissions.startPermissionActivity(PermissionGuideActivity.this,
-                                Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE);
+                                Permission.READ_MEDIA_IMAGES, Permission.READ_MEDIA_VIDEO, Permission.READ_MEDIA_AUDIO);
                     }
 
                     @Override
@@ -175,7 +178,7 @@ public final class PermissionGuideActivity extends AppActivity {
     protected void onRestart() {
         super.onRestart();
         // 从设置页返回后，检查权限是否已授予
-        if (XXPermissions.isGranted(this, Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE)) {
+        if (XXPermissions.isGranted(this, Permission.READ_MEDIA_IMAGES, Permission.READ_MEDIA_VIDEO, Permission.READ_MEDIA_AUDIO)) {
             setResult(RESULT_OK);
             finish();
         }

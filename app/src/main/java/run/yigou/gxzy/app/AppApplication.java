@@ -56,7 +56,7 @@ import com.hjq.gson.factory.GsonFactory;
 import com.hjq.gson.factory.ParseExceptionCallback;
 import com.hjq.http.EasyConfig;
 import com.hjq.http.EasyLog;
-import com.hjq.toast.ToastUtils;
+import com.hjq.toast.Toaster;
 import com.hjq.umeng.UmengClient;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
@@ -220,11 +220,11 @@ public final class AppApplication extends Application {
         });
 
         // 初始化吐司
-        ToastUtils.init(application, new ToastStyle());
-        // 设置调试模式
-        ToastUtils.setDebugMode(AppConfig.isDebug());
+        Toaster.init(application);
+        // 设置 Toast 样式
+        Toaster.setStyle(new ToastStyle());
         // 设置 Toast 拦截器
-        ToastUtils.setInterceptor(new ToastLogInterceptor());
+        Toaster.setInterceptor(new ToastLogInterceptor());
         // 初始化序列化器
         SerialUtil.getInstance(application);
         // 本地异常捕捉
@@ -313,7 +313,7 @@ public final class AppApplication extends Application {
                         return;
                     }
 
-                    ToastUtils.show(R.string.common_network_error);
+                    Toaster.show(R.string.common_network_error);
                 }
             });
         }

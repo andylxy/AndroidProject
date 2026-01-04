@@ -10,7 +10,7 @@ import run.yigou.gxzy.ui.dialog.MessageDialog;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
-import com.hjq.toast.ToastUtils;
+import com.hjq.toast.Toaster;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +31,11 @@ public abstract class PermissionCallback implements OnPermissionCallback {
         }
 
         if (permissions.size() == 1 && Permission.ACCESS_BACKGROUND_LOCATION.equals(permissions.get(0))) {
-            ToastUtils.show(R.string.common_permission_fail_4);
+            Toaster.show(R.string.common_permission_fail_4);
             return;
         }
 
-        ToastUtils.show(R.string.common_permission_fail_1);
+        Toaster.show(R.string.common_permission_fail_1);
     }
 
     /**
@@ -69,7 +69,10 @@ public abstract class PermissionCallback implements OnPermissionCallback {
             switch (permission) {
                 case Permission.READ_EXTERNAL_STORAGE:
                 case Permission.WRITE_EXTERNAL_STORAGE:
-                case Permission.MANAGE_EXTERNAL_STORAGE: {
+                case Permission.MANAGE_EXTERNAL_STORAGE:
+                case Permission.READ_MEDIA_IMAGES:
+                case Permission.READ_MEDIA_VIDEO:
+                case Permission.READ_MEDIA_AUDIO: {
                     String hint = context.getString(R.string.common_permission_storage);
                     if (!hints.contains(hint)) {
                         hints.add(hint);

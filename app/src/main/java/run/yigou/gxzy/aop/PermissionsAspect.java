@@ -12,7 +12,10 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import com.hjq.permissions.Permission;
 
 import timber.log.Timber;
 
@@ -61,8 +64,29 @@ public class PermissionsAspect {
     }
 
     private void requestPermissions(ProceedingJoinPoint joinPoint, Activity activity, String[] permissions) {
+        List<String> permissionList = new ArrayList<>();
+        for (String permission : permissions) {
+            if (Permission.READ_EXTERNAL_STORAGE.equals(permission) ||
+                    Permission.WRITE_EXTERNAL_STORAGE.equals(permission)) {
+                // targetSdkVersion >= 33 时，XXPermissions 强制要求使用 READ_MEDIA_* 权限
+                if (!permissionList.contains(Permission.READ_MEDIA_IMAGES)) {
+                    permissionList.add(Permission.READ_MEDIA_IMAGES);
+                }
+                if (!permissionList.contains(Permission.READ_MEDIA_VIDEO)) {
+                    permissionList.add(Permission.READ_MEDIA_VIDEO);
+                }
+                if (!permissionList.contains(Permission.READ_MEDIA_AUDIO)) {
+                    permissionList.add(Permission.READ_MEDIA_AUDIO);
+                }
+            } else {
+                if (!permissionList.contains(permission)) {
+                    permissionList.add(permission);
+                }
+            }
+        }
+
         XXPermissions.with(activity)
-                .permission(permissions)
+                .permission(permissionList)
                 .request(new PermissionCallback() {
 
                     @Override

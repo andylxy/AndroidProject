@@ -180,17 +180,18 @@ dependencies {
     //安卓设备唯一标识解决方案 https://github.com/gzu-liyujiang/Android_CN_OAID
     //implementation 'com.github.gzu-liyujiang:Android_CN_OAID:4.2.5'
     // 权限请求框架：https://github.com/getActivity/XXPermissions
-    implementation 'com.github.getActivity:XXPermissions:12.3'
+    implementation 'com.github.getActivity:XXPermissions:18.6'
 
     // 标题栏框架：https://github.com/getActivity/TitleBar
+    // 保持 9.2 版本以兼容 OnTitleBarListener 接口
     implementation 'com.github.getActivity:TitleBar:9.2'
 
-    // 吐司框架：https://github.com/getActivity/ToastUtils
-    implementation 'com.github.getActivity:ToastUtils:9.5'
+    // 吐司框架：https://github.com/getActivity/Toaster
+    implementation 'com.github.getActivity:Toaster:12.6'
 
     // 网络请求框架：https://github.com/getActivity/EasyHttp
+    // 保持 10.2 版本以兼容 HttpCallback API
     implementation 'com.github.getActivity:EasyHttp:10.2'
-    //implementation 'com.github.getActivity:EasyHttp:13.0'
     // OkHttp 框架：https://github.com/square/okhttp
     // noinspection GradleDependency
     implementation 'com.squareup.okhttp3:okhttp:3.12.13'
@@ -203,7 +204,7 @@ dependencies {
     implementation 'com.github.getActivity:GsonFactory:9.6'
 
     // Shape 框架：https://github.com/getActivity/ShapeView
-    implementation 'com.github.getActivity:ShapeView:6.0'
+    implementation 'com.github.getActivity:ShapeView:8.3'
 
     // AOP 插件库：https://mvnrepository.com/artifact/org.aspectj/aspectjrt
     implementation 'org.aspectj:aspectjrt:1.9.6'

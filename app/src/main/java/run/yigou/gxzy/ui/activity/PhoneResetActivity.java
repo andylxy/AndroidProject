@@ -22,7 +22,7 @@ import run.yigou.gxzy.manager.InputTextManager;
 import run.yigou.gxzy.ui.dialog.TipsDialog;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
-import com.hjq.toast.ToastUtils;
+import com.hjq.toast.Toaster;
 import com.hjq.widget.view.CountdownView;
 
 /**
@@ -120,7 +120,7 @@ public final class PhoneResetActivity extends AppActivity
             }
 
             if (mCodeView.getText().toString().length() != getResources().getInteger(R.integer.sms_code_length)) {
-                ToastUtils.show(R.string.common_code_error_hint);
+                Toaster.show(R.string.common_code_error_hint);
                 return;
             }
 

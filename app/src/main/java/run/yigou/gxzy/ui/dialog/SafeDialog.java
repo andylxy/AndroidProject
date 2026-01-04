@@ -15,7 +15,7 @@ import run.yigou.gxzy.http.api.VerifyCodeApi;
 import run.yigou.gxzy.http.model.HttpData;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.OnHttpListener;
-import com.hjq.toast.ToastUtils;
+import com.hjq.toast.Toaster;
 import com.hjq.widget.view.CountdownView;
 
 /**
@@ -69,7 +69,7 @@ public final class SafeDialog {
             int viewId = view.getId();
             if (viewId == R.id.cv_safe_countdown) {
                 if (true) {
-                    ToastUtils.show(R.string.common_code_send_hint);
+                    Toaster.show(R.string.common_code_send_hint);
                     mCountdownView.start();
                     setCancelable(false);
                     return;
@@ -83,19 +83,19 @@ public final class SafeDialog {
 
                             @Override
                             public void onSucceed(HttpData<Void> data) {
-                                ToastUtils.show(R.string.common_code_send_hint);
+                                Toaster.show(R.string.common_code_send_hint);
                                 mCountdownView.start();
                                 setCancelable(false);
                             }
 
                             @Override
                             public void onFail(Exception e) {
-                                ToastUtils.show(e.getMessage());
+                                Toaster.show(e.getMessage());
                             }
                         });
             } else if (viewId == R.id.tv_ui_confirm) {
                 if (mCodeView.getText().toString().length() != getResources().getInteger(R.integer.sms_code_length)) {
-                    ToastUtils.show(R.string.common_code_error_hint);
+                    Toaster.show(R.string.common_code_error_hint);
                     return;
                 }
 
@@ -126,7 +126,7 @@ public final class SafeDialog {
 
                             @Override
                             public void onFail(Exception e) {
-                                ToastUtils.show(e.getMessage());
+                                Toaster.show(e.getMessage());
                             }
                         });
             } else if (viewId == R.id.tv_ui_cancel) {
