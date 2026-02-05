@@ -13,5 +13,8 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+<<<<<<< HEAD
     - name: Build with Gradle
       run: ./gradlew build aR
+=======
+>>>>>>> 0bd00e3601add8cdf3c8147c13ebc706bdc73c0b

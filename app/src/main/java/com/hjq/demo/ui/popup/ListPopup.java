@@ -6,18 +6,16 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.hjq.base.BaseAdapter;
 import com.hjq.base.BasePopupWindow;
-import com.hjq.base.action.AnimAction;
+import com.hjq.core.action.AnimAction;
 import com.hjq.demo.R;
 import com.hjq.demo.app.AppAdapter;
 import com.hjq.demo.other.ArrowDrawable;
-
+import com.hjq.smallest.width.SmallestWidthAdaptation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,28 +33,30 @@ public final class ListPopup {
             implements BaseAdapter.OnItemClickListener {
 
         @SuppressWarnings("rawtypes")
-        @Nullable
-        private OnListener mListener;
         private boolean mAutoDismiss = true;
 
+        @NonNull
         private final MenuAdapter mAdapter;
 
-        public Builder(Context context) {
+        @Nullable
+        private OnListener mListener;
+
+        public Builder(@NonNull Context context) {
             super(context);
 
             RecyclerView recyclerView = new RecyclerView(context);
             recyclerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             setContentView(recyclerView);
 
-            mAdapter = new MenuAdapter(getContext());
+            mAdapter = new MenuAdapter(context);
             mAdapter.setOnItemClickListener(this);
             recyclerView.setAdapter(mAdapter);
 
             new ArrowDrawable.Builder(context)
                     .setArrowOrientation(Gravity.TOP)
                     .setArrowGravity(Gravity.CENTER)
-                    .setShadowSize((int) getResources().getDimension(R.dimen.dp_10))
-                    .setBackgroundColor(0xFFFFFFFF)
+                    .setShadowSize((int) SmallestWidthAdaptation.dp2px(context, 10))
+                    .setBackgroundColor(getColor(R.color.white))
                     .apply(recyclerView);
         }
 
@@ -99,7 +99,7 @@ public final class ListPopup {
         }
 
         @SuppressWarnings("rawtypes")
-        public Builder setListener(OnListener listener) {
+        public Builder setListener(@Nullable OnListener listener) {
             mListener = listener;
             return this;
         }
@@ -109,7 +109,7 @@ public final class ListPopup {
          */
         @SuppressWarnings("all")
         @Override
-        public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
+        public void onItemClick(@NonNull RecyclerView recyclerView, @NonNull View itemView, int position) {
             if (mAutoDismiss) {
                 dismiss();
             }
@@ -123,17 +123,17 @@ public final class ListPopup {
 
     private static final class MenuAdapter extends AppAdapter<Object> {
 
-        private MenuAdapter(Context context) {
+        private MenuAdapter(@NonNull Context context) {
             super(context);
         }
 
         @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public AppViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new ViewHolder();
         }
 
-        private final class ViewHolder extends AppAdapter<?>.ViewHolder {
+        private final class ViewHolder extends AppViewHolder {
 
             private final TextView mTextView;
 
@@ -141,17 +141,17 @@ public final class ListPopup {
                 super(new TextView(getContext()));
                 mTextView = (TextView) getItemView();
                 mTextView.setTextColor(getColor(R.color.black50));
-                mTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.sp_16));
+                mTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, SmallestWidthAdaptation.sp2px(getContext(), 16));
             }
 
             @Override
             public void onBindView(int position) {
                 mTextView.setText(getItem(position).toString());
 
-                mTextView.setPaddingRelative((int) getResources().getDimension(R.dimen.dp_12),
-                        (position == 0 ? (int) getResources().getDimension(R.dimen.dp_12) : 0),
-                        (int) getResources().getDimension(R.dimen.dp_12),
-                        (int) getResources().getDimension(R.dimen.dp_10));
+                mTextView.setPaddingRelative((int) SmallestWidthAdaptation.dp2px(itemView, 12),
+                        (position == 0 ? (int) SmallestWidthAdaptation.dp2px(itemView, 12) : 0),
+                        (int) SmallestWidthAdaptation.dp2px(itemView, 12),
+                        (int) SmallestWidthAdaptation.dp2px(itemView, 10));
             }
         }
     }
@@ -161,6 +161,6 @@ public final class ListPopup {
         /**
          * 选择条目时回调
          */
-        void onSelected(BasePopupWindow popupWindow, int position, T t);
+        void onSelected(@NonNull BasePopupWindow popupWindow, int position, T data);
     }
 }

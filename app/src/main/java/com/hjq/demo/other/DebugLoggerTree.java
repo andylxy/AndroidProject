@@ -1,9 +1,7 @@
 package com.hjq.demo.other;
 
-import android.os.Build;
-
+import com.hjq.core.tools.AndroidVersion;
 import org.jetbrains.annotations.NotNull;
-
 import timber.log.Timber;
 
 /**
@@ -23,7 +21,11 @@ public final class DebugLoggerTree extends Timber.DebugTree {
     protected String createStackElementTag(@NotNull StackTraceElement element) {
         String tag = "(" + element.getFileName() + ":" + element.getLineNumber() + ")";
         // 日志 TAG 长度限制已经在 Android 8.0 被移除
+<<<<<<< HEAD
         if (tag.length() <= MAX_TAG_LENGTH || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+=======
+        if (tag.length() <= MAX_TAG_LENGTH || AndroidVersion.isAndroid8()) {
+>>>>>>> 0bd00e3601add8cdf3c8147c13ebc706bdc73c0b
             return tag;
         }
         return tag.substring(0, MAX_TAG_LENGTH);

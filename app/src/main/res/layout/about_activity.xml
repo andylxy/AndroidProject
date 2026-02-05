@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         app:title="@string/about_title" />
 
-    <com.hjq.widget.view.ScaleImageView
+    <com.hjq.custom.widget.view.ScaleImageView
         android:layout_width="@dimen/dp_100"
         android:layout_height="@dimen/dp_100"
         android:layout_marginTop="@dimen/dp_50"
@@ -41,10 +41,11 @@
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dp_20"
             android:layout_marginTop="@dimen/dp_40"
             android:autoLink="all"
             android:gravity="center_horizontal"
-            android:lineSpacingExtra="@dimen/dp_20"
+            android:lineSpacingExtra="@dimen/dp_10"
             android:text="但愿人长久，搬砖不再有\n https://github.com/getActivity/AndroidProject"
             android:textColor="#222222"
             android:textSize="@dimen/sp_14" />
@@ -52,9 +53,13 @@
     </LinearLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_about_copyright"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="@dimen/dp_20"
+        android:layout_marginVertical="@dimen/dp_10"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:text="@string/about_copyright"
         android:textColor="#BDBDBD"
         android:textSize="@dimen/sp_14" />

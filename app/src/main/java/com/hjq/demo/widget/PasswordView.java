@@ -2,14 +2,14 @@ package com.hjq.demo.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.View;
-
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import com.hjq.demo.R;
+import com.hjq.smallest.width.SmallestWidthAdaptation;
 
 /**
  *    author : Android 轮子哥
@@ -32,10 +32,10 @@ public final class PasswordView extends View {
     private static final int POINT_RADIUS = 15;
 
     /** 中心黑点的颜色 */
-    private static final int POINT_COLOR = 0xFF666666;
+    private static final int POINT_COLOR = Color.parseColor("#666666");
 
     /** 密码框边界线的颜色值 */
-    private static final int STROKE_COLOR = 0xFFECECEC;
+    private static final int STROKE_COLOR = Color.parseColor("#ECECEC");
 
     /** 密码总个数 */
     public static final int PASSWORD_COUNT = 6;
@@ -43,23 +43,23 @@ public final class PasswordView extends View {
     /** 已经输入的密码个数，也就是需要显示的小黑点个数 */
     private int mCurrentIndex = 0;
 
-    public PasswordView(Context context) {
+    public PasswordView(@NonNull Context context) {
         this(context, null);
     }
 
-    public PasswordView(Context context, @Nullable AttributeSet attrs) {
+    public PasswordView(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public PasswordView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public PasswordView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public PasswordView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public PasswordView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        mItemWidth = (int) getResources().getDimension(R.dimen.dp_44);
-        mItemHeight = (int) getResources().getDimension(R.dimen.dp_41);
+        mItemWidth = (int) SmallestWidthAdaptation.dp2px(context, 44);
+        mItemHeight = (int) SmallestWidthAdaptation.dp2px(context, 41);
 
         mPaint = new Paint();
         // 设置抗锯齿
@@ -108,7 +108,7 @@ public final class PasswordView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         mPaint.setStrokeWidth(5);
         canvas.drawPath(mPath, mPaint);
 

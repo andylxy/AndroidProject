@@ -1,26 +1,32 @@
 package com.hjq.demo.ui.activity;
 
+import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.View;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.hjq.base.BaseDialog;
+import com.hjq.core.manager.ActivityManager;
+import com.hjq.core.manager.CacheDataManager;
+import com.hjq.core.manager.ThreadPoolManager;
+import com.hjq.custom.widget.layout.SettingBar;
+import com.hjq.custom.widget.view.SwitchButton;
 import com.hjq.demo.R;
 import com.hjq.demo.aop.SingleClick;
 import com.hjq.demo.app.AppActivity;
 import com.hjq.demo.http.api.LogoutApi;
 import com.hjq.demo.http.glide.GlideApp;
 import com.hjq.demo.http.model.HttpData;
-import com.hjq.demo.manager.ActivityManager;
-import com.hjq.demo.manager.CacheDataManager;
-import com.hjq.demo.manager.ThreadPoolManager;
 import com.hjq.demo.other.AppConfig;
-import com.hjq.demo.ui.dialog.MenuDialog;
+import com.hjq.demo.ui.activity.account.LoginActivity;
+import com.hjq.demo.ui.activity.account.PasswordResetActivity;
+import com.hjq.demo.ui.activity.account.PhoneResetActivity;
+import com.hjq.demo.ui.activity.common.BrowserActivity;
 import com.hjq.demo.ui.dialog.SafeDialog;
 import com.hjq.demo.ui.dialog.UpdateDialog;
+import com.hjq.demo.ui.dialog.common.MenuDialog;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
-import com.hjq.widget.layout.SettingBar;
-import com.hjq.widget.view.SwitchButton;
+import com.hjq.http.listener.HttpCallbackProxy;
 
 /**
  *    author : Android 轮子哥
@@ -31,10 +37,16 @@ import com.hjq.widget.view.SwitchButton;
 public final class SettingActivity extends AppActivity
         implements SwitchButton.OnCheckedChangeListener {
 
-    private SettingBar mLanguageView;
-    private SettingBar mPhoneView;
-    private SettingBar mPasswordView;
+    private SettingBar mChangeLanguageView;
+    private SettingBar mCheckUpdateView;
+    private SettingBar mModifyPhoneView;
+    private SettingBar mModifyPasswordView;
+    private SettingBar mReadAgreementView;
+    private SettingBar mAboutAppView;
+    private SettingBar mAutoLoginView;
     private SettingBar mCleanCacheView;
+    private SettingBar mExitLoginView;
+
     private SwitchButton mAutoSwitchView;
 
     @Override
@@ -44,35 +56,60 @@ public final class SettingActivity extends AppActivity
 
     @Override
     protected void initView() {
-        mLanguageView = findViewById(R.id.sb_setting_language);
-        mPhoneView = findViewById(R.id.sb_setting_phone);
-        mPasswordView = findViewById(R.id.sb_setting_password);
-        mCleanCacheView = findViewById(R.id.sb_setting_cache);
+        mChangeLanguageView = findViewById(R.id.sb_setting_change_language);
+        mCheckUpdateView = findViewById(R.id.sb_setting_check_update);
+        mModifyPhoneView = findViewById(R.id.sb_setting_modify_phone);
+        mModifyPasswordView = findViewById(R.id.sb_setting_modify_password);
+        mReadAgreementView = findViewById(R.id.sb_setting_read_agreement);
+        mAboutAppView = findViewById(R.id.sb_setting_about_app);
+        mAutoLoginView = findViewById(R.id.sb_setting_auto_login);
+        mCleanCacheView = findViewById(R.id.sb_setting_clear_cache);
+        mExitLoginView = findViewById(R.id.sb_setting_exit_login);
+
         mAutoSwitchView = findViewById(R.id.sb_setting_switch);
+
+        // 适配 RTL 特性
+        Drawable iconDrawable;
+        if (getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+            iconDrawable = getDrawable(R.drawable.arrows_left_ic);
+        } else {
+            iconDrawable = getDrawable(R.drawable.arrows_right_ic);
+        }
+        mChangeLanguageView.setEndDrawable(iconDrawable);
+        mModifyPhoneView.setEndDrawable(iconDrawable);
+        mModifyPasswordView.setEndDrawable(iconDrawable);
+        mReadAgreementView.setEndDrawable(iconDrawable);
+        mAboutAppView.setEndDrawable(iconDrawable);
+        mAutoLoginView.setEndDrawable(iconDrawable);
+        mCleanCacheView.setEndDrawable(iconDrawable);
+        mExitLoginView.setEndDrawable(iconDrawable);
 
         // 设置切换按钮的监听
         mAutoSwitchView.setOnCheckedChangeListener(this);
 
-        setOnClickListener(R.id.sb_setting_language, R.id.sb_setting_update, R.id.sb_setting_phone,
-                R.id.sb_setting_password, R.id.sb_setting_agreement, R.id.sb_setting_about,
-                R.id.sb_setting_cache, R.id.sb_setting_auto, R.id.sb_setting_exit);
+        setOnClickListener(mChangeLanguageView, mCheckUpdateView, mModifyPhoneView, mModifyPasswordView,
+                           mReadAgreementView, mAboutAppView, mAutoLoginView, mCleanCacheView, mExitLoginView);
     }
 
     @Override
     protected void initData() {
         // 获取应用缓存大小
-        mCleanCacheView.setRightText(CacheDataManager.getTotalCacheSize(this));
+        mCleanCacheView.setEndText(CacheDataManager.getTotalCacheSize(this));
+        mChangeLanguageView.setEndText("简体中文");
+        mModifyPhoneView.setEndText("181****1413");
+        mModifyPasswordView.setEndText("密码强度较低");
+    }
 
-        mLanguageView.setRightText("简体中文");
-        mPhoneView.setRightText("181****1413");
-        mPasswordView.setRightText("密码强度较低");
+    @Nullable
+    @Override
+    public View getImmersionBottomView() {
+        return findViewById(R.id.ll_setting_content);
     }
 
     @SingleClick
     @Override
-    public void onClick(View view) {
-        int viewId = view.getId();
-        if (viewId == R.id.sb_setting_language) {
+    public void onClick(@NonNull View view) {
+        if (view == mChangeLanguageView) {
 
             // 底部选择框
             new MenuDialog.Builder(this)
@@ -80,14 +117,14 @@ public final class SettingActivity extends AppActivity
                     //.setAutoDismiss(false)
                     .setList(R.string.setting_language_simple, R.string.setting_language_complex)
                     .setListener((MenuDialog.OnListener<String>) (dialog, position, string) -> {
-                        mLanguageView.setRightText(string);
-                        BrowserActivity.start(getActivity(), "https://github.com/getActivity/MultiLanguages");
+                        mChangeLanguageView.setEndText(string);
+                        BrowserActivity.start(SettingActivity.this, "https://github.com/getActivity/MultiLanguages");
                     })
                     .setGravity(Gravity.BOTTOM)
                     .setAnimStyle(BaseDialog.ANIM_BOTTOM)
                     .show();
 
-        } else if (viewId == R.id.sb_setting_update) {
+        } else if (view == mCheckUpdateView) {
 
             // 本地的版本码和服务器的进行比较
             if (20 > AppConfig.getVersionCode()) {
@@ -95,53 +132,53 @@ public final class SettingActivity extends AppActivity
                         .setVersionName("2.0")
                         .setForceUpdate(false)
                         .setUpdateLog("修复Bug\n优化用户体验")
-                        .setDownloadUrl("https://down.qq.com/qqweb/QQ_1/android_apk/Android_8.5.0.5025_537066738.apk")
-                        .setFileMd5("560017dc94e8f9b65f4ca997c7feb326")
+                        .setDownloadUrl("https://dldir1.qq.com/weixin/android/weixin8015android2020_arm64.apk")
+                        .setFileMd5("b05b25d4738ea31091dd9f80f4416469")
                         .show();
             } else {
                 toast(R.string.update_no_update);
             }
 
-        } else if (viewId == R.id.sb_setting_phone) {
+        } else if (view == mModifyPhoneView) {
 
             new SafeDialog.Builder(this)
-                    .setListener((dialog, phone, code) -> PhoneResetActivity.start(getActivity(), code))
+                    .setListener((dialog, phone, code) -> PhoneResetActivity.start(this, code))
                     .show();
 
-        } else if (viewId == R.id.sb_setting_password) {
+        } else if (view == mModifyPasswordView) {
 
             new SafeDialog.Builder(this)
-                    .setListener((dialog, phone, code) -> PasswordResetActivity.start(getActivity(), phone, code))
+                    .setListener((dialog, phone, code) -> PasswordResetActivity.start(this, phone, code))
                     .show();
 
-        } else if (viewId == R.id.sb_setting_agreement) {
+        } else if (view == mReadAgreementView) {
 
             BrowserActivity.start(this, "https://github.com/getActivity/Donate");
 
-        } else if (viewId == R.id.sb_setting_about) {
+        } else if (view == mAboutAppView) {
 
             startActivity(AboutActivity.class);
 
-        } else if (viewId == R.id.sb_setting_auto) {
+        } else if (view == mAutoLoginView) {
 
             // 自动登录
             mAutoSwitchView.setChecked(!mAutoSwitchView.isChecked());
 
-        } else if (viewId == R.id.sb_setting_cache) {
+        } else if (view == mCleanCacheView) {
 
             // 清除内存缓存（必须在主线程）
-            GlideApp.get(getActivity()).clearMemory();
+            GlideApp.get(this).clearMemory();
             ThreadPoolManager.getInstance().execute(() -> {
                 CacheDataManager.clearAllCache(this);
                 // 清除本地缓存（必须在子线程）
-                GlideApp.get(getActivity()).clearDiskCache();
+                GlideApp.get(SettingActivity.this).clearDiskCache();
                 post(() -> {
                     // 重新获取应用缓存大小
-                    mCleanCacheView.setRightText(CacheDataManager.getTotalCacheSize(getActivity()));
+                    mCleanCacheView.setEndText(CacheDataManager.getTotalCacheSize(SettingActivity.this));
                 });
             });
 
-        } else if (viewId == R.id.sb_setting_exit) {
+        } else if (view == mExitLoginView) {
 
             if (true) {
                 startActivity(LoginActivity.class);
@@ -153,10 +190,10 @@ public final class SettingActivity extends AppActivity
             // 退出登录
             EasyHttp.post(this)
                     .api(new LogoutApi())
-                    .request(new HttpCallback<HttpData<Void>>(this) {
+                    .request(new HttpCallbackProxy<HttpData<?>>(this) {
 
                         @Override
-                        public void onSucceed(HttpData<Void> data) {
+                        public void onHttpSuccess(@NonNull HttpData<?> data) {
                             startActivity(LoginActivity.class);
                             // 进行内存优化，销毁除登录页之外的所有界面
                             ActivityManager.getInstance().finishAllActivities(LoginActivity.class);
@@ -171,7 +208,7 @@ public final class SettingActivity extends AppActivity
      */
 
     @Override
-    public void onCheckedChanged(SwitchButton button, boolean checked) {
+    public void onCheckedChanged(@NonNull SwitchButton button, boolean checked) {
         toast(checked);
     }
 }

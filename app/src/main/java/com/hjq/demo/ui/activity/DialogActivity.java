@@ -1,41 +1,39 @@
 package com.hjq.demo.ui.activity;
 
-import android.content.Intent;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
+import com.hjq.bar.TitleBar;
 import com.hjq.base.BaseDialog;
+import com.hjq.base.BasePopupWindow;
 import com.hjq.demo.R;
 import com.hjq.demo.aop.SingleClick;
 import com.hjq.demo.app.AppActivity;
 import com.hjq.demo.manager.DialogManager;
-import com.hjq.demo.ui.dialog.AddressDialog;
-import com.hjq.demo.ui.dialog.DateDialog;
-import com.hjq.demo.ui.dialog.InputDialog;
-import com.hjq.demo.ui.dialog.MenuDialog;
-import com.hjq.demo.ui.dialog.MessageDialog;
 import com.hjq.demo.ui.dialog.PayPasswordDialog;
 import com.hjq.demo.ui.dialog.SafeDialog;
-import com.hjq.demo.ui.dialog.SelectDialog;
-import com.hjq.demo.ui.dialog.ShareDialog;
-import com.hjq.demo.ui.dialog.TimeDialog;
-import com.hjq.demo.ui.dialog.TipsDialog;
 import com.hjq.demo.ui.dialog.UpdateDialog;
-import com.hjq.demo.ui.dialog.WaitDialog;
+import com.hjq.demo.ui.dialog.common.AddressDialog;
+import com.hjq.demo.ui.dialog.common.DateDialog;
+import com.hjq.demo.ui.dialog.common.InputDialog;
+import com.hjq.demo.ui.dialog.common.MenuDialog;
+import com.hjq.demo.ui.dialog.common.MessageDialog;
+import com.hjq.demo.ui.dialog.common.SelectDialog;
+import com.hjq.demo.ui.dialog.common.ShareDialog;
+import com.hjq.demo.ui.dialog.common.TimeDialog;
+import com.hjq.demo.ui.dialog.common.TipsDialog;
+import com.hjq.demo.ui.dialog.common.WaitDialog;
 import com.hjq.demo.ui.popup.ListPopup;
-import com.hjq.umeng.Platform;
-import com.hjq.umeng.UmengClient;
-import com.hjq.umeng.UmengShare;
+import com.hjq.umeng.sdk.Platform;
+import com.hjq.umeng.sdk.UmengShare;
 import com.umeng.socialize.media.UMImage;
 import com.umeng.socialize.media.UMWeb;
-
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *    author : Android 轮子哥
@@ -47,6 +45,9 @@ public final class DialogActivity extends AppActivity {
 
     /** 等待对话框 */
     private BaseDialog mWaitDialog;
+
+    /** 菜单弹窗 */
+    private BasePopupWindow mListPopup;
 
     @Override
     protected int getLayoutId() {
@@ -72,14 +73,20 @@ public final class DialogActivity extends AppActivity {
 
     }
 
+    @Nullable
+    @Override
+    public View getImmersionBottomView() {
+        return findViewById(R.id.ll_dialog_content);
+    }
+
     @SingleClick
     @Override
-    public void onClick(View view) {
+    public void onClick(@NonNull View view) {
         int viewId = view.getId();
         if (viewId == R.id.btn_dialog_message) {
 
             // 消息对话框
-            new MessageDialog.Builder(getActivity())
+            new MessageDialog.Builder(this)
                     // 标题可以不用填写
                     .setTitle("我是标题")
                     // 内容必须要填写
@@ -93,12 +100,12 @@ public final class DialogActivity extends AppActivity {
                     .setListener(new MessageDialog.OnListener() {
 
                         @Override
-                        public void onConfirm(BaseDialog dialog) {
+                        public void onConfirm(@NonNull BaseDialog dialog) {
                             toast("确定了");
                         }
 
                         @Override
-                        public void onCancel(BaseDialog dialog) {
+                        public void onCancel(@NonNull BaseDialog dialog) {
                             toast("取消了");
                         }
                     })
@@ -123,12 +130,12 @@ public final class DialogActivity extends AppActivity {
                     .setListener(new InputDialog.OnListener() {
 
                         @Override
-                        public void onConfirm(BaseDialog dialog, String content) {
+                        public void onConfirm(@NonNull BaseDialog dialog, String content) {
                             toast("确定了：" + content);
                         }
 
                         @Override
-                        public void onCancel(BaseDialog dialog) {
+                        public void onCancel(@NonNull BaseDialog dialog) {
                             toast("取消了");
                         }
                     })
@@ -137,7 +144,7 @@ public final class DialogActivity extends AppActivity {
         } else if (viewId == R.id.btn_dialog_bottom_menu) {
 
             List<String> data = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 20; i++) {
                 data.add("我是数据" + (i + 1));
             }
             // 底部选择框
@@ -150,12 +157,12 @@ public final class DialogActivity extends AppActivity {
                     .setListener(new MenuDialog.OnListener<String>() {
 
                         @Override
-                        public void onSelected(BaseDialog dialog, int position, String string) {
-                            toast("位置：" + position + "，文本：" + string);
+                        public void onSelected(@NonNull BaseDialog dialog, int position, String data) {
+                            toast("位置：" + position + "，文本：" + data);
                         }
 
                         @Override
-                        public void onCancel(BaseDialog dialog) {
+                        public void onCancel(@NonNull BaseDialog dialog) {
                             toast("取消了");
                         }
                     })
@@ -164,7 +171,7 @@ public final class DialogActivity extends AppActivity {
         } else if (viewId == R.id.btn_dialog_center_menu) {
 
             List<String> data = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 20; i++) {
                 data.add("我是数据" + (i + 1));
             }
             // 居中选择框
@@ -178,12 +185,12 @@ public final class DialogActivity extends AppActivity {
                     .setListener(new MenuDialog.OnListener<String>() {
 
                         @Override
-                        public void onSelected(BaseDialog dialog, int position, String string) {
-                            toast("位置：" + position + "，文本：" + string);
+                        public void onSelected(@NonNull BaseDialog dialog, int position, String data) {
+                            toast("位置：" + position + "，文本：" + data);
                         }
 
                         @Override
-                        public void onCancel(BaseDialog dialog) {
+                        public void onCancel(@NonNull BaseDialog dialog) {
                             toast("取消了");
                         }
                     })
@@ -199,15 +206,15 @@ public final class DialogActivity extends AppActivity {
                     .setSingleSelect()
                     // 设置默认选中
                     .setSelect(0)
-                    .setListener(new SelectDialog.OnListener<String>() {
+                    .setSingleListener(new SelectDialog.OnSingleListener<String>() {
 
                         @Override
-                        public void onSelected(BaseDialog dialog, HashMap<Integer, String> data) {
-                            toast("确定了：" + data.toString());
+                        public void onSelected(@NonNull BaseDialog dialog, int position, String data) {
+                            toast("位置：" + position + "，数据：" + data);
                         }
 
                         @Override
-                        public void onCancel(BaseDialog dialog) {
+                        public void onCancel(@NonNull BaseDialog dialog) {
                             toast("取消了");
                         }
                     })
@@ -223,15 +230,15 @@ public final class DialogActivity extends AppActivity {
                     .setMaxSelect(3)
                     // 设置默认选中
                     .setSelect(2, 3, 4)
-                    .setListener(new SelectDialog.OnListener<String>() {
+                    .setMultiListener(new SelectDialog.OnMultiListener<String>() {
 
                         @Override
-                        public void onSelected(BaseDialog dialog, HashMap<Integer, String> data) {
+                        public void onSelected(@NonNull BaseDialog dialog, Map<Integer, String> data) {
                             toast("确定了：" + data.toString());
                         }
 
                         @Override
-                        public void onCancel(BaseDialog dialog) {
+                        public void onCancel(@NonNull BaseDialog dialog) {
                             toast("取消了");
                         }
                     })
@@ -285,12 +292,12 @@ public final class DialogActivity extends AppActivity {
                     .setListener(new PayPasswordDialog.OnListener() {
 
                         @Override
-                        public void onCompleted(BaseDialog dialog, String password) {
+                        public void onCompleted(@NonNull BaseDialog dialog, String password) {
                             toast(password);
                         }
 
                         @Override
-                        public void onCancel(BaseDialog dialog) {
+                        public void onCancel(@NonNull BaseDialog dialog) {
                             toast("取消了");
                         }
                     })
@@ -310,12 +317,12 @@ public final class DialogActivity extends AppActivity {
                     .setListener(new AddressDialog.OnListener() {
 
                         @Override
-                        public void onSelected(BaseDialog dialog, String province, String city, String area) {
+                        public void onSelected(@NonNull BaseDialog dialog, @NonNull String province, @NonNull String city, @NonNull String area) {
                             toast(province + city + area);
                         }
 
                         @Override
-                        public void onCancel(BaseDialog dialog) {
+                        public void onCancel(@NonNull BaseDialog dialog) {
                             toast("取消了");
                         }
                     })
@@ -344,7 +351,7 @@ public final class DialogActivity extends AppActivity {
                     //.setIgnoreDay()
                     .setListener(new DateDialog.OnListener() {
                         @Override
-                        public void onSelected(BaseDialog dialog, int year, int month, int day) {
+                        public void onSelected(@NonNull BaseDialog dialog, int year, int month, int day) {
                             toast(year + getString(R.string.common_year) + month + getString(R.string.common_month) + day + getString(R.string.common_day));
 
                             // 如果不指定时分秒则默认为现在的时间
@@ -358,7 +365,7 @@ public final class DialogActivity extends AppActivity {
                         }
 
                         @Override
-                        public void onCancel(BaseDialog dialog) {
+                        public void onCancel(@NonNull BaseDialog dialog) {
                             toast("取消了");
                         }
                     })
@@ -387,7 +394,7 @@ public final class DialogActivity extends AppActivity {
                     .setListener(new TimeDialog.OnListener() {
 
                         @Override
-                        public void onSelected(BaseDialog dialog, int hour, int minute, int second) {
+                        public void onSelected(@NonNull BaseDialog dialog, int hour, int minute, int second) {
                             toast(hour + getString(R.string.common_hour) + minute + getString(R.string.common_minute) + second + getString(R.string.common_second));
 
                             // 如果不指定年月日则默认为今天的日期
@@ -400,7 +407,7 @@ public final class DialogActivity extends AppActivity {
                         }
 
                         @Override
-                        public void onCancel(BaseDialog dialog) {
+                        public void onCancel(@NonNull BaseDialog dialog) {
                             toast("取消了");
                         }
                     })
@@ -410,28 +417,30 @@ public final class DialogActivity extends AppActivity {
 
             toast("记得改好第三方 AppID 和 Secret，否则会调不起来哦");
 
-            UMWeb content = new UMWeb("https://github.com/getActivity/AndroidProject");
-            content.setTitle("Github");
-            content.setThumb(new UMImage(this, R.mipmap.launcher_ic));
-            content.setDescription(getString(R.string.app_name));
+            UMWeb umWeb = new UMWeb("https://github.com/getActivity/AndroidProject");
+            umWeb.setTitle("Github");
+            umWeb.setThumb(new UMImage(this, R.mipmap.launcher_ic));
+            umWeb.setDescription(getString(R.string.app_name));
+
+            /* UMImage umImage = new UMImage(this, R.mipmap.launcher_ic); */
 
             // 分享对话框
             new ShareDialog.Builder(this)
-                    .setShareLink(content)
+                    .setShareLink(umWeb)
                     .setListener(new UmengShare.OnShareListener() {
 
                         @Override
-                        public void onSucceed(Platform platform) {
+                        public void onShareSuccess(@NonNull Platform platform) {
                             toast("分享成功");
                         }
 
                         @Override
-                        public void onError(Platform platform, Throwable t) {
-                            toast(t.getMessage());
+                        public void onShareFail(@NonNull Platform platform, @NonNull Throwable throwable) {
+                            toast(throwable.getMessage());
                         }
 
                         @Override
-                        public void onCancel(Platform platform) {
+                        public void onShareCancel(@NonNull Platform platform) {
                             toast("分享取消");
                         }
                     })
@@ -448,9 +457,9 @@ public final class DialogActivity extends AppActivity {
                     // 更新日志
                     .setUpdateLog("到底更新了啥\n到底更新了啥\n到底更新了啥\n到底更新了啥\n到底更新了啥\n到底更新了啥")
                     // 下载 URL
-                    .setDownloadUrl("https://dldir1.qq.com/weixin/android/weixin807android1920_arm64.apk")
+                    .setDownloadUrl("https://dldir1.qq.com/weixin/android/weixin8015android2020_arm64.apk")
                     // 文件 MD5
-                    .setFileMd5("df2f045dfa854d8461d9cefe08b813c8")
+                    .setFileMd5("b05b25d4738ea31091dd9f80f4416469")
                     .show();
 
         } else if (viewId == R.id.btn_dialog_safe) {
@@ -460,12 +469,12 @@ public final class DialogActivity extends AppActivity {
                     .setListener(new SafeDialog.OnListener() {
 
                         @Override
-                        public void onConfirm(BaseDialog dialog, String phone, String code) {
+                        public void onConfirm(@NonNull BaseDialog dialog, @NonNull String phone, @NonNull String code) {
                             toast("手机号：" + phone + "\n验证码：" + code);
                         }
 
                         @Override
-                        public void onCancel(BaseDialog dialog) {
+                        public void onCancel(@NonNull BaseDialog dialog) {
                             toast("取消了");
                         }
                     })
@@ -477,8 +486,6 @@ public final class DialogActivity extends AppActivity {
             new BaseDialog.Builder<>(this)
                     .setContentView(R.layout.custom_dialog)
                     .setAnimStyle(BaseDialog.ANIM_SCALE)
-                    //.setText(id, "我是预设置的文本")
-                    .setOnClickListener(R.id.btn_dialog_custom_ok, (BaseDialog.OnClickListener<Button>) (dialog, button) -> dialog.dismiss())
                     .setOnCreateListener(dialog -> toast("Dialog 创建了"))
                     .addOnShowListener(dialog -> toast("Dialog 显示了"))
                     .addOnCancelListener(dialog -> toast("Dialog 取消了"))
@@ -487,44 +494,51 @@ public final class DialogActivity extends AppActivity {
                         toast("按键代码：" + event.getKeyCode());
                         return false;
                     })
+                    .setOnClickListenerByView(R.id.btn_dialog_custom_ok, (BaseDialog.OnClickListener<Button>) (dialog, button) -> dialog.dismiss())
                     .show();
 
         } else if (viewId == R.id.btn_dialog_multi) {
 
-            BaseDialog dialog1 = new MessageDialog.Builder(getActivity())
+            BaseDialog dialog1 = new MessageDialog.Builder(this)
                     .setTitle("温馨提示")
                     .setMessage("我是第一个弹出的对话框")
                     .setConfirm(getString(R.string.common_confirm))
                     .setCancel(getString(R.string.common_cancel))
                     .create();
 
-            BaseDialog dialog2 = new MessageDialog.Builder(getActivity())
+            BaseDialog dialog2 = new MessageDialog.Builder(this)
                     .setTitle("温馨提示")
                     .setMessage("我是第二个弹出的对话框")
                     .setConfirm(getString(R.string.common_confirm))
                     .setCancel(getString(R.string.common_cancel))
                     .create();
 
-            DialogManager.getInstance(this).addShow(dialog1);
-            DialogManager.getInstance(this).addShow(dialog2);
+            BaseDialog dialog3 = new MessageDialog.Builder(this)
+                    .setTitle("温馨提示")
+                    .setMessage("我是第三个弹出的对话框")
+                    .setConfirm(getString(R.string.common_confirm))
+                    .setCancel(getString(R.string.common_cancel))
+                    .create();
+
+            DialogManager.getInstance(this).addDialog(dialog1);
+            DialogManager.getInstance(this).addDialog(dialog2);
+            DialogManager.getInstance(this).addDialog(dialog3);
+            DialogManager.getInstance(this).startShow();
         }
     }
 
     @Override
-    public void onRightClick(View view) {
-        // 菜单弹窗
-        new ListPopup.Builder(this)
+    public void onRightClick(TitleBar titleBar) {
+        if (mListPopup == null) {
+            mListPopup = new ListPopup.Builder(this)
                 .setList("选择拍照", "选取相册")
                 .addOnShowListener(popupWindow -> toast("PopupWindow 显示了"))
                 .addOnDismissListener(popupWindow -> toast("PopupWindow 销毁了"))
                 .setListener((ListPopup.OnListener<String>) (popupWindow, position, s) -> toast("点击了：" + s))
-                .showAsDropDown(view);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // 友盟回调
-        UmengClient.onActivityResult(this, requestCode, resultCode, data);
+                .create();
+        }
+        if (!mListPopup.isShowing()) {
+            mListPopup.showAsDropDown(titleBar.getRightView());
+        }
     }
 }

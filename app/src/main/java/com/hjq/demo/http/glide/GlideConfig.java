@@ -1,9 +1,7 @@
 package com.hjq.demo.http.glide;
 
 import android.content.Context;
-
 import androidx.annotation.NonNull;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
@@ -17,7 +15,6 @@ import com.bumptech.glide.module.AppGlideModule;
 import com.bumptech.glide.request.RequestOptions;
 import com.hjq.demo.R;
 import com.hjq.http.EasyConfig;
-
 import java.io.File;
 import java.io.InputStream;
 
@@ -41,12 +38,16 @@ public final class GlideConfig extends AppGlideModule {
         // 如果这个路径是一个文件
         if (diskCacheFile.exists() && diskCacheFile.isFile()) {
             // 执行删除操作
+            // noinspection ResultOfMethodCallIgnored
             diskCacheFile.delete();
         }
         // 如果这个路径不存在
         if (!diskCacheFile.exists()) {
             // 创建多级目录
-            diskCacheFile.mkdirs();
+            if (!diskCacheFile.mkdirs()) {
+                // 如果创建失败，并且文件夹不存在
+                return;
+            }
         }
         builder.setDiskCache(() -> DiskLruCacheWrapper.create(diskCacheFile, IMAGE_DISK_CACHE_MAX_SIZE));
 
@@ -54,8 +55,8 @@ public final class GlideConfig extends AppGlideModule {
         int defaultMemoryCacheSize = calculator.getMemoryCacheSize();
         int defaultBitmapPoolSize = calculator.getBitmapPoolSize();
 
-        int customMemoryCacheSize = (int) (1.2 * defaultMemoryCacheSize);
-        int customBitmapPoolSize = (int) (1.2 * defaultBitmapPoolSize);
+        long customMemoryCacheSize = (long) (1.2 * defaultMemoryCacheSize);
+        long customBitmapPoolSize = (long) (1.2 * defaultBitmapPoolSize);
 
         builder.setMemoryCache(new LruResourceCache(customMemoryCacheSize));
         builder.setBitmapPool(new LruBitmapPool(customBitmapPoolSize));

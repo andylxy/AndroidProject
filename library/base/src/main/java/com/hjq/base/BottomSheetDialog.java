@@ -12,14 +12,13 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
-
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 /**
@@ -31,6 +30,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 public final class BottomSheetDialog extends BaseDialog
         implements OnTouchListener, View.OnClickListener {
 
+    @NonNull
     private final BottomSheetBehavior<FrameLayout> mBottomSheetBehavior;
     private boolean mCancelable = true;
     private boolean mCanceledOnTouchOutside = true;
@@ -48,8 +48,9 @@ public final class BottomSheetDialog extends BaseDialog
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Window window = getWindow();
         if (window == null) {
@@ -61,7 +62,7 @@ public final class BottomSheetDialog extends BaseDialog
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
         // 隐藏底部导航栏
-        View decorView = getWindow().getDecorView();
+        View decorView = window.getDecorView();
         int uiOptions = decorView.getSystemUiVisibility() |
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
@@ -76,12 +77,12 @@ public final class BottomSheetDialog extends BaseDialog
     }
 
     @Override
-    public void setContentView(View view) {
+    public void setContentView(@NonNull View view) {
         super.setContentView(wrapContentView(view));
     }
 
     @Override
-    public void setContentView(View view, LayoutParams params) {
+    public void setContentView(@NonNull View view, @Nullable LayoutParams params) {
         view.setLayoutParams(params);
         super.setContentView(wrapContentView(view));
     }
@@ -93,10 +94,6 @@ public final class BottomSheetDialog extends BaseDialog
             return;
         }
         mCancelable = cancelable;
-
-        if (mBottomSheetBehavior == null) {
-            return;
-        }
         mBottomSheetBehavior.setHideable(cancelable);
     }
 
@@ -104,7 +101,7 @@ public final class BottomSheetDialog extends BaseDialog
     protected void onStart() {
         super.onStart();
 
-        if (mBottomSheetBehavior == null || mBottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+        if (mBottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
             return;
         }
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -112,7 +109,7 @@ public final class BottomSheetDialog extends BaseDialog
 
     @Override
     public void cancel() {
-        if (mBottomSheetBehavior == null || mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
+        if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
             super.cancel();
             return;
         }
@@ -140,7 +137,7 @@ public final class BottomSheetDialog extends BaseDialog
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private View wrapContentView(View view) {
+    private View wrapContentView(@NonNull View view) {
         CoordinatorLayout rootLayout = new CoordinatorLayout(getContext());
         rootLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
@@ -173,7 +170,7 @@ public final class BottomSheetDialog extends BaseDialog
      * {@link View.OnClickListener}
      */
     @Override
-    public void onClick(View view) {
+    public void onClick(@NonNull View view) {
         if (mCancelable && isShowing() && shouldWindowCloseOnTouchOutside()) {
             cancel();
         }
@@ -184,7 +181,7 @@ public final class BottomSheetDialog extends BaseDialog
      */
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public boolean onTouch(View view, MotionEvent event) {
+    public boolean onTouch(@NonNull View view, @NonNull MotionEvent event) {
         return true;
     }
 
@@ -198,13 +195,15 @@ public final class BottomSheetDialog extends BaseDialog
         }
 
         @Override
-        public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
+        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            // default implementation ignored
+        }
     }
 
     private class BehaviorAccessibilityDelegate extends AccessibilityDelegateCompat {
 
         @Override
-        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfoCompat info) {
+        public void onInitializeAccessibilityNodeInfo(@NonNull View host, @NonNull AccessibilityNodeInfoCompat info) {
             super.onInitializeAccessibilityNodeInfo(host, info);
             if (mCancelable) {
                 info.addAction(AccessibilityNodeInfoCompat.ACTION_DISMISS);
@@ -215,7 +214,7 @@ public final class BottomSheetDialog extends BaseDialog
         }
 
         @Override
-        public boolean performAccessibilityAction(View host, int action, Bundle args) {
+        public boolean performAccessibilityAction(@NonNull View host, int action, Bundle args) {
             if (action == AccessibilityNodeInfoCompat.ACTION_DISMISS && mCancelable) {
                 cancel();
                 return true;

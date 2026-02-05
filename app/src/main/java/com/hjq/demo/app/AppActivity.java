@@ -1,25 +1,26 @@
 package com.hjq.demo.app;
 
 import android.content.Intent;
-import android.os.Bundle;
+import android.graphics.Insets;
 import android.view.View;
-
+import android.view.View.OnApplyWindowInsetsListener;
+import android.view.WindowInsets;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.bar.TitleBar;
 import com.hjq.base.BaseActivity;
-import com.hjq.base.BaseDialog;
+import com.hjq.core.tools.AndroidVersion;
 import com.hjq.demo.R;
+import com.hjq.demo.action.ImmersionAction;
 import com.hjq.demo.action.TitleBarAction;
 import com.hjq.demo.action.ToastAction;
 import com.hjq.demo.http.model.HttpData;
-import com.hjq.demo.ui.dialog.WaitDialog;
+import com.hjq.demo.ui.dialog.common.WaitDialog;
+import com.hjq.http.config.IRequestApi;
 import com.hjq.http.listener.OnHttpListener;
-
-import okhttp3.Call;
+import com.hjq.umeng.sdk.UmengClient;
 
 /**
  *    author : Android 轮子哥
@@ -28,7 +29,7 @@ import okhttp3.Call;
  *    desc   : Activity 业务基类
  */
 public abstract class AppActivity extends BaseActivity
-        implements ToastAction, TitleBarAction, OnHttpListener<Object> {
+    implements ToastAction, TitleBarAction, ImmersionAction, OnHttpListener<Object> {
 
     /** 标题栏对象 */
     private TitleBar mTitleBar;
@@ -36,7 +37,7 @@ public abstract class AppActivity extends BaseActivity
     private ImmersionBar mImmersionBar;
 
     /** 加载对话框 */
-    private BaseDialog mDialog;
+    private WaitDialog.Builder mDialog;
     /** 对话框数量 */
     private int mDialogCount;
 
@@ -50,7 +51,11 @@ public abstract class AppActivity extends BaseActivity
     /**
      * 显示加载对话框
      */
-    public void showDialog() {
+    public void showLoadingDialog() {
+        showLoadingDialog(getString(R.string.common_loading));
+    }
+
+    public void showLoadingDialog(String message) {
         if (isFinishing() || isDestroyed()) {
             return;
         }
@@ -63,9 +68,9 @@ public abstract class AppActivity extends BaseActivity
 
             if (mDialog == null) {
                 mDialog = new WaitDialog.Builder(this)
-                        .setCancelable(false)
-                        .create();
+                        .setCancelable(false);
             }
+            mDialog.setMessage(message);
             if (!mDialog.isShowing()) {
                 mDialog.show();
             }
@@ -75,7 +80,7 @@ public abstract class AppActivity extends BaseActivity
     /**
      * 隐藏加载对话框
      */
-    public void hideDialog() {
+    public void hideLoadingDialog() {
         if (isFinishing() || isDestroyed()) {
             return;
         }
@@ -95,17 +100,46 @@ public abstract class AppActivity extends BaseActivity
     protected void initLayout() {
         super.initLayout();
 
-        if (getTitleBar() != null) {
-            getTitleBar().setOnTitleBarListener(this);
+        TitleBar titleBar = acquireTitleBar();
+        if (titleBar != null) {
+            titleBar.setOnTitleBarListener(this);
         }
 
         // 初始化沉浸式状态栏
         if (isStatusBarEnabled()) {
             getStatusBarConfig().init();
+        }
 
-            // 设置标题栏沉浸
-            if (getTitleBar() != null) {
-                ImmersionBar.setTitleBar(this, getTitleBar());
+        // 适配 Android 15 EdgeToEdge 特性
+        if (AndroidVersion.isAndroid15()) {
+            getWindow().getDecorView().setOnApplyWindowInsetsListener(new OnApplyWindowInsetsListener()  {
+
+                @NonNull
+                @Override
+                public WindowInsets onApplyWindowInsets(@NonNull View v, @NonNull WindowInsets insets) {
+                    Insets systemBars = insets.getInsets(WindowInsets.Type.systemBars());
+                    View immersionTopView = getImmersionTopView();
+                    View immersionBottomView = getImmersionBottomView();
+                    if (immersionTopView != null && immersionTopView == immersionBottomView) {
+                        immersionTopView.setPadding(immersionTopView.getPaddingLeft(), systemBars.top,
+                                                    immersionTopView.getPaddingRight(), systemBars.bottom);
+                        return insets;
+                    }
+                    if (immersionTopView != null) {
+                        immersionTopView.setPadding(immersionTopView.getPaddingLeft(), systemBars.top,
+                                                    immersionTopView.getPaddingRight(), immersionTopView.getPaddingBottom());
+                    }
+                    if (immersionBottomView != null) {
+                        immersionBottomView.setPadding(immersionBottomView.getPaddingLeft(), immersionBottomView.getPaddingTop(),
+                                                       immersionBottomView.getPaddingRight(), systemBars.bottom);
+                    }
+                    return insets;
+                }
+            });
+        } else {
+            View immersionTopView = getImmersionTopView();
+            if (immersionTopView != null) {
+                ImmersionBar.setTitleBar(this, immersionTopView);
             }
         }
     }
@@ -163,35 +197,33 @@ public abstract class AppActivity extends BaseActivity
     @Override
     public void setTitle(CharSequence title) {
         super.setTitle(title);
-        if (getTitleBar() != null) {
-            getTitleBar().setTitle(title);
+        TitleBar titleBar = acquireTitleBar();
+        if (titleBar != null) {
+            titleBar.setTitle(title);
         }
     }
 
-    @Override
     @Nullable
-    public TitleBar getTitleBar() {
+    @Override
+    public TitleBar acquireTitleBar() {
         if (mTitleBar == null) {
-            mTitleBar = obtainTitleBar(getContentView());
+            mTitleBar = findTitleBar(getContentView());
         }
         return mTitleBar;
     }
 
+    /**
+     * 获取需要沉浸的顶部 View 对象
+     */
+    @Nullable
     @Override
-    public void onLeftClick(View view) {
+    public View getImmersionTopView() {
+        return acquireTitleBar();
+    }
+
+    @Override
+    public void onLeftClick(TitleBar titleBar) {
         onBackPressed();
-    }
-
-    @Override
-    public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
-        super.startActivityForResult(intent, requestCode, options);
-        overridePendingTransition(R.anim.right_in_activity, R.anim.right_out_activity);
-    }
-
-    @Override
-    public void finish() {
-        super.finish();
-        overridePendingTransition(R.anim.left_in_activity, R.anim.left_out_activity);
     }
 
     /**
@@ -199,33 +231,40 @@ public abstract class AppActivity extends BaseActivity
      */
 
     @Override
-    public void onStart(Call call) {
-        showDialog();
+    public void onHttpStart(@NonNull IRequestApi api) {
+        showLoadingDialog();
     }
 
     @Override
-    public void onSucceed(Object result) {
+    public void onHttpSuccess(@NonNull Object result) {
         if (result instanceof HttpData) {
             toast(((HttpData<?>) result).getMessage());
         }
     }
 
     @Override
-    public void onFail(Exception e) {
-        toast(e.getMessage());
+    public void onHttpFail(@NonNull Throwable throwable) {
+        toast(throwable.getMessage());
     }
 
     @Override
-    public void onEnd(Call call) {
-        hideDialog();
+    public void onHttpEnd(@NonNull IRequestApi api) {
+        hideLoadingDialog();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (isShowDialog()) {
-            hideDialog();
+            hideLoadingDialog();
         }
         mDialog = null;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // 友盟回调
+        UmengClient.onActivityResult(this, requestCode, resultCode, data);
     }
 }

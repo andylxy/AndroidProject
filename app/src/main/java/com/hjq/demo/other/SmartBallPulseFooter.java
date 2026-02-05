@@ -7,13 +7,12 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.animation.AccelerateDecelerateInterpolator;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.ColorUtils;
-
 import com.hjq.demo.R;
+import com.hjq.smallest.width.SmallestWidthAdaptation;
 import com.scwang.smart.refresh.layout.api.RefreshFooter;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.constant.SpinnerStyle;
@@ -36,8 +35,11 @@ public final class SmartBallPulseFooter extends SimpleComponent implements Refre
 
     private final Paint mPaint;
 
-    private int mNormalColor = 0xFFEEEEEE;
-    private int[] mAnimatingColor = {0xFF30B399, 0xFFFF4600, 0xFF142DCC};
+    private int mNormalColor = Color.parseColor("#EEEEEE");
+    private int[] mAnimatingColor = {
+            Color.parseColor("#30B399"),
+            Color.parseColor("#FF4600"),
+            Color.parseColor("#142DCC")};
 
     private final float mCircleSpacing;
 
@@ -46,14 +48,14 @@ public final class SmartBallPulseFooter extends SimpleComponent implements Refre
 
     private final float mTextWidth;
 
-    public SmartBallPulseFooter(Context context) {
+    public SmartBallPulseFooter(@NonNull Context context) {
         this(context, null);
     }
 
-    public SmartBallPulseFooter(Context context, @Nullable AttributeSet attrs) {
+    public SmartBallPulseFooter(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs, 0);
 
-        setMinimumHeight((int) getResources().getDimension(R.dimen.dp_60));
+        setMinimumHeight((int) SmallestWidthAdaptation.dp2px(context, 60));
 
         mPaint = new Paint();
         mPaint.setColor(Color.WHITE);
@@ -62,17 +64,17 @@ public final class SmartBallPulseFooter extends SimpleComponent implements Refre
 
         mSpinnerStyle = SpinnerStyle.Translate;
 
-        mCircleSpacing = getResources().getDimension(R.dimen.dp_2);
-        mPaint.setTextSize(getResources().getDimension(R.dimen.sp_14));
+        mCircleSpacing = SmallestWidthAdaptation.dp2px(context, 2);
+        mPaint.setTextSize(SmallestWidthAdaptation.sp2px(context, 14));
         mTextWidth = mPaint.measureText(getContext().getString(R.string.common_no_more_data));
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
+    protected void dispatchDraw(@NonNull Canvas canvas) {
         final int width = getWidth();
         final int height = getHeight();
         if (mNoMoreData) {
-            mPaint.setColor(0xFF898989);
+            mPaint.setColor(Color.parseColor("#898989"));
             canvas.drawText(getContext().getString(R.string.common_no_more_data),(width - mTextWidth) / 2,(height - mPaint.getTextSize()) / 2, mPaint);
         } else {
             float radius = (Math.min(width, height) - mCircleSpacing * 2) / 7;
@@ -136,7 +138,7 @@ public final class SmartBallPulseFooter extends SimpleComponent implements Refre
             if (colors.length > 1) {
                 setNormalColor(colors[1]);
             } else if (colors.length > 0) {
-                setNormalColor(ColorUtils.compositeColors(0x99FFFFFF, colors[0]));
+                setNormalColor(ColorUtils.compositeColors(Color.parseColor("#99FFFFFF"), colors[0]));
             }
             mManualNormalColor = false;
         }

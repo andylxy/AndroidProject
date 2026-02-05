@@ -13,12 +13,14 @@ ext {
     // 打印当前执行的任务名称
     println "GradleLog TaskNameOutput " + taskName
 
-    def serverType = SERVER_TYPE_PRODUCT
+    def serverType
 
     if (taskName.endsWith("Debug")) {
         serverType = SERVER_TYPE_TEST
     } else if (taskName.endsWith("Preview")) {
         serverType = SERVER_TYPE_PREVIEW
+    } else {
+        serverType = SERVER_TYPE_PRODUCT
     }
 
     // 从 Gradle 命令中读取参数配置，例如：./gradlew assembleRelease -P ServerType="test"
@@ -44,7 +46,8 @@ ext {
         case SERVER_TYPE_TEST:
         case SERVER_TYPE_PREVIEW:
             LOG_ENABLE = true
-            BUGLY_ID = "请自行替换 Bugly 上面的 AppID"
+            BUGLY_ID = "请自行替换 Bugly 上面的 AppId"
+            BUGLY_KEY = "请自行替换 Bugly 上面的 AppKey"
             if (serverType == SERVER_TYPE_PREVIEW) {
                 HOST_URL = "https://www.pre.baidu.com/"
             } else {
@@ -53,7 +56,8 @@ ext {
             break
         case SERVER_TYPE_PRODUCT:
             LOG_ENABLE = false
-            BUGLY_ID = "请自行替换 Bugly 上面的 AppID"
+            BUGLY_ID = "请自行替换 Bugly 上面的 AppId"
+            BUGLY_KEY = "请自行替换 Bugly 上面的 AppKey"
             HOST_URL = "https://www.baidu.com/"
             break
     }

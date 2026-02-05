@@ -1,15 +1,12 @@
 package com.hjq.demo.http.glide;
 
 import androidx.annotation.NonNull;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-
 import java.io.InputStream;
-
 import okhttp3.Call;
 
 /**
@@ -20,6 +17,7 @@ import okhttp3.Call;
  */
 public final class OkHttpLoader implements ModelLoader<GlideUrl, InputStream> {
 
+    @NonNull
     private final Call.Factory mFactory;
 
     private OkHttpLoader(@NonNull Call.Factory factory) {
@@ -38,6 +36,7 @@ public final class OkHttpLoader implements ModelLoader<GlideUrl, InputStream> {
 
     public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
 
+        @NonNull
         private final Call.Factory mFactory;
 
         Factory(@NonNull Call.Factory factory) {
@@ -51,6 +50,8 @@ public final class OkHttpLoader implements ModelLoader<GlideUrl, InputStream> {
         }
 
         @Override
-        public void teardown() {}
+        public void teardown() {
+            // default implementation ignored
+        }
     }
 }

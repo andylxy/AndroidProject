@@ -1,15 +1,17 @@
 package com.hjq.demo.app;
 
+import android.graphics.Insets;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
-
+import android.view.View.OnApplyWindowInsetsListener;
+import android.view.WindowInsets;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.bar.TitleBar;
+import com.hjq.core.tools.AndroidVersion;
 import com.hjq.demo.R;
+import com.hjq.demo.action.ImmersionAction;
 import com.hjq.demo.action.TitleBarAction;
 
 /**
@@ -18,8 +20,8 @@ import com.hjq.demo.action.TitleBarAction;
  *    time   : 2020/10/31
  *    desc   : 带标题栏的 Fragment 业务基类
  */
-public abstract class TitleBarFragment<A extends AppActivity> extends AppFragment<A>
-        implements TitleBarAction {
+public abstract class TitleBarFragment<A extends AppActivity>
+        extends AppFragment<A> implements TitleBarAction, ImmersionAction {
 
     /** 标题栏对象 */
     private TitleBar mTitleBar;
@@ -31,17 +33,46 @@ public abstract class TitleBarFragment<A extends AppActivity> extends AppFragmen
         super.onViewCreated(view, savedInstanceState);
 
         // 设置标题栏点击监听
-        if (getTitleBar() != null) {
-            getTitleBar().setOnTitleBarListener(this);
+        TitleBar titleBar = acquireTitleBar();
+        if (titleBar != null) {
+            titleBar.setOnTitleBarListener(this);
         }
 
         if (isStatusBarEnabled()) {
             // 初始化沉浸式状态栏
             getStatusBarConfig().init();
+        }
 
-            if (getTitleBar() != null) {
-                // 设置标题栏沉浸
-                ImmersionBar.setTitleBar(this, getTitleBar());
+        // 适配 Android 15 EdgeToEdge 特性
+        if (AndroidVersion.isAndroid15()) {
+            view.setOnApplyWindowInsetsListener(new OnApplyWindowInsetsListener()  {
+
+                @NonNull
+                @Override
+                public WindowInsets onApplyWindowInsets(@NonNull View v, @NonNull WindowInsets insets) {
+                    Insets systemBars = insets.getInsets(WindowInsets.Type.systemBars());
+                    View immersionTopView = getImmersionTopView();
+                    View immersionBottomView = getImmersionBottomView();
+                    if (immersionTopView != null && immersionTopView == immersionBottomView) {
+                        immersionTopView.setPadding(immersionTopView.getPaddingLeft(), systemBars.top,
+                                                    immersionTopView.getPaddingRight(), systemBars.bottom);
+                        return insets;
+                    }
+                    if (immersionTopView != null) {
+                        immersionTopView.setPadding(immersionTopView.getPaddingLeft(), systemBars.top,
+                                                    immersionTopView.getPaddingRight(), immersionTopView.getPaddingBottom());
+                    }
+                    if (immersionBottomView != null) {
+                        immersionBottomView.setPadding(immersionBottomView.getPaddingLeft(), immersionBottomView.getPaddingTop(),
+                                                       immersionBottomView.getPaddingRight(), systemBars.bottom);
+                    }
+                    return insets;
+                }
+            });
+        } else {
+            View immersionTopView = getImmersionTopView();
+            if (immersionTopView != null) {
+                ImmersionBar.setTitleBar(this, immersionTopView);
             }
         }
     }
@@ -91,16 +122,26 @@ public abstract class TitleBarFragment<A extends AppActivity> extends AppFragmen
      * 获取状态栏字体颜色
      */
     protected boolean isStatusBarDarkFont() {
+        A activity = getAttachActivity();
+        if (activity == null) {
+            return false;
+        }
         // 返回真表示黑色字体
-        return getAttachActivity().isStatusBarDarkFont();
+        return activity.isStatusBarDarkFont();
     }
 
     @Override
     @Nullable
-    public TitleBar getTitleBar() {
+    public TitleBar acquireTitleBar() {
         if (mTitleBar == null || !isLoading()) {
-            mTitleBar = obtainTitleBar((ViewGroup) getView());
+            mTitleBar = findTitleBar(getView());
         }
         return mTitleBar;
+    }
+
+    @Nullable
+    @Override
+    public View getImmersionTopView() {
+        return acquireTitleBar();
     }
 }

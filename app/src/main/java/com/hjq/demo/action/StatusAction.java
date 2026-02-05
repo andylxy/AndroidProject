@@ -4,12 +4,10 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-
 import androidx.annotation.DrawableRes;
 import androidx.annotation.RawRes;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
-
 import com.hjq.demo.R;
 import com.hjq.demo.widget.StatusLayout;
 
@@ -24,7 +22,7 @@ public interface StatusAction {
     /**
      * 获取状态布局
      */
-    StatusLayout getStatusLayout();
+    StatusLayout acquireStatusLayout();
 
     /**
      * 显示加载中
@@ -34,7 +32,10 @@ public interface StatusAction {
     }
 
     default void showLoading(@RawRes int id) {
-        StatusLayout layout = getStatusLayout();
+        StatusLayout layout = acquireStatusLayout();
+        if (layout == null) {
+            return;
+        }
         layout.show();
         layout.setAnimResource(id);
         layout.setHint("");
@@ -45,7 +46,7 @@ public interface StatusAction {
      * 显示加载完成
      */
     default void showComplete() {
-        StatusLayout layout = getStatusLayout();
+        StatusLayout layout = acquireStatusLayout();
         if (layout == null || !layout.isShow()) {
             return;
         }
@@ -63,7 +64,10 @@ public interface StatusAction {
      * 显示错误提示
      */
     default void showError(StatusLayout.OnRetryListener listener) {
-        StatusLayout layout = getStatusLayout();
+        StatusLayout layout = acquireStatusLayout();
+        if (layout == null) {
+            return;
+        }
         Context context = layout.getContext();
         ConnectivityManager manager = ContextCompat.getSystemService(context, ConnectivityManager.class);
         if (manager != null) {
@@ -81,13 +85,19 @@ public interface StatusAction {
      * 显示自定义提示
      */
     default void showLayout(@DrawableRes int drawableId, @StringRes int stringId, StatusLayout.OnRetryListener listener) {
-        StatusLayout layout = getStatusLayout();
+        StatusLayout layout = acquireStatusLayout();
+        if (layout == null) {
+            return;
+        }
         Context context = layout.getContext();
         showLayout(ContextCompat.getDrawable(context, drawableId), context.getString(stringId), listener);
     }
 
     default void showLayout(Drawable drawable, CharSequence hint, StatusLayout.OnRetryListener listener) {
-        StatusLayout layout = getStatusLayout();
+        StatusLayout layout = acquireStatusLayout();
+        if (layout == null) {
+            return;
+        }
         layout.show();
         layout.setIcon(drawable);
         layout.setHint(hint);

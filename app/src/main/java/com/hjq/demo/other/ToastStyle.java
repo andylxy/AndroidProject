@@ -3,9 +3,9 @@ package com.hjq.demo.other;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.util.TypedValue;
-
+import androidx.annotation.NonNull;
 import com.hjq.demo.R;
+import com.hjq.smallest.width.SmallestWidthAdaptation;
 import com.hjq.toast.style.BlackToastStyle;
 
 /**
@@ -17,27 +17,27 @@ import com.hjq.toast.style.BlackToastStyle;
 public final class ToastStyle extends BlackToastStyle {
 
     @Override
-    protected Drawable getBackgroundDrawable(Context context) {
+    protected Drawable getBackgroundDrawable(@NonNull Context context) {
         GradientDrawable drawable = new GradientDrawable();
         // 设置颜色
         drawable.setColor(0X88000000);
         // 设置圆角
-        drawable.setCornerRadius(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (int) context.getResources().getDimension(R.dimen.button_circle_size), context.getResources().getDisplayMetrics()));
+        drawable.setCornerRadius((int) context.getResources().getDimension(R.dimen.button_circle_size));
         return drawable;
     }
 
     @Override
-    protected float getTextSize(Context context) {
-        return context.getResources().getDimension(R.dimen.sp_14);
+    protected float getTextSize(@NonNull Context context) {
+        return SmallestWidthAdaptation.sp2px(context, 14);
     }
 
     @Override
-    protected int getHorizontalPadding(Context context) {
-        return (int) context.getResources().getDimension(R.dimen.sp_24);
+    protected int getHorizontalPadding(@NonNull Context context) {
+        return (int) SmallestWidthAdaptation.sp2px(context, 24);
     }
 
     @Override
-    protected int getVerticalPadding(Context context) {
-        return (int) context.getResources().getDimension(R.dimen.sp_16);
+    protected int getVerticalPadding(@NonNull Context context) {
+        return (int) SmallestWidthAdaptation.sp2px(context, 16);
     }
 }

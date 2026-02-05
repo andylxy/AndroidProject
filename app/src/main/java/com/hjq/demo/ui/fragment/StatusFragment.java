@@ -2,20 +2,17 @@ package com.hjq.demo.ui.fragment;
 
 import android.view.View;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.hjq.base.BaseAdapter;
+import com.hjq.custom.widget.layout.WrapRecyclerView;
 import com.hjq.demo.R;
 import com.hjq.demo.app.AppActivity;
 import com.hjq.demo.app.TitleBarFragment;
 import com.hjq.demo.ui.adapter.StatusAdapter;
-import com.hjq.widget.layout.WrapRecyclerView;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,17 +45,21 @@ public final class StatusFragment extends TitleBarFragment<AppActivity>
         mRefreshLayout = findViewById(R.id.rl_status_refresh);
         mRecyclerView = findViewById(R.id.rv_status_list);
 
-        mAdapter = new StatusAdapter(getAttachActivity());
+        mAdapter = new StatusAdapter(mRecyclerView.getContext());
         mAdapter.setOnItemClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
 
         TextView headerView = mRecyclerView.addHeaderView(R.layout.picker_item);
-        headerView.setText("我是头部");
-        headerView.setOnClickListener(v -> toast("点击了头部"));
+        if (headerView != null) {
+            headerView.setText("我是头部");
+            headerView.setOnClickListener(v -> toast("点击了头部"));
+        }
 
         TextView footerView = mRecyclerView.addFooterView(R.layout.picker_item);
-        footerView.setText("我是尾部");
-        footerView.setOnClickListener(v -> toast("点击了尾部"));
+        if (footerView != null) {
+            footerView.setText("我是尾部");
+            footerView.setOnClickListener(v -> toast("点击了尾部"));
+        }
 
         mRefreshLayout.setOnRefreshLoadMoreListener(this);
     }
@@ -74,7 +75,7 @@ public final class StatusFragment extends TitleBarFragment<AppActivity>
     private List<String> analogData() {
         List<String> data = new ArrayList<>();
         for (int i = mAdapter.getCount(); i < mAdapter.getCount() + 20; i++) {
-            data.add("我是第" + i + "条目");
+            data.add("我是第 " + i + " 条目");
         }
         return data;
     }
@@ -87,7 +88,7 @@ public final class StatusFragment extends TitleBarFragment<AppActivity>
      * @param position          被点击的条目位置
      */
     @Override
-    public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
+    public void onItemClick(@NonNull RecyclerView recyclerView, @NonNull View itemView, int position) {
         toast(mAdapter.getItem(position));
     }
 

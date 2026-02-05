@@ -4,6 +4,8 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -22,7 +24,6 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.VideoView;
-
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,14 +31,12 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
-
 import com.airbnb.lottie.LottieAnimationView;
-import com.hjq.base.action.ActivityAction;
+import com.hjq.core.action.ActivityAction;
+import com.hjq.custom.widget.layout.SimpleLayout;
+import com.hjq.custom.widget.view.PlayButton;
 import com.hjq.demo.R;
-import com.hjq.demo.ui.dialog.MessageDialog;
-import com.hjq.widget.layout.SimpleLayout;
-import com.hjq.widget.view.PlayButton;
-
+import com.hjq.demo.ui.dialog.common.MessageDialog;
 import java.io.File;
 import java.util.Formatter;
 import java.util.Locale;
@@ -68,7 +67,7 @@ public final class PlayerView extends SimpleLayout
 
     private final ViewGroup mTopLayout;
     private final TextView mTitleView;
-    private final View mLeftView;
+    private final ImageView mBackView;
 
     private final ViewGroup mBottomLayout;
     private final TextView mPlayTime;
@@ -106,19 +105,92 @@ public final class PlayerView extends SimpleLayout
     private OnPlayListener mListener;
 
     /** 音量管理器 */
+    @Nullable
     private final AudioManager mAudioManager;
     /** 最大音量值 */
     private int mMaxVoice;
     /** 当前音量值 */
     private int mCurrentVolume;
-    /** 当前亮度值 */
-    private float mCurrentBrightness;
+    /** 当前亮度值百分比 */
+    private float mCurrentBrightnessPercent;
     /** 当前窗口对象 */
+    @Nullable
     private Window mWindow;
     /** 调整秒数 */
     private int mAdjustSecond;
     /** 触摸方向 */
     private int mTouchOrientation = -1;
+
+    /**
+     * 刷新任务
+     */
+    private final Runnable mRefreshRunnable = new Runnable() {
+
+        @Override
+        public void run() {
+            int progress = mVideoView.getCurrentPosition();
+            // 这里优化了播放的秒数计算，将 800 毫秒估算成 1 秒
+            if (progress + 1000 < mVideoView.getDuration()) {
+                // 进行四舍五入计算
+                progress = Math.round(progress / 1000f) * 1000;
+            }
+            mPlayTime.setText(conversionTime(progress));
+            mProgressView.setProgress(progress);
+            mProgressView.setSecondaryProgress((int) (mVideoView.getBufferPercentage() / 100f * mVideoView.getDuration()));
+            if (mVideoView.isPlaying()) {
+                if (!mLockMode && mBottomLayout.getVisibility() == GONE) {
+                    mBottomLayout.setVisibility(VISIBLE);
+                }
+                if (!mVideoView.getKeepScreenOn()) {
+                    mVideoView.setKeepScreenOn(true);
+                }
+            } else {
+                if (mBottomLayout.getVisibility() == VISIBLE) {
+                    mBottomLayout.setVisibility(GONE);
+                }
+                if (mVideoView.getKeepScreenOn()) {
+                    mVideoView.setKeepScreenOn(false);
+                }
+            }
+            postDelayed(this, REFRESH_TIME);
+
+            if (mListener == null) {
+                return;
+            }
+            mListener.onPlayProgress(PlayerView.this);
+        }
+    };
+
+    /**
+     * 显示控制面板
+     */
+    private final Runnable mShowControllerRunnable = () -> {
+        if (!mControllerShow) {
+            showController();
+        }
+    };
+
+    /**
+     * 隐藏控制面板
+     */
+    private final Runnable mHideControllerRunnable = () -> {
+        if (mControllerShow) {
+            hideController();
+        }
+    };
+
+    /**
+     * 显示提示
+     */
+    private final Runnable mShowMessageRunnable = () -> {
+        hideController();
+        mMessageLayout.setVisibility(VISIBLE);
+    };
+
+    /**
+     * 隐藏提示
+     */
+    private final Runnable mHideMessageRunnable = () -> mMessageLayout.setVisibility(GONE);
 
     public PlayerView(@NonNull Context context) {
         this(context, null);
@@ -132,12 +204,12 @@ public final class PlayerView extends SimpleLayout
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public PlayerView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public PlayerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         LayoutInflater.from(getContext()).inflate(R.layout.widget_player_view, this, true);
         mTopLayout = findViewById(R.id.ll_player_view_top);
-        mLeftView = findViewById(R.id.iv_player_view_left);
+        mBackView = findViewById(R.id.iv_player_view_left);
         mTitleView = findViewById(R.id.tv_player_view_title);
 
         mBottomLayout = findViewById(R.id.ll_player_view_bottom);
@@ -153,7 +225,7 @@ public final class PlayerView extends SimpleLayout
         mLottieView = findViewById(R.id.lav_player_view_lottie);
         mMessageView = findViewById(R.id.tv_player_view_message);
 
-        mLeftView.setOnClickListener(this);
+        mBackView.setOnClickListener(this);
         mControlView.setOnClickListener(this);
         mLockView.setOnClickListener(this);
         this.setOnClickListener(this);
@@ -166,6 +238,20 @@ public final class PlayerView extends SimpleLayout
         mVideoView.setOnErrorListener(this);
 
         mAudioManager = ContextCompat.getSystemService(getContext(), AudioManager.class);
+
+        Drawable backIconDrawable;
+        // 注意这里不要用 View 的 getLayoutDirection() 来判断，因为获取到的不准确
+        if (getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+            backIconDrawable = ContextCompat.getDrawable(context, R.drawable.arrows_right_ic);
+        } else {
+            backIconDrawable = ContextCompat.getDrawable(context, R.drawable.arrows_left_ic);
+        }
+        mBackView.setImageDrawable(backIconDrawable);
+
+        Activity activity = getActivity();
+        if (activity != null) {
+            mWindow = activity.getWindow();
+        }
     }
 
     /**
@@ -322,7 +408,7 @@ public final class PlayerView extends SimpleLayout
      */
     public void setOnPlayListener(@Nullable OnPlayListener listener) {
         mListener = listener;
-        mLeftView.setVisibility(mListener != null ? VISIBLE : INVISIBLE);
+        mBackView.setVisibility(mListener != null ? VISIBLE : INVISIBLE);
     }
 
     /**
@@ -491,12 +577,13 @@ public final class PlayerView extends SimpleLayout
         if (progress != 0) {
             // 记录当前播放进度
             mCurrentProgress = progress;
-        } else {
-            // 如果 Activity 返回到后台，progress 会等于 0，而 mVideoView.getDuration 会等于 -1
-            // 所以要避免在这种情况下记录当前的播放进度，以便用户从后台返回到前台的时候恢复正确的播放进度
-            if (mVideoView.getDuration() > 0) {
-                mCurrentProgress = progress;
-            }
+            return;
+        }
+
+        // 如果 Activity 返回到后台，progress 会等于 0，而 mVideoView.getDuration 会等于 -1
+        // 所以要避免在这种情况下记录当前的播放进度，以便用户从后台返回到前台的时候恢复正确的播放进度
+        if (mVideoView.getDuration() > 0) {
+            mCurrentProgress = 0;
         }
     }
 
@@ -598,6 +685,10 @@ public final class PlayerView extends SimpleLayout
 
     @Override
     public boolean onError(MediaPlayer player, int what, int extra) {
+        if (mListener != null && mListener.onPlayError(this, what, extra)) {
+            return true;
+        }
+
         Activity activity = getActivity();
         if (activity == null) {
             return false;
@@ -611,7 +702,7 @@ public final class PlayerView extends SimpleLayout
         }
         message += "\n" + String.format(activity.getString(R.string.common_video_error_supplement), what, extra);
 
-        new MessageDialog.Builder(getActivity())
+        new MessageDialog.Builder(activity)
                 .setMessage(message)
                 .setConfirm(R.string.common_confirm)
                 .setCancel(null)
@@ -626,7 +717,7 @@ public final class PlayerView extends SimpleLayout
      */
 
     @Override
-    public void onClick(View view) {
+    public void onClick(@NonNull View view) {
         if (view == this) {
 
             // 先移除之前发送的
@@ -643,7 +734,7 @@ public final class PlayerView extends SimpleLayout
             post(mShowControllerRunnable);
             postDelayed(mHideControllerRunnable, CONTROLLER_TIME);
 
-        } else if (view == mLeftView) {
+        } else if (view == mBackView) {
 
             if (mListener == null) {
                 return;
@@ -698,28 +789,26 @@ public final class PlayerView extends SimpleLayout
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(@NonNull MotionEvent event) {
         // 满足任一条件：关闭手势控制、处于锁定状态、处于缓冲状态
         if (!mGestureEnabled || mLockMode || mLottieView.isAnimating()) {
             return super.onTouchEvent(event);
         }
 
+        int layoutDirection = getResources().getConfiguration().getLayoutDirection();
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mMaxVoice = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-                mCurrentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                if (mAudioManager != null) {
+                    mMaxVoice = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                    mCurrentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                }
 
-                mWindow = getActivity().getWindow();
-                mCurrentBrightness = mWindow.getAttributes().screenBrightness;
-                // 如果当前亮度是默认的，那么就获取系统当前的屏幕亮度
-                if (mCurrentBrightness == WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE) {
-                    try {
-                        // 这里需要注意，Settings.System.SCREEN_BRIGHTNESS 获取到的值在小米手机上面会超过 255
-                        mCurrentBrightness = Math.min(Settings.System.getInt(
-                                getContext().getContentResolver(),
-                                Settings.System.SCREEN_BRIGHTNESS), 255) / 255f;
-                    } catch (Settings.SettingNotFoundException ignored) {
-                        mCurrentBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_OFF;
+                if (mWindow != null) {
+                    mCurrentBrightnessPercent = mWindow.getAttributes().screenBrightness;
+                    // 如果当前亮度是默认的，那么就获取系统当前的屏幕亮度
+                    if (mCurrentBrightnessPercent == WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE) {
+                        mCurrentBrightnessPercent = (float) getBrightness() / (float) getMaxBrightness();
                     }
                 }
 
@@ -746,13 +835,21 @@ public final class PlayerView extends SimpleLayout
 
                 // 如果手指触摸方向是水平的
                 if (mTouchOrientation == LinearLayout.HORIZONTAL) {
-                    int second = -(int) (distanceX / (float) getWidth() * 60f);
+                    int second = -(int) (distanceX / getWidth() * 60f);
+                    if (layoutDirection == View.LAYOUT_DIRECTION_RTL) {
+                        second = -second;
+                    }
                     int progress = getProgress() + second * 1000;
                     if (progress >= 0 && progress <= getDuration()) {
                         mAdjustSecond = second;
-                        mLottieView.setImageResource(mAdjustSecond < 0 ?
-                                R.drawable.video_schedule_rewind_ic :
-                                R.drawable.video_schedule_forward_ic);
+                        @DrawableRes
+                        int imageResource;
+                        if (layoutDirection == View.LAYOUT_DIRECTION_LTR) {
+                            imageResource = mAdjustSecond < 0 ? R.drawable.video_schedule_rewind_ic : R.drawable.video_schedule_forward_ic;
+                        } else {
+                            imageResource = mAdjustSecond < 0 ? R.drawable.video_schedule_forward_ic : R.drawable.video_schedule_rewind_ic;
+                        }
+                        mLottieView.setImageResource(imageResource);
                         mMessageView.setText(String.format("%s s", Math.abs(mAdjustSecond)));
                         post(mShowMessageRunnable);
                     }
@@ -762,7 +859,8 @@ public final class PlayerView extends SimpleLayout
                 // 如果手指触摸方向是垂直的
                 if (mTouchOrientation == LinearLayout.VERTICAL) {
                     // 判断触摸点是在屏幕左边还是右边
-                    if ((int) event.getX() < getWidth() / 2) {
+                    if ((layoutDirection == View.LAYOUT_DIRECTION_LTR && (int) event.getX() < getWidth() / 2) ||
+                        (layoutDirection == View.LAYOUT_DIRECTION_RTL && (int) event.getX() > getWidth() / 2)) {
                         // 手指在屏幕左边
                         float delta = (distanceY / getHeight()) * WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL;
                         if (delta == 0) {
@@ -770,12 +868,15 @@ public final class PlayerView extends SimpleLayout
                         }
 
                         // 更新系统亮度
-                        float brightness = Math.min(Math.max(mCurrentBrightness + delta,
+                        float brightness = Math.min(Math.max(mCurrentBrightnessPercent + delta,
                                 WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_OFF),
                                 WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL);
-                        WindowManager.LayoutParams attributes = mWindow.getAttributes();
-                        attributes.screenBrightness = brightness;
-                        mWindow.setAttributes(attributes);
+
+                        if (mWindow != null) {
+                            WindowManager.LayoutParams attributes = mWindow.getAttributes();
+                            attributes.screenBrightness = brightness;
+                            mWindow.setAttributes(attributes);
+                        }
 
                         int percent = (int) (brightness * 100);
 
@@ -799,25 +900,27 @@ public final class PlayerView extends SimpleLayout
                         break;
                     }
 
-                    // 更新系统音量
-                    int voice = (int) Math.min(Math.max(mCurrentVolume + delta, 0), mMaxVoice);
-                    mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, voice, 0);
+                    if (mAudioManager != null) {
+                        // 更新系统音量
+                        int voice = (int) Math.min(Math.max(mCurrentVolume + delta, 0), mMaxVoice);
+                        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, voice, 0);
 
-                    int percent = voice * 100 / mMaxVoice;
+                        int percent = voice * 100 / mMaxVoice;
 
-                    @DrawableRes int iconId;
-                    if (percent > 100 / 3 * 2) {
-                        iconId = R.drawable.video_volume_high_ic;
-                    } else if (percent > 100 / 3) {
-                        iconId = R.drawable.video_volume_medium_ic;
-                    } else if (percent != 0) {
-                        iconId = R.drawable.video_volume_low_ic;
-                    } else {
-                        iconId = R.drawable.video_volume_mute_ic;
+                        @DrawableRes int iconId;
+                        if (percent > 100 / 3 * 2) {
+                            iconId = R.drawable.video_volume_high_ic;
+                        } else if (percent > 100 / 3) {
+                            iconId = R.drawable.video_volume_medium_ic;
+                        } else if (percent != 0) {
+                            iconId = R.drawable.video_volume_low_ic;
+                        } else {
+                            iconId = R.drawable.video_volume_mute_ic;
+                        }
+                        mLottieView.setImageResource(iconId);
+                        mMessageView.setText(String.format("%s %%", percent));
+                        post(mShowMessageRunnable);
                     }
-                    mLottieView.setImageResource(iconId);
-                    mMessageView.setText(String.format("%s %%", percent));
-                    post(mShowMessageRunnable);
                     break;
                 }
                 break;
@@ -831,7 +934,9 @@ public final class PlayerView extends SimpleLayout
                 }
             case MotionEvent.ACTION_CANCEL:
                 mTouchOrientation = -1;
-                mCurrentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                if (mAudioManager != null) {
+                    mCurrentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                }
                 if (mAdjustSecond != 0) {
                     // 调整播放进度
                     setProgress(getProgress() + mAdjustSecond * 1000);
@@ -845,73 +950,6 @@ public final class PlayerView extends SimpleLayout
         }
         return true;
     }
-
-    /**
-     * 刷新任务
-     */
-    private final Runnable mRefreshRunnable = new Runnable() {
-
-        @Override
-        public void run() {
-            int progress = mVideoView.getCurrentPosition();
-            // 这里优化了播放的秒数计算，将 800 毫秒估算成 1 秒
-            if (progress + 1000 < mVideoView.getDuration()) {
-                // 进行四舍五入计算
-                progress = Math.round(progress / 1000f) * 1000;
-            }
-            mPlayTime.setText(conversionTime(progress));
-            mProgressView.setProgress(progress);
-            mProgressView.setSecondaryProgress((int) (mVideoView.getBufferPercentage() / 100f * mVideoView.getDuration()));
-            if (mVideoView.isPlaying()) {
-                if (!mLockMode && mBottomLayout.getVisibility() == GONE) {
-                    mBottomLayout.setVisibility(VISIBLE);
-                }
-            } else {
-                if (mBottomLayout.getVisibility() == VISIBLE) {
-                    mBottomLayout.setVisibility(GONE);
-                }
-            }
-            postDelayed(this, REFRESH_TIME);
-
-            if (mListener == null) {
-                return;
-            }
-            mListener.onPlayProgress(PlayerView.this);
-        }
-    };
-
-    /**
-     * 显示控制面板
-     */
-    private final Runnable mShowControllerRunnable = () -> {
-        if (!mControllerShow) {
-            showController();
-        }
-    };
-
-    /**
-     * 隐藏控制面板
-     */
-    private final Runnable mHideControllerRunnable = () -> {
-        if (mControllerShow) {
-            hideController();
-        }
-    };
-
-    /**
-     * 显示提示
-     */
-    private final Runnable mShowMessageRunnable = () -> {
-        hideController();
-        mMessageLayout.setVisibility(VISIBLE);
-    };
-
-    /**
-     * 隐藏提示
-     */
-    private final Runnable mHideMessageRunnable = () -> {
-        mMessageLayout.setVisibility(GONE);
-    };
 
     /**
      * 时间转换
@@ -934,6 +972,36 @@ public final class PlayerView extends SimpleLayout
     }
 
     /**
+     * 获取屏幕当前的亮度
+     */
+    private int getBrightness() {
+        try {
+            // 这里需要注意，Settings.System.SCREEN_BRIGHTNESS 获取到的值在小米手机上面会超过 255
+            return Settings.System.getInt(getContext().getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+        // 如果没有取值成功，那么就默认设置为一半亮度，防止突然变得很亮或很暗
+        return getMaxBrightness() / 2;
+    }
+
+    /**
+     * 获取屏幕最大显示的亮度，https://blog.csdn.net/jklwan/article/details/93669170
+     */
+    private int getMaxBrightness() {
+        try {
+            Resources system = Resources.getSystem();
+            int resId = system.getIdentifier("config_screenBrightnessSettingMaximum", "integer", "android");
+            if (resId != 0) {
+                return system.getInteger(resId);
+            }
+        } catch (Resources.NotFoundException e) {
+            e.printStackTrace();
+        }
+        return 255;
+    }
+
+    /**
      * 点击返回监听器
      */
     public interface OnPlayListener {
@@ -941,31 +1009,50 @@ public final class PlayerView extends SimpleLayout
         /**
          * 点击了返回按钮（可在此处处理返回事件）
          */
-        default void onClickBack(PlayerView view) {}
+        default void onClickBack(@NonNull PlayerView view) {
+            // default implementation ignored
+        }
 
         /**
          * 点击了锁定按钮
          */
-        default void onClickLock(PlayerView view) {}
+        default void onClickLock(@NonNull PlayerView view) {
+            // default implementation ignored
+        }
 
         /**
          * 点击了播放按钮
          */
-        default void onClickPlay(PlayerView view) {}
+        default void onClickPlay(@NonNull PlayerView view) {
+            // default implementation ignored
+        }
 
         /**
          * 播放开始（可在此处设置播放进度）
          */
-        default void onPlayStart(PlayerView view) {}
+        default void onPlayStart(@NonNull PlayerView view) {
+            // default implementation ignored
+        }
 
         /**
          * 播放进度发生改变
          */
-        default void onPlayProgress(PlayerView view) {}
+        default void onPlayProgress(@NonNull PlayerView view) {
+            // default implementation ignored
+        }
 
         /**
          * 播放结束（可在此处结束播放或者循环播放）
          */
-        default void onPlayEnd(PlayerView view) {}
+        default void onPlayEnd(@NonNull PlayerView view) {
+            // default implementation ignored
+        }
+
+        /**
+         * 播放出错
+         */
+        default boolean onPlayError(@NonNull PlayerView view, int what, int extra) {
+            return false;
+        }
     }
 }

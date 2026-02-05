@@ -1,0 +1,77 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.hjq.umeng.sdk">
+
+    <application>
+
+        <!-- 友盟 Key（请在 Gradle 中配置，请不要在此处修改） -->
+        <meta-data
+            android:name="UM_KEY"
+            android:value="${UM_KEY}" />
+
+        <!-- QQ AppId（请在 Gradle 中配置，请不要在此处修改） -->
+        <meta-data
+            android:name="QQ_ID"
+            android:value="${QQ_ID}" />
+        <!-- QQ Secret（请在 Gradle 中配置，请不要在此处修改） -->
+        <meta-data
+            android:name="QQ_SECRET"
+            android:value="${QQ_SECRET}" />
+
+        <!-- 微信 AppId（请在 Gradle 中配置，请不要在此处修改） -->
+        <meta-data
+            android:name="WX_ID"
+            android:value="${WX_ID}" />
+        <!-- 微信 Secret（请在 Gradle 中配置，请不要在此处修改） -->
+        <meta-data
+            android:name="WX_SECRET"
+            android:value="${WX_SECRET}" />
+
+        <!-- 友盟社会化 -->
+
+        <!-- QQ 回调 -->
+        <activity
+            android:name="com.tencent.tauth.AuthActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            tools:node="replace">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="tencent${QQ_ID}" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.tencent.connect.common.AssistActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            tools:node="replace" />
+
+        <!-- 微信回调（使用狸猫换太子） -->
+        <activity-alias
+            android:name="${applicationId}.wxapi.WXEntryActivity"
+            android:exported="true"
+            android:targetActivity=".WXEntryActivity" />
+        <activity android:name=".WXEntryActivity"
+            android:configChanges="orientation|keyboardHidden|navigation|screenSize"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="${applicationId}"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+    </application>
+
+    <!-- Android 11 软件包可见性适配：https://developer.android.google.cn/about/versions/11/privacy/package-visibility -->
+    <queries>
+        <!-- 手机 QQ 的包名 -->
+        <package android:name="com.tencent.mobileqq" />
+        <!-- 微信的包名 -->
+        <package android:name="com.tencent.mm" />
+    </queries>
+
+</manifest>
