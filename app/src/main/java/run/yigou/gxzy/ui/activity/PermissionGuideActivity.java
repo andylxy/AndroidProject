@@ -121,6 +121,9 @@ public final class PermissionGuideActivity extends AppActivity {
      * 在旧版设备上，系统会自动处理向后兼容
      */
     private void requestStoragePermission() {
+        // 用户点击同意，保存状态
+        com.tencent.mmkv.MMKV.defaultMMKV().encode("is_privacy_agreed", true);
+
         XXPermissions.with(this)
                 .permission(Permission.READ_MEDIA_IMAGES)
                 .permission(Permission.READ_MEDIA_VIDEO)

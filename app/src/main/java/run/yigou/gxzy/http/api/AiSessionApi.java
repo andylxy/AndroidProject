@@ -83,7 +83,7 @@ public final class AiSessionApi implements IRequestApi, IRequestHost {
         if(AppApplication.application.global_openness){
             return host;
         }
-       return AppConfig.getHostUrl();
+       return AppConfig.getHostUrl() + "/";
     }
 
     public final static class Bean implements Serializable {

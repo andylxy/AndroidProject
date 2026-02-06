@@ -64,7 +64,7 @@ public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A>
         if (!(result instanceof HttpData)) {
             return;
         }
-        toast(((HttpData<?>) result).getMessage());
+       // toast(((HttpData<?>) result).getMessage());
     }
 
     @Override

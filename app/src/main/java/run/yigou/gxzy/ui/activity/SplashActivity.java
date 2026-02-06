@@ -120,12 +120,20 @@ public final class SplashActivity extends AppActivity {
      * 检查存储权限
      */
     private void checkStoragePermission() {
-        if (XXPermissions.isGranted(this, Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE)) {
-            // 已授权，继续初始化
-            mPermissionChecked = true;
-            super.initActivity();
+        // 检查是否已经同意过隐私协议
+        boolean isAgreed = com.tencent.mmkv.MMKV.defaultMMKV().decodeBool("is_privacy_agreed", false);
+        if (isAgreed) {
+            // 已同意协议，检查权限
+            if (XXPermissions.isGranted(this, Permission.READ_MEDIA_IMAGES, Permission.READ_MEDIA_VIDEO, Permission.READ_MEDIA_AUDIO)) {
+                // 已授权，继续初始化
+                mPermissionChecked = true;
+                super.initActivity();
+            } else {
+                // 未授权，打开权限引导页（对话框样式）
+                PermissionGuideActivity.start(this, REQUEST_CODE_PERMISSION_GUIDE);
+            }
         } else {
-            // 未授权，打开权限引导页（对话框样式）
+            // 未同意协议，强制打开权限引导页（作为协议展示页）
             PermissionGuideActivity.start(this, REQUEST_CODE_PERMISSION_GUIDE);
         }
     }

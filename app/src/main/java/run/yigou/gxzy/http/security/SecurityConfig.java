@@ -274,9 +274,8 @@ public class SecurityConfig {
         
         StringBuilder queryString = new StringBuilder();
         boolean first = true;
-        /* TODO: Fix HttpParams iteration
-        for (String key : params.getParams().keySet()) {
-            Object value = params.getParams().get(key);
+        for (String key : params.getKeys()) {
+            Object value = params.get(key);
             if (!first) {
                 queryString.append("&");
             }
@@ -285,7 +284,6 @@ public class SecurityConfig {
                       .append(value != null ? value.toString() : "");
             first = false;
         }
-        */
         
         return queryString.toString();
     }
@@ -307,9 +305,8 @@ public class SecurityConfig {
             // 构建JSON请求体
             StringBuilder jsonBuilder = new StringBuilder("{");
             boolean first = true;
-            /* TODO: Fix HttpParams iteration
-            for (String key : params.getParams().keySet()) {
-                Object value = params.getParams().get(key);
+            for (String key : params.getKeys()) {
+                Object value = params.get(key);
                 if (!first) {
                     jsonBuilder.append(",");
                 }
@@ -322,16 +319,14 @@ public class SecurityConfig {
                 jsonBuilder.append("\"");
                 first = false;
             }
-            */
             jsonBuilder.append("}");
             return jsonBuilder.toString();
         } else if (bodyType == RequestBodyType.FORM) {
             // 构建表单请求体
             StringBuilder formBuilder = new StringBuilder();
             boolean first = true;
-            /* TODO: Fix HttpParams iteration
-            for (String key : params.getParams().keySet()) {
-                Object value = params.getParams().get(key);
+            for (String key : params.getKeys()) {
+                Object value = params.get(key);
                 if (!first) {
                     formBuilder.append("&");
                 }
@@ -340,7 +335,6 @@ public class SecurityConfig {
                           .append(value != null ? value.toString() : "");
                 first = false;
             }
-            */
             return formBuilder.toString();
         }
         

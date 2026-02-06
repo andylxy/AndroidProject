@@ -51,8 +51,8 @@ public class RequestHelper {
      * @return 主机地址
      */
     public static String getHost() {
-        IRequestServer server = new RequestServer();
-        String host = server.getHost();
+        // 直接从 AppConfig 获取原始 Host，避免使用 RequestServer.getHost() (因为它现在包含了 path)
+        String host = run.yigou.gxzy.other.AppConfig.getHostUrl();
         // 移除协议部分(http:// or https://)
         if (host.startsWith("http://")) {
             host = host.substring(7);
@@ -73,11 +73,11 @@ public class RequestHelper {
      * @return 完整请求路径
      */
     public static String getPath(IRequestApi api) {
-        IRequestServer server = new RequestServer();
+        RequestServer server = new RequestServer();
         // ⚠️ 签名用的 Host 需要去除协议头和末尾斜杠
-        String rawHost = server.getHost();
-        // String basePath = server.getPath();
-        String basePath = "/api/AppBookRequest/";
+        // String rawHost = server.getHost();
+        String basePath = server.getPath();
+        // String basePath = "/api/AppBookRequest/";
         String apiPath = api.getApi();
         
         // 组合基础路径和API路径

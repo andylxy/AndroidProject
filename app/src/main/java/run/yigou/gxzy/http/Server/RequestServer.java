@@ -27,20 +27,16 @@ public class RequestServer implements IRequestServer {
 
     @Override
     public String getHost() {
-        return AppConfig.getHostUrl();
+        return AppConfig.getHostUrl() + getPath();
     }
 
     public String getPath() {
         return "/api/AppBookRequest/";
     }
 
-    //    @Override
-//    public BodyType getType() {
-//        // 以表单的形式提交参数
-//        return BodyType.FORM;
-//    }
+
     @Override
     public IHttpPostBodyStrategy getBodyType() {
-        return RequestBodyType.FORM;
+        return RequestBodyType.JSON;
     }
 }

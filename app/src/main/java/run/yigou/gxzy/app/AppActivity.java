@@ -206,9 +206,9 @@ public abstract class AppActivity extends BaseActivity
 
     @Override
     public void onHttpSuccess(Object result) {
-        if (result instanceof HttpData) {
-            toast(((HttpData<?>) result).getMessage());
-        }
+        //if (result instanceof HttpData) {
+        //    toast(((HttpData<?>) result).getMessage());
+        //}
         onSucceed(result);
     }
 
