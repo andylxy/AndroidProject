@@ -9,7 +9,7 @@
 
 package run.yigou.gxzy.ui.tips.presenter;
 
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.utils.EasyLog;
 
 import java.util.ArrayList;
 import java.util.List;

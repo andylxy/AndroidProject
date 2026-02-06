@@ -14,7 +14,8 @@ import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.other.AppConfig;
 
 import com.hjq.http.config.IRequestServer;
-import com.hjq.http.model.BodyType;
+import com.hjq.http.config.IHttpPostBodyStrategy;
+import com.hjq.http.model.RequestBodyType;
 
 /**
  * author : Android 轮子哥
@@ -29,7 +30,6 @@ public class RequestServer implements IRequestServer {
         return AppConfig.getHostUrl();
     }
 
-    @Override
     public String getPath() {
         return "/api/AppBookRequest/";
     }
@@ -40,7 +40,7 @@ public class RequestServer implements IRequestServer {
 //        return BodyType.FORM;
 //    }
     @Override
-    public BodyType getType() {
-        return BodyType.JSON;
+    public IHttpPostBodyStrategy getBodyType() {
+        return RequestBodyType.FORM;
     }
 }

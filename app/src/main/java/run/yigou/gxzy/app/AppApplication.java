@@ -54,10 +54,13 @@ import run.yigou.gxzy.other.ToastStyle;
 
 import com.hjq.gson.factory.GsonFactory;
 import com.hjq.gson.factory.ParseExceptionCallback;
+import com.hjq.http.request.HttpRequest;
 import com.hjq.http.EasyConfig;
-import com.hjq.http.EasyLog;
+import com.hjq.http.config.IRequestInterceptor;
+import com.hjq.http.model.HttpParams;
+import com.hjq.http.model.HttpHeaders;
+import run.yigou.gxzy.utils.EasyLog;
 import com.hjq.toast.Toaster;
-import com.hjq.umeng.UmengClient;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
 import com.lucas.xbus.XEventBus;
@@ -259,8 +262,11 @@ public final class AppApplication extends Application {
                 .setHandler(new RequestHandler(application))
                 // 设置请求重试次数
                 .setRetryCount(2)
-                .setInterceptor((api, params, headers) -> {
-                    InterceptorHelper.handleIntercept(api, params, headers, this);
+                .setInterceptor(new IRequestInterceptor() {
+                    @Override
+                    public void interceptArguments(HttpRequest<?> httpRequest, HttpParams params, HttpHeaders headers) {
+                        InterceptorHelper.handleIntercept(httpRequest.getRequestApi(), params, headers, AppApplication.this);
+                    }
                 })
                 .into();
 

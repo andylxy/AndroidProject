@@ -16,10 +16,11 @@ import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.ui.activity.LoginActivity;
 import com.hjq.gson.factory.GsonFactory;
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.utils.EasyLog;
 import com.hjq.http.config.IRequestApi;
-import com.hjq.http.config.IRequestHandler;
+import com.hjq.http.request.HttpRequest;
 import com.hjq.http.exception.CancelException;
+import com.hjq.http.config.IRequestHandler;
 import com.hjq.http.exception.DataException;
 import com.hjq.http.exception.HttpException;
 import com.hjq.http.exception.NetworkException;
@@ -61,7 +62,7 @@ public final class RequestHandler implements IRequestHandler {
     }
 
     @Override
-    public Object requestSucceed(LifecycleOwner lifecycle, IRequestApi api, Response response, Type type) throws Exception {
+    public Object requestSuccess(HttpRequest<?> request, Response response, Type type) throws Exception {
 
         if (Response.class.equals(type)) {
             return response;
@@ -147,7 +148,7 @@ public final class RequestHandler implements IRequestHandler {
     }
 
     @Override
-    public Exception requestFail(LifecycleOwner lifecycle, IRequestApi api, Exception e) {
+    public Throwable requestFail(HttpRequest<?> request, Throwable e) {
         // 判断这个异常是不是自己抛的
         if (e instanceof HttpException) {
             if (e instanceof TokenException) {
@@ -195,31 +196,15 @@ public final class RequestHandler implements IRequestHandler {
         return new HttpException(e.getMessage(), e);
     }
 
+    /*
     @Override
-    public Object readCache(LifecycleOwner lifecycle, IRequestApi api, Type type) {
-        String cacheKey = GsonFactory.getSingletonGson().toJson(api);
-        String cacheValue = mMmkv.getString(cacheKey, null);
-        if (cacheValue == null || "".equals(cacheValue) || "{}".equals(cacheValue)) {
-            return null;
-        }
-        EasyLog.print("---------- cacheKey ----------");
-        EasyLog.json(cacheKey);
-        EasyLog.print("---------- cacheValue ----------");
-        EasyLog.json(cacheValue);
-        return GsonFactory.getSingletonGson().fromJson(cacheValue, type);
+    public Object readCache(HttpRequest<?> request, Type type) {
+        return null;
     }
 
     @Override
-    public boolean writeCache(LifecycleOwner lifecycle, IRequestApi api, Response response, Object result) {
-        String cacheKey = GsonFactory.getSingletonGson().toJson(api);
-        String cacheValue = GsonFactory.getSingletonGson().toJson(result);
-        if (cacheValue == null || "".equals(cacheValue) || "{}".equals(cacheValue)) {
-            return false;
-        }
-        EasyLog.print("---------- cacheKey ----------");
-        EasyLog.json(cacheKey);
-        EasyLog.print("---------- cacheValue ----------");
-        EasyLog.json(cacheValue);
-        return mMmkv.putString(cacheKey, cacheValue).commit();
+    public boolean writeCache(HttpRequest<?> request, Response response, Object result) {
+        return false;
     }
+    */
 }

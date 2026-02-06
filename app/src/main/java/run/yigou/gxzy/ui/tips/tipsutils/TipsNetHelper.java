@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.utils.EasyLog;
 
 import java.util.ArrayList;
 import java.util.Arrays;

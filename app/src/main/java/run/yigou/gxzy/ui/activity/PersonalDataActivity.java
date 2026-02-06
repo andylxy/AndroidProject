@@ -19,7 +19,7 @@ import run.yigou.gxzy.ui.dialog.AddressDialog;
 import run.yigou.gxzy.ui.dialog.InputDialog;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
-import com.hjq.http.model.FileContentResolver;
+import run.yigou.gxzy.http.model.FileContentResolver;
 import com.hjq.widget.layout.SettingBar;
 
 import java.io.File;

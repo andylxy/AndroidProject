@@ -199,25 +199,46 @@ public abstract class AppActivity extends BaseActivity
      */
 
     @Override
-    public void onStart(Call call) {
+    public void onHttpStart(com.hjq.http.config.IRequestApi api) {
         showDialog();
+        onStart((Call) null);
     }
 
     @Override
-    public void onSucceed(Object result) {
+    public void onHttpSuccess(Object result) {
         if (result instanceof HttpData) {
             toast(((HttpData<?>) result).getMessage());
         }
+        onSucceed(result);
     }
 
     @Override
-    public void onFail(Exception e) {
-        toast(e.getMessage());
+    public void onHttpFail(Throwable throwable) {
+        toast(throwable.getMessage());
+        onFail(throwable instanceof Exception ? (Exception) throwable : new Exception(throwable));
     }
 
     @Override
-    public void onEnd(Call call) {
+    public void onHttpEnd(com.hjq.http.config.IRequestApi api) {
         hideDialog();
+        onEnd((Call) null);
+    }
+
+    // 旧接口保留，供子类 override 或调用
+    public void onStart(Call call) {
+        // showDialog(); // 已经在 onHttpStart 调用
+    }
+
+    public void onSucceed(Object result) {
+        // default impl
+    }
+
+    public void onFail(Exception e) {
+        // default impl
+    }
+
+    public void onEnd(Call call) {
+        // hideDialog(); // 已经在 onHttpEnd 调用
     }
 
     @Override

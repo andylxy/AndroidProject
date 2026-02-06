@@ -82,14 +82,14 @@ public final class SafeDialog {
                         .request(new OnHttpListener<HttpData<Void>>() {
 
                             @Override
-                            public void onSucceed(HttpData<Void> data) {
+                            public void onHttpSuccess(HttpData<Void> data) {
                                 Toaster.show(R.string.common_code_send_hint);
                                 mCountdownView.start();
                                 setCancelable(false);
                             }
 
                             @Override
-                            public void onFail(Exception e) {
+                            public void onHttpFail(Throwable e) {
                                 Toaster.show(e.getMessage());
                             }
                         });
@@ -116,7 +116,7 @@ public final class SafeDialog {
                         .request(new OnHttpListener<HttpData<Void>>() {
 
                             @Override
-                            public void onSucceed(HttpData<Void> data) {
+                            public void onHttpSuccess(HttpData<Void> data) {
                                 autoDismiss();
                                 if (mListener == null) {
                                     return;
@@ -125,7 +125,7 @@ public final class SafeDialog {
                             }
 
                             @Override
-                            public void onFail(Exception e) {
+                            public void onHttpFail(Throwable e) {
                                 Toaster.show(e.getMessage());
                             }
                         });

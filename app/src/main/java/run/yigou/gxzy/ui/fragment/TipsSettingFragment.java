@@ -6,7 +6,7 @@ import android.view.View;
 import com.hjq.widget.layout.SettingBar;
 import com.hjq.widget.view.SwitchButton;
 import com.lucas.xbus.XEventBus;
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.utils.EasyLog;
 
 import run.yigou.gxzy.EventBus.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.R;

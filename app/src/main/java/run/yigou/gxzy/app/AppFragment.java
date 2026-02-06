@@ -3,6 +3,7 @@ package run.yigou.gxzy.app;
 import com.hjq.base.BaseFragment;
 import run.yigou.gxzy.action.ToastAction;
 import run.yigou.gxzy.http.model.HttpData;
+import com.hjq.http.config.IRequestApi;
 import com.hjq.http.listener.OnHttpListener;
 
 import okhttp3.Call;
@@ -54,12 +55,12 @@ public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A>
      */
 
     @Override
-    public void onStart(Call call) {
+    public void onHttpStart(IRequestApi api) {
         showDialog();
     }
 
     @Override
-    public void onSucceed(Object result) {
+    public void onHttpSuccess(Object result) {
         if (!(result instanceof HttpData)) {
             return;
         }
@@ -67,12 +68,12 @@ public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A>
     }
 
     @Override
-    public void onFail(Exception e) {
+    public void onHttpFail(Throwable e) {
         toast(e.getMessage());
     }
 
     @Override
-    public void onEnd(Call call) {
+    public void onHttpEnd(IRequestApi api) {
         hideDialog();
     }
 }

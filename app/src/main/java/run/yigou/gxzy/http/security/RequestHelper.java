@@ -2,7 +2,8 @@ package run.yigou.gxzy.http.security;
 
 import com.hjq.http.config.IRequestApi;
 import com.hjq.http.config.IRequestServer;
-import com.hjq.http.model.BodyType;
+import com.hjq.http.config.IHttpPostBodyStrategy;
+import com.hjq.http.model.RequestBodyType;
 import com.hjq.http.model.HttpParams;
 
 import java.lang.reflect.Method;
@@ -73,7 +74,10 @@ public class RequestHelper {
      */
     public static String getPath(IRequestApi api) {
         IRequestServer server = new RequestServer();
-        String basePath = server.getPath();
+        // ⚠️ 签名用的 Host 需要去除协议头和末尾斜杠
+        String rawHost = server.getHost();
+        // String basePath = server.getPath();
+        String basePath = "/api/AppBookRequest/";
         String apiPath = api.getApi();
         
         // 组合基础路径和API路径
@@ -91,8 +95,7 @@ public class RequestHelper {
      * 
      * @return 请求体类型
      */
-    public static BodyType getBodyType() {
-        IRequestServer server = new RequestServer();
-        return server.getType();
+    public static IHttpPostBodyStrategy getBodyType() {
+        return RequestBodyType.JSON;
     }
 }

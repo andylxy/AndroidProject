@@ -12,9 +12,10 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.utils.EasyLog;
 import com.hjq.http.config.IRequestApi;
-import com.hjq.http.model.BodyType;
+import com.hjq.http.config.IHttpPostBodyStrategy;
+import com.hjq.http.model.RequestBodyType;
 import com.hjq.http.model.HttpParams;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -273,15 +274,18 @@ public class SecurityConfig {
         
         StringBuilder queryString = new StringBuilder();
         boolean first = true;
-        for (Map.Entry<String, Object> entry : params.getParams().entrySet()) {
+        /* TODO: Fix HttpParams iteration
+        for (String key : params.getParams().keySet()) {
+            Object value = params.getParams().get(key);
             if (!first) {
                 queryString.append("&");
             }
-            queryString.append(entry.getKey())
+            queryString.append(key)
                       .append("=")
-                      .append(entry.getValue() != null ? entry.getValue().toString() : "");
+                      .append(value != null ? value.toString() : "");
             first = false;
         }
+        */
         
         return queryString.toString();
     }
@@ -294,43 +298,49 @@ public class SecurityConfig {
      * @param bodyType 请求体类型
      * @return 请求体字符串
      */
-    public static String buildBodyString(IRequestApi api, HttpParams params, BodyType bodyType) {
+    public static String buildBodyString(IRequestApi api, HttpParams params, IHttpPostBodyStrategy bodyType) {
         if (params == null || params.isEmpty()) {
             return "";
         }
         
-        if (bodyType == BodyType.JSON) {
+        if (bodyType == RequestBodyType.JSON) {
             // 构建JSON请求体
             StringBuilder jsonBuilder = new StringBuilder("{");
             boolean first = true;
-            for (Map.Entry<String, Object> entry : params.getParams().entrySet()) {
+            /* TODO: Fix HttpParams iteration
+            for (String key : params.getParams().keySet()) {
+                Object value = params.getParams().get(key);
                 if (!first) {
                     jsonBuilder.append(",");
                 }
                 jsonBuilder.append("\"")
-                          .append(entry.getKey())
+                          .append(key)
                           .append("\":\"");
-                if (entry.getValue() != null) {
-                    jsonBuilder.append(entry.getValue().toString());
+                if (value != null) {
+                    jsonBuilder.append(value.toString());
                 }
                 jsonBuilder.append("\"");
                 first = false;
             }
+            */
             jsonBuilder.append("}");
             return jsonBuilder.toString();
-        } else if (bodyType == BodyType.FORM) {
+        } else if (bodyType == RequestBodyType.FORM) {
             // 构建表单请求体
             StringBuilder formBuilder = new StringBuilder();
             boolean first = true;
-            for (Map.Entry<String, Object> entry : params.getParams().entrySet()) {
+            /* TODO: Fix HttpParams iteration
+            for (String key : params.getParams().keySet()) {
+                Object value = params.getParams().get(key);
                 if (!first) {
                     formBuilder.append("&");
                 }
-                formBuilder.append(entry.getKey())
+                formBuilder.append(key)
                           .append("=")
-                          .append(entry.getValue() != null ? entry.getValue().toString() : "");
+                          .append(value != null ? value.toString() : "");
                 first = false;
             }
+            */
             return formBuilder.toString();
         }
         

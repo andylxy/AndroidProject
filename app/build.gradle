@@ -190,8 +190,8 @@ dependencies {
     implementation 'com.github.getActivity:Toaster:12.6'
 
     // 网络请求框架：https://github.com/getActivity/EasyHttp
-    // 保持 10.2 版本以兼容 HttpCallback API
-    implementation 'com.github.getActivity:EasyHttp:10.2'
+    // 升级到 13.5 版本以适配新 API
+    implementation 'com.github.getActivity:EasyHttp:13.5'
     // OkHttp 框架：https://github.com/square/okhttp
     // noinspection GradleDependency
     implementation 'com.squareup.okhttp3:okhttp:3.12.13'

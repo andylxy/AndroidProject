@@ -11,7 +11,7 @@ package run.yigou.gxzy.ui.tips.tipsutils;
 
 import androidx.lifecycle.LifecycleOwner;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.utils.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 
 import java.util.ArrayList;

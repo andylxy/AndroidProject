@@ -12,7 +12,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
-import com.hjq.http.model.FileContentResolver;
+import run.yigou.gxzy.http.model.FileContentResolver;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.widget.layout.SettingBar;
 

@@ -56,7 +56,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.bar.OnTitleBarListener;
 import com.hjq.http.EasyHttp;
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.utils.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;

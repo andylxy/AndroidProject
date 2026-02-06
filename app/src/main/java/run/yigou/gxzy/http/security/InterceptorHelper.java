@@ -1,7 +1,7 @@
 package run.yigou.gxzy.http.security;
 
 import com.hjq.http.config.IRequestApi;
-import com.hjq.http.model.BodyType;
+import com.hjq.http.model.RequestBodyType;
 import com.hjq.http.model.HttpHeaders;
 import com.hjq.http.model.HttpParams;
 

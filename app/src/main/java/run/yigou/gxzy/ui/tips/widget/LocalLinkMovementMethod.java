@@ -19,7 +19,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
-import com.hjq.http.EasyLog;
+import run.yigou.gxzy.utils.EasyLog;
 
 
 public class LocalLinkMovementMethod extends LinkMovementMethod {
