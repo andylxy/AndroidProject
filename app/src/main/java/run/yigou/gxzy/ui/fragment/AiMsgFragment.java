@@ -52,6 +52,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.bar.OnTitleBarListener;
 import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.utils.MarkdownUtils;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
 
@@ -1084,58 +1085,71 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     }
 
     // 保存用户输入的内容和时间，用于重新申请会话ID后继续执行
-    private String pendingMessageContent;
-    private String pendingMessageTime;
+    // private String pendingMessageContent;
+    // private String pendingMessageTime;
 
     /**
-     * 请求新的会话ID并在完成后继续执行发送消息逻辑
+     * 发送消息的实际执行逻辑 (提取出的中间函数)
      */
-    private void requestNewSessionIdAndContinue(String messageContent, String messageTime) {
-        // 保存待发送的消息内容和时间
-        pendingMessageContent = messageContent;
-        pendingMessageTime = messageTime;
-        
-        //检测会话Id是否已过期
-        AiChatManager.getInstance().requestSessionId(AiMsgFragment.this, new AiChatManager.SessionIdCallback() {
-            @Override
-            public void onSuccess(String conversationId, String endUserId) {
-                if (currentSession != null) {
-                    currentSession.setConversationId(conversationId);
-                    currentSession.setEndUserId(endUserId);
-                    currentSession.setCreateTime(DateHelper.getSeconds1());
-                    
-                    if (currentSession.getId() != null) {
-                        ChatSessionManager.getInstance().updateSession(currentSession);
-                    }
-                    EasyLog.print(TAG, "Session ID obtained: " + conversationId);
-                    
-                    // 会话ID申请成功后，继续执行发送消息的逻辑
-                    continueSendingMessage();
-                }
-            }
-
-            @Override
-            public void onFailure(String error) {
-                EasyLog.print("过期会话Id申请失败：" + error);
-                // 清除待发送消息
-                pendingMessageContent = null;
-                pendingMessageTime = null;
-            }
-        });
-    }
-    
-    /**
-     * 继续执行发送消息的逻辑
-     */
-    private void continueSendingMessage() {
-        // 确保会话已保存到数据库
-        ensureSessionSaved();
-
+    private void executeSendMessage(String result, String time) {
         // 处理系统消息
-        handleSystemMessage(pendingMessageTime);
+        handleSystemMessage(time);
 
-        // 添加发送消息
-        ChatMessageBean chatMessageBeanSend = new ChatMessageBean(ChatMessageBean.TYPE_SEND, "", "", pendingMessageContent);
+        // 检查是否选中了总结 CheckBox，根据类型获取并追加总结
+        String messageToSend = result;
+        String summaryTag = null; // 用于显示的标记
+
+        boolean useLatestSummary = cbLatestSummary != null && cbLatestSummary.isChecked();
+        boolean useAllSummary = cbAllSummary != null && cbAllSummary.isChecked();
+
+        if (useLatestSummary || useAllSummary) {
+            EasyLog.print(TAG, "带总结发送：" + (useLatestSummary ? "最近" : "全部") + "，会话ID: " + currentSession.getId());
+            // 获取当前会话的总结
+            List<run.yigou.gxzy.greendao.entity.ChatSummaryBean> summaries =
+                    ChatSessionManager.getInstance().getSessionSummaries(currentSession.getId());
+            EasyLog.print(TAG, "带总结发送：找到 " + (summaries != null ? summaries.size() : 0) + " 条总结");
+
+            if (summaries != null && !summaries.isEmpty()) {
+                StringBuilder summaryContent = new StringBuilder();
+
+                if (useLatestSummary) {
+                    // 只发送最近一次总结（列表按创建时间降序，最新的在第一个）
+                    run.yigou.gxzy.greendao.entity.ChatSummaryBean latestSummary = summaries.get(0);
+                    if (latestSummary.getContent() != null && !latestSummary.getContent().isEmpty()) {
+                        summaryContent.append(latestSummary.getContent());
+                    }
+                    summaryTag = "[最近历史总结]";
+                } else {
+                    // 发送全部总结（按时间顺序，从旧到新）
+                    for (int i = summaries.size() - 1; i >= 0; i--) {
+                        run.yigou.gxzy.greendao.entity.ChatSummaryBean summary = summaries.get(i);
+                        if (summary.getContent() != null && !summary.getContent().isEmpty()) {
+                            if (summaryContent.length() > 0) {
+                                summaryContent.append("\n\n---\n\n");
+                            }
+                            summaryContent.append(summary.getContent());
+                        }
+                    }
+                    summaryTag = "[全部历史总结]";
+                }
+
+                if (summaryContent.length() > 0) {
+                    messageToSend = result + "\n\n[历史总结]:\n" + summaryContent.toString();
+                    EasyLog.print(TAG, "带总结发送：已追加总结，总结内容长度: " + summaryContent.length());
+                }
+            } else {
+                EasyLog.print(TAG, "带总结发送：当前会话没有总结数据");
+            }
+        }
+
+        // 确定显示在聊天框中的内容（如果带总结，添加标记）
+        String displayContent = result;
+        if (summaryTag != null && !messageToSend.equals(result)) {
+            displayContent = result + "\n" + summaryTag;
+        }
+
+        // 添加发送消息（显示带标记的内容）
+        ChatMessageBean chatMessageBeanSend = new ChatMessageBean(ChatMessageBean.TYPE_SEND, "", "", displayContent);
         chatMessageBeanSend.setSessionId(currentSession.getId());
         chatMessageBeanSend.setCreateDate(DateHelper.getSeconds1());
         chatMessageBeanSend.setIsDelete(ChatMessageBean.IS_Delete_NO);
@@ -1146,7 +1160,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         EasyLog.print(TAG, "Saved sent message to database with ID: " + sendMsgId + " and session ID: " + currentSession.getId());
 
         // 更新会话预览和时间
-        currentSession.setPreview("我: " + pendingMessageContent);
+        currentSession.setPreview("我: " + result);
         currentSession.setUpdateTime(DateHelper.getSeconds1());
         ChatSessionManager.getInstance().updateSession(currentSession);
 
@@ -1155,14 +1169,14 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         thinkingMessage.setSessionId(currentSession.getId());
         thinkingMessage.setCreateDate(DateHelper.getSeconds1());
         thinkingMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-        
+
         // 保存思考消息到数据库
         long thinkingMsgId = ChatSessionManager.getInstance().saveMessage(thinkingMessage);
         thinkingMessage.setId(thinkingMsgId);
         mChatAdapter.addItem(thinkingMessage);
         EasyLog.print(TAG, "Added thinking message with ID: " + thinkingMsgId);
 
-        // 滚动到最后一条消息
+        // 滚动到最后
         if (rv_chat != null) {
             rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
             rv_chat.clearOnScrollListeners();
@@ -1172,21 +1186,16 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     scrollState = newState;
                 }
             });
+            // 阻止子 View 获取焦点，防止 notifyItemChanged 时 TextView 获取焦点导致滚动跳动
+            rv_chat.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         }
 
         // 发送消息给GPT - 使用 AiChatManager
         AiChatManager.getInstance().sendMessage(
-                currentSession, 
-                pendingMessageContent, 
-                thinkingMessage, 
-                createChatStreamListener(thinkingMessage, false, false));
-                
-        // 清除待发送消息
-        pendingMessageContent = null;
-        pendingMessageTime = null;
-        
-        // 清空输入框
-        ((EditText) findViewById(R.id.chat_content)).getText().clear();
+                currentSession,
+                messageToSend,
+                thinkingMessage,
+                createChatStreamListener(thinkingMessage, true, true));
     }
 
     /**
@@ -1195,148 +1204,28 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     private void sendMsg(String result) {
         if (mChatAdapter != null) {
             String time = sdf.format(new Date());
-            
+
             // 如果当前没有会话，创建一个新的会话
             if (currentSession == null) {
                 createNewSession("新对话");
-            } else {
-
-                // 检查会话ID是否存在（conversationId 或 endUserId 为空需要重新申请）
-                if (currentSession.getConversationId() == null || 
-                    currentSession.getConversationId().isEmpty() ||
-                    currentSession.getEndUserId() == null ||
-                    currentSession.getEndUserId().isEmpty()) {
-                    // 会话ID缺失，重新申请
-                    EasyLog.print(TAG, "Session missing conversationId or endUserId, requesting new ID");
-                    requestNewSessionIdAndContinue(result, time);
-                    return;
-                }
-                
-                // 检查会话创建时间是否为空或者会话是否过期
-                if (currentSession.getCreateTime() == null) {
-                    // 如果会话创建时间为空，重新申请会话Id后再继续执行
-                    requestNewSessionIdAndContinue(result, time);
-                    return; // 暂停当前执行，等待会话ID申请完成后再继续
-                } else {
-                    // 检查会话是否过期（会话有效期为6天）
-                    long createTime = DateHelper.strDateToLong(currentSession.getCreateTime());
-                    long currentTime = System.currentTimeMillis();
-                    // 6天 = 6 * 24 * 60 * 60 * 1000 毫秒
-                    if (currentTime - createTime > 6 * 24 * 60 * 60 * 1000L) {
-                        // 会话已过期，重新申请会话Id后再继续执行
-                        requestNewSessionIdAndContinue(result, time);
-                        return; // 暂停当前执行，等待会话ID申请完成后再继续
-                    }
-                }
             }
 
-            // 确保会话已保存到数据库
+            // 确保会话已保存到数据库 (为了确保有 ID)
             ensureSessionSaved();
 
-            // 处理系统消息
-            handleSystemMessage(time);
-            
-            // 检查是否选中了总结 CheckBox，根据类型获取并追加总结
-            String messageToSend = result;
-            String summaryTag = null; // 用于显示的标记
-            
-            boolean useLatestSummary = cbLatestSummary != null && cbLatestSummary.isChecked();
-            boolean useAllSummary = cbAllSummary != null && cbAllSummary.isChecked();
-            
-            if (useLatestSummary || useAllSummary) {
-                EasyLog.print(TAG, "带总结发送：" + (useLatestSummary ? "最近" : "全部") + "，会话ID: " + currentSession.getId());
-                // 获取当前会话的总结
-                List<run.yigou.gxzy.greendao.entity.ChatSummaryBean> summaries = 
-                    ChatSessionManager.getInstance().getSessionSummaries(currentSession.getId());
-                EasyLog.print(TAG, "带总结发送：找到 " + (summaries != null ? summaries.size() : 0) + " 条总结");
-                
-                if (summaries != null && !summaries.isEmpty()) {
-                    StringBuilder summaryContent = new StringBuilder();
-                    
-                    if (useLatestSummary) {
-                        // 只发送最近一次总结（列表按创建时间降序，最新的在第一个）
-                        run.yigou.gxzy.greendao.entity.ChatSummaryBean latestSummary = summaries.get(0);
-                        if (latestSummary.getContent() != null && !latestSummary.getContent().isEmpty()) {
-                            summaryContent.append(latestSummary.getContent());
-                        }
-                        summaryTag = "[最近历史总结]";
-                    } else {
-                        // 发送全部总结（按时间顺序，从旧到新）
-                        for (int i = summaries.size() - 1; i >= 0; i--) {
-                            run.yigou.gxzy.greendao.entity.ChatSummaryBean summary = summaries.get(i);
-                            if (summary.getContent() != null && !summary.getContent().isEmpty()) {
-                                if (summaryContent.length() > 0) {
-                                    summaryContent.append("\n\n---\n\n");
-                                }
-                                summaryContent.append(summary.getContent());
-                            }
-                        }
-                        summaryTag = "[全部历史总结]";
-                    }
-                    
-                    if (summaryContent.length() > 0) {
-                        messageToSend = result + "\n\n[历史总结]:\n" + summaryContent.toString();
-                        EasyLog.print(TAG, "带总结发送：已追加总结，总结内容长度: " + summaryContent.length());
-                    }
-                } else {
-                    EasyLog.print(TAG, "带总结发送：当前会话没有总结数据");
+            // 使用 Manager 检查会话并执行
+            AiChatManager.getInstance().checkSessionAndExecute(this, currentSession, new AiChatManager.SessionCheckCallback() {
+                @Override
+                public void onSessionValid(ChatSessionBean session) {
+                    // 会话有效，执行发送逻辑
+                    executeSendMessage(result, time);
                 }
-            }
-            
-            // 确定显示在聊天框中的内容（如果带总结，添加标记）
-            String displayContent = result;
-            if (summaryTag != null && !messageToSend.equals(result)) {
-                displayContent = result + "\n" + summaryTag;
-            }
 
-            // 添加发送消息（显示带标记的内容）
-            ChatMessageBean chatMessageBeanSend = new ChatMessageBean(ChatMessageBean.TYPE_SEND, "", "", displayContent);
-            chatMessageBeanSend.setSessionId(currentSession.getId());
-            chatMessageBeanSend.setCreateDate(DateHelper.getSeconds1());
-            chatMessageBeanSend.setIsDelete(ChatMessageBean.IS_Delete_NO);
-            // 保存发送消息到数据库
-            long sendMsgId = ChatSessionManager.getInstance().saveMessage(chatMessageBeanSend);
-            chatMessageBeanSend.setId(sendMsgId);
-            mChatAdapter.addItem(chatMessageBeanSend);
-            EasyLog.print(TAG, "Saved sent message to database with ID: " + sendMsgId + " and session ID: " + currentSession.getId());
-
-            // 更新会话预览和时间
-            currentSession.setPreview("我: " + result);
-            currentSession.setUpdateTime(DateHelper.getSeconds1());
-            ChatSessionManager.getInstance().updateSession(currentSession);
-
-            // 1. 先创建并添加 "思考中" 消息
-            final ChatMessageBean thinkingMessage = new ChatMessageBean(ChatMessageBean.TYPE_THINKING, "Ai", "", "正在思考...");
-            thinkingMessage.setSessionId(currentSession.getId());
-            thinkingMessage.setCreateDate(DateHelper.getSeconds1());
-            thinkingMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-            
-            // 保存思考消息到数据库
-            long thinkingMsgId = ChatSessionManager.getInstance().saveMessage(thinkingMessage);
-            thinkingMessage.setId(thinkingMsgId);
-            mChatAdapter.addItem(thinkingMessage);
-            EasyLog.print(TAG, "Added thinking message with ID: " + thinkingMsgId);
-
-            // 滚动到最后
-            if (rv_chat != null) {
-                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
-                rv_chat.clearOnScrollListeners();
-                rv_chat.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                    @Override
-                    public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                        scrollState = newState;
-                    }
-                });
-                // 阻止子 View 获取焦点，防止 notifyItemChanged 时 TextView 获取焦点导致滚动跳动
-                rv_chat.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-            }
-
-            // 发送消息给GPT - 使用 AiChatManager
-            AiChatManager.getInstance().sendMessage(
-                    currentSession, 
-                    messageToSend, 
-                    thinkingMessage, 
-                    createChatStreamListener(thinkingMessage, true, true));
+                @Override
+                public void onFailure(String error) {
+                    Toast.makeText(getContext(), "会话检查失败: " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
     
@@ -1409,18 +1298,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         }
         
         // 构建总结请求的 prompt
-        StringBuilder promptBuilder = new StringBuilder();
-        promptBuilder.append("请对以下对话内容进行总结，提取关键要点：\n\n");
-        
-        for (ChatMessageBean message : messages) {
-            if (message.getType() == ChatMessageBean.TYPE_SEND) {
-                promptBuilder.append("用户：").append(message.getContent()).append("\n");
-            } else if (message.getType() == ChatMessageBean.TYPE_RECEIVED) {
-                promptBuilder.append("AI：").append(message.getContent()).append("\n");
-            }
-        }
-        
-        promptBuilder.append("\n请用简洁的语言总结上述对话的主要内容和关键信息。");
+        // 使用 Manager 生成 Prompt
+        String prompt = AiChatManager.getInstance().generateSummaryPrompt(messages);
         
         // 显示进度提示
         Toast.makeText(getContext(), "正在生成总结...", Toast.LENGTH_SHORT).show();
@@ -1449,7 +1328,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             }
         });
         
-        AiChatManager.getInstance().generateSummary(currentSession, promptBuilder.toString(), new AiChatManager.ChatStreamListener() {
+        AiChatManager.getInstance().generateSummary(currentSession, prompt, new AiChatManager.ChatStreamListener() {
             @Override
             public void onThinking(String content) {
                 // 总结模式通常没有思考过程，或者忽略
@@ -1785,55 +1664,13 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
      */
     private void copyToClipboard(String content) {
         // 将 Markdown 转换为纯文本
-        String plainText = convertMarkdownToPlainText(content);
+        String plainText = MarkdownUtils.convertMarkdownToPlainText(content);
         
         android.content.ClipboardManager clipboard = 
             (android.content.ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
         android.content.ClipData clip = android.content.ClipData.newPlainText("聊天内容", plainText);
         clipboard.setPrimaryClip(clip);
         Toast.makeText(getContext(), "已复制到剪贴板", Toast.LENGTH_SHORT).show();
-    }
-    
-    /**
-     * 将 Markdown 格式转换为纯文本
-     */
-    private String convertMarkdownToPlainText(String markdown) {
-        if (markdown == null) return "";
-        
-        String text = markdown;
-        // 移除代码块 ```...```
-        text = text.replaceAll("```[\\s\\S]*?```", "");
-        // 移除行内代码 `...`
-        text = text.replaceAll("`([^`]+)`", "$1");
-        // 移除粗体 **...** 或 __...__
-        text = text.replaceAll("\\*\\*([^*]+)\\*\\*", "$1");
-        text = text.replaceAll("__([^_]+)__", "$1");
-        // 移除斜体 *...* 或 _..._
-        text = text.replaceAll("\\*([^*]+)\\*", "$1");
-        text = text.replaceAll("_([^_]+)_", "$1");
-        // 移除标题 # ## ### 等
-        text = text.replaceAll("^#{1,6}\\s*", "");
-        text = text.replaceAll("\\n#{1,6}\\s*", "\n");
-        // 移除链接 [text](url)
-        text = text.replaceAll("\\[([^\\]]+)\\]\\([^)]+\\)", "$1");
-        // 移除图片 ![alt](url)
-        text = text.replaceAll("!\\[([^\\]]*)\\]\\([^)]+\\)", "$1");
-        // 移除列表符号 - * + 
-        text = text.replaceAll("^[\\-*+]\\s+", "");
-        text = text.replaceAll("\\n[\\-*+]\\s+", "\n");
-        // 移除有序列表 1. 2. 等
-        text = text.replaceAll("^\\d+\\.\\s+", "");
-        text = text.replaceAll("\\n\\d+\\.\\s+", "\n");
-        // 移除引用 >
-        text = text.replaceAll("^>\\s*", "");
-        text = text.replaceAll("\\n>\\s*", "\n");
-        // 移除水平线 --- *** ___
-        text = text.replaceAll("^[\\-*_]{3,}$", "");
-        text = text.replaceAll("\\n[\\-*_]{3,}\\n", "\n");
-        // 清理多余空行
-        text = text.replaceAll("\\n{3,}", "\n\n");
-        
-        return text.trim();
     }
     
     /**
