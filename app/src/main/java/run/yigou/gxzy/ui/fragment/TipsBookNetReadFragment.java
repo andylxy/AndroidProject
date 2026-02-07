@@ -28,6 +28,8 @@ import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 
 import com.hjq.base.BaseDialog;
+
+import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.utils.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
@@ -45,12 +47,9 @@ import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.BookArgs;
-import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.greendao.gen.BookDao;
 import run.yigou.gxzy.greendao.gen.ChapterDao;
-import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.tips.adapter.refactor.RefactoredExpandableAdapter;
@@ -223,103 +222,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                // 处理自定义逻辑
-                TabNavBody navTabBody = GlobalDataHolder.getInstance().getNavTabBodyMap().get(bookId);
-                if (navTabBody == null) {
-                    return;
-                }
-
-                try {
-                    handleBackPress(navTabBody);
-                } catch (Exception e) {
-                    EasyLog.print("HandleBackPress", "Error handling back press: " + e.getMessage());
-                }
-            }
-
-            private void handleBackPress(TabNavBody navTabBody) {
-                ArrayList<Book> books = queryBooks(navTabBody);
-                if (books == null || books.isEmpty()) {
-                    showAddToBookshelfDialog(navTabBody);
-                } else {
-                    updateBookInfo(books);
-                }
-            }
-
-            private ArrayList<Book> queryBooks(TabNavBody navTabBody) {
-                try {
-                    return DbService.getInstance().mBookService.find(BookDao.Properties.BookNo.eq(navTabBody.getBookNo()));
-                } catch (Exception e) {
-                    EasyLog.print("QueryBooks", "Error querying books: " + e.getMessage());
-                    return null;
-                }
-            }
-
-            private void showAddToBookshelfDialog(TabNavBody navTabBody) {
-                new MessageDialog.Builder(getContext())
-                        .setTitle("加入书架")
-                        .setMessage(navTabBody.getBookName())
-                        .setConfirm(getString(R.string.common_confirm))
-                        .setCancel(getString(R.string.common_cancel))
-                        .setListener(new MessageDialog.OnListener() {
-                            @Override
-                            public void onConfirm(BaseDialog dialog) {
-                                addBookToBookshelf(navTabBody);
-                            }
-
-                            @Override
-                            public void onCancel(BaseDialog dialog) {
-                                allowSystemBackPress();
-                            }
-                        })
-                        .show();
-            }
-
-            private void addBookToBookshelf(TabNavBody navTabBody) {
-                Book book = new Book();
-                book.setBookId(DbService.getInstance().mBookService.getUUID());
-                book.setBookNo(navTabBody.getBookNo());
-                book.setBookName(navTabBody.getBookName());
-                book.setAuthor(navTabBody.getAuthor());
-                book.setHistoriographerNumb(currentIndex == -1 ? 0 : currentIndex);
-                book.setLastReadPosition(currentIndex == -1 ? 0 : currentIndex);
-
-                try {
-                    DbService.getInstance().mBookService.addEntity(book);
-                    refreshBookshelf();
-                    allowSystemBackPress();
-                } catch (Exception e) {
-                    EasyLog.print("AddBook", "Error adding book to bookshelf: " + e.getMessage());
-                }
-            }
-
-            private void updateBookInfo(ArrayList<Book> books) {
-                if (currentIndex != -1) {
-                    Book book = books.get(0);
-                    book.setLastReadPosition(currentIndex);
-                    book.setHistoriographerNumb(currentIndex);
-
-                    try {
-                        DbService.getInstance().mBookService.updateEntity(book);
-                    } catch (Exception e) {
-                        EasyLog.print("UpdateBook", "Error updating book info: " + e.getMessage());
-                    }
-                }
-                allowSystemBackPress();
-            }
-
-            private void refreshBookshelf() {
-                BookCollectCaseFragment.newInstance().RefreshLayout();
-            }
-
-            private void allowSystemBackPress() {
-                postDelayed(() -> {
-                    setEnabled(false); // 禁用当前回调
-                    requireActivity().onBackPressed(); // 调用系统返回
-                }, AppConst.postDelayMillis);
+                // 使用中间函数桥接，将逻辑下沉到 Presenter
+                bridgeHandleBackPress();
             }
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
-
     }
 
     /**
@@ -1044,6 +951,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
     @Override
     public void onLowMemory() {
+        super.onLowMemory();
         EasyLog.print("TipsBookNetReadFragment", "低内存警告");
         // 相当于 TRIM_MEMORY_COMPLETE
         onTrimMemory(TRIM_MEMORY_COMPLETE);
@@ -1073,5 +981,78 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             EasyLog.print("TipsBookNetReadFragment", "较低内存压力");
         }
     }
+
+    // ==================== 中间函数与接口实现 ====================
+
+    /**
+     * 桥接函数：处理返回键逻辑
+     */
+    private void bridgeHandleBackPress() {
+        if (presenter != null) {
+            presenter.checkBookStatusForExit();
+        } else {
+            closeView();
+        }
+    }
+
+    /**
+     * 桥接函数：加入书架
+     */
+    private void bridgeAddToBookshelf(TabNavBody navTabBody) {
+        if (presenter != null) {
+            presenter.addToBookshelfAndExit(navTabBody);
+        }
+    }
+
+    @Override
+    public void showAddToBookshelfConfirmDialog(TabNavBody book) {
+        new MessageDialog.Builder(getContext())
+                .setTitle("加入书架")
+                .setMessage(book.getBookName())
+                .setConfirm(getString(R.string.common_confirm))
+                .setCancel(getString(R.string.common_cancel))
+                .setListener(new MessageDialog.OnListener() {
+                    @Override
+                    public void onConfirm(BaseDialog dialog) {
+                        bridgeAddToBookshelf(book);
+                    }
+
+                    @Override
+                    public void onCancel(BaseDialog dialog) {
+                        closeView();
+                    }
+                })
+                .show();
+    }
+
+    @Override
+    public void closeView() {
+        // 刷新书架（保留原逻辑中的副作用）
+        try {
+            BookCollectCaseFragment.newInstance().RefreshLayout();
+        } catch (Exception e) {
+            EasyLog.print("TipsBookNetReadFragment", "刷新书架失败: " + e.getMessage());
+        }
+
+        // 调用系统返回
+        if (onBackPressedCallback != null) {
+            onBackPressedCallback.setEnabled(false);
+        }
+        
+        // 延迟调用以确保 UI 动画流畅（保持原有 delay）
+        if (rvList != null) {
+            rvList.postDelayed(() -> {
+                if (getActivity() != null) {
+                    requireActivity().onBackPressed();
+                }
+            }, AppConst.postDelayMillis);
+        }
+    }
+
+    @Override
+    public Context getContext() {
+        return super.getContext();
+    }
+
 
 }

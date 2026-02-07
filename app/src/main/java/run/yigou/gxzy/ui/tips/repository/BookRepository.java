@@ -300,6 +300,13 @@ public class BookRepository {
     // ==================== 新数据模型 API ====================
 
     /**
+     * 生成新的书籍 ID
+     */
+    public String generateBookId() {
+        return dbService.mBookService.getUUID();
+    }
+
+    /**
      * 获取书籍数据（新模型）
      * 优先从内存缓存获取，未命中则从数据库加载
      * 

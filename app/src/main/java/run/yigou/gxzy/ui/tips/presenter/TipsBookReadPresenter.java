@@ -60,6 +60,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
 
     // 状态管理
     private int currentBookId;
+    private TabNavBody currentBookInfo; // 当前书籍信息
     private int currentChapterIndex = -1;
     private boolean isShowBookCollect = false;
     private boolean isSearchMode = false;
@@ -204,6 +205,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
      * 内部实现：加载书籍内容
      */
     private void loadBookContentInternal(TabNavBody book, int bookId, int lastReadPosition, boolean isShowBookCollect) {
+        this.currentBookInfo = book;
         EasyLog.print("TipsBookReadPresenter", "开始加载书籍内容: " + book.getBookName());
 
         // 加载书籍数据（新数据模型，使用 LRU 缓存）
@@ -606,43 +608,72 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
 
     @Override
     public void onBackPressed(boolean shouldSave) {
-        // 未使用：返回键逻辑由 Fragment 直接处理
-        /*
-        if (!isViewActive()) {
-            return;
-        }
+        // 保留接口兼容性
+    }
 
-        if (!shouldSave) {
-            // 直接返回
+    @Override
+    public void checkBookStatusForExit() {
+        if (!isViewActive() || currentBookInfo == null) {
+            // 如果信息不足，直接退出
+            if (isViewActive()) view.closeView();
             return;
         }
 
         try {
-            TabNavBody book = repository.getBookInfo(currentBookId);
-            if (book == null) {
-                return;
-            }
-
             // 查询书架
-            ArrayList<Book> books = repository.queryBookshelf(book.getBookNo());
+            ArrayList<Book> books = repository.queryBookshelf(currentBookInfo.getBookNo());
 
             if (books == null || books.isEmpty()) {
-                // 显示添加到书架对话框
-                view.showToast("是否将书籍添加到书架？");
+                // 不在书架中，提示添加
+                view.showAddToBookshelfConfirmDialog(currentBookInfo);
             } else {
-                // 更新阅读进度
+                // 在书架中，更新进度并退出
                 if (currentChapterIndex != -1) {
                     Book bookEntity = books.get(0);
                     bookEntity.setLastReadPosition(currentChapterIndex);
                     bookEntity.setHistoriographerNumb(currentChapterIndex);
                     repository.updateReadingProgress(bookEntity);
                 }
+                view.closeView();
             }
-
         } catch (Exception e) {
-            EasyLog.print("TipsBookReadPresenter", "保存阅读进度失败: " + e.getMessage());
+            EasyLog.print("TipsBookReadPresenter", "检查书籍状态失败: " + e.getMessage());
+            view.closeView();
         }
-        */
+    }
+
+    @Override
+    public void addToBookshelfAndExit(TabNavBody navTabBody) {
+        if (!isViewActive() || navTabBody == null) {
+            if (isViewActive()) view.closeView();
+            return;
+        }
+
+        try {
+            Book book = new Book();
+            book.setBookId(repository.generateBookId());
+            book.setBookNo(navTabBody.getBookNo());
+            book.setBookName(navTabBody.getBookName());
+            book.setAuthor(navTabBody.getAuthor());
+            book.setHistoriographerNumb(currentChapterIndex == -1 ? 0 : currentChapterIndex);
+            book.setLastReadPosition(currentChapterIndex == -1 ? 0 : currentChapterIndex);
+
+            repository.addToBookshelf(book);
+            
+            // 通知刷新书架 (通过 EventBus 或回调，这里假设 View 关闭后 Activity 会刷新，或者需要显式刷新)
+            // Fragment 原逻辑调用了 BookCollectCaseFragment.newInstance().RefreshLayout();
+            // 这是一种不太好的耦合。Presenter 不应该知道 BookCollectCaseFragment。
+            // 可以在 View.closeView() 中处理，或者发送 EventBus。
+            // 原逻辑: BookCollectCaseFragment.newInstance().RefreshLayout();
+            // 这里我们保持原样，在 View 实现中处理刷新，或者 Presenter 发送事件。
+            // 简单起见，Presenter 只负责数据操作，View 负责界面跳转和刷新。
+            
+            view.closeView();
+            
+        } catch (Exception e) {
+            EasyLog.print("TipsBookReadPresenter", "添加书架失败: " + e.getMessage());
+            view.closeView();
+        }
     }
 
     @Override

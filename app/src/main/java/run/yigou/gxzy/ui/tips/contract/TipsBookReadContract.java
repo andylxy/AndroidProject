@@ -14,6 +14,7 @@ import android.content.Context;
 import java.util.List;
 
 import run.yigou.gxzy.greendao.entity.Chapter;
+import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 
@@ -118,6 +119,19 @@ public interface TipsBookReadContract {
          * @return Context 对象
          */
         Context getContext();
+
+        // ==================== 退出逻辑 ====================
+
+        /**
+         * 显示加入书架确认框
+         * @param book 书籍信息
+         */
+        void showAddToBookshelfConfirmDialog(TabNavBody book);
+
+        /**
+         * 关闭当前页面
+         */
+        void closeView();
     }
 
     /**
@@ -210,5 +224,19 @@ public interface TipsBookReadContract {
          * @param childPosition 子位置
          */
         void onJumpToPosition(int groupPosition, int childPosition);
+
+        // ==================== 退出逻辑 ====================
+
+        /**
+         * 检查书籍状态并处理退出逻辑
+         * (替代原 Fragment 中的 fragmentOnBackPressed)
+         */
+        void checkBookStatusForExit();
+
+        /**
+         * 将书籍加入书架并退出
+         * @param navTabBody 书籍信息
+         */
+        void addToBookshelfAndExit(TabNavBody navTabBody);
     }
 }
