@@ -392,6 +392,7 @@ public final class AiStreamApi implements IRequestApi, IRequestHost {
                                 EasyLog.print(TAG, "收到错误信号: " + chunk.getError());
                                 isCanceled = true; // 错误也需要取消连接
                                 eventSource.cancel();
+                                // 错误回调可能会触发 UI 操作，不要在 onFailure 中重复触发
                                 callback.onError(new Exception(chunk.getError()));
                             }
                         } else {
@@ -411,7 +412,11 @@ public final class AiStreamApi implements IRequestApi, IRequestHost {
                 @Override
                 public void onFailure(@NonNull EventSource eventSource, Throwable t, Response response) {
                     // ⚠️ 如果是主动取消导致的错误，则忽略
-                    if (isCanceled) {
+                    // 增加对 "canceled" 消息的检查
+                    if (isCanceled || (t != null && "canceled".equals(t.getMessage()))) {
+                        EasyLog.print(TAG, "忽略主动取消连接后的错误 (isCanceled=" + isCanceled + ", msg=" + (t != null ? t.getMessage() : "null") + ")");
+                        return;
+                    }
                         String errMsg = t != null ? t.getMessage() : "";
                         if (t instanceof java.io.IOException && "Socket closed".equals(errMsg)) {
                             EasyLog.print(TAG, "忽略主动取消连接后的 Socket closed");
@@ -430,8 +435,9 @@ public final class AiStreamApi implements IRequestApi, IRequestHost {
                                 return;
                             }
                         }
-                    }
-
+                    
+                    // ⚠️ 注意：此处删除了多余的 "}"
+                    
                     String errorMsg = t != null ? t.getMessage() : "未知错误";
                     EasyLog.print(TAG, "====== SSE 连接失败详情 ======");
                     EasyLog.print(TAG, "错误消息: " + errorMsg);
@@ -443,12 +449,10 @@ public final class AiStreamApi implements IRequestApi, IRequestHost {
                     if (response != null) {
                         EasyLog.print(TAG, "响应码: " + response.code());
                         EasyLog.print(TAG, "响应消息: " + response.message());
-                        try {
-                            String errorBody = response.body() != null ? response.body().string() : "无响应体";
-                            EasyLog.print(TAG, "错误响应体: " + errorBody);
-                        } catch (IOException e) {
-                            EasyLog.print(TAG, "读取错误响应失败: " + e.getMessage());
-                        }
+                        // ⚠️ 注意：SSE 连接失败时，Response Body 可能已经被剥离(stripped)且不可读
+                        // 尝试读取会导致 UnreadableResponseBody 异常
+                        // String errorBody = response.body() != null ? response.body().string() : "无响应体";
+                        // EasyLog.print(TAG, "错误响应体: " + errorBody);
                     } else {
                         EasyLog.print(TAG, "响应为 null");
                     }
