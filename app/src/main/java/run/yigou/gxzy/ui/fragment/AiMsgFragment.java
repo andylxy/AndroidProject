@@ -125,6 +125,25 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     @Override
     protected void initView() {
         EasyLog.print(TAG, "initView: Starting initialization");
+        
+        initMarkwon();
+        initTitleBar();
+        initChatRecyclerView();
+        initHistorySidebar();
+        initInputArea();
+        initSummaryFeatures();
+
+        // 注册事件
+        XEventBus.getDefault().register(AiMsgFragment.this);
+        // 初始化消息数据
+        initMsgs();
+
+        // 添加调试日志，检查组件是否正确初始化
+        EasyLog.print(TAG, "initView: rv_chat=" + rv_chat);
+        EasyLog.print(TAG, "initView: mChatAdapter=" + mChatAdapter);
+    }
+
+    private void initMarkwon() {
         mMarkwon = Markwon.builder(getContext())
                 .usePlugin(CorePlugin.create())
                 .usePlugin(HtmlPlugin.create())
@@ -134,123 +153,39 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 .usePlugin(TaskListPlugin.create(getContext()))
                 .usePlugin(ImagesPlugin.create())
                 .build();
+    }
+
+    private void initTitleBar() {
         // 初始化状态栏,设置为沉浸式
         getStatusBarConfig().setTitleBar(this, findViewById(R.id.tv_title));
         getStatusBarConfig().setTitleBar(this, findViewById(R.id.side_panel));
-        rv_chat = findViewById(R.id.rv_chat);
-        drawerLayout = findViewById(R.id.drawer_layout);
-        chatHistoryList = findViewById(R.id.chat_history_list);
-
-        // 初始化聊天历史记录列表
-        chatHistoryAdapter = new ChatHistoryAdapter(getActivity());
-        chatHistoryList.setAdapter(chatHistoryAdapter);
-        chatHistoryList.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        // 设置聊天历史记录项点击监听
-        chatHistoryAdapter.setOnChatHistoryItemClickListener(new ChatHistoryAdapter.OnChatHistoryItemClickListener() {
-            @Override
-            public void onChatHistoryItemClick(int position, ChatHistoryAdapter.ChatHistoryItem item) {
-                // 获取会话列表
-                List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
-                // 确保位置有效
-                if (position >= 0 && position < sessions.size()) {
-                    ChatSessionBean selectedSession = sessions.get(position);
-                    // 保存最后选中的会话ID
-                    saveLastSessionId(selectedSession.getId());
-                    // 加载选中会话的所有聊天数据
-                    loadChatDataForSession(selectedSession.getId());
-
-                    // 关闭侧边栏
-                    if (drawerLayout != null) {
-                        drawerLayout.closeDrawers();
-                    }
-                }
-            }
-        });
-
-        // 设置聊天历史记录项删除监听
-        chatHistoryAdapter.setOnChatHistoryItemDeleteListener(new ChatHistoryAdapter.OnChatHistoryItemDeleteListener() {
-            @Override
-            public void onChatHistoryItemDelete(int position, ChatHistoryAdapter.ChatHistoryItem item) {
-                // 获取会话列表
-                List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
-                // 确保位置有效
-                if (position >= 0 && position < sessions.size()) {
-                    // 从数据库中删除会话
-                    ChatSessionBean sessionToDelete = sessions.get(position);
-                    // 删除该会话的所有总结
-                    DbService.getInstance().mChatSummaryBeanService.deleteBySessionId(sessionToDelete.getId());
-                    DbService.getInstance().mChatSessionBeanService.deleteEntity(sessionToDelete);
-
-                    // 如果删除的是当前会话，清空聊天界面
-                    if (currentSession != null && currentSession.getId().equals(sessionToDelete.getId())) {
-                        currentSession = null;
-                        if (mChatAdapter != null) {
-                            mChatAdapter.setData(new ArrayList<ChatMessageBean>());
-                        }
-                    }
-
-                    // 重新加载聊天历史记录
-                    populateChatHistoryWithTestData();
-                }
-            }
-        });
-
-        // 设置聊天历史记录项编辑标题监听
-        chatHistoryAdapter.setOnChatHistoryItemEditTitleListener(new ChatHistoryAdapter.OnChatHistoryItemEditTitleListener() {
-            @Override
-            public void onChatHistoryItemEditTitle(int position, ChatHistoryAdapter.ChatHistoryItem item) {
-                // 获取会话列表
-                List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
-                // 确保位置有效
-                if (position >= 0 && position < sessions.size()) {
-                    ChatSessionBean sessionToEdit = sessions.get(position);
-                    showEditSessionTitleDialog(sessionToEdit);
-                }
-            }
-        });
-        
-        // 设置聊天历史记录项总结管理监听
-        chatHistoryAdapter.setOnChatHistoryItemSummaryListener(new ChatHistoryAdapter.OnChatHistoryItemSummaryListener() {
-            @Override
-            public void onChatHistoryItemSummary(int position, ChatHistoryAdapter.ChatHistoryItem item) {
-                // 获取会话列表
-                List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
-                // 确保位置有效
-                if (position >= 0 && position < sessions.size()) {
-                    ChatSessionBean session = sessions.get(position);
-                    showSummaryListDialog(session);
-                }
-            }
-        });
-
         // 设置标题栏点击监听
         if (getTitleBar() != null) {
             getTitleBar().setOnTitleBarListener(this);
         }
+    }
 
-        // 禁止通过边缘滑动手势打开侧边栏
-        if (drawerLayout != null) {
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.LEFT);
-        }
-
+    private void initChatRecyclerView() {
+        rv_chat = findViewById(R.id.rv_chat);
+        
         // 获取 Activity
         Activity activity = getActivity();
         if (activity == null) return;
+        
         // 创建并设置适配器
         mChatAdapter = new TipsAiChatAdapter(activity);
         mChatAdapter.setHasStableIds(true);
         // 设置 RecyclerView 的动画时长
-        //rv_chat.getItemAnimator().setChangeDuration(0);
         rv_chat.setItemAnimator(null); // 禁用动画
         rv_chat.setNestedScrollingEnabled(false); // 禁用嵌套滚动，让内部 ScrollView 可以滚动
+        
         // 设置 RecyclerView 的布局管理器和适配器
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         rv_chat.setLayoutManager(layoutManager);
         rv_chat.setAdapter(mChatAdapter);
         
         // 设置打字机渲染回调，实现打字时同步滚动
-        TipsAiChatAdapter.setScrollCallback(() -> scrollToAbsoluteBottom());
+        TipsAiChatAdapter.setScrollCallback(this::scrollToAbsoluteBottom);
         
         // 设置消息即点击操作回调
         mChatAdapter.setOnMessageActionListener(new TipsAiChatAdapter.OnMessageActionListener() {
@@ -264,116 +199,157 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 adoptSummary(summaryMessage);
             }
         });
-
-        // 注册事件
-        XEventBus.getDefault().register(AiMsgFragment.this);
-        // 初始化消息数据
-        initMsgs();
-
-        // 添加调试日志，检查组件是否正确初始化
-        EasyLog.print(TAG, "initView: rv_chat=" + rv_chat);
-        EasyLog.print(TAG, "initView: mChatAdapter=" + mChatAdapter);
         EasyLog.print(TAG, "initView: layoutManager=" + layoutManager);
+    }
 
-        // 设置EditText的输入监听器，确保光标始终在最左侧
+    private void initHistorySidebar() {
+        drawerLayout = findViewById(R.id.drawer_layout);
+        chatHistoryList = findViewById(R.id.chat_history_list);
+
+        // 初始化聊天历史记录列表
+        chatHistoryAdapter = new ChatHistoryAdapter(getActivity());
+        chatHistoryList.setAdapter(chatHistoryAdapter);
+        chatHistoryList.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // 设置聊天历史记录项监听器
+        chatHistoryAdapter.setOnChatHistoryItemClickListener(this::onHistoryItemClick);
+        chatHistoryAdapter.setOnChatHistoryItemDeleteListener(this::onHistoryItemDelete);
+        chatHistoryAdapter.setOnChatHistoryItemEditTitleListener(this::onHistoryItemEditTitle);
+        chatHistoryAdapter.setOnChatHistoryItemSummaryListener(this::onHistoryItemSummary);
+
+        // 禁止通过边缘滑动手势打开侧边栏
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.LEFT);
+        }
+
+        // 设置侧边栏清空所有会话按钮点击事件
+        ImageButton clearAllButton = findViewById(R.id.btn_edit_title);
+        clearAllButton.setOnClickListener(v -> showClearAllSessionsDialog());
+    }
+
+    private void onHistoryItemClick(int position, ChatHistoryAdapter.ChatHistoryItem item) {
+        List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
+        if (position >= 0 && position < sessions.size()) {
+            ChatSessionBean selectedSession = sessions.get(position);
+            saveLastSessionId(selectedSession.getId());
+            loadChatDataForSession(selectedSession.getId());
+            if (drawerLayout != null) {
+                drawerLayout.closeDrawers();
+            }
+        }
+    }
+
+    private void onHistoryItemDelete(int position, ChatHistoryAdapter.ChatHistoryItem item) {
+        List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
+        if (position >= 0 && position < sessions.size()) {
+            ChatSessionBean sessionToDelete = sessions.get(position);
+            DbService.getInstance().mChatSummaryBeanService.deleteBySessionId(sessionToDelete.getId());
+            DbService.getInstance().mChatSessionBeanService.deleteEntity(sessionToDelete);
+
+            if (currentSession != null && currentSession.getId().equals(sessionToDelete.getId())) {
+                currentSession = null;
+                if (mChatAdapter != null) {
+                    mChatAdapter.setData(new ArrayList<ChatMessageBean>());
+                }
+            }
+            loadChatSessionList();
+        }
+    }
+
+    private void onHistoryItemEditTitle(int position, ChatHistoryAdapter.ChatHistoryItem item) {
+        List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
+        if (position >= 0 && position < sessions.size()) {
+            ChatSessionBean sessionToEdit = sessions.get(position);
+            showEditSessionTitleDialog(sessionToEdit);
+        }
+    }
+
+    private void onHistoryItemSummary(int position, ChatHistoryAdapter.ChatHistoryItem item) {
+        List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
+        if (position >= 0 && position < sessions.size()) {
+            ChatSessionBean session = sessions.get(position);
+            showSummaryListDialog(session);
+        }
+    }
+
+    private void initInputArea() {
         EditText chatContent = findViewById(R.id.chat_content);
         ImageView clearButton = findViewById(R.id.iv_clear);
+        Button sendButton = findViewById(R.id.chat_send);
 
         // 设置清除按钮的点击事件
-        clearButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                chatContent.setText("");
-            }
-        });
+        clearButton.setOnClickListener(v -> chatContent.setText(""));
 
         // 合并所有的文本监听功能到一个监听器中
         chatContent.addTextChangedListener(new TextWatcher() {
             int lines = 1;
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // 根据文本内容控制清除按钮的显示和隐藏
-                if (s.length() > 0) {
-                    clearButton.setVisibility(View.VISIBLE);
-                } else {
-                    clearButton.setVisibility(View.GONE);
-                }
+                clearButton.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                // 获取当前行数
                 int currentLines = chatContent.getLineCount();
-
-                // 如果行数增加，滚动到顶部以实现向上扩展的效果
                 if (currentLines > lines) {
                     chatContent.scrollTo(0, 0);
                 }
-
                 lines = currentLines;
             }
         });
 
-        chatContent.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    // 光标始终在最左侧
-                    chatContent.setSelection(0, 0);
-                    // 根据文本内容控制清除按钮的显示和隐藏
-                    if (chatContent.getText().length() > 0) {
-                        clearButton.setVisibility(View.VISIBLE);
-                    } else {
-                        clearButton.setVisibility(View.GONE);
-                    }
-                }
+        chatContent.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                chatContent.setSelection(0, 0);
+                clearButton.setVisibility(chatContent.getText().length() > 0 ? View.VISIBLE : View.GONE);
             }
         });
         
-        // 设置键盘回车/发送键监听，按下时发送消息
+        // 设置键盘回车/发送键监听
         chatContent.setOnKeyListener((v, keyCode, event) -> {
-            // 是否是回车键
             if (keyCode == android.view.KeyEvent.KEYCODE_ENTER && event.getAction() == android.view.KeyEvent.ACTION_DOWN) {
                 String msg = chatContent.getText().toString().trim();
                 if (!msg.isEmpty()) {
-                    // 隐藏键盘
-                    android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) 
-                            requireActivity().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
-                    if (imm != null && requireActivity().getCurrentFocus() != null) {
-                        imm.hideSoftInputFromWindow(requireActivity().getCurrentFocus().getWindowToken(), 
-                                android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS);
-                    }
-                    // 触发发送消息（调用发送按钮的点击逻辑）
-                    Button sendButton = findViewById(R.id.chat_send);
+                    hideKeyboard();
                     if (sendButton != null) {
                         sendButton.performClick();
                     }
                 }
-                return true; // 消费事件，防止换行
+                return true;
             }
             return false;
         });
-
-        // 设置侧边栏清空所有会话按钮点击事件
-        ImageButton clearAllButton = findViewById(R.id.btn_edit_title);
-        clearAllButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showClearAllSessionsDialog();
-            }
-        });
         
-        // 初始化总结功能 UI
+        // 发送按钮逻辑
+        if (sendButton != null) {
+            sendButton.setOnClickListener(v -> {
+                String result = chatContent.getText().toString();
+                if (!result.isEmpty()) {
+                    chatContent.setText("");
+                    sendMsg(result);
+                }
+            });
+        }
+    }
+    
+    private void hideKeyboard() {
+        android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) 
+                requireActivity().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        if (imm != null && requireActivity().getCurrentFocus() != null) {
+            imm.hideSoftInputFromWindow(requireActivity().getCurrentFocus().getWindowToken(), 
+                    android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+    }
+
+    private void initSummaryFeatures() {
         cbLatestSummary = findViewById(R.id.cb_latest_summary);
         cbAllSummary = findViewById(R.id.cb_all_summary);
         btnSummarize = findViewById(R.id.btn_summarize);
         
-        // 两个 CheckBox 互斥（只能选一个）
         if (cbLatestSummary != null) {
             cbLatestSummary.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked && cbAllSummary != null) {
@@ -404,26 +380,20 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 mChatAdapter.notifyDataSetChanged();
 
                 // 重新填充聊天历史记录测试数据
-                populateChatHistoryWithTestData();
+                loadChatSessionList();
             }
         });
     }
 
 
     /**
-     * 填充聊天历史记录列表测试数据
+     * 加载聊天会话列表
+     * Renamed from populateChatHistoryWithTestData
      */
-    private void populateChatHistoryWithTestData() {
+    private void loadChatSessionList() {
         List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
         
-        // 按更新时间倒序排序（最新的在最前面）
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            sessions.sort((s1, s2) -> {
-                String time1 = s1.getUpdateTime() != null ? s1.getUpdateTime() : "";
-                String time2 = s2.getUpdateTime() != null ? s2.getUpdateTime() : "";
-                return time2.compareTo(time1); // 倒序：time2 - time1
-            });
-        }
+        sortSessions(sessions);
 
         List<ChatHistoryAdapter.ChatHistoryItem> historyItems = new ArrayList<>();
 
@@ -446,6 +416,17 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
         // 恢复上次选中的会话
         loadLastSelectedSession(sessions);
+    }
+    
+    private void sortSessions(List<ChatSessionBean> sessions) {
+        // 按更新时间倒序排序（最新的在最前面）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            sessions.sort((s1, s2) -> {
+                String time1 = s1.getUpdateTime() != null ? s1.getUpdateTime() : "";
+                String time2 = s2.getUpdateTime() != null ? s2.getUpdateTime() : "";
+                return time2.compareTo(time1); // 倒序：time2 - time1
+            });
+        }
     }
     
     /**
@@ -521,7 +502,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                                 EasyLog.print(TAG, "Session ID obtained: " + bean.getRealConversationId());
                                 
                                 // 刷新会话列表UI
-                                populateChatHistoryWithTestData();
+                                loadChatSessionList();
                             }
                         } else {
                             EasyLog.print(TAG, "Failed to obtain session ID: " + (data != null ? data.getMessage() : "null response"));
@@ -674,24 +655,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         EasyLog.print(TAG, "initMsgs: Initializing messages");
         
         // 加载会话列表并恢复上次选中的会话
-        populateChatHistoryWithTestData();
-
-        Button chat_send = findViewById(R.id.chat_send);
-        chat_send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String result = ((EditText) findViewById(R.id.chat_content)).getText().toString();
-                if (!result.isEmpty()) {
-                    ((EditText) findViewById(R.id.chat_content)).setText("");
-                    sendMsg(result);
-                }
-            }
-        });
-
-        //setRightTitle("...");
-        //getTitleBar().setRightTitleSize(26);
-        //getTitleBar().setRightTitleColor(Color.BLACK);
-
+        loadChatSessionList();
     }
 
     /**
@@ -1193,7 +1157,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         if (!sessions.isEmpty()) {
             //初始化聊天会话数据
             // 加载历史会话历史记录
-            populateChatHistoryWithTestData();
+            loadChatSessionList();
         } else {
             // 没有会话数据时，创建新会话
             EasyLog.print(TAG, "No session data found in database, creating new session");
@@ -1279,7 +1243,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     }
 
                     // 重新加载侧边栏数据
-                    populateChatHistoryWithTestData();
+                    loadChatSessionList();
                     Toast.makeText(getContext(), "标题已更新", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -1421,6 +1385,162 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 清空输入框
         ((EditText) findViewById(R.id.chat_content)).getText().clear();
     }
+
+    /**
+     * 发送消息（核心逻辑）
+     */
+    private void sendMsg(String result) {
+        if (mChatAdapter != null) {
+            String time = sdf.format(new Date());
+            
+            // 如果当前没有会话，创建一个新的会话
+            if (currentSession == null) {
+                createNewSession("新对话");
+            } else {
+
+                // 检查会话ID是否存在（conversationId 或 endUserId 为空需要重新申请）
+                if (currentSession.getConversationId() == null || 
+                    currentSession.getConversationId().isEmpty() ||
+                    currentSession.getEndUserId() == null ||
+                    currentSession.getEndUserId().isEmpty()) {
+                    // 会话ID缺失，重新申请
+                    EasyLog.print(TAG, "Session missing conversationId or endUserId, requesting new ID");
+                    requestNewSessionIdAndContinue(result, time);
+                    return;
+                }
+                
+                // 检查会话创建时间是否为空或者会话是否过期
+                if (currentSession.getCreateTime() == null) {
+                    // 如果会话创建时间为空，重新申请会话Id后再继续执行
+                    requestNewSessionIdAndContinue(result, time);
+                    return; // 暂停当前执行，等待会话ID申请完成后再继续
+                } else {
+                    // 检查会话是否过期（会话有效期为6天）
+                    long createTime = DateHelper.strDateToLong(currentSession.getCreateTime());
+                    long currentTime = System.currentTimeMillis();
+                    // 6天 = 6 * 24 * 60 * 60 * 1000 毫秒
+                    if (currentTime - createTime > 6 * 24 * 60 * 60 * 1000L) {
+                        // 会话已过期，重新申请会话Id后再继续执行
+                        requestNewSessionIdAndContinue(result, time);
+                        return; // 暂停当前执行，等待会话ID申请完成后再继续
+                    }
+                }
+            }
+
+            // 确保会话已保存到数据库
+            ensureSessionSaved();
+
+            // 处理系统消息
+            handleSystemMessage(time);
+            
+            // 检查是否选中了总结 CheckBox，根据类型获取并追加总结
+            String messageToSend = result;
+            String summaryTag = null; // 用于显示的标记
+            
+            boolean useLatestSummary = cbLatestSummary != null && cbLatestSummary.isChecked();
+            boolean useAllSummary = cbAllSummary != null && cbAllSummary.isChecked();
+            
+            if (useLatestSummary || useAllSummary) {
+                EasyLog.print(TAG, "带总结发送：" + (useLatestSummary ? "最近" : "全部") + "，会话ID: " + currentSession.getId());
+                // 获取当前会话的总结
+                List<run.yigou.gxzy.greendao.entity.ChatSummaryBean> summaries = 
+                    DbService.getInstance().mChatSummaryBeanService.findBySessionId(currentSession.getId());
+                EasyLog.print(TAG, "带总结发送：找到 " + (summaries != null ? summaries.size() : 0) + " 条总结");
+                
+                if (summaries != null && !summaries.isEmpty()) {
+                    StringBuilder summaryContent = new StringBuilder();
+                    
+                    if (useLatestSummary) {
+                        // 只发送最近一次总结（列表按创建时间降序，最新的在第一个）
+                        run.yigou.gxzy.greendao.entity.ChatSummaryBean latestSummary = summaries.get(0);
+                        if (latestSummary.getContent() != null && !latestSummary.getContent().isEmpty()) {
+                            summaryContent.append(latestSummary.getContent());
+                        }
+                        summaryTag = "[最近历史总结]";
+                    } else {
+                        // 发送全部总结（按时间顺序，从旧到新）
+                        for (int i = summaries.size() - 1; i >= 0; i--) {
+                            run.yigou.gxzy.greendao.entity.ChatSummaryBean summary = summaries.get(i);
+                            if (summary.getContent() != null && !summary.getContent().isEmpty()) {
+                                if (summaryContent.length() > 0) {
+                                    summaryContent.append("\n\n---\n\n");
+                                }
+                                summaryContent.append(summary.getContent());
+                            }
+                        }
+                        summaryTag = "[全部历史总结]";
+                    }
+                    
+                    if (summaryContent.length() > 0) {
+                        messageToSend = result + "\n\n[历史总结]:\n" + summaryContent.toString();
+                        EasyLog.print(TAG, "带总结发送：已追加总结，总结内容长度: " + summaryContent.length());
+                    }
+                } else {
+                    EasyLog.print(TAG, "带总结发送：当前会话没有总结数据");
+                }
+            }
+            
+            // 确定显示在聊天框中的内容（如果带总结，添加标记）
+            String displayContent = result;
+            if (summaryTag != null && !messageToSend.equals(result)) {
+                displayContent = result + "\n" + summaryTag;
+            }
+
+            // 添加发送消息（显示带标记的内容）
+            ChatMessageBean chatMessageBeanSend = new ChatMessageBean(ChatMessageBean.TYPE_SEND, "", "", displayContent);
+            chatMessageBeanSend.setSessionId(currentSession.getId());
+            chatMessageBeanSend.setCreateDate(DateHelper.getSeconds1());
+            chatMessageBeanSend.setIsDelete(ChatMessageBean.IS_Delete_NO);
+            // 保存发送消息到数据库
+            long sendMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(chatMessageBeanSend);
+            chatMessageBeanSend.setId(sendMsgId);
+            mChatAdapter.addItem(chatMessageBeanSend);
+            EasyLog.print(TAG, "Saved sent message to database with ID: " + sendMsgId + " and session ID: " + currentSession.getId());
+
+            // 更新会话预览和时间
+            currentSession.setPreview("我: " + result);
+            currentSession.setUpdateTime(DateHelper.getSeconds1());
+            DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
+
+            // 1. 先创建并添加 "思考中" 消息
+            final ChatMessageBean thinkingMessage = new ChatMessageBean(ChatMessageBean.TYPE_THINKING, "Ai", "", "正在思考...");
+            thinkingMessage.setSessionId(currentSession.getId());
+            thinkingMessage.setCreateDate(DateHelper.getSeconds1());
+            thinkingMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+            
+            // 保存思考消息到数据库
+            long thinkingMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(thinkingMessage);
+            thinkingMessage.setId(thinkingMsgId);
+            mChatAdapter.addItem(thinkingMessage);
+            EasyLog.print(TAG, "Added thinking message with ID: " + thinkingMsgId);
+
+            // 准备 "回答" 消息的引用（初始为空，等到有回答时再创建）
+            final ChatMessageBean[] answerMessageRef = {null};
+            final boolean[] isThinkingPhase = {true}; // 标记当前是否处于思考阶段
+
+            // 滚动到最后
+            if (rv_chat != null) {
+                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
+                rv_chat.clearOnScrollListeners();
+                rv_chat.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                        scrollState = newState;
+                    }
+                });
+                // 阻止子 View 获取焦点，防止 notifyItemChanged 时 TextView 获取焦点导致滚动跳动
+                rv_chat.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+            }
+
+            // 发送消息给GPT - 使用 SSE 流式请求（使用共用回调）
+            // 注意：如果选中了"带总结"，发送的是追加了总结的内容
+            new AiStreamApi()
+                    .setQuery(messageToSend)
+                    .setConversationId(currentSession.getConversationId())
+                    .setEndUserId(currentSession.getEndUserId())
+                    .execute(createSseCallback(thinkingMessage, answerMessageRef, isThinkingPhase, true, true));
+        }
+    }
     
     /**
      * 显示清空所有会话的确认对话框
@@ -1483,6 +1603,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         }
     }
     
+    // ==========================================
+    // Summary Feature Logic
+    // ==========================================
     /**
      * 生成当前会话的总结
      */
@@ -1782,162 +1905,14 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 消息保留在聊天列表中，不移除
     }
     
-    /**
-     * 发送消息（核心逻辑）
-     */
-    private void sendMsg(String result) {
-        if (mChatAdapter != null) {
-            String time = sdf.format(new Date());
-            
-            // 如果当前没有会话，创建一个新的会话
-            if (currentSession == null) {
-                createNewSession("新对话");
-            } else {
+    // ==========================================
+    // Summary Feature Logic
+    // ==========================================
 
-                // 检查会话ID是否存在（conversationId 或 endUserId 为空需要重新申请）
-                if (currentSession.getConversationId() == null || 
-                    currentSession.getConversationId().isEmpty() ||
-                    currentSession.getEndUserId() == null ||
-                    currentSession.getEndUserId().isEmpty()) {
-                    // 会话ID缺失，重新申请
-                    EasyLog.print(TAG, "Session missing conversationId or endUserId, requesting new ID");
-                    requestNewSessionIdAndContinue(result, time);
-                    return;
-                }
-                
-                // 检查会话创建时间是否为空或者会话是否过期
-                if (currentSession.getCreateTime() == null) {
-                    // 如果会话创建时间为空，重新申请会话Id后再继续执行
-                    requestNewSessionIdAndContinue(result, time);
-                    return; // 暂停当前执行，等待会话ID申请完成后再继续
-                } else {
-                    // 检查会话是否过期（会话有效期为6天）
-                    long createTime = DateHelper.strDateToLong(currentSession.getCreateTime());
-                    long currentTime = System.currentTimeMillis();
-                    // 6天 = 6 * 24 * 60 * 60 * 1000 毫秒
-                    if (currentTime - createTime > 6 * 24 * 60 * 60 * 1000L) {
-                        // 会话已过期，重新申请会话Id后再继续执行
-                        requestNewSessionIdAndContinue(result, time);
-                        return; // 暂停当前执行，等待会话ID申请完成后再继续
-                    }
-                }
-            }
-
-            // 确保会话已保存到数据库
-            ensureSessionSaved();
-
-            // 处理系统消息
-            handleSystemMessage(time);
-            
-            // 检查是否选中了总结 CheckBox，根据类型获取并追加总结
-            String messageToSend = result;
-            String summaryTag = null; // 用于显示的标记
-            
-            boolean useLatestSummary = cbLatestSummary != null && cbLatestSummary.isChecked();
-            boolean useAllSummary = cbAllSummary != null && cbAllSummary.isChecked();
-            
-            if (useLatestSummary || useAllSummary) {
-                EasyLog.print(TAG, "带总结发送：" + (useLatestSummary ? "最近" : "全部") + "，会话ID: " + currentSession.getId());
-                // 获取当前会话的总结
-                List<run.yigou.gxzy.greendao.entity.ChatSummaryBean> summaries = 
-                    DbService.getInstance().mChatSummaryBeanService.findBySessionId(currentSession.getId());
-                EasyLog.print(TAG, "带总结发送：找到 " + (summaries != null ? summaries.size() : 0) + " 条总结");
-                
-                if (summaries != null && !summaries.isEmpty()) {
-                    StringBuilder summaryContent = new StringBuilder();
-                    
-                    if (useLatestSummary) {
-                        // 只发送最近一次总结（列表按创建时间降序，最新的在第一个）
-                        run.yigou.gxzy.greendao.entity.ChatSummaryBean latestSummary = summaries.get(0);
-                        if (latestSummary.getContent() != null && !latestSummary.getContent().isEmpty()) {
-                            summaryContent.append(latestSummary.getContent());
-                        }
-                        summaryTag = "[最近历史总结]";
-                    } else {
-                        // 发送全部总结（按时间顺序，从旧到新）
-                        for (int i = summaries.size() - 1; i >= 0; i--) {
-                            run.yigou.gxzy.greendao.entity.ChatSummaryBean summary = summaries.get(i);
-                            if (summary.getContent() != null && !summary.getContent().isEmpty()) {
-                                if (summaryContent.length() > 0) {
-                                    summaryContent.append("\n\n---\n\n");
-                                }
-                                summaryContent.append(summary.getContent());
-                            }
-                        }
-                        summaryTag = "[全部历史总结]";
-                    }
-                    
-                    if (summaryContent.length() > 0) {
-                        messageToSend = result + "\n\n[历史总结]:\n" + summaryContent.toString();
-                        EasyLog.print(TAG, "带总结发送：已追加总结，总结内容长度: " + summaryContent.length());
-                    }
-                } else {
-                    EasyLog.print(TAG, "带总结发送：当前会话没有总结数据");
-                }
-            }
-            
-            // 确定显示在聊天框中的内容（如果带总结，添加标记）
-            String displayContent = result;
-            if (summaryTag != null && !messageToSend.equals(result)) {
-                displayContent = result + "\n" + summaryTag;
-            }
-
-            // 添加发送消息（显示带标记的内容）
-            ChatMessageBean chatMessageBeanSend = new ChatMessageBean(ChatMessageBean.TYPE_SEND, "", "", displayContent);
-            chatMessageBeanSend.setSessionId(currentSession.getId());
-            chatMessageBeanSend.setCreateDate(DateHelper.getSeconds1());
-            chatMessageBeanSend.setIsDelete(ChatMessageBean.IS_Delete_NO);
-            // 保存发送消息到数据库
-            long sendMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(chatMessageBeanSend);
-            chatMessageBeanSend.setId(sendMsgId);
-            mChatAdapter.addItem(chatMessageBeanSend);
-            EasyLog.print(TAG, "Saved sent message to database with ID: " + sendMsgId + " and session ID: " + currentSession.getId());
-
-            // 更新会话预览和时间
-            currentSession.setPreview("我: " + result);
-            currentSession.setUpdateTime(DateHelper.getSeconds1());
-            DbService.getInstance().mChatSessionBeanService.updateEntity(currentSession);
-
-            // 1. 先创建并添加 "思考中" 消息
-            final ChatMessageBean thinkingMessage = new ChatMessageBean(ChatMessageBean.TYPE_THINKING, "Ai", "", "正在思考...");
-            thinkingMessage.setSessionId(currentSession.getId());
-            thinkingMessage.setCreateDate(DateHelper.getSeconds1());
-            thinkingMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-            
-            // 保存思考消息到数据库
-            long thinkingMsgId = DbService.getInstance().mChatMessageBeanService.addEntity(thinkingMessage);
-            thinkingMessage.setId(thinkingMsgId);
-            mChatAdapter.addItem(thinkingMessage);
-            EasyLog.print(TAG, "Added thinking message with ID: " + thinkingMsgId);
-
-            // 准备 "回答" 消息的引用（初始为空，等到有回答时再创建）
-            final ChatMessageBean[] answerMessageRef = {null};
-            final boolean[] isThinkingPhase = {true}; // 标记当前是否处于思考阶段
-
-            // 滚动到最后
-            if (rv_chat != null) {
-                rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
-                rv_chat.clearOnScrollListeners();
-                rv_chat.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                    @Override
-                    public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                        scrollState = newState;
-                    }
-                });
-                // 阻止子 View 获取焦点，防止 notifyItemChanged 时 TextView 获取焦点导致滚动跳动
-                rv_chat.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-            }
-
-            // 发送消息给GPT - 使用 SSE 流式请求（使用共用回调）
-            // 注意：如果选中了"带总结"，发送的是追加了总结的内容
-            new AiStreamApi()
-                    .setQuery(messageToSend)
-                    .setConversationId(currentSession.getConversationId())
-                    .setEndUserId(currentSession.getEndUserId())
-                    .execute(createSseCallback(thinkingMessage, answerMessageRef, isThinkingPhase, true, true));
-        }
-    }
     
+    // ==========================================
+    // Message Action Logic
+    // ==========================================
     /**
      * 显示消息操作菜单（在点击位置弹出）
      */
