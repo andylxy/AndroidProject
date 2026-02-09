@@ -1,5 +1,10 @@
 package run.yigou.gxzy.utils;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.widget.Toast;
+
 /**
  * Markdown 工具类
  */
@@ -45,5 +50,16 @@ public class MarkdownUtils {
         text = text.replaceAll("\\n{3,}", "\n\n");
         
         return text.trim();
+    }
+
+    /**
+     * 复制文本到剪贴板
+     */
+    public static void copyToClipboard(Context context, String text) {
+        if (context == null || text == null) return;
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("聊天内容", text);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
     }
 }

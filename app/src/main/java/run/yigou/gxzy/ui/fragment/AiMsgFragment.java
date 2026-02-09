@@ -1,7 +1,5 @@
 package run.yigou.gxzy.ui.fragment;
 
-import static com.blankj.utilcode.util.ThreadUtils.runOnUiThread;
-
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -52,6 +50,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.bar.OnTitleBarListener;
 import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.ui.helper.ChatInputHelper;
+import run.yigou.gxzy.ui.helper.ChatSidebarHelper;
+import run.yigou.gxzy.ui.helper.ChatSummaryHelper;
 import run.yigou.gxzy.utils.MarkdownUtils;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
@@ -79,9 +80,12 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     private static final String TAG = "AiMsgFragment";
     
     private RecyclerView rv_chat;
-    private DrawerLayout drawerLayout;
-    private RecyclerView chatHistoryList;
-    private run.yigou.gxzy.ui.tips.adapter.ChatHistoryAdapter chatHistoryAdapter; // 修改导入路径
+    
+    // Helpers
+    private ChatSidebarHelper sidebarHelper;
+    private ChatSummaryHelper summaryHelper;
+    private ChatInputHelper inputHelper;
+    
     @SuppressLint("SimpleDateFormat")
     private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
     private int scrollState = 0;
@@ -94,11 +98,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     // 当前会话
     private ChatSessionBean currentSession;
     
-    // 总结功能相关
-    private CheckBox cbLatestSummary;  // 最近一次总结
-    private CheckBox cbAllSummary;     // 全部总结
-    private Button btnSummarize;
-
     public static AiMsgFragment newInstance() {
         return new AiMsgFragment();
     }
@@ -116,7 +115,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
     @Override
     protected void initView() {
-        EasyLog.print(TAG, "initView: Starting initialization");
+        EasyLog.print(TAG, "initView: Starting initialization (Optimized Version)");
         
         // 初始化管理器
         ChatSessionManager.getInstance().init(getContext());
@@ -124,9 +123,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         initMarkwon();
         initTitleBar();
         initChatRecyclerView();
-        initHistorySidebar();
-        initInputArea();
-        initSummaryFeatures();
+        
+        // 初始化 Helpers
+        initHelpers();
 
         // 注册事件
         XEventBus.getDefault().register(AiMsgFragment.this);
@@ -136,6 +135,119 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         // 添加调试日志，检查组件是否正确初始化
         EasyLog.print(TAG, "initView: rv_chat=" + rv_chat);
         EasyLog.print(TAG, "initView: mChatAdapter=" + mChatAdapter);
+    }
+    
+    private void initHelpers() {
+        // 获取 Fragment 的根视图
+        View rootView = rv_chat.getRootView();
+
+        // Sidebar Helper
+        sidebarHelper = new ChatSidebarHelper(getContext(), rootView, new ChatSidebarHelper.OnSidebarActionListener() {
+            @Override
+            public void onSessionSelected(ChatSessionBean session) {
+                loadChatDataForSession(session.getId());
+            }
+
+            @Override
+            public void onSessionDeleted(ChatSessionBean session) {
+                if (currentSession != null && currentSession.getId().equals(session.getId())) {
+                    currentSession = null;
+                    if (mChatAdapter != null) {
+                        mChatAdapter.setData(new ArrayList<ChatMessageBean>());
+                    }
+                }
+                sidebarHelper.refreshChatHistorySidebar(currentSession);
+            }
+
+            @Override
+            public void onSessionTitleEdited(ChatSessionBean session) {
+                if (currentSession != null && currentSession.getId().equals(session.getId())) {
+                    if (getTitleBar() != null) {
+                        getTitleBar().setTitle(session.getTitle());
+                    }
+                }
+                sidebarHelper.refreshChatHistorySidebar(currentSession);
+            }
+
+            @Override
+            public void onSessionSummaryRequested(ChatSessionBean session) {
+                if (summaryHelper != null) {
+                    summaryHelper.showSummaryListDialog(session);
+                }
+            }
+
+            @Override
+            public void onClearAllSessions() {
+                clearAllSessions();
+            }
+        });
+        
+        // Summary Helper
+        summaryHelper = new ChatSummaryHelper(getContext(), rootView, mMarkwon, new ChatSummaryHelper.OnSummaryActionListener() {
+            @Override
+            public ChatSessionBean getCurrentSession() {
+                return currentSession;
+            }
+
+            @Override
+            public void onSummaryGenerated(ChatMessageBean summaryMessage) {
+                uiUpdateHandler.post(() -> {
+                    if (mChatAdapter != null) {
+                        mChatAdapter.addItem(summaryMessage);
+                        scrollToAbsoluteBottom();
+                    }
+                });
+            }
+
+            @Override
+            public void onSummaryStreamUpdate(ChatMessageBean summaryMessage) {
+                uiUpdateHandler.post(() -> {
+                    if (mChatAdapter != null) {
+                        int position = mChatAdapter.getData().indexOf(summaryMessage);
+                        if (position >= 0) {
+                            mChatAdapter.notifyItemChanged(position, TipsAiChatAdapter.PAYLOAD_UPDATE_CONTENT);
+                        }
+                    }
+                    scrollToAbsoluteBottom();
+                });
+            }
+
+            @Override
+            public void onSummaryStreamComplete(ChatMessageBean summaryMessage, boolean success) {
+                uiUpdateHandler.post(() -> {
+                    if (success) {
+                        if (mChatAdapter != null) {
+                            int position = mChatAdapter.getData().indexOf(summaryMessage);
+                            if (position >= 0) {
+                                mChatAdapter.notifyItemChanged(position);
+                            }
+                        }
+                    } else {
+                        if (mChatAdapter != null) {
+                            int position = mChatAdapter.getData().indexOf(summaryMessage);
+                            if (position >= 0) {
+                                mChatAdapter.removeItem(position);
+                            }
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onSummaryStreamError(ChatMessageBean summaryMessage, String error) {
+                uiUpdateHandler.post(() -> {
+                    if (mChatAdapter != null) {
+                        int position = mChatAdapter.getData().indexOf(summaryMessage);
+                        if (position >= 0) {
+                            mChatAdapter.removeItem(position);
+                        }
+                    }
+                });
+            }
+        });
+        
+        // Input Helper
+        inputHelper = new ChatInputHelper(getActivity(), rootView, message -> sendMsg(message));
     }
 
     private void initMarkwon() {
@@ -191,179 +303,15 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
             @Override
             public void onAdoptSummary(ChatMessageBean summaryMessage) {
-                adoptSummary(summaryMessage);
+                if (summaryHelper != null) {
+                    summaryHelper.adoptSummary(summaryMessage);
+                }
             }
         });
         EasyLog.print(TAG, "initView: layoutManager=" + layoutManager);
     }
-
-    private void initHistorySidebar() {
-        drawerLayout = findViewById(R.id.drawer_layout);
-        chatHistoryList = findViewById(R.id.chat_history_list);
-
-        // 初始化聊天历史记录列表
-        chatHistoryAdapter = new ChatHistoryAdapter(getActivity());
-        chatHistoryList.setAdapter(chatHistoryAdapter);
-        chatHistoryList.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        // 设置聊天历史记录项监听器
-        chatHistoryAdapter.setOnChatHistoryItemClickListener(this::onHistoryItemClick);
-        chatHistoryAdapter.setOnChatHistoryItemDeleteListener(this::onHistoryItemDelete);
-        chatHistoryAdapter.setOnChatHistoryItemEditTitleListener(this::onHistoryItemEditTitle);
-        chatHistoryAdapter.setOnChatHistoryItemSummaryListener(this::onHistoryItemSummary);
-
-        // 禁止通过边缘滑动手势打开侧边栏
-        if (drawerLayout != null) {
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.LEFT);
-        }
-
-        // 设置侧边栏清空所有会话按钮点击事件
-        ImageButton clearAllButton = findViewById(R.id.btn_edit_title);
-        clearAllButton.setOnClickListener(v -> showClearAllSessionsDialog());
-    }
-
-    private void onHistoryItemClick(int position, ChatHistoryAdapter.ChatHistoryItem item) {
-        List<ChatSessionBean> sessions = ChatSessionManager.getInstance().getAllSessionsSorted();
-        if (position >= 0 && position < sessions.size()) {
-            ChatSessionBean selectedSession = sessions.get(position);
-            ChatSessionManager.getInstance().saveLastSessionId(selectedSession.getId());
-            loadChatDataForSession(selectedSession.getId());
-            if (drawerLayout != null) {
-                drawerLayout.closeDrawers();
-            }
-        }
-    }
-
-    private void onHistoryItemDelete(int position, ChatHistoryAdapter.ChatHistoryItem item) {
-        List<ChatSessionBean> sessions = ChatSessionManager.getInstance().getAllSessionsSorted();
-        if (position >= 0 && position < sessions.size()) {
-            ChatSessionBean sessionToDelete = sessions.get(position);
-            ChatSessionManager.getInstance().deleteSession(sessionToDelete);
-
-            if (currentSession != null && currentSession.getId().equals(sessionToDelete.getId())) {
-                currentSession = null;
-                if (mChatAdapter != null) {
-                    mChatAdapter.setData(new ArrayList<ChatMessageBean>());
-                }
-            }
-            loadChatSessionList();
-        }
-    }
-
-    private void onHistoryItemEditTitle(int position, ChatHistoryAdapter.ChatHistoryItem item) {
-        List<ChatSessionBean> sessions = ChatSessionManager.getInstance().getAllSessionsSorted();
-        if (position >= 0 && position < sessions.size()) {
-            ChatSessionBean sessionToEdit = sessions.get(position);
-            showEditSessionTitleDialog(sessionToEdit);
-        }
-    }
-
-    private void onHistoryItemSummary(int position, ChatHistoryAdapter.ChatHistoryItem item) {
-        List<ChatSessionBean> sessions = ChatSessionManager.getInstance().getAllSessionsSorted();
-        if (position >= 0 && position < sessions.size()) {
-            ChatSessionBean session = sessions.get(position);
-            showSummaryListDialog(session);
-        }
-    }
     
-    private void initInputArea() {
-        EditText chatContent = findViewById(R.id.chat_content);
-        ImageView clearButton = findViewById(R.id.iv_clear);
-        Button sendButton = findViewById(R.id.chat_send);
-
-        // 设置清除按钮的点击事件
-        clearButton.setOnClickListener(v -> chatContent.setText(""));
-
-        // 合并所有的文本监听功能到一个监听器中
-        chatContent.addTextChangedListener(new TextWatcher() {
-            int lines = 1;
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                clearButton.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                int currentLines = chatContent.getLineCount();
-                if (currentLines > lines) {
-                    chatContent.scrollTo(0, 0);
-                }
-                lines = currentLines;
-            }
-        });
-
-        chatContent.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
-                chatContent.setSelection(0, 0);
-                clearButton.setVisibility(chatContent.getText().length() > 0 ? View.VISIBLE : View.GONE);
-            }
-        });
-        
-        // 设置键盘回车/发送键监听
-        chatContent.setOnKeyListener((v, keyCode, event) -> {
-            if (keyCode == android.view.KeyEvent.KEYCODE_ENTER && event.getAction() == android.view.KeyEvent.ACTION_DOWN) {
-                String msg = chatContent.getText().toString().trim();
-                if (!msg.isEmpty()) {
-                    hideKeyboard();
-                    if (sendButton != null) {
-                        sendButton.performClick();
-                    }
-                }
-                return true;
-            }
-            return false;
-        });
-        
-        // 发送按钮逻辑
-        if (sendButton != null) {
-            sendButton.setOnClickListener(v -> {
-                String result = chatContent.getText().toString();
-                if (!result.isEmpty()) {
-                    chatContent.setText("");
-                    sendMsg(result);
-                }
-            });
-        }
-    }
-    
-    private void hideKeyboard() {
-        android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) 
-                requireActivity().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
-        if (imm != null && requireActivity().getCurrentFocus() != null) {
-            imm.hideSoftInputFromWindow(requireActivity().getCurrentFocus().getWindowToken(), 
-                    android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS);
-        }
-    }
-
-    private void initSummaryFeatures() {
-        cbLatestSummary = findViewById(R.id.cb_latest_summary);
-        cbAllSummary = findViewById(R.id.cb_all_summary);
-        btnSummarize = findViewById(R.id.btn_summarize);
-        
-        if (cbLatestSummary != null) {
-            cbLatestSummary.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked && cbAllSummary != null) {
-                    cbAllSummary.setChecked(false);
-                }
-            });
-        }
-        if (cbAllSummary != null) {
-            cbAllSummary.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked && cbLatestSummary != null) {
-                    cbLatestSummary.setChecked(false);
-                }
-            });
-        }
-        
-        if (btnSummarize != null) {
-            btnSummarize.setOnClickListener(v -> generateSessionSummary());
-        }
-    }
-
+    // Removed initHistorySidebar(), initInputArea(), initSummaryFeatures() as they are moved to Helpers
 
     @SuppressLint("NotifyDataSetChanged")
     @Subscribe(priority = 1)
@@ -374,70 +322,23 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 mChatAdapter.notifyDataSetChanged();
 
                 // 重新填充聊天历史记录测试数据
-                loadChatSessionList();
+                if (sidebarHelper != null) {
+                    sidebarHelper.refreshChatHistorySidebar(currentSession);
+                }
             }
         });
     }
 
     /**
-     * 只刷新聊天历史侧边栏UI，不重新加载会话数据
-     */
-    private void refreshChatHistorySidebar() {
-        List<ChatSessionBean> sessions = ChatSessionManager.getInstance().getAllSessionsSorted();
-
-        List<ChatHistoryAdapter.ChatHistoryItem> historyItems = new ArrayList<>();
-        int currentSessionPosition = 0;
-        
-        for (int i = 0; i < sessions.size(); i++) {
-            ChatSessionBean session = sessions.get(i);
-            List<ChatMessageBean> messages = session.getMessages();
-            String messageCount = messages.size() + " 条消息";
-
-            historyItems.add(new ChatHistoryAdapter.ChatHistoryItem(
-                    session.getTitle(),
-                    session.getPreview(),
-                    session.getUpdateTime().substring(0, 10),
-                    messageCount));
-            
-            // 找到当前会话的位置
-            if (currentSession != null && session.getId().equals(currentSession.getId())) {
-                currentSessionPosition = i;
-            }
-        }
-
-        // 更新适配器数据
-        chatHistoryAdapter.setData(historyItems);
-        chatHistoryAdapter.setSelectedPosition(currentSessionPosition);
-        EasyLog.print(TAG, "Refreshed sidebar, current session at position: " + currentSessionPosition);
-    }
-
-    /**
-     * 加载聊天会话列表
-     * Renamed from populateChatHistoryWithTestData
+     * 加载聊天会话列表 (Delegate to Helper)
      */
     private void loadChatSessionList() {
-        List<ChatSessionBean> sessions = ChatSessionManager.getInstance().getAllSessionsSorted();
-
-        List<ChatHistoryAdapter.ChatHistoryItem> historyItems = new ArrayList<>();
-
-        // 根据会话数据创建历史记录项
-        for (ChatSessionBean session : sessions) {
-            // 计算会话中的消息数量
-            List<ChatMessageBean> messages = session.getMessages();
-            String messageCount = messages.size() + " 条消息";
-
-            historyItems.add(new ChatHistoryAdapter.ChatHistoryItem(
-                    session.getTitle(),
-                    session.getPreview(),
-                    session.getUpdateTime().substring(0, 10), // 提取日期部分
-                    messageCount));
-            EasyLog.print(TAG, "Added session to sidebar: " + session.getTitle() + ", message count: " + messageCount);
+        if (sidebarHelper != null) {
+            sidebarHelper.refreshChatHistorySidebar(currentSession);
         }
-
-        // 更新适配器数据
-        chatHistoryAdapter.setData(historyItems);
-
+        
         // 恢复上次选中的会话
+        List<ChatSessionBean> sessions = ChatSessionManager.getInstance().getAllSessionsSorted();
         loadLastSelectedSession(sessions);
     }
     
@@ -468,7 +369,12 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         }
         
         // 选中并加载会话
-        chatHistoryAdapter.setSelectedPosition(selectedPosition);
+        // 注意：sidebarHelper.refreshChatHistorySidebar 已经设置了 adapter 数据，但我们需要更新选中项
+        // 这里重新刷新一次可能有点浪费，但为了保持状态一致
+        if (sidebarHelper != null) {
+            sidebarHelper.refreshChatHistorySidebar(sessions.get(selectedPosition));
+        }
+        
         loadChatDataForSession(sessions.get(selectedPosition).getId());
         EasyLog.print(TAG, "Auto-loaded session: " + sessions.get(selectedPosition).getTitle());
     }
@@ -495,7 +401,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                     EasyLog.print(TAG, "Session ID obtained: " + conversationId);
                     
                     // 刷新会话列表UI
-                    loadChatSessionList();
+                    if (sidebarHelper != null) {
+                        sidebarHelper.refreshChatHistorySidebar(currentSession);
+                    }
                 }
             }
 
@@ -635,7 +543,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         answerUpdateRunnable = new Runnable() {
             @Override
             public void run() {
-                runOnUiThread(() -> {
+                uiUpdateHandler.post(() -> {
                     int answerPos = mChatAdapter.getData().indexOf(answerMessage);
                     if (answerPos != -1) {
                         // ⚠️ 移除重置 streaming=true 的逻辑，避免覆盖 onComplete 中的 false 值
@@ -671,7 +579,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
         @Override
         public void onThinking(String content) {
-            runOnUiThread(() -> {
+            uiUpdateHandler.post(() -> {
                 int pos = mChatAdapter.getData().indexOf(thinkingMessage);
                 if (pos != -1) {
                     mChatAdapter.notifyItemChanged(pos);
@@ -686,7 +594,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         @Override
         public void onAnswerStart(ChatMessageBean answerMsg) {
             this.answerMessage = answerMsg;
-            runOnUiThread(() -> {
+            uiUpdateHandler.post(() -> {
                 // 折叠思考消息
                 int thinkPos = mChatAdapter.getData().indexOf(thinkingMessage);
                 if (thinkPos != -1) {
@@ -704,7 +612,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             if (useThrottle) {
                 scheduleAnswerUIUpdate(answerMessage);
             } else {
-                runOnUiThread(() -> {
+                uiUpdateHandler.post(() -> {
                     int answerPos = mChatAdapter.getData().indexOf(answerMessage);
                     if (answerPos != -1) {
                         mChatAdapter.notifyItemChanged(answerPos);
@@ -721,7 +629,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 answerUpdateRunnable = null;
             }
 
-            runOnUiThread(() -> {
+            uiUpdateHandler.post(() -> {
                 // 强制折叠思考
                 thinkingMessage.setThinkingCollapsed(true);
                 int thinkPos = mChatAdapter.getData().indexOf(thinkingMessage);
@@ -740,11 +648,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
                 // 取消总结 CheckBox 选中
                 if (resetSummaryCheckbox) {
-                    if (cbLatestSummary != null && cbLatestSummary.isChecked()) {
-                        cbLatestSummary.setChecked(false);
-                    }
-                    if (cbAllSummary != null && cbAllSummary.isChecked()) {
-                        cbAllSummary.setChecked(false);
+                    if (summaryHelper != null) {
+                        summaryHelper.resetCheckboxes();
                     }
                 }
             });
@@ -752,7 +657,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
 
         @Override
         public void onError(String error) {
-            runOnUiThread(() -> {
+            uiUpdateHandler.post(() -> {
                 mChatAdapter.updateData();
                 // 恢复焦点能力
                 if (rv_chat != null) {
@@ -838,8 +743,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     @Override
     public void onLeftClick(View view) {
         // 左侧按钮被点击，打开侧边栏
-        if (drawerLayout != null) {
-            drawerLayout.openDrawer(findViewById(R.id.side_panel));
+        if (sidebarHelper != null) {
+            sidebarHelper.openDrawer();
         }
     }
 
@@ -870,9 +775,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 saveLastSessionId(session.getId());
                 
                 // 清空输入框
-                EditText chatContent = findViewById(R.id.chat_content);
-                if (chatContent != null) {
-                    chatContent.setText("");
+                if (inputHelper != null) {
+                    inputHelper.clearInput();
                 }
 
                 // 清空聊天界面并显示系统消息
@@ -897,12 +801,14 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 }
 
                 // 关闭侧边栏（如果打开的话）
-                if (drawerLayout != null) {
-                    drawerLayout.closeDrawers();
+                if (sidebarHelper != null) {
+                    sidebarHelper.closeDrawer();
                 }
                 
                 // 只刷新侧边栏 UI，不重新加载聊天数据
-                refreshChatHistorySidebar();
+                if (sidebarHelper != null) {
+                    sidebarHelper.refreshChatHistorySidebar(currentSession);
+                }
             }
 
             @Override
@@ -928,7 +834,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             // 没有会话数据时，创建新会话
             EasyLog.print(TAG, "No session data found in database, creating new session");
             // 清空侧边栏
-            chatHistoryAdapter.setData(new ArrayList<ChatHistoryAdapter.ChatHistoryItem>());
+            if (sidebarHelper != null) {
+                sidebarHelper.clearHistory();
+            }
             // 创建新会话
             handleAddNewSession();
         }
@@ -971,64 +879,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         super.onDestroy();
     }
 
-    /**
-     * 显示编辑会话标题对话框
-     *
-     * @param session 要编辑的会话
-     */
-    private void showEditSessionTitleDialog(ChatSessionBean session) {
-        if (session == null) {
-            Toast.makeText(getContext(), "会话不存在", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("编辑会话标题");
-
-        final EditText input = new EditText(getContext());
-        input.setText(session.getTitle());
-        input.setSelectAllOnFocus(true);
-        builder.setView(input);
-
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String newTitle = input.getText().toString().trim();
-                if (!newTitle.isEmpty() && !newTitle.equals(session.getTitle())) {
-                    // 更新会话标题
-                    session.setTitle(newTitle);
-                    // 保存到数据库
-                    session.setUpdateTime(DateHelper.getSeconds1());
-                    ChatSessionManager.getInstance().updateSession(session);
-
-                    // 如果是当前会话，更新标题栏显示
-                    if (currentSession != null && currentSession.getId().equals(session.getId())) {
-                        if (getTitleBar() != null) {
-                            getTitleBar().setTitle(newTitle);
-                        }
-                    }
-
-                    // 重新加载侧边栏数据
-                    loadChatSessionList();
-                    Toast.makeText(getContext(), "标题已更新", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        // 自动弹出键盘
-        input.requestFocus();
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-    }
 
     // 保存用户输入的内容和时间，用于重新申请会话ID后继续执行
     // private String pendingMessageContent;
@@ -1072,8 +923,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         String messageToSend = result;
         String summaryTag = null; // 用于显示的标记
 
-        boolean useLatestSummary = cbLatestSummary != null && cbLatestSummary.isChecked();
-        boolean useAllSummary = cbAllSummary != null && cbAllSummary.isChecked();
+        boolean useLatestSummary = summaryHelper != null && summaryHelper.isLatestSummaryChecked();
+        boolean useAllSummary = summaryHelper != null && summaryHelper.isAllSummaryChecked();
 
         if (useLatestSummary || useAllSummary) {
             EasyLog.print(TAG, "带总结发送：" + (useLatestSummary ? "最近" : "全部") + "，会话ID: " + currentSession.getId());
@@ -1202,19 +1053,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         }
     }
     
-    /**
-     * 显示清空所有会话的确认对话框
-     */
-    private void showClearAllSessionsDialog() {
-        new android.app.AlertDialog.Builder(getContext())
-                .setTitle("清空所有会话")
-                .setMessage("确定要删除所有聊天会话吗？此操作不可恢复！")
-                .setPositiveButton("确定", (dialog, which) -> {
-                    clearAllSessions();
-                })
-                .setNegativeButton("取消", null)
-                .show();
-    }
+
     
     /**
      * 清空所有会话和消息
@@ -1231,14 +1070,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         }
         
         // 刷新侧边栏历史列表
-        if (chatHistoryAdapter != null) {
-            chatHistoryAdapter.setData(new ArrayList<>());
-        }
-        
-        // 关闭侧边栏
-        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
-        if (drawerLayout != null) {
-            drawerLayout.closeDrawers();
+        if (sidebarHelper != null) {
+            sidebarHelper.clearHistory();
+            sidebarHelper.closeDrawer();
         }
         
         // 提示用户
@@ -1251,291 +1085,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     }
     
     // ==========================================
-    // Summary Feature Logic
+    // Summary Feature Logic (Moved to ChatSummaryHelper)
     // ==========================================
-    /**
-     * 生成当前会话的总结
-     */
-    private void generateSessionSummary() {
-        if (currentSession == null) {
-            Toast.makeText(getContext(), "请先选择一个会话", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        // 获取当前会话的所有消息
-        currentSession.resetMessages();
-        List<ChatMessageBean> messages = currentSession.getMessages();
-        if (messages == null || messages.isEmpty()) {
-            Toast.makeText(getContext(), "当前会话没有消息", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        // 构建总结请求的 prompt
-        // 使用 Manager 生成 Prompt
-        String prompt = AiChatManager.getInstance().generateSummaryPrompt(messages);
-        
-        // 显示进度提示
-        Toast.makeText(getContext(), "正在生成总结...", Toast.LENGTH_SHORT).show();
-        
-        // 使用 AiChatManager 生成总结 - 打字机效果
-        final StringBuilder summaryContent = new StringBuilder();
-        
-        // 先创建总结消息并添加到列表（流式显示）
-        final ChatMessageBean summaryMessage = new ChatMessageBean();
-        summaryMessage.setType(ChatMessageBean.TYPE_SUMMARY);
-        summaryMessage.setContent("");
-        summaryMessage.setNick("会话总结");
-        summaryMessage.setCreateDate(DateHelper.getSeconds1());
-        summaryMessage.setSessionId(currentSession.getId());
-        summaryMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-        summaryMessage.setStreaming(true); // 标记为流式传输中
-        
-        // 添加到聊天列表
-        runOnUiThread(() -> {
-            if (mChatAdapter != null) {
-                mChatAdapter.addItem(summaryMessage);
-                // 滚动到底部
-                if (rv_chat != null) {
-                    rv_chat.scrollToPosition(mChatAdapter.getItemCount() - 1);
-                }
-            }
-        });
-        
-        AiChatManager.getInstance().generateSummary(currentSession, prompt, new AiChatManager.ChatStreamListener() {
-            @Override
-            public void onThinking(String content) {
-                // 总结模式通常没有思考过程，或者忽略
-            }
-
-            @Override
-            public void onAnswerStart(ChatMessageBean answerMessage) {
-                // 不使用，因为我们已经手动创建了 summaryMessage
-            }
-
-            @Override
-            public void onAnswerChunk(String content) {
-                summaryContent.append(content);
-                
-                // 实时更新消息内容（打字机效果）
-                runOnUiThread(() -> {
-                    summaryMessage.setContent(summaryContent.toString());
-                    if (mChatAdapter != null) {
-                        int position = mChatAdapter.getData().indexOf(summaryMessage);
-                        if (position >= 0) {
-                            mChatAdapter.notifyItemChanged(position, TipsAiChatAdapter.PAYLOAD_UPDATE_CONTENT);
-                        }
-                    }
-                    // 滚动到底部
-                    scrollToAbsoluteBottom();
-                });
-            }
-
-            @Override
-            public void onComplete() {
-                runOnUiThread(() -> {
-                    // 标记流式传输结束
-                    summaryMessage.setStreaming(false);
-                    
-                    if (summaryContent.length() > 0) {
-                        summaryMessage.setContent(summaryContent.toString());
-                        
-                        // 保存到聊天消息数据库
-                        long msgId = ChatSessionManager.getInstance().saveMessage(summaryMessage);
-                        summaryMessage.setId(msgId);
-                        
-                        // 刷新显示（应用 Markdown 渲染）
-                        if (mChatAdapter != null) {
-                            int position = mChatAdapter.getData().indexOf(summaryMessage);
-                            if (position >= 0) {
-                                mChatAdapter.notifyItemChanged(position);
-                            }
-                        }
-
-                        toast("总结已生成，长按可选择采用");
-                    } else {
-                        // 生成失败，移除消息
-                        if (mChatAdapter != null) {
-                            int position = mChatAdapter.getData().indexOf(summaryMessage);
-                            if (position >= 0) {
-                                mChatAdapter.removeItem(position);
-                            }
-                        }
-                        toast("生成总结失败");
-                    }
-                });
-            }
-
-            @Override
-            public void onError(String error) {
-                runOnUiThread(() -> {
-                    // 移除消息
-                    if (mChatAdapter != null) {
-                        int position = mChatAdapter.getData().indexOf(summaryMessage);
-                        if (position >= 0) {
-                            mChatAdapter.removeItem(position);
-                        }
-                    }
-                    toast("生成总结失败: " + error);
-                });
-            }
-        });
-    }
-    
-    /**
-     * 保存总结到数据库并显示
-     */
-    private void saveSummary(String content) {
-        ChatSummaryBean summary = new ChatSummaryBean();
-        summary.setSessionId(currentSession.getId());
-        summary.setTitle("总结 " + sdf.format(new Date()));
-        summary.setContent(content);
-        summary.setCreateTime(DateHelper.getSeconds1());
-        summary.setIsDelete(ChatSummaryBean.IS_Delete_NO);
-        
-        long id = ChatSessionManager.getInstance().saveSummary(summary);
-        summary.setId(id);
-
-        toast("总结已保存");
-        
-        // 显示总结内容
-        showSummaryContentDialog(summary);
-    }
-    
-    /**
-     * 显示会话的总结列表对话框
-     */
-    private void showSummaryListDialog(ChatSessionBean session) {
-        if (session == null) return;
-        
-        new ChatSummaryListDialog.Builder(getContext())
-                .setSession(session.getId(), session.getTitle())
-                .setMarkwon(mMarkwon)
-                .show();
-    }
-    
-    /**
-     * 显示总结内容对话框（支持复制）
-     */
-    private void showSummaryContentDialog(ChatSummaryBean summary) {
-        if (summary == null) return;
-        
-        // 创建可选择文字的 TextView
-        TextView textView = new TextView(getContext());
-        textView.setText(summary.getContent());
-        textView.setTextIsSelectable(true);
-        textView.setPadding(48, 32, 48, 32);
-        textView.setTextSize(15);
-        textView.setLineSpacing(0, 1.3f);
-        
-        // 使用 Markwon 渲染 Markdown
-        if (mMarkwon != null) {
-            mMarkwon.setMarkdown(textView, summary.getContent());
-        }
-        
-        // 包装在 ScrollView 中以支持长文本
-        android.widget.ScrollView scrollView = new android.widget.ScrollView(getContext());
-        scrollView.addView(textView);
-        
-        // 设置最大高度为屏幕高度的 70%
-        android.util.DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        int maxHeight = (int) (displayMetrics.heightPixels * 0.7);
-        scrollView.setLayoutParams(new android.view.ViewGroup.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-        
-        // 创建对话框 - 保存 textView 引用用于复制
-        final TextView finalTextView = textView;
-        AlertDialog dialog = new AlertDialog.Builder(getContext())
-                .setTitle(summary.getTitle())
-                .setView(scrollView)
-                .setPositiveButton("复制全部", (d, which) -> {
-                    // 复制渲染后的纯文本，而非原始 Markdown
-                    String renderedText = finalTextView.getText().toString();
-                    android.content.ClipboardManager clipboard =
-                            (android.content.ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                    android.content.ClipData clip = android.content.ClipData.newPlainText("会话总结", renderedText);
-                    clipboard.setPrimaryClip(clip);
-                    Toast.makeText(getContext(), "已复制到剪贴板", Toast.LENGTH_SHORT).show();
-                })
-                .setNeutralButton("删除", (d, which) -> {
-                    // 删除总结
-                    summary.setIsDelete(ChatSummaryBean.IS_Delete_YES);
-                    ChatSessionManager.getInstance().updateSummary(summary);
-                    Toast.makeText(getContext(), "总结已删除", Toast.LENGTH_SHORT).show();
-                })
-                .setNegativeButton("关闭", null)
-                .create();
-        
-        dialog.show();
-        
-        // 限制对话框最大高度
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setLayout(
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                    Math.min(maxHeight, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-        }
-    }
-    
-    /**
-     * 将总结显示在聊天框中并保存到聊天消息表
-     * 不点采用：总结保存到聊天消息表
-     * 点击采用：额外保存到总结表（ChatSummaryBean）
-     */
-    private void displaySummaryInChat(String content) {
-        if (currentSession == null) {
-            toast("当前没有会话");
-            return;
-        }
-        
-        // 创建一个总结类型的消息
-        ChatMessageBean summaryMessage = new ChatMessageBean();
-        summaryMessage.setType(ChatMessageBean.TYPE_SUMMARY);
-        summaryMessage.setContent(content);
-        summaryMessage.setNick("会话总结");
-        summaryMessage.setCreateDate(DateHelper.getSeconds1());
-        summaryMessage.setSessionId(currentSession.getId());
-        summaryMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-        
-        // 保存到聊天消息数据库
-        long msgId = ChatSessionManager.getInstance().saveMessage(summaryMessage);
-        summaryMessage.setId(msgId);
-        
-        // 添加到聊天列表显示
-        if (mChatAdapter != null) {
-            mChatAdapter.addItem(summaryMessage);
-            
-            // 滚动到底部
-            if (rv_chat != null) {
-                rv_chat.post(() -> {
-                    rv_chat.scrollToPosition(mChatAdapter.getItemCount() - 1);
-                    rv_chat.post(() -> rv_chat.scrollBy(0, 10000));
-                });
-            }
-        }
-
-        toast("总结已生成，长按可选择采用");
-    }
-    
-    /**
-     * 采用总结：将总结消息保存到数据库（消息保留在聊天列表中）
-     */
-    public void adoptSummary(ChatMessageBean summaryMessage) {
-        if (summaryMessage == null || currentSession == null) return;
-        
-        ChatSummaryBean summary = new ChatSummaryBean();
-        summary.setSessionId(currentSession.getId());
-        summary.setTitle("总结 " + sdf.format(new Date()));
-        summary.setContent(summaryMessage.getContent());
-        summary.setCreateTime(DateHelper.getSeconds1());
-        summary.setIsDelete(ChatSummaryBean.IS_Delete_NO);
-        
-        long id = ChatSessionManager.getInstance().saveSummary(summary);
-        summary.setId(id);
-        
-        Toast.makeText(getContext(), "总结已保存", Toast.LENGTH_SHORT).show();
-        
-        // 消息保留在聊天列表中，不移除
-    }
     
     // ==========================================
     // Summary Feature Logic
@@ -1616,7 +1167,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 } else if ("复制".equals(clickedItem)) {
                     copyToClipboard(message.getContent());
                 } else if ("采用".equals(clickedItem)) {
-                    adoptSummary(message);
+                    if (summaryHelper != null) {
+                        summaryHelper.adoptSummary(message);
+                    }
                 }
             });
         }
