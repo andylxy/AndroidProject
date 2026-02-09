@@ -166,6 +166,37 @@ public class AiChatManager {
     }
 
     /**
+     * 开始新会话（创建本地对象并申请ID）
+     */
+    public void startNewSession(LifecycleOwner lifecycleOwner, final SessionCheckCallback callback) {
+        // 1. 创建本地会话
+        final ChatSessionBean newSession = ChatSessionManager.getInstance().createLocalSession("新对话", "开始新的对话");
+        
+        // 2. 申请ID
+        requestSessionId(lifecycleOwner, new SessionIdCallback() {
+            @Override
+            public void onSuccess(String conversationId, String endUserId) {
+                // 3. 更新会话信息
+                newSession.setConversationId(conversationId);
+                newSession.setEndUserId(endUserId);
+                newSession.setCreateTime(DateHelper.getSeconds1());
+                
+                ChatSessionManager.getInstance().updateSession(newSession);
+                EasyLog.print(TAG, "New Session started: " + conversationId);
+                
+                // 4. 回调
+                callback.onSessionValid(newSession);
+            }
+
+            @Override
+            public void onFailure(String error) {
+                EasyLog.print(TAG, "Failed to start new session: " + error);
+                callback.onFailure(error);
+            }
+        });
+    }
+
+    /**
      * 发送消息（SSE流式）
      *
      * @param session 当前会话

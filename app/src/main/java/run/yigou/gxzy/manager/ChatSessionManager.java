@@ -236,4 +236,53 @@ public class ChatSessionManager {
     public void updateSummary(ChatSummaryBean summary) {
         DbService.getInstance().mChatSummaryBeanService.updateEntity(summary);
     }
+
+    /**
+     * 检查并添加系统消息（时间戳）
+     * @param sessionId 会话ID
+     * @param time 时间字符串
+     * @param currentMessages 当前消息列表（用于判断是否重复），可为null
+     * @return 如果添加了新消息，返回该消息对象；否则返回null
+     */
+    public ChatMessageBean checkAndAddSystemMessage(Long sessionId, String time, List<ChatMessageBean> currentMessages) {
+        if (sessionId == null) return null;
+
+        // 1. 检查是否只有系统消息（如果是，则只UI显示不存库）
+        boolean onlySystemMessages = true;
+        if (currentMessages != null && !currentMessages.isEmpty()) {
+            if (currentMessages.size() == 1) {
+                ChatMessageBean message = currentMessages.get(0);
+                if (message.getType() != ChatMessageBean.TYPE_SYSTEM) {
+                    onlySystemMessages = false;
+                }
+            } else {
+                onlySystemMessages = false; // 多条消息，肯定不只是系统消息
+            }
+        }
+
+        // 2. 检查当前列表中是否已存在该时间戳
+        if (currentMessages != null) {
+            for (ChatMessageBean message : currentMessages) {
+                if (message.getType() == ChatMessageBean.TYPE_SYSTEM && time.equals(message.getContent())) {
+                    return null; // 已存在，不添加
+                }
+            }
+        }
+
+        ChatMessageBean systemMessage = new ChatMessageBean(ChatMessageBean.TYPE_SYSTEM, null, null, time);
+        systemMessage.setSessionId(sessionId);
+        systemMessage.setCreateDate(DateHelper.getSeconds1());
+        systemMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+
+        if (!onlySystemMessages) {
+            // 只有当存在非系统消息时，才保存到数据库
+            long id = saveMessage(systemMessage);
+            systemMessage.setId(id);
+            EasyLog.print(TAG, "Saved system message to database: " + id);
+        } else {
+            EasyLog.print(TAG, "Added system message to UI only (not saved)");
+        }
+        
+        return systemMessage;
+    }
 }

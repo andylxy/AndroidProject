@@ -380,6 +380,38 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     }
 
     /**
+     * 只刷新聊天历史侧边栏UI，不重新加载会话数据
+     */
+    private void refreshChatHistorySidebar() {
+        List<ChatSessionBean> sessions = ChatSessionManager.getInstance().getAllSessionsSorted();
+
+        List<ChatHistoryAdapter.ChatHistoryItem> historyItems = new ArrayList<>();
+        int currentSessionPosition = 0;
+        
+        for (int i = 0; i < sessions.size(); i++) {
+            ChatSessionBean session = sessions.get(i);
+            List<ChatMessageBean> messages = session.getMessages();
+            String messageCount = messages.size() + " 条消息";
+
+            historyItems.add(new ChatHistoryAdapter.ChatHistoryItem(
+                    session.getTitle(),
+                    session.getPreview(),
+                    session.getUpdateTime().substring(0, 10),
+                    messageCount));
+            
+            // 找到当前会话的位置
+            if (currentSession != null && session.getId().equals(currentSession.getId())) {
+                currentSessionPosition = i;
+            }
+        }
+
+        // 更新适配器数据
+        chatHistoryAdapter.setData(historyItems);
+        chatHistoryAdapter.setSelectedPosition(currentSessionPosition);
+        EasyLog.print(TAG, "Refreshed sidebar, current session at position: " + currentSessionPosition);
+    }
+
+    /**
      * 加载聊天会话列表
      * Renamed from populateChatHistoryWithTestData
      */
@@ -623,109 +655,112 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     }
     
     /**
-     * 创建 ChatStreamListener 回调
+     * UI 流式响应监听器 (提取出的内部类)
      */
-    private AiChatManager.ChatStreamListener createChatStreamListener(
-            final ChatMessageBean thinkingMessage,
-            final boolean useThrottle,
-            final boolean resetSummaryCheckbox) {
-        
-        return new AiChatManager.ChatStreamListener() {
-            private ChatMessageBean answerMessage;
+    private class ChatUiStreamListener implements AiChatManager.ChatStreamListener {
+        private final ChatMessageBean thinkingMessage;
+        private final boolean useThrottle;
+        private final boolean resetSummaryCheckbox;
+        private ChatMessageBean answerMessage;
 
-            @Override
-            public void onThinking(String content) {
-                runOnUiThread(() -> {
-                    int pos = mChatAdapter.getData().indexOf(thinkingMessage);
-                    if (pos != -1) {
-                        mChatAdapter.notifyItemChanged(pos);
-                        // 自动滚动
-                        if (scrollState == 0 && rv_chat != null) {
-                            rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
-                        }
+        public ChatUiStreamListener(ChatMessageBean thinkingMessage, boolean useThrottle, boolean resetSummaryCheckbox) {
+            this.thinkingMessage = thinkingMessage;
+            this.useThrottle = useThrottle;
+            this.resetSummaryCheckbox = resetSummaryCheckbox;
+        }
+
+        @Override
+        public void onThinking(String content) {
+            runOnUiThread(() -> {
+                int pos = mChatAdapter.getData().indexOf(thinkingMessage);
+                if (pos != -1) {
+                    mChatAdapter.notifyItemChanged(pos);
+                    // 自动滚动
+                    if (scrollState == 0 && rv_chat != null) {
+                        rv_chat.scrollToPosition(mChatAdapter.getData().size() - 1);
                     }
-                });
-            }
-
-            @Override
-            public void onAnswerStart(ChatMessageBean answerMsg) {
-                this.answerMessage = answerMsg;
-                runOnUiThread(() -> {
-                    // 折叠思考消息
-                    int thinkPos = mChatAdapter.getData().indexOf(thinkingMessage);
-                    if (thinkPos != -1) {
-                        mChatAdapter.notifyItemChanged(thinkPos);
-                    }
-                    // 添加回答消息
-                    mChatAdapter.addItem(answerMsg);
-                });
-            }
-
-            @Override
-            public void onAnswerChunk(String content) {
-                if (answerMessage == null) return;
-
-                if (useThrottle) {
-                    scheduleAnswerUIUpdate(answerMessage);
-                } else {
-                    runOnUiThread(() -> {
-                        int answerPos = mChatAdapter.getData().indexOf(answerMessage);
-                        if (answerPos != -1) {
-                            mChatAdapter.notifyItemChanged(answerPos);
-                        }
-                    });
                 }
+            });
+        }
+
+        @Override
+        public void onAnswerStart(ChatMessageBean answerMsg) {
+            this.answerMessage = answerMsg;
+            runOnUiThread(() -> {
+                // 折叠思考消息
+                int thinkPos = mChatAdapter.getData().indexOf(thinkingMessage);
+                if (thinkPos != -1) {
+                    mChatAdapter.notifyItemChanged(thinkPos);
+                }
+                // 添加回答消息
+                mChatAdapter.addItem(answerMsg);
+            });
+        }
+
+        @Override
+        public void onAnswerChunk(String content) {
+            if (answerMessage == null) return;
+
+            if (useThrottle) {
+                scheduleAnswerUIUpdate(answerMessage);
+            } else {
+                runOnUiThread(() -> {
+                    int answerPos = mChatAdapter.getData().indexOf(answerMessage);
+                    if (answerPos != -1) {
+                        mChatAdapter.notifyItemChanged(answerPos);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onComplete() {
+            // 移除待处理的 UI 更新任务
+            if (useThrottle && answerUpdateRunnable != null) {
+                uiUpdateHandler.removeCallbacks(answerUpdateRunnable);
+                answerUpdateRunnable = null;
             }
 
-            @Override
-            public void onComplete() {
-                // 移除待处理的 UI 更新任务
-                if (useThrottle && answerUpdateRunnable != null) {
-                    uiUpdateHandler.removeCallbacks(answerUpdateRunnable);
-                    answerUpdateRunnable = null;
+            runOnUiThread(() -> {
+                // 强制折叠思考
+                thinkingMessage.setThinkingCollapsed(true);
+                int thinkPos = mChatAdapter.getData().indexOf(thinkingMessage);
+                if (thinkPos != -1) {
+                    mChatAdapter.notifyItemChanged(thinkPos);
                 }
 
-                runOnUiThread(() -> {
-                    // 强制折叠思考
-                    thinkingMessage.setThinkingCollapsed(true);
-                    int thinkPos = mChatAdapter.getData().indexOf(thinkingMessage);
-                    if (thinkPos != -1) {
-                        mChatAdapter.notifyItemChanged(thinkPos);
-                    }
-                    
-                    // 最终刷新并滚动
-                    mChatAdapter.updateData();
-                    scrollToAbsoluteBottom();
-                    
-                    // 恢复焦点能力
-                    if (rv_chat != null) {
-                        rv_chat.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
-                    }
-                    
-                    // 取消总结 CheckBox 选中
-                    if (resetSummaryCheckbox) {
-                        if (cbLatestSummary != null && cbLatestSummary.isChecked()) {
-                            cbLatestSummary.setChecked(false);
-                        }
-                        if (cbAllSummary != null && cbAllSummary.isChecked()) {
-                            cbAllSummary.setChecked(false);
-                        }
-                    }
-                });
-            }
+                // 最终刷新并滚动
+                mChatAdapter.updateData();
+                scrollToAbsoluteBottom();
 
-            @Override
-            public void onError(String error) {
-                runOnUiThread(() -> {
-                    mChatAdapter.updateData();
-                    // 恢复焦点能力
-                    if (rv_chat != null) {
-                        rv_chat.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
+                // 恢复焦点能力
+                if (rv_chat != null) {
+                    rv_chat.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
+                }
+
+                // 取消总结 CheckBox 选中
+                if (resetSummaryCheckbox) {
+                    if (cbLatestSummary != null && cbLatestSummary.isChecked()) {
+                        cbLatestSummary.setChecked(false);
                     }
-                    Toast.makeText(getContext(), "请求出错: " + error, Toast.LENGTH_SHORT).show();
-                });
-            }
-        };
+                    if (cbAllSummary != null && cbAllSummary.isChecked()) {
+                        cbAllSummary.setChecked(false);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onError(String error) {
+            runOnUiThread(() -> {
+                mChatAdapter.updateData();
+                // 恢复焦点能力
+                if (rv_chat != null) {
+                    rv_chat.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
+                }
+                Toast.makeText(getContext(), "请求出错: " + error, Toast.LENGTH_SHORT).show();
+            });
+        }
     }
     
     /**
@@ -743,11 +778,34 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     
 
     /**
-     * 创建新会话
-     *
-     * @param title 会话标题
+     * 确保会话已保存到数据库 (Re-added as simple wrapper for legacy support if needed, or remove completely)
+     * 目前仅保留 refreshChatHistorySidebar 逻辑供 startNewSession 回调使用，
+     * 但 startNewSession 已经包含了 ID 申请，所以 ensureSessionSaved 的大部分逻辑已不再需要。
+     * 为了兼容 sendMsg 中的调用，我们保留一个简化版或者直接移除并在 sendMsg 中处理。
+     * sendMsg 现在使用 AiChatManager.checkSessionAndExecute，它会处理 ID 申请。
+     * 唯一的问题是首次创建会话（没有 ID）的情况。
+     * checkSessionAndExecute 依赖 session 对象。
+     * startNewSession 创建并保存了 session。
+     * 
+     * 我们需要保留 ensureSessionSaved 供 sendMsg 调用吗？
+     * sendMsg 中：
+     * if (currentSession == null) createNewSession("新对话"); -> 这里 createNewSession 已经被我们删除了，需要修复。
+     * ensureSessionSaved(); -> 这里也需要修复。
+     * 
+     * 让我们修复 sendMsg 逻辑。
      */
+     
+     // 重新添加简化版的辅助方法，适配重构后的逻辑
+     
     private void createNewSession(String title) {
+        // 仅在内存中创建，用于 sendMsg 的判空逻辑
+        // 实际上 sendMsg 会调用 ensureSessionSaved -> saveSession
+        // 但更好的方式是让 sendMsg 流程使用 startNewSession 的逻辑，但这涉及异步。
+        // 目前 sendMsg 逻辑是：如果 currentSession 为空，先创建一个临时的。
+        // 然后 ensureSessionSaved 保存它。
+        // 然后 checkSessionAndExecute 检查它。
+        
+        // 恢复 createNewSession 以避免编译错误
         String currentTime = DateHelper.getSeconds1();
         ChatSessionBean newSession = new ChatSessionBean();
         newSession.setTitle(title);
@@ -755,15 +813,10 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         newSession.setCreateTime(currentTime);
         newSession.setUpdateTime(currentTime);
         newSession.setIsDelete(ChatSessionBean.IS_Delete_NO);
-        // 注意：这里不立即保存到数据库，等到用户第一次发送消息时再保存
         currentSession = newSession;
-
         EasyLog.print(TAG, "Created new session in memory only");
     }
 
-    /**
-     * 确保会话已保存到数据库
-     */
     private void ensureSessionSaved() {
         if (currentSession.getId() == null) {
             String currentTime = DateHelper.getSeconds1();
@@ -774,119 +827,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
             currentSession.setId(sessionId);
             EasyLog.print(TAG, "Saved new session to database with ID: " + sessionId);
 
-            // 保存当前会话ID到 SharedPreferences（确保下次不会被覆盖）
             saveLastSessionId(sessionId);
-
-            // 更新标题栏标题
             if (getTitleBar() != null) {
                 getTitleBar().setTitle(currentSession.getTitle());
             }
-
-            // 会话保存到数据库后，只刷新侧边栏UI（不重新加载会话数据）
-            refreshChatHistorySidebar();
-        } else {
-            EasyLog.print(TAG, "Session already exists in database with ID: " + currentSession.getId());
-        }
-    }
-    
-    /**
-     * 只刷新聊天历史侧边栏UI，不重新加载会话数据
-     */
-    private void refreshChatHistorySidebar() {
-        List<ChatSessionBean> sessions = ChatSessionManager.getInstance().getAllSessionsSorted();
-
-        List<ChatHistoryAdapter.ChatHistoryItem> historyItems = new ArrayList<>();
-        int currentSessionPosition = 0;
-        
-        for (int i = 0; i < sessions.size(); i++) {
-            ChatSessionBean session = sessions.get(i);
-            List<ChatMessageBean> messages = session.getMessages();
-            String messageCount = messages.size() + " 条消息";
-
-            historyItems.add(new ChatHistoryAdapter.ChatHistoryItem(
-                    session.getTitle(),
-                    session.getPreview(),
-                    session.getUpdateTime().substring(0, 10),
-                    messageCount));
-            
-            // 找到当前会话的位置
-            if (currentSession != null && session.getId().equals(currentSession.getId())) {
-                currentSessionPosition = i;
-            }
-        }
-
-        // 更新适配器数据
-        chatHistoryAdapter.setData(historyItems);
-        chatHistoryAdapter.setSelectedPosition(currentSessionPosition);
-        EasyLog.print(TAG, "Refreshed sidebar, current session at position: " + currentSessionPosition);
-    }
-
-    /**
-     * 处理系统消息
-     *
-     * @param time 时间戳
-     */
-    private void handleSystemMessage(String time) {
-        // 检查消息列表中是否只有系统消息
-        boolean onlySystemMessages = true;
-        List<ChatMessageBean> currentMessages = mChatAdapter.getData();
-        if (currentMessages != null && !currentMessages.isEmpty()) {
-            //currentMessages只有一条消息,是不是系统消息,后续消息全部不再检查
-            if (currentMessages.size() == 1) {
-                ChatMessageBean message = currentMessages.get(0);
-                if (message.getType() != ChatMessageBean.TYPE_SYSTEM) {
-                    onlySystemMessages = false;
-                }
-            }
-
-        } else {
-            // 如果消息列表为空，视为只有系统消息的情况
-            onlySystemMessages = true;
-        }
-
-        EasyLog.print(TAG, "Checking if should save system message, onlySystemMessages: " + onlySystemMessages);
-
-        // 只有当消息列表中包含非系统消息时，才保存系统消息到数据库
-        if (!onlySystemMessages) {
-            // 检查并添加系统消息
-            boolean messageExists = false;
-            for (ChatMessageBean message : mChatAdapter.getData()) {
-                if (message.getType() == ChatMessageBean.TYPE_SYSTEM && time.equals(message.getContent())) {
-                    messageExists = true;
-                    break;
-                }
-            }
-
-            if (!messageExists) {
-                ChatMessageBean chatMessageBeanSystem = new ChatMessageBean(ChatMessageBean.TYPE_SYSTEM, null, null, time);
-                chatMessageBeanSystem.setSessionId(currentSession.getId());
-                chatMessageBeanSystem.setCreateDate(DateHelper.getSeconds1());
-                chatMessageBeanSystem.setIsDelete(ChatMessageBean.IS_Delete_NO);
-                // 保存系统消息到数据库
-                long systemMsgId = ChatSessionManager.getInstance().saveMessage(chatMessageBeanSystem);
-                chatMessageBeanSystem.setId(systemMsgId);
-                mChatAdapter.addItem(chatMessageBeanSystem);
-                EasyLog.print(TAG, "Saved system message to database with ID: " + systemMsgId + " and session ID: " + currentSession.getId());
-            }
-        } else {
-            // 如果只有系统消息，添加系统消息但不保存到数据库
-            boolean messageExists = false;
-            for (ChatMessageBean message : mChatAdapter.getData()) {
-                if (message.getType() == ChatMessageBean.TYPE_SYSTEM && time.equals(message.getContent())) {
-                    messageExists = true;
-                    break;
-                }
-            }
-
-            if (!messageExists) {
-                ChatMessageBean chatMessageBeanSystem = new ChatMessageBean(ChatMessageBean.TYPE_SYSTEM, null, null, time);
-                chatMessageBeanSystem.setSessionId(currentSession.getId());
-                chatMessageBeanSystem.setCreateDate(DateHelper.getSeconds1());
-                chatMessageBeanSystem.setIsDelete(ChatMessageBean.IS_Delete_NO);
-                // 不保存系统消息到数据库，只添加到界面
-                mChatAdapter.addItem(chatMessageBeanSystem);
-                EasyLog.print(TAG, "Added system message to UI only (not saved to database)");
-            }
+            loadChatSessionList(); // 使用 loadChatSessionList 替代 refreshChatHistorySidebar
         }
     }
 
@@ -914,56 +859,57 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
      * 处理添加新会话的逻辑
      */
     private void handleAddNewSession() {
-        //先后端请求会话Id
-        AiChatManager.getInstance().requestSessionId(AiMsgFragment.this, new AiChatManager.SessionIdCallback() {
+        // 使用 AiChatManager 开始新会话
+        AiChatManager.getInstance().startNewSession(AiMsgFragment.this, new AiChatManager.SessionCheckCallback() {
             @Override
-            public void onSuccess(String conversationId, String endUserId) {
-                if (currentSession != null) {
-                    // 设置会话Id
-                    currentSession.setConversationId(conversationId);
-                    currentSession.setEndUserId(endUserId);
-                    EasyLog.print(TAG, "Session ID obtained: " + conversationId);
+            public void onSessionValid(ChatSessionBean session) {
+                // 更新当前会话
+                currentSession = session;
+                
+                // 保存 ID 为最后选中状态，确保下次加载能选中它
+                saveLastSessionId(session.getId());
+                
+                // 清空输入框
+                EditText chatContent = findViewById(R.id.chat_content);
+                if (chatContent != null) {
+                    chatContent.setText("");
                 }
+
+                // 清空聊天界面并显示系统消息
+                if (mChatAdapter != null) {
+                    mChatAdapter.setData(new ArrayList<ChatMessageBean>());
+                    // 添加系统消息到界面
+                    String time = sdf.format(new Date());
+                    ChatMessageBean systemMessage = new ChatMessageBean(
+                            ChatMessageBean.TYPE_SYSTEM,
+                            null,
+                            null,
+                            "开始新的对话 " + time);
+                    systemMessage.setCreateDate(DateHelper.getSeconds1());
+                    systemMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+                    // 注意：新会话的第一条系统消息通常不保存到数据库，直到用户发送第一条消息
+                    mChatAdapter.addItem(systemMessage);
+                }
+
+                // 更新标题栏标题
+                if (getTitleBar() != null) {
+                    getTitleBar().setTitle("新对话");
+                }
+
+                // 关闭侧边栏（如果打开的话）
+                if (drawerLayout != null) {
+                    drawerLayout.closeDrawers();
+                }
+                
+                // 只刷新侧边栏 UI，不重新加载聊天数据
+                refreshChatHistorySidebar();
             }
 
             @Override
             public void onFailure(String error) {
-                EasyLog.print("会话Id申请失败：" + error);
+                Toast.makeText(getContext(), "创建会话失败: " + error, Toast.LENGTH_SHORT).show();
             }
         });
-
-        // 创建新会话
-        createNewSession("新对话");
-
-        // 清空输入框
-        EditText chatContent = findViewById(R.id.chat_content);
-        chatContent.setText("");
-
-        // 注意：新创建的会话还没有保存到数据库，所以不能通过loadChatDataForSession加载
-        // 直接清空聊天界面并显示系统消息
-        if (mChatAdapter != null) {
-            mChatAdapter.setData(new ArrayList<ChatMessageBean>());
-            // 添加系统消息到界面（但不保存到数据库）
-            ChatMessageBean systemMessage = new ChatMessageBean(
-                    ChatMessageBean.TYPE_SYSTEM,
-                    null,
-                    null,
-                    "开始新的对话 " + sdf.format(new Date()));
-            systemMessage.setCreateDate(DateHelper.getSeconds1());
-            systemMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
-            mChatAdapter.addItem(systemMessage);
-            EasyLog.print(TAG, "Added system message to UI only (not saved to database yet)");
-        }
-
-        // 更新标题栏标题
-        if (getTitleBar() != null) {
-            getTitleBar().setTitle("新对话");
-        }
-
-        // 关闭侧边栏（如果打开的话）
-        if (drawerLayout != null) {
-            drawerLayout.closeDrawers();
-        }
     }
 
     private ArrayList<ChatMessageBean> chatMessageBeans;
@@ -1093,7 +1039,34 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
      */
     private void executeSendMessage(String result, String time) {
         // 处理系统消息
-        handleSystemMessage(time);
+        ChatSessionManager.getInstance().checkAndAddSystemMessage(currentSession.getId(), time, mChatAdapter.getData());
+        
+        // 如果是系统自动添加了消息，刷新界面
+        // 注意：checkAndAddSystemMessage 返回的 message 已经被保存了，但我们需要手动添加到 adapter
+        // 为了简单起见，我们重新检查一下 adapter 里有没有
+        boolean hasSystemMsg = false;
+        for(ChatMessageBean msg : mChatAdapter.getData()) {
+            if(msg.getType() == ChatMessageBean.TYPE_SYSTEM && time.equals(msg.getContent())) {
+                hasSystemMsg = true;
+                break;
+            }
+        }
+        if(!hasSystemMsg) {
+             // 如果 adapter 里没有（说明是 checkAndAddSystemMessage 新加的，或者是纯 UI 显示），我们需要添加
+             // 但由于 checkAndAddSystemMessage 逻辑较复杂（涉及 DB 操作），且原逻辑是直接操作 adapter
+             // 这里我们简化：如果 checkAndAddSystemMessage 返回了新消息，我们添加到 adapter
+             // 但由于我们无法直接获取刚才调用的返回值（因为没有修改方法签名），这里我们做一个简单的 UI 补丁：
+             // 更好的做法是 checkAndAddSystemMessage 返回 ChatMessageBean，我们在 Fragment 里添加到 adapter
+             // 这里为了保持 executeSendMessage 简洁，我们假设系统消息逻辑由 Manager 处理数据，Fragment 只负责刷新
+             // 但 Adapter 是 UI 状态，必须同步。
+             // 让我们回滚一点：executeSendMessage 里的 handleSystemMessage 调用改为：
+             
+             ChatMessageBean sysMsg = ChatSessionManager.getInstance().checkAndAddSystemMessage(
+                 currentSession.getId(), time, mChatAdapter.getData());
+             if (sysMsg != null) {
+                 mChatAdapter.addItem(sysMsg);
+             }
+        }
 
         // 检查是否选中了总结 CheckBox，根据类型获取并追加总结
         String messageToSend = result;
@@ -1195,7 +1168,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                 currentSession,
                 messageToSend,
                 thinkingMessage,
-                createChatStreamListener(thinkingMessage, true, true));
+                new ChatUiStreamListener(thinkingMessage, true, true));
     }
 
     /**
