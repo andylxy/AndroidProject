@@ -204,8 +204,27 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     onBindView(position);
                 }
             } else if (bean.getType() == ChatMessageBean.TYPE_SUMMARY) {
-                // 总结消息流式更新：直接重新绑定视图
-                onBindView(position);
+                // 总结消息流式更新：
+                if (bean.isStreaming()) {
+                    // 流式中：增量更新
+                    TypewriterHelper helper = typewriterHelpers.get(bean.getId());
+                    if (helper != null) {
+                        helper.setContent(bean.getContent(), true);
+                    } else {
+                        // 如果没有 helper，可能是第一次加载，初始化 helper
+                        TextView tv_summary_content = findViewById(R.id.tv_receive_content);
+                        if (tv_summary_content != null) {
+                             helper = new TypewriterHelper(tv_summary_content, markwon);
+                             typewriterHelpers.put(bean.getId(), helper);
+                             helper.setContent(bean.getContent(), true);
+                        } else {
+                             onBindView(position);
+                        }
+                    }
+                } else {
+                    // 流式结束：完整绑定以触发 Markdown 渲染
+                    onBindView(position);
+                }
             }
         }
 
@@ -390,9 +409,14 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     // 总结消息复用接收布局
                     TextView tv_summary_content = findViewById(R.id.tv_receive_content);
                     TextView tv_summary_nick = findViewById(R.id.tv_receive_nick);
+                    ImageView iv_summary_picture = findViewById(R.id.iv_receive_picture);
                     
                     if (tv_summary_nick != null) {
                         tv_summary_nick.setText("会话总结");
+                    }
+                    
+                    if (iv_summary_picture != null) {
+                        iv_summary_picture.setImageResource(R.drawable.chat_user_default);
                     }
                     
                     if (tv_summary_content != null) {

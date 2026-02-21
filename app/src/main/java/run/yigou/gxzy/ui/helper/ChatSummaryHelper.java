@@ -98,6 +98,9 @@ public class ChatSummaryHelper {
         return cbAllSummary != null && cbAllSummary.isChecked();
     }
 
+    private static final long UI_UPDATE_INTERVAL = 100; // 100ms 批量更新一次
+    private long lastUpdateTime = 0;
+
     /**
      * 生成当前会话的总结
      */
@@ -122,7 +125,23 @@ public class ChatSummaryHelper {
         // 显示进度提示
         Toast.makeText(context, "正在生成总结...", Toast.LENGTH_SHORT).show();
 
-        // 创建总结消息
+        // 创建思考消息
+        final ChatMessageBean thinkingMessage = new ChatMessageBean();
+        thinkingMessage.setType(ChatMessageBean.TYPE_THINKING);
+        thinkingMessage.setContent("正在思考...");
+        thinkingMessage.setNick("Ai");
+        thinkingMessage.setCreateDate(DateHelper.getSeconds1());
+        thinkingMessage.setSessionId(currentSession.getId());
+        thinkingMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
+        
+        // 立即保存思考消息到数据库以获取 ID
+        long thinkingId = ChatSessionManager.getInstance().saveMessage(thinkingMessage);
+        thinkingMessage.setId(thinkingId);
+        
+        // 通知 UI 添加思考消息
+        actionListener.onSummaryGenerated(thinkingMessage);
+
+        // 创建总结消息（初始不显示）
         final ChatMessageBean summaryMessage = new ChatMessageBean();
         summaryMessage.setType(ChatMessageBean.TYPE_SUMMARY);
         summaryMessage.setContent("");
@@ -131,56 +150,90 @@ public class ChatSummaryHelper {
         summaryMessage.setSessionId(currentSession.getId());
         summaryMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
         summaryMessage.setStreaming(true);
-
-        // 通知 UI 添加消息
-        actionListener.onSummaryGenerated(summaryMessage);
+        
+        // 立即保存总结消息到数据库以获取 ID
+        long summaryId = ChatSessionManager.getInstance().saveMessage(summaryMessage);
+        summaryMessage.setId(summaryId);
 
         final StringBuilder summaryContent = new StringBuilder();
+        
+        // 标记是否已经开始接收回答
+        final boolean[] hasStartedAnswer = {false};
 
         AiChatManager.getInstance().generateSummary(currentSession, prompt, new AiChatManager.ChatStreamListener() {
             @Override
             public void onThinking(String content) {
-                // 如果后端返回了思考过程，我们将其作为内容的一部分显示，或者用特殊样式显示
-                // 这里为了简单，直接追加到内容中，或者你可以选择忽略
-                // 如果需要显示思考过程，可以这样做：
                 ThreadUtil.runOnUiThread(() -> {
-                     summaryContent.append(content);
-                     summaryMessage.setContent(summaryContent.toString());
-                     actionListener.onSummaryStreamUpdate(summaryMessage);
+                    String current = thinkingMessage.getContent();
+                    if ("正在思考...".equals(current)) {
+                        current = "";
+                    }
+                    thinkingMessage.setContent(current + content);
+                    actionListener.onSummaryStreamUpdate(thinkingMessage);
                 });
             }
 
             @Override
-            public void onAnswerStart(ChatMessageBean answerMessage) {}
+            public void onAnswerStart(ChatMessageBean answerMessage) {
+                // 忽略传入的 answerMessage，使用我们自己创建的 summaryMessage
+            }
 
             @Override
             public void onAnswerChunk(String content) {
-                ThreadUtil.runOnUiThread(() -> {
-                    summaryContent.append(content);
-                    summaryMessage.setContent(summaryContent.toString());
-                    actionListener.onSummaryStreamUpdate(summaryMessage);
-                });
+                // 1. 在当前线程（后台）更新数据，避免频繁切换主线程
+                summaryContent.append(content);
+                
+                // 如果是第一次收到回答，先通知 UI 添加总结消息
+                if (!hasStartedAnswer[0]) {
+                    hasStartedAnswer[0] = true;
+                    ThreadUtil.runOnUiThread(() -> {
+                        thinkingMessage.setThinkingCollapsed(true);
+                        actionListener.onSummaryStreamUpdate(thinkingMessage);
+                        actionListener.onSummaryGenerated(summaryMessage);
+                    });
+                }
+                
+                // 2. 节流判断
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - lastUpdateTime > UI_UPDATE_INTERVAL) {
+                    lastUpdateTime = currentTime;
+                    
+                    // 获取当前完整内容
+                    final String currentFullText = summaryContent.toString();
+                    
+                    // 3. 仅在需要刷新 UI 时切换到主线程
+                    ThreadUtil.runOnUiThread(() -> {
+                        summaryMessage.setContent(currentFullText);
+                        actionListener.onSummaryStreamUpdate(summaryMessage);
+                    });
+                }
             }
 
             @Override
             public void onComplete() {
                 ThreadUtil.runOnUiThread(() -> {
+                    // 确保思考消息被折叠
+                    thinkingMessage.setThinkingCollapsed(true);
+                    actionListener.onSummaryStreamUpdate(thinkingMessage);
+
                     // ⚠️ 先切断流式状态，确保后续操作针对的是完整消息
                     summaryMessage.setStreaming(false);
                     
                     if (summaryContent.length() > 0) {
                         summaryMessage.setContent(summaryContent.toString());
                         
-                        // 保存到数据库
-                        long msgId = ChatSessionManager.getInstance().saveMessage(summaryMessage);
-                        summaryMessage.setId(msgId);
+                        // 更新数据库中的消息（而不是再次保存）
+                        ChatSessionManager.getInstance().updateMessage(thinkingMessage); 
+                        ChatSessionManager.getInstance().updateMessage(summaryMessage);
                         
-                        // 通知 UI 成功完成
+                        // 通知 UI 成功完成（这里会触发最后一次刷新，确保内容完整并渲染 Markdown）
                         actionListener.onSummaryStreamComplete(summaryMessage, true);
                         
                         // ⚠️ 使用 Application Context 显示 Toast，避免 Activity 销毁导致的问题
                         Toast.makeText(context.getApplicationContext(), "总结已生成，长按可选择采用", Toast.LENGTH_SHORT).show();
                     } else {
+                        // 如果没有生成总结，移除思考消息和总结消息
+                        actionListener.onSummaryStreamError(thinkingMessage, "生成失败");
                         actionListener.onSummaryStreamComplete(summaryMessage, false);
                         Toast.makeText(context.getApplicationContext(), "生成总结失败: 内容为空", Toast.LENGTH_SHORT).show();
                     }
@@ -190,8 +243,16 @@ public class ChatSummaryHelper {
             @Override
             public void onError(String error) {
                 ThreadUtil.runOnUiThread(() -> {
-                    // 确保 UI 移除该消息
-                    actionListener.onSummaryStreamError(summaryMessage, error);
+                    // 记录错误到消息中
+                    String errStr = "\n[错误: " + error + "]";
+                    if (summaryContent.length() > 0) {
+                        summaryMessage.setContent(summaryMessage.getContent() + errStr);
+                        summaryMessage.setStreaming(false);
+                        actionListener.onSummaryStreamUpdate(summaryMessage);
+                    } else {
+                        thinkingMessage.setContent(thinkingMessage.getContent() + errStr);
+                        actionListener.onSummaryStreamUpdate(thinkingMessage);
+                    }
                     
                     // 忽略 "canceled" 错误，因为这是正常的流结束或中断
                     if (!"canceled".equals(error)) {
