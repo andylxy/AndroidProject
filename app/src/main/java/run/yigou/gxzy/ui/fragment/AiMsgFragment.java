@@ -220,6 +220,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                             if (position >= 0) {
                                 mChatAdapter.notifyItemChanged(position);
                             }
+                            // 确保流式结束后滚动到底部
+                            scrollToAbsoluteBottom();
                         }
                     } else {
                         if (mChatAdapter != null) {
@@ -287,11 +289,26 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
         
         // 设置 RecyclerView 的布局管理器和适配器
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        // 关键：设置 stackFromEnd 为 false (默认)，但我们在滚动时可能需要特定处理
         rv_chat.setLayoutManager(layoutManager);
         rv_chat.setAdapter(mChatAdapter);
         
+        // 关键：禁止子 View 获取焦点，防止 RecyclerView 在刷新时自动滚动到获取焦点的子 View
+        rv_chat.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        
         // 设置打字机渲染回调，实现打字时同步滚动
-        TipsAiChatAdapter.setScrollCallback(this::scrollToAbsoluteBottom);
+        TipsAiChatAdapter.setScrollCallback(new TipsAiChatAdapter.OnTypewriterRenderCallback() {
+            @Override
+            public void onRender() {
+                onTypewriterScroll();
+            }
+
+            @Override
+            public void onRenderComplete() {
+                // 渲染完成（特别是Markdown渲染后），强制滚动到底部
+                scrollToAbsoluteBottom();
+            }
+        });
         
         // 设置消息即点击操作回调
         mChatAdapter.setOnMessageActionListener(new TipsAiChatAdapter.OnMessageActionListener() {
@@ -669,11 +686,48 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
     
     /**
      * 滚动到 RecyclerView 的绝对底部
-     * 使用 smoothScrollBy 实现丝滑滚动
+     * 使用 smoothScrollToPosition 并结合偏移量，确保长文本也能展示底部
      */
     private void scrollToAbsoluteBottom() {
-        if (rv_chat == null) return;
+        if (rv_chat == null || mChatAdapter == null) return;
         
+        rv_chat.post(() -> {
+            int itemCount = mChatAdapter.getItemCount();
+            if (itemCount > 0) {
+                // 1. 获取 LayoutManager
+                RecyclerView.LayoutManager layoutManager = rv_chat.getLayoutManager();
+                if (layoutManager instanceof LinearLayoutManager) {
+                    LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
+                    // 使用 scrollToPositionWithOffset 将最后一条 Item 的底部对齐屏幕底部
+                    // 注意：offset 是相对于父容器顶部的。
+                    // 如果 offset 设置为 rv_chat.getHeight()，那么 Item 的顶部会显示在屏幕最底端（即只露出顶部一点点或完全不可见）
+                    // 我们想要的是：Item 的底部 = RecyclerView 的底部。
+                    // 但是 scrollToPositionWithOffset 的 offset 是指 Item 顶部的位置。
+                    // 所以这种方法很难精确控制显示底部。
+                    
+                    // 更好的方法：先滚到最后，再微调。
+                    // 或者直接使用 stackFromEnd = true (但这会改变整体布局逻辑)
+                    
+                    // 修正方案：
+                    // 1. 先平滑滚动到最后一条消息（这通常会显示消息顶部）
+                    rv_chat.smoothScrollToPosition(itemCount - 1);
+                    
+                    // 2. 延迟一下，再次尝试向上滚动以显示底部（如果消息很长）
+                    // 或者使用 scrollBy 强制向下
+                    rv_chat.postDelayed(() -> {
+                         // 尝试向下滚动一个大距离，确保长消息展示到底部
+                         rv_chat.smoothScrollBy(0, 10000); 
+                    }, 100);
+                }
+            }
+        });
+    }
+
+    /**
+     * 打字机效果时的微调滚动
+     */
+    private void onTypewriterScroll() {
+        if (rv_chat == null) return;
         rv_chat.post(() -> {
             // 使用 smoothScrollBy 丝滑滚动
             rv_chat.smoothScrollBy(0, 200);

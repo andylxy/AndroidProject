@@ -594,7 +594,8 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
 
     // 滚动回调接口
     public interface OnTypewriterRenderCallback {
-        void onRender();
+        void onRender(); // 打字机渲染回调（流式过程中）
+        void onRenderComplete(); // 渲染完成回调（SSE结束/Markdown渲染完成）
     }
     
     private static OnTypewriterRenderCallback scrollCallback;
@@ -634,6 +635,9 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     // 短延迟实现丝滑效果
                     long delay = 30; // 约 33fps
                     handler.postDelayed(this, delay);
+                } else {
+                    // 打字完成，停止并触发完成回调
+                    stop();
                 }
             }
         };
@@ -689,6 +693,11 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     markwon.setMarkdown(textView, targetContent);
                 } else {
                     textView.setText(targetContent);
+                }
+                
+                // 渲染完成后触发完成回调
+                if (scrollCallback != null) {
+                    scrollCallback.onRenderComplete();
                 }
             }
         }
