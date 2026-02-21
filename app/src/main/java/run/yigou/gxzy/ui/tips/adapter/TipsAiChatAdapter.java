@@ -540,6 +540,8 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                 // 采用总结
                 if (adoptSummaryListener != null) {
                     adoptSummaryListener.onAdoptSummary(summaryMessage);
+                } else if (actionListener != null) {
+                    actionListener.onAdoptSummary(summaryMessage);
                 }
             })
             .setNeutralButton("复制", (d, which) -> {

@@ -23,6 +23,7 @@ import run.yigou.gxzy.ui.dialog.ChatSummaryListDialog;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.utils.EasyLog;
 import run.yigou.gxzy.utils.MarkdownUtils;
+import run.yigou.gxzy.utils.ThreadUtil;
 
 /**
  * 总结助手：管理总结生成、显示和采用逻辑
@@ -145,30 +146,49 @@ public class ChatSummaryHelper {
 
             @Override
             public void onAnswerChunk(String content) {
-                summaryContent.append(content);
-                summaryMessage.setContent(summaryContent.toString());
-                actionListener.onSummaryStreamUpdate(summaryMessage);
+                ThreadUtil.runOnUiThread(() -> {
+                    summaryContent.append(content);
+                    summaryMessage.setContent(summaryContent.toString());
+                    actionListener.onSummaryStreamUpdate(summaryMessage);
+                });
             }
 
             @Override
             public void onComplete() {
-                summaryMessage.setStreaming(false);
-                if (summaryContent.length() > 0) {
-                    summaryMessage.setContent(summaryContent.toString());
-                    long msgId = ChatSessionManager.getInstance().saveMessage(summaryMessage);
-                    summaryMessage.setId(msgId);
-                    actionListener.onSummaryStreamComplete(summaryMessage, true);
-                    Toast.makeText(context, "总结已生成，长按可选择采用", Toast.LENGTH_SHORT).show();
-                } else {
-                    actionListener.onSummaryStreamComplete(summaryMessage, false);
-                    Toast.makeText(context, "生成总结失败", Toast.LENGTH_SHORT).show();
-                }
+                ThreadUtil.runOnUiThread(() -> {
+                    // ⚠️ 先切断流式状态，确保后续操作针对的是完整消息
+                    summaryMessage.setStreaming(false);
+                    
+                    if (summaryContent.length() > 0) {
+                        summaryMessage.setContent(summaryContent.toString());
+                        
+                        // 保存到数据库
+                        long msgId = ChatSessionManager.getInstance().saveMessage(summaryMessage);
+                        summaryMessage.setId(msgId);
+                        
+                        // 通知 UI 成功完成
+                        actionListener.onSummaryStreamComplete(summaryMessage, true);
+                        
+                        // ⚠️ 使用 Application Context 显示 Toast，避免 Activity 销毁导致的问题
+                        Toast.makeText(context.getApplicationContext(), "总结已生成，长按可选择采用", Toast.LENGTH_SHORT).show();
+                    } else {
+                        actionListener.onSummaryStreamComplete(summaryMessage, false);
+                        Toast.makeText(context.getApplicationContext(), "生成总结失败: 内容为空", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override
             public void onError(String error) {
-                actionListener.onSummaryStreamError(summaryMessage, error);
-                Toast.makeText(context, "生成总结失败: " + error, Toast.LENGTH_SHORT).show();
+                ThreadUtil.runOnUiThread(() -> {
+                    // 确保 UI 移除该消息
+                    actionListener.onSummaryStreamError(summaryMessage, error);
+                    
+                    // 忽略 "canceled" 错误，因为这是正常的流结束或中断
+                    if (!"canceled".equals(error)) {
+                        Toast.makeText(context.getApplicationContext(), "生成总结失败: " + error, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }
@@ -178,7 +198,14 @@ public class ChatSummaryHelper {
      */
     public void adoptSummary(ChatMessageBean summaryMessage) {
         ChatSessionBean currentSession = actionListener.getCurrentSession();
-        if (summaryMessage == null || currentSession == null) return;
+        if (summaryMessage == null) {
+            Toast.makeText(context, "总结内容为空", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (currentSession == null) {
+            Toast.makeText(context, "会话状态异常，请重试", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         ChatSummaryBean summary = new ChatSummaryBean();
         summary.setSessionId(currentSession.getId());
