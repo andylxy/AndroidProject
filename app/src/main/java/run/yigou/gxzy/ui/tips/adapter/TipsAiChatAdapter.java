@@ -404,7 +404,18 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                             tv_summary_content.setFocusableInTouchMode(false);
                             // 流式传输中禁止点击
                             tv_summary_content.setOnClickListener(null);
+
+                            TypewriterHelper helper = typewriterHelpers.get(bean.getId());
+                            if (helper == null) {
+                                helper = new TypewriterHelper(tv_summary_content, markwon);
+                                typewriterHelpers.put(bean.getId(), helper);
+                            }
+                            helper.setContent(bean.getContent(), true);
                         } else {
+                            // ===== SSE 流式结束 或 从数据库加载的历史消息 =====
+                            TypewriterHelper helper = typewriterHelpers.remove(bean.getId());
+                            if (helper != null) helper.stop();
+
                             // 流式传输结束：渲染 Markdown
                             if (markwon != null && bean.getContent() != null) {
                                 markwon.setMarkdown(tv_summary_content, bean.getContent());

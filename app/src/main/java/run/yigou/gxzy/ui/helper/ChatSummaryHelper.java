@@ -139,7 +139,16 @@ public class ChatSummaryHelper {
 
         AiChatManager.getInstance().generateSummary(currentSession, prompt, new AiChatManager.ChatStreamListener() {
             @Override
-            public void onThinking(String content) {}
+            public void onThinking(String content) {
+                // 如果后端返回了思考过程，我们将其作为内容的一部分显示，或者用特殊样式显示
+                // 这里为了简单，直接追加到内容中，或者你可以选择忽略
+                // 如果需要显示思考过程，可以这样做：
+                ThreadUtil.runOnUiThread(() -> {
+                     summaryContent.append(content);
+                     summaryMessage.setContent(summaryContent.toString());
+                     actionListener.onSummaryStreamUpdate(summaryMessage);
+                });
+            }
 
             @Override
             public void onAnswerStart(ChatMessageBean answerMessage) {}

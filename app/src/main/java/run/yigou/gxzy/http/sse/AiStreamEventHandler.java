@@ -42,6 +42,12 @@ public class AiStreamEventHandler extends EventSourceListener {
             if (chunk != null) {
                 EasyLog.print(TAG, "解析数据块: type=" + chunk.getType() + ", content length=" +
                         (chunk.getContent() != null ? chunk.getContent().length() : 0));
+                
+                // 打印具体内容，用于调试
+                if (chunk.getContent() != null && !chunk.getContent().isEmpty()) {
+                    EasyLog.print(TAG, "Content: " + chunk.getContent());
+                }
+                
                 callback.onChunk(chunk);
                 
                 // 如果是 done 或 error，关闭连接

@@ -353,7 +353,9 @@ public class AiChatManager {
                     @Override
                     public void onChunk(SseChunk chunk) {
                         if (chunk != null && chunk.getContent() != null) {
-                            if (!"thinking".equals(chunk.getType()) && !chunk.isThinking()) {
+                            if ("thinking".equals(chunk.getType()) || chunk.isThinking()) {
+                                listener.onThinking(chunk.getContent());
+                            } else {
                                 listener.onAnswerChunk(chunk.getContent());
                             }
                         }
