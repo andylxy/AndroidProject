@@ -211,15 +211,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     if (helper != null) {
                         helper.setContent(bean.getContent(), true);
                     } else {
-                        // 如果没有 helper，可能是第一次加载，初始化 helper
-                        TextView tv_summary_content = findViewById(R.id.tv_receive_content);
-                        if (tv_summary_content != null) {
-                             helper = new TypewriterHelper(tv_summary_content, markwon);
-                             typewriterHelpers.put(bean.getId(), helper);
-                             helper.setContent(bean.getContent(), true);
-                        } else {
-                             onBindView(position);
-                        }
+                        onBindView(position);
                     }
                 } else {
                     // 流式结束：完整绑定以触发 Markdown 渲染
@@ -422,7 +414,8 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     if (tv_summary_content != null) {
                         if (bean.isStreaming()) {
                             // 流式传输中：直接显示纯文本（打字机效果）
-                            tv_summary_content.setText(bean.getContent());
+                            // 移除这里的 setText(bean.getContent())，避免闪烁
+                            // tv_summary_content.setText(bean.getContent());
                             tv_summary_content.setTextIsSelectable(false);
                             tv_summary_content.setFocusable(false);
                             tv_summary_content.setFocusableInTouchMode(false);

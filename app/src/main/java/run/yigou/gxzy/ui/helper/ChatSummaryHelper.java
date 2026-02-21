@@ -98,7 +98,7 @@ public class ChatSummaryHelper {
         return cbAllSummary != null && cbAllSummary.isChecked();
     }
 
-    private static final long UI_UPDATE_INTERVAL = 100; // 100ms 批量更新一次
+    private static final long UI_UPDATE_INTERVAL = 200; // 200ms 批量更新一次
     private long lastUpdateTime = 0;
 
     /**

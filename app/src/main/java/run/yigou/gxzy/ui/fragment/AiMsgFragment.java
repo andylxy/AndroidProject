@@ -208,7 +208,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity> implemen
                             mChatAdapter.notifyItemChanged(position, TipsAiChatAdapter.PAYLOAD_UPDATE_CONTENT);
                         }
                     }
-                    scrollToAbsoluteBottom();
                 });
             }
 
