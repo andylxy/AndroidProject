@@ -18,23 +18,47 @@ import java.util.HashMap;
  */
 public class TipsTextRenderer {
 
-    private static final HashMap<String, Integer> colorMap = new HashMap<>();
+    // 定义样式配置类
+    public static class StyleConfig {
+        public int color;
+        public boolean isSmallFont; // 是否使用相对小字体
+        public int linkType; // 链接类型: 0:无, 1:Yao, 2:Fang, 3:MingCi
+
+        public StyleConfig(int color, boolean isSmallFont, int linkType) {
+            this.color = color;
+            this.isSmallFont = isSmallFont;
+            this.linkType = linkType;
+        }
+    }
+
+    // 使用 HashMap 存储样式配置，支持动态更新
+    private static final HashMap<String, StyleConfig> configMap = new HashMap<>();
 
     static {
-        // 初始化颜色映射
-        colorMap.put("r", Color.RED); // 红色
-        colorMap.put("n", Color.BLUE); // 蓝色
-        colorMap.put("f", Color.BLUE); // 蓝色
-        colorMap.put("a", Color.GRAY); // 灰色
-        colorMap.put("m", Color.RED); // 红色
-        colorMap.put("g", Color.argb(230, 0, 128, 255)); // 半透明蓝色
-        colorMap.put("u", Color.BLUE); // 蓝色
-        colorMap.put("v", Color.BLUE); // 蓝色
-        colorMap.put("w", Color.rgb(28, 181, 92)); // 绿色
-        colorMap.put("q", Color.rgb(61, 200, 120)); // 自定义绿色
-        colorMap.put("h", Color.BLACK); // 黑色
-        colorMap.put("x", Color.parseColor("#EA8E3B")); // 自定义橙色
-        colorMap.put("y", Color.parseColor("#9A764F")); // 自定义棕色
+        // 初始化默认配置，保持与原有 switch 逻辑一致
+        configMap.put("r", new StyleConfig(Color.RED, true, 0));
+        configMap.put("n", new StyleConfig(Color.BLUE, false, 0));
+        configMap.put("f", new StyleConfig(Color.BLUE, false, ProxyClickableSpan.TYPE_FANG));
+        configMap.put("a", new StyleConfig(Color.GRAY, true, 0));
+        configMap.put("m", new StyleConfig(Color.RED, false, 0));
+        configMap.put("g", new StyleConfig(Color.argb(230, 0, 128, 255), false, ProxyClickableSpan.TYPE_MINGCI));
+        configMap.put("u", new StyleConfig(Color.BLUE, false, ProxyClickableSpan.TYPE_YAO));
+        configMap.put("v", new StyleConfig(Color.BLUE, false, 0));
+        configMap.put("w", new StyleConfig(Color.rgb(28, 181, 92), true, 0));
+        configMap.put("q", new StyleConfig(Color.rgb(61, 200, 120), false, 0));
+        configMap.put("h", new StyleConfig(Color.BLACK, false, 0));
+        configMap.put("x", new StyleConfig(Color.parseColor("#EA8E3B"), false, 0));
+        configMap.put("y", new StyleConfig(Color.parseColor("#9A764F"), false, 0));
+    }
+
+    /**
+     * 更新样式配置
+     * @param newConfigs 新的样式配置映射
+     */
+    public static void updateStyleConfig(HashMap<String, StyleConfig> newConfigs) {
+        if (newConfigs != null) {
+            configMap.putAll(newConfigs);
+        }
     }
 
     /**
@@ -44,8 +68,8 @@ public class TipsTextRenderer {
      * @return 对应的颜色值，如果找不到则返回黑色
      */
     public static int getColoredTextByStrClass(String s) {
-        Integer colorValue = colorMap.get(s);
-        return colorValue != null ? colorValue : Color.BLACK;
+        StyleConfig config = configMap.get(s);
+        return config != null ? config.color : Color.BLACK;
     }
 
     // 创建SpannableStringBuilder对象
@@ -123,35 +147,21 @@ public class TipsTextRenderer {
     private static void applyStyle(SpannableStringBuilder spannableStringBuilder, String marker, int start, int end, final ClickLink clickLink) {
         if (marker == null) return;
         
-        // 根据不同的标记应用样式
-        switch (marker) {
-            case "a":
-            case "w":
-            case "r":
-                // 设置相对字体大小
-                spannableStringBuilder.setSpan(new RelativeSizeSpan(0.7f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                break;
-            case "u":
-                // 设置点击事件处理
-                if (clickLink != null) {
-                    spannableStringBuilder.setSpan(new ProxyClickableSpan(clickLink, ProxyClickableSpan.TYPE_YAO), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-                break;
-            case "f":
-                // 设置另一个点击事件处理
-                if (clickLink != null) {
-                    spannableStringBuilder.setSpan(new ProxyClickableSpan(clickLink, ProxyClickableSpan.TYPE_FANG), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-                break;
-            case "g":
-                // 设置另一个点击事件处理
-                if (clickLink != null) {
-                    spannableStringBuilder.setSpan(new ProxyClickableSpan(clickLink, ProxyClickableSpan.TYPE_MINGCI), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-                break;
+        StyleConfig config = configMap.get(marker);
+        if (config == null) return;
+        
+        // 1. 设置相对字体大小
+        if (config.isSmallFont) {
+            spannableStringBuilder.setSpan(new RelativeSizeSpan(0.7f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        // 设置文本颜色
-        ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(getColoredTextByStrClass(marker));
+        
+        // 2. 设置点击事件处理
+        if (config.linkType != 0 && clickLink != null) {
+             spannableStringBuilder.setSpan(new ProxyClickableSpan(clickLink, config.linkType), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        // 3. 设置文本颜色
+        ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(config.color);
         spannableStringBuilder.setSpan(foregroundColorSpan, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
     
