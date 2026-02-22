@@ -117,54 +117,26 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     private LinearLayout llClearHistory;
     private String searchKey;//搜索关键字
 
-    // 单例模式，确保实例的唯一性
-    private static volatile HomeFragment instance;
+    // 单例模式移除，确保 Fragment 正确生命周期管理
+    // private static volatile HomeFragment instance;
 
-    // 私有构造函数，防止外部直接实例化
-    private HomeFragment() {
-        try {
-            // 构造函数中的初始化逻辑
-            // 可以在这里添加一些基本的校验逻辑
-        } catch (Exception e) {
-            // 异常处理
-            throw new RuntimeException("Failed to create HomeFragment instance", e);
-        }
+    // 公共构造函数，允许系统重建
+    public HomeFragment() {
     }
 
     /**
      * 创建 HomeFragment 实例的方法。
-     * 使用 synchronized 关键字确保线程安全。
      *
      * @return HomeFragment 实例
      */
-    public static synchronized HomeFragment newInstance() {
-        if (instance == null) {
-            instance = new HomeFragment();
-        }
-        return instance;
+    public static HomeFragment newInstance() {
+        return new HomeFragment();
     }
 
     @Override
     protected int getLayoutId() {
         return R.layout.home_fragment;
     }
-
-    private TextWatcher textWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            // 文本变化之前的操作
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            // 文本变化时的操作
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            // 文本变化之后的操作
-        }
-    };
 
     @SuppressLint("CutPasteId")
     @Override
@@ -204,8 +176,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    // 当 EditText 获取焦点时，添加 TextWatcher
-                    mTvHomeSearchText.addTextChangedListener(textWatcher);
+                    // 当 EditText 获取焦点时
+                    // mTvHomeSearchText.addTextChangedListener(textWatcher); // 移除无用的监听
                     mTabView.setVisibility(View.GONE);
                     mViewPager.setVisibility(View.GONE);
                     llHistoryView.setVisibility(View.VISIBLE);
@@ -217,8 +189,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     }
 
                 } else {
-                    // 当 EditText 失去焦点时，移除 TextWatcher
-                    mTvHomeSearchText.removeTextChangedListener(textWatcher);
+                    // 当 EditText 失去焦点时
+                    // mTvHomeSearchText.removeTextChangedListener(textWatcher); // 移除无用的监听
                     mTabView.setVisibility(View.VISIBLE);
                     mViewPager.setVisibility(View.VISIBLE);
                     llHistoryView.setVisibility(View.GONE);
@@ -434,39 +406,51 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     public void onSucceed(HttpData<List<TabNav>> data) {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             if (mTabNavService == null || mPagerAdapter == null || mTabAdapter == null) {
-                                throw new IllegalStateException("mTabNavService, mPagerAdapter, or mTabAdapter is not initialized");
+                                // 避免在 Fragment 销毁后继续执行
+                                return;
                             }
 
-                            bookNavList = new CopyOnWriteArrayList<>(data.getData());
-
-                            // 【修复】同时保存到 GlobalDataHolder
-                            Map<Integer, TabNav> navTabMap = GlobalDataHolder.getInstance().getNavTabMap();
-                            Map<Integer, TabNavBody> navTabBodyMap = GlobalDataHolder.getInstance().getNavTabBodyMap();
-                            int order = 0;
-
-                            for (TabNav nav : bookNavList) {
-                                // 内容列表存在才添加
-                                if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
-
-                                    // 保存到 GlobalDataHolder
-                                    navTabMap.put(order, nav);
-                                    for (TabNavBody item : nav.getNavList()) {
-                                        if (item.getBookNo() > 0) {
-                                            navTabBodyMap.put(item.getBookNo(), item);
-                                        }
-                                    }
-                                    order++;
-
-                                    // 添加到适配器
-                                    mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
-                                    mTabAdapter.addItem(nav.getName());
-
-                                }
-                            }
-                            // 保存到数据库
+                            // 异步处理数据，避免阻塞主线程
                             ThreadUtil.runInBackground(() -> {
-                                ConvertEntity.saveTabNvaInDb(bookNavList, newInstance());
+                                List<TabNav> navList = new CopyOnWriteArrayList<>(data.getData());
+                                
+                                // 数据处理：保存到 GlobalDataHolder
+                                Map<Integer, TabNav> navTabMap = GlobalDataHolder.getInstance().getNavTabMap();
+                                Map<Integer, TabNavBody> navTabBodyMap = GlobalDataHolder.getInstance().getNavTabBodyMap();
+                                int order = 0;
+
+                                // 准备 UI 更新所需的数据
+                                final List<TabNav> validNavList = new ArrayList<>();
+                                
+                                for (TabNav nav : navList) {
+                                    if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
+                                        // 逻辑处理
+                                        navTabMap.put(order, nav);
+                                        for (TabNavBody item : nav.getNavList()) {
+                                            if (item.getBookNo() > 0) {
+                                                navTabBodyMap.put(item.getBookNo(), item);
+                                            }
+                                        }
+                                        order++;
+                                        validNavList.add(nav);
+                                    }
+                                }
+                                
+                                // 保存到数据库
+                                ConvertEntity.saveTabNvaInDb(navList, HomeFragment.this);
+                                
+                                // 切换回主线程更新 UI
+                                ThreadUtil.runOnUiThread(() -> {
+                                    if (mPagerAdapter == null || mTabAdapter == null) return;
+                                    
+                                    bookNavList = navList;
+                                    for (TabNav nav : validNavList) {
+                                        mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
+                                        mTabAdapter.addItem(nav.getName());
+                                    }
+                                });
                             });
+
                         } else {
                             bookNavList = new ArrayList<>();
                         }
@@ -502,20 +486,23 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     @Override
                     public void onSucceed(HttpData<List<Yao>> data) {
                         if (data != null && !data.getData().isEmpty()) {
-                            List<Yao> detailList = data.getData();
-                            //加载所有药物的数据到 GlobalDataHolder
-                            for (Yao yao : detailList) {
-                                GlobalDataHolder.getInstance().putYao(yao.getName(), yao);
-                                if (yao.getYaoList() != null) {
-                                    for (String alias : yao.getYaoList()) {
-                                        GlobalDataHolder.getInstance().putYao(alias, yao);
+                            // 使用后台线程处理大量数据转换
+                            ThreadUtil.runInBackground(() -> {
+                                List<Yao> detailList = data.getData();
+                                //加载所有药物的数据到 GlobalDataHolder
+                                for (Yao yao : detailList) {
+                                    GlobalDataHolder.getInstance().putYao(yao.getName(), yao);
+                                    if (yao.getYaoList() != null) {
+                                        for (String alias : yao.getYaoList()) {
+                                            GlobalDataHolder.getInstance().putYao(alias, yao);
+                                        }
                                     }
                                 }
-                            }
-                            isGetYaoData = false;
-                            //保存内容
-                            ThreadUtil.runInBackground(() -> {
+                                //保存内容到数据库
                                 ConvertEntity.saveYaoData(detailList);
+                                
+                                // 更新状态（非 UI 操作不需要切回主线程，除非有进度条等）
+                                isGetYaoData = false;
                             });
                         }
                     }
@@ -534,17 +521,14 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     @Override
                     public void onSucceed(HttpData<List<YaoAlia>> data) {
                         if (data != null && !data.getData().isEmpty()) {
-
-                            //加载额外的别名的数据
-                            // TipsSingleData.getInstance().setYaoData(new HH2SectionData(detailList, 0, "常用本草药物"));
-                            //加载额外的别名的数据
-                            Map<String, String> yaoAliasDict = GlobalDataHolder.getInstance().getYaoAliasDict();
-                            for (YaoAlia yaoAlia : data.getData()) {
-                                yaoAliasDict.put(yaoAlia.getBieming(), yaoAlia.getName());
-                            }
-
-                            //保存内容
+                            // 异步处理数据
                             ThreadUtil.runInBackground(() -> {
+                                //加载额外的别名的数据
+                                Map<String, String> yaoAliasDict = GlobalDataHolder.getInstance().getYaoAliasDict();
+                                for (YaoAlia yaoAlia : data.getData()) {
+                                    yaoAliasDict.put(yaoAlia.getBieming(), yaoAlia.getName());
+                                }
+
                                 //保存数据
                                 ConvertEntity.saveYaoAlia(data.getData());
                             });
@@ -570,15 +554,17 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                              @Override
                              public void onSucceed(HttpData<List<MingCiContent>> data) {
                                  if (data != null && !data.getData().isEmpty()) {
-                                     List<MingCiContent> detailList = data.getData();
-                                     //加载所有名词数据到 GlobalDataHolder
-                                     for (MingCiContent mingCi : detailList) {
-                                         GlobalDataHolder.getInstance().putMingCiContent(mingCi.getName(), mingCi);
-                                     }
-                                     isGetMingCiData = false;
-                                     //保存内容
+                                     // 异步处理数据
                                      ThreadUtil.runInBackground(() -> {
+                                         List<MingCiContent> detailList = data.getData();
+                                         //加载所有名词数据到 GlobalDataHolder
+                                         for (MingCiContent mingCi : detailList) {
+                                             GlobalDataHolder.getInstance().putMingCiContent(mingCi.getName(), mingCi);
+                                         }
+                                         
+                                         //保存内容
                                          ConvertEntity.saveMingCiContent(detailList);
+                                         isGetMingCiData = false;
                                      });
                                  }
                              }
@@ -649,6 +635,6 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mViewPager.setAdapter(null);
         mViewPager.removeOnPageChangeListener(this);
         mTabAdapter.setOnTabListener(null);
-        instance = null;
+        // instance = null; // 单例移除
     }
 }
