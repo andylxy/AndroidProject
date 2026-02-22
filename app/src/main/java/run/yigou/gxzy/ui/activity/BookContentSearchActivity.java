@@ -84,6 +84,9 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     // private Map<Integer, SingletonNetData> singleDataMap; // 移除
     private LinearLayoutManager layoutManager;
 
+    private final android.os.Handler mHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private Runnable mSearchRunnable;
+
     @Override
     protected int getLayoutId() {
         return R.layout.book_content_search;
@@ -100,14 +103,54 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         mTabNavBodyService = DbService.getInstance().mTabNavBodyService;
         mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
         initHistoryList();
+        
+        // 预先初始化 Adapter
+        initAdapters();
+        
         viewDataInit();
 
         // 获取传递过来的 Intent
         Intent intent = getIntent();
         // 从 Intent 中提取参数
         searchKey = intent.getStringExtra("searchQuery");
-        etSearchKey.setText(searchKey);
+        if (!StringHelper.isEmpty(searchKey)) {
+            etSearchKey.setText(searchKey);
+            etSearchKey.setSelection(searchKey.length());
+            // 如果有初始搜索词，直接开始搜索，不需要防抖
+            search();
+        }
+    }
 
+    private void initAdapters() {
+        // 初始化 mSearchBookAdapter
+        mSearchBookAdapter = new SearchBookAdapter(getActivity());
+        mSearchBookAdapter.setOnItemClickListener(this);
+        mLvSearchBooks.setLayoutManager(new LinearLayoutManager(getContext()));
+        mLvSearchBooks.setAdapter(mSearchBookAdapter);
+        mLvSearchBooks.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
+
+        // 初始化 mSearchBookDetailAdapter
+        mSearchBookDetailAdapter = new RefactoredSearchAdapter(getActivity());
+        mSearchBookDetailAdapter.setOnHeaderClickListener((adapter, holder, groupPosition) -> {
+            RefactoredSearchAdapter expandableAdapter = (RefactoredSearchAdapter) adapter;
+            if (expandableAdapter.isExpand(groupPosition)) {
+                expandableAdapter.collapseGroup(groupPosition);
+            } else {
+                expandableAdapter.expandGroup(groupPosition);
+            }
+        });
+        
+        mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener((groupPosition, childPosition) -> {
+            reListAdapter();
+            layoutManager.scrollToPositionWithOffset(groupPosition, 0);
+            mSearchBookDetailAdapter.expandGroup(groupPosition, true);
+        });
+
+        layoutManager = new LinearLayoutManager(getContext());
+        lvSearchBooksList.setLayoutManager(layoutManager);
+        lvSearchBooksList.setAdapter(mSearchBookDetailAdapter);
+        lvSearchBooksList.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_Content_RecyclerView_Color, AppConst.CustomDivider_Height));
+        lvSearchBooksList.setVisibility(View.GONE);
     }
 
     private void viewDataInit() {
@@ -127,25 +170,20 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             public void afterTextChanged(final Editable editable) {
                 //保存搜索关键字
                 searchKey = editable.toString();
-                if (!StringHelper.isEmpty(searchKey)) {
-                    // 如果内容不为空则重新光标定位
-                   etSearchKey.setSelection(searchKey.length());
-                    search();
-                } else {
-                    llClearHistory.setVisibility(View.VISIBLE);
-                    llHistoryView.setVisibility(View.VISIBLE);
-                    searchKeyTextList.clear();
-                    lvSearchBooksList.setVisibility(View.GONE);
-                    mLvSearchBooks.setVisibility(View.GONE);
-                    mSearchBookDetailAdapter.setSearch(false);
-                    // 清空搜索结果数量提示
-                    if (numTips != null) {
-                        numTips.setText("");
-                    }
+                
+                // 移除之前的搜索任务
+                if (mSearchRunnable != null) {
+                    mHandler.removeCallbacks(mSearchRunnable);
                 }
 
+                if (!StringHelper.isEmpty(searchKey)) {
+                    // 500ms 防抖
+                    mSearchRunnable = () -> search();
+                    mHandler.postDelayed(mSearchRunnable, 500);
+                } else {
+                    handleEmptySearch();
+                }
             }
-
         });
         etSearchKey.setOnKeyListener((v, keyCode, event) -> {
             //是否是回车键
@@ -167,6 +205,21 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             toast("清空历史记录成功");
             llClearHistory.setVisibility(View.GONE);
         });
+    }
+
+    private void handleEmptySearch() {
+        llClearHistory.setVisibility(View.VISIBLE);
+        llHistoryView.setVisibility(View.VISIBLE);
+        searchKeyTextList.clear();
+        lvSearchBooksList.setVisibility(View.GONE);
+        mLvSearchBooks.setVisibility(View.GONE);
+        if (mSearchBookDetailAdapter != null) {
+            mSearchBookDetailAdapter.setSearch(false);
+        }
+        // 清空搜索结果数量提示
+        if (numTips != null) {
+            numTips.setText("");
+        }
     }
 
     private void init() {
@@ -222,43 +275,15 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      * 初始化搜索列表
      */
     private void initSearchList() {
-        mSearchBookDetailAdapter = new RefactoredSearchAdapter(getActivity());
-        // 搜索模式默认已开启,不需要setSearch
-        lvSearchBooksList.setAdapter(mSearchBookDetailAdapter);
-        layoutManager = new LinearLayoutManager(getContext());
-        lvSearchBooksList.setLayoutManager(layoutManager);
-        lvSearchBooksList.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_Content_RecyclerView_Color, AppConst.CustomDivider_Height));
-        lvSearchBooksList.setVisibility(View.GONE);
-        mSearchBookDetailAdapter.setOnHeaderClickListener(new GroupedRecyclerViewAdapter.OnHeaderClickListener() {
-            @Override
-            public void onHeaderClick(GroupedRecyclerViewAdapter adapter, BaseViewHolder holder,
-                                      int groupPosition) {
-//                Toast.makeText(getContext(), "组头：groupPosition = " + groupPosition,
-//                        Toast.LENGTH_LONG).show();
-                RefactoredSearchAdapter expandableAdapter = (RefactoredSearchAdapter) adapter;
-                if (expandableAdapter.isExpand(groupPosition)) {
-                    expandableAdapter.collapseGroup(groupPosition);
-                } else {
-                    expandableAdapter.expandGroup(groupPosition);
-                }
-            }
-        });
-        //跳转指定章节
-        mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener(new RefactoredSearchAdapter.OnJumpSpecifiedItemListener() {
-            @Override
-            public void onJumpSpecifiedItem(int groupPosition, int childPosition) {
-                // 搜索模式已经默认开启,不需要setSearch
-                reListAdapter();
-                layoutManager.scrollToPositionWithOffset(groupPosition, 0);
-                mSearchBookDetailAdapter.expandGroup(groupPosition, true);
-            }
-        });
-        mSearchBookAdapter = new SearchBookAdapter(getActivity());
-        mSearchBookAdapter.setData(searchKeyTextList);
-        mSearchBookAdapter.setOnItemClickListener(this);
-        mLvSearchBooks.setAdapter(mSearchBookAdapter);
+        if (isFinishing() || isDestroyed()) return;
+
+        // 更新 mSearchBookAdapter 数据
+        if (mSearchBookAdapter != null) {
+            mSearchBookAdapter.setData(searchKeyTextList);
+        }
+        
         mLvSearchBooks.setVisibility(View.VISIBLE);
-        mLvSearchBooks.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
+        lvSearchBooksList.setVisibility(View.GONE);
         
         // 更新搜索结果数量提示
         if (numTips != null) {
@@ -285,7 +310,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         }
 
         ThreadUtil.runInBackground(() -> {
-            searchKeyTextList.clear();
+            ArrayList<SearchKey> tempResults = new ArrayList<>();
             
             // 1. 获取所有书籍信息
             Map<Integer, TabNavBody> bookMap = GlobalDataHolder.getInstance().getNavTabBodyMap();
@@ -323,7 +348,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                     );
                     
                     if (!searchResults.isEmpty()) {
-                        searchKeyTextList.add(new SearchKey(
+                        tempResults.add(new SearchKey(
                             keyword, 
                             searchResults.size(), 
                             bookInfo.getBookName(), 
@@ -338,7 +363,15 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             }
             
             // 7. 更新UI
-            ThreadUtil.runOnUiThread(() -> initSearchList());
+            ThreadUtil.runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                // 确认关键词未变（处理并发结果乱序）
+                if (!keyword.equals(etSearchKey.getText().toString())) return;
+
+                searchKeyTextList.clear();
+                searchKeyTextList.addAll(tempResults);
+                initSearchList();
+            });
         });
     }
     
@@ -420,6 +453,11 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        // 移除 Handler 消息，防止内存泄漏
+        if (mHandler != null && mSearchRunnable != null) {
+            mHandler.removeCallbacks(mSearchRunnable);
+        }
 
         // 空指针检查
         if (mSearchBookDetailAdapter != null) {
