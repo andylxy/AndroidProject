@@ -47,6 +47,7 @@ import run.yigou.gxzy.ui.tips.entity.GroupModel;
 import run.yigou.gxzy.ui.tips.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
+import run.yigou.gxzy.ui.tips.repository.BookRepository;
 import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
@@ -87,6 +88,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     private final android.os.Handler mHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     private Runnable mSearchRunnable;
 
+    private BookRepository mBookRepository;
+
     @Override
     protected int getLayoutId() {
         return R.layout.book_content_search;
@@ -103,9 +106,14 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         mTabNavBodyService = DbService.getInstance().mTabNavBodyService;
         mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
         initHistoryList();
+
+        mBookRepository = new BookRepository();
         
         // 预先初始化 Adapter
         initAdapters();
+
+        // 默认初始化 TipsNetHelper 上下文，防止空指针（使用伤寒论作为默认值）
+        TipsNetHelper.setBookContext(mBookRepository, AppConst.ShangHanNo);
         
         viewDataInit();
 
@@ -442,6 +450,13 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             lvSearchBooksList.setVisibility(View.VISIBLE);
             mLvSearchBooks.setVisibility(View.GONE);
             currentSearchKey = searchKeyTextList.get(position);
+
+            // 设置 TipsNetHelper 上下文，以便详情页链接点击能获取正确数据
+            if (mBookRepository == null) {
+                 mBookRepository = new BookRepository();
+            }
+            TipsNetHelper.setBookContext(mBookRepository, currentSearchKey.getBookNo());
+
             ArrayList<ExpandableGroupEntity> sectionData = GroupModel.getExpandableGroups(searchKeyTextList.get(position).getFilteredData(), false);
             mSearchBookDetailAdapter.setmGroups(sectionData);
             mSearchBookDetailAdapter.notifyDataChanged();

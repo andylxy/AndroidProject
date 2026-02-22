@@ -194,9 +194,10 @@ public class RefactoredSearchAdapter extends BaseRefactoredAdapter
         TextView sectionVideo = holder.get(R.id.tv_sectionvideo);
         
         if (sectionText != null) {
-            sectionText.setOnClickListener(v -> 
-                childVH.toggleTextVisibility(itemData.getNoteSpan())
-            );
+            // 注释掉 setOnClickListener 以解决 LocalLinkMovementMethod 点击冲突
+            // sectionText.setOnClickListener(v -> 
+            //    childVH.toggleTextVisibility(itemData.getNoteSpan())
+            // );
             
             sectionText.setOnLongClickListener(v -> {
                 // 优先使用SpannableStringBuilder以保留格式
@@ -213,9 +214,10 @@ public class RefactoredSearchAdapter extends BaseRefactoredAdapter
         }
         
         if (sectionNote != null) {
-            sectionNote.setOnClickListener(v -> 
-                childVH.toggleNoteVisibility(itemData.getVideoSpan())
-            );
+            // 注释掉 setOnClickListener 以解决 LocalLinkMovementMethod 点击冲突
+            // sectionNote.setOnClickListener(v -> 
+            //    childVH.toggleNoteVisibility(itemData.getVideoSpan())
+            // );
             
             sectionNote.setOnLongClickListener(v -> {
                 // 优先使用SpannableStringBuilder以保留格式
@@ -232,9 +234,10 @@ public class RefactoredSearchAdapter extends BaseRefactoredAdapter
         }
         
         if (sectionVideo != null) {
-            sectionVideo.setOnClickListener(v -> 
-                childVH.toggleVideoVisibility()
-            );
+            // 注释掉 setOnClickListener 以解决 LocalLinkMovementMethod 点击冲突
+            // sectionVideo.setOnClickListener(v -> 
+            //    childVH.toggleVideoVisibility()
+            // );
             
             sectionVideo.setOnLongClickListener(v -> {
                 // 优先使用SpannableStringBuilder以保留格式
