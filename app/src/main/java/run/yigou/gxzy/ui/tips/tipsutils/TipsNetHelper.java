@@ -127,37 +127,36 @@ public class TipsNetHelper {
     public static SpannableStringBuilder getSpanString(String str) {
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
 
-        Map<String, String> yaoAliasDict = GlobalDataHolder.getInstance().getYaoAliasDict();
+        GlobalDataHolder globalData = GlobalDataHolder.getInstance();
+        Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
 
         // 获取药物的别名，若无则保留原名
         String alias = yaoAliasDict.get(str);
         str = alias != null ? alias : str;
 
-        if (true) {
-            // 遍历药物数据
-            if (GlobalDataHolder.getInstance().getYaoMap() == null) {
-                // throw new IllegalArgumentException("GlobalDataHolder or yaoMap is null");
-                return spannableStringBuilder.append(TipsNetHelper.renderText("$r{药物数据未加载}"));
-            }
-            Map<String, Yao> yaoMap = GlobalDataHolder.getInstance().getYaoMap();
-            Yao yaoData = yaoMap.get(str);
-            if (yaoData == null) {
-                return spannableStringBuilder.append(TipsNetHelper.renderText("$r{药物未找到资料}"));
-            }
-
-            String yaoName = yaoData.getName();
-            String yaoAlias = yaoAliasDict.get(yaoName);
-            yaoName = yaoAlias != null ? yaoAlias : yaoName;
-
-            if (!yaoName.isEmpty()) {
-                spannableStringBuilder.append(yaoData.getAttributedText());
-            }
-
-            if (spannableStringBuilder.length() == 0) {
-                spannableStringBuilder.append(TipsNetHelper.renderText("$r{药物未找到资料}"));
-            }
-            spannableStringBuilder.append("\n\n");
+        // 遍历药物数据
+        if (globalData.getYaoMap() == null) {
+            return spannableStringBuilder.append(TipsNetHelper.renderText("$r{药物数据未加载}"));
         }
+        Map<String, Yao> yaoMap = globalData.getYaoMap();
+        Yao yaoData = yaoMap.get(str);
+        if (yaoData == null) {
+            return spannableStringBuilder.append(TipsNetHelper.renderText("$r{药物未找到资料}"));
+        }
+
+        String yaoName = yaoData.getName();
+        String yaoAlias = yaoAliasDict.get(yaoName);
+        yaoName = yaoAlias != null ? yaoAlias : yaoName;
+
+        if (!yaoName.isEmpty()) {
+            spannableStringBuilder.append(yaoData.getAttributedText());
+        }
+
+        if (spannableStringBuilder.length() == 0) {
+            spannableStringBuilder.append(TipsNetHelper.renderText("$r{药物未找到资料}"));
+        }
+        spannableStringBuilder.append("\n\n");
+
 
         // 处理方剂数据
         int sectionCount = 0;
@@ -190,11 +189,11 @@ public class TipsNetHelper {
 
             if (filteredFang != null) {
                 for (DataItem dataItem : filteredFang) {
-                    for (String yaoName : dataItem.getYaoList()) {
-                        String yaoAlias = yaoAliasDict.get(yaoName);
-                        yaoName = yaoAlias != null ? yaoAlias : yaoName;
+                    for (String name : dataItem.getYaoList()) {
+                        String nameAlias = yaoAliasDict.get(name);
+                        name = nameAlias != null ? nameAlias : name;
 
-                        if (yaoName.equals(str)) {
+                        if (name.equals(str)) {
                             matchedCount++;
                             fangBuilder.append(TipsNetHelper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
                             break; 
@@ -217,114 +216,116 @@ public class TipsNetHelper {
         return spannableStringBuilder;
     }
 
+    private static final ClickLink DEFAULT_CLICK_LINK = new ClickLink() {
+
+        @Override
+        public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
+            EasyLog.print("=== clickYaoLink() 新架构 ===");
+            
+            String keyword = textView.getText()
+                    .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
+                    .toString();
+            EasyLog.print("药物: " + keyword);
+            
+            if (sBookRepository == null || sCurrentBookId == -1) {
+                EasyLog.print("❌ BookRepository未设置，无法搜索");
+                return;
+            }
+            
+            SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
+            Pair<List<GroupData>, List<List<ItemData>>> data = 
+                    adapter.searchYaoContent(keyword.trim());
+            
+            EasyLog.print("Groups: " + data.first.size());
+            
+            Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
+            
+            TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
+            window.setData(textView.getContext(), data);
+            window.setFang(keyword); 
+            window.setRect(textRect);
+            
+            if (textView.getContext() instanceof Activity) {
+                window.show(((Activity) textView.getContext()).getFragmentManager());
+            }
+            
+            EasyLog.print("=== clickYaoLink() 完成 ===");
+        }
+
+        @Override
+        public void clickFangLink(TextView textView, ClickableSpan clickableSpan) {
+            EasyLog.print("=== clickFangLink() 新架构 ===");
+            
+            String keyword = textView.getText()
+                    .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
+                    .toString();
+            EasyLog.print("方剂: " + keyword);
+            
+            if (sBookRepository == null || sCurrentBookId == -1) {
+                EasyLog.print("❌ BookRepository未设置，无法搜索");
+                return;
+            }
+            
+            SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
+            Pair<List<GroupData>, List<List<ItemData>>> data = 
+                    adapter.searchFangContent(keyword.trim());
+            
+            EasyLog.print("Groups: " + data.first.size());
+            
+            Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
+            
+            TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
+            window.setData(textView.getContext(), data);
+            window.setFang(keyword);
+            window.setRect(textRect);
+            
+            Context context = textView.getContext();
+            if (context instanceof Activity) {
+                window.show(((Activity) context).getFragmentManager());
+            } else {
+                EasyLog.print("❌ Context不是Activity!");
+            }
+            
+            EasyLog.print("=== clickFangLink() 完成 ===");
+        }
+
+        @Override
+        public void clickMingCiLink(TextView textView, ClickableSpan clickableSpan) {
+            EasyLog.print("=== clickMingCiLink() 新架构 ===");
+            
+            String keyword = textView.getText()
+                    .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
+                    .toString();
+            EasyLog.print("名词: " + keyword);
+            
+            if (sBookRepository == null || sCurrentBookId == -1) {
+                EasyLog.print("❌ BookRepository未设置，无法搜索");
+                return;
+            }
+            
+            SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
+            Pair<List<GroupData>, List<List<ItemData>>> data = 
+                    adapter.searchMingCiContent(keyword.trim());
+            
+            EasyLog.print("Groups: " + data.first.size());
+            
+            Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
+            
+            TipsLittleMingCiViewWindow window = new TipsLittleMingCiViewWindow();
+            window.setData(textView.getContext(), data);
+            window.setRect(textRect);
+            
+            if (textView.getContext() instanceof Activity) {
+                window.show(((Activity) textView.getContext()).getFragmentManager());
+            }
+            
+            EasyLog.print("=== clickMingCiLink() 完成 ===");
+        }
+
+    };
+
     public static SpannableStringBuilder renderText(String str) {
-        return renderText(str, new ClickLink() {
-
-            @Override
-            public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
-                EasyLog.print("=== clickYaoLink() 新架构 ===");
-                
-                String keyword = textView.getText()
-                        .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
-                        .toString();
-                EasyLog.print("药物: " + keyword);
-                
-                if (sBookRepository == null || sCurrentBookId == -1) {
-                    EasyLog.print("❌ BookRepository未设置，无法搜索");
-                    return;
-                }
-                
-                SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
-                Pair<List<GroupData>, List<List<ItemData>>> data = 
-                        adapter.searchYaoContent(keyword.trim());
-                
-                EasyLog.print("Groups: " + data.first.size());
-                
-                Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-                
-                TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
-                window.setData(textView.getContext(), data);
-                window.setFang(keyword); 
-                window.setRect(textRect);
-                
-                if (textView.getContext() instanceof Activity) {
-                    window.show(((Activity) textView.getContext()).getFragmentManager());
-                }
-                
-                EasyLog.print("=== clickYaoLink() 完成 ===");
-            }
-
-            @Override
-            public void clickFangLink(TextView textView, ClickableSpan clickableSpan) {
-                EasyLog.print("=== clickFangLink() 新架构 ===");
-                
-                String keyword = textView.getText()
-                        .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
-                        .toString();
-                EasyLog.print("方剂: " + keyword);
-                
-                if (sBookRepository == null || sCurrentBookId == -1) {
-                    EasyLog.print("❌ BookRepository未设置，无法搜索");
-                    return;
-                }
-                
-                SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
-                Pair<List<GroupData>, List<List<ItemData>>> data = 
-                        adapter.searchFangContent(keyword.trim());
-                
-                EasyLog.print("Groups: " + data.first.size());
-                
-                Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-                
-                TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
-                window.setData(textView.getContext(), data);
-                window.setFang(keyword);
-                window.setRect(textRect);
-                
-                Context context = textView.getContext();
-                if (context instanceof Activity) {
-                    window.show(((Activity) context).getFragmentManager());
-                } else {
-                    EasyLog.print("❌ Context不是Activity!");
-                }
-                
-                EasyLog.print("=== clickFangLink() 完成 ===");
-            }
-
-            @Override
-            public void clickMingCiLink(TextView textView, ClickableSpan clickableSpan) {
-                EasyLog.print("=== clickMingCiLink() 新架构 ===");
-                
-                String keyword = textView.getText()
-                        .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
-                        .toString();
-                EasyLog.print("名词: " + keyword);
-                
-                if (sBookRepository == null || sCurrentBookId == -1) {
-                    EasyLog.print("❌ BookRepository未设置，无法搜索");
-                    return;
-                }
-                
-                SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
-                Pair<List<GroupData>, List<List<ItemData>>> data = 
-                        adapter.searchMingCiContent(keyword.trim());
-                
-                EasyLog.print("Groups: " + data.first.size());
-                
-                Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-                
-                TipsLittleMingCiViewWindow window = new TipsLittleMingCiViewWindow();
-                window.setData(textView.getContext(), data);
-                window.setRect(textRect);
-                
-                if (textView.getContext() instanceof Activity) {
-                    window.show(((Activity) textView.getContext()).getFragmentManager());
-                }
-                
-                EasyLog.print("=== clickMingCiLink() 完成 ===");
-            }
-
-        });
+        return renderText(str, DEFAULT_CLICK_LINK);
     }
 
     // ================== Dialog Helper (Keep) ==================
