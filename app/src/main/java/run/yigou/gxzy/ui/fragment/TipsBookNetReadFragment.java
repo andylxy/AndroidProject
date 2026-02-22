@@ -113,8 +113,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      */
     private run.yigou.gxzy.ui.tips.utils.SearchCoordinator searchCoordinator;
 
-    // 在 onDestroy 中释放资源
-
     private OnBackPressedCallback onBackPressedCallback;
 
     public static TipsBookNetReadFragment newInstance(BookArgs bookArgs) {
@@ -498,21 +496,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         }
     }
 
-    // ==================== 以下方法未使用，已注释 ====================
-    /*
-    private Chapter findChapterBySignatureId(long signatureId) {
-        if (chapterList == null || chapterList.isEmpty()) {
-            return null;
-        }
 
-        for (Chapter chapter : chapterList) {
-            if (chapter != null && chapter.getSignatureId() == signatureId) {
-                return chapter;
-            }
-        }
-        return null;
-    }
-    */
 
     /**
      * 更新章节内容到 UI
@@ -731,12 +715,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      * @return 如果为 null 或长度为 0，则返回 true；否则返回 false
      */
     public boolean charSequenceIsEmpty(CharSequence charSequence) {
-        boolean bl = false;
         if (charSequence == null || charSequence.length() == 0) {
             this.searchText = null;
-            bl = true;
+            return true;
         }
-        return bl;
+        return false;
     }
 
     @SuppressLint("DefaultLocale")
