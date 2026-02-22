@@ -57,64 +57,54 @@ public final class MessageFragment extends TitleBarFragment<HomeActivity> {
     @Override
     public void onClick(View view) {
         int viewId = view.getId();
-        if (viewId == R.id.btn_message_image1) {
-
-            mImageView.setVisibility(View.VISIBLE);
-            GlideApp.with(this)
-                    .load("https://www.baidu.com/img/bd_logo.png")
-                    .into(mImageView);
-
-        } else if (viewId == R.id.btn_message_image2) {
-
-            mImageView.setVisibility(View.VISIBLE);
-            GlideApp.with(this)
-                    .load("https://www.baidu.com/img/bd_logo.png")
-                    .circleCrop()
-                    .into(mImageView);
-
-        } else if (viewId == R.id.btn_message_image3) {
-
-            mImageView.setVisibility(View.VISIBLE);
-            GlideApp.with(this)
-                    .load("https://www.baidu.com/img/bd_logo.png")
-                    .transform(new RoundedCorners((int) getResources().getDimension(R.dimen.dp_20)))
-                    .into(mImageView);
-
-        } else if (viewId == R.id.btn_message_toast) {
-
-            toast("我是吐司");
-
-        }
-        else if (viewId == R.id.btn_message_login) {
-
-            startActivity(LoginActivity.class);
-
-        }
-        else if (viewId == R.id.btn_message_permission) {
-
-            requestPermission();
-
-        } else if (viewId == R.id.btn_message_setting) {
-
-            XXPermissions.startPermissionActivity(this);
-
-        } else if (viewId == R.id.btn_message_black) {
-
-            getAttachActivity()
-                    .getStatusBarConfig()
-                    .statusBarDarkFont(true)
-                    .init();
-
-        } else if (viewId == R.id.btn_message_white) {
-
-            getAttachActivity()
-                    .getStatusBarConfig()
-                    .statusBarDarkFont(false)
-                    .init();
-
-        } else if (viewId == R.id.btn_message_tab) {
-
-            HomeActivity.start(getActivity(), HomeFragment.class);
+        switch (viewId) {
+            case R.id.btn_message_image1:
+                mImageView.setVisibility(View.VISIBLE);
+                GlideApp.with(this)
+                        .load("https://www.baidu.com/img/bd_logo.png")
+                        .into(mImageView);
+                break;
+            case R.id.btn_message_image2:
+                mImageView.setVisibility(View.VISIBLE);
+                GlideApp.with(this)
+                        .load("https://www.baidu.com/img/bd_logo.png")
+                        .circleCrop()
+                        .into(mImageView);
+                break;
+            case R.id.btn_message_image3:
+                mImageView.setVisibility(View.VISIBLE);
+                GlideApp.with(this)
+                        .load("https://www.baidu.com/img/bd_logo.png")
+                        .transform(new RoundedCorners((int) getResources().getDimension(R.dimen.dp_20)))
+                        .into(mImageView);
+                break;
+            case R.id.btn_message_toast:
+                toast("我是吐司");
+                break;
+            case R.id.btn_message_login:
+                startActivity(LoginActivity.class);
+                break;
+            case R.id.btn_message_permission:
+                requestPermission();
+                break;
+            case R.id.btn_message_setting:
+                XXPermissions.startPermissionActivity(this);
+                break;
+            case R.id.btn_message_black:
+                getAttachActivity()
+                        .getStatusBarConfig()
+                        .statusBarDarkFont(true)
+                        .init();
+                break;
+            case R.id.btn_message_white:
+                getAttachActivity()
+                        .getStatusBarConfig()
+                        .statusBarDarkFont(false)
+                        .init();
+                break;
+            case R.id.btn_message_tab:
+                HomeActivity.start(getActivity(), HomeFragment.class);
+                break;
         }
     }
 

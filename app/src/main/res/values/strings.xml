@@ -337,6 +337,12 @@
     <string name="status_layout_error_network">网络错误，请重试</string>
     <string name="status_layout_retry">重试</string>
 
+    <!-- 状态页 -->
+    <string name="status_header_text">我是头部</string>
+    <string name="status_header_click">点击了头部</string>
+    <string name="status_footer_text">我是尾部</string>
+    <string name="status_footer_click">点击了尾部</string>
+
     <!-- 地区对话框 -->
     <string name="address_title">请选择地区</string>
     <string name="address_hint">请选择</string>

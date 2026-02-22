@@ -53,25 +53,15 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     private BookService mBookService;
     private SmartRefreshLayout mRefreshLayout;
 
-    // 单例模式，确保实例的唯一性
-    private static volatile BookCollectCaseFragment instance;
+    // 单例模式移除，确保 Fragment 正确生命周期管理
+    // private static volatile BookCollectCaseFragment instance;
 
-    // 私有构造函数，防止外部直接实例化
-    private BookCollectCaseFragment() {
-        try {
-            // 构造函数中的初始化逻辑
-            // 可以在这里添加一些基本的校验逻辑
-        } catch (Exception e) {
-            // 异常处理
-            throw new RuntimeException("Failed to create BookCollectCaseFragment instance", e);
-        }
+    // 公共构造函数，允许系统重建
+    public BookCollectCaseFragment() {
     }
 
-    public static synchronized BookCollectCaseFragment newInstance() {
-        if (instance == null) {
-            instance = new BookCollectCaseFragment();
-        }
-        return instance;
+    public static BookCollectCaseFragment newInstance() {
+        return new BookCollectCaseFragment();
     }
 
     @Override
@@ -114,27 +104,32 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     @Override
     public void onDestroy() {
         super.onDestroy();
-        instance = null;
+        // instance = null;
     }
 
     @Override
     protected void initData() {
         setTitle("书架");
         mBookService = DbService.getInstance().mBookService;
-        mBookCollectCaseAdapter.setData(loadData());
+        loadData();
     }
 
-    private List<Book> loadData() {
-        List<Book> gvList = mBookService.getAllBooks();
-        if (!gvList.isEmpty()) {
-            mLlNoDataTips.setVisibility(View.GONE);
-            mRefreshLayout.setVisibility(View.VISIBLE);
-            return gvList;
-        } else {
-            mLlNoDataTips.setVisibility(View.VISIBLE);
-            mRefreshLayout.setVisibility(View.GONE);
-            return new ArrayList<>();
-        }
+    private void loadData() {
+        // 异步加载数据
+        run.yigou.gxzy.utils.ThreadUtil.runInBackground(() -> {
+            List<Book> gvList = mBookService.getAllBooks();
+            run.yigou.gxzy.utils.ThreadUtil.runOnUiThread(() -> {
+                if (gvList != null && !gvList.isEmpty()) {
+                    mLlNoDataTips.setVisibility(View.GONE);
+                    mRefreshLayout.setVisibility(View.VISIBLE);
+                    mBookCollectCaseAdapter.setData(gvList);
+                } else {
+                    mLlNoDataTips.setVisibility(View.VISIBLE);
+                    mRefreshLayout.setVisibility(View.GONE);
+                    mBookCollectCaseAdapter.setData(new ArrayList<>());
+                }
+            });
+        });
     }
 
     @Override
@@ -166,17 +161,17 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
         }
     }
 
-    public void RefreshLayout() {
+    public void refreshLayout() {
         postDelayed(() -> {
             mBookCollectCaseAdapter.clearData();
-            mBookCollectCaseAdapter.setData(loadData());
+            loadData();
             mRefreshLayout.finishRefresh();
         }, 1000);
     }
 
     @Override
     public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-        RefreshLayout();
+        refreshLayout();
     }
 
     @Override
@@ -209,7 +204,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
                             if (books != null && !books.isEmpty()) {
                                 mBookService.deleteEntity(books.get(0));
                                 //刷新书架
-                                RefreshLayout();
+                                refreshLayout();
                             }
                         }
                     })

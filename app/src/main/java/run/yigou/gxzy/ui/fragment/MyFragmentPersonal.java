@@ -17,6 +17,8 @@ import com.hjq.permissions.XXPermissions;
 import com.hjq.widget.layout.SettingBar;
 
 
+import java.util.List;
+import java.util.ArrayList;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -198,9 +200,16 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
      */
     private void handleLoginRequiredActions(View view) {
         if (view == mAvatarLayout) {
-            ImageSelectActivity.start(getAttachActivity(), data -> {
-                // 裁剪头像
-                cropImageFile(new File(data.get(0)));
+            ImageSelectActivity.start(getAttachActivity(), new ImageSelectActivity.OnPhotoSelectListener() {
+                @Override
+                public void onSelected(List<String> data) {
+                    // 裁剪头像
+                    cropImageFile(new File(data.get(0)));
+                }
+
+                @Override
+                public void onCancel() {
+                }
             });
         } else if (view == mAvatarView) {
             if (mAvatarUrl != null) {

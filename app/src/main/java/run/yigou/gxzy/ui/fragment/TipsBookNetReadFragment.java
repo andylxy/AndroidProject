@@ -117,28 +117,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
     private OnBackPressedCallback onBackPressedCallback;
 
-
-//    // 单例模式，确保实例的唯一性
-//    private static volatile TipsBookNetReadFragment instance;
-//
-//    // 私有构造函数，防止外部直接实例化
-//    private TipsBookNetReadFragment() {
-//        try {
-//            // 构造函数中的初始化逻辑
-//            // 可以在这里添加一些基本的校验逻辑
-//        } catch (Exception e) {
-//            // 异常处理
-//            throw new RuntimeException("Failed to create TipsBookNetReadFragment instance", e);
-//        }
-//    }
-
-    public static synchronized TipsBookNetReadFragment newInstance(BookArgs bookArgs) {
-//        if (instance == null) {
-//            instance = new TipsBookNetReadFragment();
-//        }
-//        if (bookArgs != null) {
-//            instance.bookArgs = bookArgs;
-//        }
+    public static TipsBookNetReadFragment newInstance(BookArgs bookArgs) {
         TipsBookNetReadFragment instance = new TipsBookNetReadFragment();
         instance.bookArgs = bookArgs;
         return instance;
@@ -827,16 +806,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         }
     }
 
-    // 未使用：Fragment 通过 Activity 生命周期管理启动，不需要此静态方法
-    /*
-    public static void start(Context context) {
-        Intent intent = new Intent(context, TipsBookNetReadFragment.class);
-        if (!(context instanceof Activity)) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
-        context.startActivity(intent);
-    }
-    */
+
 
     // ==================== MVP View 接口实现 ====================
 
@@ -1029,7 +999,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
     public void closeView() {
         // 刷新书架（保留原逻辑中的副作用）
         try {
-            BookCollectCaseFragment.newInstance().RefreshLayout();
+            BookCollectCaseFragment.newInstance().refreshLayout();
         } catch (Exception e) {
             EasyLog.print("TipsBookNetReadFragment", "刷新书架失败: " + e.getMessage());
         }

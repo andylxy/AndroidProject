@@ -87,17 +87,13 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
     @Override
     protected void initData() {
        // singleData = TipsSingleData.getInstance();
-        // List<BookInfoNav.Bean.NavList> navList =mNavList;
         mAdapter.setData(analogData());
        // XEventBus.getDefault().register(TipsWindowNetFragment.this);
     }
-    // 移除不必要的 WeakReference，TitleBarFragment 提供了 getAttachActivity()
-    // private WeakReference<Activity> weakActivity;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        // weakActivity = new WeakReference<>((Activity) context);
     }
 
     private List<TabNavBody> analogData() {
@@ -176,8 +172,6 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
 
     @Override
     public void onDestroy() {
-        // 清理 post 或异步任务，确保引用不再存在
-        // weakActivity.clear();
         super.onDestroy();
     }
 }

@@ -42,9 +42,9 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
 
 
     private BookArgs bookArgs;
-    // 私有构造函数，防止外部直接实例化
-    private TipsSettingFragment() {
-        // 构造函数中的初始化逻辑
+    
+    // 公共构造函数，允许系统重建
+    public TipsSettingFragment() {
     }
 
     public static TipsSettingFragment newInstance(BookArgs bookArgs) {
@@ -94,13 +94,9 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
     @Override
     public void onClick(View view) {
         super.onClick(view);
-        switch (view.getId()) {
-            case R.id.sb_setting_yao_uint:
-                // 跳转到药单位设置页面
-                startActivityForResult(YaoUintActivity.class, null);
-                break;
-            default:
-                break;
+        if (view.getId() == R.id.sb_setting_yao_uint) {
+            // 跳转到药单位设置页面
+            startActivityForResult(YaoUintActivity.class, null);
         }
     }
 
