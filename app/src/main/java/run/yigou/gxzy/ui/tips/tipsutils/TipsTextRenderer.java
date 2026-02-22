@@ -71,104 +71,121 @@ public class TipsTextRenderer {
 
     public static SpannableStringBuilder renderText(String str, final ClickLink clickLink) {
         // 如果输入为 null，返回一个带有默认内容的 SpannableStringBuilder
-        if (str == null) {
-            // EasyLog.print("renderText default content: Null ");
+        if (str == null || str.isEmpty()) {
             return new SpannableStringBuilder();
         }
-        // 创建 SpannableStringBuilder 并初始化
-        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(str);
-        while (true) {
-            // 找到下一个"$"符号的位置
-            int indexOf = str.indexOf("$");
-            if (indexOf >= 0) {
-                // 找到下一个"}"符号的位置
-                int indexOf2 = str.indexOf("}", indexOf);
-                if (indexOf2 == -1) break; // 如果没有找到"}"，则退出循环
 
-                // 计算"$"符号的数量
-                int size = getAllSubStringPos(str.substring(indexOf, indexOf2), "$").size();
-                int i = indexOf2; // 初始化i为"}"符号的位置
-                int i2 = 1; // 初始化i2为1，用于跟踪"$"数量
-
-                // 根据"$"的数量调整结束位置
-                while (size > i2) {
-                    for (int j = 0; j < size - i2; j++) {
-                        // 更新i为下一个"}"符号的位置
-                        i += str.substring(i + 1).indexOf("}") + 1;
-                    }
-                    int currentSize = size; // 保存当前的大小
-                    size = getAllSubStringPos(str.substring(indexOf, i), "$").size(); // 更新size
-                    i2 = currentSize; // 更新i2为当前大小
-                }
-
-                // 提取"$"后面的字符
-                String marker = str.substring(indexOf + 1, indexOf + 2);
-
-                // 根据标记应用不同的样式
-                applyStyle(spannableStringBuilder, marker, indexOf, i, clickLink);
-
-                // 将处理过的部分替换为空字符串
-                spannableStringBuilder.replace(i, i + 1, "");
-                spannableStringBuilder.replace(indexOf, indexOf + 3, "");
-
-                // 更新原始字符串为修改后的字符串
-                str = spannableStringBuilder.toString();
-            } else {
-                // 处理完所有"$"后执行其他渲染
-                renderItemNumber(spannableStringBuilder);
-                break; // 跳出循环
-            }
+        // 使用 StringBuilder 预处理，去除所有标签，计算最终文本长度（优化内存）
+        // 但由于需要保留样式位置，直接操作 SpannableStringBuilder 可能更直观，但效率较低。
+        // 这里采用正则匹配方式，避免复杂的 substring 和 indexOf 逻辑。
+        
+        // 正则匹配 $x{content} 格式
+        // \$([a-zA-Z])\{([^}]*)\}
+        // Group 1: 标记 (marker)
+        // Group 2: 内容 (content)
+        
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\$([a-zA-Z])\\{([^}]*)\\}");
+        java.util.regex.Matcher matcher = pattern.matcher(str);
+        
+        SpannableStringBuilder ssb = new SpannableStringBuilder();
+        int lastAppendPosition = 0;
+        
+        while (matcher.find()) {
+            // 追加前一段普通文本
+            ssb.append(str, lastAppendPosition, matcher.start());
+            
+            String marker = matcher.group(1);
+            String content = matcher.group(2);
+            int start = ssb.length();
+            
+            // 追加标签内的内容
+            ssb.append(content);
+            int end = ssb.length();
+            
+            // 应用样式
+            applyStyle(ssb, marker, start, end, clickLink);
+            
+            lastAppendPosition = matcher.end();
         }
-        return spannableStringBuilder; // 返回最终的SpannableStringBuilder
+        
+        // 追加剩余文本
+        if (lastAppendPosition < str.length()) {
+            ssb.append(str, lastAppendPosition, str.length());
+        }
+        
+        // 处理项编号特殊渲染
+        renderItemNumber(ssb);
+        
+        return ssb;
     }
 
     // 根据标记应用样式的方法
     private static void applyStyle(SpannableStringBuilder spannableStringBuilder, String marker, int start, int end, final ClickLink clickLink) {
+        if (marker == null) return;
+        
         // 根据不同的标记应用样式
         switch (marker) {
             case "a":
             case "w":
             case "r":
                 // 设置相对字体大小
-                spannableStringBuilder.setSpan(new RelativeSizeSpan(0.7f), start + 3, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spannableStringBuilder.setSpan(new RelativeSizeSpan(0.7f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 break;
             case "u":
                 // 设置点击事件处理
                 if (clickLink != null) {
-                    spannableStringBuilder.setSpan(new ClickableSpan() {
-                        @Override
-                        public void onClick(View view) {
-                            clickLink.clickYaoLink((TextView) view, this); // 处理点击
-                        }
-                    }, start + 3, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannableStringBuilder.setSpan(new ProxyClickableSpan(clickLink, ProxyClickableSpan.TYPE_YAO), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
                 break;
             case "f":
                 // 设置另一个点击事件处理
                 if (clickLink != null) {
-                    spannableStringBuilder.setSpan(new ClickableSpan() {
-                        @Override
-                        public void onClick(View view) {
-                            clickLink.clickFangLink((TextView) view, this); // 处理点击
-                        }
-                    }, start + 3, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannableStringBuilder.setSpan(new ProxyClickableSpan(clickLink, ProxyClickableSpan.TYPE_FANG), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
                 break;
             case "g":
                 // 设置另一个点击事件处理
                 if (clickLink != null) {
-                    spannableStringBuilder.setSpan(new ClickableSpan() {
-                        @Override
-                        public void onClick(View view) {
-                            clickLink.clickMingCiLink((TextView) view, this); // 处理点击
-                        }
-                    }, start + 3, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannableStringBuilder.setSpan(new ProxyClickableSpan(clickLink, ProxyClickableSpan.TYPE_MINGCI), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
                 break;
         }
         // 设置文本颜色
         ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(getColoredTextByStrClass(marker));
-        spannableStringBuilder.setSpan(foregroundColorSpan, start + 3, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableStringBuilder.setSpan(foregroundColorSpan, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+    
+    /**
+     * 静态内部类实现 ClickableSpan，减少匿名类创建开销
+     */
+    private static class ProxyClickableSpan extends ClickableSpan {
+        static final int TYPE_YAO = 1;
+        static final int TYPE_FANG = 2;
+        static final int TYPE_MINGCI = 3;
+        
+        private final ClickLink clickLink;
+        private final int type;
+        
+        ProxyClickableSpan(ClickLink clickLink, int type) {
+            this.clickLink = clickLink;
+            this.type = type;
+        }
+        
+        @Override
+        public void onClick(View view) {
+            if (clickLink == null) return;
+            switch (type) {
+                case TYPE_YAO:
+                    clickLink.clickYaoLink((TextView) view, this);
+                    break;
+                case TYPE_FANG:
+                    clickLink.clickFangLink((TextView) view, this);
+                    break;
+                case TYPE_MINGCI:
+                    clickLink.clickMingCiLink((TextView) view, this);
+                    break;
+            }
+        }
     }
 
     /**
