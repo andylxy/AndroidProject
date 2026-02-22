@@ -10,6 +10,27 @@ import android.widget.Toast;
  */
 public class MarkdownUtils {
 
+    // 预编译正则表达式
+    private static final java.util.regex.Pattern CODE_BLOCK = java.util.regex.Pattern.compile("```[\\s\\S]*?```");
+    private static final java.util.regex.Pattern INLINE_CODE = java.util.regex.Pattern.compile("`([^`]+)`");
+    private static final java.util.regex.Pattern BOLD_ASTERISK = java.util.regex.Pattern.compile("\\*\\*([^*]+)\\*\\*");
+    private static final java.util.regex.Pattern BOLD_UNDERSCORE = java.util.regex.Pattern.compile("__([^_]+)__");
+    private static final java.util.regex.Pattern ITALIC_ASTERISK = java.util.regex.Pattern.compile("\\*([^*]+)\\*");
+    private static final java.util.regex.Pattern ITALIC_UNDERSCORE = java.util.regex.Pattern.compile("_([^_]+)_");
+    private static final java.util.regex.Pattern HEADER_START = java.util.regex.Pattern.compile("^#{1,6}\\s*");
+    private static final java.util.regex.Pattern HEADER_NEWLINE = java.util.regex.Pattern.compile("\\n#{1,6}\\s*");
+    private static final java.util.regex.Pattern LINK = java.util.regex.Pattern.compile("\\[([^\\]]+)\\]\\([^)]+\\)");
+    private static final java.util.regex.Pattern IMAGE = java.util.regex.Pattern.compile("!\\[([^\\]]*)\\]\\([^)]+\\)");
+    private static final java.util.regex.Pattern LIST_START = java.util.regex.Pattern.compile("^[\\-*+]\\s+");
+    private static final java.util.regex.Pattern LIST_NEWLINE = java.util.regex.Pattern.compile("\\n[\\-*+]\\s+");
+    private static final java.util.regex.Pattern ORDERED_LIST_START = java.util.regex.Pattern.compile("^\\d+\\.\\s+");
+    private static final java.util.regex.Pattern ORDERED_LIST_NEWLINE = java.util.regex.Pattern.compile("\\n\\d+\\.\\s+");
+    private static final java.util.regex.Pattern BLOCKQUOTE_START = java.util.regex.Pattern.compile("^>\\s*");
+    private static final java.util.regex.Pattern BLOCKQUOTE_NEWLINE = java.util.regex.Pattern.compile("\\n>\\s*");
+    private static final java.util.regex.Pattern HORIZONTAL_RULE_START = java.util.regex.Pattern.compile("^[\\-*_]{3,}$");
+    private static final java.util.regex.Pattern HORIZONTAL_RULE_NEWLINE = java.util.regex.Pattern.compile("\\n[\\-*_]{3,}\\n");
+    private static final java.util.regex.Pattern MULTIPLE_NEWLINES = java.util.regex.Pattern.compile("\\n{3,}");
+
     /**
      * 将 Markdown 格式转换为纯文本
      */
@@ -18,36 +39,36 @@ public class MarkdownUtils {
         
         String text = markdown;
         // 移除代码块 ```...```
-        text = text.replaceAll("```[\\s\\S]*?```", "");
+        text = CODE_BLOCK.matcher(text).replaceAll("");
         // 移除行内代码 `...`
-        text = text.replaceAll("`([^`]+)`", "$1");
+        text = INLINE_CODE.matcher(text).replaceAll("$1");
         // 移除粗体 **...** 或 __...__
-        text = text.replaceAll("\\*\\*([^*]+)\\*\\*", "$1");
-        text = text.replaceAll("__([^_]+)__", "$1");
+        text = BOLD_ASTERISK.matcher(text).replaceAll("$1");
+        text = BOLD_UNDERSCORE.matcher(text).replaceAll("$1");
         // 移除斜体 *...* 或 _..._
-        text = text.replaceAll("\\*([^*]+)\\*", "$1");
-        text = text.replaceAll("_([^_]+)_", "$1");
+        text = ITALIC_ASTERISK.matcher(text).replaceAll("$1");
+        text = ITALIC_UNDERSCORE.matcher(text).replaceAll("$1");
         // 移除标题 # ## ### 等
-        text = text.replaceAll("^#{1,6}\\s*", "");
-        text = text.replaceAll("\\n#{1,6}\\s*", "\n");
+        text = HEADER_START.matcher(text).replaceAll("");
+        text = HEADER_NEWLINE.matcher(text).replaceAll("\n");
         // 移除链接 [text](url)
-        text = text.replaceAll("\\[([^\\]]+)\\]\\([^)]+\\)", "$1");
+        text = LINK.matcher(text).replaceAll("$1");
         // 移除图片 ![alt](url)
-        text = text.replaceAll("!\\[([^\\]]*)\\]\\([^)]+\\)", "$1");
+        text = IMAGE.matcher(text).replaceAll("$1");
         // 移除列表符号 - * + 
-        text = text.replaceAll("^[\\-*+]\\s+", "");
-        text = text.replaceAll("\\n[\\-*+]\\s+", "\n");
+        text = LIST_START.matcher(text).replaceAll("");
+        text = LIST_NEWLINE.matcher(text).replaceAll("\n");
         // 移除有序列表 1. 2. 等
-        text = text.replaceAll("^\\d+\\.\\s+", "");
-        text = text.replaceAll("\\n\\d+\\.\\s+", "\n");
+        text = ORDERED_LIST_START.matcher(text).replaceAll("");
+        text = ORDERED_LIST_NEWLINE.matcher(text).replaceAll("\n");
         // 移除引用 >
-        text = text.replaceAll("^>\\s*", "");
-        text = text.replaceAll("\\n>\\s*", "\n");
+        text = BLOCKQUOTE_START.matcher(text).replaceAll("");
+        text = BLOCKQUOTE_NEWLINE.matcher(text).replaceAll("\n");
         // 移除水平线 --- *** ___
-        text = text.replaceAll("^[\\-*_]{3,}$", "");
-        text = text.replaceAll("\\n[\\-*_]{3,}\\n", "\n");
+        text = HORIZONTAL_RULE_START.matcher(text).replaceAll("");
+        text = HORIZONTAL_RULE_NEWLINE.matcher(text).replaceAll("\n");
         // 清理多余空行
-        text = text.replaceAll("\\n{3,}", "\n\n");
+        text = MULTIPLE_NEWLINES.matcher(text).replaceAll("\n\n");
         
         return text.trim();
     }

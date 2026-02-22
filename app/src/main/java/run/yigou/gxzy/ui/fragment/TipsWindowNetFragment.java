@@ -47,6 +47,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
 
     public static TipsWindowNetFragment newInstance(List<TabNavBody> navList) {
         TipsWindowNetFragment bookInfoFragment = new TipsWindowNetFragment();
+        // mNavList 状态保存不安全，暂时保留，建议通过 setArguments/getArguments 传递
         bookInfoFragment.mNavList = navList;
         return bookInfoFragment;
     }
@@ -56,8 +57,8 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
     private WrapRecyclerView mRecyclerView;
 
     private BookInfoAdapter mAdapter;
-
-   // TipsSingleData singleData;
+    
+    // TipsSingleData singleData;
     /**
      * 当前点击书本数据
      */
@@ -90,12 +91,13 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
         mAdapter.setData(analogData());
        // XEventBus.getDefault().register(TipsWindowNetFragment.this);
     }
-    // 在 Fragment 中使用 WeakReference 来避免内存泄漏
-    private WeakReference<Activity> weakActivity;
+    // 移除不必要的 WeakReference，TitleBarFragment 提供了 getAttachActivity()
+    // private WeakReference<Activity> weakActivity;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        weakActivity = new WeakReference<>((Activity) context);
+        // weakActivity = new WeakReference<>((Activity) context);
     }
 
     private List<TabNavBody> analogData() {
@@ -122,18 +124,21 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
         }
     }
     private void startFragmentActivity() {
-        // 获取 Activity 上下文，避免使用 getContext() 引发潜在问题
-        Activity activity = weakActivity.get();
+        // 直接获取 Activity 上下文，TitleBarFragment 提供了 getAttachActivity()
+        Activity activity = getAttachActivity();
         if (activity == null) {
-            // 如果 Fragment 当前不附加到 Activity，直接返回，不进行启动操作
+            // 如果 Fragment 当前不附加到 Activity，尝试使用 getActivity
+            activity = getActivity();
+        }
+        if (activity == null) {
             return;
         }
+
         // 启动跳转到阅读窗口
         Intent intent = new Intent(activity, TipsFragmentActivity.class);
-        //  Intent intent = new Intent(activity, CopyActivity.class);
         intent.putExtra("bookId", bookId);
 
-        // 如果当前上下文不是 Activity，需要添加 FLAG_ACTIVITY_NEW_TASK
+        // 如果当前上下文不是 Activity，需要添加 FLAG_ACTIVITY_NEW_TASK (虽然 getAttachActivity 返回的是 Activity)
         if (!(activity instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
@@ -172,9 +177,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
     @Override
     public void onDestroy() {
         // 清理 post 或异步任务，确保引用不再存在
-        weakActivity.clear();
-       // XEventBus.getDefault().unregister(TipsWindowNetFragment.this);
+        // weakActivity.clear();
         super.onDestroy();
-
     }
 }
