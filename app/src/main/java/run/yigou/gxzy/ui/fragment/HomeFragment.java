@@ -62,6 +62,8 @@ import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.AiConfigApi;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.api.MingCiContentApi;
+import run.yigou.gxzy.http.api.StyleConfigApi;
+import run.yigou.gxzy.ui.tips.tipsutils.TipsTextRenderer;
 import run.yigou.gxzy.http.api.YaoAliaApi;
 import run.yigou.gxzy.http.api.YaoContentApi;
 import run.yigou.gxzy.http.model.HttpData;
@@ -275,6 +277,9 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
             toast("清空历史记录成功");
         });
 
+         //todo 待完善
+        // 异步获取并更新 Tips 模块的样式配置（颜色、字体等）
+        //getStyleConfig();
     }
 
 
@@ -290,6 +295,38 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         lvHistoryList.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
         llHistoryView.setVisibility(View.GONE);
         llClearHistory.setVisibility(View.GONE);
+    }
+
+    /**
+     * 从后端获取最新的样式配置
+     * 确保 Tips 模块的文本渲染样式（如 $r{}, $u{} 标签的颜色和行为）与服务器保持同步
+     */
+    private void getStyleConfig() {
+        // 使用 EasyHttp 发起 GET 请求
+        EasyHttp.get(this)
+                .api(new StyleConfigApi())
+                .request(new HttpCallback<HttpData<StyleConfigApi.StyleConfigApiBean>>(this) {
+                    
+                    @Override
+                    public void onSucceed(HttpData<StyleConfigApi.StyleConfigApiBean> result) {
+                        // 校验返回数据是否有效
+                        if (result != null && result.getData() != null && result.getData().getStyles() != null) {
+                            // 在后台线程处理数据转换（虽然此处数据量不大，但保持良好习惯）
+                            // 或者是直接在主线程更新，因为 updateConfigFromApi 内部主要是 Map 操作，非常快
+                            // 这里直接在主线程更新即可，避免多线程同步问题
+                            TipsTextRenderer.updateConfigFromApi(result.getData().getStyles());
+                            // EasyLog.print("已更新 Tips 样式配置，数量: " + result.getData().getStyles().size());
+                        }
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        // 请求失败时，不做处理，继续使用本地默认配置
+                        // 也可以打印日志方便排查
+                        // EasyLog.print("获取样式配置失败: " + e.getMessage());
+                        super.onFail(e);
+                    }
+                });
     }
 
     /**

@@ -11,6 +11,9 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import run.yigou.gxzy.http.api.StyleConfigApi;
 
 /**
  * Tips 模块文本渲染器
@@ -29,6 +32,38 @@ public class TipsTextRenderer {
             this.isSmallFont = isSmallFont;
             this.linkType = linkType;
         }
+    }
+
+    /**
+     * 将 API 返回的配置列表转换为内部样式映射表，并更新配置
+     * 
+     * @param apiStyles API 返回的样式列表
+     */
+    public static void updateConfigFromApi(List<StyleConfigApi.StyleConfigApiBean.StyleItem> apiStyles) {
+        if (apiStyles == null || apiStyles.isEmpty()) {
+            return;
+        }
+        
+        HashMap<String, StyleConfig> newConfigs = new HashMap<>();
+        for (StyleConfigApi.StyleConfigApiBean.StyleItem item : apiStyles) {
+            try {
+                // 解析颜色，支持 #RRGGBB 格式，如果解析失败则捕获异常
+                int color = Color.parseColor(item.getColor());
+                
+                // 构建内部配置对象
+                newConfigs.put(item.getMarker(), new StyleConfig(
+                        color, 
+                        item.isSmallFont(), 
+                        item.getLinkType()
+                ));
+            } catch (Exception e) {
+                // 仅记录错误，跳过当前出错的项，不影响其他项的加载
+                e.printStackTrace();
+            }
+        }
+        
+        // 更新全局配置
+        updateStyleConfig(newConfigs);
     }
 
     // 使用 HashMap 存储样式配置，支持动态更新
