@@ -61,7 +61,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
         super(context);
         // 初始化 Markwon - 使用更完整的配置
         initMarkwon(context);
-        Timber.tag("TipsAiChatAdapter").d("Adapter created");
+        // Timber.tag("TipsAiChatAdapter").d("Adapter created");
     }
 
     public void setOnAdoptSummaryListener(OnAdoptSummaryListener listener) {
@@ -612,7 +612,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
         private int displayedLength = 0;
         private boolean isTyping = false;
         private String lastRenderedText = "";
-
+        
         private final Runnable typingRunnable = new Runnable() {
             @Override
             public void run() {
@@ -653,10 +653,19 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
             if (animate) {
                 if (!isTyping) {
                     isTyping = true;
+                    // 如果已经显示完全，则不需要再启动动画（除非内容变多了）
+                    // 这里的逻辑是：如果 displayedLength 已经 >= targetContent.length()，
+                    // 说明上次已经打完了，这次 targetContent 没变或者变短了？
+                    // 如果是追加内容，targetContent 变长，displayedLength < targetContent.length()，会继续打。
+                    
+                    // 关键修正：确保 displayedLength 不会越界
+                    if (displayedLength > targetContent.length()) {
+                        displayedLength = targetContent.length();
+                    }
+                    
                     handler.post(typingRunnable);
                 } else {
-                    handler.removeCallbacks(typingRunnable);
-                    handler.post(typingRunnable);
+                    // 已经在打字中，targetContent 更新了，runnable 会自动处理新的长度
                 }
             } else {
                 stop();
@@ -671,7 +680,16 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
             
             if (!textToShow.equals(lastRenderedText)) {
                 lastRenderedText = textToShow;
-                textView.setText(textToShow); // 只用 setText，不用 Markwon
+                
+                // 用户需求：每隔一段时间就渲染一次 Markdown，而不是等到最后。
+                // 方案：直接每次都使用 setMarkdown。
+                // Markwon 的性能通常足够支撑这种更新频率（特别是对于增量文本）。
+                // 如果发现性能问题，可以考虑降低 typingRunnable 的频率（例如改为 50ms）。
+                if (markwon != null) {
+                    markwon.setMarkdown(textView, textToShow);
+                } else {
+                    textView.setText(textToShow);
+                }
                 
                 // 触发滚动回调
                 if (scrollCallback != null) {
