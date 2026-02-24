@@ -26,8 +26,6 @@ import run.yigou.gxzy.utils.DebugLog;
  */
 public class TipsSearchEngine {
 
-    private static final List<String> validSearchTerms = new ArrayList<>();
-
     public static @NonNull ArrayList<HH2SectionData> getSearchHh2SectionData(SearchKeyEntity searchKeyEntity,
                                                                              List<HH2SectionData> contentList,
                                                                              Map<String, String> yaoAliasDict,
@@ -38,11 +36,12 @@ public class TipsSearchEngine {
 
         // 将搜索词拆分并过滤掉空白项
         String[] searchTerms = searchKeyEntity.getSearchKeyText().toString().split("[,.。，]");
-        validSearchTerms.clear();
+        List<Pattern> validPatterns = new ArrayList<>();
 
         for (String term : searchTerms) {
             if (!term.isEmpty()) {
-                validSearchTerms.add(term);
+                // 预编译 Pattern，避免在循环中重复编译
+                validPatterns.add(getPattern(sanitizeTerm(term)));
             }
         }
         ArrayList<HH2SectionData> filteredData = new ArrayList<>(); // 用于保存过滤后的结果
@@ -60,11 +59,8 @@ public class TipsSearchEngine {
                     DataItem dataItem2 = dataItem.getCopy();
                     dataItem2.setGroupPosition(index);
 
-                    // 检查每个搜索词
-                    for (String term : validSearchTerms) {
-                        String sanitizedTerm = sanitizeTerm(term); // 清理搜索词
-                        Pattern pattern = getPattern(sanitizedTerm);
-
+                    // 检查每个搜索词 Pattern
+                    for (Pattern pattern : validPatterns) {
                         // 检查数据项是否符合搜索条件
                         if (matchDataItem(dataItem2, pattern, yaoAliasDict, fangAliasDict)) {
                             itemMatched = true;
@@ -237,24 +233,27 @@ public class TipsSearchEngine {
             return Collections.emptyList();
         }
 
-        // 初始化数据列表，根据Android版本使用不同的方式初始化
-        List<? extends DataItem> dataItems = null;
-        // 当Android版本为N或更高时，使用Optional进行空值检查，并返回空列表作为默认值
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            dataItems = Optional.ofNullable(sectionData)
-                    .orElse(Collections.emptyList());
-        }
+        List<? extends DataItem> dataItems = sectionData;
 
-        // 再次检查Android版本，以确定是否可以使用Java 8的流式处理
+        // 使用流式处理过滤和转换数据列表，筛选出符合条件的房产信息
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // 使用流式处理过滤和转换数据列表，筛选出符合条件的房产信息
             return dataItems.stream()
                     .filter(dataItem -> dataItem instanceof Fang)
                     .map(Fang.class::cast)
                     .filter(fang -> fang.hasYao(finalStr1))
                     .collect(Collectors.toList());
+        } else {
+            // 兼容低版本 Android
+            List<DataItem> result = new ArrayList<>();
+            for (DataItem item : dataItems) {
+                if (item instanceof Fang) {
+                    Fang fang = (Fang) item;
+                    if (fang.hasYao(finalStr1)) {
+                        result.add(fang);
+                    }
+                }
+            }
+            return result;
         }
-        // 如果Android版本不满足条件，返回null
-        return null;
     }
 }
