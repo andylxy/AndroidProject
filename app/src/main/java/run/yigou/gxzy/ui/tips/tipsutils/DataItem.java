@@ -201,7 +201,9 @@ public class DataItem implements Serializable {
      */
     public void setNote(String note) {
         this.note = note;
-        this.attributedNote = TipsNetHelper.renderText(this.note);
+        // 延迟渲染：此处不立即生成 SpannedString，而是在 getAttributedNote() 中按需生成
+        // this.attributedNote = TipsNetHelper.renderText(this.note);
+        this.attributedNote = null; // 重置缓存
     }
 
     /**
@@ -218,7 +220,9 @@ public class DataItem implements Serializable {
      */
     public void setSectionvideo(String sectionvideo) {
         this.sectionvideo = sectionvideo;
-        this.attributedSectionVideo = TipsNetHelper.renderText(this.sectionvideo);
+        // 延迟渲染：此处不立即生成 SpannedString，而是在 getAttributedSectionVideo() 中按需生成
+        // this.attributedSectionVideo = TipsNetHelper.renderText(this.sectionvideo);
+        this.attributedSectionVideo = null; // 重置缓存
     }
 
     /**
@@ -243,96 +247,77 @@ public class DataItem implements Serializable {
      */
     public void setText(String str) {
         this.text = str;
-        this.attributedText = TipsNetHelper.renderText(this.text);
+        // 延迟渲染：此处不立即生成 SpannedString，而是在 getAttributedText() 中按需生成
+        // this.attributedText = TipsNetHelper.renderText(this.text);
+        this.attributedText = null; // 重置缓存
     }
 
 
+    /**
+     * 创建当前对象的深拷贝
+     * @return 深拷贝的对象
+     */
     public DataItem getCopy() {
-    DataItem dataItem = new DataItem();
+        DataItem dataItem = new DataItem();
 
-    try {
-        copyIfNotNull(this.text, dataItem::setPureText);
-        copyIfNotNull(this.name, dataItem::setName);
-        copyIfNotNull(this.imageUrl, dataItem::setImageUrl);
-        copyIfNotNull(this.attributedText, attributedText -> dataItem.setAttributedText(new SpannableStringBuilder(attributedText)));
-        copyIfNotNull(this.fangList, fangList -> dataItem.setFangList(new ArrayList<>(fangList)));
-        copyIfNotNull(this.yaoList, yaoList -> dataItem.setYaoList(new ArrayList<>(yaoList)));
-        copyIfNotNull(this.note, dataItem::setNote);
-        copyIfNotNull(this.sectionvideo, dataItem::setSectionvideo);
-        copyIfNotNull(this.attributedNote, attributedNote -> dataItem.setAttributedNote(new SpannableStringBuilder(attributedNote)));
-        copyIfNotNull(this.attributedSectionVideo, attributedSectionVideo -> dataItem.setAttributedSectionVideo(new SpannableStringBuilder(attributedSectionVideo)));
-    } catch (Exception e) {
-        // 记录日志或处理异常
-        System.err.println("Error occurred during deep copy: " + e.getMessage());
-    }
-
-    return dataItem;
-}
-
-private <T> void copyIfNotNull(T value, Consumer<T> setter) {
-    if (value != null) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            setter.accept(value);
+        // 设置纯文本内容
+        if (this.text != null) {
+            dataItem.setPureText(this.text);
         }
+        
+        // 设置名称
+        if (this.name != null) {
+            dataItem.setName(this.name);
+        }
+        
+        // 设置图片URL
+        if (this.imageUrl != null) {
+            dataItem.setImageUrl(this.imageUrl);
+        }
+        
+        // 设置带有富文本格式的内容 (如果有缓存则直接复制，否则复制源文本)
+        if (this.attributedText != null) {
+            dataItem.setAttributedText(new SpannableStringBuilder(this.attributedText));
+        }
+
+        // 深拷贝方列表
+        if (this.fangList != null) {
+            dataItem.setFangList(new ArrayList<>(this.fangList));
+        }
+
+        // 深拷贝药列表
+        if (this.yaoList != null) {
+            dataItem.setYaoList(new ArrayList<>(this.yaoList));
+        }
+
+        // 设置注解
+        if (this.note != null) {
+            dataItem.setNote(this.note);
+        }
+
+        // 设置笔记
+        if (this.sectionvideo != null) {
+            dataItem.setSectionvideo(this.sectionvideo);
+        }
+
+        // 设置带有富文本格式的注解
+        if (this.attributedNote != null) {
+            dataItem.setAttributedNote(new SpannableStringBuilder(this.attributedNote));
+        }
+
+        // 设置带有富文本格式的笔记
+        if (this.attributedSectionVideo != null) {
+            dataItem.setAttributedSectionVideo(new SpannableStringBuilder(this.attributedSectionVideo));
+        }
+        
+        // 复制其他字段
+        dataItem.setID(this.ID);
+        dataItem.setGroupPosition(this.groupPosition);
+        dataItem.setSignatureId(this.signatureId);
+        dataItem.setSignature(this.signature);
+
+        return dataItem;
     }
-}
-
-
-
-//    /**
-//     * 创建当前对象的深拷贝
-//     * @return 深拷贝的对象
-//     */
-//    public DataItem getCopy() {
-//        DataItem dataItem = new DataItem();
-//
-//        // 设置纯文本内容
-//        if (this.text != null) {
-//            dataItem.setPureText(this.text);
-//        }
-//        // 设置图片URL
-//        if (this.imageUrl != null) {
-//            dataItem.setImageUrl(this.imageUrl);
-//        }
-//        // 设置带有富文本格式的内容
-//        if (this.attributedText != null) {
-//            dataItem.setAttributedText(new SpannableStringBuilder(this.attributedText));
-//        }
-//
-//        // 深拷贝方列表
-//        if (this.fangList != null) {
-//            List<String> fangListCopy = new ArrayList<>(this.fangList);
-//            dataItem.setFangList(fangListCopy);
-//        }
-//
-//        // 深拷贝药列表
-//        if (this.yaoList != null) {
-//            List<String> yaoListCopy = new ArrayList<>(this.yaoList);
-//            dataItem.setYaoList(yaoListCopy);
-//        }
-//
-//        // 设置注解
-//        if (this.note != null) {
-//            dataItem.setNote(this.note);
-//        }
-//
-//        // 设置笔记
-//        if (this.sectionvideo != null) {
-//            dataItem.setSectionvideo(this.sectionvideo);
-//        }
-//
-//        // 设置带有富文本格式的注解
-//        if (this.attributedNote != null) {
-//            dataItem.setAttributedNote(new SpannableStringBuilder(this.attributedNote));
-//        }
-//
-//        // 设置带有富文本格式的笔记
-//        if (this.attributedSectionVideo != null) {
-//            dataItem.setAttributedSectionVideo(new SpannableStringBuilder(this.attributedSectionVideo));
-//        }
-//
-//        return dataItem;
-//    }
 
     /**
      * 设置纯文本内容
@@ -340,6 +325,7 @@ private <T> void copyIfNotNull(T value, Consumer<T> setter) {
      */
     private void setPureText(String str) {
         this.text = str;
+        // setPureText 不应该触发渲染或重置缓存，因为它通常用于内部复制
     }
 
     /**
