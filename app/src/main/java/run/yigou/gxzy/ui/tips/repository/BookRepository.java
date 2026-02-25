@@ -368,6 +368,9 @@ public class BookRepository {
                 }
             }
             
+            // ✅ 新增：加载方剂数据（修复搜索功能缺失的方剂数据）
+            loadFangDataToBookData(bookData, bookId);
+            
             bookData.markAsFullyLoaded();
             
         } catch (Exception e) {
@@ -406,6 +409,45 @@ public class BookRepository {
             }
         } catch (Exception e) {
             EasyLog.print("BookRepository", "加载章节内容失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 加载方剂数据到BookData（修复搜索功能缺失的方剂数据）
+     * 
+     * @param bookData 书籍数据
+     * @param bookId 书籍ID
+     */
+    private void loadFangDataToBookData(BookData bookData, int bookId) {
+        try {
+            // 从数据库加载方剂数据
+            ArrayList<run.yigou.gxzy.ui.tips.DataBeans.Fang> fangList = ConvertEntity.getFangDetailList(bookId);
+            
+            EasyLog.print("BookRepository", "加载方剂数据: bookId=" + bookId + 
+                ", fangSize=" + (fangList != null ? fangList.size() : 0));
+            
+            if (fangList != null && !fangList.isEmpty()) {
+                // 创建方剂章节数据
+                List<DataItem> fangItemList = new ArrayList<>(fangList);
+                
+                // 获取书籍信息用于标题
+                TabNavBody bookInfo = getBookInfo(bookId);
+                String bookName = bookInfo != null ? bookInfo.getBookName() : "未知书籍";
+                
+                ChapterData fangChapterData = new ChapterData(
+                    0L, 
+                    bookName + "方", 
+                    0, 
+                    fangItemList
+                );
+                
+                bookData.setFangData(fangChapterData);
+                EasyLog.print("BookRepository", "✅ 方剂数据已设置到BookData: " + fangList.size() + " 个");
+            } else {
+                EasyLog.print("BookRepository", "数据库中无方剂数据: bookId=" + bookId);
+            }
+        } catch (Exception e) {
+            EasyLog.print("BookRepository", "加载方剂数据失败: " + e.getMessage());
         }
     }
 

@@ -23,10 +23,8 @@ import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.ui.tips.DataBeans.MingCiContent;
 import run.yigou.gxzy.ui.tips.DataBeans.Yao;
+import run.yigou.gxzy.ui.tips.DataBeans.Fang;
 import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
-import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
-import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * 应用数据初始化器
@@ -121,7 +119,10 @@ public class AppDataInitializer {
             // 3. 加载药物别名
             loadYaoAliasData(globalData);
             
-            // 4. 加载导航数据
+            // 4. 加载方剂别名（从现有方剂数据中提取）
+            loadFangAliasData(globalData);
+            
+            // 5. 加载导航数据
             loadNavigationData(dbService, globalData);
             
             EasyLog.print(TAG, "Local data loaded successfully");
@@ -176,6 +177,78 @@ public class AppDataInitializer {
             }
             EasyLog.print(TAG, "Loaded " + aliasList.size() + " Yao aliases");
         }
+    }
+    
+    /**
+     * 加载方剂别名数据（从现有方剂数据中提取别名）
+     * 由于当前系统没有专门的方剂别名实体，我们从方剂名称中提取可能的别名
+     */
+    private static void loadFangAliasData(GlobalDataHolder globalData) {
+        try {
+            // 从所有书籍的方剂数据中提取别名信息
+            Map<Integer, TabNavBody> navTabBodyMap = globalData.getNavTabBodyMap();
+            Map<String, String> fangAliasDict = globalData.getFangAliasDict();
+            
+            int aliasCount = 0;
+            for (TabNavBody bookInfo : navTabBodyMap.values()) {
+                int bookId = bookInfo.getBookNo();
+                ArrayList<Fang> fangList = ConvertEntity.getFangDetailList(bookId);
+                
+                if (fangList != null && !fangList.isEmpty()) {
+                    for (Fang fang : fangList) {
+                        String fangName = fang.getName();
+                        if (fangName != null && !fangName.trim().isEmpty()) {
+                            // 添加标准方剂名称
+                            fangAliasDict.put(fangName.trim(), fangName.trim());
+                            aliasCount++;
+                            
+//                            // 提取可能的别名（如去掉"汤"、"散"、"丸"等后缀）
+//                            String baseName = extractFangBaseName(fangName);
+//                            if (!baseName.equals(fangName.trim())) {
+//                                fangAliasDict.put(baseName, fangName.trim());
+//                                aliasCount++;
+//                            }
+//
+//                            // 如果方剂名称包含"加"字，提取加减方的基础方名
+//                            if (fangName.contains("加")) {
+//                                String[] parts = fangName.split("加");
+//                                if (parts.length > 0) {
+//                                    String baseFang = parts[0].trim();
+//                                    fangAliasDict.put(baseFang, fangName.trim());
+//                                    aliasCount++;
+//                                }
+//                            }
+                        }
+                    }
+                }
+            }
+            
+            EasyLog.print(TAG, "Loaded " + aliasCount + " Fang aliases from " + navTabBodyMap.size() + " books");
+            
+        } catch (Exception e) {
+            EasyLog.print(TAG, "Error loading Fang aliases: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 提取方剂基础名称（去掉剂型后缀）
+     */
+    private static String extractFangBaseName(String fangName) {
+        if (fangName == null) return "";
+        
+        String baseName = fangName.trim();
+        
+        // 去掉常见的剂型后缀
+        String[] suffixes = {"汤", "散", "丸", "膏", "丹", "片", "胶囊", "颗粒", "口服液", "注射液"};
+        for (String suffix : suffixes) {
+            if (baseName.endsWith(suffix) && baseName.length() > suffix.length()) {
+                baseName = baseName.substring(0, baseName.length() - suffix.length());
+                break;
+            }
+        }
+        
+        return baseName.trim();
     }
     
     /**
