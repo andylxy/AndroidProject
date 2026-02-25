@@ -3,6 +3,7 @@ package run.yigou.gxzy.ui.activity;
 import android.content.Intent;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -53,41 +54,157 @@ import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 /**
- * 作者:  zhs
- * 时间:  2023-07-13 22:15:51
- * 包名:  run.yigou.gxzy.ui.activity
- * 类名:  BookContentSearchActivity
- * 版本:  1.0
- * 描述:
+ * 书籍内容搜索Activity
+ * 提供书籍内容的搜索功能，支持关键词搜索、历史记录、结果展示等
+ * 
+ * 功能特点：
+ * 1. 实时搜索：支持500ms防抖的实时搜索
+ * 2. 历史记录：保存和显示搜索历史
+ * 3. 结果展示：支持书籍列表和详细内容两种展示方式
+ * 4. 智能过滤：针对伤寒论等特殊书籍提供过滤功能
+ * 
+ * 搜索流程：
+ * 1. 用户输入搜索关键词
+ * 2. 系统在所有书籍内容中进行匹配
+ * 3. 返回包含关键词的书籍列表
+ * 4. 用户点击书籍查看详细匹配结果
+ * 
+ * @author zhs
+ * @since 2023-07-13
+ */
+/**
+ * 书籍内容搜索Activity
+ * 提供书籍内容的搜索功能，支持关键词搜索、历史记录、结果展示等
+ * 
+ * 功能特点：
+ * 1. 实时搜索：支持500ms防抖的实时搜索
+ * 2. 历史记录：保存和显示搜索历史
+ * 3. 结果展示：支持书籍列表和详细内容两种展示方式
+ * 4. 智能过滤：针对伤寒论等特殊书籍提供过滤功能
+ * 
+ * 搜索流程：
+ * 1. 用户输入搜索关键词
+ * 2. 系统在所有书籍内容中进行匹配
+ * 3. 返回包含关键词的书籍列表
+ * 4. 用户点击书籍查看详细匹配结果
+ * 
+ * @author zhs
+ * @since 2023-07-13
  */
 public final class BookContentSearchActivity extends AppActivity implements BaseAdapter.OnItemClickListener {
+
+    /**
+     * 搜索防抖延迟时间（毫秒）
+     */
+    private static final long SEARCH_DEBOUNCE_DELAY_MS = 500L;
+    
+    /**
+     * 伤寒论书籍ID
+     */
+    private static final int SHANGHAN_BOOK_ID = AppConst.ShangHanNo;
+    
+    /**
+     * 伤寒论金匮要略开始索引（从0开始，第9章）
+     */
+    private static final int SHANGHAN_JINKUI_START_INDEX = 8;
+    
+    /**
+     * 伤寒论金匮要略结束索引（第18章）
+     */
+    private static final int SHANGHAN_JINKUI_END_INDEX = 18;
+    
+    /**
+     * 伤寒论主体部分结束索引（第26章）
+     */
+    private static final int SHANGHAN_MAIN_END_INDEX = 26;
+    /**
+     * 搜索输入框
+     */
     private ClearEditText etSearchKey;
+    /**
+     * 搜索确认按钮
+     */
     private Button tvSearchConform;
-    private android.widget.TextView numTips; // 搜索结果数量提示
+    /**
+     * 搜索结果数量提示
+     */
+    private android.widget.TextView numTips;
+    /**
+     * 搜索书籍详情列表
+     */
     private WrapRecyclerView lvSearchBooksList;
+    /**
+     * 搜索历史列表
+     */
     private WrapRecyclerView lvHistoryList;
+    /**
+     * 清空历史记录布局
+     */
     private LinearLayout llClearHistory;
+    /**
+     * 历史记录视图布局
+     */
     private LinearLayout llHistoryView;
+    /**
+     * 搜索历史服务
+     */
     private SearchHistoryService mSearchHistoryService;
+    /**
+     * 书籍导航服务
+     */
     private TabNavBodyService mTabNavBodyService;
+    /**
+     * 搜索历史适配器
+     */
     private SearchHistoryAdapter mSearchHistoryAdapter;
+    /**
+     * 搜索书籍详情适配器
+     */
     private RefactoredSearchAdapter mSearchBookDetailAdapter;
+    /**
+     * 搜索书籍适配器
+     */
     private SearchBookAdapter mSearchBookAdapter;
 
+    /**
+     * 获取当前搜索关键词
+     * @return 搜索关键词
+     */
     public String getSearchKey() {
         return searchKey;
     }
 
-    private String searchKey;//搜索关键字
+    /**
+     * 搜索关键字
+     */
+    private String searchKey;
+    /**
+     * 搜索历史列表
+     */
     private List<SearchHistory> mSearchHistories;
+    /**
+     * 搜索书籍列表视图
+     */
     private WrapRecyclerView mLvSearchBooks;
+    /**
+     * 搜索结果列表
+     */
     private ArrayList<SearchKey> searchKeyTextList = new ArrayList<>();
-    // private Map<Integer, SingletonNetData> singleDataMap; // 移除
+    /**
+     * 布局管理器
+     */
     private LinearLayoutManager layoutManager;
-
+    /**
+     * 主线程Handler，用于防抖搜索
+     */
     private final android.os.Handler mHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    /**
+     * 搜索任务Runnable
+     */
     private Runnable mSearchRunnable;
-
+    /**
+     * 书籍数据仓库
+     */
     private BookRepository mBookRepository;
 
     @Override
@@ -97,26 +214,47 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 
     @Override
     protected void initView() {
-        init();
-        fragmentSetting = AppApplication.application.fragmentSetting;
+        setupViews();
+        setupListeners();
+        setupServices();
     }
 
     @Override
     protected void initData() {
+        setupInitialData();
+        setupAdapters();
+        setupInitialSearch();
+    }
+
+    /**
+     * 设置服务
+     */
+    private void setupServices() {
         mTabNavBodyService = DbService.getInstance().mTabNavBodyService;
         mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
-        initHistoryList();
-
         mBookRepository = new BookRepository();
-        
-        // 预先初始化 Adapter
-        initAdapters();
+    }
 
+    /**
+     * 设置初始数据
+     */
+    private void setupInitialData() {
+        initHistoryList();
         // 默认初始化 TipsNetHelper 上下文，防止空指针（使用伤寒论作为默认值）
         TipsNetHelper.setBookContext(mBookRepository, AppConst.ShangHanNo);
-        
-        viewDataInit();
+    }
 
+    /**
+     * 设置适配器
+     */
+    private void setupAdapters() {
+        initAdapters();
+    }
+
+    /**
+     * 设置初始搜索
+     */
+    private void setupInitialSearch() {
         // 获取传递过来的 Intent
         Intent intent = getIntent();
         // 从 Intent 中提取参数
@@ -129,16 +267,38 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         }
     }
 
+    /**
+     * 初始化适配器
+     */
     private void initAdapters() {
-        // 初始化 mSearchBookAdapter
+        // 初始化搜索书籍适配器
+        setupSearchBookAdapter();
+        
+        // 初始化搜索详情适配器
+        setupSearchDetailAdapter();
+        
+        // 初始化历史记录适配器（如果需要）
+        setupHistoryAdapter();
+    }
+
+    /**
+     * 设置搜索书籍适配器
+     */
+    private void setupSearchBookAdapter() {
         mSearchBookAdapter = new SearchBookAdapter(getActivity());
         mSearchBookAdapter.setOnItemClickListener(this);
-        mLvSearchBooks.setLayoutManager(new LinearLayoutManager(getContext()));
-        mLvSearchBooks.setAdapter(mSearchBookAdapter);
-        mLvSearchBooks.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
+        
+        setupRecyclerView(mLvSearchBooks, mSearchBookAdapter, 
+                         AppConst.CustomDivider_BookList_RecyclerView_Color);
+    }
 
-        // 初始化 mSearchBookDetailAdapter
+    /**
+     * 设置搜索详情适配器
+     */
+    private void setupSearchDetailAdapter() {
         mSearchBookDetailAdapter = new RefactoredSearchAdapter(getActivity());
+        
+        // 设置头部点击监听器
         mSearchBookDetailAdapter.setOnHeaderClickListener((adapter, holder, groupPosition) -> {
             RefactoredSearchAdapter expandableAdapter = (RefactoredSearchAdapter) adapter;
             if (expandableAdapter.isExpand(groupPosition)) {
@@ -148,6 +308,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             }
         });
         
+        // 设置跳转指定项监听器
         mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener((groupPosition, childPosition) -> {
             reListAdapter();
             layoutManager.scrollToPositionWithOffset(groupPosition, 0);
@@ -155,82 +316,137 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         });
 
         layoutManager = new LinearLayoutManager(getContext());
-        lvSearchBooksList.setLayoutManager(layoutManager);
-        lvSearchBooksList.setAdapter(mSearchBookDetailAdapter);
-        lvSearchBooksList.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_Content_RecyclerView_Color, AppConst.CustomDivider_Height));
+        setupRecyclerView(lvSearchBooksList, mSearchBookDetailAdapter, 
+                         AppConst.CustomDivider_Content_RecyclerView_Color);
         lvSearchBooksList.setVisibility(View.GONE);
     }
 
-    private void viewDataInit() {
-        etSearchKey.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(final Editable editable) {
-                //保存搜索关键字
-                searchKey = editable.toString();
-                
-                // 移除之前的搜索任务
-                if (mSearchRunnable != null) {
-                    mHandler.removeCallbacks(mSearchRunnable);
-                }
-
-                if (!StringHelper.isEmpty(searchKey)) {
-                    // 500ms 防抖
-                    mSearchRunnable = () -> search();
-                    mHandler.postDelayed(mSearchRunnable, 500);
-                } else {
-                    handleEmptySearch();
-                }
-            }
-        });
-        etSearchKey.setOnKeyListener((v, keyCode, event) -> {
-            //是否是回车键
-            if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
-                //隐藏键盘
-                ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE))
-                        .hideSoftInputFromWindow(getCurrentFocus()
-                                .getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                //搜索
-                search();
-            }
-            return false;
-        });
-
-        tvSearchConform.setOnClickListener(view -> search());
-        llClearHistory.setOnClickListener(v -> {
-            mSearchHistoryService.clearHistory();
-            mSearchHistories.clear();
-            toast("清空历史记录成功");
-            llClearHistory.setVisibility(View.GONE);
-        });
+    /**
+     * 通用的RecyclerView设置方法
+     */
+    private void setupRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter<?> adapter, int dividerColor) {
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
+        recyclerView.addItemDecoration(new CustomDividerItemDecoration(dividerColor, AppConst.CustomDivider_Height));
     }
 
+    /**
+     * 处理搜索文本变化
+     * @param editable 文本内容
+     */
+    private void handleSearchTextChanged(final Editable editable) {
+        //保存搜索关键字
+        searchKey = editable.toString();
+        
+        // 移除之前的搜索任务
+        cancelPendingSearch();
+
+        if (!StringHelper.isEmpty(searchKey)) {
+            // 500ms 防抖
+            scheduleSearch();
+        } else {
+            handleEmptySearch();
+        }
+    }
+
+    /**
+     * 从键盘执行搜索
+     */
+    private void performSearchFromKeyboard() {
+        //隐藏键盘
+        hideKeyboard();
+        //搜索
+        search();
+    }
+
+    /**
+     * 隐藏软键盘
+     */
+    private void hideKeyboard() {
+        View currentFocus = getCurrentFocus();
+        if (currentFocus != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        }
+    }
+
+    /**
+     * 取消待执行的搜索任务
+     */
+    private void cancelPendingSearch() {
+        if (mSearchRunnable != null) {
+            mHandler.removeCallbacks(mSearchRunnable);
+            mSearchRunnable = null;
+        }
+    }
+
+    /**
+     * 调度搜索任务
+     */
+    private void scheduleSearch() {
+        mSearchRunnable = this::search;
+        mHandler.postDelayed(mSearchRunnable, SEARCH_DEBOUNCE_DELAY_MS);
+    }
+
+    /**
+     * 清空搜索历史
+     */
+    private void clearSearchHistory() {
+        mSearchHistoryService.clearHistory();
+        mSearchHistories.clear();
+        toast("清空历史记录成功");
+        llClearHistory.setVisibility(View.GONE);
+    }
+
+    /**
+     * 处理空搜索
+     */
     private void handleEmptySearch() {
-        llClearHistory.setVisibility(View.VISIBLE);
-        llHistoryView.setVisibility(View.VISIBLE);
+        // 显示历史记录
+        showHistoryViews();
+        
+        // 清空搜索结果
+        clearSearchResults();
+        
+        // 重置适配器状态
+        resetAdaptersState();
+        
+        // 清空结果数量提示
+        clearResultCount();
+    }
+
+    /**
+     * 清空搜索结果
+     */
+    private void clearSearchResults() {
         searchKeyTextList.clear();
-        lvSearchBooksList.setVisibility(View.GONE);
-        mLvSearchBooks.setVisibility(View.GONE);
+        setSearchResultVisibility(false);
+    }
+
+    /**
+     * 重置适配器状态
+     */
+    private void resetAdaptersState() {
         if (mSearchBookDetailAdapter != null) {
             mSearchBookDetailAdapter.setSearch(false);
         }
-        // 清空搜索结果数量提示
+    }
+
+    /**
+     * 清空结果数量提示
+     */
+    private void clearResultCount() {
         if (numTips != null) {
             numTips.setText("");
         }
     }
 
-    private void init() {
+    /**
+     * 初始化视图组件
+     */
+    private void setupViews() {
         // 使用 include_search_bar 中的 ID
         etSearchKey = findViewById(R.id.searchEditText);
         tvSearchConform = findViewById(R.id.tips_btn_search);
@@ -245,13 +461,58 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     }
 
     /**
+     * 设置监听器
+     */
+    private void setupListeners() {
+        setupSearchListeners();
+        setupHistoryListeners();
+    }
+
+    /**
+     * 设置搜索相关监听器
+     */
+    private void setupSearchListeners() {
+        etSearchKey.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // 不需要实现
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // 不需要实现
+            }
+
+            @Override
+            public void afterTextChanged(final Editable editable) {
+                handleSearchTextChanged(editable);
+            }
+        });
+
+        etSearchKey.setOnKeyListener((v, keyCode, event) -> {
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
+                performSearchFromKeyboard();
+                return true;
+            }
+            return false;
+        });
+
+        tvSearchConform.setOnClickListener(view -> search());
+    }
+
+    /**
+     * 设置历史记录监听器
+     */
+    private void setupHistoryListeners() {
+        llClearHistory.setOnClickListener(v -> clearSearchHistory());
+    }
+
+    /**
      * 搜索
      */
     private void search() {
-
         if (!StringHelper.isEmpty(searchKey)) {
             llHistoryView.setVisibility(View.GONE);
-            //  setTitle("关键词: " + searchKey);
             // 放到后台执行
             startSearch(searchKey);
         }
@@ -262,21 +523,54 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      */
     private void initHistoryList() {
         mSearchHistories = mSearchHistoryService.findAllSearchHistory();
-        if (mSearchHistories == null || mSearchHistories.isEmpty()) {
-            llHistoryView.setVisibility(View.GONE);
-            llClearHistory.setVisibility(View.GONE);
+        
+        if (isHistoryEmpty()) {
+            hideHistoryViews();
         } else {
-            mSearchHistoryAdapter = new SearchHistoryAdapter(getActivity());
-            mSearchHistoryAdapter.setData(mSearchHistories);
-            mSearchHistoryAdapter.setOnItemClickListener(this);
-            lvHistoryList.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
-            lvHistoryList.setAdapter(mSearchHistoryAdapter);
-            llClearHistory.setVisibility(View.VISIBLE);
-            llHistoryView.setVisibility(View.VISIBLE);
+            setupHistoryAdapter();
+            showHistoryViews();
         }
     }
 
+    /**
+     * 检查历史记录是否为空
+     */
+    private boolean isHistoryEmpty() {
+        return mSearchHistories == null || mSearchHistories.isEmpty();
+    }
 
+    /**
+     * 隐藏历史记录视图
+     */
+    private void hideHistoryViews() {
+        llHistoryView.setVisibility(View.GONE);
+        llClearHistory.setVisibility(View.GONE);
+    }
+
+    /**
+     * 设置历史记录适配器
+     */
+    private void setupHistoryAdapter() {
+        mSearchHistoryAdapter = new SearchHistoryAdapter(getActivity());
+        mSearchHistoryAdapter.setData(mSearchHistories);
+        mSearchHistoryAdapter.setOnItemClickListener(this);
+        
+        setupRecyclerView(lvHistoryList, mSearchHistoryAdapter, 
+                         AppConst.CustomDivider_BookList_RecyclerView_Color);
+    }
+
+    /**
+     * 显示历史记录视图
+     */
+    private void showHistoryViews() {
+        llClearHistory.setVisibility(View.VISIBLE);
+        llHistoryView.setVisibility(View.VISIBLE);
+    }
+
+
+    /**
+     * 片段设置
+     */
     private FragmentSetting fragmentSetting;
 
     /**
@@ -285,127 +579,227 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     private void initSearchList() {
         if (isFinishing() || isDestroyed()) return;
 
-        // 更新 mSearchBookAdapter 数据
+        // 更新搜索书籍适配器数据
+        updateSearchBookAdapter();
+        
+        // 设置搜索结果视图可见性
+        setSearchResultVisibility(true);
+        
+        // 更新搜索结果数量提示
+        updateSearchResultCount();
+    }
+
+    /**
+     * 更新搜索书籍适配器数据
+     */
+    private void updateSearchBookAdapter() {
         if (mSearchBookAdapter != null) {
             mSearchBookAdapter.setData(searchKeyTextList);
         }
-        
-        mLvSearchBooks.setVisibility(View.VISIBLE);
-        lvSearchBooksList.setVisibility(View.GONE);
-        
-        // 更新搜索结果数量提示
-        if (numTips != null) {
-            int totalResults = 0;
-            for (SearchKey key : searchKeyTextList) {
-                totalResults += key.getSearchResTotalNum();
-            }
-            if (totalResults > 0) {
-                numTips.setText(String.format("%d个结果", totalResults));
-            } else {
-                numTips.setText("无结果");
-            }
+    }
+
+    /**
+     * 设置搜索结果视图可见性
+     * @param showBookList 是否显示书籍列表
+     */
+    private void setSearchResultVisibility(boolean showBookList) {
+        mLvSearchBooks.setVisibility(showBookList ? View.VISIBLE : View.GONE);
+        lvSearchBooksList.setVisibility(showBookList ? View.GONE : View.VISIBLE);
+    }
+
+    /**
+     * 更新搜索结果数量提示
+     */
+    private void updateSearchResultCount() {
+        if (numTips == null) {
+            return;
         }
+        
+        int totalResults = calculateTotalResults();
+        String resultText = totalResults > 0 ? String.format("%d个结果", totalResults) : "无结果";
+        numTips.setText(resultText);
+    }
+
+    /**
+     * 计算总结果数
+     */
+    private int calculateTotalResults() {
+        int totalResults = 0;
+        for (SearchKey key : searchKeyTextList) {
+            totalResults += key.getSearchResTotalNum();
+        }
+        return totalResults;
     }
 
     // 移除 extHandleShangHanData: 逻辑移至搜索内部
 
     /**
      * 开始搜索 (异步)
+     * 优化了异常处理和性能
+     * 
+     * @param keyword 搜索关键词
      */
     private void startSearch(String keyword) {
-        if (keyword == null || keyword.isEmpty()) {
+        if (StringHelper.isEmpty(keyword)) {
             return;
         }
 
+        // 保存搜索历史
+        saveSearchHistory(keyword);
+
         ThreadUtil.runInBackground(() -> {
-            ArrayList<SearchKey> tempResults = new ArrayList<>();
-            
-            // 1. 获取所有书籍信息
-            Map<Integer, TabNavBody> bookMap = GlobalDataHolder.getInstance().getNavTabBodyMap();
-            
-            // 2. 获取全局别名字典
-            GlobalDataHolder globalData = GlobalDataHolder.getInstance();
-            Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
-            Map<String, String> fangAliasDict = globalData.getFangAliasDict();
-            
-            // 3. 遍历书籍
-            for (Map.Entry<Integer, TabNavBody> entry : bookMap.entrySet()) {
-                int bookId = entry.getKey();
-                TabNavBody bookInfo = entry.getValue();
+            try {
+                ArrayList<SearchKey> tempResults = performSearchInBackground(keyword);
                 
-                try {
-                    // 4. 获取书籍内容 (直接从数据库读取，不污染BookDataManager缓存)
-                    List<HH2SectionData> contentList = ConvertEntity.getBookChapterDetailList(bookId);
+                // 更新UI
+                ThreadUtil.runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    // 确认关键词未变（处理并发结果乱序）
+                    if (!keyword.equals(etSearchKey.getText().toString())) return;
                     
-                    if (contentList == null || contentList.isEmpty()) {
-                        continue;
+                    updateSearchResults(tempResults);
+                });
+            } catch (Exception e) {
+                android.util.Log.e("BCSearchActivity", "Search failed: " + e.getMessage(), e);
+                ThreadUtil.runOnUiThread(() -> {
+                    if (!isFinishing() && !isDestroyed()) {
+                        toast("搜索失败，请重试");
+                        handleEmptySearch();
                     }
-                    
-                    // 5. 伤寒论特殊过滤逻辑
-                    if (bookId == AppConst.ShangHanNo) {
-                         contentList = filterShangHanData(contentList);
-                    }
-                    
-                    // 6. 执行搜索
-                    SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(keyword));
-                    ArrayList<HH2SectionData> searchResults = TipsNetHelper.getSearchHh2SectionData(
-                            searchKeyEntity, 
-                            contentList, 
-                            yaoAliasDict, 
-                            fangAliasDict
-                    );
-                    
-                    if (!searchResults.isEmpty()) {
-                        tempResults.add(new SearchKey(
-                            keyword, 
-                            searchResults.size(), 
-                            bookInfo.getBookName(), 
-                            bookId, 
-                            searchResults
-                        ));
-                    }
-                    
-                } catch (Exception e) {
-                    EasyLog.print("Search error for book " + bookId + ": " + e.getMessage());
-                }
+                });
+            }
+        });
+    }
+
+    /**
+     * 在后台执行搜索
+     */
+    private ArrayList<SearchKey> performSearchInBackground(String keyword) {
+        ArrayList<SearchKey> tempResults = new ArrayList<>();
+        
+        // 获取所有书籍信息
+        Map<Integer, TabNavBody> bookMap = GlobalDataHolder.getInstance().getNavTabBodyMap();
+        if (bookMap == null || bookMap.isEmpty()) {
+            return tempResults;
+        }
+        
+        // 获取全局别名字典
+        GlobalDataHolder globalData = GlobalDataHolder.getInstance();
+        Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
+        Map<String, String> fangAliasDict = globalData.getFangAliasDict();
+        
+        // 遍历书籍进行搜索
+        for (Map.Entry<Integer, TabNavBody> entry : bookMap.entrySet()) {
+            int bookId = entry.getKey();
+            TabNavBody bookInfo = entry.getValue();
+            
+            if (bookInfo == null) {
+                continue;
             }
             
-            // 7. 更新UI
-            ThreadUtil.runOnUiThread(() -> {
-                if (isFinishing() || isDestroyed()) return;
-                // 确认关键词未变（处理并发结果乱序）
-                if (!keyword.equals(etSearchKey.getText().toString())) return;
+            try {
+                SearchKey searchResult = searchInBook(bookId, bookInfo, keyword, yaoAliasDict, fangAliasDict);
+                if (searchResult != null) {
+                    tempResults.add(searchResult);
+                }
+            } catch (Exception e) {
+                android.util.Log.e("BCSearchActivity", "Search error for book " + bookId + ": " + e.getMessage(), e);
+            }
+        }
+        
+        return tempResults;
+    }
 
-                searchKeyTextList.clear();
-                searchKeyTextList.addAll(tempResults);
-                initSearchList();
-            });
-        });
+    /**
+     * 在单本书籍中搜索
+     */
+    private SearchKey searchInBook(int bookId, TabNavBody bookInfo, String keyword, 
+                                  Map<String, String> yaoAliasDict, Map<String, String> fangAliasDict) {
+        // 获取书籍内容 (直接从数据库读取，不污染BookDataManager缓存)
+        List<HH2SectionData> contentList = ConvertEntity.getBookChapterDetailList(bookId);
+        
+        if (contentList == null || contentList.isEmpty()) {
+            return null;
+        }
+        
+        // 伤寒论特殊过滤逻辑
+        if (bookId == SHANGHAN_BOOK_ID) {
+             contentList = filterShangHanData(contentList);
+        }
+        
+        // 执行搜索
+        SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(keyword));
+        ArrayList<HH2SectionData> searchResults = TipsNetHelper.getSearchHh2SectionData(
+                searchKeyEntity, 
+                contentList, 
+                yaoAliasDict, 
+                fangAliasDict
+        );
+        
+        if (searchResults.isEmpty()) {
+            return null;
+        }
+        
+        return new SearchKey(
+            keyword, 
+            searchResults.size(), 
+            bookInfo.getBookName(), 
+            bookId, 
+            searchResults
+        );
+    }
+
+    /**
+     * 更新搜索结果
+     */
+    private void updateSearchResults(ArrayList<SearchKey> results) {
+        searchKeyTextList.clear();
+        searchKeyTextList.addAll(results);
+        initSearchList();
+    }
+
+    /**
+     * 保存搜索历史
+     */
+    private void saveSearchHistory(String keyword) {
+        try {
+            if (mSearchHistoryService != null) {
+                mSearchHistoryService.addOrUpadteHistory(keyword);
+            }
+        } catch (Exception e) {
+            android.util.Log.e("BCSearchActivity", "Failed to save search history: " + e.getMessage(), e);
+        }
     }
     
     /**
      * 伤寒论特殊过滤逻辑
+     * 根据设置过滤伤寒论的不同部分
      */
     private ArrayList<HH2SectionData> filterShangHanData(List<HH2SectionData> contentList) {
         if (contentList == null || contentList.isEmpty()) {
             return new ArrayList<>();
         }
+        
         int size = contentList.size();
-
         int start = 0;
         int end = size;
 
+        // 根据设置确定过滤范围
         if (!fragmentSetting.isSong_JinKui()) {
             if (!fragmentSetting.isSong_ShangHan()) {
-                start = 8;
-                end = Math.min(18, size);
+                // 只显示金匮要略部分（第9-18章）
+                start = SHANGHAN_JINKUI_START_INDEX;
+                end = Math.min(SHANGHAN_JINKUI_END_INDEX, size);
             } else {
-                end = Math.min(26, size);
+                // 只显示伤寒论部分（第1-26章）
+                end = Math.min(SHANGHAN_MAIN_END_INDEX, size);
             }
         } else {
             if (!fragmentSetting.isSong_ShangHan()) {
-                start = 8;
+                // 从金匮要略开始显示
+                start = SHANGHAN_JINKUI_START_INDEX;
             }
+            // 否则显示全部内容
         }
 
         if (start < size) {
@@ -417,36 +811,81 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 
     @Override
     public void onBackPressed() {
-        if (!StringHelper.isEmpty(searchKey)) {
-            if (lvSearchBooksList.getVisibility() == View.GONE)
-                super.onBackPressed();
-            mLvSearchBooks.setVisibility(View.VISIBLE);
-            lvSearchBooksList.setVisibility(View.GONE);
-            return;
+        try {
+            if (!StringHelper.isEmpty(searchKey)) {
+                // 如果有搜索结果，先返回搜索结果列表
+                if (lvSearchBooksList.getVisibility() == View.GONE) {
+                    super.onBackPressed();
+                } else {
+                    // 返回书籍列表
+                    mLvSearchBooks.setVisibility(View.VISIBLE);
+                    lvSearchBooksList.setVisibility(View.GONE);
+                }
+                return;
+            }
+            super.onBackPressed();
+        } catch (Exception e) {
+            android.util.Log.e("BCSearchActivity", "Error in onBackPressed", e);
+            // 降级处理：直接调用父类方法
+            super.onBackPressed();
         }
-        super.onBackPressed();
     }
 
+    /**
+     * 当前搜索的Key对象
+     */
     private SearchKey currentSearchKey;
 
+    /**
+     * 重新设置适配器数据
+     * 用于刷新搜索结果详情列表
+     */
     private void reListAdapter() {
-        // 直接从 SearchKey 中获取 filteredData, 不再依赖 singleDataMap
+        if (currentSearchKey == null) {
+            return;
+        }
+        
+        // 直接从 SearchKey 中获取 filteredData
         List<HH2SectionData> resultList = currentSearchKey.getFilteredData();
-        // ArrayList<HH2SectionData> singletonNetData = Objects.requireNonNull(singleDataMap.get(currentSearchKey.getBookNo()), "当前搜索对象:" + currentSearchKey.getBookName()).getContent();
-        mSearchBookDetailAdapter.setmGroups(GroupModel.getExpandableGroups((ArrayList<HH2SectionData>) resultList, false));
-
+        if (resultList == null || resultList.isEmpty()) {
+            return;
+        }
+        
+        ArrayList<ExpandableGroupEntity> groups = GroupModel.getExpandableGroups(
+            (ArrayList<HH2SectionData>) resultList, false);
+        mSearchBookDetailAdapter.setmGroups(groups);
         mSearchBookDetailAdapter.notifyDataChanged();
-
     }
 
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
+        try {
+            if (recyclerView.getId() == R.id.lv_history_list) {
+                handleHistoryItemClick(position);
+            } else if (recyclerView.getId() == R.id.lv_search_books) {
+                handleSearchBookItemClick(position);
+            }
+        } catch (Exception e) {
+            android.util.Log.e("BCSearchActivity", "Error in onItemClick", e);
+            toast("操作失败，请重试");
+        }
+    }
 
-        if (recyclerView.getId() == R.id.lv_history_list) {
+    /**
+     * 处理历史记录项点击
+     */
+    private void handleHistoryItemClick(int position) {
+        if (position >= 0 && position < mSearchHistories.size()) {
             etSearchKey.setText(mSearchHistories.get(position).getContent());
             search();
         }
-        if (recyclerView.getId() == R.id.lv_search_books) {
+    }
+
+    /**
+     * 处理搜索书籍项点击
+     */
+    private void handleSearchBookItemClick(int position) {
+        if (position >= 0 && position < searchKeyTextList.size()) {
             lvSearchBooksList.setVisibility(View.VISIBLE);
             mLvSearchBooks.setVisibility(View.GONE);
             currentSearchKey = searchKeyTextList.get(position);
@@ -457,37 +896,67 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             }
             TipsNetHelper.setBookContext(mBookRepository, currentSearchKey.getBookNo());
 
-            ArrayList<ExpandableGroupEntity> sectionData = GroupModel.getExpandableGroups(searchKeyTextList.get(position).getFilteredData(), false);
+            ArrayList<ExpandableGroupEntity> sectionData = GroupModel.getExpandableGroups(
+                searchKeyTextList.get(position).getFilteredData(), false);
             mSearchBookDetailAdapter.setmGroups(sectionData);
             mSearchBookDetailAdapter.notifyDataChanged();
-
         }
     }
 
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-
-        // 移除 Handler 消息，防止内存泄漏
-        if (mHandler != null && mSearchRunnable != null) {
-            mHandler.removeCallbacks(mSearchRunnable);
+        try {
+            // 第一步：取消待执行的搜索任务
+            cancelPendingSearch();
+            
+            // 第二步：清理适配器监听器
+            cleanupAdapterListeners();
+            
+            // 第三步：清理搜索相关资源
+            cleanupSearchResources();
+            
+        } catch (Exception e) {
+            android.util.Log.e("BCSearchActivity", "Error during onDestroy cleanup", e);
+        } finally {
+            // 最后：调用父类销毁方法
+            super.onDestroy();
         }
+    }
 
-        // 空指针检查
+    /**
+     * 清理适配器监听器
+     */
+    private void cleanupAdapterListeners() {
         if (mSearchBookDetailAdapter != null) {
             mSearchBookDetailAdapter.setSearch(false);
             mSearchBookDetailAdapter.setOnJumpSpecifiedItemListener(null);
         }
+        
+        if (mSearchBookAdapter != null) {
+            mSearchBookAdapter.setOnItemClickListener(null);
+        }
+        
+        if (mSearchHistoryAdapter != null) {
+            mSearchHistoryAdapter.setOnItemClickListener(null);
+        }
+    }
 
-
-        // 移除 singleDataMap 清理逻辑，因为已经没有该字段了
-//        if (singleDataMap != null && singleDataMap.containsKey(AppConst.ShangHanNo)) {
-//            SingletonNetData singleData = singleDataMap.get(AppConst.ShangHanNo);
-//            if (singleData != null) {
-//                singleData.setOnContentUpdateListener(null);
-//            }
-//        }
-
+    /**
+     * 清理搜索相关资源
+     */
+    private void cleanupSearchResources() {
+        // 清理搜索结果
+        if (searchKeyTextList != null) {
+            searchKeyTextList.clear();
+        }
+        
+        if (mSearchHistories != null) {
+            mSearchHistories.clear();
+        }
+        
+        // 清理当前搜索关键字
+        searchKey = null;
+        currentSearchKey = null;
     }
 }
