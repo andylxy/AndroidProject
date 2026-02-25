@@ -96,9 +96,12 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
 //        EasyLog.print("RC4加密：" + encryptedData);
 
         int index = 1;
-        // HomeActivity.start(getContext());
-        HomeActivity.mHomeActivity.switchFragment(index);
-        HomeActivity.mHomeActivity.onNavigationItemSelected(index);
+        // 使用新的方式切换Fragment
+        if (getActivity() instanceof HomeActivity) {
+            HomeActivity homeActivity = (HomeActivity) getActivity();
+            homeActivity.switchFragment(index);
+            homeActivity.onNavigationItemSelected(index);
+        }
     }
 
     @Override

@@ -28,34 +28,157 @@ import run.yigou.gxzy.ui.fragment.HomeFragment;
 import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
 
 /**
- * author : Android 轮子哥
- * github : https://github.com/getActivity/AndroidProject
- * time   : 2018/10/18
- * desc   : 首页界面
+ * 首页Activity
+ * 应用程序的主界面，采用底部导航+ViewPager架构
+ * 包含四个主要功能模块：书架、发现、AI聊天（登录用户）、我的
+ * 
+ * 功能特点：
+ * 1. 底部导航栏动态显示（根据登录状态显示AI聊天）
+ * 2. ViewPager页面切换与导航栏同步
+ * 3. 双击返回键退出应用
+ * 4. 登录状态变化时动态更新界面
+ * 
+ * 导航结构：
+ * - 书架（BookCollectCaseFragment）：收藏的书籍
+ * - 发现（HomeFragment）：推荐内容和搜索
+ * - AI聊天（AiMsgFragment）：仅登录用户显示，AI对话功能
+ * - 我的（MyFragmentPersonal）：个人中心和设置
+ * 
+ * @author Android 轮子哥
+ * @github https://github.com/getActivity/AndroidProject
+ * @since 2018/10/18
  */
 public final class HomeActivity extends AppActivity
         implements NavigationAdapter.OnNavigationListener {
 
+    /**
+     * Intent参数：Fragment索引
+     */
     private static final String INTENT_KEY_IN_FRAGMENT_INDEX = "fragmentIndex";
+    /**
+     * Intent参数：Fragment类名
+     */
     private static final String INTENT_KEY_IN_FRAGMENT_CLASS = "fragmentClass";
-    public static HomeActivity mHomeActivity;
+    
+    // Fragment索引常量
+    /**
+     * Fragment索引：书架
+     */
+    private static final int FRAGMENT_INDEX_BOOKSHELF = 0;
+    /**
+     * Fragment索引：发现
+     */
+    private static final int FRAGMENT_INDEX_FOUND = 1;
+    /**
+     * Fragment索引：AI聊天
+     */
+    private static final int FRAGMENT_INDEX_AI_CHAT = 2;
+    /**
+     * Fragment索引：我的
+     */
+    private static final int FRAGMENT_INDEX_PROFILE = 3;
+    
+    // 导航索引常量
+    /**
+     * 导航索引：书架
+     */
+    private static final int NAVIGATION_INDEX_BOOKSHELF = 0;
+    /**
+     * 导航索引：发现
+     */
+    private static final int NAVIGATION_INDEX_FOUND = 1;
+    /**
+     * 导航索引：AI聊天
+     */
+    private static final int NAVIGATION_INDEX_AI_CHAT = 2;
+    /**
+     * 导航索引：我的
+     */
+    private static final int NAVIGATION_INDEX_PROFILE = 3;
+    
+    // Fragment数量常量
+    /**
+     * 未登录时的Fragment数量
+     */
+    private static final int FRAGMENT_COUNT_WITHOUT_AI = 3;
+    /**
+     * 登录后的Fragment数量
+     */
+    private static final int FRAGMENT_COUNT_WITH_AI = 4;
+    
+    // 登录状态时的Fragment索引常量
+    /**
+     * 登录状态下我的页面索引（有AI聊天）
+     */
+    private static final int PROFILE_FRAGMENT_INDEX_WITH_AI = 3;
+    /**
+     * 未登录状态下我的页面索引（无AI聊天）
+     */
+    private static final int PROFILE_FRAGMENT_INDEX_WITHOUT_AI = 2;
+    
+    // 其他常用索引常量
+    /**
+     * AI聊天Fragment索引
+     */
+    private static final int AI_CHAT_FRAGMENT_INDEX = 2;
+    /**
+     * 发现Fragment索引
+     */
+    private static final int FOUND_FRAGMENT_INDEX = 1;
+    
+    // 延迟时间常量（毫秒）
+    /**
+     * 退出延迟时间
+     */
+    private static final int EXIT_DELAY_MS = 300;
+    /**
+     * 双击间隔时间
+     */
+    private static final int DOUBLE_CLICK_INTERVAL_MS = 1000;
+    
+    /**
+     * ViewPager，用于管理Fragment页面切换
+     */
     private ViewPager mViewPager;
+    /**
+     * 底部导航RecyclerView
+     */
     private RecyclerView mNavigationView;
 
+    /**
+     * 导航适配器
+     */
     private NavigationAdapter mNavigationAdapter;
+    /**
+     * Fragment页面适配器
+     */
     private FragmentPagerAdapter<AppFragment<?>> mPagerAdapter;
 
+    /**
+     * 启动首页Activity，默认显示发现页面
+     * 
+     * @param context 上下文
+     */
     public static void start(Context context) {
         start(context, HomeFragment.class);
     }
 
+    /**
+     * 启动首页Activity，并指定初始显示的Fragment
+     * 
+     * @param context 上下文
+     * @param fragmentClass 要显示的Fragment类
+     */
     @Log
     public static void start(Context context, Class<? extends AppFragment<?>> fragmentClass) {
         Intent intent = new Intent(context, HomeActivity.class);
         intent.putExtra(INTENT_KEY_IN_FRAGMENT_CLASS, fragmentClass);
+        
+        // 如果context不是Activity，需要添加NEW_TASK标志
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
+        
         context.startActivity(intent);
     }
 
@@ -67,29 +190,90 @@ public final class HomeActivity extends AppActivity
 
     @Override
     protected void initView() {
+        setupViews();
+        setupNavigation();
+        setupViewPager();
+    }
+
+    /**
+     * 初始化视图组件
+     */
+    private void setupViews() {
         mViewPager = findViewById(R.id.vp_home_pager);
         mNavigationView = findViewById(R.id.rv_home_navigation);
+    }
 
+    /**
+     * 设置导航菜单
+     */
+    private void setupNavigation() {
         mNavigationAdapter = new NavigationAdapter(this);
-        // 导航顺序：0-书架, 1-发现, 2-AI聊天(仅登录), 3-我的
-        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_index),
-                ContextCompat.getDrawable(this, R.drawable.home_home_selector)));
-
-        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_found),
-                ContextCompat.getDrawable(this, R.drawable.home_found_selector)));
-
-        // 仅登录用户显示AI聊天
-        if (AppApplication.application.isLogin) {
-            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_aimsg),
-                    ContextCompat.getDrawable(this, R.drawable.ruler_selector_msg)));
-        }
-
-        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_me),
-                ContextCompat.getDrawable(this, R.drawable.home_me_selector)));
+        
+        // 添加基础导航项
+        addBaseNavigationItems();
+        
+        // 添加AI聊天导航项（仅登录用户）
+        addAiChatNavigationItemIfNeeded();
+        
+        // 添加我的导航项
+        addProfileNavigationItem();
+        
+        // 设置导航监听器
         mNavigationAdapter.setOnNavigationListener(this);
         mNavigationView.setAdapter(mNavigationAdapter);
     }
+
+    /**
+     * 添加基础导航项
+     */
+    private void addBaseNavigationItems() {
+        // 导航顺序：0-书架, 1-发现
+        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
+                getString(R.string.home_nav_index),
+                ContextCompat.getDrawable(this, R.drawable.home_home_selector)
+        ));
+        
+        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
+                getString(R.string.home_nav_found),
+                ContextCompat.getDrawable(this, R.drawable.home_found_selector)
+        ));
+    }
+
+    /**
+     * 添加AI聊天导航项（仅登录用户）
+     */
+    private void addAiChatNavigationItemIfNeeded() {
+        if (AppApplication.application.isLogin) {
+            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
+                    getString(R.string.tips_nav_aimsg),
+                    ContextCompat.getDrawable(this, R.drawable.ruler_selector_msg)
+            ));
+        }
+    }
+
+    /**
+     * 添加我的导航项
+     */
+    private void addProfileNavigationItem() {
+        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
+                getString(R.string.home_nav_me),
+                ContextCompat.getDrawable(this, R.drawable.home_me_selector)
+        ));
+    }
+
+    /**
+     * 设置ViewPager
+     */
+    private void setupViewPager() {
+        // ViewPager设置将在initData中进行
+    }
+    /**
+     * 发现页面Fragment
+     */
     HomeFragment homeFragment;
+    /**
+     * Fragment是否已经初始化
+     */
     private boolean isFragmentsInitialized = false;
 
     @Override
@@ -100,19 +284,61 @@ public final class HomeActivity extends AppActivity
             return;
         }
 
+        setupFragments();
+        setupPageChangeListener();
+        registerEventBus();
+        handleInitialIntent();
+        isFragmentsInitialized = true;
+    }
+
+    /**
+     * 设置Fragment适配器
+     */
+    private void setupFragments() {
         homeFragment = HomeFragment.newInstance();
         mPagerAdapter = new FragmentPagerAdapter<>(this);
-        // Fragment顺序：0-书架, 1-发现, 2-AI聊天(仅登录), 3-我的
-        mPagerAdapter.addFragment(BookCollectCaseFragment.newInstance()); // 0-书架
-        mPagerAdapter.addFragment(homeFragment);                          // 1-发现
-        // 仅登录用户显示AI聊天
-        if (AppApplication.application.isLogin) {
-            mPagerAdapter.addFragment(AiMsgFragment.newInstance());       // 2-AI聊天
-        }
-        mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());      // 3-我的(登录) / 2-我的(未登录)
-        mViewPager.setAdapter(mPagerAdapter);
         
-        // 添加页面改变监听，同步更新导航选中状态
+        // 添加基础Fragment
+        addBaseFragments();
+        
+        // 添加AI聊天Fragment（仅登录用户）
+        addAiChatFragmentIfNeeded();
+        
+        // 添加个人中心Fragment
+        addProfileFragment();
+        
+        mViewPager.setAdapter(mPagerAdapter);
+    }
+
+    /**
+     * 添加基础Fragment
+     */
+    private void addBaseFragments() {
+        // Fragment顺序：0-书架, 1-发现
+        mPagerAdapter.addFragment(BookCollectCaseFragment.newInstance());
+        mPagerAdapter.addFragment(homeFragment);
+    }
+
+    /**
+     * 添加AI聊天Fragment（仅登录用户）
+     */
+    private void addAiChatFragmentIfNeeded() {
+        if (AppApplication.application.isLogin) {
+            mPagerAdapter.addFragment(AiMsgFragment.newInstance());
+        }
+    }
+
+    /**
+     * 添加个人中心Fragment
+     */
+    private void addProfileFragment() {
+        mPagerAdapter.addFragment(MyFragmentPersonal.newInstance());
+    }
+
+    /**
+     * 设置页面切换监听
+     */
+    private void setupPageChangeListener() {
         mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
@@ -123,17 +349,26 @@ public final class HomeActivity extends AppActivity
                 }
             }
         });
-        
-        mHomeActivity = this;
+    }
 
+    /**
+     * 注册事件总线
+     */
+    private void registerEventBus() {
         XEventBus.getDefault().register(HomeActivity.this);
+    }
+
+    /**
+     * 处理初始意图
+     */
+    private void handleInitialIntent() {
         onNewIntent(getIntent());
-        isFragmentsInitialized = true;
     }
 
     /**
      * 刷新Fragment列表
      * 当登录状态变化时，动态添加或移除AI聊天Fragment
+     * 优化了性能，减少了不必要的adapter通知
      */
     private void refreshFragments() {
         if (mPagerAdapter == null || mViewPager == null) {
@@ -142,112 +377,158 @@ public final class HomeActivity extends AppActivity
 
         int currentFragmentCount = mPagerAdapter.getCount();
         boolean shouldShowAiChat = AppApplication.application.isLogin;
-        boolean hasAiChat = currentFragmentCount == 4; // 4个Fragment表示包含AI聊天
+        boolean hasAiChat = currentFragmentCount == FRAGMENT_COUNT_WITH_AI;
 
+        // 只有在状态真正需要改变时才执行操作
         if (shouldShowAiChat && !hasAiChat) {
-            // 保存当前页面位置
-            int currentPosition = mViewPager.getCurrentItem();
-            
-            // 登录后添加AI聊天Fragment（在第3个位置，索引为2）
-            mPagerAdapter.addFragment(AiMsgFragment.newInstance(), null, 2);
-            mPagerAdapter.notifyDataSetChanged();
-            
-            // 恢复页面位置（如果当前在"我的"页面，需要调整到新索引）
-            if (currentPosition == 2) {
-                // 原来的"我的"现在在索引3
-                mViewPager.setCurrentItem(3, false);
-            } else if (currentPosition < 2) {
-                // 书架和发现位置不变
-                mViewPager.setCurrentItem(currentPosition, false);
-            }
+            addAiChatFragment();
         } else if (!shouldShowAiChat && hasAiChat) {
-            // 保存当前页面位置
-            int currentPosition = mViewPager.getCurrentItem();
-            
-            // 登出后移除AI聊天Fragment（索引为2）
-            mPagerAdapter.removeFragment(2);
-            mPagerAdapter.notifyDataSetChanged();
-            
-            // 恢复页面位置（如果当前在AI聊天或我的页面，需要调整）
-            if (currentPosition == 2) {
-                // 如果在AI聊天页面，跳转到发现
-                mViewPager.setCurrentItem(1, false);
-            } else if (currentPosition == 3) {
-                // 如果在"我的"页面，调整到新索引2
-                mViewPager.setCurrentItem(2, false);
-            } else if (currentPosition < 2) {
-                // 书架和发现位置不变
-                mViewPager.setCurrentItem(currentPosition, false);
-            }
+            removeAiChatFragment();
+        }
+        // 如果状态没有变化，不需要任何操作，避免不必要的性能开销
+    }
+
+    /**
+     * 添加AI聊天Fragment
+     */
+    private void addAiChatFragment() {
+        // 保存当前页面位置
+        int currentPosition = mViewPager.getCurrentItem();
+        
+        // 登录后添加AI聊天Fragment（在第3个位置，索引为2）
+        mPagerAdapter.addFragment(AiMsgFragment.newInstance(), null, AI_CHAT_FRAGMENT_INDEX);
+        
+        // 恢复页面位置
+        restorePositionAfterAddingAiChat(currentPosition);
+    }
+
+    /**
+     * 移除AI聊天Fragment
+     */
+    private void removeAiChatFragment() {
+        // 保存当前页面位置
+        int currentPosition = mViewPager.getCurrentItem();
+        
+        // 登出后移除AI聊天Fragment（索引为2）
+        mPagerAdapter.removeFragment(AI_CHAT_FRAGMENT_INDEX);
+        
+        // 恢复页面位置
+        restorePositionAfterRemovingAiChat(currentPosition);
+    }
+
+    /**
+     * 添加AI聊天Fragment后恢复位置
+     */
+    private void restorePositionAfterAddingAiChat(int currentPosition) {
+        int targetPosition = calculateTargetPositionAfterAdding(currentPosition);
+        if (targetPosition >= 0) {
+            mViewPager.setCurrentItem(targetPosition, false);
         }
     }
 
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//
-//            initView();
-//
-//           initData();
-//    }
+    /**
+     * 移除AI聊天Fragment后恢复位置
+     */
+    private void restorePositionAfterRemovingAiChat(int currentPosition) {
+        int targetPosition = calculateTargetPositionAfterRemoving(currentPosition);
+        if (targetPosition >= 0) {
+            mViewPager.setCurrentItem(targetPosition, false);
+        }
+    }
 
-    //    @Subscribe(priority = 1)
-//    public void onEvent( LoginEventNotification event) {
-//        ThreadUtil.runOnUiThread(()->{
-//            if (event.getLoginNotification()) {
-//                //如果已登陆,
-//                if(AppApplication.application.isLogin){
-//                    mNavigationAdapter.addItem(2,msgMenuItem);
-//                    mNavigationAdapter.notifyDataSetChanged();
-//                    mPagerAdapter.addFragment(MyMsgFragment.newInstance(),null,2);
-//                }
-//
-//            } else {
-//                //如果退出登陆,
-//                if(!AppApplication.application.isLogin){
-//                    mNavigationAdapter.removeItem(2);
-//                    mPagerAdapter.removeFragment(2);
-//                }
-//
-//            }
-//            mNavigationAdapter.notifyDataSetChanged();
-//            mPagerAdapter.notifyDataSetChanged();
-//        });
-//    }
+    /**
+     * 计算添加AI聊天Fragment后的目标位置
+     */
+    private int calculateTargetPositionAfterAdding(int currentPosition) {
+        if (currentPosition == AI_CHAT_FRAGMENT_INDEX) {
+            // 原来的"我的"现在在索引3
+            return PROFILE_FRAGMENT_INDEX_WITH_AI;
+        } else if (currentPosition < AI_CHAT_FRAGMENT_INDEX) {
+            // 书架和发现位置不变
+            return currentPosition;
+        }
+        return -1; // 无效位置
+    }
 
+    /**
+     * 计算移除AI聊天Fragment后的目标位置
+     */
+    private int calculateTargetPositionAfterRemoving(int currentPosition) {
+        if (currentPosition == AI_CHAT_FRAGMENT_INDEX) {
+            // 如果在AI聊天页面，跳转到发现
+            return FOUND_FRAGMENT_INDEX;
+        } else if (currentPosition == PROFILE_FRAGMENT_INDEX_WITH_AI) {
+            // 如果在"我的"页面，调整到新索引2
+            return PROFILE_FRAGMENT_INDEX_WITHOUT_AI;
+        } else if (currentPosition < AI_CHAT_FRAGMENT_INDEX) {
+            // 书架和发现位置不变
+            return currentPosition;
+        }
+        return -1; // 无效位置
+    }
+
+    // 注释：移除了未使用的onResume和事件处理方法
+
+    /**
+     * 处理新的Intent
+     * 主要用于处理从其他页面跳转过来的请求，切换到指定的Fragment
+     * 
+     * @param intent 新的Intent对象
+     */
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        switchFragment(intent.getIntExtra(INTENT_KEY_IN_FRAGMENT_INDEX, 1));
-        //switchFragment(0); // 默认显示书架
+        // 默认切换到发现页面（索引1），如果指定了其他页面则切换到对应页面
+        int targetIndex = intent.getIntExtra(INTENT_KEY_IN_FRAGMENT_INDEX, FRAGMENT_INDEX_FOUND);
+        switchFragment(targetIndex);
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        // 保存当前 Fragment 索引位置
-        outState.putInt(INTENT_KEY_IN_FRAGMENT_INDEX, mViewPager.getCurrentItem());
+        try {
+            super.onSaveInstanceState(outState);
+            // 保存当前 Fragment 索引位置
+            if (mViewPager != null) {
+                outState.putInt(INTENT_KEY_IN_FRAGMENT_INDEX, mViewPager.getCurrentItem());
+            }
+        } catch (Exception e) {
+            android.util.Log.e("HomeActivity", "Error saving instance state", e);
+        }
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        // 恢复当前 Fragment 索引位置
-        switchFragment(savedInstanceState.getInt(INTENT_KEY_IN_FRAGMENT_INDEX));
+        try {
+            super.onRestoreInstanceState(savedInstanceState);
+            // 恢复当前 Fragment 索引位置
+            if (savedInstanceState != null) {
+                switchFragment(savedInstanceState.getInt(INTENT_KEY_IN_FRAGMENT_INDEX, FRAGMENT_INDEX_FOUND));
+            }
+        } catch (Exception e) {
+            android.util.Log.e("HomeActivity", "Error restoring instance state", e);
+        }
     }
 
+    /**
+     * 切换Fragment页面
+     * @param fragmentIndex Fragment索引
+     */
     public void switchFragment(int fragmentIndex) {
-        if (fragmentIndex == -1) {
-            return;
-        }
-
-        if (fragmentIndex >= 0 && fragmentIndex < mPagerAdapter.getCount()) {
-            mViewPager.setCurrentItem(fragmentIndex);
-            // 同步更新导航选中状态
-            int navigationPosition = fragmentIndexToNavigationIndex(fragmentIndex);
-            if (navigationPosition >= 0) {
-                mNavigationAdapter.setSelectedPosition(navigationPosition);
+        try {
+            if (fragmentIndex == -1) {
+                return;
             }
+
+            if (fragmentIndex >= 0 && fragmentIndex < mPagerAdapter.getCount()) {
+                mViewPager.setCurrentItem(fragmentIndex);
+                // 同步更新导航选中状态
+                int navigationPosition = fragmentIndexToNavigationIndex(fragmentIndex);
+                if (navigationPosition >= 0 && mNavigationAdapter != null) {
+                    mNavigationAdapter.setSelectedPosition(navigationPosition);
+                }
+            }
+        } catch (Exception e) {
+            android.util.Log.e("HomeActivity", "Error switching fragment to index: " + fragmentIndex, e);
         }
     }
 
@@ -256,14 +537,28 @@ public final class HomeActivity extends AppActivity
      * Fragment顺序：0-书架, 1-发现, 2-AI聊天(仅登录), 3-我的
      * 导航顺序：  0-书架, 1-发现, 2-AI聊天(仅登录), 3-我的
      * 两者顺序完全一致，直接1:1映射
+     * 
+     * @param fragmentIndex Fragment索引
+     * @return 导航索引，如果无效则返回-1
      */
     private int fragmentIndexToNavigationIndex(int fragmentIndex) {
         // Fragment顺序和导航顺序完全一致，直接返回
-        int maxIndex = AppApplication.application.isLogin ? 3 : 2;
-        if (fragmentIndex >= 0 && fragmentIndex <= maxIndex) {
-            return fragmentIndex;
-        }
-        return -1;
+        int maxIndex = getMaxFragmentIndex();
+        return isValidIndex(fragmentIndex, maxIndex) ? fragmentIndex : -1;
+    }
+
+    /**
+     * 获取最大有效的Fragment索引
+     */
+    private int getMaxFragmentIndex() {
+        return AppApplication.application.isLogin ? FRAGMENT_INDEX_PROFILE : FRAGMENT_INDEX_AI_CHAT;
+    }
+
+    /**
+     * 验证索引是否有效
+     */
+    private boolean isValidIndex(int index, int maxIndex) {
+        return index >= 0 && index <= maxIndex;
     }
 
     /**
@@ -272,17 +567,27 @@ public final class HomeActivity extends AppActivity
 
     @Override
     public boolean onNavigationItemSelected(int position) {
-        // 导航位置和Fragment索引完全一致，直接使用position
-        // Fragment顺序：0-书架, 1-发现, 2-AI聊天(仅登录), 3-我的
-        // 导航顺序：  0-书架, 1-发现, 2-AI聊天(仅登录), 3-我的
-        
-        if (position >= 0 && position < mPagerAdapter.getCount()) {
-            mViewPager.setCurrentItem(position);
-            return true;
+        try {
+            // 导航位置和Fragment索引完全一致，直接使用position
+            // Fragment顺序：0-书架, 1-发现, 2-AI聊天(仅登录), 3-我的
+            // 导航顺序：  0-书架, 1-发现, 2-AI聊天(仅登录), 3-我的
+            
+            if (position >= 0 && position < mPagerAdapter.getCount()) {
+                mViewPager.setCurrentItem(position);
+                return true;
+            }
+        } catch (Exception e) {
+            android.util.Log.e("HomeActivity", "Error selecting navigation position: " + position, e);
         }
         return false;
     }
 
+    /**
+     * 创建状态栏配置
+     * 设置导航栏背景颜色为白色
+     * 
+     * @return ImmersionBar配置对象
+     */
     @NonNull
     @Override
     protected ImmersionBar createStatusBarConfig() {
@@ -293,20 +598,32 @@ public final class HomeActivity extends AppActivity
 
     @Override
     public void onBackPressed() {
-        if (!DoubleClickHelper.isOnDoubleClick()) {
-            homeFragment. clearSearchTextFocus();
-            toast(R.string.home_exit_hint);
-            return;
-        }
+        try {
+            if (!DoubleClickHelper.isOnDoubleClick()) {
+                if (homeFragment != null) {
+                    homeFragment.clearSearchTextFocus();
+                }
+                toast(R.string.home_exit_hint);
+                return;
+            }
 
-        // 移动到上一个任务栈，避免侧滑引起的不良反应
-        moveTaskToBack(false);
-        postDelayed(() -> {
-            // 进行内存优化，销毁掉所有的界面
-            ActivityManager.getInstance().finishAllActivities();
-            // 销毁进程（注意：调用此 API 可能导致当前 Activity onDestroy 方法无法正常回调）
-            // System.exit(0);
-        }, 300);
+            // 移动到上一个任务栈，避免侧滑引起的不良反应
+            moveTaskToBack(false);
+            postDelayed(() -> {
+                try {
+                    // 进行内存优化，销毁掉所有的界面
+                    ActivityManager.getInstance().finishAllActivities();
+                    // 销毁进程（注意：调用此 API 可能导致当前 Activity onDestroy 方法无法正常回调）
+                    // System.exit(0);
+                } catch (Exception e) {
+                    android.util.Log.e("HomeActivity", "Error during exit cleanup", e);
+                }
+            }, EXIT_DELAY_MS);
+        } catch (Exception e) {
+            android.util.Log.e("HomeActivity", "Error in onBackPressed", e);
+            // 降级处理：直接调用父类方法
+            super.onBackPressed();
+        }
     }
     /**
      * 重新激活时调用
@@ -332,19 +649,7 @@ public final class HomeActivity extends AppActivity
         mNavigationAdapter.clearData();
 
         // 重新添加菜单项（顺序：0-书架, 1-发现, 2-AI聊天(仅登录), 3-我的）
-        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_index),
-                ContextCompat.getDrawable(this, R.drawable.home_home_selector)));
-        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_found),
-                ContextCompat.getDrawable(this, R.drawable.home_found_selector)));
-
-        // 仅登录用户显示AI聊天
-        if (AppApplication.application.isLogin) {
-            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.tips_nav_aimsg),
-                    ContextCompat.getDrawable(this, R.drawable.ruler_selector_msg)));
-        }
-
-        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(getString(R.string.home_nav_me),
-                ContextCompat.getDrawable(this, R.drawable.home_me_selector)));
+        addNavigationMenuItems();
 
         // 更新布局管理器的列数（未登录3列，登录后4列）
         mNavigationAdapter.updateLayoutManager(mNavigationView);
@@ -355,6 +660,35 @@ public final class HomeActivity extends AppActivity
         // 同步刷新Fragment
         refreshFragments();
     }
+
+    /**
+     * 添加导航菜单项
+     */
+    private void addNavigationMenuItems() {
+        // 基础菜单项
+        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
+                getString(R.string.home_nav_index),
+                ContextCompat.getDrawable(this, R.drawable.home_home_selector)
+        ));
+        
+        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
+                getString(R.string.home_nav_found),
+                ContextCompat.getDrawable(this, R.drawable.home_found_selector)
+        ));
+
+        // 仅登录用户显示AI聊天
+        if (AppApplication.application.isLogin) {
+            mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
+                    getString(R.string.tips_nav_aimsg),
+                    ContextCompat.getDrawable(this, R.drawable.ruler_selector_msg)
+            ));
+        }
+
+        mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
+                getString(R.string.home_nav_me),
+                ContextCompat.getDrawable(this, R.drawable.home_me_selector)
+        ));
+    }
     @Override
     protected boolean isStatusBarEnabled() {
         return super.isStatusBarEnabled();
@@ -362,12 +696,76 @@ public final class HomeActivity extends AppActivity
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        mViewPager.setAdapter(null);
-        mNavigationView.setAdapter(null);
-        mNavigationAdapter.setOnNavigationListener(null);
-        mHomeActivity = null;
-        XEventBus.getDefault().unregister(HomeActivity.this);
+        try {
+            // 第一步：注销事件总线，防止内存泄漏
+            safelyUnregisterEventBus();
+            
+            // 第二步：清理适配器和监听器
+            safelyCleanupAdapters();
+            
+            // 第三步：清理ViewPager
+            safelyCleanupViewPager();
+            
+            // 第四步：清理导航视图
+            safelyCleanupNavigationView();
+            
+        } catch (Exception e) {
+            android.util.Log.e("HomeActivity", "Error during onDestroy cleanup", e);
+        } finally {
+            // 最后：调用父类销毁方法
+            super.onDestroy();
+        }
+    }
+
+    /**
+     * 安全地注销事件总线
+     */
+    private void safelyUnregisterEventBus() {
+        try {
+            XEventBus.getDefault().unregister(HomeActivity.this);
+        } catch (Exception e) {
+            android.util.Log.e("HomeActivity", "Error unregistering event bus", e);
+        }
+    }
+
+    /**
+     * 安全地清理适配器和监听器
+     */
+    private void safelyCleanupAdapters() {
+        if (mNavigationAdapter != null) {
+            try {
+                mNavigationAdapter.setOnNavigationListener(null);
+            } catch (Exception e) {
+                android.util.Log.e("HomeActivity", "Error cleaning up navigation adapter", e);
+            }
+        }
+    }
+
+    /**
+     * 安全地清理ViewPager
+     */
+    private void safelyCleanupViewPager() {
+        if (mViewPager != null) {
+            try {
+                mViewPager.setAdapter(null);
+                mViewPager.clearOnPageChangeListeners();
+            } catch (Exception e) {
+                android.util.Log.e("HomeActivity", "Error cleaning up view pager", e);
+            }
+        }
+    }
+
+    /**
+     * 安全地清理导航视图
+     */
+    private void safelyCleanupNavigationView() {
+        if (mNavigationView != null) {
+            try {
+                mNavigationView.setAdapter(null);
+            } catch (Exception e) {
+                android.util.Log.e("HomeActivity", "Error cleaning up navigation view", e);
+            }
+        }
     }
 
 
