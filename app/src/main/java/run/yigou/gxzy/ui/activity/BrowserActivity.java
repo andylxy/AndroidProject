@@ -19,7 +19,7 @@ import run.yigou.gxzy.aop.CheckNet;
 import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.widget.BrowserView;
-import run.yigou.gxzy.widget.StatusLayout;
+import com.hjq.widget.layout.StatusLayout;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener;

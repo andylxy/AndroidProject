@@ -11,7 +11,7 @@ import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.widget.StatusLayout;
+import com.hjq.widget.layout.StatusLayout;
 
 /**
  *    author : Android 轮子哥

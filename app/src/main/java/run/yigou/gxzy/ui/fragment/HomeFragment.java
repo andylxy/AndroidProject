@@ -81,7 +81,7 @@ import run.yigou.gxzy.app.AppDataInitializer;
 import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
-import run.yigou.gxzy.widget.XCollapsingToolbarLayout;
+import com.hjq.widget.layout.XCollapsingToolbarLayout;
 
 /**
  * author : Android 轮子哥

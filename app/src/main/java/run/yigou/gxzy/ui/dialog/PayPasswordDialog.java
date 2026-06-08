@@ -17,7 +17,7 @@ import com.hjq.base.BaseDialog;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppAdapter;
-import run.yigou.gxzy.widget.PasswordView;
+import com.hjq.widget.view.PasswordView;
 
 import java.util.Arrays;
 import java.util.LinkedList;

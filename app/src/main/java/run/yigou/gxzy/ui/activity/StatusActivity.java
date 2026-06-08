@@ -6,7 +6,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.action.StatusAction;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.ui.dialog.MenuDialog;
-import run.yigou.gxzy.widget.StatusLayout;
+import com.hjq.widget.layout.StatusLayout;
 
 /**
  *    author : Android 轮子哥

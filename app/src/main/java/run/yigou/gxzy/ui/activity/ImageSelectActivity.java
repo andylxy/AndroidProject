@@ -24,7 +24,7 @@ import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.other.GridSpaceDecoration;
 import run.yigou.gxzy.ui.adapter.ImageSelectAdapter;
 import run.yigou.gxzy.ui.dialog.AlbumDialog;
-import run.yigou.gxzy.widget.StatusLayout;
+import com.hjq.widget.layout.StatusLayout;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.widget.view.FloatActionButton;
