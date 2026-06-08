@@ -35,7 +35,7 @@ import com.gyf.immersionbar.ImmersionBar;
 import run.yigou.gxzy.EventBus.LoginEventNotification;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.crypto.SecurityUtils;
-import run.yigou.gxzy.aop.SingleClick;
+import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.common.LoginType;

@@ -1,4 +1,4 @@
-package run.yigou.gxzy.app;
+package com.hjq.base;
 
 import android.content.Context;
 import android.view.View;
@@ -7,8 +7,6 @@ import androidx.annotation.IntRange;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import com.hjq.base.BaseAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

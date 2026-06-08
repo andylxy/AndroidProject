@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.app.AppAdapter;
+import com.hjq.base.AppAdapter;
 
 /**
  *  作者:  zhs

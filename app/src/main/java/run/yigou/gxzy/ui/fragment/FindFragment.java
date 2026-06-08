@@ -8,7 +8,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.SingleClick;
+import com.hjq.base.action.SingleClick;
 
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.glide.GlideApp;

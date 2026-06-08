@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.hjq.base.BaseDialog;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.SingleClick;
+import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.http.api.GetCodeApi;
 import run.yigou.gxzy.http.api.VerifyCodeApi;
 import run.yigou.gxzy.http.model.HttpData;

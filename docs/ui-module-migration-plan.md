@@ -115,7 +115,7 @@
 |---|---|---|---|---|
 | 文档基线 | 已完成 | 建立迁移控制文档 | 已确认 | 不改业务代码 |
 | 阶段 1 Demo 隔离 | 已完成 | 批次 4 已完成 | `assembleDebug` 成功 | 已隐藏 `MineFragment` 中 Demo 入口；`CopyActivityTest` 已移出正式 Manifest，Demo 类保留 |
-| 阶段 2 Dialog/Popup | 进行中 | 批次 4 已完成，后续 Adapter/AOP 待计划 | `assembleDebug` 成功 | `CommonDialog` / `WaitDialog` / `MessageDialog` / `InputDialog` 已迁入 `library/ui-dialog`；`PickerLayoutManager` 已迁入 `library/base`；后续 Adapter/AOP 依赖另批次处理 |
+| 阶段 2 Dialog/Popup | 进行中 | 批次 5 已完成，后续剩余通用 Dialog / Popup 待计划 | `assembleDebug` 成功 | `CommonDialog` / `WaitDialog` / `MessageDialog` / `InputDialog` 已迁入 `library/ui-dialog`；`PickerLayoutManager`、`AppAdapter` 已迁入 `library/base`；`SingleClick` 注解已迁入 `library/base`，AOP 编织仍在 app 侧 |
 | 阶段 3 Media | 未开始 | - | - | - |
 | 阶段 4 AI Chat | 未开始 | - | - | - |
 | 阶段 5 Reader/Tips | 未开始 | - | - | - |
@@ -126,11 +126,11 @@
 | 项目 | 内容 |
 |---|---|
 | 当前阶段 | 阶段 2：通用 Dialog / Popup |
-| 当前批次 | 批次 4 已完成；后续 Adapter/AOP 待计划 |
-| 允许改动文件 | 本次已改：`docs/ui-module-migration-plan.md`、`library/base/src/main/java/com/hjq/base/PickerLayoutManager.java`、`app/src/main/java/run/yigou/gxzy/ui/dialog/DateDialog.java`、`app/src/main/java/run/yigou/gxzy/ui/dialog/TimeDialog.java`；本次已删除：`app/src/main/java/run/yigou/gxzy/manager/PickerLayoutManager.java` |
-| 排除文件 | Manifest、README、AGENTS.md、Media、AI Chat、Reader/Tips、Account、`SingleClick`、`SingleClickAspect`、AspectJ 配置、`AppAdapter`、其他 Dialog/Popup |
+| 当前批次 | 批次 5 已完成；后续迁移剩余通用 Dialog / Popup 待计划 |
+| 允许改动文件 | 本次已改：`docs/ui-module-migration-plan.md`、`library/base/src/main/java/com/hjq/base/AppAdapter.java`、`library/base/src/main/java/com/hjq/base/action/SingleClick.java`、`app/src/main/java/run/yigou/gxzy/aop/SingleClickAspect.java`、`app/src/main/java` 下旧 import 引用文件；本次已删除：`app/src/main/java/run/yigou/gxzy/app/AppAdapter.java`、`app/src/main/java/run/yigou/gxzy/aop/SingleClick.java` |
+| 排除文件 | Manifest、README、AGENTS.md、Media、AI Chat、Reader/Tips、Account、AspectJ 插件/配置、剩余 Dialog/Popup 迁移、业务模块重构 |
 | 验证方式 | 静态搜索；已运行 `gradlew.bat assembleDebug` |
-| 完成条件 | `PickerLayoutManager` 已迁入 `library/base`；`DateDialog` / `TimeDialog` import 已切换；app 原类源位置已移除；Adapter/AOP 阻塞已记录；Debug 构建通过 |
+| 完成条件 | `AppAdapter` 已迁入 `library/base`；`SingleClick` 注解已迁入 `library/base`；`SingleClickAspect` 仍留在 app 且 pointcut 指向新注解；app 原类源位置已移除；Debug 构建通过 |
 
 ## 8. 阶段 1：Demo / 模板残留隔离
 
@@ -230,7 +230,7 @@
 - 批次 2：迁移无 Adapter 依赖 Dialog。
 - 批次 3：迁移低风险 Dialog 并记录 AOP 限制。
 - 批次 4：迁移 `PickerLayoutManager` 并固化 Adapter/AOP 阻塞。
-- 批次 5：单独规划 Adapter/AOP 解耦。
+- 批次 5：公共化 `AppAdapter` 与 `SingleClick` 注解，保留 app 侧 AOP 编织。
 - 批次 6：迁移剩余通用 Dialog / Popup 并验证。
 
 ### 批次 1 结果
@@ -283,6 +283,16 @@
 | 代码结果 | `PickerLayoutManager` 包名改为 `com.hjq.base` 并迁入 `library/base`；`DateDialog` / `TimeDialog` import 已切换为 `com.hjq.base.PickerLayoutManager`；类 API 和调用逻辑保持不变 |
 | 验证结果 | 静态检查通过；`gradlew.bat assembleDebug` 成功，exitCode=0 |
 | 剩余阻塞 | `DateDialog` / `TimeDialog` 仍依赖 `AppAdapter` 和 `SingleClick`，暂不能迁入 `library/ui-dialog`；`MenuDialog` / `SelectDialog` / `ListPopup` 仍被 `AppAdapter` 阻塞 |
+
+### 批次 5 结果
+
+| 项目 | 结果 |
+|---|---|
+| 决策 | 公共化 `AppAdapter` 与 `SingleClick` 注解到 `library/base`；保留 `SingleClickAspect`、AspectJ 插件与编织配置在 app 侧 |
+| 实际改动文件 | 已改：`library/base/src/main/java/com/hjq/base/AppAdapter.java`、`library/base/src/main/java/com/hjq/base/action/SingleClick.java`、`app/src/main/java/run/yigou/gxzy/aop/SingleClickAspect.java`、`app/src/main/java` 下 27 个 `AppAdapter` import 与 26 个 `SingleClick` import 引用文件、`docs/ui-module-migration-plan.md`；已删除：`app/src/main/java/run/yigou/gxzy/app/AppAdapter.java`、`app/src/main/java/run/yigou/gxzy/aop/SingleClick.java` |
+| 代码结果 | `AppAdapter` 包名改为 `com.hjq.base` 并迁入 `library/base`；`SingleClick` 包名改为 `com.hjq.base.action` 并迁入 `library/base`；`SingleClickAspect` 仍位于 app，import 与 pointcut 指向 `com.hjq.base.action.SingleClick` |
+| 验证结果 | 静态检查通过；`gradlew.bat assembleDebug` 成功，exitCode=0 |
+| 剩余阻塞 | `AppAdapter` 不再阻塞剩余 Dialog / Popup 迁移；`SingleClick` 注解可被 library 使用；`SingleClickAspect` / AspectJ 编织仍是 app 侧能力，后续若要跨模块统一编织需单独规划 |
 
 ### 完成门禁
 
@@ -431,8 +441,8 @@
 | B-001 | 2026-06-08 | 阶段 1 | `DialogActivity` / `StatusActivity` 仍由 `MineFragment` 正式入口启动，不能直接隔离 | `MineFragment.java:72`、`MineFragment.java:75` | 已选择“隐藏正式入口”；`MineFragment` 移除点击注册和启动逻辑，布局按钮设为 `gone` | 已解除 |
 | B-002 | 2026-06-08 | 阶段 1 / 批次 4 | `CopyActivityTest` 未发现代码启动引用，但仍在 Manifest 注册 | 已从正式 Manifest 移除 `.ui.activity.CopyActivityTest` 注册；类文件保留；`assembleDebug` 通过 | 已决策从正式 Manifest 移除，不迁入 debug、不删除类 | 已解除 |
 | B-003 | 2026-06-08 | 阶段 2 / 批次 2 | `CommonDialog` / `WaitDialog` 资源迁移依赖超出原计划 | `ui_dialog.xml` 使用 `SmartTextView`；`wait_dialog.xml` 使用 `SmartTextView`、Lottie、`@raw/progress` | 已补充并执行依赖方案：`library/ui-dialog` 依赖 `library:widget` 和 Lottie；`progress.json` 与 `transparent_selector.xml` 复制到模块内；最小 values 资源已补齐 | 已解除 |
-| B-004 | 2026-06-08 | 阶段 2 / 批次 3 | `SingleClick` / `SingleClickAspect` 仍属于 app，无法被 `library/ui-dialog` 直接依赖 | `MessageDialog` / `InputDialog` 原使用 `@SingleClick`；`SingleClickAspect` Pointcut 绑定 `run.yigou.gxzy.aop.SingleClick`，AspectJ include 当前面向 app applicationId | 后续需单独规划 AOP 公共模块或通用点击防抖方案；本批次已移除 `MessageDialog` / `InputDialog` 的 `@SingleClick` 注解 | 待规划 |
-| B-005 | 2026-06-08 | 阶段 2 / 批次 4 | `AppAdapter` 跨阶段引用过多，暂不迁移 | `AppAdapter` 全仓约 27 个 import，覆盖通用 Dialog、业务 Dialog、媒体 Adapter、阅读/Tips Adapter、AI Chat Adapter 和 Demo Adapter | 后续需单独规划 `AppAdapter` 公共化或分域 Adapter 策略；本批次仅迁移 `PickerLayoutManager` | 待规划 |
+| B-004 | 2026-06-08 | 阶段 2 / 批次 3 | `SingleClick` / `SingleClickAspect` 仍属于 app，无法被 `library/ui-dialog` 直接依赖 | 批次 5 已将 `SingleClick` 注解迁入 `library/base/src/main/java/com/hjq/base/action/SingleClick.java`；`SingleClickAspect` 仍在 app，pointcut 绑定 `com.hjq.base.action.SingleClick` | 注解可被 library 使用；AspectJ 编织仍由 app 侧维护，不迁移 AspectJ 配置 | 已解除 |
+| B-005 | 2026-06-08 | 阶段 2 / 批次 4 | `AppAdapter` 跨阶段引用过多，暂不迁移 | 批次 5 已将 `AppAdapter` 迁入 `library/base/src/main/java/com/hjq/base/AppAdapter.java`，app 旧 import 已替换为 `com.hjq.base.AppAdapter` | `AppAdapter` 不再阻塞剩余通用 Dialog / Popup 迁移；业务 Adapter 仍保持原调用行为 | 已解除 |
 
 ## 16. 验证记录
 
@@ -454,6 +464,8 @@
 | 2026-06-08 | 阶段 2 / 批次 3 | `gradlew.bat assembleDebug` | 通过 | exitCode=0；`:library:ui-dialog` 资源与 Java 编译已执行；存在既有 AGP、字符串格式、deprecation warning，非本批次处理范围 |
 | 2026-06-08 | 阶段 2 / 批次 4 | 静态检查 Picker 迁移路径和反向依赖 | 通过 | app 旧 `PickerLayoutManager` import 无匹配；app 原 `PickerLayoutManager.java` 不存在；新类包名为 `com.hjq.base`；`library/base` 无 `run.yigou.gxzy.R` 或 `run.yigou.gxzy.app` 引用 |
 | 2026-06-08 | 阶段 2 / 批次 4 | `gradlew.bat assembleDebug` | 通过 | exitCode=0；BUILD SUCCESSFUL；存在既有 AGP/deprecation warning，非本批次处理范围 |
+| 2026-06-08 | 阶段 2 / 批次 5 | 静态检查 `AppAdapter` / `SingleClick` 迁移路径和反向依赖 | 通过 | app 源码无旧 import 与旧全限定引用；app 原 `AppAdapter.java` / `SingleClick.java` 不存在；新类包名分别为 `com.hjq.base`、`com.hjq.base.action`；`SingleClickAspect` pointcut 指向新注解；`library/base` 无 `run.yigou.gxzy.R` 或 `run.yigou.gxzy.app` 引用 |
+| 2026-06-08 | 阶段 2 / 批次 5 | `gradlew.bat assembleDebug` | 通过 | exitCode=0；BUILD SUCCESSFUL in 27s；存在既有 AGP/Manifest/AspectJ D8/deprecation warning，非本批次处理范围 |
 
 ## 17. 决策记录
 
@@ -467,3 +479,4 @@
 | ADR-006 | 2026-06-08 | `library/ui-dialog` 直接依赖 `library:widget` 与 Lottie，并复制最小资源 | `CommonDialog` / `WaitDialog` 布局需要 `SmartTextView`、`LottieAnimationView`、`@raw/progress` 与少量 app values；直接声明依赖和最小资源可避免模块反向依赖 app | `app` 新增 `implementation project(':library:ui-dialog')`；`CommonDialog` / `WaitDialog` 迁入模块；app 原 raw/drawable 通用资源保留，模块内复制编译所需资源 |
 | ADR-007 | 2026-06-08 | 批次 3 迁移 `MessageDialog` / `InputDialog` 时暂不迁移 AOP，移除局部 `@SingleClick` | `SingleClick` / `SingleClickAspect` 当前属于 app，直接依赖会违反 `library:* -> app` 禁止规则；同步迁移 AspectJ 配置影响范围超过本批次 | `MessageDialog` / `InputDialog` 迁入 `library/ui-dialog` 并可编译；这两个 Dialog 的点击暂不经过 AOP 防重复点击，后续需单独规划 AOP 公共化或点击防抖方案 |
 | ADR-008 | 2026-06-08 | 批次 4 仅将 `PickerLayoutManager` 迁入 `library/base`，`AppAdapter` 与 AOP 后置 | `PickerLayoutManager` 仅被 `DateDialog` / `TimeDialog` 引用且无 app 依赖；`AppAdapter` 跨阶段引用过多，AOP 涉及 AspectJ 编织范围 | `DateDialog` / `TimeDialog` 不再依赖 app 内 Picker；剩余 Dialog/Popup 迁移仍需先解决 `AppAdapter` 与 AOP |
+| ADR-009 | 2026-06-08 | 公共化 `AppAdapter` 和 `SingleClick` 注解，但保留 `SingleClickAspect` 在 app | `AppAdapter` 只依赖 Android SDK、AndroidX 注解、Java 集合与 `BaseAdapter`，适合下沉 `library/base`；`SingleClick` 注解本身无 app 依赖，可供 library 使用；`SingleClickAspect` 依赖 AspectJ 编织和 app 构建配置，迁移会扩大范围 | 剩余 Dialog / Popup 可引用公共 `AppAdapter` 和 `SingleClick`；AspectJ 插件/配置不变，防重复点击编织仍由 app 侧维护 |

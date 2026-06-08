@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.hjq.base.BaseAdapter;
 import com.hjq.base.BasePopupWindow;
 import com.hjq.base.action.AnimAction;
-import run.yigou.gxzy.R;
-import run.yigou.gxzy.app.AppAdapter;
+import run.yigou.gxzy.ui.dialog.R;
+import com.hjq.base.AppAdapter;
 import com.hjq.base.ArrowDrawable;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android 轮子�?
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2019/10/18
  *    desc   : 列表弹窗
@@ -63,7 +63,7 @@ public final class ListPopup {
         @Override
         public Builder setGravity(int gravity) {
             switch (gravity) {
-                // 如果这个是在中间显示的
+                // 如果这个是在中间显示�?
                 case Gravity.CENTER:
                 case Gravity.CENTER_VERTICAL:
                     // 重新设置动画
@@ -159,7 +159,7 @@ public final class ListPopup {
     public interface OnListener<T> {
 
         /**
-         * 选择条目时回调
+         * 选择条目时回�?
          */
         void onSelected(BasePopupWindow popupWindow, int position, T t);
     }

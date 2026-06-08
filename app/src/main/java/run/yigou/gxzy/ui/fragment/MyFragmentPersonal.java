@@ -24,7 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.SingleClick;
+import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.common.AppConst;

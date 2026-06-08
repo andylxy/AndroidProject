@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 import com.github.chrisbanes.photoview.PhotoView;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.app.AppAdapter;
+import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.http.glide.GlideApp;
 
 /**

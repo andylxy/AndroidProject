@@ -21,7 +21,7 @@ import com.hjq.base.BaseDialog;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.CheckNet;
 import run.yigou.gxzy.aop.Permissions;
-import run.yigou.gxzy.aop.SingleClick;
+import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.other.AppConfig;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.OnDownloadListener;

@@ -7,7 +7,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.app.AppAdapter;
+import com.hjq.base.AppAdapter;
 
 /**
  *    author : Android 轮子哥

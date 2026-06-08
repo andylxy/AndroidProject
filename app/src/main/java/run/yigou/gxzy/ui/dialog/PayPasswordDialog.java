@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.hjq.base.BaseAdapter;
 import com.hjq.base.BaseDialog;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.SingleClick;
-import run.yigou.gxzy.app.AppAdapter;
+import com.hjq.base.action.SingleClick;
+import com.hjq.base.AppAdapter;
 import com.hjq.widget.view.PasswordView;
 
 import java.util.Arrays;

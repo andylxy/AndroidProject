@@ -6,6 +6,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.CodeSignature;
 
+import com.hjq.base.action.SingleClick;
+
 import timber.log.Timber;
 
 /**
@@ -26,7 +28,7 @@ public class SingleClickAspect {
     /**
      * 方法切入点
      */
-    @Pointcut("execution(@run.yigou.gxzy.aop.SingleClick * *(..))")
+    @Pointcut("execution(@com.hjq.base.action.SingleClick * *(..))")
     public void method() {}
 
     /**

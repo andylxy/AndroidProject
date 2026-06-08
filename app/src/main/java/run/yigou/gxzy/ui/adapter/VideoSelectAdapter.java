@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.app.AppAdapter;
+import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.manager.CacheDataManager;
 import run.yigou.gxzy.ui.activity.VideoSelectActivity;

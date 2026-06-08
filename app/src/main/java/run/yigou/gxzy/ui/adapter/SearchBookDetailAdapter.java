@@ -8,7 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.app.AppAdapter;
+import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.http.entitymodel.ChapterSearchRes;
 import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.utils.SpannableStringHelper;

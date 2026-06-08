@@ -15,7 +15,7 @@ import com.hjq.base.BaseAdapter;
 import com.hjq.base.BaseDialog;
 import com.hjq.base.BottomSheetDialog;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.app.AppAdapter;
+import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.http.glide.GlideApp;
 
 import java.util.List;

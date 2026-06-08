@@ -9,7 +9,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.gyf.immersionbar.ImmersionBar;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.SingleClick;
+import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.ui.adapter.GuideAdapter;
 

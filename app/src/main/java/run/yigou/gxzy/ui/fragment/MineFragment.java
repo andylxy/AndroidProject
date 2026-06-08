@@ -7,7 +7,7 @@ import android.net.Uri;
 import android.view.View;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.SingleClick;
+import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.ui.activity.AboutActivity;
 import run.yigou.gxzy.ui.activity.BrowserActivity;

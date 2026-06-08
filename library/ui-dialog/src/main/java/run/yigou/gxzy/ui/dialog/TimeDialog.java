@@ -10,19 +10,19 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.base.BaseDialog;
-import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.SingleClick;
-import run.yigou.gxzy.app.AppAdapter;
+import run.yigou.gxzy.ui.dialog.R;
+import com.hjq.base.action.SingleClick;
+import com.hjq.base.AppAdapter;
 import com.hjq.base.PickerLayoutManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android 轮子�?
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2019/08/17
- *    desc   : 时间选择对话框
+ *    desc   : 时间选择对话�?
  */
 public final class TimeDialog {
 
@@ -234,7 +234,7 @@ public final class TimeDialog {
         void onSelected(BaseDialog dialog, int hour, int minute, int second);
 
         /**
-         * 点击取消时回调
+         * 点击取消时回�?
          */
         default void onCancel(BaseDialog dialog) {}
     }

@@ -9,7 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.app.AppAdapter;
+import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.glide.GlideApp;

@@ -18,7 +18,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.action.StatusAction;
 import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.aop.Permissions;
-import run.yigou.gxzy.aop.SingleClick;
+import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import com.hjq.base.GridSpaceDecoration;

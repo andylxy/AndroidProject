@@ -9,4 +9,5 @@ dependencies {
     implementation project(':library:base')
     implementation project(':library:widget')
     implementation 'com.airbnb.android:lottie:4.1.0'
+    implementation 'com.github.getActivity:Toaster:12.6'
 }

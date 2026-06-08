@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.hjq.base.BaseDialog;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.SingleClick;
+import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.manager.DialogManager;
 import run.yigou.gxzy.ui.dialog.AddressDialog;

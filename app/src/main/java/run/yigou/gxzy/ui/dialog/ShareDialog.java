@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.hjq.base.BaseAdapter;
 import com.hjq.base.BaseDialog;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.app.AppAdapter;
+import com.hjq.base.AppAdapter;
 import com.hjq.toast.Toaster;
 import com.hjq.umeng.Platform;
 import com.hjq.umeng.UmengClient;

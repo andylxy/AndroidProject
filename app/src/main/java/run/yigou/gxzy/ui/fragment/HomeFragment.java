@@ -46,7 +46,7 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.SingleClick;
+import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;

@@ -13,7 +13,7 @@ import com.hjq.http.EasyHttp;
 import run.yigou.gxzy.log.EasyLog;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.app.AppAdapter;
+import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.http.entitymodel.ChapterSearchRes;
 import run.yigou.gxzy.http.entitymodel.SearchKeyText;

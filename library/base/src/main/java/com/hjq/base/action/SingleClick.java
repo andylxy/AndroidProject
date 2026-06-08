@@ -1,4 +1,4 @@
-package run.yigou.gxzy.aop;
+package com.hjq.base.action;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

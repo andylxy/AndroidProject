@@ -4,4 +4,5 @@
     <color name="common_confirm_text_color">#007AFF</color>
     <color name="common_cancel_text_color">#F44336</color>
     <color name="white">#FFFFFF</color>
+    <color name="common_accent_color">#5A8DDF</color>
 </resources>

@@ -15,9 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hjq.base.BaseAdapter;
 import com.hjq.base.BaseDialog;
-import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.SingleClick;
-import run.yigou.gxzy.app.AppAdapter;
+import run.yigou.gxzy.ui.dialog.R;
+import com.hjq.base.action.SingleClick;
+import com.hjq.base.AppAdapter;
 import com.hjq.toast.Toaster;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android 轮子�?
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2019/10/09
  *    desc   : 单选或者多选对话框
@@ -75,7 +75,7 @@ public final class SelectDialog {
         }
 
         /**
-         * 设置默认选中的位置
+         * 设置默认选中的位�?
          */
         public Builder setSelect(int... positions) {
             mAdapter.setSelect(positions);
@@ -99,7 +99,7 @@ public final class SelectDialog {
         }
 
         /**
-         * 设置单选模式
+         * 设置单选模�?
          */
         public Builder setSingleSelect() {
             mAdapter.setSingleSelect();
@@ -143,7 +143,7 @@ public final class SelectDialog {
         @Override
         public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
             mRecyclerView.removeOnLayoutChangeListener(this);
-            // 这里一定要加延迟，如果不加在 Android 9.0 上面会导致 setLayoutParams 无效
+            // 这里一定要加延迟，如果不加�?Android 9.0 上面会导�?setLayoutParams 无效
             post(this);
         }
 
@@ -165,7 +165,7 @@ public final class SelectDialog {
         }
 
         /**
-         *  获取屏幕的高度
+         *  获取屏幕的高�?
          */
         private int getScreenHeight() {
             Resources resources = getResources();
