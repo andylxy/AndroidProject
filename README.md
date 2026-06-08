@@ -98,6 +98,8 @@
 
 #### [版本适配文档请点击这里查看](https://github.com/getActivity/AndroidVersionAdapter)
 
+#### [模块架构说明](#模块架构说明)
+
 #### [常见问题解答请点击这里查看](HelpDoc.md)
 
 #### 作者的其他开源项目
@@ -143,6 +145,74 @@
 #### [点击查看捐赠列表](https://github.com/getActivity/Donate)
 
 ## License
+
+---
+
+## 模块架构说明
+
+> 最近更新：2026-06-08（模块抽取完成）
+
+### 模块结构
+
+```
+AndroidProject-old/
+├── app/                          # 主应用模块（包名: run.yigou.gxzy）
+│   ├── src/main/java/
+│   │   └── run/yigou/gxzy/
+│   │       ├── aop/              # AOP 注解和切面（日志、防抖、权限、网络）
+│   │       ├── app/              # Application/Activity/Fragment 基类
+│   │       ├── ui/               # UI 层（Activity/Fragment/Dialog）
+│   │       ├── http/             # HTTP API 定义
+│   │       ├── manager/          # 管理器（ActivityManager 等）
+│   │       └── ...
+│   └── build.gradle              # 含 aspectjx 配置
+│
+├── library/
+│   ├── base/                     # 基础模块（基类、通用工具）
+│   │   └── 包名: com.hjq.base
+│   ├── widget/                   # 自定义 View 组件
+│   │   └── 包名: com.hjq.widget
+│   ├── log/                      # 日志模块（EasyLog）
+│   │   └── 包名: run.yigou.gxzy.log
+│   ├── crypto/                   # 加密模块（AES、RSA、SM2）
+│   │   └── 包名: run.yigou.gxzy.crypto
+│   ├── sse-client/               # SSE 客户端模块
+│   │   └── 包名: run.yigou.gxzy.sse
+│   ├── umeng/                    # 友盟模块（分享、推送）
+│   │   └── 包名: com.hjq.umeng
+│   └── xbus/                     # 总线模块
+│       └── 包名: run.yigou.gxzy.xbus
+```
+
+### 包名规则
+
+| 模块 | 包名 | 说明 |
+|------|------|------|
+| app | `run.yigou.gxzy` | 业务代码（新包名） |
+| base | `com.hjq.base` | 基础库（保持原包名） |
+| widget | `com.hjq.widget` | 组件库（保持原包名） |
+| log | `run.yigou.gxzy.log` | 日志模块 |
+| crypto | `run.yigou.gxzy.crypto` | 加密模块 |
+| sse-client | `run.yigou.gxzy.sse` | SSE 客户端 |
+| umeng | `com.hjq.umeng` | 友盟模块（保持原包名） |
+| xbus | `run.yigou.gxzy.xbus` | 总线模块 |
+
+### 依赖关系
+
+```
+app ──→ library:base
+app ──→ library:widget
+app ──→ library:log
+app ──→ library:crypto
+app ──→ library:sse-client
+app ──→ library:umeng
+app ──→ library:xbus
+
+library:base ──→ library:widget
+library:log ──→ library:base
+library:crypto ──→ library:base
+library:sse-client ──→ library:log, library:base (compileOnly)
+```
 
 ```text
 Copyright 2018 Huang JinQun

@@ -678,42 +678,40 @@ dependencies {
 | 3 | `app/.../aop/Permissions.java` | `library/base/.../base/aop/Permissions.java` | `run.yigou.gxzy.aop` | `com.hjq.base.aop` |
 | 4 | `app/.../aop/SingleClick.java` | `library/base/.../base/aop/SingleClick.java` | `run.yigou.gxzy.aop` | `com.hjq.base.aop` |
 
-#### 6.2 切面实现更新
+#### 6.2 方案调整 - AOP 保留在 app 模块
 
-4 个 Aspect 文件中的 `@Pointcut` 路径需同步更新：
+**偏差说明**：原计划将 AOP 迁移到 base 模块，但经过研究后决定**保留在 app 模块中**。
 
-```java
-// 旧
-@Pointcut("execution(@run.yigou.gxzy.aop.CheckNet * *(..))")
-// 新
-@Pointcut("execution(@com.hjq.base.aop.CheckNet * *(..))")
-```
+**原因**：
+1. CheckNetAspect 依赖 `run.yigou.gxzy.R` 资源 ID（无法迁移到 base）
+2. PermissionsAspect 依赖 `run.yigou.gxzy.other.PermissionCallback`（app 模块专属）
+3. AOP 代码量小（9 个文件），抽取收益低
+4. AspectJX 插件需要在 app 模块编译时织入
 
-涉及文件（留在 app 模块不动）：
-- `app/.../aop/CheckNetAspect.java`
-- `app/.../aop/LogAspect.java`
-- `app/.../aop/PermissionsAspect.java`
-- `app/.../aop/SingleClickAspect.java`
+**处理**：
+- AOP 注解和切面文件**留在 app 模块不动**
+- 包名已经是 `run.yigou.gxzy.aop`（无需修改）
+- import 语句无需变更
+- aspectjx 配置无需变更
 
-#### 6.3 `:app/build.gradle` aspectjx 配置更新
+**涉及文件**（全部在 app 模块）：
+- `app/.../aop/CheckNet.java` - 注解
+- `app/.../aop/CheckNetAspect.java` - 切面
+- `app/.../aop/Log.java` - 注解
+- `app/.../aop/LogAspect.java` - 切面
+- `app/.../aop/Permissions.java` - 注解
+- `app/.../aop/PermissionsAspect.java` - 切面
+- `app/.../aop/SingleClick.java` - 注解
+- `app/.../aop/SingleClickAspect.java` - 切面
+- `app/.../aop/ResultCallback.java` - 回调接口
 
-```groovy
-aspectjx {
-    include android.defaultConfig.applicationId, 'com.hjq.base.aop'
-}
-```
-
-#### 6.4 Import 替换
-
-所有 app 模块中使用 `@CheckNet`、`@Log`、`@Permissions`、`@SingleClick` 的文件：
-- `import run.yigou.gxzy.aop.Xxx` → `import com.hjq.base.aop.Xxx`
-
-#### 6.5 验证
+#### 6.3 验证
 
 ```bash
-./gradlew :library:base:assembleDebug
 ./gradlew :app:assembleDebug
 ```
+
+**验证结果**：✅ BUILD SUCCESSFUL - AOP 注解织入正常
 
 ---
 
@@ -736,7 +734,7 @@ aspectjx {
 | EasyLog 替换遗漏 | 编译失败 | 全局搜索 `import run.yigou.gxzy.utils.EasyLog` 确认全部替换 |
 | SecurityUtils 内部交叉引用 | 编译失败 | 迁移后先编译 crypto 模块，再编译 app |
 | SSE 解耦后行为差异 | 运行时异常 | 保持原有逻辑不变，仅改变依赖注入方式 |
-| AOP 注解路径变更导致织入失败 | 运行时切面不生效 | 验证 aspectjx include 配置，确认注解生效 |
+| AOP 注解路径变更导致织入失败 | 运行时切面不生效 | ✅ 已消除：AOP 保留在 app 模块，无需迁移，aspectjx 配置不变 |
 
 ---
 
@@ -760,3 +758,5 @@ aspectjx {
 |------|------|----------|
 | v1.0 | 2026-06-08 | 初始版本，包含 6 个阶段的完整实施计划 |
 | v1.1 | 2026-06-08 | **阶段一偏差修正**：`BrowserView` 和 `PlayerView` 因深度耦合 app 模块（引用具体 Activity/Dialog/AppConfig），暂不迁移，留在 app 模块。阶段一迁移范围从 7 个缩减为 5 个组件。 |
+| v1.2 | 2026-06-08 | **阶段六偏差修正**：AOP 注解模块（Log、CheckNet、SingleClick、Permissions）保留在 app 模块，不迁移到 base。原因：CheckNetAspect 依赖 R 资源，PermissionsAspect 依赖 app 模块的 PermissionCallback。 |
+| v1.3 | 2026-06-08 | **阶段七收尾完成**：清理空目录（adapter、data、http/sse），更新 README.md 模块架构说明，更新 settings.gradle 注释，全量编译验证 BUILD SUCCESSFUL。 |

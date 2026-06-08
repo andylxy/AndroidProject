@@ -1,9 +1,9 @@
 include ':app'
-include ':library:base'
-include ':library:widget'
-include ':library:umeng'
-//include ':library:atableview'
-include ':library:xbus'
-include ':library:log'
-include ':library:crypto'
-include ':library:sse-client'
+include ':library:base'          // 基础模块（基类、通用工具）
+include ':library:widget'        // 自定义 View 组件
+include ':library:umeng'         // 友盟模块（分享、推送）
+//include ':library:atableview'  // 待定
+include ':library:xbus'          // 总线模块
+include ':library:log'           // 日志模块（EasyLog）
+include ':library:crypto'        // 加密模块（AES、RSA、SM2）
+include ':library:sse-client'    // SSE 客户端模块
