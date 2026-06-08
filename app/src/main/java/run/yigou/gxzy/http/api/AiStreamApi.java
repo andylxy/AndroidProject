@@ -2,6 +2,7 @@ package run.yigou.gxzy.http.api;
 
 import androidx.annotation.NonNull;
 
+import com.hjq.http.EasyConfig;
 import com.hjq.http.config.IRequestApi;
 import com.hjq.http.config.IRequestHost;
 
@@ -11,10 +12,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
-import run.yigou.gxzy.http.callback.SseStreamCallback;
-import run.yigou.gxzy.http.sse.AiStreamEventHandler;
-import run.yigou.gxzy.http.sse.AiStreamRequestBuilder;
-import run.yigou.gxzy.http.sse.SseClientHelper;
+import run.yigou.gxzy.sse.SseStreamCallback;
+import run.yigou.gxzy.sse.SseEventHandler;
+import run.yigou.gxzy.sse.SseRequestBuilder;
+import run.yigou.gxzy.sse.SseClientHelper;
 import run.yigou.gxzy.other.AppConfig;
 import run.yigou.gxzy.log.EasyLog;
 
@@ -106,15 +107,23 @@ public final class AiStreamApi implements IRequestApi, IRequestHost {
         
         try {
             // 1. 获取配置好的 OkHttpClient (TLS 1.2 等)
-            OkHttpClient client = SseClientHelper.createSseClient(getHost());
+            OkHttpClient client = EasyConfig.getInstance()
+                    .getClient()
+                    .newBuilder()
+                    .readTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+                    .writeTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+                    .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                    .build();
             
-            // 2. 构建请求 (Header, Body, 签名)
-            Request request = new AiStreamRequestBuilder(this).build();
+            // 2. 配置 TLS 1.2
+            client = SseClientHelper.configureTls12(client.newBuilder(), getHost());
             
-            // 3. 创建并启动 EventSource
+            // 3. 构建请求 (Header, Body, 签名)
+            Request request = SseRequestBuilder.buildRequest(getHost(), getApi(), this);
+            
+            // 4. 创建并启动 EventSource
             EventSource.Factory factory = EventSources.createFactory(client);
-            AiStreamEventHandler eventHandler = new AiStreamEventHandler(callback);
-            
+            SseEventHandler eventHandler = new SseEventHandler(callback);
             factory.newEventSource(request, eventHandler);
             
             EasyLog.print(TAG, "EventSource 已创建并启动");

@@ -1,0 +1,22 @@
+apply plugin: 'com.android.library'
+apply from: '../../common.gradle'
+
+android {
+    namespace 'run.yigou.gxzy.sse'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    // OkHttp SSE 支持
+    api 'com.squareup.okhttp3:okhttp:5.3.0'
+    api 'com.squareup.okhttp3:okhttp-sse:5.3.0'
+    // JSON 解析（compileOnly，由 app 层提供具体实现）
+    compileOnly 'com.google.code.gson:gson:2.8.8'
+    // 日志接口（由 app 层提供具体实现，可通过调用 EasyLog）
+    api project(':library:log')
+    // SerialUtil 工具类（compileOnly，由 app/base 层提供）
+    compileOnly project(':library:base')
+}

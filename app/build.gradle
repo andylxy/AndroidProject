@@ -164,6 +164,8 @@ dependencies {
     implementation project(':library:log')
     // 加密安全库
     implementation project(':library:crypto')
+    // SSE 客户端库
+    implementation project(':library:sse-client')
 
     //Android平台通用的RSA算法工具类及其例子 https://github.com/gzu-liyujiang/RSAUtils
     implementation 'com.github.gzu-liyujiang:RSAUtils:2.0.0'

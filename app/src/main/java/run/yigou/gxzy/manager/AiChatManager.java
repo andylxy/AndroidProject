@@ -12,9 +12,9 @@ import run.yigou.gxzy.greendao.entity.ChatMessageBean;
 import run.yigou.gxzy.greendao.entity.ChatSessionBean;
 import run.yigou.gxzy.http.api.AiSessionIdApi;
 import run.yigou.gxzy.http.api.AiStreamApi;
-import run.yigou.gxzy.http.callback.SseStreamCallback;
+import run.yigou.gxzy.sse.SseStreamCallback;
 import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.http.model.SseChunk;
+import run.yigou.gxzy.sse.SseChunk;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.log.EasyLog;
 
