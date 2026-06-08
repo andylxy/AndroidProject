@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package com.hjq.base;
 
 import android.content.Context;
 import android.view.View;

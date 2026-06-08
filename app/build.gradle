@@ -154,6 +154,8 @@ dependencies {
 
     // 基类封装
     implementation project(':library:base')
+    // 通用 Dialog / Popup
+    implementation project(':library:ui-dialog')
     // 控件封装
     implementation project(':library:widget')
     // 友盟封装

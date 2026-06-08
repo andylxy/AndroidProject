@@ -8,8 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.hjq.base.BaseDialog;
-import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.SingleClick;
+import run.yigou.gxzy.ui.dialog.R;
 
 /**
  *    author : Android 轮子哥
@@ -55,7 +54,6 @@ public final class MessageDialog {
             return super.create();
         }
 
-        @SingleClick
         @Override
         public void onClick(View view) {
             int viewId = view.getId();

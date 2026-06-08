@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="common_line_color">#ECECEC</color>
+    <color name="common_confirm_text_color">#007AFF</color>
+    <color name="common_cancel_text_color">#F44336</color>
+    <color name="white">#FFFFFF</color>
+</resources>

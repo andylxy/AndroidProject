@@ -11,9 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.hjq.base.BaseDialog;
-import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.SingleClick;
 import com.hjq.widget.view.RegexEditText;
+import run.yigou.gxzy.ui.dialog.R;
 
 /**
  *    author : Android 轮子哥
@@ -86,7 +85,6 @@ public final class InputDialog {
             postDelayed(() -> showKeyboard(mInputView), 500);
         }
 
-        @SingleClick
         @Override
         public void onClick(View view) {
             int viewId = view.getId();

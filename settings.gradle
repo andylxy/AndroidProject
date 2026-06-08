@@ -1,5 +1,6 @@
 include ':app'
 include ':library:base'          // 基础模块（基类、通用工具）
+include ':library:ui-dialog'     // 通用 Dialog / Popup 模块
 include ':library:widget'        // 自定义 View 组件
 include ':library:umeng'         // 友盟模块（分享、推送）
 //include ':library:atableview'  // 待定

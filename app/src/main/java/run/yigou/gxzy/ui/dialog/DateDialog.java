@@ -12,7 +12,7 @@ import com.hjq.base.BaseDialog;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppAdapter;
-import run.yigou.gxzy.manager.PickerLayoutManager;
+import com.hjq.base.PickerLayoutManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

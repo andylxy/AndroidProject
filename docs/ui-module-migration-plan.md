@@ -115,7 +115,7 @@
 |---|---|---|---|---|
 | 文档基线 | 已完成 | 建立迁移控制文档 | 已确认 | 不改业务代码 |
 | 阶段 1 Demo 隔离 | 已完成 | 批次 4 已完成 | `assembleDebug` 成功 | 已隐藏 `MineFragment` 中 Demo 入口；`CopyActivityTest` 已移出正式 Manifest，Demo 类保留 |
-| 阶段 2 Dialog/Popup | 未开始 | - | - | - |
+| 阶段 2 Dialog/Popup | 进行中 | 批次 4 已完成，后续 Adapter/AOP 待计划 | `assembleDebug` 成功 | `CommonDialog` / `WaitDialog` / `MessageDialog` / `InputDialog` 已迁入 `library/ui-dialog`；`PickerLayoutManager` 已迁入 `library/base`；后续 Adapter/AOP 依赖另批次处理 |
 | 阶段 3 Media | 未开始 | - | - | - |
 | 阶段 4 AI Chat | 未开始 | - | - | - |
 | 阶段 5 Reader/Tips | 未开始 | - | - | - |
@@ -125,12 +125,12 @@
 
 | 项目 | 内容 |
 |---|---|
-| 当前阶段 | 阶段 1：Demo / 模板残留隔离已完成 |
-| 当前批次 | 批次 4：已从正式 Manifest 移出 `CopyActivityTest` 注册 |
-| 允许改动文件 | `docs/ui-module-migration-plan.md`、`app/src/main/AndroidManifest.xml` |
-| 排除文件 | Java、XML 资源、Gradle、README、AGENTS.md、Dialog/Popup、Media、AI Chat、Reader/Tips、Account |
-| 验证方式 | Manifest 搜索确认无 `CopyActivityTest` 注册；运行 `gradlew.bat assembleDebug` |
-| 完成条件 | `CopyActivityTest` 不再注册于正式 Manifest；构建验证结果写入本文档 |
+| 当前阶段 | 阶段 2：通用 Dialog / Popup |
+| 当前批次 | 批次 4 已完成；后续 Adapter/AOP 待计划 |
+| 允许改动文件 | 本次已改：`docs/ui-module-migration-plan.md`、`library/base/src/main/java/com/hjq/base/PickerLayoutManager.java`、`app/src/main/java/run/yigou/gxzy/ui/dialog/DateDialog.java`、`app/src/main/java/run/yigou/gxzy/ui/dialog/TimeDialog.java`；本次已删除：`app/src/main/java/run/yigou/gxzy/manager/PickerLayoutManager.java` |
+| 排除文件 | Manifest、README、AGENTS.md、Media、AI Chat、Reader/Tips、Account、`SingleClick`、`SingleClickAspect`、AspectJ 配置、`AppAdapter`、其他 Dialog/Popup |
+| 验证方式 | 静态搜索；已运行 `gradlew.bat assembleDebug` |
+| 完成条件 | `PickerLayoutManager` 已迁入 `library/base`；`DateDialog` / `TimeDialog` import 已切换；app 原类源位置已移除；Adapter/AOP 阻塞已记录；Debug 构建通过 |
 
 ## 8. 阶段 1：Demo / 模板残留隔离
 
@@ -228,16 +228,68 @@
 
 - 批次 1：新增模块骨架。
 - 批次 2：迁移无 Adapter 依赖 Dialog。
-- 批次 3：处理 Adapter / AOP / R 依赖。
-- 批次 4：迁移资源。
-- 批次 5：app 接入并验证。
+- 批次 3：迁移低风险 Dialog 并记录 AOP 限制。
+- 批次 4：迁移 `PickerLayoutManager` 并固化 Adapter/AOP 阻塞。
+- 批次 5：单独规划 Adapter/AOP 解耦。
+- 批次 6：迁移剩余通用 Dialog / Popup 并验证。
+
+### 批次 1 结果
+
+| 项目 | 结果 |
+|---|---|
+| 决策 | 新增 `library/ui-dialog` 空模块骨架，暂不迁移 Dialog 类 |
+| 实际改动文件 | `settings.gradle`、`library/ui-dialog/build.gradle`、`library/ui-dialog/src/main/AndroidManifest.xml`、`docs/ui-module-migration-plan.md` |
+| 代码结果 | Gradle 已 include `:library:ui-dialog`；模块仅依赖 `library:base`；未改 app 调用路径 |
+| 验证结果 | `gradlew.bat assembleDebug` 成功；`:library:ui-dialog:assembleDebug` 已执行 |
+| 剩余阻塞 | 批次 2 迁移 `CommonDialog` / `WaitDialog` 前需补充 `SmartTextView`、Lottie、`@raw/progress` 依赖与资源迁移方案 |
+
+### 批次 2 前置阻塞
+
+| 项目 | 内容 |
+|---|---|
+| 阻塞项 | 原计划只声明 `library/ui-dialog -> library:base`，但目标布局实际依赖 `library:widget`、Lottie 与 `@raw/progress` |
+| 证据 | `ui_dialog.xml` 使用 `com.hjq.widget.view.SmartTextView`；`wait_dialog.xml` 使用 `SmartTextView`、`com.airbnb.lottie.LottieAnimationView`、`@raw/progress` |
+| 处理要求 | 先回到计划阶段补充依赖管理、资源迁移清单和验证方式，再迁移 `CommonDialog` / `WaitDialog` |
+| 处理结果 | 已在批次 2 补充 `library:widget`、Lottie、raw/drawable/values 最小资源方案并完成迁移 |
+
+### 批次 2 结果
+
+| 项目 | 结果 |
+|---|---|
+| 决策 | 迁移 `CommonDialog` / `WaitDialog` 到 `library/ui-dialog`，并补齐 Widget、Lottie 与最小资源依赖 |
+| 实际改动文件 | 已改：`app/build.gradle`、`library/ui-dialog/build.gradle`、`library/ui-dialog/src/main/java/run/yigou/gxzy/ui/dialog/CommonDialog.java`、`library/ui-dialog/src/main/java/run/yigou/gxzy/ui/dialog/WaitDialog.java`、`library/ui-dialog/src/main/res/layout/ui_dialog.xml`、`library/ui-dialog/src/main/res/layout/wait_dialog.xml`、`library/ui-dialog/src/main/res/raw/progress.json`、`library/ui-dialog/src/main/res/drawable/transparent_selector.xml`、`library/ui-dialog/src/main/res/values/colors.xml`、`library/ui-dialog/src/main/res/values/dimens.xml`、`library/ui-dialog/src/main/res/values/strings.xml`、`docs/ui-module-migration-plan.md`；已删除：`app/src/main/java/run/yigou/gxzy/ui/dialog/CommonDialog.java`、`app/src/main/java/run/yigou/gxzy/ui/dialog/WaitDialog.java`、`app/src/main/res/layout/ui_dialog.xml`、`app/src/main/res/layout/wait_dialog.xml` |
+| 代码结果 | `CommonDialog` / `WaitDialog` 保持原包名 `run.yigou.gxzy.ui.dialog`；模块内 R 导入切换为 `run.yigou.gxzy.ui.dialog.R`；app 原 Java/XML 源位置已移除 |
+| 资源结果 | `ui_dialog.xml` / `wait_dialog.xml` 已迁入模块；`progress.json` 与 `transparent_selector.xml` 复制到模块内，app 原 raw/drawable 资源保留；模块新增最小 colors/dimens/strings |
+| 验证结果 | 静态检查无 `library/ui-dialog -> app` 依赖；`gradlew.bat assembleDebug` 成功，exitCode=0 |
+| 剩余阻塞 | Adapter、AOP、Picker 相关 Dialog/Popup 仍需后续批次单独计划 |
+
+### 批次 3 结果
+
+| 项目 | 结果 |
+|---|---|
+| 决策 | 迁移低风险 `MessageDialog` / `InputDialog` 到 `library/ui-dialog`；暂不迁移 `SingleClick` / `SingleClickAspect`，移除这两个类中的 `@SingleClick` 注解 |
+| 实际改动文件 | 已改：`library/ui-dialog/src/main/java/run/yigou/gxzy/ui/dialog/MessageDialog.java`、`library/ui-dialog/src/main/java/run/yigou/gxzy/ui/dialog/InputDialog.java`、`library/ui-dialog/src/main/res/layout/message_dialog.xml`、`library/ui-dialog/src/main/res/layout/input_dialog.xml`、`library/ui-dialog/src/main/res/drawable/dialog_input_bg.xml`、`library/ui-dialog/src/main/res/values/colors.xml`、`library/ui-dialog/src/main/res/values/dimens.xml`、`docs/ui-module-migration-plan.md`；已删除：`app/src/main/java/run/yigou/gxzy/ui/dialog/MessageDialog.java`、`app/src/main/java/run/yigou/gxzy/ui/dialog/InputDialog.java`、`app/src/main/res/layout/message_dialog.xml`、`app/src/main/res/layout/input_dialog.xml` |
+| 代码结果 | `MessageDialog` / `InputDialog` 保持原包名 `run.yigou.gxzy.ui.dialog`；模块内 R 导入切换为 `run.yigou.gxzy.ui.dialog.R`；已移除 `run.yigou.gxzy.aop.SingleClick` import 与 `@SingleClick` 注解；app 原 Java/XML 源位置已移除 |
+| 资源结果 | `message_dialog.xml` / `input_dialog.xml` / `dialog_input_bg.xml` 已迁入模块；模块新增最小 `white`、`dp_4`、`dp_5`、`dp_10`、`dp_15`、`sp_14` 资源 |
+| 验证结果 | 静态检查无 `library/ui-dialog -> app`、`run.yigou.gxzy.R`、`run.yigou.gxzy.aop`、`SingleClick` 引用；`gradlew.bat assembleDebug` 成功，exitCode=0 |
+| 剩余阻塞 | `MessageDialog` / `InputDialog` 的点击不再经过 AOP 防重复点击；Adapter、Picker 相关 Dialog/Popup 仍需后续批次单独计划 |
+
+### 批次 4 结果
+
+| 项目 | 结果 |
+|---|---|
+| 决策 | 仅迁移 `PickerLayoutManager` 到 `library/base`，先解除 `DateDialog` / `TimeDialog` 对 app 内 Picker 的依赖；`AppAdapter` 与 AOP 后置 |
+| 实际改动文件 | 已改：`library/base/src/main/java/com/hjq/base/PickerLayoutManager.java`、`app/src/main/java/run/yigou/gxzy/ui/dialog/DateDialog.java`、`app/src/main/java/run/yigou/gxzy/ui/dialog/TimeDialog.java`、`docs/ui-module-migration-plan.md`；已删除：`app/src/main/java/run/yigou/gxzy/manager/PickerLayoutManager.java` |
+| 代码结果 | `PickerLayoutManager` 包名改为 `com.hjq.base` 并迁入 `library/base`；`DateDialog` / `TimeDialog` import 已切换为 `com.hjq.base.PickerLayoutManager`；类 API 和调用逻辑保持不变 |
+| 验证结果 | 静态检查通过；`gradlew.bat assembleDebug` 成功，exitCode=0 |
+| 剩余阻塞 | `DateDialog` / `TimeDialog` 仍依赖 `AppAdapter` 和 `SingleClick`，暂不能迁入 `library/ui-dialog`；`MenuDialog` / `SelectDialog` / `ListPopup` 仍被 `AppAdapter` 阻塞 |
 
 ### 完成门禁
 
-- [ ] 未引入 `library:ui-dialog -> app`。
-- [ ] 迁移类不依赖业务模型。
-- [ ] 资源引用已切换到模块内 `R`。
-- [ ] app 构建已验证。
+- [x] 未引入 `library:ui-dialog -> app`。
+- [x] 迁移类不依赖业务模型。
+- [x] 资源引用已切换到模块内 `R`。
+- [x] app 构建已验证。
 - [ ] 通用 Dialog 调用路径已验证。
 
 ## 10. 阶段 3：媒体模块
@@ -378,6 +430,9 @@
 |---|---|---|---|---|---|---|
 | B-001 | 2026-06-08 | 阶段 1 | `DialogActivity` / `StatusActivity` 仍由 `MineFragment` 正式入口启动，不能直接隔离 | `MineFragment.java:72`、`MineFragment.java:75` | 已选择“隐藏正式入口”；`MineFragment` 移除点击注册和启动逻辑，布局按钮设为 `gone` | 已解除 |
 | B-002 | 2026-06-08 | 阶段 1 / 批次 4 | `CopyActivityTest` 未发现代码启动引用，但仍在 Manifest 注册 | 已从正式 Manifest 移除 `.ui.activity.CopyActivityTest` 注册；类文件保留；`assembleDebug` 通过 | 已决策从正式 Manifest 移除，不迁入 debug、不删除类 | 已解除 |
+| B-003 | 2026-06-08 | 阶段 2 / 批次 2 | `CommonDialog` / `WaitDialog` 资源迁移依赖超出原计划 | `ui_dialog.xml` 使用 `SmartTextView`；`wait_dialog.xml` 使用 `SmartTextView`、Lottie、`@raw/progress` | 已补充并执行依赖方案：`library/ui-dialog` 依赖 `library:widget` 和 Lottie；`progress.json` 与 `transparent_selector.xml` 复制到模块内；最小 values 资源已补齐 | 已解除 |
+| B-004 | 2026-06-08 | 阶段 2 / 批次 3 | `SingleClick` / `SingleClickAspect` 仍属于 app，无法被 `library/ui-dialog` 直接依赖 | `MessageDialog` / `InputDialog` 原使用 `@SingleClick`；`SingleClickAspect` Pointcut 绑定 `run.yigou.gxzy.aop.SingleClick`，AspectJ include 当前面向 app applicationId | 后续需单独规划 AOP 公共模块或通用点击防抖方案；本批次已移除 `MessageDialog` / `InputDialog` 的 `@SingleClick` 注解 | 待规划 |
+| B-005 | 2026-06-08 | 阶段 2 / 批次 4 | `AppAdapter` 跨阶段引用过多，暂不迁移 | `AppAdapter` 全仓约 27 个 import，覆盖通用 Dialog、业务 Dialog、媒体 Adapter、阅读/Tips Adapter、AI Chat Adapter 和 Demo Adapter | 后续需单独规划 `AppAdapter` 公共化或分域 Adapter 策略；本批次仅迁移 `PickerLayoutManager` | 待规划 |
 
 ## 16. 验证记录
 
@@ -391,6 +446,14 @@
 | 2026-06-08 | 阶段 1 / 批次 4 | `AndroidManifest.xml` 搜索：`CopyActivityTest` | 通过 | 无匹配，正式 Manifest 注册已移除 |
 | 2026-06-08 | 阶段 1 / 批次 4 | `app/src/main/java` 搜索：`CopyActivityTest` | 通过 | 仅保留类定义，未删除 Demo/模板类 |
 | 2026-06-08 | 阶段 1 / 批次 4 | `gradlew.bat assembleDebug` | 通过 | exitCode=0；存在 AGP/Manifest/deprecation warning，非本批次处理范围 |
+| 2026-06-08 | 阶段 2 / 批次 1 | `settings.gradle` 与 `library/ui-dialog` 文件检查 | 通过 | 已 include `:library:ui-dialog`；新增空模块 `build.gradle` 和 Manifest |
+| 2026-06-08 | 阶段 2 / 批次 1 | `gradlew.bat assembleDebug` | 通过 | exitCode=0；`:library:ui-dialog:assembleDebug` 已执行；存在既有 AGP/deprecation warning，非本批次处理范围 |
+| 2026-06-08 | 阶段 2 / 批次 2 | 静态检查 app 原路径与 `library/ui-dialog` 依赖 | 通过 | app 原 `CommonDialog` / `WaitDialog` Java 与 `ui_dialog` / `wait_dialog` XML 已移除；模块内无 `run.yigou.gxzy.R` 或 `run.yigou.gxzy.app` 引用 |
+| 2026-06-08 | 阶段 2 / 批次 2 | `gradlew.bat assembleDebug` | 通过 | exitCode=0；`:library:ui-dialog` 资源与 Java 编译已执行；存在既有 AGP、字符串格式、AspectJ/D8、deprecation warning，非本批次处理范围 |
+| 2026-06-08 | 阶段 2 / 批次 3 | 静态检查 app 原路径与 `library/ui-dialog` 依赖 | 通过 | app 原 `MessageDialog` / `InputDialog` Java 与 `message_dialog` / `input_dialog` XML 已移除；模块内无 `run.yigou.gxzy.R`、`run.yigou.gxzy.aop` 或 `SingleClick` 引用 |
+| 2026-06-08 | 阶段 2 / 批次 3 | `gradlew.bat assembleDebug` | 通过 | exitCode=0；`:library:ui-dialog` 资源与 Java 编译已执行；存在既有 AGP、字符串格式、deprecation warning，非本批次处理范围 |
+| 2026-06-08 | 阶段 2 / 批次 4 | 静态检查 Picker 迁移路径和反向依赖 | 通过 | app 旧 `PickerLayoutManager` import 无匹配；app 原 `PickerLayoutManager.java` 不存在；新类包名为 `com.hjq.base`；`library/base` 无 `run.yigou.gxzy.R` 或 `run.yigou.gxzy.app` 引用 |
+| 2026-06-08 | 阶段 2 / 批次 4 | `gradlew.bat assembleDebug` | 通过 | exitCode=0；BUILD SUCCESSFUL；存在既有 AGP/deprecation warning，非本批次处理范围 |
 
 ## 17. 决策记录
 
@@ -400,3 +463,7 @@
 | ADR-002 | - | 大清单改为阶段批次执行 | 降低跑偏风险，便于每批次验证和纠偏 | 每批次结束必须更新本文档 |
 | ADR-003 | 2026-06-08 | 阶段 1 采用“隐藏正式入口”策略 | `DialogActivity` / `StatusActivity` 曾由 `MineFragment` 启动，但属于 Demo/案例入口，不应作为正式业务入口暴露 | 修改 `MineFragment` 入口显示/点击逻辑；Demo Activity 暂不删除、不迁移；`CopyActivityTest` 另起小批次处理 |
 | ADR-004 | 2026-06-08 | 从正式 Manifest 移除 `CopyActivityTest` 注册 | 未发现业务代码启动引用，且 Manifest 注册复用“关于我们”label，符合 Demo/模板残留隔离目标 | 正式包不再注册 `CopyActivityTest`；类文件保留；不新增 debug Manifest；阶段 1 阻塞解除 |
+| ADR-005 | 2026-06-08 | 阶段 2 先接入 `library/ui-dialog` 空模块再迁移类 | 先验证 Gradle 多模块接入，可降低后续 Dialog 迁移失败时的定位成本 | `settings.gradle` 新增 `:library:ui-dialog`；空模块仅依赖 `library:base`；`CommonDialog` / `WaitDialog` 因 Widget/Lottie/raw 依赖缺口暂未迁移 |
+| ADR-006 | 2026-06-08 | `library/ui-dialog` 直接依赖 `library:widget` 与 Lottie，并复制最小资源 | `CommonDialog` / `WaitDialog` 布局需要 `SmartTextView`、`LottieAnimationView`、`@raw/progress` 与少量 app values；直接声明依赖和最小资源可避免模块反向依赖 app | `app` 新增 `implementation project(':library:ui-dialog')`；`CommonDialog` / `WaitDialog` 迁入模块；app 原 raw/drawable 通用资源保留，模块内复制编译所需资源 |
+| ADR-007 | 2026-06-08 | 批次 3 迁移 `MessageDialog` / `InputDialog` 时暂不迁移 AOP，移除局部 `@SingleClick` | `SingleClick` / `SingleClickAspect` 当前属于 app，直接依赖会违反 `library:* -> app` 禁止规则；同步迁移 AspectJ 配置影响范围超过本批次 | `MessageDialog` / `InputDialog` 迁入 `library/ui-dialog` 并可编译；这两个 Dialog 的点击暂不经过 AOP 防重复点击，后续需单独规划 AOP 公共化或点击防抖方案 |
+| ADR-008 | 2026-06-08 | 批次 4 仅将 `PickerLayoutManager` 迁入 `library/base`，`AppAdapter` 与 AOP 后置 | `PickerLayoutManager` 仅被 `DateDialog` / `TimeDialog` 引用且无 app 依赖；`AppAdapter` 跨阶段引用过多，AOP 涉及 AspectJ 编织范围 | `DateDialog` / `TimeDialog` 不再依赖 app 内 Picker；剩余 Dialog/Popup 迁移仍需先解决 `AppAdapter` 与 AOP |
