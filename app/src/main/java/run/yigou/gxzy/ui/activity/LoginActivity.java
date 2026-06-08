@@ -48,7 +48,7 @@ import run.yigou.gxzy.http.api.GetCodeApi;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
-import run.yigou.gxzy.other.KeyboardWatcher;
+import com.hjq.base.KeyboardWatcher;
 import run.yigou.gxzy.ui.fragment.HomeFragment;
 import run.yigou.gxzy.utils.Base64ConverBitmapHelper;
 import run.yigou.gxzy.utils.StringHelper;

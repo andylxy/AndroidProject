@@ -21,7 +21,7 @@ import run.yigou.gxzy.aop.Permissions;
 import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.manager.ThreadPoolManager;
-import run.yigou.gxzy.other.GridSpaceDecoration;
+import com.hjq.base.GridSpaceDecoration;
 import run.yigou.gxzy.ui.adapter.ImageSelectAdapter;
 import run.yigou.gxzy.ui.dialog.AlbumDialog;
 import com.hjq.widget.layout.StatusLayout;

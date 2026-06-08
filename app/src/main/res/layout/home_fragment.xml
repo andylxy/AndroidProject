@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         app:elevation="0px">
 
-        <run.yigou.gxzy.widget.XCollapsingToolbarLayout
+        <com.hjq.widget.layout.XCollapsingToolbarLayout
             android:id="@+id/ctl_home_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -84,7 +84,7 @@
 
             </androidx.appcompat.widget.Toolbar>
 
-        </run.yigou.gxzy.widget.XCollapsingToolbarLayout>
+        </com.hjq.widget.layout.XCollapsingToolbarLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_home_tab"

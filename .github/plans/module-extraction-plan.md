@@ -253,10 +253,37 @@ dependencies {
 
 #### 2.5 验证
 
+**base 模块编译**：✅ 已通过
 ```bash
 ./gradlew :library:base:assembleDebug
-./gradlew :app:assembleDebug
 ```
+
+**完整 app 模块编译**：✅ 已通过
+```bash
+./gradlew :app:assembleDebug
+# BUILD SUCCESSFUL in 53s
+```
+
+#### 2.6 迁移文件清单（4 个）
+
+| # | 源文件 | 目标路径 | 状态 |
+|---|--------|----------|------|
+| 1 | `DoubleClickHelper.java` | `library/base/.../DoubleClickHelper.java` | ✅ |
+| 2 | `GridSpaceDecoration.java` | `library/base/.../GridSpaceDecoration.java` | ✅ |
+| 3 | `KeyboardWatcher.java` | `library/base/.../KeyboardWatcher.java` | ✅ |
+| 4 | `ArrowDrawable.java` | `library/base/.../ArrowDrawable.java` | ✅ |
+
+#### 2.7 Import 替换完成清单（5 处）
+
+| # | 文件 | 替换结果 |
+|---|------|----------|
+| 1 | `ui/popup/ListPopup.java` | ✅ `ArrowDrawable` → `com.hjq.base.ArrowDrawable` |
+| 2 | `ui/activity/HomeActivity.java` | ✅ `DoubleClickHelper` → `com.hjq.base.DoubleClickHelper` |
+| 3 | `ui/activity/ImageSelectActivity.java` | ✅ `GridSpaceDecoration` → `com.hjq.base.GridSpaceDecoration` |
+| 4 | `ui/activity/LoginActivity.java` | ✅ `KeyboardWatcher` → `com.hjq.base.KeyboardWatcher` |
+| 5 | `ui/activity/VideoSelectActivity.java` | ✅ `GridSpaceDecoration` → `com.hjq.base.GridSpaceDecoration` |
+
+---
 
 ---
 

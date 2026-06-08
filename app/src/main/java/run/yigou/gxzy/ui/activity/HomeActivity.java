@@ -20,7 +20,7 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.manager.ActivityManager;
-import run.yigou.gxzy.other.DoubleClickHelper;
+import com.hjq.base.DoubleClickHelper;
 import run.yigou.gxzy.ui.adapter.NavigationAdapter;
 import run.yigou.gxzy.ui.fragment.AiMsgFragment;
 import run.yigou.gxzy.ui.fragment.BookCollectCaseFragment;

@@ -26,4 +26,4 @@
 - PlayerView：引用 app 模块资源，延后迁移
 
 ## 下一步
-进入阶段二：Other 工具迁移至 base
+阶段二（Other 工具迁移至 base）已完成。等待后续阶段。

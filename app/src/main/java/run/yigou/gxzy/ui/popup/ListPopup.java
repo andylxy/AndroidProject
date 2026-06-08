@@ -16,7 +16,7 @@ import com.hjq.base.BasePopupWindow;
 import com.hjq.base.action.AnimAction;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppAdapter;
-import run.yigou.gxzy.other.ArrowDrawable;
+import com.hjq.base.ArrowDrawable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
