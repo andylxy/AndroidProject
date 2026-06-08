@@ -23,7 +23,7 @@ import run.yigou.gxzy.greendao.entity.ChatSessionBean;
 import run.yigou.gxzy.manager.ChatSessionManager;
 import run.yigou.gxzy.ui.tips.adapter.ChatHistoryAdapter;
 import run.yigou.gxzy.utils.DateHelper;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 
 /**
  * 侧边栏助手：管理聊天历史记录列表

@@ -3,7 +3,7 @@ package run.yigou.gxzy.greendao.util;
 import androidx.annotation.NonNull;
 
 import com.hjq.http.EasyHttp;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ import run.yigou.gxzy.ui.tips.DataBeans.YaoUse;
 import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
 import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
 
-import run.yigou.gxzy.Security.SecurityUtils;
+import run.yigou.gxzy.crypto.SecurityUtils;
 import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;

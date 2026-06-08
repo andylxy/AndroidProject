@@ -10,7 +10,7 @@
 package run.yigou.gxzy.ui.tips.repository;
 
 import com.hjq.http.EasyHttp;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 
 import java.util.ArrayList;

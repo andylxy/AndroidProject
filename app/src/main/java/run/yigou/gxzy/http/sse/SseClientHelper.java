@@ -3,7 +3,7 @@ package run.yigou.gxzy.http.sse;
 import androidx.annotation.NonNull;
 
 import com.hjq.http.EasyConfig;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 
 import java.io.IOException;
 import java.util.Arrays;

@@ -1,0 +1,17 @@
+apply plugin: 'com.android.library'
+apply from: '../../common.gradle'
+
+android {
+    namespace 'run.yigou.gxzy.crypto'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    // 国密算法支持
+    implementation 'org.bouncycastle:bcprov-jdk15to18:1.76'
+    // RSA 工具（RC4Helper 需要 RC4Utils）
+    implementation 'com.github.gzu-liyujiang:RSAUtils:2.0.0'
+}

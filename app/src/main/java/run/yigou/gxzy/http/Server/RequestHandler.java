@@ -16,7 +16,7 @@ import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.ui.activity.LoginActivity;
 import com.hjq.gson.factory.GsonFactory;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 import com.hjq.http.config.IRequestApi;
 import com.hjq.http.request.HttpRequest;
 import com.hjq.http.exception.CancelException;

@@ -13,8 +13,8 @@ import run.yigou.gxzy.greendao.entity.ChatSessionBean;
 import run.yigou.gxzy.greendao.entity.ChatSummaryBean;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.utils.DateHelper;
-import run.yigou.gxzy.utils.EasyLog;
-import run.yigou.gxzy.Security.SecurityUtils;
+import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.crypto.SecurityUtils;
 
 /**
  * 会话管理器

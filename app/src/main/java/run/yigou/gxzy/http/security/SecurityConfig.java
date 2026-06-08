@@ -12,7 +12,7 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 import com.hjq.http.config.IRequestApi;
 import com.hjq.http.config.IHttpPostBodyStrategy;
 import com.hjq.http.model.RequestBodyType;

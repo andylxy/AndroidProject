@@ -1,0 +1,12 @@
+apply plugin: 'com.android.library'
+apply from: '../../common.gradle'
+
+android {
+    namespace 'run.yigou.gxzy.log'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+// 零外部依赖，仅使用 android.util.Log

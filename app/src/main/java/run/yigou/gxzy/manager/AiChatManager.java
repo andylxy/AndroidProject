@@ -16,7 +16,7 @@ import run.yigou.gxzy.http.callback.SseStreamCallback;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.http.model.SseChunk;
 import run.yigou.gxzy.utils.DateHelper;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 
 import java.util.List;
 

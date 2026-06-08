@@ -160,6 +160,10 @@ dependencies {
     implementation project(':library:umeng')
     // 轻量事件框架：https://github.com/LucasXu01/XBus
     implementation project(':library:xbus')
+    // 日志模块
+    implementation project(':library:log')
+    // 加密安全库
+    implementation project(':library:crypto')
 
     //Android平台通用的RSA算法工具类及其例子 https://github.com/gzu-liyujiang/RSAUtils
     implementation 'com.github.gzu-liyujiang:RSAUtils:2.0.0'

@@ -42,7 +42,7 @@ import run.yigou.gxzy.ui.helper.ChatSummaryHelper;
 import run.yigou.gxzy.ui.tips.adapter.TipsAiChatAdapter;
 import run.yigou.gxzy.ui.tips.contract.AiMsgContract;
 import run.yigou.gxzy.ui.tips.presenter.AiMsgPresenter;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.utils.MarkdownUtils;
 import run.yigou.gxzy.utils.ThreadUtil;
 

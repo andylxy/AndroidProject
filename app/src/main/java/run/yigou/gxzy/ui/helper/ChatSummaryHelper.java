@@ -21,7 +21,7 @@ import run.yigou.gxzy.manager.AiChatManager;
 import run.yigou.gxzy.manager.ChatSessionManager;
 import run.yigou.gxzy.ui.dialog.ChatSummaryListDialog;
 import run.yigou.gxzy.utils.DateHelper;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.utils.MarkdownUtils;
 import run.yigou.gxzy.utils.ThreadUtil;
 

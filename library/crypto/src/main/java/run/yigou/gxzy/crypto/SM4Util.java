@@ -1,4 +1,4 @@
-package run.yigou.gxzy.Security.Cryptogram;
+package run.yigou.gxzy.crypto;
 
 import android.util.Base64;
 import android.util.Log;
@@ -9,8 +9,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-import run.yigou.gxzy.Security.Cryptogram.Sm.SM4CryptoUtil;
-import run.yigou.gxzy.Security.Cryptogram.Sm.Sm4Context;
+import run.yigou.gxzy.crypto.sm.SM4CryptoUtil;
+import run.yigou.gxzy.crypto.sm.Sm4Context;
 
 /**
  * 迁移自 SimpleEasy.Base.Cryptogram.SM4Util 的 Java 实现，保留默认密钥、补位模式等行为。
@@ -162,10 +162,9 @@ public final class SM4Util {
     }
 
     /**
-     * 工作模式描述枚举。
+     * SM4 加密模式枚举。
      */
     public enum Sm4CryptoEnum {
-        ECB,
-        CBC
+        ECB, CBC
     }
 }

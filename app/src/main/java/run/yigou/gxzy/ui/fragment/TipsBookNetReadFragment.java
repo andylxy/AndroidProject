@@ -30,7 +30,7 @@ import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import com.hjq.base.BaseDialog;
 
 import run.yigou.gxzy.greendao.util.DbService;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 import com.lucas.annotations.Subscribe;

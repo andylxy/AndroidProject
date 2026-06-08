@@ -7,7 +7,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.http.api.AiStreamApi;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.utils.SerialUtil;
 
 /**

@@ -15,7 +15,7 @@ import run.yigou.gxzy.manager.AiChatManager;
 import run.yigou.gxzy.manager.ChatSessionManager;
 import run.yigou.gxzy.ui.tips.contract.AiMsgContract;
 import run.yigou.gxzy.utils.DateHelper;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 
 public class AiMsgPresenter implements AiMsgContract.Presenter {
 

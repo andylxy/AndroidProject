@@ -9,7 +9,7 @@ import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
 import run.yigou.gxzy.http.callback.SseStreamCallback;
 import run.yigou.gxzy.http.model.SseChunk;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 
 /**
  * AI 流式事件处理器

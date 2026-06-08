@@ -15,7 +15,7 @@ import android.util.LruCache;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

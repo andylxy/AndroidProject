@@ -7,7 +7,7 @@ import android.os.Looper;
 import androidx.appcompat.widget.AppCompatTextView;
 
 import com.hjq.http.EasyHttp;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
 

@@ -1,4 +1,4 @@
-package run.yigou.gxzy.Security.Cryptogram.Sm;
+package run.yigou.gxzy.crypto.sm;
 
 /**
  * 复刻 C# 版本的 Sm4Context，用于在加解密过程中共享模式、密钥和是否补位等控制信息。

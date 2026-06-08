@@ -16,7 +16,7 @@ import run.yigou.gxzy.http.sse.AiStreamEventHandler;
 import run.yigou.gxzy.http.sse.AiStreamRequestBuilder;
 import run.yigou.gxzy.http.sse.SseClientHelper;
 import run.yigou.gxzy.other.AppConfig;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 
 /**
  * AI 流式对话 API

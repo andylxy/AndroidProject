@@ -13,7 +13,7 @@ package run.yigou.gxzy.ui.tips.entity;
 import android.text.SpannableStringBuilder;
 import android.text.style.ClickableSpan;
 
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 
 import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
 import run.yigou.gxzy.utils.DebugLog;

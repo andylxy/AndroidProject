@@ -31,7 +31,7 @@ import com.google.gson.stream.JsonToken;
 import com.hjq.bar.TitleBar;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.Security.SecurityUtils;
+import run.yigou.gxzy.crypto.SecurityUtils;
 import run.yigou.gxzy.common.FragmentSetting;
 import run.yigou.gxzy.common.ManagerSetting;
 import run.yigou.gxzy.greendao.entity.UserInfo;
@@ -59,7 +59,7 @@ import com.hjq.http.EasyConfig;
 import com.hjq.http.config.IRequestInterceptor;
 import com.hjq.http.model.HttpParams;
 import com.hjq.http.model.HttpHeaders;
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 import com.hjq.toast.Toaster;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;

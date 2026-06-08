@@ -5,7 +5,7 @@ import android.text.SpannableStringBuilder;
 
 import androidx.annotation.NonNull;
 
-import run.yigou.gxzy.utils.EasyLog;
+import run.yigou.gxzy.log.EasyLog;
 
 import java.util.ArrayList;
 import java.util.Collections;

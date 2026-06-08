@@ -1,8 +1,8 @@
-package run.yigou.gxzy.Security.Cryptogram;
+package run.yigou.gxzy.crypto;
 
 import android.util.Log;
 
-import run.yigou.gxzy.Security.Cryptogram.Sm.SM2CryptoUtil;
+import run.yigou.gxzy.crypto.sm.SM2CryptoUtil;
 
 /**
  * Java 版 SM2 门面类，对应 SimpleEasy.Base.Cryptogram.SM2Util。
