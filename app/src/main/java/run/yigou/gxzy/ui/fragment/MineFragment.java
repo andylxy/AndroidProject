@@ -11,7 +11,6 @@ import run.yigou.gxzy.aop.SingleClick;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.ui.activity.AboutActivity;
 import run.yigou.gxzy.ui.activity.BrowserActivity;
-import run.yigou.gxzy.ui.activity.DialogActivity;
 import run.yigou.gxzy.ui.activity.GuideActivity;
 import run.yigou.gxzy.ui.activity.ImagePreviewActivity;
 import run.yigou.gxzy.ui.activity.ImageSelectActivity;
@@ -22,7 +21,6 @@ import run.yigou.gxzy.ui.activity.PersonalDataActivity;
 import run.yigou.gxzy.ui.activity.PhoneResetActivity;
 import run.yigou.gxzy.ui.activity.RegisterActivity;
 import run.yigou.gxzy.ui.activity.SettingActivity;
-import run.yigou.gxzy.ui.activity.StatusActivity;
 import run.yigou.gxzy.ui.activity.VideoPlayActivity;
 import run.yigou.gxzy.ui.activity.VideoSelectActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
@@ -52,7 +50,7 @@ public final class MineFragment extends TitleBarFragment<HomeActivity> {
 
     @Override
     protected void initView() {
-        setOnClickListener(R.id.btn_mine_dialog, R.id.btn_mine_hint, R.id.btn_mine_login, R.id.btn_mine_register, R.id.btn_mine_forget,
+        setOnClickListener(R.id.btn_mine_login, R.id.btn_mine_register, R.id.btn_mine_forget,
                 R.id.btn_mine_reset, R.id.btn_mine_change, R.id.btn_mine_personal, R.id.btn_mine_setting, R.id.btn_mine_about,
                 R.id.btn_mine_guide, R.id.btn_mine_browser, R.id.btn_mine_image_select, R.id.btn_mine_image_preview,
                 R.id.btn_mine_video_select, R.id.btn_mine_video_play, R.id.btn_mine_crash, R.id.btn_mine_pay);
@@ -68,12 +66,6 @@ public final class MineFragment extends TitleBarFragment<HomeActivity> {
     public void onClick(View view) {
         int viewId = view.getId();
         switch (viewId) {
-            case R.id.btn_mine_dialog:
-                startActivity(DialogActivity.class);
-                break;
-            case R.id.btn_mine_hint:
-                startActivity(StatusActivity.class);
-                break;
             case R.id.btn_mine_login:
                 startActivity(LoginActivity.class);
                 break;
