@@ -1,0 +1,138 @@
+using Microsoft.Agents.AI;
+using SimpleEasy.Base.Autofac;
+using SimpleEasy.MAF.AI.Scaffolds.Agent;
+using SimpleEasy.MAF.AI.Tools;
+
+public sealed class YOUR_CLASS_NAME : AgentScaffoldBase, IDependency
+{
+    public YOUR_CLASS_NAME(
+        AgentSessionContextFactory sessionContextFactory,
+        ManagedAgentFactory managedAgentFactory,
+        AgentToolRegistry toolRegistry,
+        AgentCapabilitySelector capabilitySelector)
+        : base(sessionContextFactory, managedAgentFactory, toolRegistry, capabilitySelector)
+    {
+    }
+
+    protected override string AgentName => "YOUR_AGENT_NAME";
+
+    protected override void ConfigureAgentCapabilities(AgentCapabilitySelection selection)
+    {
+        selection.IncludeToolSet(ClockAgentToolSet.ToolSetKey)
+            .IncludeToolSet(CalculatorAgentToolSet.ToolSetKey)
+            .IncludeToolSet(TravelPlanningToolSet.ToolSetKey);
+    }
+
+    protected override void ConfigureFunctionCallingBuild(AgentBuildOptions options)
+    {
+        options.ConfigureAgent(agent =>
+        {
+            agent.Description = "YOUR_DESCRIPTION";
+            agent.Temperature = 0.2f;
+        });
+    }
+
+    // 如果当前入口不是简单默认组合，而是“默认 ToolSet + 业务 ToolSet”或“按能力模块组合”，
+    // 再启用下面这个模板。默认不启用，目的是让第一次复制时先走最小可运行链路。
+    // protected override void ConfigureAgentCapabilities(AgentCapabilitySelection selection)
+    // {
+    //     selection.IncludeToolSet(ClockAgentToolSet.ToolSetKey)
+    //         .IncludeToolSet(CalculatorAgentToolSet.ToolSetKey)
+    //         .IncludeToolSet(YOUR_TOOLSET_CLASS.ToolSetKey);
+    // }
+
+    // 如果当前入口需要显式接管最终 Agent 创建动作，而不仅仅是配置构建参数，
+    // 再启用下面这个模板，并优先复用基类 helper，而不是复制参数映射逻辑。
+    // protected override AIAgent CreateAgent(AgentBuildOptions options)
+    // {
+    //     var chatClient = CreateDefaultChatClient(options);
+    //     var chatClientAgentOptions = CreateDefaultChatClientAgentOptions(options, chatClient);
+    //     return chatClient.AsAIAgent(chatClientAgentOptions);
+    // }
+
+    // 如果当前入口需要补充业务约束校验，例如要求固定 Provider 或要求启用某些 HistoryOptions，
+    // 再启用下面这个模板。
+    // protected override void ValidateAgentBuildOptions(AgentBuildOptions options)
+    // {
+    //     if (!string.Equals(options.Provider, "AzureOpenAI", StringComparison.OrdinalIgnoreCase))
+    //     {
+    //         throw new InvalidOperationException("当前 Agent 只允许使用 AzureOpenAI Provider。");
+    //     }
+    // }
+
+    // 如果你需要自定义工具摘要输出，再启用下面模板，补充业务模式说明或额外诊断信息。
+    // protected override void WriteFunctionCallingToolSummary(
+    //     string entryTitle,
+    //     string modeDescription,
+    //     AgentSession session,
+    //     IReadOnlyList<string> resolvedToolSets)
+    // {
+    //     base.WriteFunctionCallingToolSummary(entryTitle, modeDescription, session, resolvedToolSets);
+    //     Console.WriteLine("YOUR_SUMMARY_TEXT\n");
+    // }
+
+    // 如果你需要自定义历史输出，再启用下面模板，例如给历史打印加上业务标题或过滤说明。
+    // protected override async Task PrintFunctionCallingHistoryAsync(AgentSession session)
+    // {
+    //     Console.WriteLine("YOUR_HISTORY_TITLE\n");
+    //     await base.PrintFunctionCallingHistoryAsync(session);
+    // }
+
+    public Task RunAsync()
+    {
+        return RunInternalAsync();
+    }
+
+    private async Task RunInternalAsync()
+    {
+        var session = await GetSessionAsync();
+        var resolvedToolSets = ResolveToolSetNames(
+            ClockAgentToolSet.ToolSetKey,
+            CalculatorAgentToolSet.ToolSetKey,
+            TravelPlanningToolSet.ToolSetKey);
+
+        WriteFunctionCallingToolSummary(
+            entryTitle: nameof(YOUR_CLASS_NAME),
+            modeDescription: "YOUR_MODE_DESCRIPTION",
+            session: session,
+            resolvedToolSets: resolvedToolSets);
+
+        var messages = new[]
+        {
+            "YOUR_FIRST_MESSAGE",
+            "YOUR_SECOND_MESSAGE"
+        };
+
+        // 如果是业务入口，通常至少会补到第三轮甚至更多轮脚本，
+        // 用来验证“记住用户条件 -> 调工具 -> 基于前文继续回答”的完整链路。
+        // var messages = new[]
+        // {
+        //     "YOUR_FIRST_MESSAGE",
+        //     "YOUR_SECOND_MESSAGE",
+        //     "YOUR_THIRD_MESSAGE"
+        // };
+
+        foreach (var message in messages)
+        {
+            Console.WriteLine($"👤 用户: {message}");
+            Console.WriteLine("\n正在请求 Function Calling Agent...\n");
+
+            var response = await SendAsync(message, session);
+            Console.WriteLine($"🤖 {ResolvedAgentName}: {response}");
+            Console.WriteLine();
+        }
+
+        await PrintFunctionCallingHistoryAsync(session);
+    }
+}
+
+// 参考案例：
+// 1. vol.api.sqlsugar/SimpleEasy.MEAI.AI.Conhost/Demos/FunctionCallingPresetAgentDemo.cs
+// 2. vol.api.sqlsugar/SimpleEasy.MEAI.AI.Conhost/Demos/FunctionCallingCustomSelectionAgentDemo.cs
+// 3. vol.api.sqlsugar/SimpleEasy.MEAI.AI.Conhost/Demos/TravelPlannerAgentDemo.cs
+
+// 使用说明：
+// 1. 默认先保持显式 ToolSet 组合 + 两轮 messages，打通最小 Function Calling 链路。
+// 2. 如果需要业务 ToolSet 组合，再启用 ConfigureAgentCapabilities(...)。
+// 3. 如果需要业务化摘要/历史输出，再启用对应覆写模板。
+// 4. 如果需要更强控制权，再启用 CreateAgent(...) 或 ValidateAgentBuildOptions(...)。

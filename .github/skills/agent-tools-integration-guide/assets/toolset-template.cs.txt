@@ -1,0 +1,49 @@
+using Microsoft.Extensions.AI;
+using SimpleEasy.MAF.AI.Tools;
+using System.ComponentModel;
+
+public sealed class YOUR_CLASS_NAME : IAgentToolSet
+{
+    public const string ToolSetKey = "YOUR_TOOLSET_KEY";
+
+    private IReadOnlyList<AITool>? _cachedTools;
+
+    public string Name => ToolSetKey;
+
+    public IList<AITool> CreateTools()
+    {
+        _cachedTools ??=
+        [
+            AIFunctionFactory.Create(YOUR_METHOD_NAME, name: nameof(YOUR_METHOD_NAME))
+        ];
+
+        return [.. _cachedTools];
+    }
+
+    [Description("YOUR_METHOD_DESCRIPTION")]
+    public string YOUR_METHOD_NAME([Description("YOUR_PARAMETER_DESCRIPTION")] string YOUR_PARAMETER_NAME)
+    {
+        return $"YOUR_RESULT_TEXT: {YOUR_PARAMETER_NAME}";
+    }
+
+    // 如果需要正式业务 ToolSet，通常会继续追加第二个、第三个方法。
+    // 做法：复制下面这个方法块，并替换成真实业务语义。
+    //
+    // [Description("YOUR_SECOND_METHOD_DESCRIPTION")]
+    // public string YOUR_SECOND_METHOD_NAME(
+    //     [Description("YOUR_SECOND_PARAMETER_DESCRIPTION")] string YOUR_SECOND_PARAMETER_NAME)
+    // {
+    //     return $"YOUR_SECOND_RESULT_TEXT: {YOUR_SECOND_PARAMETER_NAME}";
+    // }
+}
+
+// 使用说明：
+// 1. 将 YOUR_CLASS_NAME 替换为具体 ToolSet 类名。
+// 2. 将 ToolSetKey 替换为当前 ToolSet 的稳定键，例如 Utility.Clock。
+// 3. 将 YOUR_METHOD_NAME、YOUR_PARAMETER_NAME、Description 文案替换为真实业务语义。
+// 4. 如果需要多个工具，继续在 CreateTools() 中追加 AIFunctionFactory.Create(...)，并复制下面的可选方法块。
+// 5. 优先让业务 Agent 通过 ConfigureAgentCapabilities 挂接该 ToolSet。
+
+// 可选扩展示例：
+// 1. 在 CreateTools() 中追加：AIFunctionFactory.Create(YOUR_SECOND_METHOD_NAME, name: nameof(YOUR_SECOND_METHOD_NAME))
+// 2. 再把上面的可选方法块去掉注释并替换占位符。
