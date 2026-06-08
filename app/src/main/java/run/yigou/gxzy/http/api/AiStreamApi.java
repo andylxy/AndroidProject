@@ -6,18 +6,25 @@ import com.hjq.http.EasyConfig;
 import com.hjq.http.config.IRequestApi;
 import com.hjq.http.config.IRequestHost;
 
+import com.google.gson.Gson;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
+import run.yigou.gxzy.app.AppApplication;
+import run.yigou.gxzy.http.security.SecurityConfig;
 import run.yigou.gxzy.sse.SseStreamCallback;
 import run.yigou.gxzy.sse.SseEventHandler;
-import run.yigou.gxzy.sse.SseRequestBuilder;
 import run.yigou.gxzy.sse.SseClientHelper;
 import run.yigou.gxzy.other.AppConfig;
 import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.utils.SerialUtil;
 
 /**
  * AI 流式对话 API
@@ -31,6 +38,8 @@ import run.yigou.gxzy.log.EasyLog;
 public final class AiStreamApi implements IRequestApi, IRequestHost {
     
     private static final String TAG = "AiStreamApi";
+    private static final String CONTENT_TYPE = "application/json; charset=utf-8";
+    private static final MediaType JSON = MediaType.parse(CONTENT_TYPE);
     
     // 参数字段
     private String query;           // 用户问题
@@ -95,6 +104,91 @@ public final class AiStreamApi implements IRequestApi, IRequestHost {
         }
     }
     
+    private String getFullUrl() {
+        String host = getHost();
+        if (!host.endsWith("/")) {
+            host += "/";
+        }
+        return host + "api/AppBookRequest/" + getApi();
+    }
+
+    private String buildRequestBody() {
+        RequestData data = new RequestData();
+        data.conversationId = conversationId;
+        data.endUserId = endUserId;
+        data.query = query;
+        return new Gson().toJson(data);
+    }
+
+    private Request buildSignedRequest() {
+        String jsonBody = buildRequestBody();
+        RequestBody body = RequestBody.create(jsonBody.getBytes(StandardCharsets.UTF_8), JSON);
+
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(getFullUrl())
+                .post(body)
+                .addHeader("Content-Type", CONTENT_TYPE)
+                .addHeader("Accept", "text/event-stream")
+                .addHeader("Cache-Control", "no-cache")
+                .addHeader("Connection", "keep-alive")
+                .addHeader("app", "2")
+                .addHeader("SessionId", getSessionIdHeader());
+
+        addSecurityHeaders(requestBuilder);
+        return requestBuilder.build();
+    }
+
+    private String getSessionIdHeader() {
+        String sessionId = SerialUtil.getSerial();
+        return sessionId != null ? sessionId : "";
+    }
+
+    private void addSecurityHeaders(Request.Builder requestBuilder) {
+        if (!SecurityConfig.isAntiReplayAttackEnabled()) {
+            return;
+        }
+
+        String accessKeyId = SecurityConfig.getAccessKeyId();
+        String accessKeySecret = SecurityConfig.getAccessKeySecret();
+        if (AppApplication.application != null && AppApplication.application.mUserInfoToken != null) {
+            accessKeyId = AppApplication.application.mUserInfoToken.getAccessKeyId();
+            accessKeySecret = AppApplication.application.mUserInfoToken.getAccessKeySecret();
+        }
+
+        if (accessKeyId == null || accessKeyId.isEmpty() || accessKeySecret == null || accessKeySecret.isEmpty()) {
+            EasyLog.print(TAG, "SSE 请求缺少移动端登录签名凭证");
+            return;
+        }
+
+        String method = "POST";
+        String path = "/api/AppBookRequest/" + getApi();
+        String timestamp = SecurityConfig.getCurrentTimestamp();
+        String nonce = SecurityConfig.generateNonce();
+        String hostForSign = getHostForSign();
+
+        SecurityConfig.setAccessKeyId(accessKeyId);
+        SecurityConfig.setAccessKeySecret(accessKeySecret);
+        String signature = SecurityConfig.generateSignature(this, method, hostForSign, path, timestamp, nonce);
+
+        requestBuilder.addHeader("Signature", "Signature " + signature);
+        requestBuilder.addHeader("X-AccessKeyId", accessKeyId);
+        requestBuilder.addHeader("X-Timestamp", timestamp);
+        requestBuilder.addHeader("X-Nonce", nonce);
+    }
+
+    private String getHostForSign() {
+        String host = getHost();
+        if (host.startsWith("http://")) {
+            host = host.substring(7);
+        } else if (host.startsWith("https://")) {
+            host = host.substring(8);
+        }
+        if (host.endsWith("/")) {
+            host = host.substring(0, host.length() - 1);
+        }
+        return host;
+    }
+
     // ========== SSE 流式请求方法 ==========
     
     /**
@@ -119,7 +213,7 @@ public final class AiStreamApi implements IRequestApi, IRequestHost {
             client = SseClientHelper.configureTls12(client.newBuilder(), getHost());
             
             // 3. 构建请求 (Header, Body, 签名)
-            Request request = SseRequestBuilder.buildRequest(getHost(), getApi(), this);
+            Request request = buildSignedRequest();
             
             // 4. 创建并启动 EventSource
             EventSource.Factory factory = EventSources.createFactory(client);
@@ -133,5 +227,14 @@ public final class AiStreamApi implements IRequestApi, IRequestHost {
             e.printStackTrace();
             callback.onError(e);
         }
+    }
+
+    private static class RequestData {
+        @com.google.gson.annotations.SerializedName("conversationId")
+        String conversationId;
+        @com.google.gson.annotations.SerializedName("endUserId")
+        String endUserId;
+        @com.google.gson.annotations.SerializedName("query")
+        String query;
     }
 }
