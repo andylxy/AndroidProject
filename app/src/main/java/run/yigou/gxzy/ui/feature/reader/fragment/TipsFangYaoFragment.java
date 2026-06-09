@@ -24,7 +24,7 @@ import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.feature.reader.data.BookData;
 import run.yigou.gxzy.ui.feature.reader.data.BookDataManager;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
-import run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder;
+import run.yigou.gxzy.data.GlobalDataHolder;
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.utils.DebugLog;
 

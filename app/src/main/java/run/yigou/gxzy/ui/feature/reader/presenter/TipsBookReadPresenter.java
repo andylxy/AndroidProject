@@ -7,7 +7,7 @@
  * Copyright (c) 2025, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.tips.presenter;
+package run.yigou.gxzy.ui.feature.reader.presenter;
 
 import run.yigou.gxzy.log.EasyLog;
 
@@ -32,15 +32,15 @@ import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
-import run.yigou.gxzy.ui.tips.contract.TipsBookReadContract;
+import run.yigou.gxzy.ui.feature.reader.contract.TipsBookReadContract;
 import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.feature.reader.entity.GroupModel;
 import run.yigou.gxzy.ui.feature.reader.data.BookData;
 import run.yigou.gxzy.ui.feature.reader.data.BookDataManager;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterIndexBuilder;
-import run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder;
-import run.yigou.gxzy.ui.tips.repository.BookRepository;
+import run.yigou.gxzy.data.GlobalDataHolder;
+import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
 import run.yigou.gxzy.ui.feature.reader.utils.ChapterDownloadManager;
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.model.HH2SectionData;
@@ -520,7 +520,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             }
             
             // 3. 获取全书别名映射（用于增强搜索）
-            run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder globalData = run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder.getInstance();
+            run.yigou.gxzy.data.GlobalDataHolder globalData = run.yigou.gxzy.data.GlobalDataHolder.getInstance();
             java.util.Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
             java.util.Map<String, String> fangAliasDict = globalData.getFangAliasDict();
             

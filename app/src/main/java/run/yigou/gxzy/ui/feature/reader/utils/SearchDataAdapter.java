@@ -28,11 +28,11 @@ import run.yigou.gxzy.ui.feature.reader.data.BookData;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
 import run.yigou.gxzy.ui.feature.reader.entity.GroupData;
 import run.yigou.gxzy.ui.feature.reader.entity.ItemData;
-import run.yigou.gxzy.ui.tips.repository.BookRepository;
+import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.model.HH2SectionData;
 import run.yigou.gxzy.ui.feature.reader.utils.TipsNetHelper;
-import run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder;
+import run.yigou.gxzy.data.GlobalDataHolder;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**

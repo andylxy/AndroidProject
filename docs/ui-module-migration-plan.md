@@ -118,7 +118,7 @@
 | 阶段 2 Dialog/Popup | 已完成 | 批次 6 已完成 | `assembleDebug` 成功 | 通用 `CommonDialog` / `WaitDialog` / `MessageDialog` / `InputDialog` / `MenuDialog` / `SelectDialog` / `DateDialog` / `TimeDialog` / `ListPopup` 已迁入 `library/ui-dialog`；AOP 编织仍在 app 侧 |
 | 阶段 3 Media | 批次 2 已完成 | 批次 2 已完成：app 内 feature/media 包级聚合 | `assembleDebug` 成功 | 7 个 Activity、3 个 Adapter、1 个 Dialog 已移动到 app 内 `run.yigou.gxzy.ui.feature.media` 包；所有调用方 import 已更新 |
 | 阶段 4 AI Chat | 未开始 | - | - | - |
-| 阶段 5 Reader/Tips | 进行中 | 批次 9 已完成（reader widget 迁移） | `assembleDebug` 成功 | reader Activity/Fragment/Widget 已迁入 `feature/reader/`；tips/ 剩余 67 文件待按分层方案迁移；计划已更新为 10 批次分层迁移 |
+| 阶段 5 Reader/Tips | 进行中 | 批次 3 已完成（model/ 7文件 + reader/entity/ 7文件）；批次 2 GlobalDataHolder 已迁入 reader/data/（非根 data/） | `assembleDebug` 成功 | model/（7文件）、reader/entity/（7文件）、reader/data/GlobalDataHolder 已迁移；tips/ 剩余文件待迁移 |
 | 阶段 6 Account | 未开始 | - | - | - |
 
 ## 7. 当前批次控制
@@ -829,7 +829,8 @@ app/src/main/java/run/yigou/gxzy/
 
 #### 批次 2：迁移 tips/data/ 下 6 个文件 → eature/reader/data/ ✅ COMPLETED
 
-- [x] 2.1 创建 un.yigou.gxzy.ui.feature.reader.data 包目录
+- [x] 2.1 创建 
+un.yigou.gxzy.ui.feature.reader.data 包目录
 - [x] 2.2 迁移 BookData.java → eature/reader/data/BookData.java，更新 package
 - [x] 2.3 迁移 BookDataManager.java → eature/reader/data/BookDataManager.java，更新 package
 - [x] 2.4 迁移 ChapterData.java → eature/reader/data/ChapterData.java，更新 package
@@ -844,28 +845,33 @@ app/src/main/java/run/yigou/gxzy/
 
 #### 批次 3：迁移 entity/ 下 7 个文件 → eature/reader/entity/
 
-- [ ] 3.1 创建 un.yigou.gxzy.ui.feature.reader.entity 包目录
-- [ ] 3.2 迁移 tips/entity/ 下 7 个文件，更新 package 为 un.yigou.gxzy.ui.feature.reader.entity
+- [ ] 3.1 创建 
+un.yigou.gxzy.ui.feature.reader.entity 包目录
+- [ ] 3.2 迁移 tips/entity/ 下 7 个文件，更新 package 为 
+un.yigou.gxzy.ui.feature.reader.entity
 - [ ] 3.3 批量更新所有外部 import 引用
 - [ ] 3.4 删除原始 tips/entity/ 下文件
 
 #### 批次 4：迁移 tipsutils/ 下 6 个文件 → eature/reader/tipsutils/
 
-- [ ] 4.1 创建 un.yigou.gxzy.ui.feature.reader.tipsutils 包目录
+- [ ] 4.1 创建 
+un.yigou.gxzy.ui.feature.reader.tipsutils 包目录
 - [ ] 4.2 迁移 tips/tipsutils/ 下 6 个文件，更新 package
 - [ ] 4.3 批量更新所有外部 import 引用
 - [ ] 4.4 删除原始 tips/tipsutils/ 下文件
 
 #### 批次 5：迁移 utils/ 下 5 个文件 → eature/reader/utils/
 
-- [ ] 5.1 创建 un.yigou.gxzy.ui.feature.reader.utils 包目录
+- [ ] 5.1 创建 
+un.yigou.gxzy.ui.feature.reader.utils 包目录
 - [ ] 5.2 迁移 tips/utils/ 下 5 个文件，更新 package
 - [ ] 5.3 批量更新所有外部 import 引用
 - [ ] 5.4 删除原始 tips/utils/ 下文件
 
 #### 批次 6：迁移 adapter/ 和 refactor/ 下 28 个文件 → eature/reader/adapter/
 
-- [ ] 6.1 创建 un.yigou.gxzy.ui.feature.reader.adapter 和 dapter/refactor/ 包目录
+- [ ] 6.1 创建 
+un.yigou.gxzy.ui.feature.reader.adapter 和 dapter/refactor/ 包目录
 - [ ] 6.2 迁移 tips/adapter/ 和 tips/adapter/refactor/ 下 28 个文件，更新 package
 - [ ] 6.3 批量更新所有外部 import 引用
 - [ ] 6.4 删除原始 tips/adapter/ 下文件

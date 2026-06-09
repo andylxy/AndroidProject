@@ -7,7 +7,7 @@
  * Copyright (c) 2025, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.tips.contract;
+package run.yigou.gxzy.ui.feature.reader.contract;
 
 import android.content.Context;
 

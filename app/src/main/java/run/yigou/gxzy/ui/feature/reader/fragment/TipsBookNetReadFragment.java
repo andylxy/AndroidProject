@@ -59,11 +59,11 @@ import run.yigou.gxzy.ui.feature.reader.entity.GroupModel;
 import run.yigou.gxzy.model.HH2SectionData;
 import run.yigou.gxzy.ui.feature.reader.utils.TipsNetHelper;
 import run.yigou.gxzy.ui.feature.reader.utils.SearchCoordinator;
-import run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder;
+import run.yigou.gxzy.data.GlobalDataHolder;
 import run.yigou.gxzy.ui.feature.reader.utils.ChapterDownloadManager;
-import run.yigou.gxzy.ui.tips.contract.TipsBookReadContract;
-import run.yigou.gxzy.ui.tips.presenter.TipsBookReadPresenter;
-import run.yigou.gxzy.ui.tips.repository.BookRepository;
+import run.yigou.gxzy.ui.feature.reader.contract.TipsBookReadContract;
+import run.yigou.gxzy.ui.feature.reader.presenter.TipsBookReadPresenter;
+import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
 import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.ThreadUtil;
 

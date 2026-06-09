@@ -38,7 +38,7 @@
 -keep class run.yigou.gxzy.greendao.** { *; }
 
 # Tips 模块全局数据持有者（单例模式，包含 Map 操作）
-#-keep class run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder { *; }
+#-keep class run.yigou.gxzy.data.GlobalDataHolder { *; }
 
 # Tips 模块数据模型（响应解析和存储）
 #-keep class run.yigou.gxzy.ui.tips.DataBeans.** { *; }

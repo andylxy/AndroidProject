@@ -7,7 +7,7 @@
  * Copyright (c) 2025, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.feature.reader.data;
+package run.yigou.gxzy.data;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

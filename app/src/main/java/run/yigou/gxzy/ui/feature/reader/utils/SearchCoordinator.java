@@ -10,7 +10,7 @@ import java.util.List;
 
 import run.yigou.gxzy.ui.feature.reader.entity.GroupData;
 import run.yigou.gxzy.ui.feature.reader.entity.ItemData;
-import run.yigou.gxzy.ui.tips.repository.BookRepository;
+import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
 import run.yigou.gxzy.ui.feature.reader.data.BookData;
 import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
@@ -75,8 +75,8 @@ public class SearchCoordinator {
         }
         
         // 3. 获取别名字典
-        run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder globalData = 
-            run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder.getInstance();
+        run.yigou.gxzy.data.GlobalDataHolder globalData = 
+            run.yigou.gxzy.data.GlobalDataHolder.getInstance();
         java.util.Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
         java.util.Map<String, String> fangAliasDict = globalData.getFangAliasDict();
         

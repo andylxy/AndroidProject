@@ -7,7 +7,7 @@
  * Copyright (c) 2025, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.tips.repository;
+package run.yigou.gxzy.ui.feature.reader.repository;
 
 import com.hjq.http.EasyHttp;
 import run.yigou.gxzy.log.EasyLog;
@@ -33,7 +33,7 @@ import run.yigou.gxzy.ui.feature.reader.data.BookData;
 import run.yigou.gxzy.ui.feature.reader.data.BookDataManager;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
 import run.yigou.gxzy.ui.feature.reader.data.DataConverter;
-import run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder;
+import run.yigou.gxzy.data.GlobalDataHolder;
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.model.HH2SectionData;
 import run.yigou.gxzy.utils.DebugLog;
