@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.adapter;
+package run.yigou.gxzy.ui.feature.media.adapter;
 
 import android.content.Context;
 import android.view.ViewGroup;
@@ -14,8 +14,8 @@ import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.manager.CacheDataManager;
-import run.yigou.gxzy.ui.activity.VideoSelectActivity;
-import run.yigou.gxzy.widget.PlayerView;
+import run.yigou.gxzy.ui.feature.media.activity.VideoSelectActivity;
+import run.yigou.gxzy.ui.feature.media.widget.PlayerView;
 
 import java.util.List;
 

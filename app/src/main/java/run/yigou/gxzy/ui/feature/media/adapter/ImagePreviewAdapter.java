@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.adapter;
+package run.yigou.gxzy.ui.feature.media.adapter;
 
 import android.content.Context;
 import android.view.ViewGroup;

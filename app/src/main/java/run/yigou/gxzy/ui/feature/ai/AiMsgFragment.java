@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.fragment;
+package run.yigou.gxzy.ui.feature.ai;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -36,12 +36,10 @@ import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
 import run.yigou.gxzy.greendao.entity.ChatSessionBean;
 import run.yigou.gxzy.ui.activity.HomeActivity;
-import run.yigou.gxzy.ui.helper.ChatInputHelper;
-import run.yigou.gxzy.ui.helper.ChatSidebarHelper;
-import run.yigou.gxzy.ui.helper.ChatSummaryHelper;
-import run.yigou.gxzy.ui.tips.adapter.TipsAiChatAdapter;
-import run.yigou.gxzy.ui.tips.contract.AiMsgContract;
-import run.yigou.gxzy.ui.tips.presenter.AiMsgPresenter;
+import run.yigou.gxzy.ui.feature.ai.helper.ChatInputHelper;
+import run.yigou.gxzy.ui.feature.ai.helper.ChatSidebarHelper;
+import run.yigou.gxzy.ui.feature.ai.helper.ChatSummaryHelper;
+import run.yigou.gxzy.ui.feature.ai.adapter.TipsAiChatAdapter;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.utils.MarkdownUtils;
 import run.yigou.gxzy.utils.ThreadUtil;

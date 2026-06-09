@@ -21,6 +21,9 @@ import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
 import run.yigou.gxzy.http.model.FileContentResolver;
 import com.hjq.widget.layout.SettingBar;
+import run.yigou.gxzy.ui.feature.media.activity.ImageCropActivity;
+import run.yigou.gxzy.ui.feature.media.activity.ImagePreviewActivity;
+import run.yigou.gxzy.ui.feature.media.activity.ImageSelectActivity;
 
 import java.io.File;
 import java.net.URI;

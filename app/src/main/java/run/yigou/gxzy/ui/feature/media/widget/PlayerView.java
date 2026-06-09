@@ -1,4 +1,4 @@
-package run.yigou.gxzy.widget;
+package run.yigou.gxzy.ui.feature.media.widget;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;

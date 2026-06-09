@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.helper;
+package run.yigou.gxzy.ui.feature.ai.helper;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -20,8 +20,8 @@ import java.util.List;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
 import run.yigou.gxzy.greendao.entity.ChatSessionBean;
-import run.yigou.gxzy.manager.ChatSessionManager;
-import run.yigou.gxzy.ui.tips.adapter.ChatHistoryAdapter;
+import run.yigou.gxzy.manager.ai.ChatSessionManager;
+import run.yigou.gxzy.ui.feature.ai.adapter.ChatHistoryAdapter;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.log.EasyLog;
 

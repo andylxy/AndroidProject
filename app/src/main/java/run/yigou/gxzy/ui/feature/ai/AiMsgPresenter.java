@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.tips.presenter;
+package run.yigou.gxzy.ui.feature.ai;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -11,9 +11,8 @@ import java.util.List;
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
 import run.yigou.gxzy.greendao.entity.ChatSessionBean;
 import run.yigou.gxzy.greendao.entity.ChatSummaryBean;
-import run.yigou.gxzy.manager.AiChatManager;
-import run.yigou.gxzy.manager.ChatSessionManager;
-import run.yigou.gxzy.ui.tips.contract.AiMsgContract;
+import run.yigou.gxzy.manager.ai.AiChatManager;
+import run.yigou.gxzy.manager.ai.ChatSessionManager;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.log.EasyLog;
 

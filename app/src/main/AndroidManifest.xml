@@ -194,52 +194,52 @@
 
         <!-- 拍照选择 -->
         <activity
-            android:name=".ui.activity.CameraActivity"
+            android:name=".ui.feature.media.activity.CameraActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <!-- 图片裁剪 -->
         <activity
-            android:name=".ui.activity.ImageCropActivity"
+            android:name=".ui.feature.media.activity.ImageCropActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <!-- 图片选择 -->
         <activity
-            android:name=".ui.activity.ImageSelectActivity"
+            android:name=".ui.feature.media.activity.ImageSelectActivity"
             android:label="@string/image_select_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <!-- 查看大图 -->
         <activity
-            android:name=".ui.activity.ImagePreviewActivity"
+            android:name=".ui.feature.media.activity.ImagePreviewActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <!-- 播放视频（自适应方向） -->
         <activity
-            android:name=".ui.activity.VideoPlayActivity"
+            android:name=".ui.feature.media.activity.VideoPlayActivity"
             android:launchMode="singleTop"
             android:theme="@style/FullScreenTheme" />
 
         <!-- 播放视频（竖屏方向） -->
         <activity
-            android:name=".ui.activity.VideoPlayActivity$Portrait"
+            android:name=".ui.feature.media.activity.VideoPlayActivity$Portrait"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/FullScreenTheme" />
 
         <!-- 播放视频（横屏方向） -->
         <activity
-            android:name=".ui.activity.VideoPlayActivity$Landscape"
+            android:name=".ui.feature.media.activity.VideoPlayActivity$Landscape"
             android:launchMode="singleTop"
             android:screenOrientation="landscape"
             android:theme="@style/FullScreenTheme" />
 
         <!-- 选择视频 -->
         <activity
-            android:name=".ui.activity.VideoSelectActivity"
+            android:name=".ui.feature.media.activity.VideoSelectActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 

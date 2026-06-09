@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.feature.media.activity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -18,7 +18,7 @@ import com.hjq.base.RecyclerPagerAdapter;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.ui.adapter.ImagePreviewAdapter;
+import run.yigou.gxzy.ui.feature.media.adapter.ImagePreviewAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;

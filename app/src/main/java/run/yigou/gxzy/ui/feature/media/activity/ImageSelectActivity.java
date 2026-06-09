@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.feature.media.activity;
 
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -22,8 +22,8 @@ import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import com.hjq.base.GridSpaceDecoration;
-import run.yigou.gxzy.ui.adapter.ImageSelectAdapter;
-import run.yigou.gxzy.ui.dialog.AlbumDialog;
+import run.yigou.gxzy.ui.feature.media.adapter.ImageSelectAdapter;
+import run.yigou.gxzy.ui.feature.media.dialog.AlbumDialog;
 import com.hjq.widget.layout.StatusLayout;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;

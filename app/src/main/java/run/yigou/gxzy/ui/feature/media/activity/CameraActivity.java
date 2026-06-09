@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.feature.media.activity;
 
 import android.content.Intent;
 import android.media.MediaScannerConnection;

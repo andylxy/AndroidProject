@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.feature.media.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -14,7 +14,7 @@ import com.gyf.immersionbar.BarHide;
 import com.gyf.immersionbar.ImmersionBar;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.widget.PlayerView;
+import run.yigou.gxzy.ui.feature.media.widget.PlayerView;
 
 import java.io.File;
 

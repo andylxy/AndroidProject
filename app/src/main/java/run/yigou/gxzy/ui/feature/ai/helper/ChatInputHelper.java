@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.helper;
+package run.yigou.gxzy.ui.feature.ai.helper;
 
 import android.app.Activity;
 import android.content.Context;

@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 /**
- *    author : Android 轮子�?
+ *    author : Android 杞瓙鍝?
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2019/08/17
- *    desc   : 时间选择对话�?
+ *    desc   : 鏃堕棿閫夋嫨瀵硅瘽妗?
  */
 public final class TimeDialog {
 
@@ -58,19 +58,19 @@ public final class TimeDialog {
             mMinuteAdapter = new PickerAdapter(context);
             mSecondAdapter = new PickerAdapter(context);
 
-            // 生产小时
+            // 鐢熶骇灏忔椂
             ArrayList<String> hourData = new ArrayList<>(24);
             for (int i = 0; i <= 23; i++) {
                 hourData.add((i < 10 ? "0" : "") + i + " " + getString(R.string.common_hour));
             }
 
-            // 生产分钟
+            // 鐢熶骇鍒嗛挓
             ArrayList<String> minuteData = new ArrayList<>(60);
             for (int i = 0; i <= 59; i++) {
                 minuteData.add((i < 10 ? "0" : "") + i + " " + getString(R.string.common_minute));
             }
 
-            // 生产秒钟
+            // 鐢熶骇绉掗挓
             ArrayList<String> secondData = new ArrayList<>(60);
             for (int i = 0; i <= 59; i++) {
                 secondData.add((i < 10 ? "0" : "") + i + " " + getString(R.string.common_second));
@@ -107,7 +107,7 @@ public final class TimeDialog {
         }
 
         /**
-         * 不选择秒数
+         * 涓嶉€夋嫨绉掓暟
          */
         public Builder setIgnoreSecond() {
             mSecondView.setVisibility(View.GONE);
@@ -225,16 +225,16 @@ public final class TimeDialog {
     public interface OnListener {
 
         /**
-         * 选择完时间后回调
+         * 閫夋嫨瀹屾椂闂村悗鍥炶皟
          *
-         * @param hour              时钟
-         * @param minute            分钟
-         * @param second            秒钟
+         * @param hour              鏃堕挓
+         * @param minute            鍒嗛挓
+         * @param second            绉掗挓
          */
         void onSelected(BaseDialog dialog, int hour, int minute, int second);
 
         /**
-         * 点击取消时回�?
+         * 鐐瑰嚮鍙栨秷鏃跺洖璋?
          */
         default void onCancel(BaseDialog dialog) {}
     }

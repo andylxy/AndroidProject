@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.tips.contract;
+package run.yigou.gxzy.ui.feature.ai;
 
 import java.util.List;
 

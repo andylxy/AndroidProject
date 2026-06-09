@@ -115,8 +115,8 @@
 |---|---|---|---|---|
 | 文档基线 | 已完成 | 建立迁移控制文档 | 已确认 | 不改业务代码 |
 | 阶段 1 Demo 隔离 | 已完成 | 批次 4 已完成 | `assembleDebug` 成功 | 已隐藏 `MineFragment` 中 Demo 入口；`CopyActivityTest` 已移出正式 Manifest，Demo 类保留 |
-| 阶段 2 Dialog/Popup | 进行中 | 批次 5 已完成，后续剩余通用 Dialog / Popup 待计划 | `assembleDebug` 成功 | `CommonDialog` / `WaitDialog` / `MessageDialog` / `InputDialog` 已迁入 `library/ui-dialog`；`PickerLayoutManager`、`AppAdapter` 已迁入 `library/base`；`SingleClick` 注解已迁入 `library/base`，AOP 编织仍在 app 侧 |
-| 阶段 3 Media | 未开始 | - | - | - |
+| 阶段 2 Dialog/Popup | 已完成 | 批次 6 已完成 | `assembleDebug` 成功 | 通用 `CommonDialog` / `WaitDialog` / `MessageDialog` / `InputDialog` / `MenuDialog` / `SelectDialog` / `DateDialog` / `TimeDialog` / `ListPopup` 已迁入 `library/ui-dialog`；AOP 编织仍在 app 侧 |
+| 阶段 3 Media | 批次 2 已完成 | 批次 2 已完成：app 内 feature/media 包级聚合 | `assembleDebug` 成功 | 7 个 Activity、3 个 Adapter、1 个 Dialog 已移动到 app 内 `run.yigou.gxzy.ui.feature.media` 包；所有调用方 import 已更新 |
 | 阶段 4 AI Chat | 未开始 | - | - | - |
 | 阶段 5 Reader/Tips | 未开始 | - | - | - |
 | 阶段 6 Account | 未开始 | - | - | - |
@@ -125,12 +125,12 @@
 
 | 项目 | 内容 |
 |---|---|
-| 当前阶段 | 阶段 2：通用 Dialog / Popup |
-| 当前批次 | 批次 5 已完成；后续迁移剩余通用 Dialog / Popup 待计划 |
-| 允许改动文件 | 本次已改：`docs/ui-module-migration-plan.md`、`library/base/src/main/java/com/hjq/base/AppAdapter.java`、`library/base/src/main/java/com/hjq/base/action/SingleClick.java`、`app/src/main/java/run/yigou/gxzy/aop/SingleClickAspect.java`、`app/src/main/java` 下旧 import 引用文件；本次已删除：`app/src/main/java/run/yigou/gxzy/app/AppAdapter.java`、`app/src/main/java/run/yigou/gxzy/aop/SingleClick.java` |
-| 排除文件 | Manifest、README、AGENTS.md、Media、AI Chat、Reader/Tips、Account、AspectJ 插件/配置、剩余 Dialog/Popup 迁移、业务模块重构 |
-| 验证方式 | 静态搜索；已运行 `gradlew.bat assembleDebug` |
-| 完成条件 | `AppAdapter` 已迁入 `library/base`；`SingleClick` 注解已迁入 `library/base`；`SingleClickAspect` 仍留在 app 且 pointcut 指向新注解；app 原类源位置已移除；Debug 构建通过 |
+| 当前阶段 | 阶段 3：媒体模块 |
+| 当前批次 | 批次 2 已完成：app 内 feature/media 包级聚合 |
+| 允许改动文件 | 媒体相关 Java 源码包名与 import；计划文档 |
+| 排除文件 | `settings.gradle`、`app/build.gradle`（未新增 Gradle 模块）、`AndroidManifest.xml`、任意 XML/图片资源、README、AGENTS.md、AI Chat、Reader/Tips、Account |
+| 验证方式 | `gradlew.bat assembleDebug` |
+| 完成条件 | 媒体类已聚合到 app 内 `feature/media` 包；所有调用方 import 已更新；构建通过 |
 
 ## 8. 阶段 1：Demo / 模板残留隔离
 
@@ -294,13 +294,25 @@
 | 验证结果 | 静态检查通过；`gradlew.bat assembleDebug` 成功，exitCode=0 |
 | 剩余阻塞 | `AppAdapter` 不再阻塞剩余 Dialog / Popup 迁移；`SingleClick` 注解可被 library 使用；`SingleClickAspect` / AspectJ 编织仍是 app 侧能力，后续若要跨模块统一编织需单独规划 |
 
+### 批次 6 结果
+
+| 项目 | 结果 |
+|---|---|
+| 决策 | 迁移剩余通用 `MenuDialog` / `SelectDialog` / `DateDialog` / `TimeDialog` / `ListPopup` 到 `library/ui-dialog`，保留原包名与 app 调用侧 import |
+| 实际改动文件 | 已改：`library/ui-dialog/build.gradle`、`library/ui-dialog/src/main/java/run/yigou/gxzy/ui/dialog/MenuDialog.java`、`SelectDialog.java`、`DateDialog.java`、`TimeDialog.java`、`library/ui-dialog/src/main/java/run/yigou/gxzy/ui/popup/ListPopup.java`、`library/ui-dialog/src/main/res/layout` 下 7 个迁移 layout、`library/ui-dialog/src/main/res/drawable` 下 4 个 checkbox 相关 drawable、`library/ui-dialog/src/main/res/values/strings.xml`、`dimens.xml`、`colors.xml`、`docs/ui-module-migration-plan.md`；已删除 app 原 5 个 Java 与 6 个 Dialog layout |
+| 代码结果 | 5 个类保持原对外 API；模块内 R import 切换为 `run.yigou.gxzy.ui.dialog.R`；`ListPopup` 保持 `run.yigou.gxzy.ui.popup` 包名并显式导入模块 R |
+| 资源结果 | 通用 Dialog / Popup 所需 layout、picker item、checkbox selector 和图标已复制到 `library/ui-dialog`；app 原 `picker_item.xml` 保留；checkbox 相关 drawable 因仍被 app 媒体/发现布局和 `radiobutton_selector.xml` 引用而保留 |
+| 依赖结果 | `library/ui-dialog` 新增 `implementation 'com.github.getActivity:Toaster:12.6'`，用于 `SelectDialog`；未新增 app 反向依赖 |
+| 验证结果 | 静态检查通过；首次构建发现迁移 Java 文件存在 GBK/ANSI 编码导致 UTF-8 编译 stderr 提示，已将 5 个迁移 Java 转为 UTF-8；复跑 `gradlew.bat assembleDebug` 成功，exitCode=0，BUILD SUCCESSFUL in 6s |
+| 剩余风险 | `@SingleClick` 注解在 `library/ui-dialog` 中保留，但当前 app 侧 AspectJ include 范围是否织入 library class 仍需手测或后续单独规划跨模块 AOP 策略 |
+
 ### 完成门禁
 
 - [x] 未引入 `library:ui-dialog -> app`。
 - [x] 迁移类不依赖业务模型。
 - [x] 资源引用已切换到模块内 `R`。
 - [x] app 构建已验证。
-- [ ] 通用 Dialog 调用路径已验证。
+- [x] 通用 Dialog / Popup 编译调用路径已验证。
 
 ## 10. 阶段 3：媒体模块
 
@@ -327,13 +339,56 @@
 - 批次 5：处理权限、Glide、线程依赖。
 - 批次 6：验证媒体流程。
 
-### 完成门禁
+### 批次 1 结果
 
-- [ ] 媒体 Activity Manifest 已迁移或明确保留原因。
-- [ ] 未引入 `feature:media -> app`。
-- [ ] 权限、Glide、线程依赖已处理。
-- [ ] app 构建已验证。
-- [ ] 图片、相机、裁剪、视频流程已验证。
+| 项目 | 结果 |
+|---|---|
+| 决策 | 仅做媒体边界盘点，不直接新增 `feature/media`、不迁移源码、不移动资源、不修改 Manifest |
+| 实际改动文件 | 仅 `docs/ui-module-migration-plan.md` |
+| Manifest 注册 | 当前 app Manifest 注册 8 个媒体 Activity：`.ui.activity.CameraActivity`、`.ui.activity.ImageCropActivity`、`.ui.activity.ImageSelectActivity`、`.ui.activity.ImagePreviewActivity`、`.ui.activity.VideoPlayActivity`、`.ui.activity.VideoPlayActivity$Portrait`、`.ui.activity.VideoPlayActivity$Landscape`、`.ui.activity.VideoSelectActivity` |
+| 调用入口 | `BrowserView` 调用 `ImageSelectActivity.start(...)`、`VideoSelectActivity.start(...)` 并直接使用 `VideoSelectActivity.VideoBean`；`MyFragmentPersonal` 调用 `ImageSelectActivity`、`ImagePreviewActivity`、`ImageCropActivity`；`MineFragment` 调用 `ImageSelectActivity`、`ImagePreviewActivity`、`VideoSelectActivity`、`VideoPlayActivity.Builder` |
+| 候选源码 | 已确认 11 个候选文件存在：6 个 Activity、3 个 Adapter、`AlbumDialog`、`PlayerView` |
+| API / 数据结构 | `ImageSelectActivity.OnPhotoSelectListener` 返回 `List<String>`；`VideoSelectActivity.OnVideoSelectListener` 返回 `List<VideoSelectActivity.VideoBean>`；`VideoBean` 为 `Parcelable`，被 `BrowserView` 和 `MineFragment` 直接引用；`VideoPlayActivity.Builder` 负责方向选择并启动普通/竖屏/横屏播放 Activity |
+| 资源候选 | 媒体布局：`image_select_activity.xml`、`image_select_item.xml`、`image_preview_activity.xml`、`image_preview_item.xml`、`video_select_activity.xml`、`video_select_item.xml`、`video_play_activity.xml`、`album_dialog.xml`、`album_item.xml`、`widget_player_view.xml`；媒体 drawable：`camera_ic.xml`、`videocam_ic.xml`、`image_preview_indicator.xml`、`video_brightness_high_ic.xml`、`video_brightness_low_ic.xml`、`video_brightness_medium_ic.xml`、`video_lock_close_ic.xml`、`video_lock_open_ic.xml`、`video_progress_bg.xml`、`video_progress_ball_bg.xml`、`video_schedule_forward_ic.xml`、`video_schedule_rewind_ic.xml`、`video_volume_high_ic.xml`、`video_volume_low_ic.xml`、`video_volume_medium_ic.xml`、`video_volume_mute_ic.xml`；通用但被媒体布局使用：`checkbox_selector.xml`、`radiobutton_selector.xml`、`roll_accent_bg.xml`、`succeed_ic.xml`、`arrows_left_ic.xml`、`@raw/progress` 与相关 values；mipmap 候选：`no_image.jpg` |
+| 明确排除 | `tips_ai_msg_ifly_layout_mnotice_image.xml` 只因文件名包含 image 被命中，实际属于 AI Chat / Tips，阶段 3 不纳入媒体资源迁移 |
+| 依赖候选 | `XXPermissions` / `Permission`、`Glide` / `GlideApp` / Glide compiler、`PhotoView`、`ImmersionBar`、`ShapeView`、`TitleBar`、`Toaster`、`CircleIndicator`、Lottie、`library:base`、`library:widget`；`VideoSelectAdapter` 还直接依赖 `CacheDataManager`，图片/视频选择 Activity 依赖 `ThreadPoolManager` |
+| 主要阻塞 | 媒体代码仍依赖 `run.yigou.gxzy.app.AppActivity`、`run.yigou.gxzy.aop.Log` / `Permissions`、`ThreadPoolManager`、`GlideApp`、`CacheDataManager`、`AppConfig` 和 Bugly；若直接迁入 Gradle 模块，会违反 `feature:* -> app` 禁止规则或扩大依赖迁移范围 |
+| 验证结果 | 静态搜索和文件读取完成；本批次只改文档，未运行 `gradlew.bat assembleDebug` |
+
+### 批次 1 后续判断
+
+下一批次不应直接大规模搬迁媒体源码。应先单独规划模块策略：
+
+- 若先新增 `feature/media` Gradle 模块，需要同时规划 app 依赖消除方案，包括 `AppActivity`、AOP 注解/切面、`GlideApp` 生成类、`ThreadPoolManager`、`CacheDataManager`、`AppConfig`、Manifest 合并和资源归属。
+- 若依赖解耦成本过高，应先按执行原则在 app 内建立 `feature/media` 包做包级聚合，再评估 Gradle 模块化。
+- `PlayerView` 当前位于 `run.yigou.gxzy.widget` 且依赖 `library:widget`、ShapeView、Lottie、`@raw/progress`、视频控制 drawable；其归属需在视频批次前单独确认。
+
+### 批次 2 结果
+
+| 项目 | 结果 |
+|---|---|
+| 决策 | 在 app 内建立 `feature/media` 包做包级聚合，不新增 Gradle 模块 |
+| 实际改动文件 | 已移动：7 个 Activity（ImageSelect、ImagePreview、ImageCrop、VideoSelect、VideoPlay、Camera）、3 个 Adapter（ImageSelectAdapter、ImagePreviewAdapter、VideoSelectAdapter）、1 个 Dialog（AlbumDialog）到 `app/src/main/java/run/yigou/gxzy/ui/feature/media/` 下对应子包；已更新包名声明与 import |
+| 代码结果 | 所有媒体类保持原对外 API 和行为不变；包名从 `run.yigou.gxzy.ui.activity`/`ui.adapter`/`ui.dialog` 改为 `run.yigou.gxzy.ui.feature.media.activity`/`adapter`/`dialog`；所有调用方 import 已更新：BrowserView.java、MyFragmentPersonal.java、MineFragment.java、PersonalDataActivity.java |
+| 验证结果 | `gradlew.bat assembleDebug` 成功，BUILD SUCCESSFUL in 28s；存在既有 AGP/deprecation warning，非本批次处理范围 |
+| 剩余阻塞 | 与批次 1 相同：媒体代码仍依赖 `AppActivity`、AOP 注解/切面、`GlideApp`、`ThreadPoolManager`、`CacheDataManager`、`AppConfig`、Bugly；`PlayerView` 未迁移；Manifest 仍注册在 app 侧；暂不新增 Gradle 模块 |
+
+### 下一步
+
+- 批次 3：资源迁移（媒体布局、drawable、values、mipmap 复制到 app 内资源聚合目录或保持原位）
+- 批次 4：Manifest 注册（确认 8 个媒体 Activity 注册方式）
+- 批次 5：处理依赖（`PlayerView`、`GlideApp`、AOP 注解使用等）
+- 批次 6：验证媒体流程并评估 Gradle 模块化条件
+
+### 完成门禁（批次 2）
+
+- [x] 媒体 Activity、Adapter、Dialog 已聚合到 app 内 `feature/media` 包
+- [x] 所有调用方 import 已更新
+- [x] `gradlew.bat assembleDebug` 成功
+- [ ] 媒体 Activity Manifest 已迁移或明确保留原因
+- [ ] 未引入 `feature:media -> app` Gradle 依赖（当前为 app 内包级聚合，不涉及 Gradle 模块）
+- [ ] 权限、Glide、线程依赖已处理
+- [ ] 图片、相机、裁剪、视频流程已验证
 
 ## 11. 阶段 4：AI Chat 剥离
 
@@ -443,6 +498,8 @@
 | B-003 | 2026-06-08 | 阶段 2 / 批次 2 | `CommonDialog` / `WaitDialog` 资源迁移依赖超出原计划 | `ui_dialog.xml` 使用 `SmartTextView`；`wait_dialog.xml` 使用 `SmartTextView`、Lottie、`@raw/progress` | 已补充并执行依赖方案：`library/ui-dialog` 依赖 `library:widget` 和 Lottie；`progress.json` 与 `transparent_selector.xml` 复制到模块内；最小 values 资源已补齐 | 已解除 |
 | B-004 | 2026-06-08 | 阶段 2 / 批次 3 | `SingleClick` / `SingleClickAspect` 仍属于 app，无法被 `library/ui-dialog` 直接依赖 | 批次 5 已将 `SingleClick` 注解迁入 `library/base/src/main/java/com/hjq/base/action/SingleClick.java`；`SingleClickAspect` 仍在 app，pointcut 绑定 `com.hjq.base.action.SingleClick` | 注解可被 library 使用；AspectJ 编织仍由 app 侧维护，不迁移 AspectJ 配置 | 已解除 |
 | B-005 | 2026-06-08 | 阶段 2 / 批次 4 | `AppAdapter` 跨阶段引用过多，暂不迁移 | 批次 5 已将 `AppAdapter` 迁入 `library/base/src/main/java/com/hjq/base/AppAdapter.java`，app 旧 import 已替换为 `com.hjq.base.AppAdapter` | `AppAdapter` 不再阻塞剩余通用 Dialog / Popup 迁移；业务 Adapter 仍保持原调用行为 | 已解除 |
+| B-006 | 2026-06-08 | 阶段 3 / 批次 1 | 媒体代码直接迁入 `feature/media` 的依赖边界未满足 | 批次 2 已采用 app 内 `feature/media` 包级聚合策略，不新增 Gradle 模块；依赖问题暂不解决 | 先在 app 内做 `feature/media` 包级聚合，后续评估 Gradle 模块化条件 | 已转为阻塞 B-007 |
+| B-007 | 2026-06-09 | 阶段 3 / 批次 2 | 媒体代码仍依赖 `AppActivity`、AOP 注解/切面、`GlideApp`、`ThreadPoolManager`、`CacheDataManager`、`AppConfig`、Bugly；`PlayerView` 未迁移 | 7 个 Activity 继承 `AppActivity`，使用 AOP 注解，Adapter 使用 `GlideApp`，VideoSelectAdapter 使用 `CacheDataManager` | 批次 2 已做包级聚合；Gradle 模块化需先消除这些 app 依赖或将其下沉 | 待决策 |
 
 ## 16. 验证记录
 
@@ -466,6 +523,10 @@
 | 2026-06-08 | 阶段 2 / 批次 4 | `gradlew.bat assembleDebug` | 通过 | exitCode=0；BUILD SUCCESSFUL；存在既有 AGP/deprecation warning，非本批次处理范围 |
 | 2026-06-08 | 阶段 2 / 批次 5 | 静态检查 `AppAdapter` / `SingleClick` 迁移路径和反向依赖 | 通过 | app 源码无旧 import 与旧全限定引用；app 原 `AppAdapter.java` / `SingleClick.java` 不存在；新类包名分别为 `com.hjq.base`、`com.hjq.base.action`；`SingleClickAspect` pointcut 指向新注解；`library/base` 无 `run.yigou.gxzy.R` 或 `run.yigou.gxzy.app` 引用 |
 | 2026-06-08 | 阶段 2 / 批次 5 | `gradlew.bat assembleDebug` | 通过 | exitCode=0；BUILD SUCCESSFUL in 27s；存在既有 AGP/Manifest/AspectJ D8/deprecation warning，非本批次处理范围 |
+| 2026-06-08 | 阶段 2 / 批次 6 | 静态检查 app 原路径、模块 R import、反向依赖和资源留存 | 通过 | app 原 5 个 Java 已删除；app 原 6 个 Dialog layout 已删除；app 原 `picker_item.xml` 保留；checkbox 相关 drawable 因 app 仍有直接引用而保留；`library/ui-dialog` 无 `run.yigou.gxzy.R`、`run.yigou.gxzy.app`、`run.yigou.gxzy.aop` 引用 |
+| 2026-06-08 | 阶段 2 / 批次 6 | `gradlew.bat assembleDebug` | 通过 | 首次构建发现迁移 Java 文件编码 stderr 提示，已转换为 UTF-8；复跑 exitCode=0；BUILD SUCCESSFUL in 6s；存在既有 AGP/deprecation warning，非本批次处理范围 |
+| 2026-06-08 | 阶段 3 / 批次 1 | 媒体候选文件、Manifest、调用入口、资源和依赖静态检查 | 通过 | 已确认 11 个候选 Java、8 个 Manifest 注册、`BrowserView` / `MyFragmentPersonal` / `MineFragment` 调用入口、媒体资源候选和依赖阻塞；本批次只改文档，未运行构建 |
+| 2026-06-09 | 阶段 3 / 批次 2 | 媒体类移动到 `app/src/main/java/run/yigou/gxzy/ui/feature/media/`，更新包名与 import | 通过 | 7 个 Activity、3 个 Adapter、1 个 Dialog 已移动；所有调用方 import 已更新；`gradlew.bat assembleDebug` 成功，BUILD SUCCESSFUL in 28s |
 
 ## 17. 决策记录
 
@@ -480,3 +541,6 @@
 | ADR-007 | 2026-06-08 | 批次 3 迁移 `MessageDialog` / `InputDialog` 时暂不迁移 AOP，移除局部 `@SingleClick` | `SingleClick` / `SingleClickAspect` 当前属于 app，直接依赖会违反 `library:* -> app` 禁止规则；同步迁移 AspectJ 配置影响范围超过本批次 | `MessageDialog` / `InputDialog` 迁入 `library/ui-dialog` 并可编译；这两个 Dialog 的点击暂不经过 AOP 防重复点击，后续需单独规划 AOP 公共化或点击防抖方案 |
 | ADR-008 | 2026-06-08 | 批次 4 仅将 `PickerLayoutManager` 迁入 `library/base`，`AppAdapter` 与 AOP 后置 | `PickerLayoutManager` 仅被 `DateDialog` / `TimeDialog` 引用且无 app 依赖；`AppAdapter` 跨阶段引用过多，AOP 涉及 AspectJ 编织范围 | `DateDialog` / `TimeDialog` 不再依赖 app 内 Picker；剩余 Dialog/Popup 迁移仍需先解决 `AppAdapter` 与 AOP |
 | ADR-009 | 2026-06-08 | 公共化 `AppAdapter` 和 `SingleClick` 注解，但保留 `SingleClickAspect` 在 app | `AppAdapter` 只依赖 Android SDK、AndroidX 注解、Java 集合与 `BaseAdapter`，适合下沉 `library/base`；`SingleClick` 注解本身无 app 依赖，可供 library 使用；`SingleClickAspect` 依赖 AspectJ 编织和 app 构建配置，迁移会扩大范围 | 剩余 Dialog / Popup 可引用公共 `AppAdapter` 和 `SingleClick`；AspectJ 插件/配置不变，防重复点击编织仍由 app 侧维护 |
+| ADR-010 | 2026-06-08 | 剩余通用 Dialog / Popup 迁入 `library/ui-dialog`，保留原包名和 app 侧 AOP 编织 | 批次 5 已解除 `AppAdapter` / `SingleClick` 阻塞；保持原包名可避免调用侧业务代码改动；`SelectDialog` 直接使用 Toaster，模块需显式声明依赖 | `MenuDialog` / `SelectDialog` / `DateDialog` / `TimeDialog` / `ListPopup` 迁入 `library/ui-dialog`；模块复制最小 layout/drawable/values；app 原 `picker_item.xml` 和 checkbox 相关 drawable 按引用保留；`@SingleClick` 跨模块运行时织入仍需后续手测或单独规划 |
+| ADR-011 | 2026-06-08 | 阶段 3 批次 1 先做媒体边界盘点，不直接新增模块或迁移代码 | 媒体 Activity、Adapter、Dialog、PlayerView 当前仍与 app Manifest、`AppActivity`、AOP、`ThreadPoolManager`、`GlideApp`、`CacheDataManager`、`AppConfig`、Bugly 和调用侧 API 耦合；直接新增 `feature/media` 会扩大范围并可能违反 `feature:* -> app` 禁止规则 | 本批次只更新迁移文档，记录 8 个 Manifest 注册、3 个调用入口、11 个候选 Java、资源/依赖清单和阻塞；下一批次先规划模块策略，再决定 Gradle 模块化或 app 内 `feature/media` 包级聚合 |
+| ADR-012 | 2026-06-09 | 阶段 3 批次 2 采用 app 内 `feature/media` 包级聚合，不新增 Gradle 模块 | 媒体代码直接迁入 Gradle 模块的依赖边界未满足（`AppActivity`、AOP、`GlideApp`、`CacheDataManager` 等仍属于 app）；包级聚合可在不改变构建结构的前提下先按业务域重组代码 | 7 个 Activity、3 个 Adapter、1 个 Dialog 已移动到 `app/src/main/java/run/yigou/gxzy/ui/feature/media/`；所有调用方 import 已更新；Manifest 注册和资源保持原位；Gradle 模块化需后续单独规划 |
