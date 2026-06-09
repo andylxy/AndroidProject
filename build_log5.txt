@@ -1,0 +1,1168 @@
+﻿Type-safe dependency accessors is an incubating feature.
+
+> Configure project :
+GradleLog TaskNameOutput assembleDebug
+GradleLog ServerTypeOutput test
+
+> Configure project :app
+WARNING:We recommend using a newer Android Gradle plugin to use compileSdk = 34
+
+This Android Gradle plugin (7.0.4) was tested up to compileSdk = 31
+
+This warning can be suppressed by adding
+    android.suppressUnsupportedCompileSdk=34
+to this project's gradle.properties
+
+The build will continue, but you are strongly encouraged to update your project to
+use a newer Android Gradle Plugin that has been tested with compileSdk = 34
+
+> Task :app:clean
+:app:clean spend 568ms
+
+> Task :app:preBuild
+:app:preBuild spend 0ms
+
+> Task :app:preDebugBuild
+:app:preDebugBuild spend 0ms
+
+> Task :library:base:preBuild UP-TO-DATE
+:library:base:preBuild spend 0ms
+
+> Task :library:base:preDebugBuild UP-TO-DATE
+:library:base:preDebugBuild spend 0ms
+
+> Task :library:base:compileDebugAidl NO-SOURCE
+:library:base:compileDebugAidl spend 0ms
+
+> Task :library:crypto:preBuild UP-TO-DATE
+:library:crypto:preBuild spend 0ms
+
+> Task :library:crypto:preDebugBuild UP-TO-DATE
+:library:crypto:preDebugBuild spend 0ms
+
+> Task :library:crypto:compileDebugAidl NO-SOURCE
+:library:crypto:compileDebugAidl spend 0ms
+
+> Task :library:log:preBuild UP-TO-DATE
+:library:log:preBuild spend 0ms
+
+> Task :library:log:preDebugBuild UP-TO-DATE
+:library:log:preDebugBuild spend 0ms
+
+> Task :library:log:compileDebugAidl NO-SOURCE
+:library:log:compileDebugAidl spend 0ms
+
+> Task :library:sse-client:preBuild UP-TO-DATE
+:library:sse-client:preBuild spend 0ms
+
+> Task :library:sse-client:preDebugBuild UP-TO-DATE
+:library:sse-client:preDebugBuild spend 0ms
+
+> Task :library:sse-client:compileDebugAidl NO-SOURCE
+:library:sse-client:compileDebugAidl spend 1ms
+
+> Task :library:ui-dialog:preBuild UP-TO-DATE
+:library:ui-dialog:preBuild spend 0ms
+
+> Task :library:ui-dialog:preDebugBuild UP-TO-DATE
+:library:ui-dialog:preDebugBuild spend 0ms
+
+> Task :library:widget:preBuild UP-TO-DATE
+:library:widget:preBuild spend 0ms
+
+> Task :library:widget:preDebugBuild UP-TO-DATE
+:library:widget:preDebugBuild spend 0ms
+
+> Task :library:widget:compileDebugAidl NO-SOURCE
+:library:widget:compileDebugAidl spend 1ms
+
+> Task :library:ui-dialog:compileDebugAidl NO-SOURCE
+:library:ui-dialog:compileDebugAidl spend 0ms
+
+> Task :library:umeng:preBuild UP-TO-DATE
+:library:umeng:preBuild spend 0ms
+
+> Task :library:umeng:preDebugBuild UP-TO-DATE
+:library:umeng:preDebugBuild spend 0ms
+
+> Task :library:umeng:compileDebugAidl NO-SOURCE
+:library:umeng:compileDebugAidl spend 0ms
+
+> Task :library:xbus:preBuild UP-TO-DATE
+:library:xbus:preBuild spend 0ms
+
+> Task :library:xbus:preDebugBuild UP-TO-DATE
+:library:xbus:preDebugBuild spend 0ms
+
+> Task :library:xbus:compileDebugAidl NO-SOURCE
+:library:xbus:compileDebugAidl spend 0ms
+
+> Task :app:compileDebugAidl NO-SOURCE
+:app:compileDebugAidl spend 0ms
+
+> Task :library:base:packageDebugRenderscript NO-SOURCE
+:library:base:packageDebugRenderscript spend 0ms
+
+> Task :library:crypto:packageDebugRenderscript NO-SOURCE
+:library:crypto:packageDebugRenderscript spend 0ms
+
+> Task :library:log:packageDebugRenderscript NO-SOURCE
+:library:log:packageDebugRenderscript spend 0ms
+
+> Task :library:sse-client:packageDebugRenderscript NO-SOURCE
+:library:sse-client:packageDebugRenderscript spend 0ms
+
+> Task :library:ui-dialog:packageDebugRenderscript NO-SOURCE
+:library:ui-dialog:packageDebugRenderscript spend 0ms
+
+> Task :library:umeng:packageDebugRenderscript NO-SOURCE
+:library:umeng:packageDebugRenderscript spend 0ms
+
+> Task :library:widget:packageDebugRenderscript NO-SOURCE
+:library:widget:packageDebugRenderscript spend 0ms
+
+> Task :library:xbus:packageDebugRenderscript NO-SOURCE
+:library:xbus:packageDebugRenderscript spend 0ms
+
+> Task :app:compileDebugRenderscript NO-SOURCE
+:app:compileDebugRenderscript spend 1ms
+
+> Task :app:generateDebugBuildConfig
+:app:generateDebugBuildConfig spend 7ms
+
+> Task :app:greendaoPrepare
+:app:greendaoPrepare spend 11ms
+
+> Task :app:greendao UP-TO-DATE
+:app:greendao spend 31ms
+
+> Task :library:base:writeDebugAarMetadata UP-TO-DATE
+:library:base:writeDebugAarMetadata spend 1ms
+
+> Task :library:crypto:writeDebugAarMetadata UP-TO-DATE
+:library:crypto:writeDebugAarMetadata spend 0ms
+
+> Task :library:log:writeDebugAarMetadata UP-TO-DATE
+:library:log:writeDebugAarMetadata spend 0ms
+
+> Task :library:sse-client:writeDebugAarMetadata UP-TO-DATE
+:library:sse-client:writeDebugAarMetadata spend 0ms
+
+> Task :library:ui-dialog:writeDebugAarMetadata UP-TO-DATE
+:library:ui-dialog:writeDebugAarMetadata spend 0ms
+
+> Task :library:umeng:writeDebugAarMetadata UP-TO-DATE
+:library:umeng:writeDebugAarMetadata spend 0ms
+
+> Task :library:widget:writeDebugAarMetadata UP-TO-DATE
+:library:widget:writeDebugAarMetadata spend 0ms
+
+> Task :library:xbus:writeDebugAarMetadata UP-TO-DATE
+:library:xbus:writeDebugAarMetadata spend 0ms
+
+> Task :app:generateDebugResValues
+:app:generateDebugResValues spend 2ms
+
+> Task :app:generateDebugResources
+:app:generateDebugResources spend 1ms
+
+> Task :library:base:compileDebugRenderscript NO-SOURCE
+:library:base:compileDebugRenderscript spend 0ms
+
+> Task :library:base:generateDebugResValues UP-TO-DATE
+:library:base:generateDebugResValues spend 2ms
+
+> Task :library:base:generateDebugResources UP-TO-DATE
+:library:base:generateDebugResources spend 0ms
+
+> Task :library:base:packageDebugResources UP-TO-DATE
+:library:base:packageDebugResources spend 1ms
+
+> Task :library:crypto:compileDebugRenderscript NO-SOURCE
+:library:crypto:compileDebugRenderscript spend 0ms
+
+> Task :library:crypto:generateDebugResValues UP-TO-DATE
+:library:crypto:generateDebugResValues spend 1ms
+
+> Task :library:crypto:generateDebugResources UP-TO-DATE
+:library:crypto:generateDebugResources spend 0ms
+
+> Task :library:crypto:packageDebugResources UP-TO-DATE
+:library:crypto:packageDebugResources spend 1ms
+
+> Task :library:log:compileDebugRenderscript NO-SOURCE
+:library:log:compileDebugRenderscript spend 0ms
+
+> Task :library:log:generateDebugResValues UP-TO-DATE
+:library:log:generateDebugResValues spend 0ms
+
+> Task :library:log:generateDebugResources UP-TO-DATE
+:library:log:generateDebugResources spend 0ms
+
+> Task :library:log:packageDebugResources UP-TO-DATE
+:library:log:packageDebugResources spend 0ms
+
+> Task :library:sse-client:compileDebugRenderscript NO-SOURCE
+:library:sse-client:compileDebugRenderscript spend 0ms
+
+> Task :library:sse-client:generateDebugResValues UP-TO-DATE
+:library:sse-client:generateDebugResValues spend 1ms
+
+> Task :library:sse-client:generateDebugResources UP-TO-DATE
+:library:sse-client:generateDebugResources spend 0ms
+
+> Task :app:checkDebugAarMetadata
+:app:checkDebugAarMetadata spend 65ms
+
+> Task :library:sse-client:packageDebugResources UP-TO-DATE
+:library:sse-client:packageDebugResources spend 1ms
+
+> Task :library:ui-dialog:compileDebugRenderscript NO-SOURCE
+:library:ui-dialog:compileDebugRenderscript spend 1ms
+
+> Task :library:ui-dialog:generateDebugResValues UP-TO-DATE
+:library:ui-dialog:generateDebugResValues spend 0ms
+
+> Task :library:ui-dialog:generateDebugResources UP-TO-DATE
+:library:ui-dialog:generateDebugResources spend 0ms
+
+> Task :library:ui-dialog:packageDebugResources UP-TO-DATE
+:library:ui-dialog:packageDebugResources spend 1ms
+
+> Task :library:umeng:compileDebugRenderscript NO-SOURCE
+:library:umeng:compileDebugRenderscript spend 1ms
+
+> Task :library:umeng:generateDebugResValues UP-TO-DATE
+:library:umeng:generateDebugResValues spend 0ms
+
+> Task :library:umeng:generateDebugResources UP-TO-DATE
+:library:umeng:generateDebugResources spend 0ms
+
+> Task :library:umeng:packageDebugResources UP-TO-DATE
+:library:umeng:packageDebugResources spend 3ms
+
+> Task :library:widget:compileDebugRenderscript NO-SOURCE
+:library:widget:compileDebugRenderscript spend 0ms
+
+> Task :library:widget:generateDebugResValues UP-TO-DATE
+:library:widget:generateDebugResValues spend 0ms
+
+> Task :library:widget:generateDebugResources UP-TO-DATE
+:library:widget:generateDebugResources spend 0ms
+
+> Task :library:widget:packageDebugResources UP-TO-DATE
+:library:widget:packageDebugResources spend 2ms
+
+> Task :library:xbus:compileDebugRenderscript NO-SOURCE
+:library:xbus:compileDebugRenderscript spend 0ms
+
+> Task :library:xbus:generateDebugResValues UP-TO-DATE
+:library:xbus:generateDebugResValues spend 1ms
+
+> Task :library:xbus:generateDebugResources UP-TO-DATE
+:library:xbus:generateDebugResources spend 0ms
+
+> Task :library:xbus:packageDebugResources UP-TO-DATE
+:library:xbus:packageDebugResources spend 2ms
+
+> Task :app:createDebugCompatibleScreenManifests
+:app:createDebugCompatibleScreenManifests spend 11ms
+
+> Task :app:extractDeepLinksDebug
+:app:extractDeepLinksDebug spend 7ms
+
+> Task :library:base:extractDeepLinksDebug UP-TO-DATE
+:library:base:extractDeepLinksDebug spend 5ms
+
+> Task :library:base:processDebugManifest UP-TO-DATE
+:library:base:processDebugManifest spend 1ms
+
+> Task :library:crypto:extractDeepLinksDebug UP-TO-DATE
+:library:crypto:extractDeepLinksDebug spend 2ms
+
+> Task :library:crypto:processDebugManifest UP-TO-DATE
+:library:crypto:processDebugManifest spend 1ms
+
+> Task :library:log:extractDeepLinksDebug UP-TO-DATE
+:library:log:extractDeepLinksDebug spend 3ms
+
+> Task :library:log:processDebugManifest UP-TO-DATE
+:library:log:processDebugManifest spend 1ms
+
+> Task :library:sse-client:extractDeepLinksDebug UP-TO-DATE
+:library:sse-client:extractDeepLinksDebug spend 1ms
+
+> Task :library:sse-client:processDebugManifest UP-TO-DATE
+:library:sse-client:processDebugManifest spend 1ms
+
+> Task :library:ui-dialog:extractDeepLinksDebug UP-TO-DATE
+:library:ui-dialog:extractDeepLinksDebug spend 1ms
+
+> Task :library:ui-dialog:processDebugManifest UP-TO-DATE
+:library:ui-dialog:processDebugManifest spend 1ms
+
+> Task :library:umeng:extractDeepLinksDebug UP-TO-DATE
+:library:umeng:extractDeepLinksDebug spend 1ms
+
+> Task :library:umeng:processDebugManifest UP-TO-DATE
+:library:umeng:processDebugManifest spend 0ms
+
+> Task :library:widget:extractDeepLinksDebug UP-TO-DATE
+:library:widget:extractDeepLinksDebug spend 0ms
+
+> Task :library:widget:processDebugManifest UP-TO-DATE
+:library:widget:processDebugManifest spend 1ms
+
+> Task :library:xbus:extractDeepLinksDebug UP-TO-DATE
+:library:xbus:extractDeepLinksDebug spend 1ms
+
+> Task :library:xbus:processDebugManifest UP-TO-DATE
+:library:xbus:processDebugManifest spend 2ms
+
+> Task :app:processDebugMainManifest
+D:\git\app\AndroidProject-old\app\src\main\AndroidManifest.xml:30:5-265:19 Warning:
+	application@android:allowBackup was tagged at AndroidManifest.xml:30 to replace other declarations but no other declaration present
+D:\git\app\AndroidProject-old\app\src\main\AndroidManifest.xml:30:5-265:19 Warning:
+	application@android:supportsRtl was tagged at AndroidManifest.xml:30 to replace other declarations but no other declaration present
+:app:processDebugMainManifest spend 236ms
+
+> Task :app:processDebugManifest
+:app:processDebugManifest spend 6ms
+
+> Task :library:base:compileDebugLibraryResources UP-TO-DATE
+:library:base:compileDebugLibraryResources spend 1ms
+
+> Task :library:base:parseDebugLocalResources UP-TO-DATE
+:library:base:parseDebugLocalResources spend 5ms
+
+> Task :library:base:generateDebugRFile UP-TO-DATE
+:library:base:generateDebugRFile spend 17ms
+
+> Task :library:crypto:compileDebugLibraryResources UP-TO-DATE
+:library:crypto:compileDebugLibraryResources spend 0ms
+
+> Task :library:crypto:parseDebugLocalResources UP-TO-DATE
+:library:crypto:parseDebugLocalResources spend 5ms
+
+> Task :library:crypto:generateDebugRFile UP-TO-DATE
+:library:crypto:generateDebugRFile spend 16ms
+
+> Task :library:log:compileDebugLibraryResources UP-TO-DATE
+:library:log:compileDebugLibraryResources spend 0ms
+
+> Task :library:log:parseDebugLocalResources UP-TO-DATE
+:library:log:parseDebugLocalResources spend 2ms
+
+> Task :library:log:generateDebugRFile UP-TO-DATE
+:library:log:generateDebugRFile spend 29ms
+
+> Task :library:sse-client:compileDebugLibraryResources UP-TO-DATE
+:library:sse-client:compileDebugLibraryResources spend 0ms
+
+> Task :library:sse-client:parseDebugLocalResources UP-TO-DATE
+:library:sse-client:parseDebugLocalResources spend 4ms
+
+> Task :library:sse-client:generateDebugRFile UP-TO-DATE
+:library:sse-client:generateDebugRFile spend 12ms
+
+> Task :library:ui-dialog:compileDebugLibraryResources UP-TO-DATE
+:library:ui-dialog:compileDebugLibraryResources spend 0ms
+
+> Task :library:ui-dialog:parseDebugLocalResources UP-TO-DATE
+:library:ui-dialog:parseDebugLocalResources spend 2ms
+
+> Task :library:widget:parseDebugLocalResources UP-TO-DATE
+:library:widget:parseDebugLocalResources spend 2ms
+
+> Task :library:widget:generateDebugRFile UP-TO-DATE
+:library:widget:generateDebugRFile spend 12ms
+
+> Task :library:ui-dialog:generateDebugRFile UP-TO-DATE
+:library:ui-dialog:generateDebugRFile spend 9ms
+
+> Task :library:umeng:compileDebugLibraryResources UP-TO-DATE
+:library:umeng:compileDebugLibraryResources spend 0ms
+
+> Task :library:umeng:parseDebugLocalResources UP-TO-DATE
+:library:umeng:parseDebugLocalResources spend 1ms
+
+> Task :library:umeng:generateDebugRFile UP-TO-DATE
+:library:umeng:generateDebugRFile spend 7ms
+
+> Task :library:widget:compileDebugLibraryResources UP-TO-DATE
+:library:widget:compileDebugLibraryResources spend 0ms
+
+> Task :library:xbus:compileDebugLibraryResources UP-TO-DATE
+:library:xbus:compileDebugLibraryResources spend 0ms
+
+> Task :library:xbus:parseDebugLocalResources UP-TO-DATE
+:library:xbus:parseDebugLocalResources spend 2ms
+
+> Task :app:mergeDebugResources
+D:\git\app\AndroidProject-old\app\src\main\res\values\strings.xml:30:4: Multiple substitutions specified in non-positional format of string resource string/common_video_error_supplement. Did you mean to add the formatted="false" attribute?
+:app:mergeDebugResources spend 1640ms
+
+> Task :library:xbus:generateDebugRFile UP-TO-DATE
+:library:xbus:generateDebugRFile spend 6ms
+
+> Task :library:base:generateDebugBuildConfig UP-TO-DATE
+:library:base:generateDebugBuildConfig spend 1ms
+
+> Task :library:base:javaPreCompileDebug UP-TO-DATE
+:library:base:javaPreCompileDebug spend 0ms
+
+> Task :library:base:compileDebugJavaWithJavac UP-TO-DATE
+:library:base:compileDebugJavaWithJavac spend 5ms
+
+> Task :library:base:bundleLibCompileToJarDebug UP-TO-DATE
+:library:base:bundleLibCompileToJarDebug spend 0ms
+
+> Task :library:crypto:generateDebugBuildConfig UP-TO-DATE
+:library:crypto:generateDebugBuildConfig spend 1ms
+
+> Task :library:crypto:javaPreCompileDebug UP-TO-DATE
+:library:crypto:javaPreCompileDebug spend 0ms
+
+> Task :library:crypto:compileDebugJavaWithJavac UP-TO-DATE
+:library:crypto:compileDebugJavaWithJavac spend 3ms
+
+> Task :library:crypto:bundleLibCompileToJarDebug UP-TO-DATE
+:library:crypto:bundleLibCompileToJarDebug spend 1ms
+
+> Task :library:log:generateDebugBuildConfig UP-TO-DATE
+:library:log:generateDebugBuildConfig spend 0ms
+
+> Task :library:log:javaPreCompileDebug UP-TO-DATE
+:library:log:javaPreCompileDebug spend 1ms
+
+> Task :library:log:compileDebugJavaWithJavac UP-TO-DATE
+:library:log:compileDebugJavaWithJavac spend 3ms
+
+> Task :library:log:bundleLibCompileToJarDebug UP-TO-DATE
+:library:log:bundleLibCompileToJarDebug spend 1ms
+
+> Task :library:sse-client:generateDebugBuildConfig UP-TO-DATE
+:library:sse-client:generateDebugBuildConfig spend 0ms
+
+> Task :library:sse-client:javaPreCompileDebug UP-TO-DATE
+:library:sse-client:javaPreCompileDebug spend 1ms
+
+> Task :library:sse-client:compileDebugJavaWithJavac UP-TO-DATE
+:library:sse-client:compileDebugJavaWithJavac spend 4ms
+
+> Task :library:sse-client:bundleLibCompileToJarDebug UP-TO-DATE
+:library:sse-client:bundleLibCompileToJarDebug spend 0ms
+
+> Task :library:ui-dialog:generateDebugBuildConfig UP-TO-DATE
+:library:ui-dialog:generateDebugBuildConfig spend 1ms
+
+> Task :library:ui-dialog:javaPreCompileDebug UP-TO-DATE
+:library:ui-dialog:javaPreCompileDebug spend 1ms
+
+> Task :library:widget:generateDebugBuildConfig UP-TO-DATE
+:library:widget:generateDebugBuildConfig spend 0ms
+
+> Task :library:widget:javaPreCompileDebug UP-TO-DATE
+:library:widget:javaPreCompileDebug spend 0ms
+
+> Task :library:widget:compileDebugJavaWithJavac UP-TO-DATE
+:library:widget:compileDebugJavaWithJavac spend 4ms
+
+> Task :library:widget:bundleLibCompileToJarDebug UP-TO-DATE
+:library:widget:bundleLibCompileToJarDebug spend 1ms
+
+> Task :library:ui-dialog:compileDebugJavaWithJavac UP-TO-DATE
+:library:ui-dialog:compileDebugJavaWithJavac spend 4ms
+
+> Task :library:ui-dialog:bundleLibCompileToJarDebug UP-TO-DATE
+:library:ui-dialog:bundleLibCompileToJarDebug spend 1ms
+
+> Task :library:umeng:generateDebugBuildConfig UP-TO-DATE
+:library:umeng:generateDebugBuildConfig spend 0ms
+
+> Task :library:umeng:javaPreCompileDebug UP-TO-DATE
+:library:umeng:javaPreCompileDebug spend 1ms
+
+> Task :library:umeng:compileDebugJavaWithJavac UP-TO-DATE
+:library:umeng:compileDebugJavaWithJavac spend 2ms
+
+> Task :library:umeng:bundleLibCompileToJarDebug UP-TO-DATE
+:library:umeng:bundleLibCompileToJarDebug spend 0ms
+
+> Task :library:xbus:generateDebugBuildConfig UP-TO-DATE
+:library:xbus:generateDebugBuildConfig spend 0ms
+
+> Task :library:xbus:javaPreCompileDebug UP-TO-DATE
+:library:xbus:javaPreCompileDebug spend 1ms
+
+> Task :library:xbus:compileDebugJavaWithJavac UP-TO-DATE
+:library:xbus:compileDebugJavaWithJavac spend 3ms
+
+> Task :library:xbus:bundleLibCompileToJarDebug UP-TO-DATE
+:library:xbus:bundleLibCompileToJarDebug spend 0ms
+
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+:app:mergeDebugNativeDebugMetadata spend 0ms
+
+> Task :app:mergeDebugShaders
+:app:mergeDebugShaders spend 5ms
+
+> Task :app:compileDebugShaders NO-SOURCE
+:app:compileDebugShaders spend 0ms
+
+> Task :app:generateDebugAssets UP-TO-DATE
+:app:generateDebugAssets spend 0ms
+
+> Task :library:base:mergeDebugShaders UP-TO-DATE
+:library:base:mergeDebugShaders spend 1ms
+
+> Task :library:base:compileDebugShaders NO-SOURCE
+:library:base:compileDebugShaders spend 0ms
+
+> Task :library:base:generateDebugAssets UP-TO-DATE
+:library:base:generateDebugAssets spend 0ms
+
+> Task :library:base:packageDebugAssets UP-TO-DATE
+:library:base:packageDebugAssets spend 0ms
+
+> Task :library:crypto:mergeDebugShaders UP-TO-DATE
+:library:crypto:mergeDebugShaders spend 0ms
+
+> Task :library:crypto:compileDebugShaders NO-SOURCE
+:library:crypto:compileDebugShaders spend 0ms
+
+> Task :library:crypto:generateDebugAssets UP-TO-DATE
+:library:crypto:generateDebugAssets spend 0ms
+
+> Task :library:crypto:packageDebugAssets UP-TO-DATE
+:library:crypto:packageDebugAssets spend 0ms
+
+> Task :library:log:mergeDebugShaders UP-TO-DATE
+:library:log:mergeDebugShaders spend 0ms
+
+> Task :library:log:compileDebugShaders NO-SOURCE
+:library:log:compileDebugShaders spend 1ms
+
+> Task :library:log:generateDebugAssets UP-TO-DATE
+:library:log:generateDebugAssets spend 0ms
+
+> Task :library:log:packageDebugAssets UP-TO-DATE
+:library:log:packageDebugAssets spend 0ms
+
+> Task :library:sse-client:mergeDebugShaders UP-TO-DATE
+:library:sse-client:mergeDebugShaders spend 0ms
+
+> Task :library:sse-client:compileDebugShaders NO-SOURCE
+:library:sse-client:compileDebugShaders spend 1ms
+
+> Task :library:sse-client:generateDebugAssets UP-TO-DATE
+:library:sse-client:generateDebugAssets spend 0ms
+
+> Task :library:sse-client:packageDebugAssets UP-TO-DATE
+:library:sse-client:packageDebugAssets spend 0ms
+
+> Task :library:ui-dialog:mergeDebugShaders UP-TO-DATE
+:library:ui-dialog:mergeDebugShaders spend 0ms
+
+> Task :library:ui-dialog:compileDebugShaders NO-SOURCE
+:library:ui-dialog:compileDebugShaders spend 1ms
+
+> Task :library:ui-dialog:generateDebugAssets UP-TO-DATE
+:library:ui-dialog:generateDebugAssets spend 0ms
+
+> Task :library:ui-dialog:packageDebugAssets UP-TO-DATE
+:library:ui-dialog:packageDebugAssets spend 0ms
+
+> Task :library:umeng:mergeDebugShaders UP-TO-DATE
+:library:umeng:mergeDebugShaders spend 0ms
+
+> Task :library:umeng:compileDebugShaders NO-SOURCE
+:library:umeng:compileDebugShaders spend 1ms
+
+> Task :library:umeng:generateDebugAssets UP-TO-DATE
+:library:umeng:generateDebugAssets spend 0ms
+
+> Task :library:umeng:packageDebugAssets UP-TO-DATE
+:library:umeng:packageDebugAssets spend 0ms
+
+> Task :library:widget:mergeDebugShaders UP-TO-DATE
+:library:widget:mergeDebugShaders spend 0ms
+
+> Task :library:widget:compileDebugShaders NO-SOURCE
+:library:widget:compileDebugShaders spend 0ms
+
+> Task :library:widget:generateDebugAssets UP-TO-DATE
+:library:widget:generateDebugAssets spend 0ms
+
+> Task :library:widget:packageDebugAssets UP-TO-DATE
+:library:widget:packageDebugAssets spend 0ms
+
+> Task :library:xbus:mergeDebugShaders UP-TO-DATE
+:library:xbus:mergeDebugShaders spend 0ms
+
+> Task :library:xbus:compileDebugShaders NO-SOURCE
+:library:xbus:compileDebugShaders spend 1ms
+
+> Task :library:xbus:generateDebugAssets UP-TO-DATE
+:library:xbus:generateDebugAssets spend 0ms
+
+> Task :library:xbus:packageDebugAssets UP-TO-DATE
+:library:xbus:packageDebugAssets spend 0ms
+
+> Task :app:mergeDebugAssets
+:app:mergeDebugAssets spend 15ms
+
+> Task :app:processDebugJavaRes NO-SOURCE
+:app:processDebugJavaRes spend 0ms
+
+> Task :library:base:processDebugJavaRes NO-SOURCE
+:library:base:processDebugJavaRes spend 1ms
+
+> Task :library:base:bundleLibResDebug NO-SOURCE
+:library:base:bundleLibResDebug spend 0ms
+
+> Task :library:crypto:processDebugJavaRes NO-SOURCE
+:library:crypto:processDebugJavaRes spend 0ms
+
+> Task :library:crypto:bundleLibResDebug NO-SOURCE
+:library:crypto:bundleLibResDebug spend 0ms
+
+> Task :library:log:processDebugJavaRes NO-SOURCE
+:library:log:processDebugJavaRes spend 2ms
+
+> Task :library:log:bundleLibResDebug NO-SOURCE
+:library:log:bundleLibResDebug spend 0ms
+
+> Task :library:sse-client:processDebugJavaRes NO-SOURCE
+:library:sse-client:processDebugJavaRes spend 0ms
+
+> Task :library:sse-client:bundleLibResDebug NO-SOURCE
+:library:sse-client:bundleLibResDebug spend 0ms
+
+> Task :library:ui-dialog:processDebugJavaRes NO-SOURCE
+:library:ui-dialog:processDebugJavaRes spend 0ms
+
+> Task :library:ui-dialog:bundleLibResDebug NO-SOURCE
+:library:ui-dialog:bundleLibResDebug spend 0ms
+
+> Task :library:umeng:processDebugJavaRes NO-SOURCE
+:library:umeng:processDebugJavaRes spend 0ms
+
+> Task :library:umeng:bundleLibResDebug NO-SOURCE
+:library:umeng:bundleLibResDebug spend 0ms
+
+> Task :library:widget:processDebugJavaRes NO-SOURCE
+:library:widget:processDebugJavaRes spend 0ms
+
+> Task :library:widget:bundleLibResDebug NO-SOURCE
+:library:widget:bundleLibResDebug spend 0ms
+
+> Task :library:xbus:processDebugJavaRes NO-SOURCE
+:library:xbus:processDebugJavaRes spend 0ms
+
+> Task :library:xbus:bundleLibResDebug NO-SOURCE
+:library:xbus:bundleLibResDebug spend 1ms
+
+> Task :library:base:bundleLibRuntimeToJarDebug UP-TO-DATE
+:library:base:bundleLibRuntimeToJarDebug spend 1ms
+
+> Task :library:crypto:bundleLibRuntimeToJarDebug UP-TO-DATE
+:library:crypto:bundleLibRuntimeToJarDebug spend 1ms
+
+> Task :library:log:bundleLibRuntimeToJarDebug UP-TO-DATE
+:library:log:bundleLibRuntimeToJarDebug spend 0ms
+
+> Task :library:sse-client:bundleLibRuntimeToJarDebug UP-TO-DATE
+:library:sse-client:bundleLibRuntimeToJarDebug spend 0ms
+
+> Task :library:ui-dialog:bundleLibRuntimeToJarDebug UP-TO-DATE
+:library:ui-dialog:bundleLibRuntimeToJarDebug spend 0ms
+
+> Task :library:umeng:bundleLibRuntimeToJarDebug UP-TO-DATE
+:library:umeng:bundleLibRuntimeToJarDebug spend 1ms
+
+> Task :library:widget:bundleLibRuntimeToJarDebug UP-TO-DATE
+:library:widget:bundleLibRuntimeToJarDebug spend 1ms
+
+> Task :library:xbus:bundleLibRuntimeToJarDebug UP-TO-DATE
+:library:xbus:bundleLibRuntimeToJarDebug spend 1ms
+
+> Task :app:mergeDebugJniLibFolders
+:app:mergeDebugJniLibFolders spend 9ms
+
+> Task :library:base:mergeDebugJniLibFolders UP-TO-DATE
+:library:base:mergeDebugJniLibFolders spend 0ms
+
+> Task :library:base:mergeDebugNativeLibs NO-SOURCE
+:library:base:mergeDebugNativeLibs spend 1ms
+
+> Task :library:base:stripDebugDebugSymbols NO-SOURCE
+:library:base:stripDebugDebugSymbols spend 1ms
+
+> Task :library:base:copyDebugJniLibsProjectOnly UP-TO-DATE
+:library:base:copyDebugJniLibsProjectOnly spend 0ms
+
+> Task :library:crypto:mergeDebugJniLibFolders UP-TO-DATE
+:library:crypto:mergeDebugJniLibFolders spend 0ms
+
+> Task :library:crypto:mergeDebugNativeLibs NO-SOURCE
+:library:crypto:mergeDebugNativeLibs spend 0ms
+
+> Task :library:crypto:stripDebugDebugSymbols NO-SOURCE
+:library:crypto:stripDebugDebugSymbols spend 0ms
+
+> Task :library:crypto:copyDebugJniLibsProjectOnly UP-TO-DATE
+:library:crypto:copyDebugJniLibsProjectOnly spend 0ms
+
+> Task :library:log:mergeDebugJniLibFolders UP-TO-DATE
+:library:log:mergeDebugJniLibFolders spend 0ms
+
+> Task :library:log:mergeDebugNativeLibs NO-SOURCE
+:library:log:mergeDebugNativeLibs spend 0ms
+
+> Task :library:log:stripDebugDebugSymbols NO-SOURCE
+:library:log:stripDebugDebugSymbols spend 0ms
+
+> Task :library:log:copyDebugJniLibsProjectOnly UP-TO-DATE
+:library:log:copyDebugJniLibsProjectOnly spend 1ms
+
+> Task :library:sse-client:mergeDebugJniLibFolders UP-TO-DATE
+:library:sse-client:mergeDebugJniLibFolders spend 0ms
+
+> Task :library:sse-client:mergeDebugNativeLibs NO-SOURCE
+:library:sse-client:mergeDebugNativeLibs spend 1ms
+
+> Task :library:sse-client:stripDebugDebugSymbols NO-SOURCE
+:library:sse-client:stripDebugDebugSymbols spend 0ms
+
+> Task :library:sse-client:copyDebugJniLibsProjectOnly UP-TO-DATE
+:library:sse-client:copyDebugJniLibsProjectOnly spend 1ms
+
+> Task :library:ui-dialog:mergeDebugJniLibFolders UP-TO-DATE
+:library:ui-dialog:mergeDebugJniLibFolders spend 0ms
+
+> Task :library:ui-dialog:mergeDebugNativeLibs NO-SOURCE
+:library:ui-dialog:mergeDebugNativeLibs spend 0ms
+
+> Task :library:ui-dialog:stripDebugDebugSymbols NO-SOURCE
+:library:ui-dialog:stripDebugDebugSymbols spend 0ms
+
+> Task :library:ui-dialog:copyDebugJniLibsProjectOnly UP-TO-DATE
+:library:ui-dialog:copyDebugJniLibsProjectOnly spend 0ms
+
+> Task :library:umeng:mergeDebugJniLibFolders UP-TO-DATE
+:library:umeng:mergeDebugJniLibFolders spend 0ms
+
+> Task :library:umeng:mergeDebugNativeLibs NO-SOURCE
+:library:umeng:mergeDebugNativeLibs spend 1ms
+
+> Task :library:umeng:stripDebugDebugSymbols NO-SOURCE
+:library:umeng:stripDebugDebugSymbols spend 0ms
+
+> Task :library:umeng:copyDebugJniLibsProjectOnly UP-TO-DATE
+:library:umeng:copyDebugJniLibsProjectOnly spend 0ms
+
+> Task :library:widget:mergeDebugJniLibFolders UP-TO-DATE
+:library:widget:mergeDebugJniLibFolders spend 0ms
+
+> Task :library:widget:mergeDebugNativeLibs NO-SOURCE
+:library:widget:mergeDebugNativeLibs spend 1ms
+
+> Task :library:widget:stripDebugDebugSymbols NO-SOURCE
+:library:widget:stripDebugDebugSymbols spend 0ms
+
+> Task :library:widget:copyDebugJniLibsProjectOnly UP-TO-DATE
+:library:widget:copyDebugJniLibsProjectOnly spend 0ms
+
+> Task :library:xbus:mergeDebugJniLibFolders UP-TO-DATE
+:library:xbus:mergeDebugJniLibFolders spend 1ms
+
+> Task :library:xbus:mergeDebugNativeLibs NO-SOURCE
+:library:xbus:mergeDebugNativeLibs spend 0ms
+
+> Task :library:xbus:stripDebugDebugSymbols NO-SOURCE
+:library:xbus:stripDebugDebugSymbols spend 0ms
+
+> Task :library:xbus:copyDebugJniLibsProjectOnly UP-TO-DATE
+:library:xbus:copyDebugJniLibsProjectOnly spend 0ms
+
+> Task :app:validateSigningDebug
+:app:validateSigningDebug spend 3ms
+
+> Task :app:writeDebugAppMetadata
+:app:writeDebugAppMetadata spend 5ms
+
+> Task :app:writeDebugSigningConfigVersions
+:app:writeDebugSigningConfigVersions spend 3ms
+
+> Task :library:base:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+:library:base:copyDebugJniLibsProjectAndLocalJars spend 0ms
+
+> Task :library:base:extractDebugAnnotations UP-TO-DATE
+:library:base:extractDebugAnnotations spend 39ms
+
+> Task :library:base:mergeDebugGeneratedProguardFiles UP-TO-DATE
+:library:base:mergeDebugGeneratedProguardFiles spend 2ms
+
+> Task :library:base:mergeDebugConsumerProguardFiles UP-TO-DATE
+:library:base:mergeDebugConsumerProguardFiles spend 0ms
+
+> Task :library:base:prepareDebugArtProfile UP-TO-DATE
+:library:base:prepareDebugArtProfile spend 1ms
+
+> Task :library:base:prepareLintJarForPublish UP-TO-DATE
+:library:base:prepareLintJarForPublish spend 1ms
+
+> Task :library:base:mergeDebugJavaResource UP-TO-DATE
+:library:base:mergeDebugJavaResource spend 0ms
+
+> Task :library:base:syncDebugLibJars UP-TO-DATE
+:library:base:syncDebugLibJars spend 1ms
+
+> Task :library:base:bundleDebugAar UP-TO-DATE
+:library:base:bundleDebugAar spend 1ms
+
+> Task :library:base:compileDebugSources UP-TO-DATE
+:library:base:compileDebugSources spend 0ms
+
+> Task :library:base:assembleDebug UP-TO-DATE
+:library:base:assembleDebug spend 0ms
+
+> Task :library:crypto:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+:library:crypto:copyDebugJniLibsProjectAndLocalJars spend 0ms
+
+> Task :library:crypto:extractDebugAnnotations UP-TO-DATE
+:library:crypto:extractDebugAnnotations spend 12ms
+
+> Task :library:crypto:mergeDebugGeneratedProguardFiles UP-TO-DATE
+:library:crypto:mergeDebugGeneratedProguardFiles spend 2ms
+
+> Task :library:crypto:mergeDebugConsumerProguardFiles UP-TO-DATE
+:library:crypto:mergeDebugConsumerProguardFiles spend 0ms
+
+> Task :library:crypto:prepareDebugArtProfile UP-TO-DATE
+:library:crypto:prepareDebugArtProfile spend 1ms
+
+> Task :library:crypto:prepareLintJarForPublish UP-TO-DATE
+:library:crypto:prepareLintJarForPublish spend 0ms
+
+> Task :library:crypto:mergeDebugJavaResource UP-TO-DATE
+:library:crypto:mergeDebugJavaResource spend 1ms
+
+> Task :library:crypto:syncDebugLibJars UP-TO-DATE
+:library:crypto:syncDebugLibJars spend 0ms
+
+> Task :library:crypto:bundleDebugAar UP-TO-DATE
+:library:crypto:bundleDebugAar spend 1ms
+
+> Task :library:crypto:compileDebugSources UP-TO-DATE
+:library:crypto:compileDebugSources spend 0ms
+
+> Task :library:crypto:assembleDebug UP-TO-DATE
+:library:crypto:assembleDebug spend 0ms
+
+> Task :library:log:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+:library:log:copyDebugJniLibsProjectAndLocalJars spend 1ms
+
+> Task :library:log:extractDebugAnnotations UP-TO-DATE
+:library:log:extractDebugAnnotations spend 5ms
+
+> Task :library:log:mergeDebugGeneratedProguardFiles UP-TO-DATE
+:library:log:mergeDebugGeneratedProguardFiles spend 1ms
+
+> Task :library:log:mergeDebugConsumerProguardFiles UP-TO-DATE
+:library:log:mergeDebugConsumerProguardFiles spend 0ms
+
+> Task :library:log:prepareDebugArtProfile UP-TO-DATE
+:library:log:prepareDebugArtProfile spend 0ms
+
+> Task :library:log:prepareLintJarForPublish UP-TO-DATE
+:library:log:prepareLintJarForPublish spend 1ms
+
+> Task :library:log:mergeDebugJavaResource UP-TO-DATE
+:library:log:mergeDebugJavaResource spend 1ms
+
+> Task :library:log:syncDebugLibJars UP-TO-DATE
+:library:log:syncDebugLibJars spend 0ms
+
+> Task :library:log:bundleDebugAar UP-TO-DATE
+:library:log:bundleDebugAar spend 1ms
+
+> Task :library:log:compileDebugSources UP-TO-DATE
+:library:log:compileDebugSources spend 0ms
+
+> Task :library:log:assembleDebug UP-TO-DATE
+:library:log:assembleDebug spend 0ms
+
+> Task :library:sse-client:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+:library:sse-client:copyDebugJniLibsProjectAndLocalJars spend 0ms
+
+> Task :library:sse-client:extractDebugAnnotations UP-TO-DATE
+:library:sse-client:extractDebugAnnotations spend 7ms
+
+> Task :library:sse-client:mergeDebugGeneratedProguardFiles UP-TO-DATE
+:library:sse-client:mergeDebugGeneratedProguardFiles spend 1ms
+
+> Task :library:sse-client:mergeDebugConsumerProguardFiles UP-TO-DATE
+:library:sse-client:mergeDebugConsumerProguardFiles spend 0ms
+
+> Task :library:sse-client:prepareDebugArtProfile UP-TO-DATE
+:library:sse-client:prepareDebugArtProfile spend 0ms
+
+> Task :library:sse-client:prepareLintJarForPublish UP-TO-DATE
+:library:sse-client:prepareLintJarForPublish spend 0ms
+
+> Task :library:sse-client:mergeDebugJavaResource UP-TO-DATE
+:library:sse-client:mergeDebugJavaResource spend 1ms
+
+> Task :library:sse-client:syncDebugLibJars UP-TO-DATE
+:library:sse-client:syncDebugLibJars spend 0ms
+
+> Task :library:sse-client:bundleDebugAar UP-TO-DATE
+:library:sse-client:bundleDebugAar spend 0ms
+
+> Task :library:sse-client:compileDebugSources UP-TO-DATE
+:library:sse-client:compileDebugSources spend 0ms
+
+> Task :library:sse-client:assembleDebug UP-TO-DATE
+:library:sse-client:assembleDebug spend 0ms
+
+> Task :library:ui-dialog:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+:library:ui-dialog:copyDebugJniLibsProjectAndLocalJars spend 1ms
+
+> Task :library:ui-dialog:extractDebugAnnotations UP-TO-DATE
+:library:ui-dialog:extractDebugAnnotations spend 5ms
+
+> Task :library:ui-dialog:mergeDebugGeneratedProguardFiles UP-TO-DATE
+:library:ui-dialog:mergeDebugGeneratedProguardFiles spend 2ms
+
+> Task :library:ui-dialog:mergeDebugConsumerProguardFiles UP-TO-DATE
+:library:ui-dialog:mergeDebugConsumerProguardFiles spend 1ms
+
+> Task :library:ui-dialog:prepareDebugArtProfile UP-TO-DATE
+:library:ui-dialog:prepareDebugArtProfile spend 0ms
+
+> Task :library:ui-dialog:prepareLintJarForPublish UP-TO-DATE
+:library:ui-dialog:prepareLintJarForPublish spend 1ms
+
+> Task :library:ui-dialog:mergeDebugJavaResource UP-TO-DATE
+:library:ui-dialog:mergeDebugJavaResource spend 0ms
+
+> Task :library:ui-dialog:syncDebugLibJars UP-TO-DATE
+:library:ui-dialog:syncDebugLibJars spend 1ms
+
+> Task :library:ui-dialog:bundleDebugAar UP-TO-DATE
+:library:ui-dialog:bundleDebugAar spend 1ms
+
+> Task :library:ui-dialog:compileDebugSources UP-TO-DATE
+:library:ui-dialog:compileDebugSources spend 0ms
+
+> Task :library:ui-dialog:assembleDebug UP-TO-DATE
+:library:ui-dialog:assembleDebug spend 0ms
+
+> Task :library:umeng:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+:library:umeng:copyDebugJniLibsProjectAndLocalJars spend 1ms
+
+> Task :library:umeng:extractDebugAnnotations UP-TO-DATE
+:library:umeng:extractDebugAnnotations spend 6ms
+
+> Task :library:umeng:mergeDebugGeneratedProguardFiles UP-TO-DATE
+:library:umeng:mergeDebugGeneratedProguardFiles spend 1ms
+
+> Task :library:umeng:mergeDebugConsumerProguardFiles UP-TO-DATE
+:library:umeng:mergeDebugConsumerProguardFiles spend 0ms
+
+> Task :library:umeng:prepareDebugArtProfile UP-TO-DATE
+:library:umeng:prepareDebugArtProfile spend 1ms
+
+> Task :library:umeng:prepareLintJarForPublish UP-TO-DATE
+:library:umeng:prepareLintJarForPublish spend 1ms
+
+> Task :library:umeng:mergeDebugJavaResource UP-TO-DATE
+:library:umeng:mergeDebugJavaResource spend 1ms
+
+> Task :library:umeng:syncDebugLibJars UP-TO-DATE
+:library:umeng:syncDebugLibJars spend 1ms
+
+> Task :library:umeng:bundleDebugAar UP-TO-DATE
+:library:umeng:bundleDebugAar spend 1ms
+
+> Task :library:umeng:compileDebugSources UP-TO-DATE
+:library:umeng:compileDebugSources spend 0ms
+
+> Task :library:umeng:assembleDebug UP-TO-DATE
+:library:umeng:assembleDebug spend 0ms
+
+> Task :app:javaPreCompileDebug
+:app:javaPreCompileDebug spend 2000ms
+
+> Task :library:widget:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+:library:widget:copyDebugJniLibsProjectAndLocalJars spend 0ms
+
+> Task :library:widget:extractDebugAnnotations UP-TO-DATE
+:library:widget:extractDebugAnnotations spend 6ms
+
+> Task :library:widget:mergeDebugGeneratedProguardFiles UP-TO-DATE
+:library:widget:mergeDebugGeneratedProguardFiles spend 1ms
+
+> Task :library:widget:mergeDebugConsumerProguardFiles UP-TO-DATE
+:library:widget:mergeDebugConsumerProguardFiles spend 0ms
+
+> Task :library:widget:prepareDebugArtProfile UP-TO-DATE
+:library:widget:prepareDebugArtProfile spend 0ms
+
+> Task :library:widget:prepareLintJarForPublish UP-TO-DATE
+:library:widget:prepareLintJarForPublish spend 1ms
+
+> Task :library:widget:mergeDebugJavaResource UP-TO-DATE
+:library:widget:mergeDebugJavaResource spend 0ms
+
+> Task :library:widget:syncDebugLibJars UP-TO-DATE
+:library:widget:syncDebugLibJars spend 1ms
+
+> Task :library:widget:bundleDebugAar UP-TO-DATE
+:library:widget:bundleDebugAar spend 0ms
+
+> Task :library:widget:compileDebugSources UP-TO-DATE
+:library:widget:compileDebugSources spend 1ms
+
+> Task :library:widget:assembleDebug UP-TO-DATE
+:library:widget:assembleDebug spend 0ms
+
+> Task :library:xbus:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+:library:xbus:copyDebugJniLibsProjectAndLocalJars spend 1ms
+
+> Task :library:xbus:extractDebugAnnotations UP-TO-DATE
+:library:xbus:extractDebugAnnotations spend 14ms
+
+> Task :library:xbus:mergeDebugGeneratedProguardFiles UP-TO-DATE
+:library:xbus:mergeDebugGeneratedProguardFiles spend 3ms
+
+> Task :library:xbus:mergeDebugConsumerProguardFiles UP-TO-DATE
+:library:xbus:mergeDebugConsumerProguardFiles spend 1ms
+
+> Task :library:xbus:prepareDebugArtProfile UP-TO-DATE
+:library:xbus:prepareDebugArtProfile spend 0ms
+
+> Task :library:xbus:prepareLintJarForPublish UP-TO-DATE
+:library:xbus:prepareLintJarForPublish spend 1ms
+
+> Task :library:xbus:mergeDebugJavaResource UP-TO-DATE
+:library:xbus:mergeDebugJavaResource spend 1ms
+
+> Task :library:xbus:syncDebugLibJars UP-TO-DATE
+:library:xbus:syncDebugLibJars spend 1ms
+
+> Task :library:xbus:bundleDebugAar UP-TO-DATE
+:library:xbus:bundleDebugAar spend 1ms
+
+> Task :library:xbus:compileDebugSources UP-TO-DATE
+:library:xbus:compileDebugSources spend 0ms
+
+> Task :library:xbus:assembleDebug UP-TO-DATE
+:library:xbus:assembleDebug spend 0ms
+
+> Task :app:mergeDebugNativeLibs
+:app:mergeDebugNativeLibs spend 186ms
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libBugly.so, libmmkv.so, libumeng-spy.so.
+:app:stripDebugDebugSymbols spend 30ms
+
+> Task :app:compressDebugAssets
+:app:compressDebugAssets spend 261ms
+
+> Task :app:checkDebugDuplicateClasses
+:app:checkDebugDuplicateClasses spend 252ms
+
+> Task :app:processDebugManifestForPackage
+:app:processDebugManifestForPackage spend 576ms
+
+> Task :app:processDebugResources
+:app:processDebugResources spend 1286ms
+
+> Task :app:compileDebugJavaWithJavac
+.\gradlew.bat : 注: [1] Wrote GeneratedAppGlideModule with: []
+所在位置 行:1 字符: 1
++ .\gradlew.bat assembleDebug --console=plain 2>&1 | Out-File build_log ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (注: [1] Wrote Ge...Module with: [] 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+D:\git\app\AndroidProject-old\app\src\main\java\run\yigou\gxzy\ui\feature\reade
+r\adapter\refactor\RefactoredExpandableAdapter.java:110: 错误: 程序包run.yigou.gxzy.
+ui.tips.adapter.refactor.model不存在
+        List<run.yigou.gxzy.ui.tips.adapter.refactor.model.GroupData> modelGrou
+pList = new ArrayList<>();
+                                                          ^
+D:\git\app\AndroidProject-old\app\src\main\java\run\yigou\gxzy\ui\feature\reade
+r\adapter\refactor\RefactoredExpandableAdapter.java:117: 错误: 程序包run.yigou.gxzy.
+ui.tips.adapter.refactor.model不存在
+            List<run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemData> modelI
+tems = new ArrayList<>();
+                                                              ^
+D:\git\app\AndroidProject-old\app\src\main\java\run\yigou\gxzy\ui\feature\reade
+r\adapter\refactor\RefactoredExpandableAdapter.java:126: 错误: 程序包run.yigou.gxzy.
+ui.tips.adapter.refactor.model不存在
+                    run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemData mode
+lItem = 
+                                                                 ^
+D:\git\app\AndroidProject-old\app\src\main\java\run\yigou\gxzy\ui\feature\reade
+r\adapter\refactor\RefactoredExpandableAdapter.java:127: 错误: 程序包run.yigou.gxzy.
+ui.tips.adapter.refactor.model不存在
+                        new run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemD
+ata(
+                                                                         ^
+D:\git\app\AndroidProject-old\app\src\main\java\run\yigou\gxzy\ui\feature\reade
+r\adapter\refactor\RefactoredExpandableAdapter.java:141: 错误: 程序包run.yigou.gxzy.
+ui.tips.adapter.refactor.model不存在
+            run.yigou.gxzy.ui.tips.adapter.refactor.model.GroupData modelGroup 
+= 
+                                                         ^
+D:\git\app\AndroidProject-old\app\src\main\java\run\yigou\gxzy\ui\feature\reade
+r\adapter\refactor\RefactoredExpandableAdapter.java:142: 错误: 程序包run.yigou.gxzy.
+ui.tips.adapter.refactor.model不存在
+                new run.yigou.gxzy.ui.tips.adapter.refactor.model.GroupData(
+                                                                 ^
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+注: 某些输入文件使用了未经检查或不安全的操作。
+注: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+6 个错误
+:app:compileDebugJavaWithJavac spend 3921ms
+
+> Task :app:compileDebugJavaWithJavac FAILED
+      00:03.92   :app:compileDebugJavaWithJavac
+      00:02.00   :app:javaPreCompileDebug
+      00:01.64   :app:mergeDebugResources
+      00:01.28   :app:processDebugResources
+      00:00.57   :app:processDebugManifestForPackage
+      00:00.56   :app:clean
+      00:00.26   :app:compressDebugAssets
+      00:00.25   :app:checkDebugDuplicateClasses
+      00:00.23   :app:processDebugMainManifest
+      00:00.18   :app:mergeDebugNativeLibs
+      00:00.06   :app:checkDebugAarMetadata
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugJavaWithJavac'.
+> Compilation failed; see the compiler error output for details.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+
+* Get more help at https://help.gradle.org
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 8.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+See https://docs.gradle.org/7.4/userguide/command_line_interface.html#sec:command_line_warnings
+
+BUILD FAILED in 12s
+233 actionable tasks: 24 executed, 209 up-to-date
