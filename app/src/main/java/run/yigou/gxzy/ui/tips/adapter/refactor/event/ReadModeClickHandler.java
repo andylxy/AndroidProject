@@ -14,9 +14,9 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.ui.tips.entity.ChildEntity;
-import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
+import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ChildEntity;
+import run.yigou.gxzy.ui.feature.reader.utils.TipsNetHelper;
 
 /**
  * 阅读模式点击处理器

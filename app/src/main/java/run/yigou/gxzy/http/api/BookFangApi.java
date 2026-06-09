@@ -4,7 +4,7 @@ package run.yigou.gxzy.http.api;
 
 import com.hjq.http.config.IRequestApi;
 
-import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
+import run.yigou.gxzy.model.HH2SectionData;
 
 
 

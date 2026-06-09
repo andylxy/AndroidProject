@@ -1,6 +1,6 @@
 package run.yigou.gxzy.EventBus;
 
-import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
+import run.yigou.gxzy.model.HH2SectionData;
 
 public class ChapterContentNotificationEvent {
 

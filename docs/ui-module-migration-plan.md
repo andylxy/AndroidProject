@@ -118,7 +118,7 @@
 | 阶段 2 Dialog/Popup | 已完成 | 批次 6 已完成 | `assembleDebug` 成功 | 通用 `CommonDialog` / `WaitDialog` / `MessageDialog` / `InputDialog` / `MenuDialog` / `SelectDialog` / `DateDialog` / `TimeDialog` / `ListPopup` 已迁入 `library/ui-dialog`；AOP 编织仍在 app 侧 |
 | 阶段 3 Media | 批次 2 已完成 | 批次 2 已完成：app 内 feature/media 包级聚合 | `assembleDebug` 成功 | 7 个 Activity、3 个 Adapter、1 个 Dialog 已移动到 app 内 `run.yigou.gxzy.ui.feature.media` 包；所有调用方 import 已更新 |
 | 阶段 4 AI Chat | 未开始 | - | - | - |
-| 阶段 5 Reader/Tips | 未开始 | - | - | - |
+| 阶段 5 Reader/Tips | 进行中 | 批次 9 已完成（reader widget 迁移） | `assembleDebug` 成功 | reader Activity/Fragment/Widget 已迁入 `feature/reader/`；tips/ 剩余 67 文件待按分层方案迁移；计划已更新为 10 批次分层迁移 |
 | 阶段 6 Account | 未开始 | - | - | - |
 
 ## 7. 当前批次控制
@@ -426,32 +426,313 @@
 
 ## 12. 阶段 5：阅读 / Tips 治理
 
-### 迁移候选
+### 目标
 
-迁移到 app 内 `feature/reader`：
+将 `app/src/main/java/run/yigou/gxzy/ui/tips/` 下 67 个文件按职责分层迁移，消除 `ui.tips` 扁平包，建立清晰的模块边界。
 
-- 阅读 Activity。
-- 阅读 Fragment。
-- 阅读 Adapter。
-- `tips` 非 AI 代码。
+### 设计原则
+
+1. **按职责分层，不按技术层组织**：数据模型归数据层，Reader 业务归 Reader 模块，全局单例归全局层。
+2. **规避耦合**：跨层引用的类下沉到共享层（`model/`、`data/`），避免 `feature/reader` 与 `greendao`、`http`、`EventBus` 之间产生反向依赖。
+3. **不改功能**：仅移动文件、更新 package 和 import，不修改任何业务逻辑。
+4. **每批次编译验证**：确保每一步都可回退。
+
+### 外部引用分析（关键约束）
+
+tips 包被以下非 tips 目录的文件引用，迁移时必须同步更新：
+
+| 外部文件 | 引用的 tips 类 | 所属层 |
+|----------|---------------|--------|
+| `greendao/util/ConvertEntity.java` | Fang, Yao, MingCiContent, YaoAlia, YaoUse, DataItem, HH2SectionData | 数据层 |
+| `http/api/BookFangApi.java` | HH2SectionData | 网络层 |
+| `app/AppDataInitializer.java` | GlobalDataHolder, MingCiContent, Yao, Fang | 应用初始化 |
+| `EventBus/ChapterContentNotificationEvent.java` | HH2SectionData | 事件总线 |
+| `ui/fragment/HomeFragment.java` | TipsTextRenderer, MingCiContent, Yao, YaoAlia, GlobalDataHolder | 首页 |
+| `ui/activity/AboutActivity.java` | TipsNetHelper | 关于页 |
+| `ui/activity/YaoUintActivity.java` | TipsNetHelper | 药物页 |
+| `ui/adapter/TipsFangYaoAdapter.java` | TipsNetHelper | 方药适配器 |
+| `ui/adapter/SearchBookAdapter.java` | SearchKey | 搜索适配器 |
+| `ui/feature/reader/*` (已迁移) | 多个 tips 类 | Reader 模块 |
+
+### 迁移分层方案
+
+#### 第 1 层：跨层数据模型 → `run.yigou.gxzy.model`（新建包）
+
+> **理由**：DataItem、HH2SectionData、Fang、Yao 等被 greendao（数据层）、http（网络层）、EventBus（事件层）、ui（展示层）跨层引用，不属于任何单一 UI 模块。新建 `model` 包作为 app 内共享数据模型层。
+
+| # | 文件 | 当前路径 | 目标路径 |
+|---|------|---------|---------|
+| 1 | `DataItem.java` | `tips/tipsutils/` | `model/DataItem.java` | ✅ 已完成 |
+| 2 | `HH2SectionData.java` | `tips/tipsutils/` | `model/HH2SectionData.java` | ✅ 已完成 |
+| 3 | `Fang.java` | `tips/DataBeans/` | `model/Fang.java` | ✅ 已完成 |
+| 4 | `Yao.java` | `tips/DataBeans/` | `model/Yao.java` | ✅ 已完成 |
+| 5 | `MingCiContent.java` | `tips/DataBeans/` | `model/MingCiContent.java` | ✅ 已完成 |
+| 6 | `YaoUse.java` | `tips/DataBeans/` | `model/YaoUse.java` | ✅ 已完成 |
+| 7 | `YaoAlia.java` | `tips/DataBeans/` | `model/YaoAlia.java` | ✅ 已完成 |
+
+**完成状态**：✅ 已完成
+
+**编译结果**：BUILD SUCCESSFUL in 34s
+
+**操作步骤**：
+1. 从 git HEAD 恢复 7 个原始文件到 tips 目录
+2. 批量复制到 `model/` 包并更新 package 声明
+3. 修复 UTF-8 BOM 字符问题（PowerShell 添加的 BOM）
+4. 删除 tips/DataBeans/ 和 tips/tipsutils/ 下的旧模型文件
+5. 批量更新 model 包内部的 import（Fang/Yao/MingCiContent/YaoAlia 引用 DataItem）
+6. 批量更新 tips/presenter/, tips/repository/, tips/utils/ 的内联包引用
+7. 为 DataItem.java 添加 TipsNetHelper import
+
+**遗留问题**：无
+
+**影响范围**（需同步更新 import 的外部文件）：
+- `greendao/util/ConvertEntity.java`（7 处 import）
+- `http/api/BookFangApi.java`（1 处）
+- `app/AppDataInitializer.java`（4 处）
+- `EventBus/ChapterContentNotificationEvent.java`（1 处）
+- `ui/fragment/HomeFragment.java`（4 处）
+- tips 内部所有引用这些类的文件
+
+#### 第 2 层：全局数据持有者 → `run.yigou.gxzy.data`（新建包）
+
+> **理由**：GlobalDataHolder 是全局单例，被 AppDataInitializer、HomeFragment、Reader 等多处引用，不属于任何单一 UI 模块。
+
+| # | 文件 | 当前路径 | 目标路径 |
+|---|------|---------|---------|
+| 8 | `GlobalDataHolder.java` | `tips/data/` | `data/GlobalDataHolder.java` |
+
+**影响范围**：AppDataInitializer, HomeFragment, TipsFragmentActivity, TipsBookNetReadFragment, TipsFangYaoFragment, BookContentSearchActivity, TipsNetHelper, BookRepository, GroupModel, SearchDataAdapter, SearchCoordinator
+
+#### 第 3 层：Reader 数据管理 → `ui/feature/reader/data/`
+
+> **理由**：BookData/BookDataManager/ChapterData/ChapterIndexBuilder/DataConverter 是 Reader 功能的数据管理组件，与 reader Activity/Fragment 紧密耦合。
+
+| # | 文件 | 当前路径 | 目标路径 |
+|---|------|---------|---------|
+| 9 | `BookData.java` | `tips/data/` | `feature/reader/data/BookData.java` |
+| 10 | `BookDataManager.java` | `tips/data/` | `feature/reader/data/BookDataManager.java` |
+| 11 | `ChapterData.java` | `tips/data/` | `feature/reader/data/ChapterData.java` |
+| 12 | `ChapterIndexBuilder.java` | `tips/data/` | `feature/reader/data/ChapterIndexBuilder.java` |
+| 13 | `DataConverter.java` | `tips/data/` | `feature/reader/data/DataConverter.java` |
+
+#### 第 4 层：Reader 架构组件 → `ui/feature/reader/` 子包
+
+> **理由**：Repository/Presenter/Contract 是 Reader 的 MVP 架构组件。
+
+| # | 文件 | 当前路径 | 目标路径 |
+|---|------|---------|---------|
+| 14 | `BookRepository.java` | `tips/repository/` | `feature/reader/repository/BookRepository.java` |
+| 15 | `TipsBookReadContract.java` | `tips/contract/` | `feature/reader/contract/TipsBookReadContract.java` |
+| 16 | `TipsBookReadPresenter.java` | `tips/presenter/` | `feature/reader/presenter/TipsBookReadPresenter.java` |
+
+#### 第 5 层：Reader 实体 → `ui/feature/reader/entity/`
+
+> **理由**：这些是 Reader UI 的实体/模型类，仅被 Reader 内部使用。
+
+| # | 文件 | 当前路径 | 目标路径 |
+|---|------|---------|---------|
+| 17 | `ChildEntity.java` | `tips/entity/` | `feature/reader/entity/ChildEntity.java` |
+| 18 | `ExpandableGroupEntity.java` | `tips/entity/` | `feature/reader/entity/ExpandableGroupEntity.java` |
+| 19 | `GroupData.java` | `tips/entity/` | `feature/reader/entity/GroupData.java` |
+| 20 | `GroupEntity.java` | `tips/entity/` | `feature/reader/entity/GroupEntity.java` |
+| 21 | `GroupModel.java` | `tips/entity/` | `feature/reader/entity/GroupModel.java` |
+| 22 | `ItemData.java` | `tips/entity/` | `feature/reader/entity/ItemData.java` |
+| 23 | `SearchKeyEntity.java` | `tips/entity/` | `feature/reader/entity/SearchKeyEntity.java` |
+
+#### 第 6 层：Reader 核心引擎 → `ui/feature/reader/` 子包
+
+> **理由**：这些是 Reader 功能的核心处理类，按职责细分到不同子包。
+
+| # | 文件 | 当前路径 | 目标路径 | 职责说明 |
+|---|------|---------|---------|----------|
+| 24 | `TipsNetHelper.java` | `tips/tipsutils/` | `feature/reader/helper/TipsNetHelper.java` | Facade 门面，统一入口 |
+| 25 | `TipsUIHelper.java` | `tips/tipsutils/` | `feature/reader/helper/TipsUIHelper.java` | UI 辅助（ClickableSpan 定位等） |
+| 26 | `TipsTextRenderer.java` | `tips/tipsutils/` | `feature/reader/renderer/TipsTextRenderer.java` | 富文本渲染引擎 |
+| 27 | `TipsSearchEngine.java` | `tips/tipsutils/` | `feature/reader/search/TipsSearchEngine.java` | 搜索引擎核心 |
+| 28 | `ClickLink.java` | `tips/tipsutils/` | `feature/reader/listener/ClickLink.java` | 点击回调接口 |
+
+#### 第 7 层：Reader 下载管理 → `ui/feature/reader/manager/`
+
+> **理由**：ChapterDownloadManager 是章节下载数据管理类，负责按需下载、智能预加载、优先级管理和生命周期管理，属于数据管理组件而非通用工具。
+
+| # | 文件 | 当前路径 | 目标路径 |
+|---|------|---------|---------|
+| 29 | `ChapterDownloadManager.java` | `tips/tipsutils/` | `feature/reader/manager/ChapterDownloadManager.java` |
+
+#### 第 8 层：Reader 搜索与工具 → `ui/feature/reader/search/`
+
+> **理由**：这些是 Reader 功能的搜索相关工具类，包括匹配、高亮、协调和适配。
+
+| # | 文件 | 当前路径 | 目标路径 | 职责说明 |
+|---|------|---------|---------|----------|
+| 30 | `SearchKey.java` | `tips/Search/` | `feature/reader/search/SearchKey.java` | 搜索结果实体 |
+| 31 | `SearchMatcher.java` | `tips/utils/` | `feature/reader/search/SearchMatcher.java` | 文本匹配工具 |
+| 32 | `TextHighlighter.java` | `tips/utils/` | `feature/reader/search/TextHighlighter.java` | 文本高亮工具 |
+| 33 | `SearchCoordinator.java` | `tips/utils/` | `feature/reader/search/SearchCoordinator.java` | 全局搜索协调器 |
+| 34 | `SearchDataAdapter.java` | `tips/utils/` | `feature/reader/search/SearchDataAdapter.java` | 搜索数据适配器 |
+
+#### 第 9 层：Reader 适配器 → `ui/feature/reader/adapter/`
+
+> **理由**：这些是 Reader 功能的 RecyclerView 适配器和数据转换器。
+
+| # | 文件 | 当前路径 | 目标路径 |
+|---|------|---------|---------|
+| 35 | `PopupDataAdapter.java` | `tips/utils/` | `feature/reader/adapter/PopupDataAdapter.java` |
+| 36 | `RefactoredPopupAdapter.java` | `tips/adapter/` | `feature/reader/adapter/RefactoredPopupAdapter.java` |
+| 37 | `PopupHeaderViewHolder.java` | `tips/adapter/` | `feature/reader/adapter/PopupHeaderViewHolder.java` |
+| 38-62 | `adapter/refactor/` 下 25 个文件 | `tips/adapter/refactor/` | `feature/reader/adapter/refactor/` |
+
+### 目标目录结构（迁移完成后）
+
+```
+app/src/main/java/run/yigou/gxzy/
+├── model/                              ← 新建：跨层数据模型（7 文件）
+│   ├── DataItem.java
+│   ├── HH2SectionData.java
+│   ├── Fang.java
+│   ├── Yao.java
+│   ├── MingCiContent.java
+│   ├── YaoUse.java
+│   └── YaoAlia.java
+├── data/                               ← 新建：全局数据持有者（1 文件）
+│   └── GlobalDataHolder.java
+├── ui/
+│   ├── feature/reader/
+│   │   ├── activity/                   ← 已有（2 文件）
+│   │   ├── fragment/                   ← 已有（4 文件）
+│   │   ├── widget/                     ← 已有（8 文件）
+│   │   ├── data/                       ← 从 tips/data 迁移（5 文件）
+│   │   ├── entity/                     ← 从 tips/entity 迁移（7 文件）
+│   │   ├── repository/                 ← 从 tips/repository 迁移（1 文件）
+│   │   ├── contract/                   ← 从 tips/contract 迁移（1 文件）
+│   │   ├── presenter/                  ← 从 tips/presenter 迁移（1 文件）
+│   │   ├── helper/                     ← 从 tips/tipsutils 迁移（2 文件）
+│   │   ├── renderer/                   ← 从 tips/tipsutils 迁移（1 文件）
+│   │   ├── search/                     ← 从 tips/tipsutils+utils+Search 迁移（6 文件）
+│   │   ├── listener/                   ← 从 tips/tipsutils 迁移（1 文件）
+│   │   ├── manager/                    ← 从 tips/tipsutils 迁移（1 文件）
+│   │   └── adapter/                    ← 从 tips/adapter+utils 迁移（28 文件）
+│   └── tips/                           ← 清空后删除
+```
 
 ### 执行批次
 
-- 批次 1：确认 AI 已剥离。
-- 批次 2：建立 reader 包。
-- 批次 3：迁移页面入口。
-- 批次 4：迁移 tips 非 AI 代码。
-- 批次 5：收敛 `GlobalDataHolder`。
-- 批次 6：梳理 `BookRepository` / `TipsNetHelper`。
-- 批次 7：验证阅读路径。
+按依赖关系从底向上执行，每批次完成后编译验证：
+
+#### 批次 1：迁移跨层数据模型（7 文件 → `model/`）✅ COMPLETED
+
+- [x] 1.1 创建 `run.yigou.gxzy.model` 包目录
+- [x] 1.2 迁移 `DataItem.java` → `model/DataItem.java`，更新 package 为 `run.yigou.gxzy.model`
+- [x] 1.3 迁移 `HH2SectionData.java` → `model/HH2SectionData.java`，更新 package
+- [x] 1.4 迁移 `Fang.java` → `model/Fang.java`，更新 package 和 import（Fang extends DataItem）
+- [x] 1.5 迁移 `Yao.java` → `model/Yao.java`，更新 package 和 import
+- [x] 1.6 迁移 `MingCiContent.java` → `model/MingCiContent.java`，更新 package 和 import
+- [x] 1.7 迁移 `YaoUse.java` → `model/YaoUse.java`，更新 package
+- [x] 1.8 迁移 `YaoAlia.java` → `model/YaoAlia.java`，更新 package 和 import
+
+**编译验证**: BUILD SUCCESSFUL in 34s
+**修复记录**: UTF-8 BOM 问题（二进制检测并移除）、旧文件冲突（删除 tips/DataBeans/ 下旧文件）、内联包引用（正则替换完整包路径）、DataItem 缺少 TipsNetHelper import
+**外部引用修复**: greendao/util/ConvertEntity.java（7 处）、http/api/BookFangApi.java、app/AppDataInitializer.java、EventBus/ChapterContentNotificationEvent.java、ui/fragment/HomeFragment.java
+- [ ] 1.9 更新外部文件 import：`ConvertEntity.java`(7处), `BookFangApi.java`(1处), `AppDataInitializer.java`(4处), `ChapterContentNotificationEvent.java`(1处), `HomeFragment.java`(4处)
+- [ ] 1.10 更新 tips 内部所有引用这些类的 import（TipsNetHelper, TipsSearchEngine, BookRepository, GlobalDataHolder, SearchDataAdapter, GroupModel, ChildEntity, TipsTextRenderer, MingCiContent, Yao, Fang, YaoAlia, YaoUse, SearchKey, PopupDataAdapter, SearchCoordinator）
+- [ ] 1.11 编译验证：`.\gradlew.bat assembleDebug`
+
+#### 批次 2：迁移全局数据持有者（1 文件 → `data/`）
+
+- [ ] 2.1 创建 `run.yigou.gxzy.data` 包目录
+- [ ] 2.2 迁移 `GlobalDataHolder.java` → `data/GlobalDataHolder.java`，更新 package 和 import（引用 model 包下的类）
+- [ ] 2.3 更新外部文件 import：`AppDataInitializer.java`, `HomeFragment.java`
+- [ ] 2.4 更新 tips 内部和 feature/reader 所有引用 import
+- [ ] 2.5 编译验证
+
+#### 批次 3：迁移 Reader 实体（7 文件 → `feature/reader/entity/`）
+
+- [ ] 3.1 迁移 entity/ 下 7 个文件到 `feature/reader/entity/`，更新 package 和 import
+- [ ] 3.2 更新所有引用这些实体的 import（TipsNetHelper, BookRepository, TipsBookReadPresenter, TipsBookReadContract, GroupModel, SearchDataAdapter, SearchCoordinator, PopupDataAdapter, RefactoredPopupAdapter, TipsLittleRecyclerViewWindow, TipsBookNetReadFragment, BookContentSearchActivity, TipsFangYaoFragment, RefactoredExpandableAdapter, RefactoredSearchAdapter）
+- [ ] 3.3 编译验证
+
+#### 批次 4：迁移 Reader 数据层（5 文件 → `feature/reader/data/`）
+
+- [ ] 4.1 迁移 data/ 下 5 个文件（BookData, BookDataManager, ChapterData, ChapterIndexBuilder, DataConverter）到 `feature/reader/data/`
+- [ ] 4.2 更新所有引用 import（TipsNetHelper, BookRepository, TipsBookReadPresenter, TipsFangYaoFragment, SearchDataAdapter, SearchCoordinator）
+- [ ] 4.3 编译验证
+
+#### 批次 5：迁移 Reader 架构组件（3 文件 → `feature/reader/` 子包）
+
+- [ ] 5.1 迁移 `BookRepository.java` → `feature/reader/repository/`
+- [ ] 5.2 迁移 `TipsBookReadContract.java` → `feature/reader/contract/`
+- [ ] 5.3 迁移 `TipsBookReadPresenter.java` → `feature/reader/presenter/`
+- [ ] 5.4 更新所有引用 import（TipsBookNetReadFragment, BookContentSearchActivity, SearchDataAdapter, SearchCoordinator）
+- [ ] 5.5 编译验证
+
+#### 批次 6：迁移 Reader 核心引擎（5 文件 → `feature/reader/` 子包）
+
+- [ ] 6.1 迁移 `TipsNetHelper.java` → `feature/reader/helper/`
+- [ ] 6.2 迁移 `TipsUIHelper.java` → `feature/reader/helper/`
+- [ ] 6.3 迁移 `TipsTextRenderer.java` → `feature/reader/renderer/`
+- [ ] 6.4 迁移 `TipsSearchEngine.java` → `feature/reader/search/`
+- [ ] 6.5 迁移 `ClickLink.java` → `feature/reader/listener/`
+- [ ] 6.6 更新外部文件 import：`AboutActivity.java`, `YaoUintActivity.java`, `TipsFangYaoAdapter.java`, `HomeFragment.java`
+- [ ] 6.7 更新内部引用 import（ChildEntity, GroupModel, SearchDataAdapter, TipsBookReadPresenter, TipsBookNetReadFragment, BookContentSearchActivity, TipsFangYaoFragment, TipsSettingFragment, TipsUnitYaoFragment, TipsLittleWindow, TipsLittleTextViewWindow, TipsLittleRecyclerViewWindow, TipsLittleTableViewWindow, TipsLittleMingCiViewWindow, RefactoredPopupAdapter, TipsSearchEngine）
+- [ ] 6.8 编译验证
+
+#### 批次 7：迁移 Reader 下载管理（1 文件 → `feature/reader/manager/`）
+
+- [ ] 7.1 迁移 `ChapterDownloadManager.java` → `feature/reader/manager/`
+- [ ] 7.2 更新引用 import（TipsBookReadPresenter, TipsBookNetReadFragment）
+- [ ] 7.3 编译验证
+
+#### 批次 8：迁移 Reader 搜索工具（5 文件 → `feature/reader/search/`）
+
+- [ ] 8.1 迁移 `SearchKey.java` → `feature/reader/search/`
+- [ ] 8.2 迁移 `SearchMatcher.java` → `feature/reader/search/`
+- [ ] 8.3 迁移 `TextHighlighter.java` → `feature/reader/search/`
+- [ ] 8.4 迁移 `SearchCoordinator.java` → `feature/reader/search/`
+- [ ] 8.5 迁移 `SearchDataAdapter.java` → `feature/reader/search/`
+- [ ] 8.6 更新外部文件 import：`SearchBookAdapter.java`
+- [ ] 8.7 更新内部引用 import（TipsBookReadPresenter, BookContentSearchActivity）
+- [ ] 8.8 编译验证
+
+#### 批次 9：迁移 Reader 适配器（28 文件 → `feature/reader/adapter/`）
+
+- [ ] 9.1 迁移 `PopupDataAdapter.java` → `feature/reader/adapter/`
+- [ ] 9.2 迁移 `RefactoredPopupAdapter.java` → `feature/reader/adapter/`
+- [ ] 9.3 迁移 `PopupHeaderViewHolder.java` → `feature/reader/adapter/`
+- [ ] 9.4 迁移 `adapter/refactor/` 下 25 个文件到 `feature/reader/adapter/refactor/`
+- [ ] 9.5 更新所有引用 import（TipsLittleRecyclerViewWindow, TipsBookNetReadFragment, BookContentSearchActivity, TipsFangYaoFragment, TipsSettingFragment, TipsUnitYaoFragment, TipsFangYaoAdapter）
+- [ ] 9.6 编译验证
+
+#### 批次 10：清理与最终验证
+
+- [ ] 10.1 确认 tips/ 目录已清空（所有子目录无 .java 文件）
+- [ ] 10.2 删除 tips/ 空目录结构
+- [ ] 10.3 全量编译验证：`.\gradlew.bat assembleDebug`
+- [ ] 10.4 检查是否有遗漏的 XML 布局文件引用旧类名
+- [ ] 10.5 更新本文档进度
+
+### 实施边界
+
+| 项目 | 说明 |
+|------|------|
+| **改动范围** | 67 个 tips/ 文件迁移 + 约 20 个外部文件 import 更新 |
+| **排除范围** | 不修改业务逻辑、不修改 XML 布局（除非发现旧类名引用）、不创建新 Gradle 模块、不修改 library/ |
+| **新增文件** | 无（仅移动现有文件） |
+| **新增目录** | `model/`（7 文件）、`data/`（1 文件）、`feature/reader/` 下 8 个新子包 |
+| **删除目录** | `tips/` 全部 10 个子目录（迁移完成后） |
+| **风险点** | DataBeans 迁移影响 greendao 层；TipsNetHelper 是 Facade 被多处引用；ChapterDownloadManager 依赖 EasyHttp |
+| **验证方式** | 每批次后 `.\gradlew.bat assembleDebug` |
 
 ### 完成门禁
 
-- [ ] AI Chat 已从 tips 剥离。
-- [ ] 阅读相关代码聚合到 reader 边界。
-- [ ] 未引入 reader 与 AI 的互相依赖。
-- [ ] app 构建已验证。
-- [ ] 阅读、搜索、方药名词弹窗路径已验证。
+- [ ] AI Chat 已从 tips 剥离（阶段 4 前置条件）
+- [ ] 跨层数据模型已下沉到 `model/` 包
+- [ ] 全局数据持有者已迁移到 `data/` 包
+- [ ] Reader 所有代码已聚合到 `feature/reader/` 边界
+- [ ] 未引入 reader 与 AI 的互相依赖
+- [ ] tips/ 目录已清空并删除
+- [ ] 所有外部引用 import 已更新
+- [ ] app 构建已验证
+- [ ] 阅读、搜索、方药名词弹窗路径已验证
 
 ## 13. 阶段 6：账户模块
 
@@ -544,3 +825,84 @@
 | ADR-010 | 2026-06-08 | 剩余通用 Dialog / Popup 迁入 `library/ui-dialog`，保留原包名和 app 侧 AOP 编织 | 批次 5 已解除 `AppAdapter` / `SingleClick` 阻塞；保持原包名可避免调用侧业务代码改动；`SelectDialog` 直接使用 Toaster，模块需显式声明依赖 | `MenuDialog` / `SelectDialog` / `DateDialog` / `TimeDialog` / `ListPopup` 迁入 `library/ui-dialog`；模块复制最小 layout/drawable/values；app 原 `picker_item.xml` 和 checkbox 相关 drawable 按引用保留；`@SingleClick` 跨模块运行时织入仍需后续手测或单独规划 |
 | ADR-011 | 2026-06-08 | 阶段 3 批次 1 先做媒体边界盘点，不直接新增模块或迁移代码 | 媒体 Activity、Adapter、Dialog、PlayerView 当前仍与 app Manifest、`AppActivity`、AOP、`ThreadPoolManager`、`GlideApp`、`CacheDataManager`、`AppConfig`、Bugly 和调用侧 API 耦合；直接新增 `feature/media` 会扩大范围并可能违反 `feature:* -> app` 禁止规则 | 本批次只更新迁移文档，记录 8 个 Manifest 注册、3 个调用入口、11 个候选 Java、资源/依赖清单和阻塞；下一批次先规划模块策略，再决定 Gradle 模块化或 app 内 `feature/media` 包级聚合 |
 | ADR-012 | 2026-06-09 | 阶段 3 批次 2 采用 app 内 `feature/media` 包级聚合，不新增 Gradle 模块 | 媒体代码直接迁入 Gradle 模块的依赖边界未满足（`AppActivity`、AOP、`GlideApp`、`CacheDataManager` 等仍属于 app）；包级聚合可在不改变构建结构的前提下先按业务域重组代码 | 7 个 Activity、3 个 Adapter、1 个 Dialog 已移动到 `app/src/main/java/run/yigou/gxzy/ui/feature/media/`；所有调用方 import 已更新；Manifest 注册和资源保持原位；Gradle 模块化需后续单独规划 |
+| ADR-013 | 2026-06-09 | 阶段 5 采用分层迁移策略：跨层数据模型下沉 `model/`，全局单例下沉 `data/`，Reader 业务聚合 `feature/reader/` | tips/ 下 67 个文件包含三层不同职责：跨层数据模型（被 greendao/http/EventBus 引用）、全局单例（被全 app 引用）、Reader 业务（仅被 reader 使用）。不分层直接全部迁入 `feature/reader/` 会导致 greendao 等非 UI 层反向依赖 reader | 新建 `model/`（7 文件）和 `data/`（1 文件）共享包；Reader 专属 59 文件按子包迁入 `feature/reader/`；ChapterDownloadManager 归属 `manager/` 子包而非工具包；SearchMatcher/TextHighlighter 归属 `search/` 子包 |
+
+#### 批次 2：迁移 tips/data/ 下 6 个文件 → eature/reader/data/ ✅ COMPLETED
+
+- [x] 2.1 创建 un.yigou.gxzy.ui.feature.reader.data 包目录
+- [x] 2.2 迁移 BookData.java → eature/reader/data/BookData.java，更新 package
+- [x] 2.3 迁移 BookDataManager.java → eature/reader/data/BookDataManager.java，更新 package
+- [x] 2.4 迁移 ChapterData.java → eature/reader/data/ChapterData.java，更新 package
+- [x] 2.5 迁移 ChapterIndexBuilder.java → eature/reader/data/ChapterIndexBuilder.java，更新 package
+- [x] 2.6 迁移 DataConverter.java → eature/reader/data/DataConverter.java，更新 package
+- [x] 2.7 迁移 GlobalDataHolder.java → eature/reader/data/GlobalDataHolder.java，更新 package
+- [x] 2.8 批量更新所有外部 import（12 个文件，30 处引用）
+- [x] 2.9 批量更新内联包引用（Fang.java、SearchCoordinator.java、TipsBookReadPresenter.java、GroupModel.java、proguard-app.pro）
+- [x] 2.10 删除原始 tips/data/ 下 6 个文件
+
+**编译验证**: BUILD SUCCESSFUL in 27s
+
+#### 批次 3：迁移 entity/ 下 7 个文件 → eature/reader/entity/
+
+- [ ] 3.1 创建 un.yigou.gxzy.ui.feature.reader.entity 包目录
+- [ ] 3.2 迁移 tips/entity/ 下 7 个文件，更新 package 为 un.yigou.gxzy.ui.feature.reader.entity
+- [ ] 3.3 批量更新所有外部 import 引用
+- [ ] 3.4 删除原始 tips/entity/ 下文件
+
+#### 批次 4：迁移 tipsutils/ 下 6 个文件 → eature/reader/tipsutils/
+
+- [ ] 4.1 创建 un.yigou.gxzy.ui.feature.reader.tipsutils 包目录
+- [ ] 4.2 迁移 tips/tipsutils/ 下 6 个文件，更新 package
+- [ ] 4.3 批量更新所有外部 import 引用
+- [ ] 4.4 删除原始 tips/tipsutils/ 下文件
+
+#### 批次 5：迁移 utils/ 下 5 个文件 → eature/reader/utils/
+
+- [ ] 5.1 创建 un.yigou.gxzy.ui.feature.reader.utils 包目录
+- [ ] 5.2 迁移 tips/utils/ 下 5 个文件，更新 package
+- [ ] 5.3 批量更新所有外部 import 引用
+- [ ] 5.4 删除原始 tips/utils/ 下文件
+
+#### 批次 6：迁移 adapter/ 和 refactor/ 下 28 个文件 → eature/reader/adapter/
+
+- [ ] 6.1 创建 un.yigou.gxzy.ui.feature.reader.adapter 和 dapter/refactor/ 包目录
+- [ ] 6.2 迁移 tips/adapter/ 和 tips/adapter/refactor/ 下 28 个文件，更新 package
+- [ ] 6.3 批量更新所有外部 import 引用
+- [ ] 6.4 删除原始 tips/adapter/ 下文件
+
+#### 批次 7：迁移 presenter/ 下 1 个文件 → eature/reader/presenter/
+
+- [ ] 7.1 迁移 tips/presenter/TipsBookReadPresenter.java → eature/reader/presenter/，更新 package
+- [ ] 7.2 批量更新所有外部 import 引用
+- [ ] 7.3 删除原始 tips/presenter/ 下文件
+
+#### 批次 8：迁移 repository/ 下 1 个文件 → eature/reader/repository/
+
+- [ ] 8.1 迁移 tips/repository/BookRepository.java → eature/reader/repository/，更新 package
+- [ ] 8.2 批量更新所有外部 import 引用
+- [ ] 8.3 删除原始 tips/repository/ 下文件
+
+#### 批次 9：迁移 contract/ 下 1 个文件 → eature/reader/contract/
+
+- [ ] 9.1 迁移 tips/contract/ 下文件 → eature/reader/contract/，更新 package
+- [ ] 9.2 批量更新所有外部 import 引用
+- [ ] 9.3 删除原始 tips/contract/ 下文件
+
+#### 批次 10：迁移 Search/ 下 1 个文件 + 清理空目录
+
+- [ ] 10.1 迁移 tips/Search/ 下文件 → eature/reader/search/，更新 package
+- [ ] 10.2 批量更新所有外部 import 引用
+- [ ] 10.3 删除 tips/ 下所有空目录
+- [ ] 10.4 最终全量编译验证 .\gradlew.bat assembleDebug
+
+---
+
+## 当前进度
+
+- ✅ 阶段 1-2: Demo/Dialog/媒体 - 已完成（预-session）
+- ✅ 阶段 4: AI Chat 迁移 - 已完成（预-session）
+- ✅ 阶段 5 批次 1-9: Reader Activity+Fragment+Widget - 已完成（预-session）
+- ✅ 阶段 5 批次 1: model/ 数据模型迁移 - 已完成（34s）
+- ✅ 阶段 5 批次 2: data/ 数据容器迁移 - 已完成（27s）
+- ⏳ 阶段 5 批次 3: entity/ 实体迁移 - 待开始
+- ⏳ 阶段 5 批次 4-10: 按依赖顺序继续迁移

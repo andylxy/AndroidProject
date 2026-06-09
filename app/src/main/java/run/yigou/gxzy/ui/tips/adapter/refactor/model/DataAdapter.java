@@ -19,8 +19,8 @@ import run.yigou.gxzy.log.EasyLog;
 import java.util.ArrayList;
 import java.util.List;
 
-import run.yigou.gxzy.ui.tips.entity.ChildEntity;
-import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ChildEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**

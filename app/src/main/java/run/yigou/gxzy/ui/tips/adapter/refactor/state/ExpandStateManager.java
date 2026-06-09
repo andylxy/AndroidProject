@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 
 /**
  * 展开状态管理器

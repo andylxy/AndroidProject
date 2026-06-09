@@ -13,8 +13,8 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import run.yigou.gxzy.ui.tips.entity.ChildEntity;
-import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ChildEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 
 /**
  * 弹窗模式点击处理器

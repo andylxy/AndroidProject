@@ -23,10 +23,10 @@ import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.common.BookArgs;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.ui.adapter.NavigationAdapter;
-import run.yigou.gxzy.ui.fragment.TipsBookNetReadFragment;
-import run.yigou.gxzy.ui.fragment.TipsFangYaoFragment;
-import run.yigou.gxzy.ui.fragment.TipsSettingFragment;
-import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
+import run.yigou.gxzy.ui.feature.reader.fragment.TipsBookNetReadFragment;
+import run.yigou.gxzy.ui.feature.reader.fragment.TipsFangYaoFragment;
+import run.yigou.gxzy.ui.feature.reader.fragment.TipsSettingFragment;
+import run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder;
 
 /**
  * 书籍详情页面Activity

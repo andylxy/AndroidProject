@@ -15,8 +15,8 @@ import java.util.List;
 
 import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
-import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
+import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.model.HH2SectionData;
 
 /**
  * MVP 契约接口

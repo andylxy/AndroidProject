@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 
 /**
  * Tips头部ViewHolder

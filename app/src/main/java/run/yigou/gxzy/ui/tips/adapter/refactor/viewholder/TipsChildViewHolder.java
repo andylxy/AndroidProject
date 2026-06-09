@@ -22,7 +22,7 @@ import run.yigou.gxzy.log.EasyLog;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.tips.adapter.refactor.utils.TextViewHelper;
-import run.yigou.gxzy.ui.tips.entity.ChildEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ChildEntity;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**

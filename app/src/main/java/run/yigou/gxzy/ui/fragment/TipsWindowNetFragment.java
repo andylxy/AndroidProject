@@ -32,9 +32,9 @@ import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
-import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
-import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
-import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
+import run.yigou.gxzy.model.DataItem;
+import run.yigou.gxzy.model.HH2SectionData;
+import run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder;
 
 /**
  * HomeFragment页面下

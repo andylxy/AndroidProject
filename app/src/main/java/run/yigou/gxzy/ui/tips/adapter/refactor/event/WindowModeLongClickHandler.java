@@ -15,7 +15,7 @@ import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemData;
 import run.yigou.gxzy.ui.tips.adapter.refactor.utils.ClipboardHelper;
-import run.yigou.gxzy.ui.tips.entity.ChildEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ChildEntity;
 
 /**
  * 弹窗模式长按处理器

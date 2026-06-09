@@ -23,7 +23,8 @@ import run.yigou.gxzy.ui.tips.adapter.refactor.image.ImageLoader;
 import run.yigou.gxzy.ui.tips.adapter.refactor.state.ExpandStateManager;
 import run.yigou.gxzy.ui.tips.adapter.refactor.state.SearchStateManager;
 import run.yigou.gxzy.ui.tips.adapter.refactor.utils.SpannableStringCache;
-import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.GroupData;
 
 /**
  * 重构基类Adapter

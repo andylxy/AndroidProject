@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import run.yigou.gxzy.ui.tips.adapter.refactor.model.GroupData;
 import run.yigou.gxzy.ui.tips.adapter.refactor.state.ExpandStateManager;
 import run.yigou.gxzy.ui.tips.adapter.refactor.viewholder.TipsHeaderViewHolder;
-import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 
 /**
  * Header绑定器

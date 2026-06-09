@@ -34,7 +34,7 @@ import run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemData;
 import run.yigou.gxzy.ui.tips.adapter.refactor.viewholder.TipsChildViewHolder;
 import run.yigou.gxzy.ui.tips.adapter.refactor.viewholder.TipsHeaderViewHolder;
 import run.yigou.gxzy.ui.tips.adapter.refactor.viewholder.ViewHolderFactory;
-import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**
@@ -99,8 +99,8 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
      * @param itemDataList 条目数据列表 (entity.ItemData)
      */
     public void setSearchData(
-            @NonNull List<run.yigou.gxzy.ui.tips.entity.GroupData> groupDataList,
-            @NonNull List<List<run.yigou.gxzy.ui.tips.entity.ItemData>> itemDataList) {
+            @NonNull List<run.yigou.gxzy.ui.feature.reader.entity.GroupData> groupDataList,
+            @NonNull List<List<run.yigou.gxzy.ui.feature.reader.entity.ItemData>> itemDataList) {
         
         EasyLog.print("RefactoredExpandableAdapter", "设置搜索结果数据");
         EasyLog.print("RefactoredExpandableAdapter", "GroupData数量: " + groupDataList.size());
@@ -110,13 +110,13 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
         List<run.yigou.gxzy.ui.tips.adapter.refactor.model.GroupData> modelGroupList = new ArrayList<>();
         
         for (int i = 0; i < groupDataList.size() && i < itemDataList.size(); i++) {
-            run.yigou.gxzy.ui.tips.entity.GroupData sourceGroup = groupDataList.get(i);
-            List<run.yigou.gxzy.ui.tips.entity.ItemData> sourceItems = itemDataList.get(i);
+            run.yigou.gxzy.ui.feature.reader.entity.GroupData sourceGroup = groupDataList.get(i);
+            List<run.yigou.gxzy.ui.feature.reader.entity.ItemData> sourceItems = itemDataList.get(i);
             
             // 转换 entity.ItemData 为 model.ItemData (直接使用 SpannableStringBuilder，保留 ClickableSpan)
             List<run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemData> modelItems = new ArrayList<>();
             if (sourceItems != null) {
-                for (run.yigou.gxzy.ui.tips.entity.ItemData sourceItem : sourceItems) {
+                for (run.yigou.gxzy.ui.feature.reader.entity.ItemData sourceItem : sourceItems) {
                     // 获取富文本 (已经包含 ClickableSpan)
                     android.text.SpannableStringBuilder textSpan = sourceItem.getAttributedText();
                     android.text.SpannableStringBuilder noteSpan = sourceItem.getAttributedNote();

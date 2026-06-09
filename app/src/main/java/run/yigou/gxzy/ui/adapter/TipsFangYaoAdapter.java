@@ -11,8 +11,8 @@ import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.ui.tips.tipsutils.TipsNetHelper;
-import run.yigou.gxzy.ui.tips.widget.LocalLinkMovementMethod;
+import run.yigou.gxzy.ui.feature.reader.utils.TipsNetHelper;
+import run.yigou.gxzy.ui.feature.reader.widget.LocalLinkMovementMethod;
 
 
 public final class TipsFangYaoAdapter extends AppAdapter<String> {

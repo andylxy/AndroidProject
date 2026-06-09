@@ -32,7 +32,7 @@ import run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemData;
 import run.yigou.gxzy.ui.tips.adapter.refactor.viewholder.TipsChildViewHolder;
 import run.yigou.gxzy.ui.tips.adapter.refactor.viewholder.TipsHeaderViewHolder;
 import run.yigou.gxzy.ui.tips.adapter.refactor.viewholder.ViewHolderFactory;
-import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 
 /**
  * 重构后的搜索适配器

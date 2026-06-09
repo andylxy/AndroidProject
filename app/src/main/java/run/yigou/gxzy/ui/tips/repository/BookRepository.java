@@ -28,14 +28,14 @@ import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.BookFangApi;
 import run.yigou.gxzy.http.api.ChapterContentApi;
 import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.ui.tips.DataBeans.Fang;
-import run.yigou.gxzy.ui.tips.data.BookData;
-import run.yigou.gxzy.ui.tips.data.BookDataManager;
-import run.yigou.gxzy.ui.tips.data.ChapterData;
-import run.yigou.gxzy.ui.tips.data.DataConverter;
-import run.yigou.gxzy.ui.tips.data.GlobalDataHolder;
-import run.yigou.gxzy.ui.tips.tipsutils.DataItem;
-import run.yigou.gxzy.ui.tips.tipsutils.HH2SectionData;
+import run.yigou.gxzy.model.Fang;
+import run.yigou.gxzy.ui.feature.reader.data.BookData;
+import run.yigou.gxzy.ui.feature.reader.data.BookDataManager;
+import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
+import run.yigou.gxzy.ui.feature.reader.data.DataConverter;
+import run.yigou.gxzy.ui.feature.reader.data.GlobalDataHolder;
+import run.yigou.gxzy.model.DataItem;
+import run.yigou.gxzy.model.HH2SectionData;
 import run.yigou.gxzy.utils.DebugLog;
 
 
@@ -421,7 +421,7 @@ public class BookRepository {
     private void loadFangDataToBookData(BookData bookData, int bookId) {
         try {
             // 从数据库加载方剂数据
-            ArrayList<run.yigou.gxzy.ui.tips.DataBeans.Fang> fangList = ConvertEntity.getFangDetailList(bookId);
+            ArrayList<run.yigou.gxzy.model.Fang> fangList = ConvertEntity.getFangDetailList(bookId);
             
             EasyLog.print("BookRepository", "加载方剂数据: bookId=" + bookId + 
                 ", fangSize=" + (fangList != null ? fangList.size() : 0));

@@ -11,8 +11,8 @@ package run.yigou.gxzy.ui.tips.adapter.refactor.event;
 
 import androidx.annotation.NonNull;
 
-import run.yigou.gxzy.ui.tips.entity.ChildEntity;
-import run.yigou.gxzy.ui.tips.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.feature.reader.entity.ChildEntity;
 
 /**
  * 点击事件处理器接口
