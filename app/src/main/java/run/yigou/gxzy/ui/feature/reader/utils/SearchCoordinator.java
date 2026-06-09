@@ -85,7 +85,7 @@ public class SearchCoordinator {
             new run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity(new StringBuilder(trimmedKeyword));
         
         java.util.ArrayList<run.yigou.gxzy.model.HH2SectionData> filteredData = 
-            run.yigou.gxzy.ui.feature.reader.utils.TipsNetHelper.getSearchHh2SectionData(
+            run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper.getSearchHh2SectionData(
                 searchKeyEntity, 
                 allContent, 
                 yaoAliasDict, 

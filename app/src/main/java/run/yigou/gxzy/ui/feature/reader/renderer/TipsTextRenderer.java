@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.feature.reader.utils;
+package run.yigou.gxzy.ui.feature.reader.renderer;
 
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.model.HH2SectionData;
@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import run.yigou.gxzy.http.api.StyleConfigApi;
+import run.yigou.gxzy.ui.feature.reader.listener.ClickLink;
 
 /**
  * Tips 模块文本渲染器

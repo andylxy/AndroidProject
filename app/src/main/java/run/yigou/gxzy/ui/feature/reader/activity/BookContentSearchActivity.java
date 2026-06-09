@@ -47,7 +47,7 @@ import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.feature.reader.entity.GroupModel;
 import run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity;
 import run.yigou.gxzy.model.HH2SectionData;
-import run.yigou.gxzy.ui.feature.reader.utils.TipsNetHelper;
+import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
 import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.StringHelper;

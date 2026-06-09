@@ -8,7 +8,7 @@
  * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.feature.reader.utils;
+package run.yigou.gxzy.ui.feature.reader.listener;
 
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.model.HH2SectionData;

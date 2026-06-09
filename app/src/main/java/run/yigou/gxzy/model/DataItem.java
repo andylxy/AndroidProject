@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import run.yigou.gxzy.ui.feature.reader.utils.TipsNetHelper;
+import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
 
 /**
  * 数据项类，用于存储和管理数据项的各种属性。

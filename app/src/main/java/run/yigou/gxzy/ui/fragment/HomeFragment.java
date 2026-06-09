@@ -63,7 +63,7 @@ import run.yigou.gxzy.http.api.AiConfigApi;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.api.MingCiContentApi;
 import run.yigou.gxzy.http.api.StyleConfigApi;
-import run.yigou.gxzy.ui.feature.reader.utils.TipsTextRenderer;
+import run.yigou.gxzy.ui.feature.reader.renderer.TipsTextRenderer;
 import run.yigou.gxzy.http.api.YaoAliaApi;
 import run.yigou.gxzy.http.api.YaoContentApi;
 import run.yigou.gxzy.http.model.HttpData;

@@ -21,7 +21,7 @@ import run.yigou.gxzy.ui.feature.reader.utils.SearchMatcher;
 import run.yigou.gxzy.ui.feature.reader.utils.TextHighlighter;
 
 import run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity;
-import run.yigou.gxzy.ui.feature.reader.utils.TipsNetHelper;
+import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.ui.feature.reader.data.DataConverter; // Kept existing
 
 import run.yigou.gxzy.app.AppApplication;
@@ -41,7 +41,7 @@ import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterIndexBuilder;
 import run.yigou.gxzy.data.GlobalDataHolder;
 import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
-import run.yigou.gxzy.ui.feature.reader.utils.ChapterDownloadManager;
+import run.yigou.gxzy.ui.feature.reader.manager.ChapterDownloadManager;
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.model.HH2SectionData;
 import run.yigou.gxzy.utils.DebugLog;

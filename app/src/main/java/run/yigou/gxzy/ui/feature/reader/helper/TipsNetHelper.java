@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.feature.reader.utils;
+package run.yigou.gxzy.ui.feature.reader.helper;
 
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.model.HH2SectionData;
@@ -35,6 +35,9 @@ import run.yigou.gxzy.ui.feature.reader.entity.GroupData;
 import run.yigou.gxzy.ui.feature.reader.entity.ItemData;
 import run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
+import run.yigou.gxzy.ui.feature.reader.listener.ClickLink;
+import run.yigou.gxzy.ui.feature.reader.renderer.TipsTextRenderer;
+import run.yigou.gxzy.ui.feature.reader.search.TipsSearchEngine;
 import run.yigou.gxzy.ui.feature.reader.utils.SearchDataAdapter;
 import run.yigou.gxzy.ui.feature.reader.widget.TipsLittleMingCiViewWindow;
 import run.yigou.gxzy.ui.feature.reader.widget.TipsLittleTableViewWindow;

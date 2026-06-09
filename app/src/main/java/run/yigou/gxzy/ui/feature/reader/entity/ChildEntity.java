@@ -15,7 +15,7 @@ import android.text.style.ClickableSpan;
 
 import run.yigou.gxzy.log.EasyLog;
 
-import run.yigou.gxzy.ui.feature.reader.utils.TipsNetHelper;
+import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**

@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.feature.reader.utils;
+package run.yigou.gxzy.ui.feature.reader.search;
 
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.model.HH2SectionData;
@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 
 import run.yigou.gxzy.model.Fang;
 import run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity;
+import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
+import run.yigou.gxzy.ui.feature.reader.renderer.TipsTextRenderer;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**

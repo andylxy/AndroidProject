@@ -19,7 +19,7 @@ import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.ui.tips.adapter.refactor.utils.ClipboardHelper;
 import run.yigou.gxzy.ui.tips.adapter.refactor.model.ItemData;
 import run.yigou.gxzy.ui.feature.reader.entity.ChildEntity;
-import run.yigou.gxzy.ui.feature.reader.utils.TipsNetHelper;
+import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**

@@ -7,7 +7,7 @@
  * Copyright (c) 2025, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.feature.reader.utils;
+package run.yigou.gxzy.ui.feature.reader.manager;
 
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.model.HH2SectionData;
