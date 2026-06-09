@@ -21,7 +21,7 @@ import android.widget.Toast;
 import run.yigou.gxzy.log.EasyLog;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
+import run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity;
 
 import run.yigou.gxzy.utils.DebugLog;
 import timber.log.Timber;

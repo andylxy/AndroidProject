@@ -67,7 +67,7 @@ import run.yigou.gxzy.ui.tips.tipsutils.TipsTextRenderer;
 import run.yigou.gxzy.http.api.YaoAliaApi;
 import run.yigou.gxzy.http.api.YaoContentApi;
 import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
+import run.yigou.gxzy.ui.feature.reader.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.adapter.NavigationAdapter;
 import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;

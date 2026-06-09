@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.http.entitymodel.ChapterSearchRes;
-import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
+import run.yigou.gxzy.ui.feature.reader.activity.BookContentSearchActivity;
 import run.yigou.gxzy.utils.SpannableStringHelper;
 
 /**
