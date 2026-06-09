@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.feature.reader.utils;
+package run.yigou.gxzy.ui.feature.reader.search;
 
 import java.util.ArrayList;
 import java.util.List;

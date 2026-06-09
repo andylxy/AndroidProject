@@ -38,7 +38,7 @@ import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
 import run.yigou.gxzy.ui.feature.reader.listener.ClickLink;
 import run.yigou.gxzy.ui.feature.reader.renderer.TipsTextRenderer;
 import run.yigou.gxzy.ui.feature.reader.search.TipsSearchEngine;
-import run.yigou.gxzy.ui.feature.reader.utils.SearchDataAdapter;
+import run.yigou.gxzy.ui.feature.reader.search.SearchDataAdapter;
 import run.yigou.gxzy.ui.feature.reader.widget.TipsLittleMingCiViewWindow;
 import run.yigou.gxzy.ui.feature.reader.widget.TipsLittleTableViewWindow;
 import run.yigou.gxzy.utils.DebugLog;

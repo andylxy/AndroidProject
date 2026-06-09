@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.feature.reader.utils;
+package run.yigou.gxzy.ui.feature.reader.search;
 
 import android.os.Build;
 import android.text.SpannableString;
