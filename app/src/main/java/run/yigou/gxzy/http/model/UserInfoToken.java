@@ -1,14 +1,14 @@
 /*
  * 项目名: AndroidProject
  * 类名: UserInfoToken.java
- * 包名: run.yigou.gxzy.http.entitymodel.UserInfoToken
+ * 包名: run.yigou.gxzy.http.model.UserInfoToken
  * 作者 : Zhs (xiaoyang_02@qq.com)
  * 当前修改时间 : 2024年03月11日 08:17:34
  * 上次修改时间: 2024年01月16日 21:42:31
  * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.http.entitymodel;
+package run.yigou.gxzy.http.model;
 
 import java.io.Serializable;
 

@@ -1,4 +1,4 @@
-package run.yigou.gxzy.http.entitymodel;
+package run.yigou.gxzy.http.model;
 
 import java.io.Serializable;
 

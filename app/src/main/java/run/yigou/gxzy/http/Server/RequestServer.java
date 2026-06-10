@@ -8,10 +8,10 @@
  * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.http.Server;
+package run.yigou.gxzy.http.server;
 
 import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.other.AppConfig;
+import run.yigou.gxzy.app.AppConfig;
 
 import com.hjq.http.config.IRequestServer;
 import com.hjq.http.config.IHttpPostBodyStrategy;

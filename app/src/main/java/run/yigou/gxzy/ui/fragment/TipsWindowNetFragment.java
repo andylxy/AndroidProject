@@ -34,7 +34,7 @@ import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.model.HH2SectionData;
-import run.yigou.gxzy.data.GlobalDataHolder;
+import run.yigou.gxzy.manager.GlobalDataHolder;
 
 /**
  * HomeFragment页面下

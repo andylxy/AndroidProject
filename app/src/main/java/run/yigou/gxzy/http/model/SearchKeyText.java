@@ -1,14 +1,14 @@
 /*
  * 项目名: AndroidProject
  * 类名: SearchKeyText.java
- * 包名: run.yigou.gxzy.http.entitymodel.SearchKeyText
+ * 包名: run.yigou.gxzy.http.model.SearchKeyText
  * 作者 : Zhs (xiaoyang_02@qq.com)
  * 当前修改时间 : 2024年03月07日 23:00:37
  * 上次修改时间: 2024年03月07日 23:00:37
  * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.http.entitymodel;
+package run.yigou.gxzy.http.model;
 
 import java.io.Serializable;
 import java.util.List;

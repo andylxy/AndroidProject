@@ -8,7 +8,7 @@ import org.greenrobot.greendao.database.Database;
 import run.yigou.gxzy.greendao.gen.DaoMaster;
 import run.yigou.gxzy.greendao.gen.DaoSession;
 import run.yigou.gxzy.greendao.util.MySQLiteOpenHelper;
-import run.yigou.gxzy.other.AppConfig;
+import run.yigou.gxzy.app.AppConfig;
 
 /**
  * 作者:  zhs

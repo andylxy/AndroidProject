@@ -16,7 +16,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.aop.Permissions;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.other.AppConfig;
+import run.yigou.gxzy.app.AppConfig;
 import com.hjq.permissions.Permission;
 import com.tencent.bugly.crashreport.CrashReport;
 

@@ -25,7 +25,7 @@ import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.manager.ThreadPoolManager;
-import run.yigou.gxzy.other.AppConfig;
+import run.yigou.gxzy.app.AppConfig;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 import com.tencent.bugly.crashreport.CrashReport;

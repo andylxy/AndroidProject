@@ -76,7 +76,7 @@ import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.model.MingCiContent;
 import run.yigou.gxzy.model.Yao;
 import run.yigou.gxzy.model.YaoAlia;
-import run.yigou.gxzy.data.GlobalDataHolder;
+import run.yigou.gxzy.manager.GlobalDataHolder;
 import run.yigou.gxzy.app.AppDataInitializer;
 import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.StringHelper;

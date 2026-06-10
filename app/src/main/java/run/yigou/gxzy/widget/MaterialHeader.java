@@ -1,4 +1,4 @@
-package run.yigou.gxzy.other;
+package run.yigou.gxzy.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;

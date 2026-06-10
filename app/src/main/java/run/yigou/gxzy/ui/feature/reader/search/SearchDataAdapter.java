@@ -32,7 +32,7 @@ import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.model.HH2SectionData;
 import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
-import run.yigou.gxzy.data.GlobalDataHolder;
+import run.yigou.gxzy.manager.GlobalDataHolder;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**

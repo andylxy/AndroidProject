@@ -1,4 +1,4 @@
-package run.yigou.gxzy.other;
+package run.yigou.gxzy.app;
 
 import android.annotation.SuppressLint;
 import android.app.Application;

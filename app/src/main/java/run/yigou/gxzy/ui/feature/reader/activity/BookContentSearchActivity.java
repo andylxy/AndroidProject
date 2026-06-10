@@ -42,7 +42,7 @@ import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.feature.reader.search.SearchKey;
 import run.yigou.gxzy.ui.feature.reader.adapter.refactor.RefactoredSearchAdapter;
-import run.yigou.gxzy.data.GlobalDataHolder;
+import run.yigou.gxzy.manager.GlobalDataHolder;
 import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.feature.reader.entity.GroupModel;
 import run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity;

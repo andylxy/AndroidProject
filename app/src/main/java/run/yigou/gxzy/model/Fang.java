@@ -294,7 +294,7 @@ public class Fang extends DataItem {
     }
 
     public String getStandardYaoName(String str) {
-        String str2 = run.yigou.gxzy.data.GlobalDataHolder.getInstance().getYaoAliasDict().get(str);
+        String str2 = run.yigou.gxzy.manager.GlobalDataHolder.getInstance().getYaoAliasDict().get(str);
         return str2 == null ? str : str2;
     }
 

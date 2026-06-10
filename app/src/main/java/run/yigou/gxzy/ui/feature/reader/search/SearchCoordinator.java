@@ -75,8 +75,8 @@ public class SearchCoordinator {
         }
         
         // 3. 获取别名字典
-        run.yigou.gxzy.data.GlobalDataHolder globalData = 
-            run.yigou.gxzy.data.GlobalDataHolder.getInstance();
+        run.yigou.gxzy.manager.GlobalDataHolder globalData = 
+            run.yigou.gxzy.manager.GlobalDataHolder.getInstance();
         java.util.Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
         java.util.Map<String, String> fangAliasDict = globalData.getFangAliasDict();
         

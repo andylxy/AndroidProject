@@ -1,4 +1,4 @@
-package run.yigou.gxzy.other;
+package run.yigou.gxzy.app;
 
 
 import run.yigou.gxzy.action.ToastAction;

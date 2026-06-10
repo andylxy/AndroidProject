@@ -23,7 +23,7 @@
         android:progressDrawable="@drawable/progress_gradient_bg"
         android:visibility="gone" />
 
-    <run.yigou.gxzy.widget.StatusLayout
+    <com.hjq.widget.layout.StatusLayout
         android:id="@+id/hl_browser_hint"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -44,6 +44,6 @@
 
         </com.scwang.smart.refresh.layout.SmartRefreshLayout>
 
-    </run.yigou.gxzy.widget.StatusLayout>
+    </com.hjq.widget.layout.StatusLayout>
 
 </LinearLayout>

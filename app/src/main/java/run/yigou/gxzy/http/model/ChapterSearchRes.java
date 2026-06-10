@@ -1,14 +1,14 @@
 /*
  * 项目名: AndroidProject
  * 类名: ChapterSearchRes.java
- * 包名: run.yigou.gxzy.http.entitymodel.ChapterSearchRes
+ * 包名: run.yigou.gxzy.http.model.ChapterSearchRes
  * 作者 : Zhs (xiaoyang_02@qq.com)
  * 当前修改时间 : 2024年04月01日 09:36:14
  * 上次修改时间: 2024年04月01日 09:36:14
  * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.http.entitymodel;
+package run.yigou.gxzy.http.model;
 
 import java.io.Serializable;
 

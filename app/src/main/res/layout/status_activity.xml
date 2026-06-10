@@ -14,7 +14,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:title="界面状态案例" />
 
-    <run.yigou.gxzy.widget.StatusLayout
+    <com.hjq.widget.layout.StatusLayout
         android:id="@+id/hl_status_hint"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -26,6 +26,6 @@
             tools:ignore="MissingId"
             tools:layout="@layout/status_fragment" />
 
-    </run.yigou.gxzy.widget.StatusLayout>
+    </com.hjq.widget.layout.StatusLayout>
 
 </LinearLayout>

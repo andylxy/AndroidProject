@@ -1,4 +1,4 @@
-package run.yigou.gxzy.EventBus;
+package run.yigou.gxzy.eventbus;
 
 /**
  *  宋版伤寒金匮通知界面刷新

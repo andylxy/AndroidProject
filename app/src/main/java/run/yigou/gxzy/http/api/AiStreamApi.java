@@ -22,7 +22,7 @@ import run.yigou.gxzy.http.security.SecurityConfig;
 import run.yigou.gxzy.sse.SseStreamCallback;
 import run.yigou.gxzy.sse.SseEventHandler;
 import run.yigou.gxzy.sse.SseClientHelper;
-import run.yigou.gxzy.other.AppConfig;
+import run.yigou.gxzy.app.AppConfig;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.utils.SerialUtil;
 

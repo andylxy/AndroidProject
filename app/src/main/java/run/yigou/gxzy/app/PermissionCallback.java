@@ -1,4 +1,4 @@
-package run.yigou.gxzy.other;
+package run.yigou.gxzy.app;
 
 import android.app.Activity;
 import android.content.Context;

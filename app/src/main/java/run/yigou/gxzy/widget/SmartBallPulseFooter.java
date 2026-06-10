@@ -1,4 +1,4 @@
-package run.yigou.gxzy.other;
+package run.yigou.gxzy.widget;
 
 import android.animation.TimeInterpolator;
 import android.content.Context;

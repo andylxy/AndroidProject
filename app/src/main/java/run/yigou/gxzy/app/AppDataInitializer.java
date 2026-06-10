@@ -24,7 +24,7 @@ import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.model.MingCiContent;
 import run.yigou.gxzy.model.Yao;
 import run.yigou.gxzy.model.Fang;
-import run.yigou.gxzy.data.GlobalDataHolder;
+import run.yigou.gxzy.manager.GlobalDataHolder;
 
 /**
  * 应用数据初始化器

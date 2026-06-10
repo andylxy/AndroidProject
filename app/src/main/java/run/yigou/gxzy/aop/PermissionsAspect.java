@@ -3,7 +3,7 @@ package run.yigou.gxzy.aop;
 import android.app.Activity;
 
 import run.yigou.gxzy.manager.ActivityManager;
-import run.yigou.gxzy.other.PermissionCallback;
+import run.yigou.gxzy.app.PermissionCallback;
 import com.hjq.permissions.XXPermissions;
 import com.tencent.bugly.crashreport.CrashReport;
 

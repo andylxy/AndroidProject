@@ -1,4 +1,4 @@
-package run.yigou.gxzy.http.entitymodel;
+package run.yigou.gxzy.http.model;
 
 import java.io.Serializable;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * 作者:  zhs
  * 时间:  2023-07-10 11:47:39
- * 包名:  run.yigou.gxzy.http.entitymodel
+ * 包名:  run.yigou.gxzy.http.model
  * 类名:  ChapterInfo
  * 版本:  1.0
  * 描述:

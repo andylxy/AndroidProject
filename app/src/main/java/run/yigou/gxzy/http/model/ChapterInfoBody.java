@@ -1,11 +1,11 @@
-package run.yigou.gxzy.http.entitymodel;
+package run.yigou.gxzy.http.model;
 
 import java.io.Serializable;
 
 /**
  * 作者:  zhs
  * 时间:  2023-07-10 11:47:44
- * 包名:  run.yigou.gxzy.http.entitymodel
+ * 包名:  run.yigou.gxzy.http.model
  * 类名:  ChapterInfoBody
  * 版本:  1.0
  * 描述:

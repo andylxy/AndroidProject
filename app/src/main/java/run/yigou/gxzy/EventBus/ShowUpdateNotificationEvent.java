@@ -1,4 +1,4 @@
-package run.yigou.gxzy.EventBus;
+package run.yigou.gxzy.eventbus;
 
 public class ShowUpdateNotificationEvent {
 

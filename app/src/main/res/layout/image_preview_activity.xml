@@ -7,7 +7,7 @@
     android:background="#363636"
     tools:context=".ui.activity.ImagePreviewActivity">
 
-    <run.yigou.gxzy.widget.PhotoViewPager
+    <com.hjq.widget.view.PhotoViewPager
         android:id="@+id/vp_image_preview_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

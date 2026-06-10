@@ -22,7 +22,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.CheckNet;
 import run.yigou.gxzy.aop.Permissions;
 import com.hjq.base.action.SingleClick;
-import run.yigou.gxzy.other.AppConfig;
+import run.yigou.gxzy.app.AppConfig;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.OnDownloadListener;
 import com.hjq.http.model.HttpMethod;

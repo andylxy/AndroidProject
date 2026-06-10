@@ -7,7 +7,7 @@
  * Copyright (c) 2025, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.data;
+package run.yigou.gxzy.manager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

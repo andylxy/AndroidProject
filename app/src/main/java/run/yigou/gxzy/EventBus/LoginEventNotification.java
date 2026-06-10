@@ -1,4 +1,4 @@
-package run.yigou.gxzy.EventBus;
+package run.yigou.gxzy.eventbus;
 
 /**
  *  登陆成功后通知界面刷新

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<run.yigou.gxzy.widget.StatusLayout
+<com.hjq.widget.layout.StatusLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -24,4 +24,4 @@
 
     </com.scwang.smart.refresh.layout.SmartRefreshLayout>
 
-</run.yigou.gxzy.widget.StatusLayout>
+</com.hjq.widget.layout.StatusLayout>

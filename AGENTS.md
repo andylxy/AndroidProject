@@ -6,6 +6,7 @@
 - `app/`：应用主模块，包含业务代码、资源、Manifest、混淆配置和应用级 Gradle 配置。
 - `library/base`：基类、通用工具和基础能力封装。
 - `library/widget`：可复用自定义 View 与 UI 组件。
+- `library/ui-dialog`：通用 Dialog 和 Popup 组件。
 - `library/umeng`：友盟分享、推送等集成。
 - `library/xbus`：轻量事件总线模块。
 - `library/log`：日志工具模块。

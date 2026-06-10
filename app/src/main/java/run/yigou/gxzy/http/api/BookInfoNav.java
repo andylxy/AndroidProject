@@ -14,7 +14,7 @@ import com.hjq.http.config.IRequestApi;
 
 import java.util.List;
 
-import run.yigou.gxzy.http.entitymodel.NavItem;
+import run.yigou.gxzy.http.model.NavItem;
 
 
 /**

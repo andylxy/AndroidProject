@@ -13,7 +13,7 @@ import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.glide.GlideApp;
-import run.yigou.gxzy.other.AppConfig;
+import run.yigou.gxzy.app.AppConfig;
 
 /**
  * 作者:  zhs

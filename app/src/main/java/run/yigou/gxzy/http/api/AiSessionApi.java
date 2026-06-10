@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import run.yigou.gxzy.app.AppApplication;
-import run.yigou.gxzy.other.AppConfig;
+import run.yigou.gxzy.app.AppConfig;
 
 /**
  * 版本:  1.0

@@ -3,7 +3,7 @@ package run.yigou.gxzy.http.api;
 import com.hjq.http.config.IRequestApi;
 
 import run.yigou.gxzy.greendao.entity.UserInfo;
-import run.yigou.gxzy.http.entitymodel.UserInfoToken;
+import run.yigou.gxzy.http.model.UserInfoToken;
 
 /**
  *    author : Android 轮子哥

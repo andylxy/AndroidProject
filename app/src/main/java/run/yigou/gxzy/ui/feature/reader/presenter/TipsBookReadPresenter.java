@@ -39,7 +39,7 @@ import run.yigou.gxzy.ui.feature.reader.data.BookData;
 import run.yigou.gxzy.ui.feature.reader.data.BookDataManager;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterIndexBuilder;
-import run.yigou.gxzy.data.GlobalDataHolder;
+import run.yigou.gxzy.manager.GlobalDataHolder;
 import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
 import run.yigou.gxzy.ui.feature.reader.manager.ChapterDownloadManager;
 import run.yigou.gxzy.model.DataItem;
@@ -520,7 +520,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             }
             
             // 3. 获取全书别名映射（用于增强搜索）
-            run.yigou.gxzy.data.GlobalDataHolder globalData = run.yigou.gxzy.data.GlobalDataHolder.getInstance();
+            run.yigou.gxzy.manager.GlobalDataHolder globalData = run.yigou.gxzy.manager.GlobalDataHolder.getInstance();
             java.util.Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
             java.util.Map<String, String> fangAliasDict = globalData.getFangAliasDict();
             

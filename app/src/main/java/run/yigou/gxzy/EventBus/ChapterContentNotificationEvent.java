@@ -1,4 +1,4 @@
-package run.yigou.gxzy.EventBus;
+package run.yigou.gxzy.eventbus;
 
 import run.yigou.gxzy.model.HH2SectionData;
 
