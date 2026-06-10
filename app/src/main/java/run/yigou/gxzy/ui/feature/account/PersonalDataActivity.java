@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.feature.account;
 
 import android.net.Uri;
 import android.os.Build;

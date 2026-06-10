@@ -19,7 +19,9 @@ import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.dialog.SafeDialog;
 import run.yigou.gxzy.ui.dialog.UpdateDialog;
 import run.yigou.gxzy.ui.fragment.HomeFragment;
-import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
+import run.yigou.gxzy.ui.feature.account.MyFragmentPersonal;
+import run.yigou.gxzy.ui.feature.account.PhoneResetActivity;
+import run.yigou.gxzy.ui.feature.account.PasswordResetActivity;
 
 import com.hjq.permissions.XXPermissions;
 import com.hjq.widget.layout.SettingBar;

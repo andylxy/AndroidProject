@@ -14,7 +14,7 @@ import com.google.gson.JsonSyntaxException;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.ActivityManager;
-import run.yigou.gxzy.ui.activity.LoginActivity;
+import run.yigou.gxzy.ui.feature.account.LoginActivity;
 import com.hjq.gson.factory.GsonFactory;
 import run.yigou.gxzy.log.EasyLog;
 import com.hjq.http.config.IRequestApi;

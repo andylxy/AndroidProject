@@ -1,7 +1,7 @@
 /*
  * 项目名: AndroidProject
  * 类名: ImageSizeCalculator.java
- * 包名: run.yigou.gxzy.ui.tips.adapter.refactor.image
+ * 包名: run.yigou.gxzy.ui.feature.reader.adapter.refactor.image
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 图片尺寸计算器 - 计算图片在TextView中的显示尺寸

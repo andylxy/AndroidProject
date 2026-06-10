@@ -1,7 +1,7 @@
 /*
  * 项目名: AndroidProject
  * 类名: ImageSpanBuilder.java
- * 包名: run.yigou.gxzy.ui.tips.adapter.refactor.image
+ * 包名: run.yigou.gxzy.ui.feature.reader.adapter.refactor.image
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: ImageSpan构建器 - 创建和插入ImageSpan到SpannableString

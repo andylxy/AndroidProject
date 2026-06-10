@@ -8,7 +8,7 @@
  * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.feature.account;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -50,6 +50,7 @@ import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
 import com.hjq.base.KeyboardWatcher;
 import run.yigou.gxzy.ui.fragment.HomeFragment;
+import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.utils.Base64ConverBitmapHelper;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.wxapi.WXEntryActivity;

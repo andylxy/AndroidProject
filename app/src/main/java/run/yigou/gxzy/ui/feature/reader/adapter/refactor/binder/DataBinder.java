@@ -1,7 +1,7 @@
 /*
  * 项目名: AndroidProject
  * 类名: DataBinder.java
- * 包名: run.yigou.gxzy.ui.tips.adapter.refactor.binder
+ * 包名: run.yigou.gxzy.ui.feature.reader.adapter.refactor.binder
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 数据绑定器接口 - 定义数据绑定规范

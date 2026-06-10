@@ -1,7 +1,7 @@
 /*
  * 项目名: AndroidProject
  * 类名: SearchModeLongClickHandler.java
- * 包名: run.yigou.gxzy.ui.tips.adapter.refactor.event
+ * 包名: run.yigou.gxzy.ui.feature.reader.adapter.refactor.event
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 搜索模式长按处理器 - 处理搜索界面的长按事件(仅复制功能)

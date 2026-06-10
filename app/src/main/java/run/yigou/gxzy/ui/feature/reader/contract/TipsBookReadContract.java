@@ -1,7 +1,7 @@
 /*
  * 项目名: AndroidProject
  * 类名: TipsBookReadContract.java
- * 包名: run.yigou.gxzy.ui.tips.contract
+ * 包名: run.yigou.gxzy.ui.feature.reader.contract
  * 作者 : AI Assistant
  * 当前修改时间 : 2025年12月09日
  * Copyright (c) 2025, Inc. All Rights Reserved

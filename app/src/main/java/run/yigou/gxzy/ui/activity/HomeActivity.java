@@ -25,7 +25,7 @@ import run.yigou.gxzy.ui.adapter.NavigationAdapter;
 import run.yigou.gxzy.ui.feature.ai.AiMsgFragment;
 import run.yigou.gxzy.ui.fragment.BookCollectCaseFragment;
 import run.yigou.gxzy.ui.fragment.HomeFragment;
-import run.yigou.gxzy.ui.fragment.MyFragmentPersonal;
+import run.yigou.gxzy.ui.feature.account.MyFragmentPersonal;
 
 /**
  * 首页Activity

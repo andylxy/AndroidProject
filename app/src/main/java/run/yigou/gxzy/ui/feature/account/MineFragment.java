@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.fragment;
+package run.yigou.gxzy.ui.feature.account;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -14,12 +14,12 @@ import run.yigou.gxzy.ui.activity.BrowserActivity;
 import run.yigou.gxzy.ui.activity.GuideActivity;
 import run.yigou.gxzy.ui.feature.media.activity.ImagePreviewActivity;
 import run.yigou.gxzy.ui.feature.media.activity.ImageSelectActivity;
-import run.yigou.gxzy.ui.activity.LoginActivity;
-import run.yigou.gxzy.ui.activity.PasswordForgetActivity;
-import run.yigou.gxzy.ui.activity.PasswordResetActivity;
-import run.yigou.gxzy.ui.activity.PersonalDataActivity;
-import run.yigou.gxzy.ui.activity.PhoneResetActivity;
-import run.yigou.gxzy.ui.activity.RegisterActivity;
+import run.yigou.gxzy.ui.feature.account.LoginActivity;
+import run.yigou.gxzy.ui.feature.account.PasswordForgetActivity;
+import run.yigou.gxzy.ui.feature.account.PasswordResetActivity;
+import run.yigou.gxzy.ui.feature.account.PersonalDataActivity;
+import run.yigou.gxzy.ui.feature.account.PhoneResetActivity;
+import run.yigou.gxzy.ui.feature.account.RegisterActivity;
 import run.yigou.gxzy.ui.activity.SettingActivity;
 import run.yigou.gxzy.ui.feature.media.activity.VideoPlayActivity;
 import run.yigou.gxzy.ui.feature.media.activity.VideoSelectActivity;

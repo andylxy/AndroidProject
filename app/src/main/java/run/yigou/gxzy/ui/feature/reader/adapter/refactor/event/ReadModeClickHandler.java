@@ -1,7 +1,7 @@
 /*
  * 项目名: AndroidProject
  * 类名: ReadModeClickHandler.java
- * 包名: run.yigou.gxzy.ui.tips.adapter.refactor.event
+ * 包名: run.yigou.gxzy.ui.feature.reader.adapter.refactor.event
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 阅读模式点击处理器 - 处理阅读界面的点击事件

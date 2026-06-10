@@ -1,8 +1,5 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.feature.account;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -12,59 +9,41 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.aop.Log;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.http.api.GetCodeApi;
-import run.yigou.gxzy.http.api.PhoneApi;
+import run.yigou.gxzy.http.api.VerifyCodeApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
-import run.yigou.gxzy.ui.dialog.TipsDialog;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
-import com.hjq.toast.Toaster;
 import com.hjq.widget.view.CountdownView;
 
 /**
  *    author : Android 轮子哥
  *    github : https://github.com/getActivity/AndroidProject
- *    time   : 2019/04/20
- *    desc   : 设置手机号
+ *    time   : 2019/02/27
+ *    desc   : 忘记密码
  */
-public final class PhoneResetActivity extends AppActivity
+public final class PasswordForgetActivity extends AppActivity
         implements TextView.OnEditorActionListener {
-
-    private static final String INTENT_KEY_IN_CODE = "code";
-
-    @Log
-    public static void start(Context context, String code) {
-        Intent intent = new Intent(context, PhoneResetActivity.class);
-        intent.putExtra(INTENT_KEY_IN_CODE, code);
-        if (!(context instanceof Activity)) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
-        context.startActivity(intent);
-    }
 
     private EditText mPhoneView;
     private EditText mCodeView;
     private CountdownView mCountdownView;
     private Button mCommitView;
 
-    /** 验证码 */
-    private String mVerifyCode;
-
     @Override
     protected int getLayoutId() {
-        return R.layout.phone_reset_activity;
+        return R.layout.password_forget_activity;
     }
 
     @Override
     protected void initView() {
-        mPhoneView = findViewById(R.id.et_phone_reset_phone);
-        mCodeView = findViewById(R.id.et_phone_reset_code);
-        mCountdownView = findViewById(R.id.cv_phone_reset_countdown);
-        mCommitView = findViewById(R.id.btn_phone_reset_commit);
+        mPhoneView = findViewById(R.id.et_password_forget_phone);
+        mCodeView = findViewById(R.id.et_password_forget_code);
+        mCountdownView = findViewById(R.id.cv_password_forget_countdown);
+        mCommitView = findViewById(R.id.btn_password_forget_commit);
 
         setOnClickListener(mCountdownView, mCommitView);
 
@@ -79,14 +58,13 @@ public final class PhoneResetActivity extends AppActivity
 
     @Override
     protected void initData() {
-        mVerifyCode = getString(INTENT_KEY_IN_CODE);
+
     }
 
     @SingleClick
     @Override
     public void onClick(View view) {
         if (view == mCountdownView) {
-
             if (mPhoneView.getText().toString().length() != 11) {
                 mPhoneView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.shake_anim));
                 toast(R.string.common_phone_input_error);
@@ -98,6 +76,9 @@ public final class PhoneResetActivity extends AppActivity
                 mCountdownView.start();
                 return;
             }
+
+            // 隐藏软键盘
+            hideKeyboard(getCurrentFocus());
 
             // 获取验证码
             EasyHttp.post(this)
@@ -120,39 +101,28 @@ public final class PhoneResetActivity extends AppActivity
             }
 
             if (mCodeView.getText().toString().length() != getResources().getInteger(R.integer.sms_code_length)) {
-                Toaster.show(R.string.common_code_error_hint);
+                mCodeView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.shake_anim));
+                toast(R.string.common_code_error_hint);
                 return;
             }
-
-            // 隐藏软键盘
-            hideKeyboard(getCurrentFocus());
 
             if (true) {
-                new TipsDialog.Builder(this)
-                        .setIcon(TipsDialog.ICON_FINISH)
-                        .setMessage(R.string.phone_reset_commit_succeed)
-                        .setDuration(2000)
-                        .addOnDismissListener(dialog -> finish())
-                        .show();
+                PasswordResetActivity.start(getActivity(), mPhoneView.getText().toString(), mCodeView.getText().toString());
+                finish();
                 return;
             }
 
-            // 更换手机号
+            // 验证码校验
             EasyHttp.post(this)
-                    .api(new PhoneApi()
-                            .setPreCode(mVerifyCode)
+                    .api(new VerifyCodeApi()
                             .setPhone(mPhoneView.getText().toString())
                             .setCode(mCodeView.getText().toString()))
                     .request(new HttpCallback<HttpData<Void>>(this) {
 
                         @Override
                         public void onSucceed(HttpData<Void> data) {
-                            new TipsDialog.Builder(getActivity())
-                                    .setIcon(TipsDialog.ICON_FINISH)
-                                    .setMessage(R.string.phone_reset_commit_succeed)
-                                    .setDuration(2000)
-                                    .addOnDismissListener(dialog -> finish())
-                                    .show();
+                            PasswordResetActivity.start(getActivity(), mPhoneView.getText().toString(), mCodeView.getText().toString());
+                            finish();
                         }
                     });
         }
@@ -164,7 +134,7 @@ public final class PhoneResetActivity extends AppActivity
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE && mCommitView.isEnabled()) {
-            // 模拟点击提交按钮
+            // 模拟点击下一步按钮
             onClick(mCommitView);
             return true;
         }

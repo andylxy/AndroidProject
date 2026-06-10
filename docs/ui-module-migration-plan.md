@@ -117,9 +117,9 @@
 | 阶段 1 Demo 隔离 | 已完成 | 批次 4 已完成 | `assembleDebug` 成功 | 已隐藏 `MineFragment` 中 Demo 入口；`CopyActivityTest` 已移出正式 Manifest，Demo 类保留 |
 | 阶段 2 Dialog/Popup | 已完成 | 批次 6 已完成 | `assembleDebug` 成功 | 通用 `CommonDialog` / `WaitDialog` / `MessageDialog` / `InputDialog` / `MenuDialog` / `SelectDialog` / `DateDialog` / `TimeDialog` / `ListPopup` 已迁入 `library/ui-dialog`；AOP 编织仍在 app 侧 |
 | 阶段 3 Media | 批次 2 已完成 | 批次 2 已完成：app 内 feature/media 包级聚合 | `assembleDebug` 成功 | 7 个 Activity、3 个 Adapter、1 个 Dialog 已移动到 app 内 `run.yigou.gxzy.ui.feature.media` 包；所有调用方 import 已更新 |
-| 阶段 4 AI Chat | 未开始 | - | - | - |
-| 阶段 5 Reader/Tips | 进行中 | 批次 3 已完成（model/ 7文件 + reader/entity/ 7文件）；批次 2 GlobalDataHolder 已迁入 reader/data/（非根 data/） | `assembleDebug` 成功 | model/（7文件）、reader/entity/（7文件）、reader/data/GlobalDataHolder 已迁移；tips/ 剩余文件待迁移 |
-| 阶段 6 Account | 未开始 | - | - | - |
+| 阶段 4 AI Chat | 已完成 | 预-session 已完成 | `assembleDebug` 成功 | AI Chat 相关代码已从 tips 剥离到 feature/aichat |
+| 阶段 5 Reader/Tips | 已完成 | 批次 10 已完成 + 注释清理批次已完成 | `assembleDebug` 成功 | tips/ 目录已完全删除；feature/reader/ 包含 74 个 Java 文件，按业务域组织（activity/adapter/contract/data/entity/fragment/helper/listener/manager/presenter/renderer/repository/search/state/widget/callback/model/event/binder/image）；所有 package 声明已切换；所有文件头注释包名已同步更新 |
+| 阶段 6 Account | 已完成 | 批次 1 已完成 | `assembleDebug` 验证中 | 6 个 Activity + 3 个 Fragment 已迁移到 `ui/feature/account/`；所有调用方 import、AndroidManifest.xml、布局文件 tools:context 已更新 |
 
 ## 7. 当前批次控制
 

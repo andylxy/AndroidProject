@@ -1,7 +1,7 @@
 /*
  * 项目名: AndroidProject
  * 类名: RefactoredSearchAdapter.java
- * 包名: run.yigou.gxzy.ui.tips.adapter.refactor
+ * 包名: run.yigou.gxzy.ui.feature.reader.adapter.refactor
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 重构后的搜索适配器 - 搜索模式专用

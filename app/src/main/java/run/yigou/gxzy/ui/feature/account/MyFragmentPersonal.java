@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.fragment;
+package run.yigou.gxzy.ui.feature.account;
 
 import android.net.Uri;
 import android.os.Build;
@@ -28,6 +28,7 @@ import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.ui.fragment.HomeFragment;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.http.api.UpdateImageApi;
 import run.yigou.gxzy.http.glide.GlideApp;
@@ -36,7 +37,7 @@ import run.yigou.gxzy.ui.activity.AboutActivity;
 import run.yigou.gxzy.ui.feature.media.activity.ImageCropActivity;
 import run.yigou.gxzy.ui.feature.media.activity.ImagePreviewActivity;
 import run.yigou.gxzy.ui.feature.media.activity.ImageSelectActivity;
-import run.yigou.gxzy.ui.activity.LoginActivity;
+import run.yigou.gxzy.ui.feature.account.LoginActivity;
 import run.yigou.gxzy.ui.activity.SettingActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.dialog.InputDialog;

@@ -1,7 +1,7 @@
 /*
  * 项目名: AndroidProject
  * 类名: TipsHeaderViewHolder.java
- * 包名: run.yigou.gxzy.ui.tips.adapter.refactor.viewholder
+ * 包名: run.yigou.gxzy.ui.feature.reader.adapter.refactor.viewholder
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 头部ViewHolder - 封装Header绑定逻辑

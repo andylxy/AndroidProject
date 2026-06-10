@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.fragment;
+package run.yigou.gxzy.ui.feature.account;
 
 import android.view.View;
 import android.widget.ImageView;
@@ -9,7 +9,8 @@ import run.yigou.gxzy.aop.Permissions;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.glide.GlideApp;
-import run.yigou.gxzy.ui.activity.LoginActivity;
+import run.yigou.gxzy.ui.fragment.HomeFragment;
+import run.yigou.gxzy.ui.feature.account.LoginActivity;
 import run.yigou.gxzy.ui.activity.HomeActivity;
 
 import com.hjq.permissions.Permission;
