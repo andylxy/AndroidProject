@@ -8,7 +8,7 @@ import com.hjq.http.model.HttpParams;
 
 import java.lang.reflect.Method;
 
-import run.yigou.gxzy.http.Server.RequestServer;
+import run.yigou.gxzy.http.server.RequestServer;
 
 /**
  * author : Android 轮子哥

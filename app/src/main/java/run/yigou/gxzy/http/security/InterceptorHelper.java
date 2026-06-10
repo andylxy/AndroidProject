@@ -7,7 +7,7 @@ import com.hjq.http.model.HttpParams;
 
 import java.util.Map;
 
-import run.yigou.gxzy.http.Server.RequestServer;
+import run.yigou.gxzy.http.server.RequestServer;
 import run.yigou.gxzy.utils.SerialUtil;
 import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.app.AppApplication;

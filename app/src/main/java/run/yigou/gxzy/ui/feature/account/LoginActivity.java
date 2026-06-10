@@ -32,7 +32,7 @@ import androidx.annotation.Nullable;
 
 import com.gyf.immersionbar.ImmersionBar;
 
-import run.yigou.gxzy.EventBus.LoginEventNotification;
+import run.yigou.gxzy.eventbus.LoginEventNotification;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.crypto.SecurityUtils;
 import com.hjq.base.action.SingleClick;

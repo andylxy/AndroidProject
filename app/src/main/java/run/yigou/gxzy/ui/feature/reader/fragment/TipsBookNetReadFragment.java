@@ -40,7 +40,7 @@ import com.lucas.xbus.XEventBus;
 import java.util.ArrayList;
 import java.util.List;
 
-import run.yigou.gxzy.EventBus.TipsFragmentSettingEventNotification;
+import run.yigou.gxzy.eventbus.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;

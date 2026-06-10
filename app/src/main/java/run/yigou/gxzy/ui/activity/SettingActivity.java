@@ -5,7 +5,7 @@ import android.view.View;
 
 import com.hjq.base.BaseDialog;
 
-import run.yigou.gxzy.EventBus.LoginEventNotification;
+import run.yigou.gxzy.eventbus.LoginEventNotification;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
