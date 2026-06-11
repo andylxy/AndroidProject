@@ -1,7 +1,4 @@
-package run.yigou.gxzy.ui.feature.reader.renderer;
-
-import run.yigou.gxzy.model.DataItem;
-import run.yigou.gxzy.model.HH2SectionData;
+package run.yigou.gxzy.text;
 
 import android.graphics.Color;
 import android.text.Spannable;
@@ -15,9 +12,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import run.yigou.gxzy.http.api.StyleConfigApi;
-import run.yigou.gxzy.ui.feature.reader.listener.ClickLink;
 
 /**
  * Tips 模块文本渲染器
@@ -36,38 +30,6 @@ public class TipsTextRenderer {
             this.isSmallFont = isSmallFont;
             this.linkType = linkType;
         }
-    }
-
-    /**
-     * 将 API 返回的配置列表转换为内部样式映射表，并更新配置
-     * 
-     * @param apiStyles API 返回的样式列表
-     */
-    public static void updateConfigFromApi(List<StyleConfigApi.StyleConfigApiBean.StyleItem> apiStyles) {
-        if (apiStyles == null || apiStyles.isEmpty()) {
-            return;
-        }
-        
-        HashMap<String, StyleConfig> newConfigs = new HashMap<>();
-        for (StyleConfigApi.StyleConfigApiBean.StyleItem item : apiStyles) {
-            try {
-                // 解析颜色，支持 #RRGGBB 格式，如果解析失败则捕获异常
-                int color = Color.parseColor(item.getColor());
-                
-                // 构建内部配置对象
-                newConfigs.put(item.getMarker(), new StyleConfig(
-                        color, 
-                        item.isSmallFont(), 
-                        item.getLinkType()
-                ));
-            } catch (Exception e) {
-                // 仅记录错误，跳过当前出错的项，不影响其他项的加载
-                e.printStackTrace();
-            }
-        }
-        
-        // 更新全局配置
-        updateStyleConfig(newConfigs);
     }
 
     // 使用 HashMap 存储样式配置，支持动态更新
@@ -115,7 +77,7 @@ public class TipsTextRenderer {
     public static SpannableStringBuilder createSpannable(String text) {
         return createSpannable(text, null);
     }
-    
+
     // 创建SpannableStringBuilder对象，用于渲染DataItem的文本、注释和视频部分
     public static SpannableStringBuilder createSpannable(String text, final ClickLink clickLink) {
         // 当输入的文本为null时，返回一个包含空字符串的SpannableStringBuilder对象
@@ -141,59 +103,59 @@ public class TipsTextRenderer {
         // 使用 StringBuilder 预处理，去除所有标签，计算最终文本长度（优化内存）
         // 但由于需要保留样式位置，直接操作 SpannableStringBuilder 可能更直观，但效率较低。
         // 这里采用正则匹配方式，避免复杂的 substring 和 indexOf 逻辑。
-        
+
         // 正则匹配 $x{content} 格式
         // \$([a-zA-Z])\{([^}]*)\}
         // Group 1: 标记 (marker)
         // Group 2: 内容 (content)
-        
+
         java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\$([a-zA-Z])\\{([^}]*)\\}");
         java.util.regex.Matcher matcher = pattern.matcher(str);
-        
+
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         int lastAppendPosition = 0;
-        
+
         while (matcher.find()) {
             // 追加前一段普通文本
             ssb.append(str, lastAppendPosition, matcher.start());
-            
+
             String marker = matcher.group(1);
             String content = matcher.group(2);
             int start = ssb.length();
-            
+
             // 追加标签内的内容
             ssb.append(content);
             int end = ssb.length();
-            
+
             // 应用样式
             applyStyle(ssb, marker, start, end, clickLink);
-            
+
             lastAppendPosition = matcher.end();
         }
-        
+
         // 追加剩余文本
         if (lastAppendPosition < str.length()) {
             ssb.append(str, lastAppendPosition, str.length());
         }
-        
+
         // 处理项编号特殊渲染
         renderItemNumber(ssb);
-        
+
         return ssb;
     }
 
     // 根据标记应用样式的方法
     private static void applyStyle(SpannableStringBuilder spannableStringBuilder, String marker, int start, int end, final ClickLink clickLink) {
         if (marker == null) return;
-        
+
         StyleConfig config = configMap.get(marker);
         if (config == null) return;
-        
+
         // 1. 设置相对字体大小
         if (config.isSmallFont) {
             spannableStringBuilder.setSpan(new RelativeSizeSpan(0.7f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        
+
         // 2. 设置点击事件处理
         if (config.linkType != 0 && clickLink != null) {
              spannableStringBuilder.setSpan(new ProxyClickableSpan(clickLink, config.linkType), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -203,7 +165,7 @@ public class TipsTextRenderer {
         ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(config.color);
         spannableStringBuilder.setSpan(foregroundColorSpan, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
-    
+
     /**
      * 静态内部类实现 ClickableSpan，减少匿名类创建开销
      */
@@ -211,15 +173,15 @@ public class TipsTextRenderer {
         static final int TYPE_YAO = 1;
         static final int TYPE_FANG = 2;
         static final int TYPE_MINGCI = 3;
-        
+
         private final ClickLink clickLink;
         private final int type;
-        
+
         ProxyClickableSpan(ClickLink clickLink, int type) {
             this.clickLink = clickLink;
             this.type = type;
         }
-        
+
         @Override
         public void onClick(View view) {
             if (clickLink == null) return;
@@ -295,51 +257,42 @@ public class TipsTextRenderer {
      * @return 包含子字符串在主字符串中所有起始位置的列表。
      */
     public static ArrayList<Integer> getAllSubStringPos(String str, String str2) {
-        // 初始化一个ArrayList来存储所有匹配的位置
+        // 改用 SearchMatcher 进行匹配（保持与文本工具模块的一致性）
+        // 注意：SearchMatcher 不区分大小写，此方法原实现区分大小写
+        // 为保持行为一致，直接使用 indexOf 实现
         ArrayList<Integer> positions = new ArrayList<>();
 
-        // 确保主字符串和子字符串都不是null，并且子字符串不为空
         if (str == null || str2 == null || str2.isEmpty() || str.isEmpty()) {
             return positions;
         }
 
-        // 获取主字符串的长度和子字符串的长度
         int strLength = str.length();
         int str2Length = str2.length();
 
-        // 初始化搜索索引
         int index = 0;
-
-        // 在主字符串中查找子字符串
         while (index <= strLength - str2Length) {
-            // 从当前索引位置查找子字符串
             int foundIndex = str.indexOf(str2, index);
-
-            // 如果没有找到子字符串，退出循环
             if (foundIndex == -1) {
                 break;
             }
-
-            // 将找到的位置添加到结果列表中
             positions.add(foundIndex);
-
-            // 移动索引到子字符串末尾的下一个位置，继续查找
             index = foundIndex + str2Length;
         }
 
         return positions;
     }
+
     /**
      * 高亮匹配项
      * 此方法用于在SpannableStringBuilder中查找匹配项，并将它们高亮显示（黄色背景）
-     * 保持与 TipsBookNetReadFragment (TextHighlighter) 一致
+     * 保持与 TextHighlighter 一致
      *
      * @param matcher   用于查找匹配项的Matcher对象
      * @param spannable 要进行高亮显示的SpannableStringBuilder对象
      */
     public static void highlightMatches(java.util.regex.Matcher matcher, SpannableStringBuilder spannable) {
         // 定义高亮显示的颜色为黄色 (与 TextHighlighter 一致)
-        int color = 0xFFFFFF00; 
+        int color = 0xFFFFFF00;
         // 遍历所有匹配项并应用高亮
         while (matcher.find()) {
             // 设置文本高亮背景颜色

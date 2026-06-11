@@ -17,8 +17,8 @@ import java.util.List;
 import android.content.ComponentCallbacks2;
 import android.text.SpannableStringBuilder;
 
-import run.yigou.gxzy.ui.feature.reader.search.SearchMatcher;
-import run.yigou.gxzy.ui.feature.reader.search.TextHighlighter;
+import run.yigou.gxzy.text.SearchMatcher;
+import run.yigou.gxzy.text.TextHighlighter;
 
 import run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;

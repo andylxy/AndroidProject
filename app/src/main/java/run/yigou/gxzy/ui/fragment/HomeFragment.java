@@ -63,7 +63,7 @@ import run.yigou.gxzy.http.api.AiConfigApi;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.api.MingCiContentApi;
 import run.yigou.gxzy.http.api.StyleConfigApi;
-import run.yigou.gxzy.ui.feature.reader.renderer.TipsTextRenderer;
+import run.yigou.gxzy.ui.feature.reader.renderer.TipsTextRendererBridge;
 import run.yigou.gxzy.http.api.YaoAliaApi;
 import run.yigou.gxzy.http.api.YaoContentApi;
 import run.yigou.gxzy.http.model.HttpData;
@@ -314,7 +314,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             // 在后台线程处理数据转换（虽然此处数据量不大，但保持良好习惯）
                             // 或者是直接在主线程更新，因为 updateConfigFromApi 内部主要是 Map 操作，非常快
                             // 这里直接在主线程更新即可，避免多线程同步问题
-                            TipsTextRenderer.updateConfigFromApi(result.getData().getStyles());
+                            TipsTextRendererBridge.updateConfigFromApi(result.getData().getStyles());
                             // EasyLog.print("已更新 Tips 样式配置，数量: " + result.getData().getStyles().size());
                         }
                     }

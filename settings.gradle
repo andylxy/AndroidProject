@@ -8,3 +8,5 @@ include ':library:xbus'          // 总线模块
 include ':library:log'           // 日志模块（EasyLog）
 include ':library:crypto'        // 加密模块（AES、RSA、SM2）
 include ':library:sse-client'    // SSE 客户端模块
+include ':library:text-utils'     // 文本搜索+高亮工具模块
+include ':library:text-renderer'  // 文本渲染引擎模块
