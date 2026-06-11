@@ -8,13 +8,13 @@ import androidx.annotation.NonNull;
 import com.github.chrisbanes.photoview.PhotoView;
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.http.glide.GlideApp;
+import run.yigou.gxzy.network.glide.GlideApp;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android ???
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2020/08/28
- *    desc   : 图片预览适配器
+ *    desc   : ???????
  */
 public final class ImagePreviewAdapter extends AppAdapter<String> {
 

@@ -13,7 +13,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.feature.reader.entity.ChildEntity;
 import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;

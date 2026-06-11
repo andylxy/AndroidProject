@@ -14,7 +14,7 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.action.StatusAction;
+import run.yigou.gxzy.base.action.StatusAction;
 import run.yigou.gxzy.aop.CheckNet;
 import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.app.AppActivity;

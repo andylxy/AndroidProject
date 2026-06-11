@@ -11,16 +11,16 @@ import androidx.annotation.NonNull;
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.greendao.entity.Book;
-import run.yigou.gxzy.http.api.BookInfoNav;
-import run.yigou.gxzy.http.glide.GlideApp;
+import run.yigou.gxzy.data.remote.api.BookInfoNav;
+import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.app.AppConfig;
 
 /**
- * 作者:  zhs
- * 时间:  2023-07-13 14:40:41
- * 类名:  BookCollectCaseAdapter
- * 版本:  1.0
- * 描述:
+ * ??:  zhs
+ * ??:  2023-07-13 14:40:41
+ * ??:  BookCollectCaseAdapter
+ * ??:  1.0
+ * ??:
  */
 public final class BookCollectCaseAdapter extends AppAdapter<Book> {
 

@@ -2,7 +2,7 @@ package run.yigou.gxzy.greendao;
 
 
 import run.yigou.gxzy.app.AppApplication;
-import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.base.constant.AppConst;
 import org.greenrobot.greendao.database.Database;
 
 import run.yigou.gxzy.greendao.gen.DaoMaster;

@@ -18,7 +18,7 @@ import java.util.List;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
-import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.ui.feature.reader.TipsFangYaoAdapter;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.feature.reader.data.BookData;

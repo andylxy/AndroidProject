@@ -11,19 +11,19 @@ import android.widget.TextView;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.http.api.GetCodeApi;
-import run.yigou.gxzy.http.api.VerifyCodeApi;
-import run.yigou.gxzy.http.model.HttpData;
+import run.yigou.gxzy.data.remote.api.GetCodeApi;
+import run.yigou.gxzy.data.remote.api.VerifyCodeApi;
+import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.view.CountdownView;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android ???
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2019/02/27
- *    desc   : 忘记密码
+ *    desc   : ????
  */
 public final class PasswordForgetActivity extends AppActivity
         implements TextView.OnEditorActionListener {
@@ -77,10 +77,10 @@ public final class PasswordForgetActivity extends AppActivity
                 return;
             }
 
-            // 隐藏软键盘
+            // ?????
             hideKeyboard(getCurrentFocus());
 
-            // 获取验证码
+            // ?????
             EasyHttp.post(this)
                     .api(new GetCodeApi()
                             .setPhone(mPhoneView.getText().toString()))
@@ -112,7 +112,7 @@ public final class PasswordForgetActivity extends AppActivity
                 return;
             }
 
-            // 验证码校验
+            // ?????
             EasyHttp.post(this)
                     .api(new VerifyCodeApi()
                             .setPhone(mPhoneView.getText().toString())
@@ -134,7 +134,7 @@ public final class PasswordForgetActivity extends AppActivity
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE && mCommitView.isEnabled()) {
-            // 模拟点击下一步按钮
+            // ?????????
             onClick(mCommitView);
             return true;
         }

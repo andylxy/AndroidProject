@@ -5,13 +5,13 @@ import android.view.View;
 
 import com.hjq.base.BaseDialog;
 
-import run.yigou.gxzy.eventbus.LoginEventNotification;
+import run.yigou.gxzy.event.LoginEvent;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.greendao.util.DbService;
-import run.yigou.gxzy.http.glide.GlideApp;
+import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.manager.CacheDataManager;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.app.AppConfig;
@@ -31,10 +31,10 @@ import com.hjq.widget.view.SwitchButton;
 import com.lucas.xbus.XEventBus;
 
 /**
- * author : Android 轮子哥
+ * author : Android ???
  * github : https://github.com/getActivity/AndroidProject
  * time   : 2019/03/01
- * desc   : 设置界面
+ * desc   : ????
  */
 public final class SettingActivity extends AppActivity
         implements SwitchButton.OnCheckedChangeListener {
@@ -58,7 +58,7 @@ public final class SettingActivity extends AppActivity
         mCleanCacheView = findViewById(R.id.sb_setting_cache);
         mAutoSwitchView = findViewById(R.id.sb_setting_switch);
 
-        // 设置切换按钮的监听
+        // ?????????
         mAutoSwitchView.setOnCheckedChangeListener(this);
 
         setOnClickListener(R.id.sb_setting_language, R.id.sb_setting_update, R.id.sb_setting_phone,
@@ -68,13 +68,13 @@ public final class SettingActivity extends AppActivity
 
     @Override
     protected void initData() {
-        // 获取应用缓存大小
+        // ????????
         mCleanCacheView.setRightText(CacheDataManager.getTotalCacheSize(this));
-        //隐藏自动登陆
+        //??????
         // mAutoSwitchView.setVisibility(View.GONE);
-        mLanguageView.setRightText("简体中文");
+        mLanguageView.setRightText("????");
         mPhoneView.setRightText("181****1413");
-        mPasswordView.setRightText("密码强度较低");
+        mPasswordView.setRightText("??????");
        // XEventBus.getDefault().register(SettingActivity.this);
     }
 
@@ -84,9 +84,9 @@ public final class SettingActivity extends AppActivity
         int viewId = view.getId();
         if (viewId == R.id.sb_setting_language) {
 
-            // 底部选择框
+            // ?????
             new MenuDialog.Builder(this)
-                    // 设置点击按钮后不关闭对话框
+                    // ?????????????
                     //.setAutoDismiss(false)
                     .setList(R.string.setting_language_simple, R.string.setting_language_complex)
                     .setListener((MenuDialog.OnListener<String>) (dialog, position, string) -> {
@@ -99,12 +99,12 @@ public final class SettingActivity extends AppActivity
 
         } else if (viewId == R.id.sb_setting_update) {
 
-            // 本地的版本码和服务器的进行比较
+            // ???????????????
             if (20 > AppConfig.getVersionCode()) {
                 new UpdateDialog.Builder(this)
                         .setVersionName("2.0")
                         .setForceUpdate(false)
-                        .setUpdateLog("修复Bug\n优化用户体验")
+                        .setUpdateLog("??Bug\n??????")
                         .setDownloadUrl("https://down.qq.com/qqweb/QQ_1/android_apk/Android_8.5.0.5025_537066738.apk")
                         .setFileMd5("560017dc94e8f9b65f4ca997c7feb326")
                         .show();
@@ -138,19 +138,19 @@ public final class SettingActivity extends AppActivity
 
         } else if (viewId == R.id.sb_setting_auto) {
 
-            // 自动登录
+            // ????
             mAutoSwitchView.setChecked(!mAutoSwitchView.isChecked());
 
         } else if (viewId == R.id.sb_setting_cache) {
 
-            // 清除内存缓存（必须在主线程）
+            // ??????????????
             GlideApp.get(getActivity()).clearMemory();
             ThreadPoolManager.getInstance().execute(() -> {
                 CacheDataManager.clearAllCache(this);
-                // 清除本地缓存（必须在子线程）
+                // ??????????????
                 GlideApp.get(getActivity()).clearDiskCache();
                 post(() -> {
-                    // 重新获取应用缓存大小
+                    // ??????????
                     mCleanCacheView.setRightText(CacheDataManager.getTotalCacheSize(getActivity()));
                 });
             });
@@ -163,14 +163,14 @@ public final class SettingActivity extends AppActivity
                 AppApplication.application.mUserInfoToken = null;
                 // startActivity(LoginActivity.class);
                 AppApplication.application.isLogin=false;
-               // XEventBus.getDefault().post(new LoginEventNotification(false));
+               // XEventBus.getDefault().post(new LoginEvent(false));
                 HomeActivity.start(getContext(), HomeFragment.class);
                 finish();
 
 
             }
 
-//            // 退出登录
+//            // ????
 //            EasyHttp.post(this)
 //                    .api(new LogoutApi())
 //                    .request(new HttpCallback<HttpData<Void>>(this) {
@@ -178,7 +178,7 @@ public final class SettingActivity extends AppActivity
 //                        @Override
 //                        public void onSucceed(HttpData<Void> data) {
 //                            startActivity(LoginActivity.class);
-//                            // 进行内存优化，销毁除登录页之外的所有界面
+//                            // ????????????????????
 //                            ActivityManager.getInstance().finishAllActivities(LoginActivity.class);
 //                        }
 //                    });

@@ -40,13 +40,13 @@ import com.lucas.xbus.XEventBus;
 import java.util.ArrayList;
 import java.util.List;
 
-import run.yigou.gxzy.eventbus.TipsFragmentSettingEventNotification;
+import run.yigou.gxzy.event.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
-import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.common.BookArgs;
+import run.yigou.gxzy.base.constant.AppConst;
+import run.yigou.gxzy.base.args.BookArgs;
 import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.greendao.gen.ChapterDao;

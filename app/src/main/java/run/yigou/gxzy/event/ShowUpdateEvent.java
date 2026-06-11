@@ -1,0 +1,76 @@
+package run.yigou.gxzy.event;
+
+public class ShowUpdateEvent {
+
+
+    private boolean updateNotification = false;
+    private boolean allChapterNotification = false;
+    private boolean chapterNotification = false;
+
+    private Long chapterId;
+
+    /**
+     * ??????
+     *
+     * @return ?????????id
+     */
+    public Long getChapterId() {
+        return chapterId;
+    }
+
+    /**
+     * ??????
+     *
+     * @param chapterId ???id
+     */
+    public void setChapterId(Long chapterId) {
+        this.chapterId = chapterId;
+    }
+
+    /**
+     *  ???????
+     */
+    public boolean isAllChapterNotification() {
+        return allChapterNotification;
+    }
+
+    /**
+     * ???????
+     *
+     * @param allChapterNotification true ??????????????? ,false ??????????????
+     */
+    public void setAllChapterNotification(boolean allChapterNotification) {
+        this.allChapterNotification = allChapterNotification;
+    }
+
+    public boolean isChapterNotification() {
+        return chapterNotification;
+    }
+
+    /**
+     * ??????
+     *
+     * @param chapterNotification true ??????????????? ,false ??????????????
+     */
+    public void setChapterNotification(boolean chapterNotification) {
+        this.chapterNotification = chapterNotification;
+    }
+
+    /**
+     * ?????????????????
+     *
+     * @return true ???????????? ,false ???????????
+     */
+    public boolean isUpdateNotification() {
+        return updateNotification;
+    }
+
+    /**
+     * true ???????????? ,false ???????????
+     *
+     * @param flag
+     */
+    public void setUpdateNotification(boolean flag) {
+        this.updateNotification = flag;
+    }
+}

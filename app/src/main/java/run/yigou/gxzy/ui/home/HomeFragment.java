@@ -1,10 +1,10 @@
 /*
- * 项目名: AndroidProject
- * 类名: HomeFragment.java
- * 包名: run.yigou.gxzy.ui.fragment.HomeFragment
- * 作者 : Zhs (xiaoyang_02@qq.com)
- * 当前修改时间 : 2023年07月05日 23:27:44
- * 上次修改时间: 2023年07月05日 17:23:50
+ * ???: AndroidProject
+ * ??: HomeFragment.java
+ * ??: run.yigou.gxzy.ui.fragment.HomeFragment
+ * ?? : Zhs (xiaoyang_02@qq.com)
+ * ?????? : 2023?07?05? 23:27:44
+ * ??????: 2023?07?05? 17:23:50
  * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
  */
 
@@ -50,7 +50,7 @@ import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;
-import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.greendao.entity.AiConfig;
 import run.yigou.gxzy.greendao.entity.SearchHistory;
 import run.yigou.gxzy.greendao.entity.TabNav;
@@ -59,14 +59,14 @@ import run.yigou.gxzy.greendao.service.SearchHistoryService;
 import run.yigou.gxzy.greendao.service.TabNavService;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
-import run.yigou.gxzy.http.api.AiConfigApi;
-import run.yigou.gxzy.http.api.BookInfoNav;
-import run.yigou.gxzy.http.api.MingCiContentApi;
-import run.yigou.gxzy.http.api.StyleConfigApi;
+import run.yigou.gxzy.data.remote.api.AiConfigApi;
+import run.yigou.gxzy.data.remote.api.BookInfoNav;
+import run.yigou.gxzy.data.remote.api.MingCiContentApi;
+import run.yigou.gxzy.data.remote.api.StyleConfigApi;
 import run.yigou.gxzy.ui.feature.reader.renderer.TipsTextRendererBridge;
-import run.yigou.gxzy.http.api.YaoAliaApi;
-import run.yigou.gxzy.http.api.YaoContentApi;
-import run.yigou.gxzy.http.model.HttpData;
+import run.yigou.gxzy.data.remote.api.YaoAliaApi;
+import run.yigou.gxzy.data.remote.api.YaoContentApi;
+import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.ui.feature.reader.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.ui.home.NavigationAdapter;
@@ -85,10 +85,10 @@ import run.yigou.gxzy.utils.ThreadUtil;
 import com.hjq.widget.layout.XCollapsingToolbarLayout;
 
 /**
- * author : Android 轮子哥
+ * author : Android ???
  * github : https://github.com/getActivity/AndroidProject
  * time   : 2018/10/18
- * desc   : 首页 Fragment
+ * desc   : ?? Fragment
  */
 public final class HomeFragment extends TitleBarFragment<HomeActivity>
         implements TabAdapter.OnTabListener, ViewPager.OnPageChangeListener,
@@ -118,19 +118,19 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     private SearchHistoryAdapter mSearchHistoryAdapter;
     private List<SearchHistory> mSearchHistories;
     private LinearLayout llClearHistory;
-    private String searchKey;//搜索关键字
+    private String searchKey;//?????
 
-    // 单例模式移除，确保 Fragment 正确生命周期管理
+    // ????????? Fragment ????????
     // private static volatile HomeFragment instance;
 
-    // 公共构造函数，允许系统重建
+    // ?????????????
     public HomeFragment() {
     }
 
     /**
-     * 创建 HomeFragment 实例的方法。
+     * ?? HomeFragment ??????
      *
-     * @return HomeFragment 实例
+     * @return HomeFragment ??
      */
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -160,27 +160,27 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         lvHistoryList = findViewById(R.id.include_book_content_search_ll_history_view).findViewById(R.id.lv_history_list);
         llClearHistory = findViewById(R.id.include_book_content_search_ll_history_view).findViewById(R.id.ll_clear_history);
 
-        // 确保使用新的 adapter（避免单例模式下状态不一致）
+        // ?????? adapter??????????????
         mPagerAdapter = new FragmentPagerAdapter<>(this);
         mTabAdapter = new TabAdapter(getAttachActivity());
 
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.addOnPageChangeListener(this);
         mTabView.setAdapter(mTabAdapter);
-        // 给这个 ToolBar 设置顶部内边距，才能和 TitleBar 进行对齐
+        // ??? ToolBar ??????????? TitleBar ????
         ImmersionBar.setTitleBar(getAttachActivity(), mToolbar);
-        //设置渐变监听
+        //??????
         mCollapsingToolbarLayout.setOnScrimsListener(this);
         setOnClickListener(R.id.tv_home_search_text, R.id.iv_home_search, R.id.iv_home_refresh);
-        //搜索处理
-        mTvHomeSearchText.setMaxLines(1);  // 设置最大行数为 1，限制为单行输入
-        mTvHomeSearchText.setSingleLine(true);  // 确保只显示一行
+        //????
+        mTvHomeSearchText.setMaxLines(1);  // ??????? 1????????
+        mTvHomeSearchText.setSingleLine(true);  // ???????
         mTvHomeSearchText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    // 当 EditText 获取焦点时
-                    // mTvHomeSearchText.addTextChangedListener(textWatcher); // 移除无用的监听
+                    // ? EditText ?????
+                    // mTvHomeSearchText.addTextChangedListener(textWatcher); // ???????
                     mTabView.setVisibility(View.GONE);
                     mViewPager.setVisibility(View.GONE);
                     llHistoryView.setVisibility(View.VISIBLE);
@@ -192,8 +192,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     }
 
                 } else {
-                    // 当 EditText 失去焦点时
-                    // mTvHomeSearchText.removeTextChangedListener(textWatcher); // 移除无用的监听
+                    // ? EditText ?????
+                    // mTvHomeSearchText.removeTextChangedListener(textWatcher); // ???????
                     mTabView.setVisibility(View.VISIBLE);
                     mViewPager.setVisibility(View.VISIBLE);
                     llHistoryView.setVisibility(View.GONE);
@@ -204,25 +204,25 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         });
         mTvHomeSearchText.setOnKeyListener((v, keyCode, event) -> {
 
-            //是否是回车键
+            //??????
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
-                //隐藏键盘
+                //????
                 ((InputMethodManager) requireActivity().getSystemService(INPUT_METHOD_SERVICE))
                         .hideSoftInputFromWindow(Objects.requireNonNull(requireActivity().getCurrentFocus())
                                 .getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                //搜索
+                //??
                 searchKey = Objects.requireNonNull(mTvHomeSearchText.getText()).toString();
                 search();
             }
             return false;
         });
-        //EditText 以外的区域时，EditText 失去焦点
-        // 为整个布局设置触摸事件监听器
+        //EditText ???????EditText ????
+        // ??????????????
         findViewById(R.id.root_layout).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    // 如果触摸的是 EditText 以外的地方
+                    // ?????? EditText ?????
                     if (mTvHomeSearchText.isFocused()) {
                         clearSearchTextFocus();
                     }
@@ -234,12 +234,12 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     }
 
     public void clearSearchTextFocus() {
-        // 使 EditText 失去焦点
+        // ? EditText ????
         mTvHomeSearchText.clearFocus();
         mTvHomeSearchText.setFocusable(false);
         mTvHomeSearchText.setFocusableInTouchMode(false);
         mTvHomeSearchText.setText("");
-        //    隐藏软键盘
+        //    ?????
         InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(INPUT_METHOD_SERVICE);
         if (imm != null) {
             imm.hideSoftInputFromWindow(mTvHomeSearchText.getWindowToken(), 0);
@@ -249,24 +249,24 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
     @Override
     protected void initData() {
-        // 初始化服务（不再调用 tipsSingleDataInit，由 AppDataInitializer 统一处理）
+        // ?????????? tipsSingleDataInit?? AppDataInitializer ?????
         mTabNavService = DbService.getInstance().mTabNavService;
-        // 优先加载本地数据
+        // ????????
         loadBookNavigation();
         mTabAdapter.setOnTabListener(this);
 
-        // 只在本地无药物数据时才从网络获取
+        // ????????????????
         if (isGetYaoData && GlobalDataHolder.getInstance().getYaoMap().isEmpty()) {
             ThreadUtil.runInBackground(this::getAllYaoData);
         }
-        // 只在本地无名词数据时才从网络获取
+        // ????????????????
         if (isGetMingCiData && GlobalDataHolder.getInstance().getMingCiContentMap().isEmpty()) {
             ThreadUtil.runInBackground(this::getAllMingCiData);
         }
         mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
-        // 搜索框默认失去焦点
+        // ?????????
         clearSearchTextFocus();
-        //初始化搜索历史列表
+        //?????????
         initHistoryList();
         llClearHistory.setOnClickListener(v -> {
             mSearchHistoryService.clearHistory();
@@ -275,17 +275,17 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
             llClearHistory.setVisibility(View.GONE);
             llHistoryView.setVisibility(View.GONE);
             lvHistoryList.setVisibility(View.GONE);
-            toast("清空历史记录成功");
+            toast("????????");
         });
 
-         //todo 待完善
-        // 异步获取并更新 Tips 模块的样式配置（颜色、字体等）
+         //todo ???
+        // ??????? Tips ???????????????
         //getStyleConfig();
     }
 
 
     /**
-     * 初始化历史列表
+     * ???????
      */
     private void initHistoryList() {
         mSearchHistories = mSearchHistoryService.findAllSearchHistory();
@@ -299,54 +299,54 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     }
 
     /**
-     * 从后端获取最新的样式配置
-     * 确保 Tips 模块的文本渲染样式（如 $r{}, $u{} 标签的颜色和行为）与服务器保持同步
+     * ????????????
+     * ?? Tips ??????????? $r{}, $u{} ?????????????????
      */
     private void getStyleConfig() {
-        // 使用 EasyHttp 发起 GET 请求
+        // ?? EasyHttp ?? GET ??
         EasyHttp.get(this)
                 .api(new StyleConfigApi())
                 .request(new HttpCallback<HttpData<StyleConfigApi.StyleConfigApiBean>>(this) {
                     
                     @Override
                     public void onSucceed(HttpData<StyleConfigApi.StyleConfigApiBean> result) {
-                        // 校验返回数据是否有效
+                        // ??????????
                         if (result != null && result.getData() != null && result.getData().getStyles() != null) {
-                            // 在后台线程处理数据转换（虽然此处数据量不大，但保持良好习惯）
-                            // 或者是直接在主线程更新，因为 updateConfigFromApi 内部主要是 Map 操作，非常快
-                            // 这里直接在主线程更新即可，避免多线程同步问题
+                            // ??????????????????????????????
+                            // ?????????????? updateConfigFromApi ????? Map ??????
+                            // ??????????????????????
                             TipsTextRendererBridge.updateConfigFromApi(result.getData().getStyles());
-                            // EasyLog.print("已更新 Tips 样式配置，数量: " + result.getData().getStyles().size());
+                            // EasyLog.print("??? Tips ???????: " + result.getData().getStyles().size());
                         }
                     }
 
                     @Override
                     public void onFail(Exception e) {
-                        // 请求失败时，不做处理，继续使用本地默认配置
-                        // 也可以打印日志方便排查
-                        // EasyLog.print("获取样式配置失败: " + e.getMessage());
+                        // ?????????????????????
+                        // ???????????
+                        // EasyLog.print("????????: " + e.getMessage());
                         super.onFail(e);
                     }
                 });
     }
 
     /**
-     * 搜索
+     * ??
      */
     private void search() {
 
         //   toast(AppConst.Key_Window_Tips);
-        //开放全部功能
+        //??????
         if (!AppApplication.application.global_openness) {
             toast(AppConst.Key_Window_Tips);
             return;
         }
-        //有限功能不开放全部功能
-//        //保存搜索关键字
+        //???????????
+//        //???????
         if (!StringHelper.isEmpty(searchKey)) {
             mSearchHistoryService.addOrUpadteHistory(searchKey);
             Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
-            // 添加一个参数（Extra）到 Intent
+            // ???????Extra?? Intent
             intent.putExtra("searchQuery", searchKey);
             startActivityForResult(intent, (resultCode, data) -> {
                 clearSearchTextFocus();
@@ -361,7 +361,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
             searchKey = mSearchHistories.get(position).getContent();
             mTvHomeSearchText.setText(searchKey);
             search();
-            //  toast("点击历史搜索关健字");
+            //  toast("?????????");
         }
     }
 
@@ -388,25 +388,25 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     }
 
     /**
-     * 加载导航数据（优先本地）
+     * ????????????
      */
     private void loadBookNavigation() {
-        // 检查本地数据
+        // ??????
         ArrayList<TabNav> localNavList = mTabNavService.findAll();
         if (localNavList != null && !localNavList.isEmpty()) {
-            // 本地有数据，使用 post 延迟加载（确保 ViewPager 初始化完成，与网络回调行为一致）
+            // ???????? post ??????? ViewPager ????????????????
             mViewPager.post(() -> {
                 loadNavFromLocal(localNavList);
                 EasyLog.print("Loaded navigation from local database");
             });
         } else {
-            // 本地无数据，从网络获取（这是异步的）
+            // ??????????????????
             getBookInfoList();
         }
     }
 
     /**
-     * 从本地加载导航数据
+     * ?????????
      */
     private void loadNavFromLocal(List<TabNav> navList) {
         for (TabNav nav : navList) {
@@ -418,18 +418,18 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     }
 
     /**
-     * 手动刷新数据（从网络重新获取）
+     * ???????????????
      */
     private void refreshDataFromNetwork() {
-        toast("正在刷新数据...");
-        // 清空现有数据
+        toast("??????...");
+        // ??????
         while (mPagerAdapter.getCount() > 0) {
             mPagerAdapter.removeFragment(0);
         }
         mTabAdapter.clearData();
-        // 强制从网络获取
+        // ???????
         getBookInfoList();
-        // 同时刷新药物和名词数据
+        // ???????????
         ThreadUtil.runInBackground(this::getAllYaoData);
         ThreadUtil.runInBackground(this::getAllMingCiData);
     }
@@ -444,25 +444,25 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     public void onSucceed(HttpData<List<TabNav>> data) {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             if (mTabNavService == null || mPagerAdapter == null || mTabAdapter == null) {
-                                // 避免在 Fragment 销毁后继续执行
+                                // ??? Fragment ???????
                                 return;
                             }
 
-                            // 异步处理数据，避免阻塞主线程
+                            // ??????????????
                             ThreadUtil.runInBackground(() -> {
                                 List<TabNav> navList = new CopyOnWriteArrayList<>(data.getData());
                                 
-                                // 数据处理：保存到 GlobalDataHolder
+                                // ???????? GlobalDataHolder
                                 Map<Integer, TabNav> navTabMap = GlobalDataHolder.getInstance().getNavTabMap();
                                 Map<Integer, TabNavBody> navTabBodyMap = GlobalDataHolder.getInstance().getNavTabBodyMap();
                                 int order = 0;
 
-                                // 准备 UI 更新所需的数据
+                                // ?? UI ???????
                                 final List<TabNav> validNavList = new ArrayList<>();
                                 
                                 for (TabNav nav : navList) {
                                     if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
-                                        // 逻辑处理
+                                        // ????
                                         navTabMap.put(order, nav);
                                         for (TabNavBody item : nav.getNavList()) {
                                             if (item.getBookNo() > 0) {
@@ -474,10 +474,10 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                     }
                                 }
                                 
-                                // 保存到数据库
+                                // ??????
                                 ConvertEntity.saveTabNvaInDb(navList, HomeFragment.this);
                                 
-                                // 切换回主线程更新 UI
+                                // ???????? UI
                                 ThreadUtil.runOnUiThread(() -> {
                                     if (mPagerAdapter == null || mTabAdapter == null) return;
                                     
@@ -500,7 +500,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                         super.onFail(e);
                         Map<Integer, TabNav> tabNavMap = GlobalDataHolder.getInstance().getNavTabMap();
                         if (tabNavMap != null && !tabNavMap.isEmpty()) {
-                            // 遍历 Map
+                            // ?? Map
                             for (Map.Entry<Integer, TabNav> entry : tabNavMap.entrySet()) {
                                 // Integer key = entry.getKey();
                                 TabNav value = entry.getValue();
@@ -508,7 +508,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                 mTabAdapter.addItem(value.getName());
                             }
                         } else {
-                            toast("获取数据失败：" + e.getMessage());
+                            toast("???????" + e.getMessage());
                             EasyLog.print(e);
                         }
                     }
@@ -524,10 +524,10 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     @Override
                     public void onSucceed(HttpData<List<Yao>> data) {
                         if (data != null && !data.getData().isEmpty()) {
-                            // 使用后台线程处理大量数据转换
+                            // ??????????????
                             ThreadUtil.runInBackground(() -> {
                                 List<Yao> detailList = data.getData();
-                                //加载所有药物的数据到 GlobalDataHolder
+                                //?????????? GlobalDataHolder
                                 for (Yao yao : detailList) {
                                     GlobalDataHolder.getInstance().putYao(yao.getName(), yao);
                                     if (yao.getYaoList() != null) {
@@ -536,10 +536,10 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                         }
                                     }
                                 }
-                                //保存内容到数据库
+                                //????????
                                 ConvertEntity.saveYaoData(detailList);
                                 
-                                // 更新状态（非 UI 操作不需要切回主线程，除非有进度条等）
+                                // ?????? UI ???????????????????
                                 isGetYaoData = false;
                             });
                         }
@@ -559,15 +559,15 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     @Override
                     public void onSucceed(HttpData<List<YaoAlia>> data) {
                         if (data != null && !data.getData().isEmpty()) {
-                            // 异步处理数据
+                            // ??????
                             ThreadUtil.runInBackground(() -> {
-                                //加载额外的别名的数据
+                                //??????????
                                 Map<String, String> yaoAliasDict = GlobalDataHolder.getInstance().getYaoAliasDict();
                                 for (YaoAlia yaoAlia : data.getData()) {
                                     yaoAliasDict.put(yaoAlia.getBieming(), yaoAlia.getName());
                                 }
 
-                                //保存数据
+                                //????
                                 ConvertEntity.saveYaoAlia(data.getData());
                             });
                         }
@@ -592,15 +592,15 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                              @Override
                              public void onSucceed(HttpData<List<MingCiContent>> data) {
                                  if (data != null && !data.getData().isEmpty()) {
-                                     // 异步处理数据
+                                     // ??????
                                      ThreadUtil.runInBackground(() -> {
                                          List<MingCiContent> detailList = data.getData();
-                                         //加载所有名词数据到 GlobalDataHolder
+                                         //????????? GlobalDataHolder
                                          for (MingCiContent mingCi : detailList) {
                                              GlobalDataHolder.getInstance().putMingCiContent(mingCi.getName(), mingCi);
                                          }
                                          
-                                         //保存内容
+                                         //????
                                          ConvertEntity.saveMingCiContent(detailList);
                                          isGetMingCiData = false;
                                      });
@@ -652,7 +652,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     }
 
     /**
-     * CollapsingToolbarLayout 渐变回调
+     * CollapsingToolbarLayout ????
      * <p>
      * {@link XCollapsingToolbarLayout.OnScrimsListener}
      */
@@ -673,6 +673,6 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mViewPager.setAdapter(null);
         mViewPager.removeOnPageChangeListener(this);
         mTabAdapter.setOnTabListener(null);
-        // instance = null; // 单例移除
+        // instance = null; // ????
     }
 }

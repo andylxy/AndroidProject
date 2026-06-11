@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.action.ToastAction;
+import run.yigou.gxzy.base.action.ToastAction;
 import run.yigou.gxzy.ui.feature.reader.adapter.refactor.binder.ChildTextBinder;
 import run.yigou.gxzy.ui.feature.reader.adapter.refactor.binder.HeaderBinder;
 import run.yigou.gxzy.ui.feature.reader.adapter.refactor.event.SearchModeClickHandler;

@@ -1,10 +1,10 @@
 /*
- * 项目名: AndroidProject
- * 类名: BookInfoAdapter.java
- * 包名: run.yigou.gxzy.ui.feature.bookshelf
- * 作者 : Zhs (xiaoyang_02@qq.com)
- * 当前修改时间 : 2023年07月06日 11:07:57
- * 上次修改时间: 2023年07月06日 10:48:01
+ * ???: AndroidProject
+ * ??: BookInfoAdapter.java
+ * ??: run.yigou.gxzy.ui.feature.bookshelf
+ * ?? : Zhs (xiaoyang_02@qq.com)
+ * ?????? : 2023?07?06? 11:07:57
+ * ??????: 2023?07?06? 10:48:01
  * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
  */
 
@@ -21,16 +21,16 @@ import androidx.annotation.NonNull;
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.http.api.BookInfoNav;
-import run.yigou.gxzy.http.glide.GlideApp;
+import run.yigou.gxzy.data.remote.api.BookInfoNav;
+import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.app.AppConfig;
 
 /**
- *  作者:  zhs
- *  时间:  2023-07-13 09:13:14
- *  类名:  BookInfoAdapter
- *  版本:  1.0
- *  描述:
+ *  ??:  zhs
+ *  ??:  2023-07-13 09:13:14
+ *  ??:  BookInfoAdapter
+ *  ??:  1.0
+ *  ??:
  *
 */
 public final class BookInfoAdapter extends AppAdapter<TabNavBody> {

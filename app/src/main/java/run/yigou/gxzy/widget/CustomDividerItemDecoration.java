@@ -7,7 +7,7 @@ import android.graphics.Rect;
 import android.view.View;
 import androidx.recyclerview.widget.RecyclerView;
 
-import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.base.constant.AppConst;
 
 public class CustomDividerItemDecoration extends RecyclerView.ItemDecoration {
 

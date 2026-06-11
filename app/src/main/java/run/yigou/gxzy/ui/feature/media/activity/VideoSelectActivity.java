@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.hjq.base.BaseActivity;
 import com.hjq.base.BaseAdapter;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.action.StatusAction;
+import run.yigou.gxzy.base.action.StatusAction;
 import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.aop.Permissions;
 import com.hjq.base.action.SingleClick;

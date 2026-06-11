@@ -18,16 +18,16 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.greendao.entity.About;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
-import run.yigou.gxzy.http.api.AboutApi;
-import run.yigou.gxzy.http.model.HttpData;
+import run.yigou.gxzy.data.remote.api.AboutApi;
+import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 /**
- * author : Android 轮子哥
+ * author : Android ???
  * github : https://github.com/getActivity/AndroidProject
  * time   : 2018/10/18
- * desc   : 关于界面
+ * desc   : ????
  */
 public final class AboutActivity extends AppActivity {
 
@@ -52,28 +52,28 @@ public final class AboutActivity extends AppActivity {
         tvUpdataLog = findViewById(R.id.tv_updata_log);
         tvDisclaimer = findViewById(R.id.tv_disclaimer);
 
-        // 设置版权年份
-        tvCopyright.setText("  Copyright © 2023 - " + Calendar.getInstance().get(Calendar.YEAR));
+        // ??????
+        tvCopyright.setText("  Copyright ? 2023 - " + Calendar.getInstance().get(Calendar.YEAR));
 
-        // 加载免责声明内容
+        // ????????
         loadDisclaimerContent();
     }
 
-    // 缓存相关常量
+    // ??????
     private static final String PREF_NAME = "about_cache";
     private static final String KEY_CACHE_TIME = "cache_time";
-    private static final long CACHE_EXPIRY_MS = 90L * 24 * 60 * 60 * 1000; // 3 个月（90天）
+    private static final long CACHE_EXPIRY_MS = 90L * 24 * 60 * 60 * 1000; // 3 ???90??
 
     @Override
     protected void initData() {
-        // 优先加载本地数据
+        // ????????
         List<About> localData = ConvertEntity.getAbout();
         if (!localData.isEmpty()) {
             setAbout(localData);
             EasyLog.print("AboutActivity", "Loaded data from local cache");
         }
 
-        // 检查是否需要刷新数据（缓存超过3个月或本地无数据）
+        // ???????????????3?????????
         if (shouldRefreshCache() || localData.isEmpty()) {
             requestAboutData();
         } else {
@@ -82,14 +82,14 @@ public final class AboutActivity extends AppActivity {
     }
 
     /**
-     * 检查缓存是否过期（超过3个月）
+     * ???????????3???
      */
     private boolean shouldRefreshCache() {
         long lastCacheTime = getSharedPreferences(PREF_NAME, MODE_PRIVATE)
                 .getLong(KEY_CACHE_TIME, 0);
         
         if (lastCacheTime == 0) {
-            // 从未缓存过
+            // ?????
             return true;
         }
         
@@ -106,7 +106,7 @@ public final class AboutActivity extends AppActivity {
     }
 
     /**
-     * 更新缓存时间戳
+     * ???????
      */
     private void updateCacheTime() {
         getSharedPreferences(PREF_NAME, MODE_PRIVATE)
@@ -116,7 +116,7 @@ public final class AboutActivity extends AppActivity {
     }
 
     /**
-     * 请求网络数据
+     * ??????
      */
     private void requestAboutData() {
         EasyLog.print("AboutActivity", "Requesting about data from network...");
@@ -129,10 +129,10 @@ public final class AboutActivity extends AppActivity {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             List<About> aboutList = data.getData();
                             
-                            // 更新UI
+                            // ??UI
                             setAbout(aboutList);
                             
-                            // 后台保存数据并更新缓存时间
+                            // ?????????????
                             ThreadUtil.runInBackground(() -> {
                                 ConvertEntity.saveAbout(aboutList);
                                 updateCacheTime();
@@ -145,7 +145,7 @@ public final class AboutActivity extends AppActivity {
                     public void onFail(Exception e) {
                         super.onFail(e);
                         EasyLog.print("AboutActivity", "Network request failed: " + e.getMessage());
-                        // 网络失败时，如果本地没有数据，再次尝试加载
+                        // ?????????????????????
                         List<About> localData = ConvertEntity.getAbout();
                         if (!localData.isEmpty()) {
                             setAbout(localData);
@@ -231,8 +231,8 @@ public final class AboutActivity extends AppActivity {
     }
 
     /**
-     * 加载免责声明内容
-     * 从 strings.xml 读取 HTML 格式的免责声明并显示
+     * ????????
+     * ? strings.xml ?? HTML ??????????
      */
     private void loadDisclaimerContent() {
         if (tvDisclaimer == null) {

@@ -10,19 +10,19 @@ import androidx.annotation.Nullable;
 import com.hjq.base.BaseDialog;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
-import run.yigou.gxzy.http.api.GetCodeApi;
-import run.yigou.gxzy.http.api.VerifyCodeApi;
-import run.yigou.gxzy.http.model.HttpData;
+import run.yigou.gxzy.data.remote.api.GetCodeApi;
+import run.yigou.gxzy.data.remote.api.VerifyCodeApi;
+import run.yigou.gxzy.data.remote.model.HttpData;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.OnHttpListener;
 import com.hjq.toast.Toaster;
 import com.hjq.widget.view.CountdownView;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android ???
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2020/02/06
- *    desc   : 身份校验对话框
+ *    desc   : ???????
  */
 public final class SafeDialog {
 
@@ -36,7 +36,7 @@ public final class SafeDialog {
         @Nullable
         private OnListener mListener;
 
-        /** 当前手机号 */
+        /** ????? */
         private final String mPhoneNumber;
 
         public Builder(Context context) {
@@ -49,7 +49,7 @@ public final class SafeDialog {
             setOnClickListener(mCountdownView);
 
             mPhoneNumber = "18100001413";
-            // 为了保护用户的隐私，不明文显示中间四个数字
+            // ?????????????????????
             mPhoneView.setText(String.format("%s****%s", mPhoneNumber.substring(0, 3), mPhoneNumber.substring(mPhoneNumber.length() - 4)));
         }
 
@@ -75,7 +75,7 @@ public final class SafeDialog {
                     return;
                 }
 
-                // 获取验证码
+                // ?????
                 EasyHttp.post(getDialog())
                         .api(new GetCodeApi()
                                 .setPhone(mPhoneNumber))
@@ -108,7 +108,7 @@ public final class SafeDialog {
                     return;
                 }
 
-                // 验证码校验
+                // ?????
                 EasyHttp.post(getDialog())
                         .api(new VerifyCodeApi()
                                 .setPhone(mPhoneNumber)
@@ -142,12 +142,12 @@ public final class SafeDialog {
     public interface OnListener {
 
         /**
-         * 点击确定时回调
+         * ???????
          */
         void onConfirm(BaseDialog dialog, String phone, String code);
 
         /**
-         * 点击取消时回调
+         * ???????
          */
         default void onCancel(BaseDialog dialog) {}
     }

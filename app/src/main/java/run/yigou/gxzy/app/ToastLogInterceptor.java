@@ -1,7 +1,7 @@
 package run.yigou.gxzy.app;
 
 
-import run.yigou.gxzy.action.ToastAction;
+import run.yigou.gxzy.base.action.ToastAction;
 import com.hjq.toast.ToastParams;
 import com.hjq.toast.Toaster;
 import com.hjq.toast.config.IToastInterceptor;

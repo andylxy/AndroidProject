@@ -15,18 +15,18 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.http.api.PasswordApi;
-import run.yigou.gxzy.http.model.HttpData;
+import run.yigou.gxzy.data.remote.api.PasswordApi;
+import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
 import run.yigou.gxzy.ui.tips.TipsDialog;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android ???
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2019/02/27
- *    desc   : 重置密码
+ *    desc   : ????
  */
 public final class PasswordResetActivity extends AppActivity
         implements TextView.OnEditorActionListener {
@@ -49,9 +49,9 @@ public final class PasswordResetActivity extends AppActivity
     private EditText mSecondPassword;
     private Button mCommitView;
 
-    /** 手机号 */
+    /** ??? */
     private String mPhoneNumber;
-    /** 验证码 */
+    /** ??? */
     private String mVerifyCode;
 
     @Override
@@ -94,7 +94,7 @@ public final class PasswordResetActivity extends AppActivity
                 return;
             }
 
-            // 隐藏软键盘
+            // ?????
             hideKeyboard(getCurrentFocus());
 
             if (true) {
@@ -107,7 +107,7 @@ public final class PasswordResetActivity extends AppActivity
                 return;
             }
 
-            // 重置密码
+            // ????
             EasyHttp.post(this)
                     .api(new PasswordApi()
                             .setPhone(mPhoneNumber)
@@ -134,7 +134,7 @@ public final class PasswordResetActivity extends AppActivity
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE && mCommitView.isEnabled()) {
-            // 模拟点击提交按钮
+            // ????????
             onClick(mCommitView);
             return true;
         }

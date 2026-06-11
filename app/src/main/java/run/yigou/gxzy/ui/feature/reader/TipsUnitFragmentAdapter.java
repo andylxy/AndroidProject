@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.greendao.entity.Book;
-import run.yigou.gxzy.http.glide.GlideApp;
+import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.app.AppConfig;
 
 
@@ -38,7 +38,7 @@ public final class TipsUnitFragmentAdapter extends AppAdapter<String> {
         @Override
         public void onBindView(int position) {
             if (getData() != null && !getData().isEmpty()) {
-                tvTipsUnitFragmentItem.setText((position+1)+"、"+getData().get(position));
+                tvTipsUnitFragmentItem.setText((position+1)+"?"+getData().get(position));
             }
         }
     }

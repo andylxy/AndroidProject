@@ -9,16 +9,16 @@ import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.http.model.ChapterSearchRes;
+import run.yigou.gxzy.data.remote.model.ChapterSearchRes;
 import run.yigou.gxzy.ui.feature.reader.activity.BookContentSearchActivity;
 import run.yigou.gxzy.utils.SpannableStringHelper;
 
 /**
- *  作者:  zhs
- *  时间:  2023-07-14 14:28:00
- *  类名:  SearchBookDetailAdapter
- *  版本:  1.0
- *  描述:
+ *  ??:  zhs
+ *  ??:  2023-07-14 14:28:00
+ *  ??:  SearchBookDetailAdapter
+ *  ??:  1.0
+ *  ??:
  *
 */
 public final class SearchBookDetailAdapter extends AppAdapter<ChapterSearchRes> {

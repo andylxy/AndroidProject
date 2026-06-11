@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.http.glide.GlideApp;
+import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.manager.CacheDataManager;
 import run.yigou.gxzy.ui.feature.media.activity.VideoSelectActivity;
 import run.yigou.gxzy.ui.feature.media.widget.PlayerView;
@@ -20,10 +20,10 @@ import run.yigou.gxzy.ui.feature.media.widget.PlayerView;
 import java.util.List;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android ???
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2020/03/01
- *    desc   : 视频选择适配器
+ *    desc   : ???????
  */
 public final class VideoSelectAdapter extends AppAdapter<VideoSelectActivity.VideoBean> {
 
@@ -64,10 +64,10 @@ public final class VideoSelectAdapter extends AppAdapter<VideoSelectActivity.Vid
 
             mCheckBox.setChecked(mSelectVideo.contains(getItem(position)));
 
-            // 获取视频的总时长
+            // ????????
             mDurationView.setText(PlayerView.conversionTime((int) bean.getVideoDuration()));
 
-            // 获取视频文件大小
+            // ????????
             mSizeView.setText(CacheDataManager.getFormatSize(bean.getVideoSize()));
         }
     }

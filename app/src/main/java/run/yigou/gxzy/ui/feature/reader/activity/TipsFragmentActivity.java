@@ -20,7 +20,7 @@ import java.util.List;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppFragment;
-import run.yigou.gxzy.common.BookArgs;
+import run.yigou.gxzy.base.args.BookArgs;
 import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.ui.home.NavigationAdapter;
 import run.yigou.gxzy.ui.feature.reader.fragment.TipsBookNetReadFragment;

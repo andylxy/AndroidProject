@@ -11,17 +11,17 @@ import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 
 import run.yigou.gxzy.app.TitleBarFragment;
-import run.yigou.gxzy.http.glide.GlideApp;
+import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.ui.home.HomeActivity;
 
 import com.hjq.widget.view.CountdownView;
 import com.hjq.widget.view.SwitchButton;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android ???
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2018/10/18
- *    desc   : 发现 Fragment
+ *    desc   : ?? Fragment
  */
 public final class FindFragment extends TitleBarFragment<HomeActivity>
         implements SwitchButton.OnCheckedChangeListener {
@@ -53,7 +53,7 @@ public final class FindFragment extends TitleBarFragment<HomeActivity>
 
     @Override
     protected void initData() {
-        // 显示圆形的 ImageView
+        // ????? ImageView
         GlideApp.with(this)
                 .load(R.drawable.update_app_top_bg)
                 .transform(new MultiTransformation<>(new CenterCrop(), new CircleCrop()))
@@ -62,6 +62,6 @@ public final class FindFragment extends TitleBarFragment<HomeActivity>
 
     @Override
     public void onCheckedChanged(SwitchButton button, boolean checked) {
-        toast(checked ? "开启" : "关闭");
+        toast(checked ? "??" : "??");
     }
 }

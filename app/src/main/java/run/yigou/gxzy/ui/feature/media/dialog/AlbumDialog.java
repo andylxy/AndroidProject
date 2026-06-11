@@ -16,15 +16,15 @@ import com.hjq.base.BaseDialog;
 import com.hjq.base.BottomSheetDialog;
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.http.glide.GlideApp;
+import run.yigou.gxzy.network.glide.GlideApp;
 
 import java.util.List;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android ???
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2019/07/27
- *    desc   : 相册专辑选取对话框
+ *    desc   : ?????????
  */
 public final class AlbumDialog {
 
@@ -51,7 +51,7 @@ public final class AlbumDialog {
 
         public Builder setData(List<AlbumInfo> data) {
             mAdapter.setData(data);
-            // 滚动到选中的位置
+            // ????????
             for (int i = 0; i < data.size(); i++) {
                 if (data.get(i).isSelect()) {
                     mRecyclerView.scrollToPosition(i);
@@ -82,7 +82,7 @@ public final class AlbumDialog {
             mAdapter.getItem(position).setSelect(true);
             mAdapter.notifyDataSetChanged();
 
-            // 延迟消失
+            // ????
             postDelayed(() -> {
 
                 if (mListener != null) {
@@ -147,17 +147,17 @@ public final class AlbumDialog {
     }
 
     /**
-     * 专辑信息类
+     * ?????
      */
     public static class AlbumInfo {
 
-        /** 封面 */
+        /** ?? */
         private String icon;
-        /** 名称 */
+        /** ?? */
         private String name;
-        /** 备注 */
+        /** ?? */
         private String remark;
-        /** 选中 */
+        /** ?? */
         private boolean select;
 
         public AlbumInfo(String icon, String name, String remark, boolean select) {
@@ -195,7 +195,7 @@ public final class AlbumDialog {
     public interface OnListener {
 
         /**
-         * 选择条目时回调
+         * ???????
          */
         void onSelected(BaseDialog dialog, int position, AlbumInfo bean);
     }

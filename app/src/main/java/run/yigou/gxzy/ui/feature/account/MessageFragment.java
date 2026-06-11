@@ -8,7 +8,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Permissions;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.TitleBarFragment;
-import run.yigou.gxzy.http.glide.GlideApp;
+import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.ui.home.HomeFragment;
 import run.yigou.gxzy.ui.feature.account.LoginActivity;
 import run.yigou.gxzy.ui.home.HomeActivity;
@@ -17,10 +17,10 @@ import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android ???
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2018/10/18
- *    desc   : 消息 Fragment
+ *    desc   : ?? Fragment
  */
 public final class MessageFragment extends TitleBarFragment<HomeActivity> {
 
@@ -50,7 +50,7 @@ public final class MessageFragment extends TitleBarFragment<HomeActivity> {
 
     @Override
     public boolean isStatusBarEnabled() {
-        // 使用沉浸式状态栏
+        // ????????
         return !super.isStatusBarEnabled();
     }
 
@@ -80,7 +80,7 @@ public final class MessageFragment extends TitleBarFragment<HomeActivity> {
                         .into(mImageView);
                 break;
             case R.id.btn_message_toast:
-                toast("我是吐司");
+                toast("????");
                 break;
             case R.id.btn_message_login:
                 startActivity(LoginActivity.class);
@@ -111,6 +111,6 @@ public final class MessageFragment extends TitleBarFragment<HomeActivity> {
 
     @Permissions(Permission.CAMERA)
     private void requestPermission() {
-        toast("获取摄像头权限成功");
+        toast("?????????");
     }
 }

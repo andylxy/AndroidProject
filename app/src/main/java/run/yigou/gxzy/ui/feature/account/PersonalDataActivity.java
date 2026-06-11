@@ -12,14 +12,14 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.http.api.UpdateImageApi;
-import run.yigou.gxzy.http.glide.GlideApp;
-import run.yigou.gxzy.http.model.HttpData;
+import run.yigou.gxzy.data.remote.api.UpdateImageApi;
+import run.yigou.gxzy.network.glide.GlideApp;
+import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.ui.dialog.AddressDialog;
 import run.yigou.gxzy.ui.dialog.InputDialog;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
-import run.yigou.gxzy.http.model.FileContentResolver;
+import run.yigou.gxzy.data.remote.model.FileContentResolver;
 import com.hjq.widget.layout.SettingBar;
 import run.yigou.gxzy.ui.feature.media.activity.ImageCropActivity;
 import run.yigou.gxzy.ui.feature.media.activity.ImagePreviewActivity;
@@ -30,10 +30,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android ???
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2019/04/20
- *    desc   : 个人资料
+ *    desc   : ????
  */
 public final class PersonalDataActivity extends AppActivity {
 
@@ -43,14 +43,14 @@ public final class PersonalDataActivity extends AppActivity {
     private SettingBar mNameView;
     private SettingBar mAddressView;
 
-    /** 省 */
-    private String mProvince = "广东省";
-    /** 市 */
-    private String mCity = "广州市";
-    /** 区 */
-    private String mArea = "天河区";
+    /** ? */
+    private String mProvince = "???";
+    /** ? */
+    private String mCity = "???";
+    /** ? */
+    private String mArea = "???";
 
-    /** 头像地址 */
+    /** ???? */
     private Uri mAvatarUrl;
 
     @Override
@@ -78,7 +78,7 @@ public final class PersonalDataActivity extends AppActivity {
                 .into(mAvatarView);
 
         mIdView.setRightText("880634");
-        mNameView.setRightText("Android 轮子哥");
+        mNameView.setRightText("Android ???");
 
         String address = mProvince + mCity + mArea;
         mAddressView.setRightText(address);
@@ -89,27 +89,27 @@ public final class PersonalDataActivity extends AppActivity {
     public void onClick(View view) {
         if (view == mAvatarLayout) {
             ImageSelectActivity.start(this, data -> {
-                // 裁剪头像
+                // ????
                 cropImageFile(new File(data.get(0)));
             });
         } else if (view == mAvatarView) {
             if (mAvatarUrl != null) {
-                // 查看头像
+                // ????
                 ImagePreviewActivity.start(getActivity(), mAvatarUrl.toString());
             } else {
-                // 选择头像
+                // ????
                 onClick(mAvatarLayout);
             }
         } else if (view == mNameView) {
             new InputDialog.Builder(this)
-                    // 标题可以不用填写
+                    // ????????
                     .setTitle(getString(R.string.personal_data_name_hint))
                     .setContent(mNameView.getRightText())
                     //.setHint(getString(R.string.personal_data_name_hint))
-                    //.setConfirm("确定")
-                    // 设置 null 表示不显示取消按钮
-                    //.setCancel("取消")
-                    // 设置点击按钮后不关闭对话框
+                    //.setConfirm("??")
+                    // ?? null ?????????
+                    //.setCancel("??")
+                    // ?????????????
                     //.setAutoDismiss(false)
                     .setListener((dialog, content) -> {
                         if (!mNameView.getRightText().equals(content)) {
@@ -119,12 +119,12 @@ public final class PersonalDataActivity extends AppActivity {
                     .show();
         } else if (view == mAddressView) {
             new AddressDialog.Builder(this)
-                    //.setTitle("选择地区")
-                    // 设置默认省份
+                    //.setTitle("????")
+                    // ??????
                     .setProvince(mProvince)
-                    // 设置默认城市（必须要先设置默认省份）
+                    // ??????????????????
                     .setCity(mCity)
-                    // 不选择县级区域
+                    // ???????
                     //.setIgnoreArea()
                     .setListener((dialog, province, city, area) -> {
                         String address = province + city + area;
@@ -140,7 +140,7 @@ public final class PersonalDataActivity extends AppActivity {
     }
 
     /**
-     * 裁剪图片
+     * ????
      */
     private void cropImageFile(File sourceFile) {
         ImageCropActivity.start(this, sourceFile, 1, 1, new ImageCropActivity.OnCropListener() {
@@ -163,15 +163,15 @@ public final class PersonalDataActivity extends AppActivity {
 
             @Override
             public void onError(String details) {
-                // 没有的话就不裁剪，直接上传原图片
-                // 但是这种情况极其少见，可以忽略不计
+                // ????????????????
+                // ?????????????????
                 updateCropImage(sourceFile, false);
             }
         });
     }
 
     /**
-     * 上传裁剪后的图片
+     * ????????
      */
     private void updateCropImage(File file, boolean deleteFile) {
         if (true) {

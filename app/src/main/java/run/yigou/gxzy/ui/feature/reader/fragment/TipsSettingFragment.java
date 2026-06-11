@@ -8,15 +8,15 @@ import com.hjq.widget.view.SwitchButton;
 import com.lucas.xbus.XEventBus;
 import run.yigou.gxzy.log.EasyLog;
 
-import run.yigou.gxzy.eventbus.TipsFragmentSettingEventNotification;
+import run.yigou.gxzy.event.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
-import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.common.BookArgs;
-import run.yigou.gxzy.common.FragmentSetting;
-import run.yigou.gxzy.common.ManagerSetting;
+import run.yigou.gxzy.base.constant.AppConst;
+import run.yigou.gxzy.base.args.BookArgs;
+import run.yigou.gxzy.base.args.FragmentSetting;
+import run.yigou.gxzy.base.args.ManagerSetting;
 import run.yigou.gxzy.ui.feature.reader.YaoUintActivity;
 import run.yigou.gxzy.utils.DebugLog;
 

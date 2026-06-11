@@ -25,9 +25,9 @@ import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.ui.feature.reader.data.DataConverter; // Kept existing
 
 import run.yigou.gxzy.app.AppApplication;
-import run.yigou.gxzy.common.FragmentSetting;
+import run.yigou.gxzy.base.args.FragmentSetting;
 
-import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.greendao.entity.Book;
 import run.yigou.gxzy.greendao.entity.Chapter;
 import run.yigou.gxzy.greendao.entity.TabNavBody;

@@ -11,15 +11,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.http.glide.GlideApp;
+import run.yigou.gxzy.network.glide.GlideApp;
 
 import java.util.List;
 
 /**
- *    author : Android 轮子哥
+ *    author : Android ???
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2019/07/24
- *    desc   : 图片选择适配器
+ *    desc   : ???????
  */
 public final class ImageSelectAdapter extends AppAdapter<String> {
 

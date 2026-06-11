@@ -27,7 +27,7 @@ import run.yigou.gxzy.ui.feature.reader.adapter.refactor.utils.TextViewHelper;
 import run.yigou.gxzy.ui.feature.reader.adapter.refactor.viewholder.TipsChildViewHolder;
 import run.yigou.gxzy.ui.feature.reader.entity.ChildEntity;
 import run.yigou.gxzy.tips.widget.LocalLinkMovementMethod;
-import run.yigou.gxzy.common.AppConst;
+import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.app.AppConfig;
 import run.yigou.gxzy.utils.DebugLog;
 

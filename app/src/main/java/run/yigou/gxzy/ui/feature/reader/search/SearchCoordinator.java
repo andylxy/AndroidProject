@@ -72,7 +72,7 @@ public class SearchCoordinator {
         EasyLog.print("开始搜索，总章节数: " + allContent.size());
         
         // 2. 针对伤寒论进行特殊过滤
-        if (bookId == run.yigou.gxzy.common.AppConst.ShangHanNo) {
+        if (bookId == run.yigou.gxzy.base.constant.AppConst.ShangHanNo) {
             allContent = filterShangHanData(allContent);
         }
         
@@ -128,7 +128,7 @@ public class SearchCoordinator {
             return new ArrayList<>();
         }
         
-        run.yigou.gxzy.common.FragmentSetting fragmentSetting = 
+        run.yigou.gxzy.base.args.FragmentSetting fragmentSetting = 
             run.yigou.gxzy.app.AppApplication.getApplication().fragmentSetting;
         if (fragmentSetting == null) {
             return contentList;

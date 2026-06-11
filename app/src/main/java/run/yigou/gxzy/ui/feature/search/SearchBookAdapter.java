@@ -15,18 +15,18 @@ import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.greendao.entity.Book;
-import run.yigou.gxzy.http.model.ChapterSearchRes;
-import run.yigou.gxzy.http.model.SearchKeyText;
+import run.yigou.gxzy.data.remote.model.ChapterSearchRes;
+import run.yigou.gxzy.data.remote.model.SearchKeyText;
 import run.yigou.gxzy.ui.feature.reader.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.feature.reader.search.SearchKey;
 import run.yigou.gxzy.utils.SpannableStringHelper;
 
 /**
- *  作者:  zhs
- *  时间:  2023-07-14 14:28:00
- *  类名:  SearchBookAdapter
- *  版本:  1.0
- *  描述:
+ *  ??:  zhs
+ *  ??:  2023-07-14 14:28:00
+ *  ??:  SearchBookAdapter
+ *  ??:  1.0
+ *  ??:
  *
 */
 public final class SearchBookAdapter extends AppAdapter<SearchKey> {
@@ -71,7 +71,7 @@ public final class SearchBookAdapter extends AppAdapter<SearchKey> {
             mTvSearchKeyCount.setText( keyText.getFilteredData().size()+"");
             if (!keyText.getFilteredData().isEmpty())
             {
-                // 加载 drawable 中的图片资源
+                // ?? drawable ??????
                 mIvSearchAvatar.setImageResource(R.drawable.success);
             }else {
                 mIvSearchAvatar.setImageResource(R.drawable.failed);

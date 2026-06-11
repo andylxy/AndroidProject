@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.bar.TitleBar;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.action.TitleBarAction;
+import run.yigou.gxzy.base.action.TitleBarAction;
 
 /**
  *    author : Android 轮子哥

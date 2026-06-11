@@ -1,0 +1,40 @@
+/*
+ * ????? AndroidProject
+ * ???: BookInfoNav.java
+ * ???: run.yigou.gxzy.http.api.BookInfoNav
+ * ????: Zhs (xiaoyang_02@qq.com)
+ * ????????? : 2023??7??5??23:20:45
+ * ?????????: 2023??7??5??20:35:30
+ * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
+ */
+
+package run.yigou.gxzy.data.remote.api;
+
+import com.hjq.http.config.IRequestApi;
+
+import java.util.List;
+
+import run.yigou.gxzy.data.remote.model.NavItem;
+
+
+/**
+ * ????  zhs
+ * ???:  2023/7/6 9:22
+ * ???:  run.yigou.gxzy.http.api
+ * ???:  BookInfoNav.java
+ * ???:  BookInfoNav
+ * ???:  1.0
+ * ???:  dkii
+ */
+
+public final class BookInfoNav implements IRequestApi {
+
+    @Override
+    public String getApi() {
+        return "getNav";
+    }
+    // ????????????
+    public String getMethod() {
+        return "GET"; // ??"POST", "PUT" ??
+    }
+}
