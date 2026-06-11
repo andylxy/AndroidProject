@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.ui.feature.reader.widget.TipsLittleRecyclerViewWindow;
+import run.yigou.gxzy.tips.widget.WindowConfig;
 
 /**
  * 名词弹窗
@@ -24,6 +26,7 @@ public class TipsLittleMingCiViewWindow extends TipsLittleRecyclerViewWindow {
                 .arrow(R.id.arrow, 30, 20)
                 .enableCopy(true)
                 .enableMore(false) // 名词弹窗不启用更多按钮
+                .wrapperView(R.id.wrapper)
                 .build();
     }
 

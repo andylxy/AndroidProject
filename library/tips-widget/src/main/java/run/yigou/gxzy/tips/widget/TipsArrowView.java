@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.feature.reader.widget;
+package run.yigou.gxzy.tips.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;

@@ -5,6 +5,7 @@ import run.yigou.gxzy.model.HH2SectionData;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Build;
 import android.text.SpannableStringBuilder;
@@ -41,7 +42,10 @@ import run.yigou.gxzy.ui.feature.reader.search.TipsSearchEngine;
 import run.yigou.gxzy.ui.feature.reader.search.SearchDataAdapter;
 import run.yigou.gxzy.ui.feature.reader.widget.TipsLittleMingCiViewWindow;
 import run.yigou.gxzy.ui.feature.reader.widget.TipsLittleTableViewWindow;
+import run.yigou.gxzy.tips.widget.ITipsWindowHost;
 import run.yigou.gxzy.utils.DebugLog;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * Tips 模块核心辅助类 (Facade)
@@ -248,13 +252,27 @@ public class TipsNetHelper {
             
             TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
             window.setData(textView.getContext(), data);
-            window.setFang(keyword); 
+            window.setFang(keyword);
             window.setRect(textRect);
-            
-            if (textView.getContext() instanceof Activity) {
-                window.show(((Activity) textView.getContext()).getFragmentManager());
+
+            Context context = textView.getContext();
+            if (context instanceof AppCompatActivity) {
+                AppCompatActivity activity = (AppCompatActivity) context;
+                window.setHost(new ITipsWindowHost() {
+                    @Override
+                    public int getWrapperViewId() {
+                        return run.yigou.gxzy.R.id.wrapper;
+                    }
+
+                    @Override
+                    public void navigateToDetail(Intent intent) {
+                        intent.setClass(activity, run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity.class);
+                        activity.startActivity(intent);
+                    }
+                });
+                window.show(activity.getSupportFragmentManager());
             }
-            
+
             EasyLog.print("=== clickYaoLink() 完成 ===");
         }
 
@@ -284,10 +302,23 @@ public class TipsNetHelper {
             window.setData(textView.getContext(), data);
             window.setFang(keyword);
             window.setRect(textRect);
-            
+
             Context context = textView.getContext();
-            if (context instanceof Activity) {
-                window.show(((Activity) context).getFragmentManager());
+            if (context instanceof AppCompatActivity) {
+                AppCompatActivity activity = (AppCompatActivity) context;
+                window.setHost(new ITipsWindowHost() {
+                    @Override
+                    public int getWrapperViewId() {
+                        return run.yigou.gxzy.R.id.wrapper;
+                    }
+
+                    @Override
+                    public void navigateToDetail(Intent intent) {
+                        intent.setClass(activity, run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity.class);
+                        activity.startActivity(intent);
+                    }
+                });
+                window.show(activity.getSupportFragmentManager());
             } else {
                 EasyLog.print("❌ Context不是Activity!");
             }
@@ -320,9 +351,23 @@ public class TipsNetHelper {
             TipsLittleMingCiViewWindow window = new TipsLittleMingCiViewWindow();
             window.setData(textView.getContext(), data);
             window.setRect(textRect);
-            
-            if (textView.getContext() instanceof Activity) {
-                window.show(((Activity) textView.getContext()).getFragmentManager());
+
+            Context context = textView.getContext();
+            if (context instanceof AppCompatActivity) {
+                AppCompatActivity activity = (AppCompatActivity) context;
+                window.setHost(new ITipsWindowHost() {
+                    @Override
+                    public int getWrapperViewId() {
+                        return run.yigou.gxzy.R.id.wrapper;
+                    }
+
+                    @Override
+                    public void navigateToDetail(Intent intent) {
+                        intent.setClass(activity, run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity.class);
+                        activity.startActivity(intent);
+                    }
+                });
+                window.show(activity.getSupportFragmentManager());
             }
             
             EasyLog.print("=== clickMingCiLink() 完成 ===");

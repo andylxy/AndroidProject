@@ -64,7 +64,7 @@
         </ScrollView>
     </LinearLayout>
 
-    <run.yigou.gxzy.ui.feature.reader.widget.TipsArrowView
+    <run.yigou.gxzy.tips.widget.TipsArrowView
         android:id="@+id/arrow"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

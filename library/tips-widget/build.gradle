@@ -1,0 +1,17 @@
+apply plugin: 'com.android.library'
+apply from: '../../common.gradle'
+
+android {
+    namespace 'run.yigou.gxzy.tips.widget'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    // EasyLog 日志桥接（零外部依赖）
+    implementation project(':library:log')
+    // AndroidX Fragment（替代废弃的 android.app.Fragment）
+    api 'androidx.fragment:fragment:1.5.0'
+}

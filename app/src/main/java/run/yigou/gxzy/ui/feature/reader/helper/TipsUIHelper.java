@@ -40,7 +40,7 @@ public class TipsUIHelper {
         }
 
         // 1. 优先尝试获取精确的点击坐标 (修复弹窗位置偏移问题)
-        run.yigou.gxzy.ui.feature.reader.widget.LocalLinkMovementMethod method = run.yigou.gxzy.ui.feature.reader.widget.LocalLinkMovementMethod.getInstance();
+        run.yigou.gxzy.tips.widget.LocalLinkMovementMethod method = run.yigou.gxzy.tips.widget.LocalLinkMovementMethod.getInstance();
         if (method != null) {
             android.graphics.Point touchPoint = method.getLastTouchPoint();
             if (touchPoint != null) {

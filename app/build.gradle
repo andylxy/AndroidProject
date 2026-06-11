@@ -175,6 +175,8 @@ dependencies {
     implementation project(':library:text-utils')
     // 文本渲染引擎模块（自定义标签解析 + 样式渲染）
     implementation project(':library:text-renderer')
+    // Tips 弹窗框架模块（弹窗基础组件+框架）
+    implementation project(':library:tips-widget')
 
     //Android平台通用的RSA算法工具类及其例子 https://github.com/gzu-liyujiang/RSAUtils
     implementation 'com.github.gzu-liyujiang:RSAUtils:2.0.0'

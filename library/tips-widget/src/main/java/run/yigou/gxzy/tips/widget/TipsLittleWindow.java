@@ -1,9 +1,6 @@
-package run.yigou.gxzy.ui.feature.reader.widget;
+package run.yigou.gxzy.tips.widget;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Build;
@@ -18,13 +15,12 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import run.yigou.gxzy.log.EasyLog;
-
-import run.yigou.gxzy.R;
-import run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity;
-
-import run.yigou.gxzy.utils.DebugLog;
-import timber.log.Timber;
 
 /**
  * LittleWindow类是一个Fragment的子类，用于实现一个小窗口的功能
@@ -62,6 +58,19 @@ public abstract class TipsLittleWindow extends Fragment {
 
     // 静态窗口栈，替代 TipsSingleData 中的管理
     public static final java.util.List<TipsLittleWindow> windowStack = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    // 宿主接口（用于解耦 app 模块依赖）
+    private ITipsWindowHost mHost;
+    // 箭头布局参数（替代 View Tag 存储，避免对 R.id 的依赖）
+    private FrameLayout.LayoutParams mArrowParams;
+
+    /**
+     * 设置宿主接口
+     * @param host 宿主实现
+     */
+    public void setHost(@NonNull ITipsWindowHost host) {
+        this.mHost = host;
+    }
 
     /**
      * 获取Fragment的标签
@@ -115,9 +124,9 @@ public abstract class TipsLittleWindow extends Fragment {
         windowStack.remove(this);
 
         // 获取FragmentManager
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getParentFragmentManager();
         if (fragmentManager == null) {
-            Timber.tag("Fragment").e("FragmentManager is null, cannot dismiss fragment.");
+            EasyLog.print("TipsLittleWindow", "FragmentManager is null, cannot dismiss fragment.");
             return;
         }
 
@@ -131,33 +140,31 @@ public abstract class TipsLittleWindow extends Fragment {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 try {
                     transaction.commitNow();
-                    Timber.tag("TransactionManager").i("事务提交成功，使用 commitNow()。");
+                    EasyLog.print("TipsLittleWindow", "事务提交成功，使用 commitNow()。");
                 } catch (IllegalStateException e) {
-                    Timber.tag("TransactionManager").e(e, "使用 commitNow() 提交事务失败。");
+                    EasyLog.print("TipsLittleWindow", "使用 commitNow() 提交事务失败。");
                     // 尝试使用 commit() 方法
                     try {
                         transaction.commit();
-                        Timber.tag("TransactionManager").i("事务提交成功，使用 commit()。");
+                        EasyLog.print("TipsLittleWindow", "事务提交成功，使用 commit()。");
                     } catch (IllegalStateException ex) {
-                        Timber.tag("TransactionManager").e(ex, "使用 commit() 提交事务失败。");
+                        EasyLog.print(ex);
                     }
                 } catch (Exception e) {
-                    Timber.tag("TransactionManager").e(e, "提交事务时发生意外错误。");
+                    EasyLog.print(e);
                 }
             } else {
                 try {
                     transaction.commit();
-                    Timber.tag("TransactionManager").i("事务提交成功，使用 commit()。");
+                    EasyLog.print("TipsLittleWindow", "事务提交成功，使用 commit()。");
                 } catch (IllegalStateException e) {
-                    Timber.tag("TransactionManager").e(e, "使用 commit() 提交事务失败。");
+                    EasyLog.print("TipsLittleWindow", "使用 commit() 提交事务失败。");
                 } catch (Exception e) {
-                    Timber.tag("TransactionManager").e(e, "提交事务时发生意外错误。");
+                    EasyLog.print(e);
                 }
             }
-
-            // 处理外部捕获的 IllegalStateException
         } catch (IllegalStateException e) {
-            Timber.tag("Fragment").e(e, "提交事务失败。");
+            EasyLog.print(e);
         }
     }
 
@@ -274,12 +281,19 @@ public abstract class TipsLittleWindow extends Fragment {
             );
         }
 
-        // 配置Wrapper布局参数
-        LinearLayout wrapper = this.view.findViewById(R.id.wrapper);
-        wrapper.setLayoutParams(largeLayoutParams);
+        // 配置Wrapper布局参数（通过接口解耦，避免硬编码 R.id.wrapper）
+        int wrapperId = config.getWrapperViewId();
+        if (wrapperId == -1) {
+            EasyLog.print("TipsLittleWindow", "wrapperViewId 未配置，跳过位置设置");
+        } else {
+            LinearLayout wrapper = this.view.findViewById(wrapperId);
+            if (wrapper != null) {
+                wrapper.setLayoutParams(largeLayoutParams);
+            }
+        }
 
         // 保存smallLayoutParams供箭头使用
-        this.view.setTag(R.id.arrow, smallLayoutParams);
+        this.mArrowParams = smallLayoutParams;
     }
 
     /**
@@ -289,7 +303,7 @@ public abstract class TipsLittleWindow extends Fragment {
         TipsArrowView arrowView = this.view.findViewById(config.getArrowViewId());
         if (arrowView != null) {
             arrowView.setDirection(positionInfo.isUp ? TipsArrowView.UP : TipsArrowView.DOWN);
-            FrameLayout.LayoutParams arrowParams = (FrameLayout.LayoutParams) this.view.getTag(R.id.arrow);
+            FrameLayout.LayoutParams arrowParams = this.mArrowParams;
             if (arrowParams != null) {
                 arrowView.setLayoutParams(arrowParams);
             }
@@ -325,9 +339,13 @@ public abstract class TipsLittleWindow extends Fragment {
             Button moreButton = this.view.findViewById(config.getMoreButtonId());
             if (moreButton != null) {
                 moreButton.setOnClickListener(v -> {
-                    Intent intent = new Intent(activity, TipsFragmentActivity.class);
+                    Intent intent = new Intent();
                     onMoreButtonClick(intent);
-                    activity.startActivity(intent);
+                    if (mHost != null) {
+                        mHost.navigateToDetail(intent);
+                    } else {
+                        EasyLog.print("TipsLittleWindow", "ITipsWindowHost 未设置，无法导航");
+                    }
                 });
             }
         }

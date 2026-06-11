@@ -18,7 +18,7 @@ import java.util.List;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.feature.reader.entity.GroupData;
 import run.yigou.gxzy.ui.feature.reader.entity.ItemData;
-import run.yigou.gxzy.ui.feature.reader.widget.LocalLinkMovementMethod;
+import run.yigou.gxzy.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**

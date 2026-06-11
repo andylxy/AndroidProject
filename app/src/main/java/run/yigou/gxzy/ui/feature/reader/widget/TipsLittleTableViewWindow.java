@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.ui.feature.reader.widget.TipsLittleRecyclerViewWindow;
+import run.yigou.gxzy.tips.widget.WindowConfig;
 
 /**
  * 药方弹窗
@@ -34,6 +36,7 @@ public class TipsLittleTableViewWindow extends TipsLittleRecyclerViewWindow {
                 .arrow(R.id.arrow, 30, 20)
                 .enableCopy(true)
                 .enableMore(true)
+                .wrapperView(R.id.wrapper)
                 .build();
     }
 

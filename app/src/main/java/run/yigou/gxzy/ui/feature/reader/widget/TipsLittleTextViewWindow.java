@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.tips.widget.TipsLittleWindow;
+import run.yigou.gxzy.tips.widget.WindowConfig;
 
 /**
  * 药名弹窗
@@ -34,6 +36,7 @@ public class TipsLittleTextViewWindow extends TipsLittleWindow {
                 .arrow(R.id.arrow, 30, 20)
                 .enableCopy(false)  // 药名弹窗不需要复制按钮
                 .enableMore(false)  // 药名弹窗不需要更多按钮
+                .wrapperView(R.id.wrapper)
                 .build();
     }
 

@@ -1,7 +1,7 @@
-package run.yigou.gxzy.ui.feature.reader.widget;
+package run.yigou.gxzy.tips.widget;
 
-import androidx.annotation.LayoutRes;
 import androidx.annotation.IdRes;
+import androidx.annotation.LayoutRes;
 
 /**
  * 弹窗配置类
@@ -13,7 +13,7 @@ public class WindowConfig {
     private final int upLayoutRes;      // 向上显示的布局
     @LayoutRes
     private final int downLayoutRes;    // 向下显示的布局
-    
+
     // 按钮ID
     @IdRes
     private final int closeButtonId;    // 关闭按钮ID
@@ -21,20 +21,24 @@ public class WindowConfig {
     private final int copyButtonId;     // 复制按钮ID
     @IdRes
     private final int moreButtonId;     // 更多按钮ID
-    
+
     // 箭头相关
     @IdRes
     private final int arrowViewId;      // 箭头View的ID
     private final int arrowWidth;       // 箭头宽度
     private final int arrowHeight;      // 箭头高度
-    
+
     // 边距配置
     private final int horizontalMargin; // 水平边距
     private final int verticalMargin;   // 垂直边距
-    
+
     // 功能开关
     private final boolean enableCopy;   // 是否启用复制功能
     private final boolean enableMore;   // 是否启用更多功能
+
+    // wrapper 容器 View ID（由宿主提供，替代硬编码 R.id.wrapper）
+    @IdRes
+    private final int wrapperViewId;
 
     private WindowConfig(Builder builder) {
         this.upLayoutRes = builder.upLayoutRes;
@@ -49,6 +53,7 @@ public class WindowConfig {
         this.verticalMargin = builder.verticalMargin;
         this.enableCopy = builder.enableCopy;
         this.enableMore = builder.enableMore;
+        this.wrapperViewId = builder.wrapperViewId;
     }
 
     // Getters
@@ -64,6 +69,7 @@ public class WindowConfig {
     public int getVerticalMargin() { return verticalMargin; }
     public boolean isEnableCopy() { return enableCopy; }
     public boolean isEnableMore() { return enableMore; }
+    public int getWrapperViewId() { return wrapperViewId; }
 
     /**
      * Builder模式构建器
@@ -81,6 +87,7 @@ public class WindowConfig {
         private int verticalMargin = 10;    // 默认垂直边距
         private boolean enableCopy = true;  // 默认启用复制
         private boolean enableMore = true;  // 默认启用更多
+        private int wrapperViewId = -1;     // 默认未配置
 
         public Builder upLayout(@LayoutRes int layoutRes) {
             this.upLayoutRes = layoutRes;
@@ -127,6 +134,11 @@ public class WindowConfig {
 
         public Builder enableMore(boolean enable) {
             this.enableMore = enable;
+            return this;
+        }
+
+        public Builder wrapperView(@IdRes int viewId) {
+            this.wrapperViewId = viewId;
             return this;
         }
 

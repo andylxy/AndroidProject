@@ -10,3 +10,4 @@ include ':library:crypto'        // 加密模块（AES、RSA、SM2）
 include ':library:sse-client'    // SSE 客户端模块
 include ':library:text-utils'     // 文本搜索+高亮工具模块
 include ':library:text-renderer'  // 文本渲染引擎模块
+include ':library:tips-widget'    // Tips 弹窗框架模块
