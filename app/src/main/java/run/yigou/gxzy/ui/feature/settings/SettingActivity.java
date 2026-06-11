@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.settings;
+package run.yigou.gxzy.ui.feature.settings;
 
 import android.view.Gravity;
 import android.view.View;

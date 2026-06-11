@@ -23,7 +23,7 @@ import run.yigou.gxzy.manager.ActivityManager;
 import com.hjq.base.DoubleClickHelper;
 import run.yigou.gxzy.ui.home.NavigationAdapter;
 import run.yigou.gxzy.ui.feature.ai.AiMsgFragment;
-import run.yigou.gxzy.ui.bookshelf.BookCollectCaseFragment;
+import run.yigou.gxzy.ui.feature.bookshelf.BookCollectCaseFragment;
 import run.yigou.gxzy.ui.home.HomeFragment;
 import run.yigou.gxzy.ui.feature.account.MyFragmentPersonal;
 

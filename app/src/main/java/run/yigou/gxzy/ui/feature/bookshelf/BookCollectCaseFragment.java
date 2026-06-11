@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.bookshelf;
+package run.yigou.gxzy.ui.feature.bookshelf;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -18,7 +18,7 @@ import run.yigou.gxzy.greendao.util.DbService;
 
 import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity;
-import run.yigou.gxzy.ui.bookshelf.BookCollectCaseAdapter;
+import run.yigou.gxzy.ui.feature.bookshelf.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 
 
@@ -39,7 +39,6 @@ import java.util.List;
 /**
  * 作者:  zhs
  * 时间:  2023-07-13 11:04:50
- * 包名:  run.yigou.gxzy.ui.fragment
  * 类名:  BookCollectCaseFragment
  * 版本:  1.0
  * 描述:

@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.dividerItemdecoration;
+package run.yigou.gxzy.widget;
 
 import android.graphics.Canvas;
 import android.graphics.Color;

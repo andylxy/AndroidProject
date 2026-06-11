@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.search;
+package run.yigou.gxzy.ui.feature.search;
 
 import android.content.Context;
 import android.view.ViewGroup;
@@ -13,7 +13,6 @@ import run.yigou.gxzy.greendao.entity.SearchHistory;
 /**
  *  作者:  zhs
  *  时间:  2023-07-14 14:25:35
- *  包名:  run.yigou.gxzy.ui.search
  *  类名:  SearchHistoryAdapter
  *  版本:  1.0
  *  描述:
@@ -32,7 +31,8 @@ public final class SearchHistoryAdapter extends AppAdapter<SearchHistory> {
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType
+) {
         return new ViewHolder();
     }
 

@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.fragment;
+package run.yigou.gxzy.ui.feature.find;
 
 import android.view.View;
 import android.widget.ImageView;
@@ -58,35 +58,10 @@ public final class FindFragment extends TitleBarFragment<HomeActivity>
                 .load(R.drawable.update_app_top_bg)
                 .transform(new MultiTransformation<>(new CenterCrop(), new CircleCrop()))
                 .into(mCircleView);
-
-        // 显示圆角的 ImageView
-        GlideApp.with(this)
-                .load(R.drawable.update_app_top_bg)
-                .transform(new MultiTransformation<>(new CenterCrop(), new RoundedCorners((int) getResources().getDimension(R.dimen.dp_10))))
-                .into(mCornerView);
     }
-
-    @SingleClick
-    @Override
-    public void onClick(View view) {
-        if (view == mCountdownView) {
-            toast(R.string.common_code_send_hint);
-            mCountdownView.start();
-        }
-    }
-
-    @Override
-    public boolean isStatusBarEnabled() {
-        // 使用沉浸式状态栏
-        return !super.isStatusBarEnabled();
-    }
-
-    /**
-     * {@link SwitchButton.OnCheckedChangeListener}
-     */
 
     @Override
     public void onCheckedChanged(SwitchButton button, boolean checked) {
-        toast(checked);
+        toast(checked ? "开启" : "关闭");
     }
 }

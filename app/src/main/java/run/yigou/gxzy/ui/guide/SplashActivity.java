@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.settings;
+package run.yigou.gxzy.ui.guide;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

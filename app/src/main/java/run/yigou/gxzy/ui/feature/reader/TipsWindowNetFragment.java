@@ -1,6 +1,4 @@
-
-
-package run.yigou.gxzy.ui.tips;
+package run.yigou.gxzy.ui.feature.reader;
 
 import android.app.Activity;
 import android.content.Context;

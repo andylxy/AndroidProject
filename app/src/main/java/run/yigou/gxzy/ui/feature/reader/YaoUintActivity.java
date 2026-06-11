@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.settings;
+package run.yigou.gxzy.ui.feature.reader;
 
 import android.annotation.SuppressLint;
 import android.os.Build;
@@ -23,8 +23,8 @@ import run.yigou.gxzy.greendao.entity.About;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.http.api.AboutApi;
 import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.ui.tips.TipsUnitFragmentAdapter;
-import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
+import run.yigou.gxzy.ui.feature.reader.TipsUnitFragmentAdapter;
+import run.yigou.gxzy.widget.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
@@ -32,7 +32,7 @@ import run.yigou.gxzy.utils.ThreadUtil;
  * author : Android 轮子哥
  * github : https://github.com/getActivity/AndroidProject
  * time   : 2018/10/18
- * desc   : 关于界面
+ * desc   : 药单元界面
  */
 public final class YaoUintActivity extends AppActivity {
 

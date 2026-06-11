@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.fragment;
+package run.yigou.gxzy.ui.feature.find;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.TitleBarFragment;

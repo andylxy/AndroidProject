@@ -62,7 +62,7 @@
 
         <!-- 闪屏页（程序入口） -->
         <activity
-            android:name=".ui.settings.SplashActivity"
+            android:name=".ui.guide.SplashActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -125,19 +125,19 @@
 
         <!-- 崩溃展示（必须在独立进程） -->
         <activity
-            android:name=".ui.settings.CrashActivity"
+            android:name=".ui.feature.settings.CrashActivity"
             android:launchMode="singleTop"
             android:process=":crash"
             android:screenOrientation="landscape" />
         <!-- 重启应用（必须在独立进程） -->
         <activity
-            android:name=".ui.settings.RestartActivity"
+            android:name=".ui.feature.settings.RestartActivity"
             android:launchMode="singleTop"
             android:process=":restart" />
 
         <!-- 设置页 -->
         <activity
-            android:name=".ui.settings.SettingActivity"
+            android:name=".ui.feature.settings.SettingActivity"
             android:label="@string/setting_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
@@ -167,14 +167,14 @@
             android:windowSoftInputMode="stateHidden" />
         <!-- 汉制单位 -->
         <activity
-            android:name=".ui.settings.YaoUintActivity"
+            android:name=".ui.feature.reader.YaoUintActivity"
             android:label="@string/yao_unit_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <!-- 汉制单位 -->
         <!-- 关于我们 -->
         <activity
-            android:name=".ui.settings.AboutActivity"
+            android:name=".ui.feature.settings.AboutActivity"
             android:label="@string/about_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
@@ -240,18 +240,6 @@
         <!-- 选择视频 -->
         <activity
             android:name=".ui.feature.media.activity.VideoSelectActivity"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-
-        <!-- 对话框案例 -->
-        <activity
-            android:name=".ui.activity.DialogActivity"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-
-        <!-- 状态案例 -->
-        <activity
-            android:name=".ui.activity.StatusActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 

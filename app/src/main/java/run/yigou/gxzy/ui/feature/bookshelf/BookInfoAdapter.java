@@ -1,4 +1,14 @@
-package run.yigou.gxzy.ui.bookshelf;
+/*
+ * 项目名: AndroidProject
+ * 类名: BookInfoAdapter.java
+ * 包名: run.yigou.gxzy.ui.feature.bookshelf
+ * 作者 : Zhs (xiaoyang_02@qq.com)
+ * 当前修改时间 : 2023年07月06日 11:07:57
+ * 上次修改时间: 2023年07月06日 10:48:01
+ * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
+ */
+
+package run.yigou.gxzy.ui.feature.bookshelf;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -10,65 +20,60 @@ import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.greendao.entity.Book;
+import run.yigou.gxzy.greendao.entity.TabNavBody;
 import run.yigou.gxzy.http.api.BookInfoNav;
 import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.app.AppConfig;
 
 /**
- * 作者:  zhs
- * 时间:  2023-07-13 14:40:41
- * 包名:  run.yigou.gxzy.ui.adapter
- * 类名:  BookCollectCaseAdapter
- * 版本:  1.0
- * 描述:
- */
-public final class BookCollectCaseAdapter extends AppAdapter<Book> {
+ *  作者:  zhs
+ *  时间:  2023-07-13 09:13:14
+ *  类名:  BookInfoAdapter
+ *  版本:  1.0
+ *  描述:
+ *
+*/
+public final class BookInfoAdapter extends AppAdapter<TabNavBody> {
 
-    public BookCollectCaseAdapter(Context context) {
+    public BookInfoAdapter(Context context) {
         super(context);
     }
-
-//    @Override
-//    public int getItemCount() {
-//        return 10;
-//    }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder();
     }
-
     private final class ViewHolder extends AppAdapter<?>.ViewHolder {
 
-        // private final ImageView mDelete;
+
         private final TextView tvBookName;
         private final TextView tvBookAuthor;
-        //private final TextView tvBookDesc;
-        //private final ImageView ivBookImg;
+
 
         private ViewHolder() {
             super(R.layout.book_tab_label_book_item);
-            // mTextView = findViewById(R.id.tv_status_text);
+
             tvBookName = findViewById(R.id.tv_book_name);
             tvBookAuthor = findViewById(R.id.tv_book_author);
-            // tvBookDesc = findViewById(R.id.tv_book_desc);
-            //  ivBookImg = findViewById(R.id.iv_book_img);
-            // mDelete = findViewById(R.id.iv_book_del);
+
+
         }
 
         @SuppressLint("SetTextI18n")
         @Override
         public void onBindView(int position) {
             //mTextView.setText(getItem(position));
+           TabNavBody item = null;
             if (getData() != null) {
-                Book item = getData().get(position);
+                item = getData().get(position);
+            }
+            if (item != null) {
                 tvBookName.setText(item.getBookName());
                 tvBookAuthor.setText(item.getAuthor());
-//                tvBookDesc.setText("     " + item.getDesc());
+//                tvBookDesc.setText("     " + (item.getDesc() == null ?"":item.getDesc()));
 //                GlideApp.with(this.getItemView())
-//                        .load(AppConfig.getHostUrl() + item.getImgUrl())
+//                        .load(AppConfig.getHostUrl()+item.getImageUrl())
 //                        .into(ivBookImg);
             }
         }
