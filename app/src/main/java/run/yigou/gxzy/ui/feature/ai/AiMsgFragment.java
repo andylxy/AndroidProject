@@ -35,7 +35,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.greendao.entity.ChatMessageBean;
 import run.yigou.gxzy.greendao.entity.ChatSessionBean;
-import run.yigou.gxzy.ui.activity.HomeActivity;
+import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.ui.feature.ai.helper.ChatInputHelper;
 import run.yigou.gxzy.ui.feature.ai.helper.ChatSidebarHelper;
 import run.yigou.gxzy.ui.feature.ai.helper.ChatSummaryHelper;

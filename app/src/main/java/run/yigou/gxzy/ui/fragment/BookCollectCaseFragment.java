@@ -16,7 +16,7 @@ import run.yigou.gxzy.greendao.gen.BookDao;
 import run.yigou.gxzy.greendao.service.BookService;
 import run.yigou.gxzy.greendao.util.DbService;
 
-import run.yigou.gxzy.ui.activity.HomeActivity;
+import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.adapter.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;

@@ -33,7 +33,7 @@ import run.yigou.gxzy.greendao.gen.YaoFangBodyDao;
 import run.yigou.gxzy.greendao.gen.YaoFangDao;
 import run.yigou.gxzy.http.api.ChapterListApi;
 import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.ui.fragment.HomeFragment;
+import run.yigou.gxzy.ui.home.HomeFragment;
 import run.yigou.gxzy.model.Fang;
 import run.yigou.gxzy.model.MingCiContent;
 import run.yigou.gxzy.model.Yao;

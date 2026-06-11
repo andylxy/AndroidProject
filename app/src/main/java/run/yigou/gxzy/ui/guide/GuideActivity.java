@@ -11,7 +11,7 @@ import com.gyf.immersionbar.ImmersionBar;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.ui.activity.HomeActivity;
+import run.yigou.gxzy.ui.home.HomeActivity;
 
 import me.relex.circleindicator.CircleIndicator3;
 

@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.settings;
 
 import android.Manifest;
 import android.app.Application;
@@ -247,7 +247,6 @@ public final class CrashActivity extends AppActivity {
             } else {
                 mInfoView.setText(builder);
             }
-
         } catch (PackageManager.NameNotFoundException e) {
             CrashReport.postCatchedException(e);
         }

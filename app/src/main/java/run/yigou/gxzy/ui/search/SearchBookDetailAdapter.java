@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.adapter;
+package run.yigou.gxzy.ui.search;
 
 import android.content.Context;
 import android.text.Spanned;
@@ -16,8 +16,8 @@ import run.yigou.gxzy.utils.SpannableStringHelper;
 /**
  *  作者:  zhs
  *  时间:  2023-07-14 14:28:00
- *  包名:  run.yigou.gxzy.ui.adapter
- *  类名:  SearchBookAdapter
+ *  包名:  run.yigou.gxzy.ui.search
+ *  类名:  SearchBookDetailAdapter
  *  版本:  1.0
  *  描述:
  *

@@ -8,7 +8,7 @@
  * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.fragment;
+package run.yigou.gxzy.ui.home;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
@@ -68,10 +68,11 @@ import run.yigou.gxzy.http.api.YaoAliaApi;
 import run.yigou.gxzy.http.api.YaoContentApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.ui.feature.reader.activity.BookContentSearchActivity;
-import run.yigou.gxzy.ui.activity.HomeActivity;
-import run.yigou.gxzy.ui.adapter.NavigationAdapter;
-import run.yigou.gxzy.ui.adapter.SearchHistoryAdapter;
-import run.yigou.gxzy.ui.adapter.TabAdapter;
+import run.yigou.gxzy.ui.home.HomeActivity;
+import run.yigou.gxzy.ui.home.NavigationAdapter;
+import run.yigou.gxzy.ui.search.SearchHistoryAdapter;
+import run.yigou.gxzy.ui.home.TabAdapter;
+import run.yigou.gxzy.ui.fragment.TipsWindowNetFragment;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.model.MingCiContent;
 import run.yigou.gxzy.model.Yao;

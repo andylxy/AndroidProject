@@ -2,7 +2,7 @@ package run.yigou.gxzy.ui.fragment;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.TitleBarFragment;
-import run.yigou.gxzy.ui.activity.HomeActivity;
+import run.yigou.gxzy.ui.home.HomeActivity;
 
 
 /**

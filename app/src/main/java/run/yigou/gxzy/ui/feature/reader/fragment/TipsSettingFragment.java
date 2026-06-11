@@ -17,7 +17,7 @@ import run.yigou.gxzy.common.AppConst;
 import run.yigou.gxzy.common.BookArgs;
 import run.yigou.gxzy.common.FragmentSetting;
 import run.yigou.gxzy.common.ManagerSetting;
-import run.yigou.gxzy.ui.activity.YaoUintActivity;
+import run.yigou.gxzy.ui.settings.YaoUintActivity;
 import run.yigou.gxzy.utils.DebugLog;
 
 

@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.adapter;
+package run.yigou.gxzy.ui.home;
 
 import android.animation.ValueAnimator;
 import android.content.Context;

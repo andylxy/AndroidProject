@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.settings;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -17,6 +17,7 @@ import com.hjq.permissions.XXPermissions;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppConfig;
+import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.ui.guide.PermissionGuideActivity;
 
 import com.hjq.widget.view.SlantedTextView;

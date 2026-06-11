@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.settings;
 
 import android.annotation.SuppressLint;
 import android.os.Build;
@@ -62,7 +62,7 @@ public final class AboutActivity extends AppActivity {
     // 缓存相关常量
     private static final String PREF_NAME = "about_cache";
     private static final String KEY_CACHE_TIME = "cache_time";
-    private static final long CACHE_EXPIRY_MS = 90L * 24 * 60 * 60 * 1000; // 3个月（90天）
+    private static final long CACHE_EXPIRY_MS = 90L * 24 * 60 * 60 * 1000; // 3 个月（90天）
 
     @Override
     protected void initData() {

@@ -12,7 +12,7 @@ import com.hjq.base.action.SingleClick;
 
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.http.glide.GlideApp;
-import run.yigou.gxzy.ui.activity.HomeActivity;
+import run.yigou.gxzy.ui.home.HomeActivity;
 
 import com.hjq.widget.view.CountdownView;
 import com.hjq.widget.view.SwitchButton;

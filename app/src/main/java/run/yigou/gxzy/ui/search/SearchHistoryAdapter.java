@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.adapter;
+package run.yigou.gxzy.ui.search;
 
 import android.content.Context;
 import android.view.ViewGroup;
@@ -13,7 +13,7 @@ import run.yigou.gxzy.greendao.entity.SearchHistory;
 /**
  *  作者:  zhs
  *  时间:  2023-07-14 14:25:35
- *  包名:  run.yigou.gxzy.ui.adapter
+ *  包名:  run.yigou.gxzy.ui.search
  *  类名:  SearchHistoryAdapter
  *  版本:  1.0
  *  描述:

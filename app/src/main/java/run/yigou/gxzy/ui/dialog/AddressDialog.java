@@ -19,7 +19,7 @@ import com.hjq.base.BaseDialog;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.ui.adapter.TabAdapter;
+import run.yigou.gxzy.ui.home.TabAdapter;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import org.json.JSONArray;
