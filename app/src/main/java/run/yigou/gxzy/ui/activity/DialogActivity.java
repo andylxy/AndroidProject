@@ -22,7 +22,7 @@ import run.yigou.gxzy.ui.dialog.SafeDialog;
 import run.yigou.gxzy.ui.dialog.SelectDialog;
 import run.yigou.gxzy.ui.dialog.ShareDialog;
 import run.yigou.gxzy.ui.dialog.TimeDialog;
-import run.yigou.gxzy.ui.dialog.TipsDialog;
+import run.yigou.gxzy.ui.tips.TipsDialog;
 import run.yigou.gxzy.ui.dialog.UpdateDialog;
 import run.yigou.gxzy.ui.dialog.WaitDialog;
 import run.yigou.gxzy.ui.popup.ListPopup;

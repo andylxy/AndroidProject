@@ -1,6 +1,6 @@
 
 
-package run.yigou.gxzy.ui.fragment;
+package run.yigou.gxzy.ui.tips;
 
 import android.app.Activity;
 import android.content.Context;
@@ -30,7 +30,7 @@ import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.greendao.util.DbService;
 import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity;
-import run.yigou.gxzy.ui.adapter.BookInfoAdapter;
+import run.yigou.gxzy.ui.bookshelf.BookInfoAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.model.DataItem;
 import run.yigou.gxzy.model.HH2SectionData;

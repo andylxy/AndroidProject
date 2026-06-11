@@ -19,7 +19,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.common.AppConst;
-import run.yigou.gxzy.ui.adapter.TipsFangYaoAdapter;
+import run.yigou.gxzy.ui.tips.TipsFangYaoAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.feature.reader.data.BookData;
 import run.yigou.gxzy.ui.feature.reader.data.BookDataManager;

@@ -19,7 +19,7 @@ import run.yigou.gxzy.http.api.GetCodeApi;
 import run.yigou.gxzy.http.api.PhoneApi;
 import run.yigou.gxzy.http.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
-import run.yigou.gxzy.ui.dialog.TipsDialog;
+import run.yigou.gxzy.ui.tips.TipsDialog;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.toast.Toaster;

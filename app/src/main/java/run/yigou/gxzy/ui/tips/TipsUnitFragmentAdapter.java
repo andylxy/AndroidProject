@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.adapter;
+package run.yigou.gxzy.ui.tips;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

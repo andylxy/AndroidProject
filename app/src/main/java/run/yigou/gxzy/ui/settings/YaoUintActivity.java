@@ -23,7 +23,7 @@ import run.yigou.gxzy.greendao.entity.About;
 import run.yigou.gxzy.greendao.util.ConvertEntity;
 import run.yigou.gxzy.http.api.AboutApi;
 import run.yigou.gxzy.http.model.HttpData;
-import run.yigou.gxzy.ui.adapter.TipsUnitFragmentAdapter;
+import run.yigou.gxzy.ui.tips.TipsUnitFragmentAdapter;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.utils.ThreadUtil;

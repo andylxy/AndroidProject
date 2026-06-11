@@ -72,7 +72,7 @@ import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.ui.home.NavigationAdapter;
 import run.yigou.gxzy.ui.search.SearchHistoryAdapter;
 import run.yigou.gxzy.ui.home.TabAdapter;
-import run.yigou.gxzy.ui.fragment.TipsWindowNetFragment;
+import run.yigou.gxzy.ui.tips.TipsWindowNetFragment;
 import run.yigou.gxzy.ui.dividerItemdecoration.CustomDividerItemDecoration;
 import run.yigou.gxzy.model.MingCiContent;
 import run.yigou.gxzy.model.Yao;

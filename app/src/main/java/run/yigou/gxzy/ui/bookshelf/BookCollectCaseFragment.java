@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.fragment;
+package run.yigou.gxzy.ui.bookshelf;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -18,7 +18,7 @@ import run.yigou.gxzy.greendao.util.DbService;
 
 import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity;
-import run.yigou.gxzy.ui.adapter.BookCollectCaseAdapter;
+import run.yigou.gxzy.ui.bookshelf.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 
 
