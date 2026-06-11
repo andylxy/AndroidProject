@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.adapter;
+package run.yigou.gxzy.ui.copy;
 
 import android.content.Context;
 import android.view.ViewGroup;
@@ -11,7 +11,7 @@ import com.hjq.base.AppAdapter;
 /**
  *  作者:  zhs
  *  时间:  2023-07-15 08:32:15
- *  包名:  run.yigou.gxzy.ui.adapter
+ *  包名:  run.yigou.gxzy.ui.copy
  *  类名:  CopyAdapter
  *  版本:  1.0
  *  描述:
@@ -22,11 +22,6 @@ public final class CopyAdapter extends AppAdapter<String> {
     public CopyAdapter(Context context) {
         super(context);
     }
-
-//    @Override
-//    public int getItemCount() {
-//        return 10;
-//    }
 
     @NonNull
     @Override

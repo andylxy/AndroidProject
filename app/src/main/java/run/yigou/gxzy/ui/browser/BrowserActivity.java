@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.browser;
 
 import android.app.Activity;
 import android.content.Context;
@@ -50,7 +50,6 @@ public final class BrowserActivity extends AppActivity
     }
 
     private StatusLayout mStatusLayout;
-    private ProgressBar mProgressBar;
     private SmartRefreshLayout mRefreshLayout;
     private BrowserView mBrowserView;
 
@@ -62,23 +61,19 @@ public final class BrowserActivity extends AppActivity
     @Override
     protected void initView() {
         mStatusLayout = findViewById(R.id.hl_browser_hint);
-        mProgressBar = findViewById(R.id.pb_browser_progress);
         mRefreshLayout = findViewById(R.id.sl_browser_refresh);
         mBrowserView = findViewById(R.id.wv_browser_view);
 
-        // 设置 WebView 生命管控
         mBrowserView.setLifecycleOwner(this);
-        // 设置网页刷新监听
         mRefreshLayout.setOnRefreshListener(this);
     }
 
     @Override
     protected void initData() {
-        showLoading();
-
         mBrowserView.setBrowserViewClient(new AppBrowserViewClient());
-        mBrowserView.setBrowserChromeClient(new AppBrowserChromeClient(mBrowserView));
-        mBrowserView.loadUrl(getString(INTENT_KEY_IN_URL));
+        mBrowserView.setBrowserChromeClient(new BrowserView.BrowserChromeClient(mBrowserView));
+        mBrowserView.loadUrl(getIntent().getStringExtra(INTENT_KEY_IN_URL));
+        showLoading();
     }
 
     @Override
@@ -86,99 +81,59 @@ public final class BrowserActivity extends AppActivity
         return mStatusLayout;
     }
 
-    @Override
-    public void onLeftClick(View view) {
-        finish();
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && mBrowserView.canGoBack()) {
-            // 后退网页并且拦截该事件
-            mBrowserView.goBack();
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-
     /**
      * 重新加载当前页
      */
     @CheckNet
-    private void reload() {
+    public void reload() {
         mBrowserView.reload();
     }
 
-    /**
-     * {@link OnRefreshListener}
-     */
+    @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (mBrowserView.canGoBack()) {
+                mBrowserView.goBack();
+                return true;
+            }
+        }
+        return super.onKeyLongPress(keyCode, event);
+    }
 
     @Override
     public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-        reload();
+        // 这里应该执行刷新操作，但是为了演示，这里延迟两秒后隐藏刷新布局
+        postDelayed(() -> {
+            mBrowserView.reload();
+            mRefreshLayout.finishRefresh();
+        }, 1000);
     }
 
     private class AppBrowserViewClient extends BrowserView.BrowserViewClient {
 
-        /**
-         * 网页加载错误时回调，这个方法会在 onPageFinished 之前调用
-         */
-        @Override
-        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-            // 这里为什么要用延迟呢？因为加载出错之后会先调用 onReceivedError 再调用 onPageFinished
-            post(() -> showError(listener -> reload()));
-        }
-
-        /**
-         * 开始加载网页
-         */
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
-            mProgressBar.setVisibility(View.VISIBLE);
+            showLoading();
         }
 
-        /**
-         * 完成加载网页
-         */
         @Override
         public void onPageFinished(WebView view, String url) {
-            mProgressBar.setVisibility(View.GONE);
-            mRefreshLayout.finishRefresh();
+            if (mRefreshLayout != null && mRefreshLayout.isRefreshing()) {
+                mRefreshLayout.finishRefresh();
+            }
             showComplete();
         }
-    }
 
-    private class AppBrowserChromeClient extends BrowserView.BrowserChromeClient {
-
-        private AppBrowserChromeClient(BrowserView view) {
-            super(view);
-        }
-
-        /**
-         * 收到网页标题
-         */
         @Override
-        public void onReceivedTitle(WebView view, String title) {
-            if (title == null) {
-                return;
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            if (mRefreshLayout != null && mRefreshLayout.isRefreshing()) {
+                mRefreshLayout.finishRefresh(false);
             }
-            setTitle(title);
+            showError((v) -> reload());
         }
 
-        @Override
-        public void onReceivedIcon(WebView view, Bitmap icon) {
-            if (icon == null) {
-                return;
-            }
-            setRightIcon(new BitmapDrawable(getResources(), icon));
-        }
-
-        /**
-         * 收到加载进度变化
-         */
-        @Override
         public void onProgressChanged(WebView view, int newProgress) {
-            mProgressBar.setProgress(newProgress);
+
         }
     }
 }

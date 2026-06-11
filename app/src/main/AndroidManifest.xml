@@ -79,7 +79,7 @@
 
         <!-- 权限引导页（对话框样式） -->
         <activity
-            android:name=".ui.activity.PermissionGuideActivity"
+            android:name=".ui.guide.PermissionGuideActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/PermissionGuideDialogTheme" />
@@ -99,7 +99,7 @@
 
         <!-- 引导页 -->
         <activity
-            android:name=".ui.activity.GuideActivity"
+            android:name=".ui.guide.GuideActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
@@ -187,7 +187,7 @@
 
         <!-- 网页浏览 -->
         <activity
-            android:name=".ui.activity.BrowserActivity"
+            android:name=".ui.browser.BrowserActivity"
             android:label="@string/web_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />

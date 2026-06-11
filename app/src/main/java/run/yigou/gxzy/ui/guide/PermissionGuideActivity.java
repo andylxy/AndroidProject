@@ -1,9 +1,10 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.guide;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -51,37 +52,26 @@ public final class PermissionGuideActivity extends AppActivity {
         mTvPrivacy = findViewById(R.id.tv_privacy_policy);
         mTvDisclaimer = findViewById(R.id.tv_disclaimer);
 
-        // 同意并继续按钮
         mBtnAgree.setOnClickListener(v -> requestStoragePermission());
-
-        // 退出应用按钮
         mBtnExit.setOnClickListener(v -> {
             setResult(RESULT_CANCELED);
             exitApp();
         });
-
-        // 隐私协议点击
         mTvPrivacy.setOnClickListener(v -> showPrivacyPolicyDialog());
-
-        // 免责声明点击
         mTvDisclaimer.setOnClickListener(v -> showDisclaimerDialog());
     }
 
     @Override
     protected void initData() {
-        // 设置窗口大小为屏幕的 80%
         setWindowSize();
     }
 
-    /**
-     * 设置窗口大小为屏幕的 80%
-     */
     private void setWindowSize() {
         Window window = getWindow();
         if (window != null) {
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-            
+
             WindowManager.LayoutParams params = window.getAttributes();
             params.width = (int) (displayMetrics.widthPixels * 0.85);
             params.height = (int) (displayMetrics.heightPixels * 0.80);
@@ -95,9 +85,6 @@ public final class PermissionGuideActivity extends AppActivity {
         // 禁用返回键，必须选择同意或退出
     }
 
-    /**
-     * 显示隐私协议对话框
-     */
     private void showPrivacyPolicyDialog() {
         new AgreementDialog.Builder(this)
                 .setTitle(getString(R.string.permission_guide_privacy))
@@ -105,9 +92,6 @@ public final class PermissionGuideActivity extends AppActivity {
                 .show();
     }
 
-    /**
-     * 显示免责声明对话框
-     */
     private void showDisclaimerDialog() {
         new AgreementDialog.Builder(this)
                 .setTitle(getString(R.string.permission_guide_disclaimer))
@@ -115,13 +99,7 @@ public final class PermissionGuideActivity extends AppActivity {
                 .show();
     }
 
-    /**
-     * 请求存储权限
-     * 注意：因为 targetSdkVersion >= 33，XXPermissions 强制要求使用 READ_MEDIA_* 权限
-     * 在旧版设备上，系统会自动处理向后兼容
-     */
     private void requestStoragePermission() {
-        // 用户点击同意，保存状态
         com.tencent.mmkv.MMKV.defaultMMKV().encode("is_privacy_agreed", true);
 
         XXPermissions.with(this)
@@ -132,7 +110,6 @@ public final class PermissionGuideActivity extends AppActivity {
                     @Override
                     public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
                         if (allGranted) {
-                            // 权限已授予，返回成功结果
                             setResult(RESULT_OK);
                             finish();
                         }
@@ -141,19 +118,14 @@ public final class PermissionGuideActivity extends AppActivity {
                     @Override
                     public void onDenied(@NonNull List<String> permissions, boolean doNotAskAgain) {
                         if (doNotAskAgain) {
-                            // 用户勾选了"不再询问"，引导去设置页
                             showGoToSettingsDialog();
                         } else {
-                            // 用户拒绝授权，提示
                             Toaster.show(R.string.permission_denied_exit_message);
                         }
                     }
                 });
     }
 
-    /**
-     * 显示前往设置页面的对话框
-     */
     private void showGoToSettingsDialog() {
         new run.yigou.gxzy.ui.dialog.MessageDialog.Builder(this)
                 .setTitle(R.string.common_permission_alert)
@@ -180,16 +152,12 @@ public final class PermissionGuideActivity extends AppActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        // 从设置页返回后，检查权限是否已授予
         if (XXPermissions.isGranted(this, Permission.READ_MEDIA_IMAGES, Permission.READ_MEDIA_VIDEO, Permission.READ_MEDIA_AUDIO)) {
             setResult(RESULT_OK);
             finish();
         }
     }
 
-    /**
-     * 退出应用
-     */
     private void exitApp() {
         ActivityManager.getInstance().finishAllActivities();
     }

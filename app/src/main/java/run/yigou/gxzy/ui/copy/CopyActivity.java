@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.copy;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;

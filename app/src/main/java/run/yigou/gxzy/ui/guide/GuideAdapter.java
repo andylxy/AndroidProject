@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.adapter;
+package run.yigou.gxzy.ui.guide;
 
 import android.content.Context;
 import android.view.ViewGroup;

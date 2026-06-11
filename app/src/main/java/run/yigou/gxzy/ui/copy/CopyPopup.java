@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.popup;
+package run.yigou.gxzy.ui.copy;
 
 import android.content.Context;
 

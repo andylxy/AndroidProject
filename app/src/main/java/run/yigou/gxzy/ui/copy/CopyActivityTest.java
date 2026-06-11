@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.copy;
 
 import androidx.appcompat.app.AppCompatActivity;
 

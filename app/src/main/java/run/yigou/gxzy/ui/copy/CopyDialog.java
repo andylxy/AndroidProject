@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.dialog;
+package run.yigou.gxzy.ui.copy;
 
 import android.content.Context;
 import android.view.Gravity;

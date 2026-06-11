@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.activity;
+package run.yigou.gxzy.ui.guide;
 
 import android.view.View;
 import android.view.animation.Animation;
@@ -11,7 +11,7 @@ import com.gyf.immersionbar.ImmersionBar;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.ui.adapter.GuideAdapter;
+import run.yigou.gxzy.ui.activity.HomeActivity;
 
 import me.relex.circleindicator.CircleIndicator3;
 
@@ -53,57 +53,48 @@ public final class GuideActivity extends AppActivity {
     @SingleClick
     @Override
     public void onClick(View view) {
-        if (view == mCompleteView) {
-            HomeActivity.start(getContext());
+        if (mViewPager.getCurrentItem() != mAdapter.getCount() - 1) {
+            mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
+        } else {
+            // 跳转到首页
+            startActivity(HomeActivity.class);
+            // 销毁当前页面
             finish();
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mViewPager.unregisterOnPageChangeCallback(mCallback);
-    }
-
-    @NonNull
-    @Override
-    protected ImmersionBar createStatusBarConfig() {
-        return super.createStatusBarConfig()
-                // 指定导航栏背景颜色
-                .navigationBarColor(R.color.white);
-    }
-
-    private final ViewPager2.OnPageChangeCallback mCallback = new ViewPager2.OnPageChangeCallback() {
+    private ViewPager2.OnPageChangeCallback mCallback = new ViewPager2.OnPageChangeCallback() {
 
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            if (mViewPager.getCurrentItem() != mAdapter.getCount() - 1 || positionOffsetPixels <= 0) {
+            if (mAdapter.getCount() == 0) {
                 return;
             }
+            // 判断是否是最后一页
+            if (position == mAdapter.getCount() - 1) {
+                mCompleteView.setVisibility(View.VISIBLE);
 
-            mIndicatorView.setVisibility(View.VISIBLE);
-            mCompleteView.setVisibility(View.INVISIBLE);
-            mCompleteView.clearAnimation();
+                float endProgress = 1.0f - positionOffset;
+                ScaleAnimation scaleAnimation = new ScaleAnimation(
+                        endProgress, 1.0f, endProgress, 1.0f,
+                        Animation.RELATIVE_TO_SELF, 0.5f,
+                        Animation.RELATIVE_TO_SELF, 0.5f);
+                scaleAnimation.setDuration(0);
+                scaleAnimation.setFillAfter(true);
+                mCompleteView.startAnimation(scaleAnimation);
+            } else {
+                mCompleteView.setVisibility(View.INVISIBLE);
+            }
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+
         }
 
         @Override
         public void onPageScrollStateChanged(int state) {
-            if (state != ViewPager2.SCROLL_STATE_IDLE) {
-                return;
-            }
 
-            boolean lastItem = mViewPager.getCurrentItem() == mAdapter.getCount() - 1;
-            mIndicatorView.setVisibility(lastItem ? View.INVISIBLE : View.VISIBLE);
-            mCompleteView.setVisibility(lastItem ? View.VISIBLE : View.INVISIBLE);
-            if (lastItem) {
-                // 按钮呼吸动效
-                ScaleAnimation animation = new ScaleAnimation(1.0f, 1.1f, 1.0f, 1.1f,
-                        Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-                animation.setDuration(350);
-                animation.setRepeatMode(Animation.REVERSE);
-                animation.setRepeatCount(Animation.INFINITE);
-                mCompleteView.startAnimation(animation);
-            }
         }
     };
 }

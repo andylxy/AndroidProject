@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.fragment;
+package run.yigou.gxzy.ui.browser;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -13,7 +13,6 @@ import run.yigou.gxzy.aop.CheckNet;
 import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppFragment;
-import run.yigou.gxzy.ui.activity.BrowserActivity;
 import run.yigou.gxzy.widget.BrowserView;
 import com.hjq.widget.layout.StatusLayout;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
@@ -55,9 +54,7 @@ public final class BrowserFragment extends AppFragment<AppActivity>
         mRefreshLayout = findViewById(R.id.sl_browser_refresh);
         mBrowserView = findViewById(R.id.wv_browser_view);
 
-        // 设置 WebView 生命周期回调
         mBrowserView.setLifecycleOwner(this);
-        // 设置网页刷新监听
         mRefreshLayout.setOnRefreshListener(this);
     }
 
@@ -78,65 +75,43 @@ public final class BrowserFragment extends AppFragment<AppActivity>
      * 重新加载当前页
      */
     @CheckNet
-    private void reload() {
+    public void reload() {
         mBrowserView.reload();
     }
 
-    /**
-     * {@link OnRefreshListener}
-     */
-
     @Override
     public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-        reload();
+        postDelayed(() -> {
+            mBrowserView.reload();
+            mRefreshLayout.finishRefresh();
+        }, 1000);
     }
 
     private class AppBrowserViewClient extends BrowserView.BrowserViewClient {
 
-        /**
-         * 网页加载错误时回调，这个方法会在 onPageFinished 之前调用
-         */
         @Override
-        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-            // 这里为什么要用延迟呢？因为加载出错之后会先调用 onReceivedError 再调用 onPageFinished
-            post(() -> showError(listener -> reload()));
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            showLoading();
         }
 
-        /**
-         * 开始加载网页
-         */
-        @Override
-        public void onPageStarted(WebView view, String url, Bitmap favicon) {}
-
-        /**
-         * 完成加载网页
-         */
         @Override
         public void onPageFinished(WebView view, String url) {
-            mRefreshLayout.finishRefresh();
+            if (mRefreshLayout != null && mRefreshLayout.isRefreshing()) {
+                mRefreshLayout.finishRefresh();
+            }
             showComplete();
         }
 
-        /**
-         * 跳转到其他链接
-         */
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, final String url) {
-            String scheme = Uri.parse(url).getScheme();
-            if (scheme == null) {
-                return true;
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            if (mRefreshLayout != null && mRefreshLayout.isRefreshing()) {
+                mRefreshLayout.finishRefresh(false);
             }
-            switch (scheme.toLowerCase()) {
-                // 如果这是跳链接操作
-                case "http":
-                case "https":
-                    BrowserActivity.start(getAttachActivity(), url);
-                    break;
-                default:
-                    break;
-            }
-            // 已经处理该链接请求
-            return true;
+            showError((v) -> reload());
+        }
+
+        public void onProgressChanged(WebView view, int newProgress) {
+
         }
     }
 }

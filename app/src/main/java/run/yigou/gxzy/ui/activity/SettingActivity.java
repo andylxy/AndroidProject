@@ -15,6 +15,7 @@ import run.yigou.gxzy.http.glide.GlideApp;
 import run.yigou.gxzy.manager.CacheDataManager;
 import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.app.AppConfig;
+import run.yigou.gxzy.ui.browser.BrowserActivity;
 import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.dialog.SafeDialog;
 import run.yigou.gxzy.ui.dialog.UpdateDialog;

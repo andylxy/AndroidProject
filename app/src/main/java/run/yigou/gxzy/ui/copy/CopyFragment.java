@@ -1,8 +1,7 @@
-package run.yigou.gxzy.ui.fragment;
+package run.yigou.gxzy.ui.copy;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppFragment;
-import run.yigou.gxzy.ui.activity.CopyActivity;
 
 /**
  *    author : Android 轮子哥
