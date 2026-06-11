@@ -12,6 +12,8 @@
 - `library/log`：日志工具模块。
 - `library/crypto`：AES、RSA、SM2 等加密与安全工具。
 - `library/sse-client`：Server-Sent Events 客户端实现。
+- `library/text-utils`：文本搜索与高亮工具模块（`SearchMatcher`、`TextHighlighter`）。
+- `library/text-renderer`：Tips 模块文本渲染引擎（`TipsTextRenderer`、`ClickLink`），依赖 `text-utils`。
 - `picture/`、`jks/`、`localMaven/`：项目图片资料、签名材料和本地 Maven 产物。
 
 各模块遵循标准 Android 目录：`src/main/java`、`src/main/res`、`src/test`，需要仪器测试时使用 `src/androidTest`。

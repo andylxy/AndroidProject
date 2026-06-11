@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 
 /**
@@ -19,11 +19,22 @@ import java.util.List;
  */
 public class TipsTextRenderer {
 
+    /** 自定义标签正则：匹配 $x{content} 格式，Group1=标记(marker)，Group2=内容(content) */
+    private static final java.util.regex.Pattern TAG_PATTERN =
+        java.util.regex.Pattern.compile("\\$([a-zA-Z])\\{([^}]*)\\}");
+
+    /** 未知标记的默认样式：灰色、正常字体、无链接，保障任何 $x{} 标签至少可见 */
+    private static final StyleConfig DEFAULT_STYLE_CONFIG =
+        new StyleConfig(Color.GRAY, false, 0);
+
+    /** 项编号高亮颜色：蓝色 */
+    private static final int ITEM_NUMBER_COLOR = 0xFF0000FF;
+
     // 定义样式配置类
     public static class StyleConfig {
-        public int color;
-        public boolean isSmallFont; // 是否使用相对小字体
-        public int linkType; // 链接类型: 0:无, 1:Yao, 2:Fang, 3:MingCi
+        public final int color;
+        public final boolean isSmallFont; // 是否使用相对小字体
+        public final int linkType; // 链接类型: 0:无, 1:Yao, 2:Fang, 3:MingCi
 
         public StyleConfig(int color, boolean isSmallFont, int linkType) {
             this.color = color;
@@ -32,8 +43,8 @@ public class TipsTextRenderer {
         }
     }
 
-    // 使用 HashMap 存储样式配置，支持动态更新
-    private static final HashMap<String, StyleConfig> configMap = new HashMap<>();
+    // 使用 ConcurrentHashMap 存储样式配置，支持并发线程安全更新
+    private static final ConcurrentHashMap<String, StyleConfig> configMap = new ConcurrentHashMap<>();
 
     static {
         // 初始化默认配置，保持与原有 switch 逻辑一致
@@ -56,7 +67,7 @@ public class TipsTextRenderer {
      * 更新样式配置
      * @param newConfigs 新的样式配置映射
      */
-    public static void updateStyleConfig(HashMap<String, StyleConfig> newConfigs) {
+    public static void updateStyleConfig(ConcurrentHashMap<String, StyleConfig> newConfigs) {
         if (newConfigs != null) {
             configMap.putAll(newConfigs);
         }
@@ -109,8 +120,7 @@ public class TipsTextRenderer {
         // Group 1: 标记 (marker)
         // Group 2: 内容 (content)
 
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\$([a-zA-Z])\\{([^}]*)\\}");
-        java.util.regex.Matcher matcher = pattern.matcher(str);
+        java.util.regex.Matcher matcher = TAG_PATTERN.matcher(str);
 
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         int lastAppendPosition = 0;
@@ -149,7 +159,10 @@ public class TipsTextRenderer {
         if (marker == null) return;
 
         StyleConfig config = configMap.get(marker);
-        if (config == null) return;
+        // 未知标记使用默认样式兜底，保障内容至少可见（灰色文本），而非静默丢弃
+        if (config == null) {
+            config = DEFAULT_STYLE_CONFIG;
+        }
 
         // 1. 设置相对字体大小
         if (config.isSmallFont) {
@@ -185,15 +198,18 @@ public class TipsTextRenderer {
         @Override
         public void onClick(View view) {
             if (clickLink == null) return;
+            // 防御：非 TextView 安全跳过，避免 ClassCastException
+            if (!(view instanceof TextView)) return;
+            TextView textView = (TextView) view;
             switch (type) {
                 case TYPE_YAO:
-                    clickLink.clickYaoLink((TextView) view, this);
+                    clickLink.clickYaoLink(textView, this);
                     break;
                 case TYPE_FANG:
-                    clickLink.clickFangLink((TextView) view, this);
+                    clickLink.clickFangLink(textView, this);
                     break;
                 case TYPE_MINGCI:
-                    clickLink.clickMingCiLink((TextView) view, this);
+                    clickLink.clickMingCiLink(textView, this);
                     break;
             }
         }
@@ -216,7 +232,7 @@ public class TipsTextRenderer {
         if (delimiterIndex != -1 && isNumeric(text.substring(0, delimiterIndex))) {
             // 对数字前缀设置前景色跨度
             spannableStringBuilder.setSpan(
-                    new ForegroundColorSpan(0xFF0000FF),  // 颜色为蓝色（十六进制表示）
+                    new ForegroundColorSpan(ITEM_NUMBER_COLOR),  // 项编号高亮颜色
                     0,  // Span的起始索引
                     delimiterIndex,  // Span的结束索引
                     SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE  // Span标志，避免影响周围文本
@@ -251,6 +267,7 @@ public class TipsTextRenderer {
 
     /**
      * 查找给定字符串 (str) 中所有子字符串 (str2) 的起始位置。
+     * 注意：此方法区分大小写匹配，与 SearchMatcher.findMatches() 不区分大小写的行为不同。
      *
      * @param str  主字符串。
      * @param str2 要查找的子字符串。
@@ -291,6 +308,8 @@ public class TipsTextRenderer {
      * @param spannable 要进行高亮显示的SpannableStringBuilder对象
      */
     public static void highlightMatches(java.util.regex.Matcher matcher, SpannableStringBuilder spannable) {
+        // 重置 Matcher 位置，确保无论调用方是否已消费，行为一致
+        matcher.reset();
         // 定义高亮显示的颜色为黄色 (与 TextHighlighter 一致)
         int color = 0xFFFFFF00;
         // 遍历所有匹配项并应用高亮

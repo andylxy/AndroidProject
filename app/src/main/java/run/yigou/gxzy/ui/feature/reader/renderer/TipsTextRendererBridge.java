@@ -2,7 +2,7 @@ package run.yigou.gxzy.ui.feature.reader.renderer;
 
 import android.graphics.Color;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 
 import run.yigou.gxzy.http.api.StyleConfigApi;
@@ -26,7 +26,7 @@ public final class TipsTextRendererBridge {
             return;
         }
 
-        HashMap<String, StyleConfig> newConfigs = new HashMap<>();
+        ConcurrentHashMap<String, StyleConfig> newConfigs = new ConcurrentHashMap<>();
         for (StyleConfigApi.StyleConfigApiBean.StyleItem item : apiStyles) {
             try {
                 // 解析颜色，支持 #RRGGBB 格式，如果解析失败则捕获异常
