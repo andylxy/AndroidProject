@@ -31,12 +31,12 @@ import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.UpdateImageApi;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.data.remote.model.HttpData;
-import run.yigou.gxzy.ui.feature.settings.AboutActivity;
+import run.yigou.gxzy.ui.activity.AboutActivity;
 import run.yigou.gxzy.ui.media.activity.ImageCropActivity;
 import run.yigou.gxzy.ui.media.activity.ImagePreviewActivity;
 import run.yigou.gxzy.ui.media.activity.ImageSelectActivity;
-import run.yigou.gxzy.ui.feature.settings.SettingActivity;
-import run.yigou.gxzy.ui.home.HomeActivity;
+import run.yigou.gxzy.ui.activity.SettingActivity;
+import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.dialog.InputDialog;
 
 /**

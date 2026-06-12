@@ -3,7 +3,6 @@ package run.yigou.gxzy.ui.feature.reader.helper;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -20,7 +19,6 @@ import run.yigou.gxzy.log.EasyLog;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -43,7 +41,7 @@ import run.yigou.gxzy.ui.feature.reader.search.SearchDataAdapter;
 import run.yigou.gxzy.ui.feature.reader.widget.TipsLittleMingCiViewWindow;
 import run.yigou.gxzy.ui.feature.reader.widget.TipsLittleTableViewWindow;
 import run.yigou.gxzy.tips.widget.ITipsWindowHost;
-import run.yigou.gxzy.utils.DebugLog;
+import run.yigou.gxzy.ui.home.TipsFragmentActivity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -266,7 +264,7 @@ public class TipsNetHelper {
 
                     @Override
                     public void navigateToDetail(Intent intent) {
-                        intent.setClass(activity, run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity.class);
+                        intent.setClass(activity, TipsFragmentActivity.class);
                         activity.startActivity(intent);
                     }
                 });
@@ -314,7 +312,7 @@ public class TipsNetHelper {
 
                     @Override
                     public void navigateToDetail(Intent intent) {
-                        intent.setClass(activity, run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity.class);
+                        intent.setClass(activity, TipsFragmentActivity.class);
                         activity.startActivity(intent);
                     }
                 });
@@ -363,7 +361,7 @@ public class TipsNetHelper {
 
                     @Override
                     public void navigateToDetail(Intent intent) {
-                        intent.setClass(activity, run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity.class);
+                        intent.setClass(activity, TipsFragmentActivity.class);
                         activity.startActivity(intent);
                     }
                 });

@@ -79,33 +79,33 @@
 
         <!-- 权限引导页（对话框样式） -->
         <activity
-            android:name=".ui.guide.PermissionGuideActivity"
+            android:name=".ui.activity.PermissionGuideActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/PermissionGuideDialogTheme" />
 
         <!-- 书本内容BookContentSearchActivity -->
         <activity
-            android:name=".ui.feature.reader.activity.BookContentSearchActivity"
+            android:name=".ui.home.BookContentSearchActivity"
             android:label="@string/search_content"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".ui.feature.reader.activity.TipsFragmentActivity"
+            android:name=".ui.home.TipsFragmentActivity"
             android:label="@string/tips_book_data_content"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <!-- 引导页 -->
         <activity
-            android:name=".ui.guide.GuideActivity"
+            android:name=".ui.activity.GuideActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <!-- 首页 -->
         <activity
-            android:name=".ui.home.HomeActivity"
+            android:name=".ui.activity.HomeActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
@@ -125,19 +125,19 @@
 
         <!-- 崩溃展示（必须在独立进程） -->
         <activity
-            android:name=".ui.feature.settings.CrashActivity"
+            android:name=".ui.activity.CrashActivity"
             android:launchMode="singleTop"
             android:process=":crash"
             android:screenOrientation="landscape" />
         <!-- 重启应用（必须在独立进程） -->
         <activity
-            android:name=".ui.feature.settings.RestartActivity"
+            android:name=".ui.activity.RestartActivity"
             android:launchMode="singleTop"
             android:process=":restart" />
 
         <!-- 设置页 -->
         <activity
-            android:name=".ui.feature.settings.SettingActivity"
+            android:name=".ui.activity.SettingActivity"
             android:label="@string/setting_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
@@ -174,7 +174,7 @@
         <!-- 汉制单位 -->
         <!-- 关于我们 -->
         <activity
-            android:name=".ui.feature.settings.AboutActivity"
+            android:name=".ui.activity.AboutActivity"
             android:label="@string/about_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />

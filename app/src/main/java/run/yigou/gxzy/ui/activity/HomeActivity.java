@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.home;
+package run.yigou.gxzy.ui.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -23,8 +23,10 @@ import run.yigou.gxzy.manager.ActivityManager;
 import com.hjq.base.DoubleClickHelper;
 
 import run.yigou.gxzy.ui.feature.reader.ai.AiMsgFragment;
-import run.yigou.gxzy.ui.feature.reader.fragment.BookCollectCaseFragment;
 import run.yigou.gxzy.ui.account.MyFragmentPersonal;
+import run.yigou.gxzy.ui.home.BookCollectCaseFragment;
+import run.yigou.gxzy.ui.home.HomeFragment;
+import run.yigou.gxzy.ui.home.NavigationAdapter;
 
 /**
  * 首页Activity

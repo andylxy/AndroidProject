@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.feature.settings;
+package run.yigou.gxzy.ui.activity;
 
 import android.view.Gravity;
 import android.view.View;
@@ -21,7 +21,6 @@ import run.yigou.gxzy.ui.dialog.UpdateDialog;
 import run.yigou.gxzy.ui.home.HomeFragment;
 import run.yigou.gxzy.ui.account.PhoneResetActivity;
 import run.yigou.gxzy.ui.account.PasswordResetActivity;
-import run.yigou.gxzy.ui.home.HomeActivity;
 
 import com.hjq.permissions.XXPermissions;
 import com.hjq.widget.layout.SettingBar;

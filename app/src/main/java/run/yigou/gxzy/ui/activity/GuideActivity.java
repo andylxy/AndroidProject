@@ -1,17 +1,14 @@
-package run.yigou.gxzy.ui.guide;
+package run.yigou.gxzy.ui.activity;
 
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 
-import androidx.annotation.NonNull;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.gyf.immersionbar.ImmersionBar;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.ui.home.HomeActivity;
 
 import me.relex.circleindicator.CircleIndicator3;
 

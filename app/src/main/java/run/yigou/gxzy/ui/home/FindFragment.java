@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.find;
+package run.yigou.gxzy.ui.home;
 
 import android.widget.ImageView;
 
@@ -10,7 +10,7 @@ import run.yigou.gxzy.R;
 
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.network.glide.GlideApp;
-import run.yigou.gxzy.ui.home.HomeActivity;
+import run.yigou.gxzy.ui.activity.HomeActivity;
 
 import com.hjq.widget.view.CountdownView;
 import com.hjq.widget.view.SwitchButton;

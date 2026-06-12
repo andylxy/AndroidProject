@@ -1,10 +1,9 @@
-package run.yigou.gxzy.ui.guide;
+package run.yigou.gxzy.ui.activity;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;

@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.feature.settings;
+package run.yigou.gxzy.ui.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -7,7 +7,6 @@ import android.content.Intent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.ui.home.SplashActivity;
-import run.yigou.gxzy.ui.home.HomeActivity;
 
 /**
  *    author : Android 轮子哥

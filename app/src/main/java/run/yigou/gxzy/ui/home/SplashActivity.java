@@ -17,7 +17,8 @@ import com.hjq.permissions.XXPermissions;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppConfig;
-import run.yigou.gxzy.ui.guide.PermissionGuideActivity;
+import run.yigou.gxzy.ui.activity.HomeActivity;
+import run.yigou.gxzy.ui.activity.PermissionGuideActivity;
 
 import com.hjq.widget.view.SlantedTextView;
 

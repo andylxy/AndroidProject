@@ -10,7 +10,7 @@ import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.ui.home.HomeFragment;
-import run.yigou.gxzy.ui.home.HomeActivity;
+import run.yigou.gxzy.ui.activity.HomeActivity;
 
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;

@@ -36,7 +36,7 @@ import run.yigou.gxzy.data.local.entity.ChatMessageBean;
 import run.yigou.gxzy.data.local.entity.ChatSessionBean;
 import run.yigou.gxzy.ui.feature.reader.ai.contract.AiMsgContract;
 import run.yigou.gxzy.ui.feature.reader.ai.presenter.AiMsgPresenter;
-import run.yigou.gxzy.ui.home.HomeActivity;
+import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.ui.feature.reader.ai.helper.ChatInputHelper;
 import run.yigou.gxzy.ui.feature.reader.ai.helper.ChatSidebarHelper;
 import run.yigou.gxzy.ui.feature.reader.ai.helper.ChatSummaryHelper;

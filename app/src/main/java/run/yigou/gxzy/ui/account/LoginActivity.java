@@ -49,7 +49,7 @@ import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
 import com.hjq.base.KeyboardWatcher;
 import run.yigou.gxzy.ui.home.HomeFragment;
-import run.yigou.gxzy.ui.home.HomeActivity;
+import run.yigou.gxzy.ui.activity.HomeActivity;
 import run.yigou.gxzy.utils.Base64ConverBitmapHelper;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.wxapi.WXEntryActivity;
