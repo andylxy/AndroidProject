@@ -12,9 +12,9 @@ import run.yigou.gxzy.ui.feature.reader.entity.GroupData;
 import run.yigou.gxzy.ui.feature.reader.entity.ItemData;
 import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
 import run.yigou.gxzy.ui.feature.reader.data.BookData;
-import run.yigou.gxzy.greendao.entity.Chapter;
+import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
-import run.yigou.gxzy.model.DataItem;
+import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.text.SearchMatcher;
 import run.yigou.gxzy.text.TextHighlighter;
 import run.yigou.gxzy.utils.DebugLog;
@@ -61,8 +61,8 @@ public class SearchCoordinator {
         String trimmedKeyword = keyword.trim();
         
         // 1. 从数据库获取整本书所有章节内容 (与 BookContentSearchActivity 逻辑一致)
-        java.util.List<run.yigou.gxzy.model.HH2SectionData> allContent = 
-            run.yigou.gxzy.greendao.util.ConvertEntity.getBookChapterDetailList(bookId);
+        java.util.List<run.yigou.gxzy.data.model.HH2SectionData> allContent = 
+            run.yigou.gxzy.data.local.helper.ConvertEntity.getBookChapterDetailList(bookId);
         
         if (allContent == null || allContent.isEmpty()) {
             EasyLog.print("❌ 无书籍数据");
@@ -77,8 +77,8 @@ public class SearchCoordinator {
         }
         
         // 3. 获取别名字典
-        run.yigou.gxzy.manager.GlobalDataHolder globalData = 
-            run.yigou.gxzy.manager.GlobalDataHolder.getInstance();
+        run.yigou.gxzy.base.GlobalDataHolder globalData = 
+            run.yigou.gxzy.base.GlobalDataHolder.getInstance();
         java.util.Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
         java.util.Map<String, String> fangAliasDict = globalData.getFangAliasDict();
         
@@ -86,7 +86,7 @@ public class SearchCoordinator {
         run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity searchKeyEntity = 
             new run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity(new StringBuilder(trimmedKeyword));
         
-        java.util.ArrayList<run.yigou.gxzy.model.HH2SectionData> filteredData = 
+        java.util.ArrayList<run.yigou.gxzy.data.model.HH2SectionData> filteredData = 
             run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper.getSearchHh2SectionData(
                 searchKeyEntity, 
                 allContent, 
@@ -95,7 +95,7 @@ public class SearchCoordinator {
             );
         
         // 5. 转换为 GroupData/ItemData 格式
-        for (run.yigou.gxzy.model.HH2SectionData section : filteredData) {
+        for (run.yigou.gxzy.data.model.HH2SectionData section : filteredData) {
             GroupData groupData = new GroupData();
             groupData.setTitle(section.getHeader());
             groupData.setExpanded(false); // 默认折叠
@@ -104,7 +104,7 @@ public class SearchCoordinator {
             // 创建 ItemData 列表
             List<ItemData> items = new ArrayList<>();
             if (section.getData() != null) {
-                for (run.yigou.gxzy.model.DataItem dataItem : section.getData()) {
+                for (run.yigou.gxzy.data.model.DataItem dataItem : section.getData()) {
                     ItemData itemData = convertDataItemToItemData(dataItem);
                     items.add(itemData);
                 }
@@ -122,8 +122,8 @@ public class SearchCoordinator {
     /**
      * 伤寒论特殊过滤逻辑
      */
-    private java.util.List<run.yigou.gxzy.model.HH2SectionData> filterShangHanData(
-            java.util.List<run.yigou.gxzy.model.HH2SectionData> contentList) {
+    private java.util.List<run.yigou.gxzy.data.model.HH2SectionData> filterShangHanData(
+            java.util.List<run.yigou.gxzy.data.model.HH2SectionData> contentList) {
         if (contentList == null || contentList.isEmpty()) {
             return new ArrayList<>();
         }
@@ -164,7 +164,7 @@ public class SearchCoordinator {
      * 注意：直接使用原始 CharSequence，不要创建新的 SpannableStringBuilder，
      * 否则会丢失 ClickableSpan！
      */
-    private run.yigou.gxzy.ui.feature.reader.entity.ItemData convertDataItemToItemData(run.yigou.gxzy.model.DataItem dataItem) {
+    private run.yigou.gxzy.ui.feature.reader.entity.ItemData convertDataItemToItemData(run.yigou.gxzy.data.model.DataItem dataItem) {
         ItemData itemData = new ItemData();
         
         // ✅ 直接使用原始对象，保留 ClickableSpan

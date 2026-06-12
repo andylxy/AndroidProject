@@ -2,7 +2,7 @@ package run.yigou.gxzy.data.remote.api;
 
 import com.hjq.http.config.IRequestApi;
 
-import run.yigou.gxzy.greendao.entity.UserInfo;
+import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.remote.model.UserInfoToken;
 
 /**

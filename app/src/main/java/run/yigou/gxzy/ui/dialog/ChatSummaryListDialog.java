@@ -16,8 +16,8 @@ import java.util.List;
 
 import io.noties.markwon.Markwon;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.greendao.entity.ChatSummaryBean;
-import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
+import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.ui.feature.ai.adapter.ChatSummaryAdapter;
 
 /**

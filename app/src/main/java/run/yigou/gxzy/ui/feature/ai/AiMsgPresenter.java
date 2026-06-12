@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import run.yigou.gxzy.greendao.entity.ChatMessageBean;
-import run.yigou.gxzy.greendao.entity.ChatSessionBean;
-import run.yigou.gxzy.greendao.entity.ChatSummaryBean;
+import run.yigou.gxzy.data.local.entity.ChatMessageBean;
+import run.yigou.gxzy.data.local.entity.ChatSessionBean;
+import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
 import run.yigou.gxzy.manager.ai.AiChatManager;
 import run.yigou.gxzy.manager.ai.ChatSessionManager;
 import run.yigou.gxzy.utils.DateHelper;

@@ -1,7 +1,7 @@
 package run.yigou.gxzy.ui.feature.reader.search;
 
-import run.yigou.gxzy.model.DataItem;
-import run.yigou.gxzy.model.HH2SectionData;
+import run.yigou.gxzy.data.model.DataItem;
+import run.yigou.gxzy.data.model.HH2SectionData;
 
 import android.os.Build;
 import android.text.SpannableStringBuilder;
@@ -19,7 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import run.yigou.gxzy.model.Fang;
+import run.yigou.gxzy.data.model.Fang;
 import run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.text.TipsTextRenderer;

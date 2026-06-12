@@ -21,18 +21,18 @@ import java.util.List;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.base.constant.AppConst;
-import run.yigou.gxzy.greendao.entity.Chapter;
-import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.greendao.gen.ChapterDao;
-import run.yigou.gxzy.greendao.util.ConvertEntity;
-import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.data.local.entity.Chapter;
+import run.yigou.gxzy.data.local.entity.TabNavBody;
+import run.yigou.gxzy.data.local.gen.ChapterDao;
+import run.yigou.gxzy.data.local.helper.ConvertEntity;
+import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.feature.bookshelf.BookInfoAdapter;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
-import run.yigou.gxzy.model.DataItem;
-import run.yigou.gxzy.model.HH2SectionData;
-import run.yigou.gxzy.manager.GlobalDataHolder;
+import run.yigou.gxzy.data.model.DataItem;
+import run.yigou.gxzy.data.model.HH2SectionData;
+import run.yigou.gxzy.base.GlobalDataHolder;
 
 /**
  * HomeFragment页面下

@@ -8,8 +8,8 @@ import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.http.listener.OnHttpListener;
 
-import run.yigou.gxzy.greendao.entity.ChatMessageBean;
-import run.yigou.gxzy.greendao.entity.ChatSessionBean;
+import run.yigou.gxzy.data.local.entity.ChatMessageBean;
+import run.yigou.gxzy.data.local.entity.ChatSessionBean;
 import run.yigou.gxzy.data.remote.api.AiSessionIdApi;
 import run.yigou.gxzy.data.remote.api.AiStreamApi;
 import run.yigou.gxzy.sse.SseStreamCallback;

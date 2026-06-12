@@ -10,7 +10,7 @@ import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
-import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.manager.CacheDataManager;
 import run.yigou.gxzy.manager.ThreadPoolManager;

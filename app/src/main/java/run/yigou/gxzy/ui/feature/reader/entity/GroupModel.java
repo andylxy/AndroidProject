@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.model.DataItem;
-import run.yigou.gxzy.model.HH2SectionData;
+import run.yigou.gxzy.data.model.DataItem;
+import run.yigou.gxzy.data.model.HH2SectionData;
 
 import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.utils.DebugLog;
@@ -37,7 +37,7 @@ public class GroupModel {
         EasyLog.print("showMingCiList: " + (showMingCiList != null ? showMingCiList.size() + " items" : "null"));
         try {
             // 获取别名字典
-            run.yigou.gxzy.manager.GlobalDataHolder globalData = run.yigou.gxzy.manager.GlobalDataHolder.getInstance();
+            run.yigou.gxzy.base.GlobalDataHolder globalData = run.yigou.gxzy.base.GlobalDataHolder.getInstance();
             java.util.Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
             java.util.Map<String, String> fangAliasDict = globalData.getFangAliasDict();
 

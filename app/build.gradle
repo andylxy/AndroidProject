@@ -296,6 +296,6 @@ dependencies {
 
 greendao {
     schemaVersion 1
-    daoPackage 'run.yigou.gxzy.greendao.gen'
+    daoPackage 'run.yigou.gxzy.data.local.gen'
     targetGenDir 'src/main/java'
 }

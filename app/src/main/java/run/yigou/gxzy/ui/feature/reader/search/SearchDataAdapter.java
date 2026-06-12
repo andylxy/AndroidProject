@@ -21,18 +21,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import run.yigou.gxzy.greendao.entity.Chapter;
-import run.yigou.gxzy.model.MingCiContent;
-import run.yigou.gxzy.model.Yao;
+import run.yigou.gxzy.data.local.entity.Chapter;
+import run.yigou.gxzy.data.model.MingCiContent;
+import run.yigou.gxzy.data.model.Yao;
 import run.yigou.gxzy.ui.feature.reader.data.BookData;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
 import run.yigou.gxzy.ui.feature.reader.entity.GroupData;
 import run.yigou.gxzy.ui.feature.reader.entity.ItemData;
 import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
-import run.yigou.gxzy.model.DataItem;
-import run.yigou.gxzy.model.HH2SectionData;
+import run.yigou.gxzy.data.model.DataItem;
+import run.yigou.gxzy.data.model.HH2SectionData;
 import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
-import run.yigou.gxzy.manager.GlobalDataHolder;
+import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**

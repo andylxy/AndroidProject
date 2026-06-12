@@ -28,10 +28,10 @@ import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.base.args.FragmentSetting;
 
 import run.yigou.gxzy.base.constant.AppConst;
-import run.yigou.gxzy.greendao.entity.Book;
-import run.yigou.gxzy.greendao.entity.Chapter;
-import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.greendao.util.ConvertEntity;
+import run.yigou.gxzy.data.local.entity.Book;
+import run.yigou.gxzy.data.local.entity.Chapter;
+import run.yigou.gxzy.data.local.entity.TabNavBody;
+import run.yigou.gxzy.data.local.helper.ConvertEntity;
 import run.yigou.gxzy.ui.feature.reader.contract.TipsBookReadContract;
 import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.feature.reader.entity.GroupModel;
@@ -39,11 +39,11 @@ import run.yigou.gxzy.ui.feature.reader.data.BookData;
 import run.yigou.gxzy.ui.feature.reader.data.BookDataManager;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterIndexBuilder;
-import run.yigou.gxzy.manager.GlobalDataHolder;
+import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
 import run.yigou.gxzy.ui.feature.reader.manager.ChapterDownloadManager;
-import run.yigou.gxzy.model.DataItem;
-import run.yigou.gxzy.model.HH2SectionData;
+import run.yigou.gxzy.data.model.DataItem;
+import run.yigou.gxzy.data.model.HH2SectionData;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**
@@ -520,7 +520,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             }
             
             // 3. 获取全书别名映射（用于增强搜索）
-            run.yigou.gxzy.manager.GlobalDataHolder globalData = run.yigou.gxzy.manager.GlobalDataHolder.getInstance();
+            run.yigou.gxzy.base.GlobalDataHolder globalData = run.yigou.gxzy.base.GlobalDataHolder.getInstance();
             java.util.Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
             java.util.Map<String, String> fangAliasDict = globalData.getFangAliasDict();
             
@@ -744,7 +744,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         loadedBookFangs.add(currentBookId);
         
         // 【优化】先检查数据库是否已有方剂数据
-        ArrayList<run.yigou.gxzy.model.Fang> cachedFangList = 
+        ArrayList<run.yigou.gxzy.data.model.Fang> cachedFangList = 
             ConvertEntity.getFangDetailList(currentBookId);
         
         if (cachedFangList != null && !cachedFangList.isEmpty()) {
@@ -765,9 +765,9 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         EasyLog.print("TipsBookReadPresenter", "数据库无方剂数据，开始从网络下载");
         
         androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
-        repository.downloadBookFang(currentBookId, lifecycleOwner, new BookRepository.DataCallback<List<run.yigou.gxzy.model.Fang>>() {
+        repository.downloadBookFang(currentBookId, lifecycleOwner, new BookRepository.DataCallback<List<run.yigou.gxzy.data.model.Fang>>() {
             @Override
-            public void onSuccess(List<run.yigou.gxzy.model.Fang> data) {
+            public void onSuccess(List<run.yigou.gxzy.data.model.Fang> data) {
                 EasyLog.print("TipsBookReadPresenter", "药方数据网络下载完成: " + data.size() + " 个");
                 
                 // 【新架构】将方剂数据设置到BookData

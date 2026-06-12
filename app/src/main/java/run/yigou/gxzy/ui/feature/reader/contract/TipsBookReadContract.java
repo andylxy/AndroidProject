@@ -13,10 +13,10 @@ import android.content.Context;
 
 import java.util.List;
 
-import run.yigou.gxzy.greendao.entity.Chapter;
-import run.yigou.gxzy.greendao.entity.TabNavBody;
+import run.yigou.gxzy.data.local.entity.Chapter;
+import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
-import run.yigou.gxzy.model.HH2SectionData;
+import run.yigou.gxzy.data.model.HH2SectionData;
 
 /**
  * MVP 契约接口

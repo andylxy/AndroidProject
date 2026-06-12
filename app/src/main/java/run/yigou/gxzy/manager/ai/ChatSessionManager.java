@@ -8,10 +8,10 @@ import android.text.TextUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import run.yigou.gxzy.greendao.entity.ChatMessageBean;
-import run.yigou.gxzy.greendao.entity.ChatSessionBean;
-import run.yigou.gxzy.greendao.entity.ChatSummaryBean;
-import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.data.local.entity.ChatMessageBean;
+import run.yigou.gxzy.data.local.entity.ChatSessionBean;
+import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
+import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.crypto.SecurityUtils;

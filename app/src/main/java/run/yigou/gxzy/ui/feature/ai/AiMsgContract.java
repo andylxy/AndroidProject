@@ -3,8 +3,8 @@ package run.yigou.gxzy.ui.feature.ai;
 import java.util.List;
 
 import androidx.lifecycle.LifecycleOwner;
-import run.yigou.gxzy.greendao.entity.ChatMessageBean;
-import run.yigou.gxzy.greendao.entity.ChatSessionBean;
+import run.yigou.gxzy.data.local.entity.ChatMessageBean;
+import run.yigou.gxzy.data.local.entity.ChatSessionBean;
 
 public interface AiMsgContract {
 

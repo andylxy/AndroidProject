@@ -29,7 +29,7 @@ import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.ui.home.HomeFragment;
-import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.UpdateImageApi;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.data.remote.model.HttpData;

@@ -23,7 +23,7 @@ import android.os.Looper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import run.yigou.gxzy.greendao.entity.ChatMessageBean;
+import run.yigou.gxzy.data.local.entity.ChatMessageBean;
 import timber.log.Timber;
 
 public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {

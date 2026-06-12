@@ -1,7 +1,7 @@
 package run.yigou.gxzy.ui.feature.reader.helper;
 
-import run.yigou.gxzy.model.DataItem;
-import run.yigou.gxzy.model.HH2SectionData;
+import run.yigou.gxzy.data.model.DataItem;
+import run.yigou.gxzy.data.model.HH2SectionData;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;

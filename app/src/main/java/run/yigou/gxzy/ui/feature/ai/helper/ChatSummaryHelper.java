@@ -14,9 +14,9 @@ import java.util.List;
 
 import io.noties.markwon.Markwon;
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.greendao.entity.ChatMessageBean;
-import run.yigou.gxzy.greendao.entity.ChatSessionBean;
-import run.yigou.gxzy.greendao.entity.ChatSummaryBean;
+import run.yigou.gxzy.data.local.entity.ChatMessageBean;
+import run.yigou.gxzy.data.local.entity.ChatSessionBean;
+import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
 import run.yigou.gxzy.manager.ai.AiChatManager;
 import run.yigou.gxzy.manager.ai.ChatSessionManager;
 import run.yigou.gxzy.ui.dialog.ChatSummaryListDialog;

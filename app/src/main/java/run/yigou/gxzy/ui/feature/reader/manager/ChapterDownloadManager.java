@@ -9,8 +9,8 @@
 
 package run.yigou.gxzy.ui.feature.reader.manager;
 
-import run.yigou.gxzy.model.DataItem;
-import run.yigou.gxzy.model.HH2SectionData;
+import run.yigou.gxzy.data.model.DataItem;
+import run.yigou.gxzy.data.model.HH2SectionData;
 
 import androidx.lifecycle.LifecycleOwner;
 import com.hjq.http.EasyHttp;
@@ -26,9 +26,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import run.yigou.gxzy.greendao.entity.Chapter;
-import run.yigou.gxzy.greendao.util.ConvertEntity;
-import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.data.local.entity.Chapter;
+import run.yigou.gxzy.data.local.helper.ConvertEntity;
+import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.ChapterContentApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.utils.DebugLog;

@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import run.yigou.gxzy.greendao.entity.Chapter;
+import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**

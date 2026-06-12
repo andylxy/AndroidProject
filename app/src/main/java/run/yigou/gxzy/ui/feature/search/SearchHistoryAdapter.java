@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.greendao.entity.SearchHistory;
+import run.yigou.gxzy.data.local.entity.SearchHistory;
 
 /**
  *  作者:  zhs

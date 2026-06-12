@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.greendao.entity.ChatMessageBean;
-import run.yigou.gxzy.greendao.entity.ChatSessionBean;
+import run.yigou.gxzy.data.local.entity.ChatMessageBean;
+import run.yigou.gxzy.data.local.entity.ChatSessionBean;
 import run.yigou.gxzy.manager.ai.ChatSessionManager;
 import run.yigou.gxzy.ui.feature.ai.adapter.ChatHistoryAdapter;
 import run.yigou.gxzy.utils.DateHelper;

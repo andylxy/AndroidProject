@@ -1,7 +1,7 @@
 package run.yigou.gxzy.ui.feature.reader.helper;
 
-import run.yigou.gxzy.model.DataItem;
-import run.yigou.gxzy.model.HH2SectionData;
+import run.yigou.gxzy.data.model.DataItem;
+import run.yigou.gxzy.data.model.HH2SectionData;
 
 import android.app.Activity;
 import android.content.Context;
@@ -26,12 +26,12 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import run.yigou.gxzy.ui.dialog.MenuDialog;
-import run.yigou.gxzy.model.Fang;
-import run.yigou.gxzy.model.Yao;
+import run.yigou.gxzy.data.model.Fang;
+import run.yigou.gxzy.data.model.Yao;
 import run.yigou.gxzy.ui.feature.reader.data.BookData;
 import run.yigou.gxzy.ui.feature.reader.data.BookDataManager;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
-import run.yigou.gxzy.manager.GlobalDataHolder;
+import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.ui.feature.reader.entity.GroupData;
 import run.yigou.gxzy.ui.feature.reader.entity.ItemData;
 import run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity;

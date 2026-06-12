@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.greendao.entity.ChatSummaryBean;
+import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
 
 /**
  * 会话总结列表适配器

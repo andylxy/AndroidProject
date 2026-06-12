@@ -20,7 +20,7 @@ import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.greendao.entity.TabNavBody;
+import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.remote.api.BookInfoNav;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.app.AppConfig;

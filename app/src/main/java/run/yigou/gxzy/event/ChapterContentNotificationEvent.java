@@ -1,6 +1,6 @@
 package run.yigou.gxzy.event;
 
-import run.yigou.gxzy.model.HH2SectionData;
+import run.yigou.gxzy.data.model.HH2SectionData;
 
 public class ChapterContentNotificationEvent {
 

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import run.yigou.gxzy.model.DataItem;
+import run.yigou.gxzy.data.model.DataItem;
 
 /**
  * 章节数据（优化版）

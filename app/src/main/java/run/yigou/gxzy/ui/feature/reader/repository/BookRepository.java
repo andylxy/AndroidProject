@@ -18,24 +18,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import run.yigou.gxzy.greendao.entity.Book;
-import run.yigou.gxzy.greendao.entity.Chapter;
-import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.greendao.gen.BookDao;
-import run.yigou.gxzy.greendao.gen.ChapterDao;
-import run.yigou.gxzy.greendao.util.ConvertEntity;
-import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.data.local.entity.Book;
+import run.yigou.gxzy.data.local.entity.Chapter;
+import run.yigou.gxzy.data.local.entity.TabNavBody;
+import run.yigou.gxzy.data.local.gen.BookDao;
+import run.yigou.gxzy.data.local.gen.ChapterDao;
+import run.yigou.gxzy.data.local.helper.ConvertEntity;
+import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.BookFangApi;
 import run.yigou.gxzy.data.remote.api.ChapterContentApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
-import run.yigou.gxzy.model.Fang;
+import run.yigou.gxzy.data.model.Fang;
 import run.yigou.gxzy.ui.feature.reader.data.BookData;
 import run.yigou.gxzy.ui.feature.reader.data.BookDataManager;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
 import run.yigou.gxzy.ui.feature.reader.data.DataConverter;
-import run.yigou.gxzy.manager.GlobalDataHolder;
-import run.yigou.gxzy.model.DataItem;
-import run.yigou.gxzy.model.HH2SectionData;
+import run.yigou.gxzy.base.GlobalDataHolder;
+import run.yigou.gxzy.data.model.DataItem;
+import run.yigou.gxzy.data.model.HH2SectionData;
 import run.yigou.gxzy.utils.DebugLog;
 
 
@@ -421,7 +421,7 @@ public class BookRepository {
     private void loadFangDataToBookData(BookData bookData, int bookId) {
         try {
             // ??????????
-            ArrayList<run.yigou.gxzy.model.Fang> fangList = ConvertEntity.getFangDetailList(bookId);
+            ArrayList<run.yigou.gxzy.data.model.Fang> fangList = ConvertEntity.getFangDetailList(bookId);
             
             EasyLog.print("BookRepository", "??????: bookId=" + bookId + 
                 ", fangSize=" + (fangList != null ? fangList.size() : 0));

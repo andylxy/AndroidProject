@@ -16,15 +16,15 @@ import run.yigou.gxzy.log.EasyLog;
 import java.util.ArrayList;
 import java.util.Map;
 
-import run.yigou.gxzy.greendao.entity.TabNav;
-import run.yigou.gxzy.greendao.entity.TabNavBody;
-import run.yigou.gxzy.greendao.entity.ZhongYaoAlia;
-import run.yigou.gxzy.greendao.util.ConvertEntity;
-import run.yigou.gxzy.greendao.util.DbService;
-import run.yigou.gxzy.model.MingCiContent;
-import run.yigou.gxzy.model.Yao;
-import run.yigou.gxzy.model.Fang;
-import run.yigou.gxzy.manager.GlobalDataHolder;
+import run.yigou.gxzy.data.local.entity.TabNav;
+import run.yigou.gxzy.data.local.entity.TabNavBody;
+import run.yigou.gxzy.data.local.entity.ZhongYaoAlia;
+import run.yigou.gxzy.data.local.helper.ConvertEntity;
+import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.model.MingCiContent;
+import run.yigou.gxzy.data.model.Yao;
+import run.yigou.gxzy.data.model.Fang;
+import run.yigou.gxzy.base.GlobalDataHolder;
 
 /**
  * 应用数据初始化器

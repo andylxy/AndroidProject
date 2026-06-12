@@ -11,10 +11,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.TitleBarFragment;
-import run.yigou.gxzy.greendao.entity.Book;
-import run.yigou.gxzy.greendao.gen.BookDao;
-import run.yigou.gxzy.greendao.service.BookService;
-import run.yigou.gxzy.greendao.util.DbService;
+import run.yigou.gxzy.data.local.entity.Book;
+import run.yigou.gxzy.data.local.gen.BookDao;
+import run.yigou.gxzy.data.local.service.BookService;
+import run.yigou.gxzy.data.local.helper.DbService;
 
 import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.ui.feature.reader.activity.TipsFragmentActivity;

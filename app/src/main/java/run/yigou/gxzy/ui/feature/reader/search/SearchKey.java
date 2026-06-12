@@ -3,7 +3,7 @@ package run.yigou.gxzy.ui.feature.reader.search;
 import java.util.ArrayList;
 
 import run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity;
-import run.yigou.gxzy.model.HH2SectionData;
+import run.yigou.gxzy.data.model.HH2SectionData;
 
 public class SearchKey extends SearchKeyEntity {
     private String bookName;

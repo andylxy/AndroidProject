@@ -14,7 +14,7 @@ import run.yigou.gxzy.log.EasyLog;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.greendao.entity.Book;
+import run.yigou.gxzy.data.local.entity.Book;
 import run.yigou.gxzy.data.remote.model.ChapterSearchRes;
 import run.yigou.gxzy.data.remote.model.SearchKeyText;
 import run.yigou.gxzy.ui.feature.reader.activity.BookContentSearchActivity;
