@@ -12,13 +12,13 @@ import okhttp3.Call;
  *    author : Android ???
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2018/10/18
- *    desc   : Fragment ????
+ *    desc   : Fragment 基类
  */
 public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A>
         implements ToastAction, OnHttpListener<Object> {
 
     /**
-     * ?????????????
+     * 是否显示加载对话框
      */
     public boolean isShowDialog() {
         A activity = getAttachActivity();
@@ -29,7 +29,7 @@ public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A>
     }
 
     /**
-     * ???????
+     * 显示加载对话框
      */
     public void showDialog() {
         A activity = getAttachActivity();
@@ -40,7 +40,7 @@ public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A>
     }
 
     /**
-     * ???????
+     * 显示加载对话框
      */
     public void hideDialog() {
         A activity = getAttachActivity();

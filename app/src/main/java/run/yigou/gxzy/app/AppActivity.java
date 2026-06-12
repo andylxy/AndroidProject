@@ -25,30 +25,30 @@ import okhttp3.Call;
  *    author : Android ???
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2018/10/18
- *    desc   : Activity ????
+ *    desc   : Activity 基类
  */
 public abstract class AppActivity extends BaseActivity
         implements ToastAction, TitleBarAction, OnHttpListener<Object> {
 
-    /** ????? */
+    /** 标题栏 */
     private TitleBar mTitleBar;
-    /** ????? */
+    /** 沉浸式状态栏 */
     private ImmersionBar mImmersionBar;
 
-    /** ????? */
+    /** 等待对话框 */
     private BaseDialog mDialog;
-    /** ????? */
+    /** 加载对话框 */
     private int mDialogCount;
 
     /**
-     * ?????????????
+     * 是否显示加载对话框
      */
     public boolean isShowDialog() {
         return mDialog != null && mDialog.isShowing();
     }
 
     /**
-     * ???????
+     * 显示加载对话框
      */
     public void showDialog() {
         if (isFinishing() || isDestroyed()) {
@@ -73,7 +73,7 @@ public abstract class AppActivity extends BaseActivity
     }
 
     /**
-     * ???????
+     * 显示加载对话框
      */
     public void hideDialog() {
         if (isFinishing() || isDestroyed()) {
@@ -99,11 +99,11 @@ public abstract class AppActivity extends BaseActivity
             getTitleBar().setOnTitleBarListener(this);
         }
 
-        // ?????????
+        // ，延迟?
         if (isStatusBarEnabled()) {
             getStatusBarConfig().init();
 
-            // ???????
+            // 显示加载对话框
             if (getTitleBar() != null) {
                 ImmersionBar.setTitleBar(this, getTitleBar());
             }
@@ -111,21 +111,21 @@ public abstract class AppActivity extends BaseActivity
     }
 
     /**
-     * ??????????
+     * ，延迟??
      */
     protected boolean isStatusBarEnabled() {
         return true;
     }
 
     /**
-     * ?????????
+     * 状态栏字体是否为深色
      */
     protected boolean isStatusBarDarkFont() {
         return true;
     }
 
     /**
-     * ????????????
+     * 获取状态栏配置
      */
     @NonNull
     public ImmersionBar getStatusBarConfig() {
@@ -136,21 +136,21 @@ public abstract class AppActivity extends BaseActivity
     }
 
     /**
-     * ?????????
+     * 创建状态栏配置
      */
     @NonNull
     protected ImmersionBar createStatusBarConfig() {
         return ImmersionBar.with(this)
-                // ????????????
+                // 默认使用深色字体
                 .statusBarDarkFont(isStatusBarDarkFont())
-                // ?????????
+                // 设置导航栏颜色为白色
                 .navigationBarColor(R.color.white)
-                // ??????????????????????????????????????
+                // 自动适配深色模式
                 .autoDarkModeEnable(true, 0.2f);
     }
 
     /**
-     * ????????
+     * 设置标题（字符串资源）
      */
     @Override
     public void setTitle(@StringRes int id) {
@@ -158,7 +158,7 @@ public abstract class AppActivity extends BaseActivity
     }
 
     /**
-     * ????????
+     * 设置标题（字符串文本）
      */
     @Override
     public void setTitle(CharSequence title) {
@@ -224,9 +224,9 @@ public abstract class AppActivity extends BaseActivity
         onEnd((Call) null);
     }
 
-    // ????????? override ???
+    // ，延迟? override ???
     public void onStart(Call call) {
-        // showDialog(); // ??? onHttpStart ??
+        // showDialog(); // 已在 onHttpStart 中调用
     }
 
     public void onSucceed(Object result) {
@@ -238,7 +238,7 @@ public abstract class AppActivity extends BaseActivity
     }
 
     public void onEnd(Call call) {
-        // hideDialog(); // ??? onHttpEnd ??
+        // hideDialog(); // 已在 onHttpEnd 中调用
     }
 
     @Override
