@@ -6,7 +6,7 @@ import android.content.Intent;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.ui.guide.SplashActivity;
+import run.yigou.gxzy.ui.home.SplashActivity;
 import run.yigou.gxzy.ui.home.HomeActivity;
 
 /**

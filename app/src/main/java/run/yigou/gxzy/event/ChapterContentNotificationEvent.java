@@ -5,13 +5,13 @@ import run.yigou.gxzy.data.model.HH2SectionData;
 public class ChapterContentNotificationEvent {
 
     private int groupPosition;
-    // ???id
+    // 书籍 ID
     private int bookId;
-    // ??????
+    // 章节段落号
     private int chapterSection;
-    // ??????
+    // 章节标题
     private String chapterHeader;
-    // ???id
+    // 签名 ID
     private Long signatureId;
 
     public HH2SectionData getData() {

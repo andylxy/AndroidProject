@@ -19,14 +19,12 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.base.constant.AppConst;
-import run.yigou.gxzy.ui.feature.reader.TipsFangYaoAdapter;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.feature.reader.data.BookData;
 import run.yigou.gxzy.ui.feature.reader.data.BookDataManager;
 import run.yigou.gxzy.ui.feature.reader.data.ChapterData;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.data.model.DataItem;
-import run.yigou.gxzy.utils.DebugLog;
 
 
 public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {

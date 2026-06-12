@@ -5,7 +5,6 @@ import android.view.View;
 
 import com.hjq.base.BaseDialog;
 
-import run.yigou.gxzy.event.LoginEvent;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
@@ -20,15 +19,13 @@ import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.dialog.SafeDialog;
 import run.yigou.gxzy.ui.dialog.UpdateDialog;
 import run.yigou.gxzy.ui.home.HomeFragment;
-import run.yigou.gxzy.ui.feature.account.MyFragmentPersonal;
-import run.yigou.gxzy.ui.feature.account.PhoneResetActivity;
-import run.yigou.gxzy.ui.feature.account.PasswordResetActivity;
+import run.yigou.gxzy.ui.account.PhoneResetActivity;
+import run.yigou.gxzy.ui.account.PasswordResetActivity;
 import run.yigou.gxzy.ui.home.HomeActivity;
 
 import com.hjq.permissions.XXPermissions;
 import com.hjq.widget.layout.SettingBar;
 import com.hjq.widget.view.SwitchButton;
-import com.lucas.xbus.XEventBus;
 
 /**
  * author : Android ???

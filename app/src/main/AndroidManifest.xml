@@ -62,7 +62,7 @@
 
         <!-- 闪屏页（程序入口） -->
         <activity
-            android:name=".ui.guide.SplashActivity"
+            android:name=".ui.home.SplashActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -112,13 +112,13 @@
 
         <!-- 登录页 -->
         <activity
-            android:name=".ui.feature.account.LoginActivity"
+            android:name=".ui.account.LoginActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
         <!-- 注册页 -->
         <activity
-            android:name=".ui.feature.account.RegisterActivity"
+            android:name=".ui.account.RegisterActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
@@ -144,7 +144,7 @@
 
         <!-- 忘记密码 -->
         <activity
-            android:name=".ui.feature.account.PasswordForgetActivity"
+            android:name=".ui.account.PasswordForgetActivity"
             android:label="@string/password_forget_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -152,7 +152,7 @@
 
         <!-- 重置密码 -->
         <activity
-            android:name=".ui.feature.account.PasswordResetActivity"
+            android:name=".ui.account.PasswordResetActivity"
             android:label="@string/password_reset_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -160,14 +160,14 @@
 
         <!-- 更换手机 -->
         <activity
-            android:name=".ui.feature.account.PhoneResetActivity"
+            android:name=".ui.account.PhoneResetActivity"
             android:label="@string/phone_reset_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
         <!-- 汉制单位 -->
         <activity
-            android:name=".ui.feature.reader.YaoUintActivity"
+            android:name=".ui.feature.reader.fragment.YaoUintActivity"
             android:label="@string/yao_unit_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
@@ -180,7 +180,7 @@
             android:screenOrientation="portrait" />
         <!-- 个人资料 -->
         <activity
-            android:name=".ui.feature.account.PersonalDataActivity"
+            android:name=".ui.account.PersonalDataActivity"
             android:label="@string/personal_data_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
@@ -194,52 +194,52 @@
 
         <!-- 拍照选择 -->
         <activity
-            android:name=".ui.feature.media.activity.CameraActivity"
+            android:name=".ui.media.activity.CameraActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <!-- 图片裁剪 -->
         <activity
-            android:name=".ui.feature.media.activity.ImageCropActivity"
+            android:name=".ui.media.activity.ImageCropActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <!-- 图片选择 -->
         <activity
-            android:name=".ui.feature.media.activity.ImageSelectActivity"
+            android:name=".ui.media.activity.ImageSelectActivity"
             android:label="@string/image_select_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <!-- 查看大图 -->
         <activity
-            android:name=".ui.feature.media.activity.ImagePreviewActivity"
+            android:name=".ui.media.activity.ImagePreviewActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <!-- 播放视频（自适应方向） -->
         <activity
-            android:name=".ui.feature.media.activity.VideoPlayActivity"
+            android:name=".ui.media.activity.VideoPlayActivity"
             android:launchMode="singleTop"
             android:theme="@style/FullScreenTheme" />
 
         <!-- 播放视频（竖屏方向） -->
         <activity
-            android:name=".ui.feature.media.activity.VideoPlayActivity$Portrait"
+            android:name=".ui.media.activity.VideoPlayActivity$Portrait"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/FullScreenTheme" />
 
         <!-- 播放视频（横屏方向） -->
         <activity
-            android:name=".ui.feature.media.activity.VideoPlayActivity$Landscape"
+            android:name=".ui.media.activity.VideoPlayActivity$Landscape"
             android:launchMode="singleTop"
             android:screenOrientation="landscape"
             android:theme="@style/FullScreenTheme" />
 
         <!-- 选择视频 -->
         <activity
-            android:name=".ui.feature.media.activity.VideoSelectActivity"
+            android:name=".ui.media.activity.VideoSelectActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 

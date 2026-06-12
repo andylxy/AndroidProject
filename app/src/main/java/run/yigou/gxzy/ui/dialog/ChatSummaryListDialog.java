@@ -18,7 +18,7 @@ import io.noties.markwon.Markwon;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
 import run.yigou.gxzy.data.local.helper.DbService;
-import run.yigou.gxzy.ui.feature.ai.adapter.ChatSummaryAdapter;
+import run.yigou.gxzy.ui.feature.reader.ai.adapter.ChatSummaryAdapter;
 
 /**
  * 会话总结列表对话框

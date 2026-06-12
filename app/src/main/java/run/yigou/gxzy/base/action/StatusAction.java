@@ -17,17 +17,17 @@ import com.hjq.widget.layout.StatusLayout;
  *    author : Android ?????
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2019/12/08
- *    desc   : ??????????
+ *    desc   : 状态布局管理接口
  */
 public interface StatusAction {
 
     /**
-     * ??????????
+     * 获取状态布局
      */
     StatusLayout getStatusLayout();
 
     /**
-     * ????????
+     * 显示加载中
      */
     default void showLoading() {
         showLoading(R.raw.loading);
@@ -42,7 +42,7 @@ public interface StatusAction {
     }
 
     /**
-     * ?????????
+     * 显示完成（隐藏状态布局）
      */
     default void showComplete() {
         StatusLayout layout = getStatusLayout();
@@ -53,14 +53,15 @@ public interface StatusAction {
     }
 
     /**
-     * ????????
+     * 显示空数据
      */
     default void showEmpty() {
         showLayout(R.drawable.status_empty_ic, R.string.status_layout_no_data, null);
     }
 
     /**
-     * ?????????
+     * 显示错误状态
+     * 自动检测网络连接，网络异常时显示网络错误，否则显示请求错误
      */
     default void showError(StatusLayout.OnRetryListener listener) {
         StatusLayout layout = getStatusLayout();
@@ -68,7 +69,7 @@ public interface StatusAction {
         ConnectivityManager manager = ContextCompat.getSystemService(context, ConnectivityManager.class);
         if (manager != null) {
             NetworkInfo info = manager.getActiveNetworkInfo();
-            // ????????????
+            // 网络未连接时显示网络错误
             if (info == null || !info.isConnected()) {
                 showLayout(R.drawable.status_network_ic, R.string.status_layout_error_network, listener);
                 return;
@@ -78,7 +79,7 @@ public interface StatusAction {
     }
 
     /**
-     * ???????????
+     * 显示自定义状态布局
      */
     default void showLayout(@DrawableRes int drawableId, @StringRes int stringId, StatusLayout.OnRetryListener listener) {
         StatusLayout layout = getStatusLayout();

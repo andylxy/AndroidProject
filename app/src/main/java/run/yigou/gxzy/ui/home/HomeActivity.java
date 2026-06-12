@@ -21,11 +21,10 @@ import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.manager.ActivityManager;
 import com.hjq.base.DoubleClickHelper;
-import run.yigou.gxzy.ui.home.NavigationAdapter;
-import run.yigou.gxzy.ui.feature.ai.AiMsgFragment;
-import run.yigou.gxzy.ui.feature.bookshelf.BookCollectCaseFragment;
-import run.yigou.gxzy.ui.home.HomeFragment;
-import run.yigou.gxzy.ui.feature.account.MyFragmentPersonal;
+
+import run.yigou.gxzy.ui.feature.reader.ai.AiMsgFragment;
+import run.yigou.gxzy.ui.feature.reader.fragment.BookCollectCaseFragment;
+import run.yigou.gxzy.ui.account.MyFragmentPersonal;
 
 /**
  * 首页Activity

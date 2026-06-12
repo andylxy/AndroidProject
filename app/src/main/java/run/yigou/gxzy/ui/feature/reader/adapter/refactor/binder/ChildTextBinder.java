@@ -20,16 +20,15 @@ import androidx.annotation.Nullable;
 
 import run.yigou.gxzy.log.EasyLog;
 
-import run.yigou.gxzy.ui.feature.reader.adapter.refactor.image.ImageLoader;
+import run.yigou.gxzy.ui.media.image.ImageLoader;
 import run.yigou.gxzy.ui.feature.reader.adapter.refactor.model.ItemData;
-import run.yigou.gxzy.ui.feature.reader.adapter.refactor.utils.SpannableStringCache;
-import run.yigou.gxzy.ui.feature.reader.adapter.refactor.utils.TextViewHelper;
+import run.yigou.gxzy.utils.SpannableStringCache;
+import run.yigou.gxzy.utils.TextViewHelper;
 import run.yigou.gxzy.ui.feature.reader.adapter.refactor.viewholder.TipsChildViewHolder;
 import run.yigou.gxzy.ui.feature.reader.entity.ChildEntity;
 import run.yigou.gxzy.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.app.AppConfig;
-import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * Child文本绑定器

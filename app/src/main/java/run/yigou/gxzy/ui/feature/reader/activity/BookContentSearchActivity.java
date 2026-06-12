@@ -3,22 +3,17 @@ package run.yigou.gxzy.ui.feature.reader.activity;
 import android.content.Intent;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
-import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BaseAdapter;
-import run.yigou.gxzy.log.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 
@@ -28,7 +23,6 @@ import java.util.Map;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.base.args.FragmentSetting;
 import run.yigou.gxzy.data.local.entity.SearchHistory;
@@ -37,8 +31,8 @@ import run.yigou.gxzy.data.local.service.SearchHistoryService;
 import run.yigou.gxzy.data.local.service.TabNavBodyService;
 import run.yigou.gxzy.data.local.helper.ConvertEntity;
 import run.yigou.gxzy.data.local.helper.DbService;
-import run.yigou.gxzy.ui.feature.search.SearchBookAdapter;
-import run.yigou.gxzy.ui.feature.search.SearchHistoryAdapter;
+import run.yigou.gxzy.ui.feature.search.adapter.SearchBookAdapter;
+import run.yigou.gxzy.ui.feature.search.adapter.SearchHistoryAdapter;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.feature.reader.search.SearchKey;
 import run.yigou.gxzy.ui.feature.reader.adapter.refactor.RefactoredSearchAdapter;
@@ -49,7 +43,6 @@ import run.yigou.gxzy.ui.feature.reader.entity.SearchKeyEntity;
 import run.yigou.gxzy.data.model.HH2SectionData;
 import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
-import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 

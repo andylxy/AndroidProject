@@ -21,9 +21,8 @@ import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import run.yigou.gxzy.log.EasyLog;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.ui.feature.reader.adapter.refactor.utils.TextViewHelper;
+import run.yigou.gxzy.utils.TextViewHelper;
 import run.yigou.gxzy.ui.feature.reader.entity.ChildEntity;
-import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * Tips子项ViewHolder

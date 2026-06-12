@@ -8,7 +8,7 @@ import com.hjq.toast.Toaster;
  *    author : Android ?????
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2019/12/08
- *    desc   : ??????
+ *    desc   : Toast 提示接口
  */
 public interface ToastAction {
 

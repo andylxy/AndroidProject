@@ -1,6 +1,5 @@
 package run.yigou.gxzy.ui.feature.reader.fragment;
 
-import android.content.SharedPreferences;
 import android.view.View;
 
 import com.hjq.widget.layout.SettingBar;
@@ -17,8 +16,6 @@ import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.base.args.BookArgs;
 import run.yigou.gxzy.base.args.FragmentSetting;
 import run.yigou.gxzy.base.args.ManagerSetting;
-import run.yigou.gxzy.ui.feature.reader.YaoUintActivity;
-import run.yigou.gxzy.utils.DebugLog;
 
 
 public final class TipsSettingFragment extends AppFragment<AppActivity> implements SwitchButton.OnCheckedChangeListener {

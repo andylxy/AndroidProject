@@ -1,7 +1,8 @@
 package run.yigou.gxzy.event;
 
 /**
- *  ??????????????????
+ * Tips 片段设置事件通知
+ * 用于通知伤寒论、金匮要略、书解等模块的设置变更
  */
 public class TipsFragmentSettingEventNotification {
 

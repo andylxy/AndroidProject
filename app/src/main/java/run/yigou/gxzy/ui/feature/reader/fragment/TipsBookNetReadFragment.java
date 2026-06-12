@@ -11,10 +11,8 @@
 package run.yigou.gxzy.ui.feature.reader.fragment;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
-import android.content.Intent;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -52,19 +50,15 @@ import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.gen.ChapterDao;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
-import run.yigou.gxzy.ui.feature.bookshelf.BookCollectCaseFragment;
 import run.yigou.gxzy.ui.feature.reader.adapter.refactor.RefactoredExpandableAdapter;
 import run.yigou.gxzy.ui.feature.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.feature.reader.entity.GroupModel;
 import run.yigou.gxzy.data.model.HH2SectionData;
 import run.yigou.gxzy.ui.feature.reader.helper.TipsNetHelper;
-import run.yigou.gxzy.ui.feature.reader.search.SearchCoordinator;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.ui.feature.reader.manager.ChapterDownloadManager;
 import run.yigou.gxzy.ui.feature.reader.contract.TipsBookReadContract;
 import run.yigou.gxzy.ui.feature.reader.presenter.TipsBookReadPresenter;
-import run.yigou.gxzy.ui.feature.reader.repository.BookRepository;
-import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 

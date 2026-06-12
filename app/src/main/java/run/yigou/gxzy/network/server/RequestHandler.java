@@ -8,16 +8,14 @@ import android.net.Network;
 import android.net.NetworkInfo;
 import android.os.Build;
 
-import androidx.lifecycle.LifecycleOwner;
-
 import com.google.gson.JsonSyntaxException;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.ActivityManager;
-import run.yigou.gxzy.ui.feature.account.LoginActivity;
+import run.yigou.gxzy.ui.account.LoginActivity;
 import com.hjq.gson.factory.GsonFactory;
 import run.yigou.gxzy.log.EasyLog;
-import com.hjq.http.config.IRequestApi;
+
 import com.hjq.http.request.HttpRequest;
 import com.hjq.http.exception.CancelException;
 import com.hjq.http.config.IRequestHandler;

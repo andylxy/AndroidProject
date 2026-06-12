@@ -14,7 +14,7 @@ import com.hjq.bar.TitleBar;
  *    author : Android ?????
  *    github : https://github.com/getActivity/AndroidProject
  *    time   : 2019/12/08
- *    desc   : ????????
+ *    desc   : 标题栏操作接口
  */
 public interface TitleBarAction extends OnTitleBarListener {
 
@@ -22,31 +22,31 @@ public interface TitleBarAction extends OnTitleBarListener {
     TitleBar getTitleBar();
 
     /**
-     * ????????
+     * 标题栏左侧点击事件
      *
-     * @param view     ?????????View
+     * @param view     被点击的 View
      */
     @Override
     default void onLeftClick(View view) {}
 
     /**
-     * ????????
+     * 标题栏标题点击事件
      *
-     * @param view     ?????????View
+     * @param view     被点击的 View
      */
     @Override
     default void onTitleClick(View view) {}
 
     /**
-     * ????????
+     * 标题栏右侧点击事件
      *
-     * @param view     ?????????View
+     * @param view     被点击的 View
      */
     @Override
     default void onRightClick(View view) {}
 
     /**
-     * ????????????
+     * 设置标题栏标题（字符串资源）
      */
     default void setTitle(@StringRes int id) {
         if (getTitleBar() != null) {
@@ -55,7 +55,7 @@ public interface TitleBarAction extends OnTitleBarListener {
     }
 
     /**
-     * ????????????
+     * 设置标题（字符串文本）
      */
     default void setTitle(CharSequence title) {
         if (getTitleBar() != null) {
@@ -64,7 +64,7 @@ public interface TitleBarAction extends OnTitleBarListener {
     }
 
     /**
-     * ??????????????
+     * 设置标题栏左侧标题（字符串资源）
      */
     default void setLeftTitle(int id) {
         if (getTitleBar() != null) {
@@ -86,7 +86,7 @@ public interface TitleBarAction extends OnTitleBarListener {
     }
 
     /**
-     * ??????????????
+     * 设置标题栏右侧标题（字符串资源）
      */
     default void setRightTitle(int id) {
         if (getTitleBar() != null) {
@@ -108,7 +108,7 @@ public interface TitleBarAction extends OnTitleBarListener {
     }
 
     /**
-     * ??????????????
+     * 设置标题栏左侧图标（字符串资源）
      */
     default void setLeftIcon(int id) {
         if (getTitleBar() != null) {
@@ -131,7 +131,7 @@ public interface TitleBarAction extends OnTitleBarListener {
     }
 
     /**
-     * ??????????????
+     * 设置标题栏右侧图标（字符串资源）
      */
     default void setRightIcon(int id) {
         if (getTitleBar() != null) {

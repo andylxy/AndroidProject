@@ -12,9 +12,9 @@ package run.yigou.gxzy.ui.feature.reader.adapter.refactor.binder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import run.yigou.gxzy.ui.feature.reader.adapter.refactor.image.ImageLoader;
+import run.yigou.gxzy.ui.media.image.ImageLoader;
 import run.yigou.gxzy.ui.feature.reader.adapter.refactor.state.ExpandStateManager;
-import run.yigou.gxzy.ui.feature.reader.adapter.refactor.utils.SpannableStringCache;
+import run.yigou.gxzy.utils.SpannableStringCache;
 
 /**
  * Binder工厂

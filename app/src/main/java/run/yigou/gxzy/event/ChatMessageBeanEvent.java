@@ -10,8 +10,8 @@ public class ChatMessageBeanEvent {
     }
 
     /**
-     *   ??????????????
-     * @param assistantName false ?????true ?????
+     * 设置是否显示 AI 助手名称
+     * @param assistantName false 不显示助手名称, true 显示助手名称
      */
     public ChatMessageBeanEvent setAssistantName(boolean assistantName) {
         this.assistantName = assistantName;
@@ -23,9 +23,9 @@ public class ChatMessageBeanEvent {
     }
 
     /**
-     * ????????????
-     * @param clear false:?????true:???
-     * @return ChatMessageBeanEvent???
+     * 设置是否清除聊天消息
+     * @param clear false: 不清除, true: 清除
+     * @return ChatMessageBeanEvent 当前实例
      */
     public ChatMessageBeanEvent setClear(boolean clear) {
         isClear = clear;
