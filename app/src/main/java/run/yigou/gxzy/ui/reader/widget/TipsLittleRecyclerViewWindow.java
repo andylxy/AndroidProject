@@ -1,7 +1,6 @@
 package run.yigou.gxzy.ui.reader.widget;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +18,6 @@ import run.yigou.gxzy.tips.widget.TipsLittleWindow;
 import run.yigou.gxzy.ui.reader.adapter.RefactoredPopupAdapter;
 import run.yigou.gxzy.ui.reader.entity.GroupData;
 import run.yigou.gxzy.ui.reader.entity.ItemData;
-import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * RecyclerView弹窗中间基类
