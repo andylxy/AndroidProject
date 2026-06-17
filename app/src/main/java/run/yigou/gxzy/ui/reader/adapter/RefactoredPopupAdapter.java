@@ -1,3 +1,10 @@
+/*
+ * 项目名: AndroidProject
+ * 类名: RefactoredPopupAdapter.java
+ * 包名: run.yigou.gxzy.ui.reader.adapter
+ * 描述: 重构后的弹窗适配器 - 弹窗场景专用
+ */
+
 package run.yigou.gxzy.ui.reader.adapter;
 
 import android.content.Context;
@@ -67,7 +74,9 @@ public class RefactoredPopupAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private void buildPositionMappings() {
         positionMappings.clear();
 
-        for (int groupIndex = 0; groupIndex < groupDataList.size(); groupIndex++) {
+        // 边界保护：取两个列表的最小长度，避免数据不一致时越界
+        int groupCount = Math.min(groupDataList.size(), itemDataList.size());
+        for (int groupIndex = 0; groupIndex < groupCount; groupIndex++) {
             // 添加Header
             positionMappings.add(new PositionMapping(groupIndex, -1, VIEW_TYPE_HEADER));
 
@@ -112,11 +121,12 @@ public class RefactoredPopupAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         PositionMapping mapping = positionMappings.get(position);
+        int viewType = getItemViewType(position);
 
-        if (holder instanceof PopupHeaderViewHolder) {
+        if (viewType == VIEW_TYPE_HEADER) {
             GroupData groupData = groupDataList.get(mapping.groupPosition);
             ((PopupHeaderViewHolder) holder).bind(groupData);
-        } else if (holder instanceof PopupChildViewHolder) {
+        } else {
             ItemData itemData = itemDataList.get(mapping.groupPosition).get(mapping.childPosition);
             ((PopupChildViewHolder) holder).bind(itemData);
         }
@@ -143,34 +153,22 @@ public class RefactoredPopupAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
 
         public void bind(@NonNull ItemData itemData) {
-            // 绑定文本
-            SpannableStringBuilder text = itemData.getAttributedText();
-            if (text != null && text.length() > 0) {
-                tvSectionText.setText(text);
-                tvSectionText.setMovementMethod(LocalLinkMovementMethod.getInstance());
-                tvSectionText.setVisibility(View.VISIBLE);
-            } else {
-                tvSectionText.setVisibility(View.GONE);
-            }
+            bindSectionTextView(tvSectionText, itemData.getAttributedText());
+            bindSectionTextView(tvSectionNote, itemData.getAttributedNote());
+            bindSectionTextView(tvSectionVideo, itemData.getAttributedVideo());
+        }
 
-            // 绑定注释
-            SpannableStringBuilder note = itemData.getAttributedNote();
-            if (note != null && note.length() > 0) {
-                tvSectionNote.setText(note);
-                tvSectionNote.setMovementMethod(LocalLinkMovementMethod.getInstance());
-                tvSectionNote.setVisibility(View.VISIBLE);
+        /**
+         * 绑定单个 Section TextView 的文本、MovementMethod 和可见性
+         */
+        private static void bindSectionTextView(TextView textView,
+                                                 SpannableStringBuilder content) {
+            if (content != null && content.length() > 0) {
+                textView.setText(content);
+                textView.setMovementMethod(LocalLinkMovementMethod.getInstance());
+                textView.setVisibility(View.VISIBLE);
             } else {
-                tvSectionNote.setVisibility(View.GONE);
-            }
-
-            // 绑定视频
-            SpannableStringBuilder video = itemData.getAttributedVideo();
-            if (video != null && video.length() > 0) {
-                tvSectionVideo.setText(video);
-                tvSectionVideo.setMovementMethod(LocalLinkMovementMethod.getInstance());
-                tvSectionVideo.setVisibility(View.VISIBLE);
-            } else {
-                tvSectionVideo.setVisibility(View.GONE);
+                textView.setVisibility(View.GONE);
             }
         }
     }

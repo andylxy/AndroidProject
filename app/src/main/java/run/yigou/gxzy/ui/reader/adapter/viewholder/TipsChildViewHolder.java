@@ -10,16 +10,12 @@
 package run.yigou.gxzy.ui.reader.adapter.viewholder;
 
 import android.text.SpannableStringBuilder;
-import android.text.style.ClickableSpan;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
-import run.yigou.gxzy.log.EasyLog;
-
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.utils.TextViewHelper;
 import run.yigou.gxzy.ui.reader.entity.ChildEntity;
@@ -70,44 +66,15 @@ public class TipsChildViewHolder {
      * @param entity 数据实体
      */
     private void bindText(@NonNull ChildEntity entity) {
-        EasyLog.print("=== TipsChildViewHolder.bindText() 诊断开始 ===");
-        
         SpannableStringBuilder spannableText = entity.getAttributed_child_section_text();
         
         if (spannableText != null && spannableText.length() > 0) {
-            EasyLog.print("✅ spannableText 不为空, length: " + spannableText.length());
-            
-            // 检查 ClickableSpan 数量
-            ClickableSpan[] spans = spannableText.getSpans(0, spannableText.length(), ClickableSpan.class);
-            EasyLog.print("ClickableSpan count: " + spans.length);
-            
-            if (spans.length > 0) {
-                EasyLog.print("✅ ClickableSpan 存在！");
-                for (int i = 0; i < Math.min(spans.length, 5); i++) {
-                    int start = spannableText.getSpanStart(spans[i]);
-                    int end = spannableText.getSpanEnd(spans[i]);
-                    String clickText = spannableText.subSequence(start, end).toString();
-                    EasyLog.print("  Span[" + i + "]: \"" + clickText + "\" (" + start + "-" + end + ")");
-                }
-            } else {
-                EasyLog.print("❌ 没有 ClickableSpan！");
-            }
-            
             tvText.setText(spannableText);
-            EasyLog.print("setText() 完成");
-            
-            // 验证 MovementMethod
-            EasyLog.print("MovementMethod: " + tvText.getMovementMethod());
         } else if (entity.getChild_section_text() != null) {
-            EasyLog.print("⚠️ spannableText 为空，使用普通文本");
-            EasyLog.print("text: " + entity.getChild_section_text().substring(0, Math.min(50, entity.getChild_section_text().length())));
             tvText.setText(entity.getChild_section_text());
         } else {
-            EasyLog.print("⚠️ 所有文本都为空");
             tvText.setText("");
         }
-        
-        EasyLog.print("=== TipsChildViewHolder.bindText() 诊断结束 ===\n");
     }
 
     /**
@@ -143,83 +110,6 @@ public class TipsChildViewHolder {
     }
 
     /**
-     * 绑定数据 - 简化版本(使用默认TEXT模式)
-     *
-     * @param entity 数据实体
-     */
-    public void bind(@NonNull ChildEntity entity) {
-        bind(entity, TextViewHelper.DisplayMode.TEXT);
-    }
-
-    /**
-     * 切换显示模式
-     *
-     * @return 切换后的模式
-     */
-    public TextViewHelper.DisplayMode toggleVisibility() {
-        return TextViewHelper.toggleVisibility(tvText, tvNote, tvVideo);
-    }
-
-    /**
-     * 获取当前显示模式
-     *
-     * @return 当前模式
-     */
-    public TextViewHelper.DisplayMode getCurrentMode() {
-        return TextViewHelper.getCurrentMode(tvText, tvNote, tvVideo);
-    }
-
-    /**
-     * 获取当前可见的TextView
-     *
-     * @return 当前显示的TextView
-     */
-    @Nullable
-    public TextView getVisibleTextView() {
-        if (tvText.getVisibility() == View.VISIBLE) {
-            return tvText;
-        } else if (tvNote.getVisibility() == View.VISIBLE) {
-            return tvNote;
-        } else if (tvVideo.getVisibility() == View.VISIBLE) {
-            return tvVideo;
-        }
-        return null;
-    }
-
-    /**
-     * 获取当前可见TextView的文本
-     *
-     * @return 当前显示的文本
-     */
-    @Nullable
-    public CharSequence getVisibleText() {
-        TextView visibleView = getVisibleTextView();
-        return visibleView != null ? visibleView.getText() : null;
-    }
-
-    /**
-     * 设置点击事件
-     *
-     * @param holder          BaseViewHolder
-     * @param clickListener   点击监听器
-     */
-    public static void setClickListener(@NonNull BaseViewHolder holder,
-                                         @NonNull View.OnClickListener clickListener) {
-        holder.itemView.setOnClickListener(clickListener);
-    }
-
-    /**
-     * 设置长按事件
-     *
-     * @param holder              BaseViewHolder
-     * @param longClickListener   长按监听器
-     */
-    public static void setLongClickListener(@NonNull BaseViewHolder holder,
-                                             @NonNull View.OnLongClickListener longClickListener) {
-        holder.itemView.setOnLongClickListener(longClickListener);
-    }
-
-    /**
      * 获取正文TextView
      *
      * @return TextView
@@ -251,9 +141,7 @@ public class TipsChildViewHolder {
      * @param noteContent 笺注内容,用于判断是否可切换
      */
     public void toggleTextVisibility(SpannableStringBuilder noteContent) {
-        // 检查是否点击了链接(由LocalLinkMovementMethod设置的tag)
-        Boolean isClick = (Boolean) tvText.getTag();
-        if (isClick != null && isClick) {
+        if (isLinkClick(tvText)) {
             return;
         }
         
@@ -275,9 +163,7 @@ public class TipsChildViewHolder {
      * @param videoContent 视频内容,用于判断是否可切换
      */
     public void toggleNoteVisibility(SpannableStringBuilder videoContent) {
-        // 检查是否点击了链接(由LocalLinkMovementMethod设置的tag)
-        Boolean isClick = (Boolean) tvNote.getTag();
-        if (isClick != null && isClick) {
+        if (isLinkClick(tvNote)) {
             return;
         }
         
@@ -315,9 +201,7 @@ public class TipsChildViewHolder {
      * 切换视频可见性
      */
     public void toggleVideoVisibility() {
-        // 检查是否点击了链接(由LocalLinkMovementMethod设置的tag)
-        Boolean isClick = (Boolean) tvVideo.getTag();
-        if (isClick != null && isClick) {
+        if (isLinkClick(tvVideo)) {
             return;
         }
         
@@ -329,5 +213,13 @@ public class TipsChildViewHolder {
             tvVideo.setVisibility(View.VISIBLE);
             isSectionvideo = false;
         }
+    }
+
+    /**
+     * 检查 TextView 是否正在处理链接点击（由 LocalLinkMovementMethod 标记）
+     */
+    private static boolean isLinkClick(TextView textView) {
+        Boolean isClick = (Boolean) textView.getTag();
+        return isClick != null && isClick;
     }
 }

@@ -228,26 +228,21 @@ public class TipsNetHelper {
 
         @Override
         public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
-            EasyLog.print("=== clickYaoLink() 新架构 ===");
-            
             String keyword = textView.getText()
                     .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
                     .toString();
-            EasyLog.print("药物: " + keyword);
-            
+
             if (sBookRepository == null || sCurrentBookId == -1) {
                 EasyLog.print("❌ BookRepository未设置，无法搜索");
                 return;
             }
-            
+
             SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
             Pair<List<GroupData>, List<List<ItemData>>> data = 
                     adapter.searchYaoContent(keyword.trim());
-            
-            EasyLog.print("Groups: " + data.first.size());
-            
+
             Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-            
+
             TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
             window.setData(textView.getContext(), data);
             window.setFang(keyword);
@@ -270,32 +265,25 @@ public class TipsNetHelper {
                 });
                 window.show(activity.getSupportFragmentManager());
             }
-
-            EasyLog.print("=== clickYaoLink() 完成 ===");
         }
 
         @Override
         public void clickFangLink(TextView textView, ClickableSpan clickableSpan) {
-            EasyLog.print("=== clickFangLink() 新架构 ===");
-            
             String keyword = textView.getText()
                     .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
                     .toString();
-            EasyLog.print("方剂: " + keyword);
-            
+
             if (sBookRepository == null || sCurrentBookId == -1) {
                 EasyLog.print("❌ BookRepository未设置，无法搜索");
                 return;
             }
-            
+
             SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
             Pair<List<GroupData>, List<List<ItemData>>> data = 
                     adapter.searchFangContent(keyword.trim());
-            
-            EasyLog.print("Groups: " + data.first.size());
-            
+
             Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-            
+
             TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
             window.setData(textView.getContext(), data);
             window.setFang(keyword);
@@ -320,32 +308,25 @@ public class TipsNetHelper {
             } else {
                 EasyLog.print("❌ Context不是Activity!");
             }
-            
-            EasyLog.print("=== clickFangLink() 完成 ===");
         }
 
         @Override
         public void clickMingCiLink(TextView textView, ClickableSpan clickableSpan) {
-            EasyLog.print("=== clickMingCiLink() 新架构 ===");
-            
             String keyword = textView.getText()
                     .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
                     .toString();
-            EasyLog.print("名词: " + keyword);
-            
+
             if (sBookRepository == null || sCurrentBookId == -1) {
                 EasyLog.print("❌ BookRepository未设置，无法搜索");
                 return;
             }
-            
+
             SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
             Pair<List<GroupData>, List<List<ItemData>>> data = 
                     adapter.searchMingCiContent(keyword.trim());
-            
-            EasyLog.print("Groups: " + data.first.size());
-            
+
             Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-            
+
             TipsLittleMingCiViewWindow window = new TipsLittleMingCiViewWindow();
             window.setData(textView.getContext(), data);
             window.setRect(textRect);
@@ -367,8 +348,6 @@ public class TipsNetHelper {
                 });
                 window.show(activity.getSupportFragmentManager());
             }
-            
-            EasyLog.print("=== clickMingCiLink() 完成 ===");
         }
 
     };

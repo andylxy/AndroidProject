@@ -1,12 +1,6 @@
 package run.yigou.gxzy.ui.reader.widget;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.ui.reader.widget.TipsLittleRecyclerViewWindow;
 import run.yigou.gxzy.tips.widget.WindowConfig;
 
 /**
@@ -28,17 +22,5 @@ public class TipsLittleMingCiViewWindow extends TipsLittleRecyclerViewWindow {
                 .enableMore(false) // 名词弹窗不启用更多按钮
                 .wrapperView(R.id.wrapper)
                 .build();
-    }
-
-    @Override
-    protected View createContentView(LayoutInflater inflater, ViewGroup container) {
-        // 调用父类创建RecyclerView
-        return super.createContentView(inflater, container);
-    }
-
-    @Override
-    protected void bindData() {
-        // 调用父类绑定RecyclerView数据
-        super.bindData();
     }
 }

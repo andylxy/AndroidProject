@@ -9,7 +9,6 @@
 
 package run.yigou.gxzy.ui.reader.adapter.viewholder;
 
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -69,31 +68,11 @@ public class TipsHeaderViewHolder {
     }
 
     /**
-     * 设置点击事件
-     *
-     * @param holder          BaseViewHolder
-     * @param clickListener   点击监听器
-     */
-    public static void setClickListener(@NonNull BaseViewHolder holder,
-                                         @NonNull View.OnClickListener clickListener) {
-        holder.itemView.setOnClickListener(clickListener);
-    }
-
-    /**
      * 获取TextView控件
      *
      * @return TextView
      */
     public TextView getTextView() {
         return tvHeader;
-    }
-
-    /**
-     * 获取ImageView控件
-     *
-     * @return ImageView
-     */
-    public ImageView getImageView() {
-        return ivState;
     }
 }
