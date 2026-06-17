@@ -14,7 +14,6 @@ import run.yigou.gxzy.tips.widget.LocalLinkMovementMethod;
 
 
 public final class TipsFangYaoAdapter extends AppAdapter<String> {
-    private final String TAG = "TipsFangYaoAdapter";
     private final int typeFangYao;
 
     public TipsFangYaoAdapter(Context context, int typeFangYao) {

@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import run.yigou.gxzy.log.EasyLog;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 
@@ -41,7 +40,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
     private ClearEditText clearEditText;
     private TextView ll_no_btn;
     // 使用 for 循环查找包含 SearchText控件指定内容
-    List<String> searchTextResults = new ArrayList<>();
+    private List<String> searchTextResults = new ArrayList<>();
 
     /**
      * 创建一个实例，并设置类型。
@@ -74,7 +73,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
         // 设置文本变化监听
         tipsBtnSearch.setOnClickListener(v -> {
             if (clearEditText.getText() != null) {
-                setSearchText(clearEditText.getText() != null ? clearEditText.getText().toString() : "");
+                setSearchText(clearEditText.getText().toString());
             }
         });
         clearEditText.addTextChangedListener(new TextWatcher() {
@@ -96,7 +95,6 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                EasyLog.print("clearEditText", "onTextChanged: " + s);
                 removeCallbacks(runnable);
                 postDelayed(runnable, 300); // 延迟 300 毫秒执行
             }
@@ -172,21 +170,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
 
     @Override
     protected void initData() {
-
-        //判断是方或者药
-        switch (typeFangYao) {
-            case 1:
-                mAdapter = new TipsFangYaoAdapter(getAttachActivity(), 1);
-                break;
-            case 2:
-                mAdapter = new TipsFangYaoAdapter(getAttachActivity(), 2);
-                break;
-            case 3:
-                mAdapter = new TipsFangYaoAdapter(getAttachActivity(), 3);
-                break;
-            default:
-                break;
-        }
+        mAdapter = new TipsFangYaoAdapter(getAttachActivity(), typeFangYao);
 
         mRecyclerView.setAdapter(mAdapter);
         //设置数据源

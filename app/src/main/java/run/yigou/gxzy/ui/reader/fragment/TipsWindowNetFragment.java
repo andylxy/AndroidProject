@@ -1,7 +1,6 @@
 package run.yigou.gxzy.ui.reader.fragment;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 
@@ -47,11 +46,6 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
     private WrapRecyclerView mRecyclerView;
 
     private BookInfoAdapter mAdapter;
-    
-    // TipsSingleData singleData;
-    /**
-     * 当前点击书本数据
-     */
 
 
     @Override
@@ -76,18 +70,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
 
     @Override
     protected void initData() {
-       // singleData = TipsSingleData.getInstance();
-        mAdapter.setData(analogData());
-       // XEventBus.getDefault().register(TipsWindowNetFragment.this);
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    private List<TabNavBody> analogData() {
-        return mNavList;
+        mAdapter.setData(mNavList);
     }
 
     /**
@@ -124,11 +107,6 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
         Intent intent = new Intent(activity, TipsFragmentActivity.class);
         intent.putExtra("bookId", bookId);
 
-        // 如果当前上下文不是 Activity，需要添加 FLAG_ACTIVITY_NEW_TASK (虽然 getAttachActivity 返回的是 Activity)
-        if (!(activity instanceof Activity)) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
-
         startActivityForResult(intent, (resultCode, data) -> {
 
         });
@@ -141,10 +119,9 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
 
     @Override
     public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-
         postDelayed(() -> {
             mAdapter.clearData();
-            mAdapter.setData(analogData());
+            mAdapter.setData(mNavList);
             mRefreshLayout.finishRefresh();
         }, 1000);
     }
@@ -152,16 +129,11 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
     @Override
     public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
         postDelayed(() -> {
-            mAdapter.addData(analogData());
+            mAdapter.addData(mNavList);
             mRefreshLayout.finishLoadMore();
 
             mAdapter.setLastPage(mAdapter.getCount() >= 100);
             mRefreshLayout.setNoMoreData(mAdapter.isLastPage());
         }, 1000);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 }

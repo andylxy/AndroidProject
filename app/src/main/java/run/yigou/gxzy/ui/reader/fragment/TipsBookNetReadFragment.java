@@ -1,7 +1,7 @@
 /*
  * 项目名: AndroidProject
- * 类名: TipsBookReadActivity.java
- * 包名: run.yigou.gxzy.ui.activity.TipsBookReadActivity
+ * 类名: TipsBookNetReadFragment.java
+ * 包名: run.yigou.gxzy.ui.reader.fragment
  * 作者 : Zhs (xiaoyang_02@qq.com)
  * 当前修改时间 : 2024年09月08日 10:50:43
  * 上次修改时间: 2024年09月08日 10:50:43
@@ -177,7 +177,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                EasyLog.print("clearEditText", "onTextChanged: " + s);
                 removeCallbacks(runnable);
                 postDelayed(runnable, 300); // 延迟 300 毫秒执行
             }
@@ -290,8 +289,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
     private void initializeAdapter() {
         adapter = new RefactoredExpandableAdapter(getContext());
-        EasyLog.print("TipsBookNetReadFragment", "========== 初始化RefactoredExpandableAdapter ==========");
-        EasyLog.print("TipsBookNetReadFragment", "adapter实例: " + adapter);
     }
 
     private boolean isShowUpdateNotification = true;
@@ -325,9 +322,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                                 int foundIndex = findChapterIndexByTitle(headerTitle);
                                 if (foundIndex != -1) {
                                     realIndex = foundIndex;
-                                    EasyLog.print("TipsBookNetReadFragment", "Search mapped: UI pos " + groupPosition + " -> Real pos " + realIndex);
                                 } else {
-                                    EasyLog.print("TipsBookNetReadFragment", "Search mode: Title not found for mapping: " + headerTitle);
                                     // 没找到对应章节，不触发后续逻辑以防错乱
                                     return;
                                 }
@@ -344,7 +339,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
                 // ✅ 搜索模式下：只允许展开/收起，不触发下载逻辑（防止数据被覆盖）
                 if (isSearchMode) {
-                    EasyLog.print("TipsBookNetReadFragment", "搜索模式：跳过章节下载，仅展开/收起");
                     return;
                 }
 
@@ -523,11 +517,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                     // 数据更新后重新展开，确保子项显示
                     adapter.notifyDataChanged();  // 先刷新所有数据
                     adapter.expandGroup(groupPosition, false);  // 再展开该组(无动画，避免闪烁)
-                    EasyLog.print("TipsBookNetReadFragment", "章节内容已更新并重新展开: " + sectionData.getHeader());
                 } else {
                     // 如果是收起状态，只刷新组数据即可
                     adapter.notifyGroupChanged(groupPosition);
-                    EasyLog.print("TipsBookNetReadFragment", "章节内容已更新(收起状态): " + sectionData.getHeader());
                 }
             }
         } catch (Exception e) {
@@ -539,19 +531,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
     private ArrayList<Chapter> chapterList;
 
     private void bookInitData() {
-
-        EasyLog.print("TipsBookNetReadFragment", "========== bookInitData 开始 ==========");
-        
-        // ✅ 不再需要初始化 singletonNetData
-        // ✅ 不再需要初始化别名字典（由 Repository/Presenter 处理）
-
-        //加载书本相关的药方
+        // 加载书本相关的药方
         TabNavBody book = GlobalDataHolder.getInstance().getNavTabBodyMap().get(bookId);
-        EasyLog.print("TipsBookNetReadFragment", "book=" + (book != null ? book.getBookName() : "null"));
         
         if (book != null) {
             chapterList = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(book.getBookNo()));
-            EasyLog.print("TipsBookNetReadFragment", "chapterList size=" + (chapterList != null ? chapterList.size() : "null"));
             //加载书本相关的章节
             getBookData(book);
         } else {
@@ -564,25 +548,14 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      * 获取数据
      */
     public void getBookData(TabNavBody book) {
-
-        EasyLog.print("TipsBookNetReadFragment", "========== getBookData 开始 ==========");
-        EasyLog.print("TipsBookNetReadFragment", "book=" + (book != null ? book.getBookName() : "null"));
-        EasyLog.print("TipsBookNetReadFragment", "presenter=" + (presenter != null ? "存在" : "null"));
-        EasyLog.print("TipsBookNetReadFragment", "chapterList=" + (chapterList != null ? chapterList.size() : "null"));
-
         if (book != null) {
-            // ✅ 通过 Presenter 加载书籍数据（新数据模型）
             if (presenter != null && chapterList != null) {
-                EasyLog.print("TipsBookNetReadFragment", "开始加载书籍数据，共 " + chapterList.size() + " 个章节");
                 // 调用 Presenter 初始化书籍数据（传递 TabNavBody 避免全局数据获取失败）
                 // Presenter 会自动加载药方数据
                 presenter.loadBookContent(book, bookId, bookLastReadPosition, isShowBookCollect);
                 
-                // 【新功能】初始化章节下载管理器并启动后台下载
+                // 初始化章节下载管理器并启动后台下载
                 initChapterDownloadManager();
-            } else {
-                EasyLog.print("TipsBookNetReadFragment", "跳过加载: presenter=" + (presenter != null) + 
-                    ", chapterList=" + (chapterList != null));
             }
         }
     }
@@ -594,8 +567,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         if (chapterDownloadManager == null && chapterList != null) {
             chapterDownloadManager = new ChapterDownloadManager();
             chapterDownloadManager.initDownloadedCache(chapterList);
-            
-            EasyLog.print("TipsBookNetReadFragment", "章节下载管理器初始化完成");
             
             // 启动后台批量下载所有未下载章节（低优先级）
             chapterDownloadManager.batchDownloadAllChapters(chapterList, this);
@@ -610,17 +581,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         reListAdapter(true, false);
     }
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        refreshData();
-//    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        
-        // Presenter 已在 onDestroyView 中清理
         
         // 清理章节下载管理器
         if (chapterDownloadManager != null) {
@@ -633,8 +597,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             adapter.setOnHeaderClickListener(null);
             adapter.setOnJumpSpecifiedItemListener(null);
         }
-        
-        // ✅ 不再需要清理 singletonNetData 监听器
 
         // 清理 RecyclerView
         if (rvList != null) {
@@ -655,7 +617,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         try {
             if (XEventBus.getDefault() != null) {
                 XEventBus.getDefault().unregister(this);
-                EasyLog.print("TipsBookNetReadFragment", "✅ EventBus 注销成功");
             }
         } catch (Exception e) {
             EasyLog.print("TipsBookNetReadFragment", "⚠️ EventBus 注销异常: " + e.getMessage());
@@ -741,10 +702,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      * 执行全局搜索
      */
     private void performGlobalSearch(String keyword) {
-        EasyLog.print("TipsBookNetReadFragment", "执行全局搜索: " + keyword);
-        
         if (searchCoordinator == null) {
-            EasyLog.print("TipsBookNetReadFragment", "❌ searchCoordinator 未初始化");
             return;
         }
         
@@ -754,7 +712,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             searchCoordinator.searchGlobal(keyword);
         
         if (result == null) {
-            EasyLog.print("TipsBookNetReadFragment", "搜索结果为 null");
             return;
         }
         
@@ -779,10 +736,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             if (numTips != null) {
                 numTips.setText(String.format("%d个结果", totalMatches));
             }
-            
-            EasyLog.print("TipsBookNetReadFragment", 
-                "✅ 搜索完成，匹配章节: " + (groupDataList != null ? groupDataList.size() : 0) + 
-                ", 总匹配数: " + totalMatches);
         }
     }
 
@@ -817,11 +770,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
     @Override
     public void showLoading(boolean isLoading) {
-        // 显示/隐藏加载中
         if (isLoading) {
-            // 可以添加 loading 对话框
         } else {
-            // 隐藏 loading
         }
     }
 
@@ -920,15 +870,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         if (level >= TRIM_MEMORY_RUNNING_CRITICAL) {
             // 极端情况：清除适配器缓存
             if (adapter != null) {
-                EasyLog.print("TipsBookNetReadFragment", "清除适配器缓存");
                 // 可以在这里添加适配器缓存清理逻辑
             }
-        } else if (level >= TRIM_MEMORY_RUNNING_MODERATE) {
-            // 中等压力：减少缓存
-            EasyLog.print("TipsBookNetReadFragment", "中等内存压力");
-        } else if (level >= TRIM_MEMORY_RUNNING_LOW) {
-            // 较低压力：预警
-            EasyLog.print("TipsBookNetReadFragment", "较低内存压力");
         }
     }
 
@@ -998,11 +941,5 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             }, AppConst.postDelayMillis);
         }
     }
-
-    @Override
-    public Context getContext() {
-        return super.getContext();
-    }
-
 
 }

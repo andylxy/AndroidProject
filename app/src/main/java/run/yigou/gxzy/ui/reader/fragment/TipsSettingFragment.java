@@ -5,7 +5,6 @@ import android.view.View;
 import com.hjq.widget.layout.SettingBar;
 import com.hjq.widget.view.SwitchButton;
 import com.lucas.xbus.XEventBus;
-import run.yigou.gxzy.log.EasyLog;
 
 import run.yigou.gxzy.event.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.R;
@@ -175,10 +174,9 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         try {
             if (XEventBus.getDefault() != null && tipsFragmentSettingEventNotification != null) {
                 XEventBus.getDefault().post(tipsFragmentSettingEventNotification);
-                EasyLog.print("TipsSettingFragment", "✅ EventBus 事件发送成功");
             }
         } catch (Exception e) {
-            EasyLog.print("TipsSettingFragment", "⚠️ EventBus 事件发送异常: " + e.getMessage());
+            // EventBus 发送失败时静默处理
         }
 
     }
