@@ -1,7 +1,7 @@
 /*
  * 项目名: AndroidProject
  * 类名: GlideImageLoader.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.image
+ * 包名: run.yigou.gxzy.ui.reader.adapter.image
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: Glide图片加载器实现 - 封装Glide加载图片到TextView的逻辑

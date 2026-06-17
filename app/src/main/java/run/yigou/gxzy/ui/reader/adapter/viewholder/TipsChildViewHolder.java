@@ -1,13 +1,13 @@
 /*
  * 项目名: AndroidProject
  * 类名: TipsChildViewHolder.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.viewholder
+ * 包名: run.yigou.gxzy.ui.reader.adapter.viewholder
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 子项ViewHolder - 封装Child绑定逻辑,支持三段式TextView
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor.viewholder;
+package run.yigou.gxzy.ui.reader.adapter.viewholder;
 
 import android.text.SpannableStringBuilder;
 import android.text.style.ClickableSpan;

@@ -7,7 +7,7 @@
  * 描述: 重构后的可展开适配器 - 阅读模式专用
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor;
+package run.yigou.gxzy.ui.reader.adapter;
 
 import android.content.Context;
 import android.view.View;
@@ -24,16 +24,16 @@ import java.util.List;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.base.action.ToastAction;
-import run.yigou.gxzy.ui.reader.adapter.refactor.binder.ChildTextBinder;
-import run.yigou.gxzy.ui.reader.adapter.refactor.binder.HeaderBinder;
-import run.yigou.gxzy.ui.reader.adapter.refactor.event.ReadModeClickHandler;
-import run.yigou.gxzy.ui.reader.adapter.refactor.event.ReadModeLongClickHandler;
-import run.yigou.gxzy.ui.reader.adapter.refactor.model.DataAdapter;
-import run.yigou.gxzy.ui.reader.adapter.refactor.model.GroupData;
-import run.yigou.gxzy.ui.reader.adapter.refactor.model.ItemData;
-import run.yigou.gxzy.ui.reader.adapter.refactor.viewholder.TipsChildViewHolder;
-import run.yigou.gxzy.ui.reader.adapter.refactor.viewholder.TipsHeaderViewHolder;
-import run.yigou.gxzy.ui.reader.adapter.refactor.viewholder.ViewHolderFactory;
+import run.yigou.gxzy.ui.reader.adapter.binder.ChildTextBinder;
+import run.yigou.gxzy.ui.reader.adapter.binder.HeaderBinder;
+import run.yigou.gxzy.ui.reader.adapter.event.ReadModeClickHandler;
+import run.yigou.gxzy.ui.reader.adapter.event.ReadModeLongClickHandler;
+import run.yigou.gxzy.ui.reader.adapter.model.DataAdapter;
+import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.viewholder.TipsChildViewHolder;
+import run.yigou.gxzy.ui.reader.adapter.viewholder.TipsHeaderViewHolder;
+import run.yigou.gxzy.ui.reader.adapter.viewholder.ViewHolderFactory;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.utils.DebugLog;
 
@@ -107,14 +107,14 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
         EasyLog.print("RefactoredExpandableAdapter", "ItemData列表数量: " + itemDataList.size());
         
         // ✅ 直接转换为 model.GroupData/model.ItemData (避免经过 ExpandableGroupEntity)
-        List<run.yigou.gxzy.ui.reader.adapter.refactor.model.GroupData> modelGroupList = new ArrayList<>();
+        List<run.yigou.gxzy.ui.reader.adapter.model.GroupData> modelGroupList = new ArrayList<>();
         
         for (int i = 0; i < groupDataList.size() && i < itemDataList.size(); i++) {
             run.yigou.gxzy.ui.reader.entity.GroupData sourceGroup = groupDataList.get(i);
             List<run.yigou.gxzy.ui.reader.entity.ItemData> sourceItems = itemDataList.get(i);
             
             // 转换 entity.ItemData 为 model.ItemData (直接使用 SpannableStringBuilder，保留 ClickableSpan)
-            List<run.yigou.gxzy.ui.reader.adapter.refactor.model.ItemData> modelItems = new ArrayList<>();
+            List<run.yigou.gxzy.ui.reader.adapter.model.ItemData> modelItems = new ArrayList<>();
             if (sourceItems != null) {
                 for (run.yigou.gxzy.ui.reader.entity.ItemData sourceItem : sourceItems) {
                     // 获取富文本 (已经包含 ClickableSpan)
@@ -123,8 +123,8 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
                     android.text.SpannableStringBuilder videoSpan = sourceItem.getAttributedVideo();
                     
                     // 创建 model.ItemData
-                    run.yigou.gxzy.ui.reader.adapter.refactor.model.ItemData modelItem = 
-                        new run.yigou.gxzy.ui.reader.adapter.refactor.model.ItemData(
+                    run.yigou.gxzy.ui.reader.adapter.model.ItemData modelItem = 
+                        new run.yigou.gxzy.ui.reader.adapter.model.ItemData(
                             textSpan != null ? textSpan.toString() : "",  // text
                             noteSpan != null ? noteSpan.toString() : null, // note
                             videoSpan != null ? videoSpan.toString() : null, // videoUrl
@@ -138,8 +138,8 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
             }
             
             // 创建 model.GroupData
-            run.yigou.gxzy.ui.reader.adapter.refactor.model.GroupData modelGroup = 
-                new run.yigou.gxzy.ui.reader.adapter.refactor.model.GroupData(
+            run.yigou.gxzy.ui.reader.adapter.model.GroupData modelGroup = 
+                new run.yigou.gxzy.ui.reader.adapter.model.GroupData(
                     sourceGroup.getTitle(),
                     modelItems
                 );

@@ -1,13 +1,13 @@
 /*
  * 项目名: AndroidProject
  * 类名: WindowModeClickHandler.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.event
+ * 包名: run.yigou.gxzy.ui.reader.adapter.event
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 弹窗模式点击处理器 - 处理弹窗界面的点击事件
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor.event;
+package run.yigou.gxzy.ui.reader.adapter.event;
 
 import android.content.Context;
 

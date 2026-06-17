@@ -1,13 +1,13 @@
 /*
  * 项目名: AndroidProject
  * 类名: ChildTextBinder.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.binder
+ * 包名: run.yigou.gxzy.ui.reader.adapter.binder
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: Child文本绑定器 - 绑定Child文本数据到ViewHolder
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor.binder;
+package run.yigou.gxzy.ui.reader.adapter.binder;
 
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -21,10 +21,10 @@ import androidx.annotation.Nullable;
 import run.yigou.gxzy.log.EasyLog;
 
 import run.yigou.gxzy.ui.media.image.ImageLoader;
-import run.yigou.gxzy.ui.reader.adapter.refactor.model.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.utils.SpannableStringCache;
 import run.yigou.gxzy.utils.TextViewHelper;
-import run.yigou.gxzy.ui.reader.adapter.refactor.viewholder.TipsChildViewHolder;
+import run.yigou.gxzy.ui.reader.adapter.viewholder.TipsChildViewHolder;
 import run.yigou.gxzy.ui.reader.entity.ChildEntity;
 import run.yigou.gxzy.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.base.constant.AppConst;

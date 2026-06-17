@@ -22,7 +22,7 @@ import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.ui.main.HomeActivity;
 import run.yigou.gxzy.ui.reader.TipsFragmentActivity;
-import run.yigou.gxzy.ui.reader.adapter.refactor.BookInfoAdapter;
+import run.yigou.gxzy.ui.reader.adapter.BookInfoAdapter;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
 import run.yigou.gxzy.base.GlobalDataHolder;
 

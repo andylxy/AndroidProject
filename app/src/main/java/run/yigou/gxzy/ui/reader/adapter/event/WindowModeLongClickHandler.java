@@ -1,19 +1,19 @@
 /*
  * 项目名: AndroidProject
  * 类名: WindowModeLongClickHandler.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.event
+ * 包名: run.yigou.gxzy.ui.reader.adapter.event
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 弹窗模式长按处理器 - 处理弹窗界面的长按事件(简单复制功能)
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor.event;
+package run.yigou.gxzy.ui.reader.adapter.event;
 
 import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import run.yigou.gxzy.ui.reader.adapter.refactor.model.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.utils.ClipboardHelper;
 import run.yigou.gxzy.ui.reader.entity.ChildEntity;
 

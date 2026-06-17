@@ -8,7 +8,7 @@
  * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor;
+package run.yigou.gxzy.ui.reader.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

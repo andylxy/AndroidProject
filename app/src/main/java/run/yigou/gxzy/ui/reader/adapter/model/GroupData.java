@@ -1,13 +1,13 @@
 /*
  * 项目名: AndroidProject
  * 类名: GroupData.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.model
+ * 包名: run.yigou.gxzy.ui.reader.adapter.model
  * 作者 : AI Refactor
  * 创建时间 : 2025年12月10日
  * Copyright (c) 2025, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor.model;
+package run.yigou.gxzy.ui.reader.adapter.model;
 
 import android.text.SpannableStringBuilder;
 import androidx.annotation.NonNull;

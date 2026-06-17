@@ -7,7 +7,7 @@
  * 描述: 重构后的搜索适配器 - 搜索模式专用
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor;
+package run.yigou.gxzy.ui.reader.adapter;
 
 import android.content.Context;
 import android.widget.ImageView;
@@ -22,16 +22,16 @@ import java.util.List;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.base.action.ToastAction;
-import run.yigou.gxzy.ui.reader.adapter.refactor.binder.ChildTextBinder;
-import run.yigou.gxzy.ui.reader.adapter.refactor.binder.HeaderBinder;
-import run.yigou.gxzy.ui.reader.adapter.refactor.event.SearchModeClickHandler;
-import run.yigou.gxzy.ui.reader.adapter.refactor.event.SearchModeLongClickHandler;
-import run.yigou.gxzy.ui.reader.adapter.refactor.model.DataAdapter;
-import run.yigou.gxzy.ui.reader.adapter.refactor.model.GroupData;
-import run.yigou.gxzy.ui.reader.adapter.refactor.model.ItemData;
-import run.yigou.gxzy.ui.reader.adapter.refactor.viewholder.TipsChildViewHolder;
-import run.yigou.gxzy.ui.reader.adapter.refactor.viewholder.TipsHeaderViewHolder;
-import run.yigou.gxzy.ui.reader.adapter.refactor.viewholder.ViewHolderFactory;
+import run.yigou.gxzy.ui.reader.adapter.binder.ChildTextBinder;
+import run.yigou.gxzy.ui.reader.adapter.binder.HeaderBinder;
+import run.yigou.gxzy.ui.reader.adapter.event.SearchModeClickHandler;
+import run.yigou.gxzy.ui.reader.adapter.event.SearchModeLongClickHandler;
+import run.yigou.gxzy.ui.reader.adapter.model.DataAdapter;
+import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.viewholder.TipsChildViewHolder;
+import run.yigou.gxzy.ui.reader.adapter.viewholder.TipsHeaderViewHolder;
+import run.yigou.gxzy.ui.reader.adapter.viewholder.ViewHolderFactory;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 
 /**

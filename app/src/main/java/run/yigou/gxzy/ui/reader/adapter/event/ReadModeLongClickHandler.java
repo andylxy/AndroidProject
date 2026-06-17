@@ -1,13 +1,13 @@
 /*
  * 项目名: AndroidProject
  * 类名: ReadModeLongClickHandler.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.event
+ * 包名: run.yigou.gxzy.ui.reader.adapter.event
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 阅读模式长按处理器 - 处理阅读界面的长按事件(复制/跳转/重新下载)
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor.event;
+package run.yigou.gxzy.ui.reader.adapter.event;
 
 import android.content.Context;
 
@@ -17,7 +17,7 @@ import run.yigou.gxzy.log.EasyLog;
 
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.utils.ClipboardHelper;
-import run.yigou.gxzy.ui.reader.adapter.refactor.model.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.entity.ChildEntity;
 import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
 

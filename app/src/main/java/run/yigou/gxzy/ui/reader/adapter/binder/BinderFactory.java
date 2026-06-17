@@ -1,19 +1,19 @@
 /*
  * 项目名: AndroidProject
  * 类名: BinderFactory.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.binder
+ * 包名: run.yigou.gxzy.ui.reader.adapter.binder
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: Binder工厂 - 创建和管理各种Binder
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor.binder;
+package run.yigou.gxzy.ui.reader.adapter.binder;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import run.yigou.gxzy.ui.media.image.ImageLoader;
-import run.yigou.gxzy.ui.reader.adapter.refactor.state.ExpandStateManager;
+import run.yigou.gxzy.ui.reader.adapter.state.ExpandStateManager;
 import run.yigou.gxzy.utils.SpannableStringCache;
 
 /**

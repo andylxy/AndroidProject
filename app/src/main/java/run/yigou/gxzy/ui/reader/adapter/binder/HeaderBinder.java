@@ -1,19 +1,19 @@
 /*
  * 项目名: AndroidProject
  * 类名: HeaderBinder.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.binder
+ * 包名: run.yigou.gxzy.ui.reader.adapter.binder
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: Header绑定器 - 绑定Header数据到ViewHolder
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor.binder;
+package run.yigou.gxzy.ui.reader.adapter.binder;
 
 import androidx.annotation.NonNull;
 
-import run.yigou.gxzy.ui.reader.adapter.refactor.model.GroupData;
-import run.yigou.gxzy.ui.reader.adapter.refactor.state.ExpandStateManager;
-import run.yigou.gxzy.ui.reader.adapter.refactor.viewholder.TipsHeaderViewHolder;
+import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
+import run.yigou.gxzy.ui.reader.adapter.state.ExpandStateManager;
+import run.yigou.gxzy.ui.reader.adapter.viewholder.TipsHeaderViewHolder;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 
 /**

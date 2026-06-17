@@ -1,13 +1,13 @@
 /*
  * 项目名: AndroidProject
  * 类名: SearchStateManager.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.state
+ * 包名: run.yigou.gxzy.ui.reader.adapter.state
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 搜索状态管理器 - 管理搜索模式状态
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor.state;
+package run.yigou.gxzy.ui.reader.adapter.state;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

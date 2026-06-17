@@ -7,7 +7,7 @@
  * 描述: 重构基类Adapter - 提供公共功能
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor;
+package run.yigou.gxzy.ui.reader.adapter;
 
 import android.content.Context;
 
@@ -17,11 +17,11 @@ import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 
 import java.util.ArrayList;
 
-import run.yigou.gxzy.ui.reader.adapter.refactor.binder.BinderFactory;
+import run.yigou.gxzy.ui.reader.adapter.binder.BinderFactory;
 import run.yigou.gxzy.ui.media.image.GlideImageLoader;
 import run.yigou.gxzy.ui.media.image.ImageLoader;
-import run.yigou.gxzy.ui.reader.adapter.refactor.state.ExpandStateManager;
-import run.yigou.gxzy.ui.reader.adapter.refactor.state.SearchStateManager;
+import run.yigou.gxzy.ui.reader.adapter.state.ExpandStateManager;
+import run.yigou.gxzy.ui.reader.adapter.state.SearchStateManager;
 import run.yigou.gxzy.utils.SpannableStringCache;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 

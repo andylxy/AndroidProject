@@ -1,7 +1,7 @@
 /*
  * 项目名: AndroidProject
  * 类名: TextViewHelper.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.utils
+ * 包名: run.yigou.gxzy.ui.reader.adapter.utils
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: TextView显示切换工具类 - 统一管理TextView的text/note/video三种模式切换

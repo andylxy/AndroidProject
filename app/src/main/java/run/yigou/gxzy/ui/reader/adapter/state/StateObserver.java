@@ -1,13 +1,13 @@
 /*
  * 项目名: AndroidProject
  * 类名: StateObserver.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.state
+ * 包名: run.yigou.gxzy.ui.reader.adapter.state
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 状态观察者接口 - 监听状态变化
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor.state;
+package run.yigou.gxzy.ui.reader.adapter.state;
 
 /**
  * 状态观察者接口

@@ -17,7 +17,7 @@ import run.yigou.gxzy.data.local.service.BookService;
 import run.yigou.gxzy.data.local.helper.DbService;
 
 import run.yigou.gxzy.ui.main.HomeActivity;
-import run.yigou.gxzy.ui.reader.adapter.refactor.BookCollectCaseAdapter;
+import run.yigou.gxzy.ui.reader.adapter.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 
 

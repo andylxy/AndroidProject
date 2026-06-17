@@ -1,17 +1,17 @@
 /*
  * 项目名: AndroidProject
  * 类名: LongClickEventHandler.java
- * 包名: run.yigou.gxzy.ui.reader.adapter.refactor.event
+ * 包名: run.yigou.gxzy.ui.reader.adapter.event
  * 作者: Refactor Team
  * 创建时间: 2025年12月10日
  * 描述: 长按事件处理器接口 - 定义长按事件处理规范
  */
 
-package run.yigou.gxzy.ui.reader.adapter.refactor.event;
+package run.yigou.gxzy.ui.reader.adapter.event;
 
 import androidx.annotation.NonNull;
 
-import run.yigou.gxzy.ui.reader.adapter.refactor.model.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.entity.ChildEntity;
 
 /**
