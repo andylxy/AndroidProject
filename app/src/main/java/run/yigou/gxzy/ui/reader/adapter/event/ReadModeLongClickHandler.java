@@ -12,11 +12,12 @@ package run.yigou.gxzy.ui.reader.adapter.event;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import run.yigou.gxzy.log.EasyLog;
-
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.utils.ClipboardHelper;
+import run.yigou.gxzy.ui.reader.adapter.BaseRefactoredAdapter;
 import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.entity.ChildEntity;
 import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
@@ -29,7 +30,8 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
 
     private final Context context;
     private final OnMenuActionListener menuActionListener;
-    private Object jumpListener;  // 跳转监听器(动态类型,兼容不同接口)
+    @Nullable
+    private BaseRefactoredAdapter.OnJumpSpecifiedItemListener jumpListener;
 
     /**
      * 菜单动作监听器
@@ -118,7 +120,7 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
     }
 
     /**
-     * 处理菜单动作
+     * 处理菜单动作（统一入口，同时处理旧版和新版跳转逻辑）
      *
      * @param action        菜单项文本
      * @param groupPosition 组位置
@@ -172,13 +174,17 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
     }
 
     /**
-     * 处理跳转动作
+     * 处理跳转动作（统一使用类型安全的jumpListener，若未设置则回退到menuActionListener）
      *
      * @param groupPosition 组位置
      */
     private void handleJumpAction(int groupPosition) {
         if (groupPosition > 0) {
-            menuActionListener.onJumpRequested(groupPosition, -1);
+            if (jumpListener != null) {
+                jumpListener.onJumpSpecifiedItem(groupPosition, -1);
+            } else {
+                menuActionListener.onJumpRequested(groupPosition, -1);
+            }
         }
     }
 
@@ -199,72 +205,11 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
     }
     
     /**
-     * 设置跳转监听器(兼容旧接口)
+     * 设置跳转监听器（类型安全，替代旧版Object参数）
+     *
+     * @param listener 跳转监听器
      */
-    public void setJumpListener(Object listener) {
+    public void setJumpListener(@Nullable BaseRefactoredAdapter.OnJumpSpecifiedItemListener listener) {
         this.jumpListener = listener;
-    }
-    
-    /**
-     * Child长按事件 - 使用新数据结构ItemData
-     */
-    public boolean onChildLongClick(int groupPosition,
-                                     int childPosition,
-                                     @NonNull ItemData itemData,
-                                     @NonNull String text) {
-        // 显示菜单(阅读模式菜单类型)
-        TipsNetHelper.showListDialog(context, AppConst.data_Type)
-                .setListener((dialog, position, string) -> {
-                    handleMenuActionNew(String.valueOf(string), groupPosition, childPosition, text);
-                })
-                .show();
-
-        return true;
-    }
-    
-    /**
-     * 处理菜单动作 - 新版本使用jumpListener
-     */
-    private void handleMenuActionNew(@NonNull String action,
-                                       int groupPosition,
-                                       int childPosition,
-                                       @NonNull CharSequence text) {
-        switch (action) {
-            case "拷贝内容":
-                handleCopyAction(text);
-                break;
-
-            case "跳转到本章内容":
-                handleJumpActionNew(groupPosition);
-                break;
-
-            case "重新下载全部数据":
-                handleRedownloadAllAction();
-                break;
-
-            case "重新下本章节":
-                handleRedownloadChapterAction(groupPosition);
-                break;
-
-            default:
-                EasyLog.print("Unknown menu action: " + action);
-                break;
-        }
-    }
-    
-    /**
-     * 处理跳转动作 - 新版本
-     */
-    private void handleJumpActionNew(int groupPosition) {
-        if (jumpListener != null && groupPosition > 0) {
-            try {
-                // 使用反射调用,兼容不同接口
-                jumpListener.getClass()
-                    .getMethod("onJumpSpecifiedItem", int.class, int.class)
-                    .invoke(jumpListener, groupPosition, -1);
-            } catch (Exception e) {
-                EasyLog.print("Jump failed: " + e.getMessage());
-            }
-        }
     }
 }

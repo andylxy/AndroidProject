@@ -8,7 +8,6 @@
 package run.yigou.gxzy.ui.reader.adapter;
 
 import android.content.Context;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,16 +19,12 @@ import java.util.List;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.base.action.ToastAction;
-import run.yigou.gxzy.ui.reader.adapter.binder.ChildTextBinder;
-import run.yigou.gxzy.ui.reader.adapter.binder.HeaderBinder;
 import run.yigou.gxzy.ui.reader.adapter.event.ReadModeClickHandler;
 import run.yigou.gxzy.ui.reader.adapter.event.ReadModeLongClickHandler;
 import run.yigou.gxzy.ui.reader.adapter.model.DataAdapter;
 import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
 import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.adapter.viewholder.TipsChildViewHolder;
-import run.yigou.gxzy.ui.reader.adapter.viewholder.TipsHeaderViewHolder;
-import run.yigou.gxzy.ui.reader.adapter.viewholder.ViewHolderFactory;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 
 /**
@@ -53,26 +48,14 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
     }
 
     // 事件处理器
-    private final ReadModeClickHandler clickHandler;
     private final ReadModeLongClickHandler longClickHandler;
 
     public RefactoredExpandableAdapter(@NonNull Context context) {
         super(context);
-        this.clickHandler = new ReadModeClickHandler(context, this);
         this.longClickHandler = new ReadModeLongClickHandler(context, this);
     }
 
     // ============ 数据管理 ============
-
-    /**
-     * 设置数据 - 旧数据结构（兼容层）
-     * 自动转换为新数据结构并同步展开状态
-     */
-    @Override
-    public void setGroups(@NonNull ArrayList<ExpandableGroupEntity> groups) {
-        // super 处理: this.groups=groups, groupDataList=convert, syncExpand, notify
-        super.setGroups(groups);
-    }
 
     /**
      * 设置搜索结果数据（专用于全局搜索）
@@ -169,32 +152,13 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
     // ============ 数据绑定 ============
 
     @Override
-    public void onBindHeaderViewHolder(BaseViewHolder holder, int groupPosition) {
-        GroupData groupData = groupDataList.get(groupPosition);
-
-        // ViewHolder + Binder 绑定
-        TipsHeaderViewHolder headerVH = ViewHolderFactory.createHeaderViewHolder(holder);
-        HeaderBinder binder = binderFactory.createHeaderBinder();
-        binder.bind(groupData, headerVH, groupPosition);
-
-        // 展开/收起箭头旋转
-        ImageView ivState = holder.get(R.id.iv_state);
-        if (ivState != null) {
-            ivState.setRotation(expandStateManager.isExpanded(groupPosition) ? 90f : 0f);
-        }
-    }
-
-    @Override
     public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {
+        // 公共绑定（ViewHolder + Binder + 长按监听）
+        TipsChildViewHolder childVH = performChildBindingSetup(holder, groupPosition, childPosition);
         GroupData groupData = groupDataList.get(groupPosition);
         ItemData itemData = groupData.getItem(childPosition);
 
-        // ViewHolder + Binder 绑定
-        TipsChildViewHolder childVH = ViewHolderFactory.createChildViewHolder(holder);
-        ChildTextBinder binder = binderFactory.createChildTextBinder();
-        binder.bind(itemData, childVH, childPosition);
-
-        // 设置点击事件
+        // 阅读模式特有：设置点击切换显示模式（text/note/video）
         TextView sectionText = holder.get(R.id.tv_sectiontext);
         TextView sectionNote = holder.get(R.id.tv_sectionnote);
         TextView sectionVideo = holder.get(R.id.tv_sectionvideo);
@@ -202,32 +166,27 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
         if (sectionText != null) {
             sectionText.setOnClickListener(v ->
                     childVH.toggleTextVisibility(itemData.getNoteSpan()));
-            sectionText.setOnLongClickListener(v -> {
-                CharSequence text = itemData.hasTextSpan()
-                        ? itemData.getTextSpan() : sectionText.getText();
-                return longClickHandler.onChildLongClick(groupPosition, childPosition, itemData, text);
-            });
         }
 
         if (sectionNote != null) {
             sectionNote.setOnClickListener(v ->
                     childVH.toggleNoteVisibility(itemData.getVideoSpan()));
-            sectionNote.setOnLongClickListener(v -> {
-                CharSequence text = itemData.hasNoteSpan()
-                        ? itemData.getNoteSpan() : sectionNote.getText();
-                return longClickHandler.onChildLongClick(groupPosition, childPosition, itemData, text);
-            });
         }
 
         if (sectionVideo != null) {
             sectionVideo.setOnClickListener(v ->
                     childVH.toggleVideoVisibility());
-            sectionVideo.setOnLongClickListener(v -> {
-                CharSequence text = itemData.hasVideoSpan()
-                        ? itemData.getVideoSpan() : sectionVideo.getText();
-                return longClickHandler.onChildLongClick(groupPosition, childPosition, itemData, text);
-            });
         }
+    }
+
+    /**
+     * 子项长按事件 - 委托给ReadModeLongClickHandler
+     */
+    @Override
+    protected boolean onChildLongClick(int groupPosition, int childPosition,
+                                        @NonNull ItemData itemData,
+                                        @NonNull CharSequence text) {
+        return longClickHandler.onChildLongClick(groupPosition, childPosition, itemData, text);
     }
 
     // ============ 跳转监听器 ============

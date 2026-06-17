@@ -8,6 +8,8 @@
 package run.yigou.gxzy.ui.reader.adapter;
 
 import android.content.Context;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
@@ -21,10 +23,16 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.ui.media.image.GlideImageLoader;
 import run.yigou.gxzy.ui.media.image.ImageLoader;
 import run.yigou.gxzy.ui.reader.adapter.binder.BinderFactory;
+import run.yigou.gxzy.ui.reader.adapter.binder.ChildTextBinder;
+import run.yigou.gxzy.ui.reader.adapter.binder.HeaderBinder;
 import run.yigou.gxzy.ui.reader.adapter.model.DataAdapter;
 import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.adapter.state.ExpandStateManager;
 import run.yigou.gxzy.ui.reader.adapter.state.SearchStateManager;
+import run.yigou.gxzy.ui.reader.adapter.viewholder.TipsChildViewHolder;
+import run.yigou.gxzy.ui.reader.adapter.viewholder.TipsHeaderViewHolder;
+import run.yigou.gxzy.ui.reader.adapter.viewholder.ViewHolderFactory;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.utils.SpannableStringCache;
 
@@ -186,6 +194,9 @@ public abstract class BaseRefactoredAdapter extends GroupedRecyclerViewAdapter {
      * @param animate       是否使用插入动画
      */
     public void expandGroup(int groupPosition, boolean animate) {
+        if (groupDataList == null || groupPosition < 0 || groupPosition >= groupDataList.size()) {
+            return;
+        }
         expandStateManager.setExpandState(groupPosition, true);
         syncEntityExpandState(groupPosition, true);
         if (animate) {
@@ -209,6 +220,9 @@ public abstract class BaseRefactoredAdapter extends GroupedRecyclerViewAdapter {
      * @param animate       是否使用删除动画
      */
     public void collapseGroup(int groupPosition, boolean animate) {
+        if (groupDataList == null || groupPosition < 0 || groupPosition >= groupDataList.size()) {
+            return;
+        }
         expandStateManager.setExpandState(groupPosition, false);
         syncEntityExpandState(groupPosition, false);
         if (animate) {
@@ -283,6 +297,90 @@ public abstract class BaseRefactoredAdapter extends GroupedRecyclerViewAdapter {
     public void onBindFooterViewHolder(BaseViewHolder holder, int groupPosition) {
         // 不使用Footer，留空实现
     }
+
+    // ============ 数据绑定 ============
+
+    /**
+     * 绑定Header ViewHolder（公共实现，子类无需重写）
+     */
+    @Override
+    public void onBindHeaderViewHolder(BaseViewHolder holder, int groupPosition) {
+        GroupData groupData = groupDataList.get(groupPosition);
+
+        // ViewHolder + Binder 绑定
+        TipsHeaderViewHolder headerVH = ViewHolderFactory.createHeaderViewHolder(holder);
+        HeaderBinder binder = binderFactory.createHeaderBinder();
+        binder.bind(groupData, headerVH, groupPosition);
+
+        // 展开/收起箭头旋转
+        ImageView ivState = holder.get(R.id.iv_state);
+        if (ivState != null) {
+            ivState.setRotation(expandStateManager.isExpanded(groupPosition) ? 90f : 0f);
+        }
+    }
+
+    /**
+     * 执行子项公共绑定设置（ViewHolder创建 + 数据绑定 + 长按监听）
+     * <p>
+     * 子类在 onBindChildViewHolder 中调用此方法完成公共绑定，
+     * 然后添加各自的点击监听器。
+     *
+     * @return TipsChildViewHolder 供子类添加额外的点击监听
+     */
+    protected TipsChildViewHolder performChildBindingSetup(
+            BaseViewHolder holder, int groupPosition, int childPosition) {
+        GroupData groupData = groupDataList.get(groupPosition);
+        ItemData itemData = groupData.getItem(childPosition);
+
+        // ViewHolder + Binder 绑定
+        TipsChildViewHolder childVH = ViewHolderFactory.createChildViewHolder(holder);
+        ChildTextBinder binder = binderFactory.createChildTextBinder();
+        binder.bind(itemData, childVH, childPosition);
+
+        // 设置公共长按监听器
+        TextView sectionText = holder.get(R.id.tv_sectiontext);
+        TextView sectionNote = holder.get(R.id.tv_sectionnote);
+        TextView sectionVideo = holder.get(R.id.tv_sectionvideo);
+
+        if (sectionText != null) {
+            sectionText.setOnLongClickListener(v -> {
+                CharSequence text = itemData.hasTextSpan()
+                        ? itemData.getTextSpan() : sectionText.getText();
+                return onChildLongClick(groupPosition, childPosition, itemData, text);
+            });
+        }
+
+        if (sectionNote != null) {
+            sectionNote.setOnLongClickListener(v -> {
+                CharSequence text = itemData.hasNoteSpan()
+                        ? itemData.getNoteSpan() : sectionNote.getText();
+                return onChildLongClick(groupPosition, childPosition, itemData, text);
+            });
+        }
+
+        if (sectionVideo != null) {
+            sectionVideo.setOnLongClickListener(v -> {
+                CharSequence text = itemData.hasVideoSpan()
+                        ? itemData.getVideoSpan() : sectionVideo.getText();
+                return onChildLongClick(groupPosition, childPosition, itemData, text);
+            });
+        }
+
+        return childVH;
+    }
+
+    /**
+     * 子项长按事件回调，由子类实现以委托给各自的长按处理器
+     *
+     * @param groupPosition 组位置
+     * @param childPosition 子项位置
+     * @param itemData      子项数据
+     * @param text          当前显示的文本
+     * @return true表示消费事件
+     */
+    protected abstract boolean onChildLongClick(int groupPosition, int childPosition,
+                                                 @NonNull ItemData itemData,
+                                                 @NonNull CharSequence text);
 
     // ============ 跳转监听器 ============
 

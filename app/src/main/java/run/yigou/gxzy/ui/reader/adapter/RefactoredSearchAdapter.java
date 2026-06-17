@@ -8,8 +8,6 @@
 package run.yigou.gxzy.ui.reader.adapter;
 
 import android.content.Context;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
@@ -17,18 +15,12 @@ import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 
 import java.util.ArrayList;
 
-import run.yigou.gxzy.R;
 import run.yigou.gxzy.base.action.ToastAction;
-import run.yigou.gxzy.ui.reader.adapter.binder.ChildTextBinder;
-import run.yigou.gxzy.ui.reader.adapter.binder.HeaderBinder;
 import run.yigou.gxzy.ui.reader.adapter.event.SearchModeClickHandler;
 import run.yigou.gxzy.ui.reader.adapter.event.SearchModeLongClickHandler;
 import run.yigou.gxzy.ui.reader.adapter.model.DataAdapter;
 import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
 import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
-import run.yigou.gxzy.ui.reader.adapter.viewholder.TipsChildViewHolder;
-import run.yigou.gxzy.ui.reader.adapter.viewholder.TipsHeaderViewHolder;
-import run.yigou.gxzy.ui.reader.adapter.viewholder.ViewHolderFactory;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 
 /**
@@ -51,12 +43,10 @@ public class RefactoredSearchAdapter extends BaseRefactoredAdapter
     }
 
     // 事件处理器
-    private final SearchModeClickHandler clickHandler;
     private final SearchModeLongClickHandler longClickHandler;
 
     public RefactoredSearchAdapter(@NonNull Context context) {
         super(context);
-        this.clickHandler = new SearchModeClickHandler(context, this);
         this.longClickHandler = new SearchModeLongClickHandler(context, this);
         // 搜索模式默认开启
         searchStateManager.enterSearchMode("");
@@ -91,56 +81,19 @@ public class RefactoredSearchAdapter extends BaseRefactoredAdapter
     // ============ 数据绑定 ============
 
     @Override
-    public void onBindHeaderViewHolder(BaseViewHolder holder, int groupPosition) {
-        GroupData groupData = groupDataList.get(groupPosition);
-
-        TipsHeaderViewHolder headerVH = ViewHolderFactory.createHeaderViewHolder(holder);
-        HeaderBinder binder = binderFactory.createHeaderBinder();
-        binder.bind(groupData, headerVH, groupPosition);
-
-        ImageView ivState = holder.get(R.id.iv_state);
-        if (ivState != null) {
-            ivState.setRotation(expandStateManager.isExpanded(groupPosition) ? 90f : 0f);
-        }
+    public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {
+        // 搜索模式只需公共绑定（ViewHolder + Binder + 长按监听），无额外点击监听
+        performChildBindingSetup(holder, groupPosition, childPosition);
     }
 
+    /**
+     * 子项长按事件 - 委托给SearchModeLongClickHandler
+     */
     @Override
-    public void onBindChildViewHolder(BaseViewHolder holder, int groupPosition, int childPosition) {
-        GroupData groupData = groupDataList.get(groupPosition);
-        ItemData itemData = groupData.getItem(childPosition);
-
-        TipsChildViewHolder childVH = ViewHolderFactory.createChildViewHolder(holder);
-        ChildTextBinder binder = binderFactory.createChildTextBinder();
-        binder.bind(itemData, childVH, childPosition);
-
-        // 搜索模式下注释掉setOnClickListener，避免与LocalLinkMovementMethod冲突
-        TextView sectionText = holder.get(R.id.tv_sectiontext);
-        TextView sectionNote = holder.get(R.id.tv_sectionnote);
-        TextView sectionVideo = holder.get(R.id.tv_sectionvideo);
-
-        if (sectionText != null) {
-            sectionText.setOnLongClickListener(v -> {
-                CharSequence text = itemData.hasTextSpan()
-                        ? itemData.getTextSpan() : sectionText.getText();
-                return longClickHandler.onChildLongClick(groupPosition, childPosition, itemData, text);
-            });
-        }
-
-        if (sectionNote != null) {
-            sectionNote.setOnLongClickListener(v -> {
-                CharSequence text = itemData.hasNoteSpan()
-                        ? itemData.getNoteSpan() : sectionNote.getText();
-                return longClickHandler.onChildLongClick(groupPosition, childPosition, itemData, text);
-            });
-        }
-
-        if (sectionVideo != null) {
-            sectionVideo.setOnLongClickListener(v -> {
-                CharSequence text = itemData.hasVideoSpan()
-                        ? itemData.getVideoSpan() : sectionVideo.getText();
-                return longClickHandler.onChildLongClick(groupPosition, childPosition, itemData, text);
-            });
-        }
+    protected boolean onChildLongClick(int groupPosition, int childPosition,
+                                        @NonNull ItemData itemData,
+                                        @NonNull CharSequence text) {
+        return longClickHandler.onChildLongClick(groupPosition, childPosition, itemData, text);
     }
 
     // ============ 跳转监听器 ============

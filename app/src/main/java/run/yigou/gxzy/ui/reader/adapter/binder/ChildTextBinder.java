@@ -9,16 +9,12 @@
 
 package run.yigou.gxzy.ui.reader.adapter.binder;
 
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
-import android.text.style.ClickableSpan;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import run.yigou.gxzy.log.EasyLog;
 
 import run.yigou.gxzy.ui.media.image.ImageLoader;
 import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
@@ -142,79 +138,45 @@ public class ChildTextBinder implements DataBinder<ChildEntity, TipsChildViewHol
     public void bind(@NonNull ItemData data,
                      @NonNull TipsChildViewHolder viewHolder,
                      int position) {
-        EasyLog.print("=== ChildTextBinder.bind(ItemData) 诊断开始 ===");
-        EasyLog.print("position: " + position);
-        
         // 设置LocalLinkMovementMethod以支持ClickableSpan点击
         viewHolder.getTextView().setMovementMethod(LocalLinkMovementMethod.getInstance());
         viewHolder.getNoteView().setMovementMethod(LocalLinkMovementMethod.getInstance());
         viewHolder.getVideoView().setMovementMethod(LocalLinkMovementMethod.getInstance());
-        
-        EasyLog.print("✅ MovementMethod已设置");
-        
+
         // 设置初始可见性: text可见, note和video默认隐藏
         viewHolder.getTextView().setVisibility(View.VISIBLE);
         viewHolder.getNoteView().setVisibility(View.GONE);
         viewHolder.getVideoView().setVisibility(View.GONE);
-        
-        // 诊断: 检查textSpan状态
-        EasyLog.print("hasTextSpan: " + data.hasTextSpan());
-        
-        // 绑定正文
+
+        // 绑定正文（优先使用富文本以保留ClickableSpan）
         if (data.hasTextSpan()) {
-            SpannableStringBuilder textSpan = data.getTextSpan();
-            EasyLog.print("✅ textSpan不为空, length: " + textSpan.length());
-            
-            // 检查ClickableSpan
-            ClickableSpan[] spans = textSpan.getSpans(0, textSpan.length(), ClickableSpan.class);
-            EasyLog.print("ClickableSpan count: " + spans.length);
-            
-            if (spans.length > 0) {
-                EasyLog.print("✅ ClickableSpan存在！");
-                for (int i = 0; i < Math.min(spans.length, 5); i++) {
-                    int start = textSpan.getSpanStart(spans[i]);
-                    int end = textSpan.getSpanEnd(spans[i]);
-                    String clickText = textSpan.subSequence(start, end).toString();
-                    EasyLog.print("  Span[" + i + "]: \"" + clickText + "\" (" + start + "-" + end + ")");
-                }
-            } else {
-                EasyLog.print("❌ 没有ClickableSpan！");
-            }
-            
-            viewHolder.getTextView().setText(textSpan);
-            EasyLog.print("setText(textSpan) 完成");
-            
-            // 验证MovementMethod是否还在
-            EasyLog.print("MovementMethod after setText: " + viewHolder.getTextView().getMovementMethod());
+            viewHolder.getTextView().setText(data.getTextSpan());
         } else {
-            EasyLog.print("⚠️ textSpan为null，使用普通文本");
             viewHolder.getTextView().setText(data.getText());
         }
-        
-        EasyLog.print("=== ChildTextBinder.bind(ItemData) 诊断结束 ===\n");
-        
+
         // 绑定笺注
         if (data.hasNoteSpan()) {
             viewHolder.getNoteView().setText(data.getNoteSpan());
-            // Fix: 如果有高亮关键字，强制显示
+            // 如果有高亮关键字，强制显示
             if (hasHighlight(data.getNoteSpan())) {
                 viewHolder.getNoteView().setVisibility(View.VISIBLE);
             }
         } else if (data.hasNote()) {
             viewHolder.getNoteView().setText(data.getNote());
         }
-        
+
         // 绑定视频
         if (data.hasVideoSpan()) {
             viewHolder.getVideoView().setText(data.getVideoSpan());
-            // Fix: 如果有高亮关键字，强制显示
+            // 如果有高亮关键字，强制显示
             if (hasHighlight(data.getVideoSpan())) {
                 viewHolder.getVideoView().setVisibility(View.VISIBLE);
             }
         } else if (data.hasVideo()) {
             viewHolder.getVideoView().setText(data.getVideoUrl());
         }
-        
+
         // 加载图片(如果有)
         if (imageLoader != null && data.hasImage()) {
             String imageUrl = buildImageUrl(data.getImageUrl());

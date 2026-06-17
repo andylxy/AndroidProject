@@ -10,18 +10,14 @@
 package run.yigou.gxzy.ui.reader.adapter.model;
 
 import android.text.SpannableStringBuilder;
-import android.text.style.ClickableSpan;
 
 import androidx.annotation.NonNull;
-
-import run.yigou.gxzy.log.EasyLog;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import run.yigou.gxzy.ui.reader.entity.ChildEntity;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
-import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * 数据转换器 - 旧数据结构转换为新数据结构
@@ -69,46 +65,17 @@ public class DataAdapter {
      */
     @NonNull
     public static ItemData fromChildEntity(@NonNull ChildEntity old) {
-        EasyLog.print("=== DataAdapter.fromChildEntity() 诊断开始 ===");
-        
-        // 获取各个字段(使用正确的方法名)
+        // 获取基础文本字段
         String text = old.getChild_section_text() != null ? old.getChild_section_text() : "";
         String note = old.getChild_section_note();
         String videoUrl = old.getChild_section_video();
         String imageUrl = old.getChild_section_image();
-        
-        // 诊断: 检查富文本版本
+
+        // 获取富文本版本（如已渲染过则保留ClickableSpan等信息）
         SpannableStringBuilder textSpan = old.getAttributed_child_section_text();
         SpannableStringBuilder noteSpan = old.getAttributed_child_section_note();
         SpannableStringBuilder videoSpan = old.getAttributed_child_section_video();
-        
-        EasyLog.print("text.length: " + text.length());
-        
-        if (textSpan != null) {
-            EasyLog.print("✅ textSpan 不为空, length: " + textSpan.length());
-            
-            // 检查 ClickableSpan
-            ClickableSpan[] spans = textSpan.getSpans(0, textSpan.length(), ClickableSpan.class);
-            EasyLog.print("ClickableSpan count: " + spans.length);
-            
-            if (spans.length > 0) {
-                EasyLog.print("✅ ClickableSpan 存在！");
-                for (int i = 0; i < Math.min(spans.length, 3); i++) {
-                    int start = textSpan.getSpanStart(spans[i]);
-                    int end = textSpan.getSpanEnd(spans[i]);
-                    String clickText = textSpan.subSequence(start, end).toString();
-                    EasyLog.print("  Span[" + i + "]: \"" + clickText + "\" (" + start + "-" + end + ")");
-                }
-            } else {
-                EasyLog.print("❌ 没有 ClickableSpan！");
-            }
-        } else {
-            EasyLog.print("❌ textSpan 为 null！");
-        }
-        
-        EasyLog.print("=== DataAdapter.fromChildEntity() 诊断结束 ===\n");
-        
-        // 获取富文本版本(如果已经渲染过)
+
         return new ItemData(
             text,
             note,
