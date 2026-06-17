@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Locale;
 
 import run.yigou.gxzy.data.model.DataItem;
-import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
+import run.yigou.gxzy.utils.CollectionsUtils;
 
 
 
@@ -89,7 +89,7 @@ public class Fang extends DataItem {
             this.helpYaoList = new LinkedList();
         }
         // 创建一个条件对象，用于测试 Yao 的名称是否与给定字符串相等
-        TipsNetHelper.Condition<YaoUse> iBool = new TipsNetHelper.Condition<YaoUse>() {
+        CollectionsUtils.Condition<YaoUse> iBool = new CollectionsUtils.Condition<YaoUse>() {
             @Override
             public boolean test(YaoUse yaoUse) {
                 // 重写 test 方法，实现名称比较逻辑
@@ -98,7 +98,7 @@ public class Fang extends DataItem {
         };
         // 使用 TipsNetHelper 的 some 方法检查标准、额外和辅助 Yao 列表中是否存在满足条件的 Yao
         // 如果任一列表中存在与给定字符串相等的 Yao 名称，则返回 true
-        return TipsNetHelper.some(this.standardYaoList, iBool) || TipsNetHelper.some(this.extraYaoList, iBool) || TipsNetHelper.some(this.helpYaoList, iBool);
+        return CollectionsUtils.some(this.standardYaoList, iBool) || CollectionsUtils.some(this.extraYaoList, iBool) || CollectionsUtils.some(this.helpYaoList, iBool);
     }
 
     /**

@@ -4,18 +4,19 @@ import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Build;
 import android.text.SpannableStringBuilder;
 import android.text.style.ClickableSpan;
-import android.util.Pair;
 import android.widget.TextView;
 
+import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.log.EasyLog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,27 +31,18 @@ import run.yigou.gxzy.ui.reader.data.BookData;
 import run.yigou.gxzy.ui.reader.data.BookDataManager;
 import run.yigou.gxzy.ui.reader.data.ChapterData;
 import run.yigou.gxzy.base.GlobalDataHolder;
-import run.yigou.gxzy.ui.reader.entity.GroupData;
-import run.yigou.gxzy.ui.reader.entity.ItemData;
 import run.yigou.gxzy.ui.reader.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.reader.repository.BookRepository;
 import run.yigou.gxzy.text.ClickLink;
 import run.yigou.gxzy.text.TipsTextRenderer;
 import run.yigou.gxzy.ui.reader.search.TipsSearchEngine;
-import run.yigou.gxzy.ui.reader.search.SearchDataAdapter;
-import run.yigou.gxzy.ui.reader.widget.TipsLittleMingCiViewWindow;
-import run.yigou.gxzy.ui.reader.widget.TipsLittleTableViewWindow;
-import run.yigou.gxzy.tips.widget.ITipsWindowHost;
-import run.yigou.gxzy.ui.reader.TipsFragmentActivity;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * Tips 模块核心辅助类 (Facade)
  * 职责：
  * 1. 管理 BookContext (供点击事件使用)
  * 2. 也是 TextRenderer, SearchEngine, UIHelper 的统一入口 (为了兼容)
- * 3. 处理复杂的 ClickLink 逻辑
+ * 3. 处理复杂的 ClickLink 逻辑（已委托至 {@link TipsClickHandler}）
  */
 public class TipsNetHelper {
 
@@ -102,9 +94,26 @@ public class TipsNetHelper {
 
     // ================== Text Renderer Delegation ==================
 
+    /**
+     * @deprecated 请直接使用 {@link #renderText(String)}，该方法功能完全相同。
+     *             保留仅为兼容旧调用方。
+     */
+    @Deprecated
     public static SpannableStringBuilder createSpannable(String text) {
-        // 使用默认的 renderText (带点击事件)
         return renderText(text);
+    }
+
+    /**
+     * 使用默认 ClickLink 渲染文本为富文本 SpannableStringBuilder。
+     *
+     * <p>委托到 {@link TipsClickHandler#renderText(String)}，
+     * 后者内部使用 {@link TipsTextRenderer#renderText(String, ClickLink)} 配合默认点击处理器。
+     *
+     * @param str 原始文本字符串，支持标记语法
+     * @return 带有 ClickableSpan 的 SpannableStringBuilder
+     */
+    public static SpannableStringBuilder renderText(String str) {
+        return TipsClickHandler.renderText(str);
     }
 
     public static SpannableStringBuilder renderText(String str, ClickLink clickLink) {
@@ -144,12 +153,12 @@ public class TipsNetHelper {
 
         // 遍历药物数据
         if (globalData.getYaoMap() == null) {
-            return spannableStringBuilder.append(TipsNetHelper.renderText("$r{药物数据未加载}"));
+            return spannableStringBuilder.append(renderText("$r{药物数据未加载}"));
         }
         Map<String, Yao> yaoMap = globalData.getYaoMap();
         Yao yaoData = yaoMap.get(str);
         if (yaoData == null) {
-            return spannableStringBuilder.append(TipsNetHelper.renderText("$r{药物未找到资料}"));
+            return spannableStringBuilder.append(renderText("$r{药物未找到资料}"));
         }
 
         String yaoName = yaoData.getName();
@@ -161,7 +170,7 @@ public class TipsNetHelper {
         }
 
         if (spannableStringBuilder.length() == 0) {
-            spannableStringBuilder.append(TipsNetHelper.renderText("$r{药物未找到资料}"));
+            spannableStringBuilder.append(renderText("$r{药物未找到资料}"));
         }
         spannableStringBuilder.append("\n\n");
 
@@ -203,7 +212,7 @@ public class TipsNetHelper {
 
                         if (name.equals(str)) {
                             matchedCount++;
-                            fangBuilder.append(TipsNetHelper.renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
+                            fangBuilder.append(renderText(((Fang) dataItem).getFangNameLinkWithYaoWeight(str)));
                             break; 
                         }
                     }
@@ -214,7 +223,7 @@ public class TipsNetHelper {
                 if (sectionCount > 0) {
                     spannableStringBuilder.append("\n\n");
                 }
-                spannableStringBuilder.append(TipsNetHelper.renderText(
+                spannableStringBuilder.append(renderText(
                         String.format("$m{%s}-$m{含“$v{%s}”凡%d方：}", sectionData.getHeader(), str, matchedCount)));
                 spannableStringBuilder.append("\n").append(fangBuilder);
                 sectionCount++;
@@ -224,154 +233,40 @@ public class TipsNetHelper {
         return spannableStringBuilder;
     }
 
-    private static final ClickLink DEFAULT_CLICK_LINK = new ClickLink() {
+    // ================== Dialog Helper ==================
 
-        @Override
-        public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
-            String keyword = textView.getText()
-                    .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
-                    .toString();
+    /** 对话框类型：仅拷贝内容 */
+    public static final int DIALOG_TYPE_COPY = 1;
+    /** 对话框类型：拷贝内容 + 跳转到本章内容 */
+    public static final int DIALOG_TYPE_COPY_AND_JUMP = 2;
+    /** 对话框类型：重新下载本章节 */
+    public static final int DIALOG_TYPE_REDOWNLOAD = 3;
 
-            if (sBookRepository == null || sCurrentBookId == -1) {
-                EasyLog.print("❌ BookRepository未设置，无法搜索");
-                return;
-            }
-
-            SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
-            Pair<List<GroupData>, List<List<ItemData>>> data = 
-                    adapter.searchYaoContent(keyword.trim());
-
-            Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-
-            TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
-            window.setData(textView.getContext(), data);
-            window.setFang(keyword);
-            window.setRect(textRect);
-
-            Context context = textView.getContext();
-            if (context instanceof AppCompatActivity) {
-                AppCompatActivity activity = (AppCompatActivity) context;
-                window.setHost(new ITipsWindowHost() {
-                    @Override
-                    public int getWrapperViewId() {
-                        return run.yigou.gxzy.R.id.wrapper;
-                    }
-
-                    @Override
-                    public void navigateToDetail(Intent intent) {
-                        intent.setClass(activity, TipsFragmentActivity.class);
-                        activity.startActivity(intent);
-                    }
-                });
-                window.show(activity.getSupportFragmentManager());
-            }
-        }
-
-        @Override
-        public void clickFangLink(TextView textView, ClickableSpan clickableSpan) {
-            String keyword = textView.getText()
-                    .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
-                    .toString();
-
-            if (sBookRepository == null || sCurrentBookId == -1) {
-                EasyLog.print("❌ BookRepository未设置，无法搜索");
-                return;
-            }
-
-            SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
-            Pair<List<GroupData>, List<List<ItemData>>> data = 
-                    adapter.searchFangContent(keyword.trim());
-
-            Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-
-            TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
-            window.setData(textView.getContext(), data);
-            window.setFang(keyword);
-            window.setRect(textRect);
-
-            Context context = textView.getContext();
-            if (context instanceof AppCompatActivity) {
-                AppCompatActivity activity = (AppCompatActivity) context;
-                window.setHost(new ITipsWindowHost() {
-                    @Override
-                    public int getWrapperViewId() {
-                        return run.yigou.gxzy.R.id.wrapper;
-                    }
-
-                    @Override
-                    public void navigateToDetail(Intent intent) {
-                        intent.setClass(activity, TipsFragmentActivity.class);
-                        activity.startActivity(intent);
-                    }
-                });
-                window.show(activity.getSupportFragmentManager());
-            } else {
-                EasyLog.print("❌ Context不是Activity!");
-            }
-        }
-
-        @Override
-        public void clickMingCiLink(TextView textView, ClickableSpan clickableSpan) {
-            String keyword = textView.getText()
-                    .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
-                    .toString();
-
-            if (sBookRepository == null || sCurrentBookId == -1) {
-                EasyLog.print("❌ BookRepository未设置，无法搜索");
-                return;
-            }
-
-            SearchDataAdapter adapter = new SearchDataAdapter(sBookRepository, sCurrentBookId);
-            Pair<List<GroupData>, List<List<ItemData>>> data = 
-                    adapter.searchMingCiContent(keyword.trim());
-
-            Rect textRect = TipsNetHelper.getTextRect(clickableSpan, textView);
-
-            TipsLittleMingCiViewWindow window = new TipsLittleMingCiViewWindow();
-            window.setData(textView.getContext(), data);
-            window.setRect(textRect);
-
-            Context context = textView.getContext();
-            if (context instanceof AppCompatActivity) {
-                AppCompatActivity activity = (AppCompatActivity) context;
-                window.setHost(new ITipsWindowHost() {
-                    @Override
-                    public int getWrapperViewId() {
-                        return run.yigou.gxzy.R.id.wrapper;
-                    }
-
-                    @Override
-                    public void navigateToDetail(Intent intent) {
-                        intent.setClass(activity, TipsFragmentActivity.class);
-                        activity.startActivity(intent);
-                    }
-                });
-                window.show(activity.getSupportFragmentManager());
-            }
-        }
-
-    };
-
-    public static SpannableStringBuilder renderText(String str) {
-        return renderText(str, DEFAULT_CLICK_LINK);
-    }
-
-    // ================== Dialog Helper (Keep) ==================
+    @IntDef({DIALOG_TYPE_COPY, DIALOG_TYPE_COPY_AND_JUMP, DIALOG_TYPE_REDOWNLOAD})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DialogType {}
 
     private static final List<String> reData = Arrays.asList( "重新下本章节");
     private static final List<String> data = Arrays.asList("拷贝内容");
     private static final List<String> noFooterData = Arrays.asList("拷贝内容", "跳转到本章内容");
 
-    public static MenuDialog.Builder showListDialog(Context context, int type) {
+    /**
+     * 显示菜单对话框。
+     *
+     * @param context 上下文
+     * @param type    对话框类型，使用 {@link #DIALOG_TYPE_COPY} / {@link #DIALOG_TYPE_COPY_AND_JUMP} / {@link #DIALOG_TYPE_REDOWNLOAD}
+     * @return MenuDialog.Builder 实例
+     */
+    public static MenuDialog.Builder showListDialog(Context context, @DialogType int type) {
         MenuDialog.Builder builder;
         switch (type) {
-            case 3:
+            case DIALOG_TYPE_REDOWNLOAD:
                 builder = new MenuDialog.Builder(context).setList(reData);
                 break;
-            case 2:
+            case DIALOG_TYPE_COPY_AND_JUMP:
                 builder = new MenuDialog.Builder(context).setList(noFooterData);
                 break;
-            case 1:
+            case DIALOG_TYPE_COPY:
             default:
                 builder = new MenuDialog.Builder(context).setList(data);
         }
@@ -380,22 +275,19 @@ public class TipsNetHelper {
 
     }
 
-    // ================== Utils (Keep) ==================
+    // ================== Package-Private Context Accessors ==================
 
-    @FunctionalInterface
-    public interface Condition<T> {
-        boolean test(T t);
+    /**
+     * 获取当前 BookRepository 上下文（package-private，供同包 TipsClickHandler 使用）。
+     */
+    static BookRepository getBookRepository() {
+        return sBookRepository;
     }
 
-    public static <T> boolean some(List<T> list, Condition<T> condition) {
-        if (list == null || condition == null) {
-            return false;
-        }
-        for (T element : list) {
-            if (condition.test(element)) {
-                return true;
-            }
-        }
-        return false;
+    /**
+     * 获取当前书籍 ID（package-private，供同包 TipsClickHandler 使用）。
+     */
+    static int getCurrentBookId() {
+        return sCurrentBookId;
     }
 }
