@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 import run.yigou.gxzy.data.model.Fang;
 import run.yigou.gxzy.ui.reader.entity.SearchKeyEntity;
-import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
+import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
 import run.yigou.gxzy.text.TipsTextRenderer;
 import run.yigou.gxzy.utils.DebugLog;
 
@@ -167,7 +167,7 @@ public class TipsSearchEngine {
     /**
      * 高亮匹配的文本
      * 
-     * 修复：使用 TipsNetHelper.renderText() 代替 TipsTextRenderer.createSpannable()
+     * 修复：使用 TipsClickHandler.renderText() 代替 TipsTextRenderer.createSpannable()
      * 这样可以正确创建 ClickableSpan，支持 LocalLinkMovementMethod 点击
      */
     public static void createSingleDataCopy(DataItem dataItem, Pattern pattern) {
@@ -176,12 +176,12 @@ public class TipsSearchEngine {
             return;
         }
 
-        // ✅ 使用 TipsNetHelper.renderText() 代替 TipsTextRenderer.createSpannable()
-        // TipsNetHelper.renderText() 会创建带有 ClickLink 的 SpannableStringBuilder
+        // ✅ 使用 TipsClickHandler.renderText() 代替 TipsTextRenderer.createSpannable()
+        // TipsClickHandler.renderText() 会创建带有 ClickLink 的 SpannableStringBuilder
         // 这样 ClickableSpan 才能正常工作
-        SpannableStringBuilder spannableText = TipsNetHelper.renderText(dataItem.getText());
-        SpannableStringBuilder spannableNote = TipsNetHelper.renderText(dataItem.getNote());
-        SpannableStringBuilder spannableSectionVideo = TipsNetHelper.renderText(dataItem.getSectionvideo());
+        SpannableStringBuilder spannableText = TipsClickHandler.renderText(dataItem.getText());
+        SpannableStringBuilder spannableNote = TipsClickHandler.renderText(dataItem.getNote());
+        SpannableStringBuilder spannableSectionVideo = TipsClickHandler.renderText(dataItem.getSectionvideo());
 
         // 创建Matcher对象，用于在各个部分中匹配模式
         Matcher matcherText = pattern.matcher(spannableText);

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
+import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
 
 /**
  * 数据项类，用于存储和管理数据项的各种属性。
@@ -157,7 +157,7 @@ public class DataItem implements Serializable {
      */
     public SpannableStringBuilder getAttributedSectionVideo() {
         if (this.attributedSectionVideo == null && this.sectionvideo != null) {
-            this.attributedSectionVideo = TipsNetHelper.renderText(this.sectionvideo);
+            this.attributedSectionVideo = TipsClickHandler.renderText(this.sectionvideo);
         }
         return attributedSectionVideo;
     }
@@ -176,7 +176,7 @@ public class DataItem implements Serializable {
      */
     public SpannableStringBuilder getAttributedNote() {
         if (this.attributedNote == null && this.note != null) {
-            this.attributedNote = TipsNetHelper.renderText(this.note);
+            this.attributedNote = TipsClickHandler.renderText(this.note);
         }
         return attributedNote;
     }
@@ -204,7 +204,7 @@ public class DataItem implements Serializable {
     public void setNote(String note) {
         this.note = note;
         // 延迟渲染：此处不立即生成 SpannedString，而是在 getAttributedNote() 中按需生成
-        // this.attributedNote = TipsNetHelper.renderText(this.note);
+        // this.attributedNote = TipsClickHandler.renderText(this.note);
         this.attributedNote = null; // 重置缓存
     }
 
@@ -223,7 +223,7 @@ public class DataItem implements Serializable {
     public void setSectionvideo(String sectionvideo) {
         this.sectionvideo = sectionvideo;
         // 延迟渲染：此处不立即生成 SpannedString，而是在 getAttributedSectionVideo() 中按需生成
-        // this.attributedSectionVideo = TipsNetHelper.renderText(this.sectionvideo);
+        // this.attributedSectionVideo = TipsClickHandler.renderText(this.sectionvideo);
         this.attributedSectionVideo = null; // 重置缓存
     }
 
@@ -250,7 +250,7 @@ public class DataItem implements Serializable {
     public void setText(String str) {
         this.text = str;
         // 延迟渲染：此处不立即生成 SpannedString，而是在 getAttributedText() 中按需生成
-        // this.attributedText = TipsNetHelper.renderText(this.text);
+        // this.attributedText = TipsClickHandler.renderText(this.text);
         this.attributedText = null; // 重置缓存
     }
 
@@ -360,7 +360,7 @@ public class DataItem implements Serializable {
      */
     public SpannableStringBuilder getAttributedText() {
         if (this.attributedText == null && this.text != null) {
-            this.attributedText = TipsNetHelper.renderText(this.text);
+            this.attributedText = TipsClickHandler.renderText(this.text);
         }
         return this.attributedText;
     }
