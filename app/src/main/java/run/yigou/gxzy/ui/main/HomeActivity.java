@@ -27,6 +27,7 @@ import run.yigou.gxzy.ui.account.MyFragmentPersonal;
 import run.yigou.gxzy.ui.reader.BookCollectCaseFragment;
 import run.yigou.gxzy.ui.main.HomeFragment;
 import run.yigou.gxzy.ui.main.NavigationAdapter;
+import run.yigou.gxzy.log.EasyLog;
 
 /**
  * 首页Activity
@@ -52,6 +53,8 @@ import run.yigou.gxzy.ui.main.NavigationAdapter;
 public final class HomeActivity extends AppActivity
         implements NavigationAdapter.OnNavigationListener {
 
+    private static final String TAG = "HomeActivity";
+
     /**
      * Intent参数：Fragment索引
      */
@@ -62,10 +65,6 @@ public final class HomeActivity extends AppActivity
     private static final String INTENT_KEY_IN_FRAGMENT_CLASS = "fragmentClass";
     
     // Fragment索引常量
-    /**
-     * Fragment索引：书架
-     */
-    private static final int FRAGMENT_INDEX_BOOKSHELF = 0;
     /**
      * Fragment索引：发现
      */
@@ -79,63 +78,19 @@ public final class HomeActivity extends AppActivity
      */
     private static final int FRAGMENT_INDEX_PROFILE = 3;
     
-    // 导航索引常量
-    /**
-     * 导航索引：书架
-     */
-    private static final int NAVIGATION_INDEX_BOOKSHELF = 0;
-    /**
-     * 导航索引：发现
-     */
-    private static final int NAVIGATION_INDEX_FOUND = 1;
-    /**
-     * 导航索引：AI聊天
-     */
-    private static final int NAVIGATION_INDEX_AI_CHAT = 2;
-    /**
-     * 导航索引：我的
-     */
-    private static final int NAVIGATION_INDEX_PROFILE = 3;
-    
+
     // Fragment数量常量
-    /**
-     * 未登录时的Fragment数量
-     */
-    private static final int FRAGMENT_COUNT_WITHOUT_AI = 3;
     /**
      * 登录后的Fragment数量
      */
     private static final int FRAGMENT_COUNT_WITH_AI = 4;
     
-    // 登录状态时的Fragment索引常量
-    /**
-     * 登录状态下我的页面索引（有AI聊天）
-     */
-    private static final int PROFILE_FRAGMENT_INDEX_WITH_AI = 3;
-    /**
-     * 未登录状态下我的页面索引（无AI聊天）
-     */
-    private static final int PROFILE_FRAGMENT_INDEX_WITHOUT_AI = 2;
-    
-    // 其他常用索引常量
-    /**
-     * AI聊天Fragment索引
-     */
-    private static final int AI_CHAT_FRAGMENT_INDEX = 2;
-    /**
-     * 发现Fragment索引
-     */
-    private static final int FOUND_FRAGMENT_INDEX = 1;
-    
+
     // 延迟时间常量（毫秒）
     /**
      * 退出延迟时间
      */
     private static final int EXIT_DELAY_MS = 300;
-    /**
-     * 双击间隔时间
-     */
-    private static final int DOUBLE_CLICK_INTERVAL_MS = 1000;
     
     /**
      * ViewPager，用于管理Fragment页面切换
@@ -193,7 +148,6 @@ public final class HomeActivity extends AppActivity
     protected void initView() {
         setupViews();
         setupNavigation();
-        setupViewPager();
     }
 
     /**
@@ -260,13 +214,6 @@ public final class HomeActivity extends AppActivity
                 getString(R.string.home_nav_me),
                 ContextCompat.getDrawable(this, R.drawable.home_me_selector)
         ));
-    }
-
-    /**
-     * 设置ViewPager
-     */
-    private void setupViewPager() {
-        // ViewPager设置将在initData中进行
     }
     /**
      * 发现页面Fragment
@@ -397,7 +344,7 @@ public final class HomeActivity extends AppActivity
         int currentPosition = mViewPager.getCurrentItem();
         
         // 登录后添加AI聊天Fragment（在第3个位置，索引为2）
-        mPagerAdapter.addFragment(AiMsgFragment.newInstance(), null, AI_CHAT_FRAGMENT_INDEX);
+        mPagerAdapter.addFragment(AiMsgFragment.newInstance(), null, FRAGMENT_INDEX_AI_CHAT);
         
         // 恢复页面位置
         restorePositionAfterAddingAiChat(currentPosition);
@@ -411,7 +358,7 @@ public final class HomeActivity extends AppActivity
         int currentPosition = mViewPager.getCurrentItem();
         
         // 登出后移除AI聊天Fragment（索引为2）
-        mPagerAdapter.removeFragment(AI_CHAT_FRAGMENT_INDEX);
+        mPagerAdapter.removeFragment(FRAGMENT_INDEX_AI_CHAT);
         
         // 恢复页面位置
         restorePositionAfterRemovingAiChat(currentPosition);
@@ -441,10 +388,10 @@ public final class HomeActivity extends AppActivity
      * 计算添加AI聊天Fragment后的目标位置
      */
     private int calculateTargetPositionAfterAdding(int currentPosition) {
-        if (currentPosition == AI_CHAT_FRAGMENT_INDEX) {
+        if (currentPosition == FRAGMENT_INDEX_AI_CHAT) {
             // 原来的"我的"现在在索引3
-            return PROFILE_FRAGMENT_INDEX_WITH_AI;
-        } else if (currentPosition < AI_CHAT_FRAGMENT_INDEX) {
+            return FRAGMENT_INDEX_PROFILE;
+        } else if (currentPosition < FRAGMENT_INDEX_AI_CHAT) {
             // 书架和发现位置不变
             return currentPosition;
         }
@@ -455,20 +402,18 @@ public final class HomeActivity extends AppActivity
      * 计算移除AI聊天Fragment后的目标位置
      */
     private int calculateTargetPositionAfterRemoving(int currentPosition) {
-        if (currentPosition == AI_CHAT_FRAGMENT_INDEX) {
+        if (currentPosition == FRAGMENT_INDEX_AI_CHAT) {
             // 如果在AI聊天页面，跳转到发现
-            return FOUND_FRAGMENT_INDEX;
-        } else if (currentPosition == PROFILE_FRAGMENT_INDEX_WITH_AI) {
-            // 如果在"我的"页面，调整到新索引2
-            return PROFILE_FRAGMENT_INDEX_WITHOUT_AI;
-        } else if (currentPosition < AI_CHAT_FRAGMENT_INDEX) {
+            return FRAGMENT_INDEX_FOUND;
+        } else if (currentPosition == FRAGMENT_INDEX_PROFILE) {
+            // 如果在"我的"页面，调整到AI聊天索引
+            return FRAGMENT_INDEX_AI_CHAT;
+        } else if (currentPosition < FRAGMENT_INDEX_AI_CHAT) {
             // 书架和发现位置不变
             return currentPosition;
         }
         return -1; // 无效位置
     }
-
-    // 注释：移除了未使用的onResume和事件处理方法
 
     /**
      * 处理新的Intent
@@ -493,7 +438,8 @@ public final class HomeActivity extends AppActivity
                 outState.putInt(INTENT_KEY_IN_FRAGMENT_INDEX, mViewPager.getCurrentItem());
             }
         } catch (Exception e) {
-            android.util.Log.e("HomeActivity", "Error saving instance state", e);
+            EasyLog.print(TAG, "Error saving instance state");
+            EasyLog.print(e);
         }
     }
 
@@ -506,7 +452,8 @@ public final class HomeActivity extends AppActivity
                 switchFragment(savedInstanceState.getInt(INTENT_KEY_IN_FRAGMENT_INDEX, FRAGMENT_INDEX_FOUND));
             }
         } catch (Exception e) {
-            android.util.Log.e("HomeActivity", "Error restoring instance state", e);
+            EasyLog.print(TAG, "Error restoring instance state");
+            EasyLog.print(e);
         }
     }
 
@@ -529,7 +476,8 @@ public final class HomeActivity extends AppActivity
                 }
             }
         } catch (Exception e) {
-            android.util.Log.e("HomeActivity", "Error switching fragment to index: " + fragmentIndex, e);
+            EasyLog.print(TAG, "Error switching fragment to index: " + fragmentIndex);
+            EasyLog.print(e);
         }
     }
 
@@ -578,7 +526,8 @@ public final class HomeActivity extends AppActivity
                 return true;
             }
         } catch (Exception e) {
-            android.util.Log.e("HomeActivity", "Error selecting navigation position: " + position, e);
+            EasyLog.print(TAG, "Error selecting navigation position: " + position);
+            EasyLog.print(e);
         }
         return false;
     }
@@ -617,11 +566,13 @@ public final class HomeActivity extends AppActivity
                     // 销毁进程（注意：调用此 API 可能导致当前 Activity onDestroy 方法无法正常回调）
                     // System.exit(0);
                 } catch (Exception e) {
-                    android.util.Log.e("HomeActivity", "Error during exit cleanup", e);
+                    EasyLog.print(TAG, "Error during exit cleanup");
+                    EasyLog.print(e);
                 }
             }, EXIT_DELAY_MS);
         } catch (Exception e) {
-            android.util.Log.e("HomeActivity", "Error in onBackPressed", e);
+            EasyLog.print(TAG, "Error in onBackPressed");
+            EasyLog.print(e);
             // 降级处理：直接调用父类方法
             super.onBackPressed();
         }
@@ -634,7 +585,6 @@ public final class HomeActivity extends AppActivity
         super.onResume();
         // 刷新导航菜单，根据登录状态动态显示AI聊天
         refreshNavigationMenu();
-        //     toast("onResume");
     }
 
     /**
@@ -690,10 +640,6 @@ public final class HomeActivity extends AppActivity
                 ContextCompat.getDrawable(this, R.drawable.home_me_selector)
         ));
     }
-    @Override
-    protected boolean isStatusBarEnabled() {
-        return super.isStatusBarEnabled();
-    }
 
     @Override
     protected void onDestroy() {
@@ -711,7 +657,8 @@ public final class HomeActivity extends AppActivity
             safelyCleanupNavigationView();
             
         } catch (Exception e) {
-            android.util.Log.e("HomeActivity", "Error during onDestroy cleanup", e);
+            EasyLog.print(TAG, "Error during onDestroy cleanup");
+            EasyLog.print(e);
         } finally {
             // 最后：调用父类销毁方法
             super.onDestroy();
@@ -725,7 +672,8 @@ public final class HomeActivity extends AppActivity
         try {
             XEventBus.getDefault().unregister(HomeActivity.this);
         } catch (Exception e) {
-            android.util.Log.e("HomeActivity", "Error unregistering event bus", e);
+            EasyLog.print(TAG, "Error unregistering event bus");
+            EasyLog.print(e);
         }
     }
 
@@ -737,7 +685,8 @@ public final class HomeActivity extends AppActivity
             try {
                 mNavigationAdapter.setOnNavigationListener(null);
             } catch (Exception e) {
-                android.util.Log.e("HomeActivity", "Error cleaning up navigation adapter", e);
+                EasyLog.print(TAG, "Error cleaning up navigation adapter");
+                EasyLog.print(e);
             }
         }
     }
@@ -751,7 +700,8 @@ public final class HomeActivity extends AppActivity
                 mViewPager.setAdapter(null);
                 mViewPager.clearOnPageChangeListeners();
             } catch (Exception e) {
-                android.util.Log.e("HomeActivity", "Error cleaning up view pager", e);
+                EasyLog.print(TAG, "Error cleaning up view pager");
+                EasyLog.print(e);
             }
         }
     }
@@ -764,7 +714,8 @@ public final class HomeActivity extends AppActivity
             try {
                 mNavigationView.setAdapter(null);
             } catch (Exception e) {
-                android.util.Log.e("HomeActivity", "Error cleaning up navigation view", e);
+                EasyLog.print(TAG, "Error cleaning up navigation view");
+                EasyLog.print(e);
             }
         }
     }
