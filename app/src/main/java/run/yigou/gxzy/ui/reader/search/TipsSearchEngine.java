@@ -3,7 +3,6 @@ package run.yigou.gxzy.ui.reader.search;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
 
-import android.os.Build;
 import android.text.SpannableStringBuilder;
 
 import androidx.annotation.NonNull;
@@ -14,22 +13,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import run.yigou.gxzy.data.model.Fang;
 import run.yigou.gxzy.ui.reader.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
 import run.yigou.gxzy.text.TipsTextRenderer;
-import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * Tips 模块搜索引擎
  * 负责处理搜索逻辑、正则匹配、数据过滤等
  */
 public class TipsSearchEngine {
+
+    private TipsSearchEngine() {
+    }
 
     public static @NonNull ArrayList<HH2SectionData> getSearchHh2SectionData(SearchKeyEntity searchKeyEntity,
                                                                              List<HH2SectionData> contentList,
@@ -127,8 +126,7 @@ public class TipsSearchEngine {
 
         // 获取数据项的属性文本，用于后续匹配
         String attributeText = getAttributeText(dataItem);
-        // 初始化Matcher对象，初始匹配字符串为空
-        Matcher matcher = pattern.matcher("");
+        Matcher matcher = pattern.matcher(attributeText);
 
         // 检查模式是否匹配Fang列表或Yao列表中的任何项
         if (matchInList(dataItem.getFangList(), matcher) || matchInList(dataItem.getYaoList(), matcher)) {
@@ -166,19 +164,12 @@ public class TipsSearchEngine {
 
     /**
      * 高亮匹配的文本
-     * 
-     * 修复：使用 TipsClickHandler.renderText() 代替 TipsTextRenderer.createSpannable()
-     * 这样可以正确创建 ClickableSpan，支持 LocalLinkMovementMethod 点击
      */
     public static void createSingleDataCopy(DataItem dataItem, Pattern pattern) {
-        // 检查模式是否为null，如果是null则直接返回
         if (pattern == null) {
             return;
         }
 
-        // ✅ 使用 TipsClickHandler.renderText() 代替 TipsTextRenderer.createSpannable()
-        // TipsClickHandler.renderText() 会创建带有 ClickLink 的 SpannableStringBuilder
-        // 这样 ClickableSpan 才能正常工作
         SpannableStringBuilder spannableText = TipsClickHandler.renderText(dataItem.getText());
         SpannableStringBuilder spannableNote = TipsClickHandler.renderText(dataItem.getNote());
         SpannableStringBuilder spannableSectionVideo = TipsClickHandler.renderText(dataItem.getSectionvideo());
@@ -230,35 +221,22 @@ public class TipsSearchEngine {
     }
 
     /**
-     * 过滤出符合条件的房产信息
+     * 过滤出符合条件的方剂信息
      */
     public static List<? extends DataItem> filterFang(List<? extends DataItem> sectionData, String finalStr1) {
-        // 检查输入参数是否为空，如果任一参数为空，则返回空列表
         if (sectionData == null || finalStr1 == null) {
             return Collections.emptyList();
         }
 
-        List<? extends DataItem> dataItems = sectionData;
-
-        // 使用流式处理过滤和转换数据列表，筛选出符合条件的房产信息
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return dataItems.stream()
-                    .filter(dataItem -> dataItem instanceof Fang)
-                    .map(Fang.class::cast)
-                    .filter(fang -> fang.hasYao(finalStr1))
-                    .collect(Collectors.toList());
-        } else {
-            // 兼容低版本 Android
-            List<DataItem> result = new ArrayList<>();
-            for (DataItem item : dataItems) {
-                if (item instanceof Fang) {
-                    Fang fang = (Fang) item;
-                    if (fang.hasYao(finalStr1)) {
-                        result.add(fang);
-                    }
+        List<DataItem> result = new ArrayList<>();
+        for (DataItem item : sectionData) {
+            if (item instanceof Fang) {
+                Fang fang = (Fang) item;
+                if (fang.hasYao(finalStr1)) {
+                    result.add(fang);
                 }
             }
-            return result;
         }
+        return result;
     }
 }

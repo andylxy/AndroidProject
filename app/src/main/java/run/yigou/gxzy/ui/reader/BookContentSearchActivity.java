@@ -8,6 +8,10 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +27,7 @@ import java.util.Map;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.base.args.FragmentSetting;
 import run.yigou.gxzy.data.local.entity.SearchHistory;
@@ -46,25 +51,6 @@ import run.yigou.gxzy.ui.reader.repository.BookRepository;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
-/**
- * 书籍内容搜索Activity
- * 提供书籍内容的搜索功能，支持关键词搜索、历史记录、结果展示等
- * 
- * 功能特点：
- * 1. 实时搜索：支持500ms防抖的实时搜索
- * 2. 历史记录：保存和显示搜索历史
- * 3. 结果展示：支持书籍列表和详细内容两种展示方式
- * 4. 智能过滤：针对伤寒论等特殊书籍提供过滤功能
- * 
- * 搜索流程：
- * 1. 用户输入搜索关键词
- * 2. 系统在所有书籍内容中进行匹配
- * 3. 返回包含关键词的书籍列表
- * 4. 用户点击书籍查看详细匹配结果
- * 
- * @author zhs
- * @since 2023-07-13
- */
 /**
  * 书籍内容搜索Activity
  * 提供书籍内容的搜索功能，支持关键词搜索、历史记录、结果展示等
@@ -121,7 +107,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     /**
      * 搜索结果数量提示
      */
-    private android.widget.TextView numTips;
+    private TextView numTips;
     /**
      * 搜索书籍详情列表
      */
@@ -190,7 +176,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     /**
      * 主线程Handler，用于防抖搜索
      */
-    private final android.os.Handler mHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     /**
      * 搜索任务Runnable
      */
@@ -233,6 +219,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      */
     private void setupInitialData() {
         initHistoryList();
+        // 从全局 Application 获取伤寒论过滤设置
+        fragmentSetting = AppApplication.getApplication().fragmentSetting;
         // 默认初始化 TipsNetHelper 上下文，防止空指针（使用伤寒论作为默认值）
         TipsNetHelper.setBookContext(mBookRepository, AppConst.ShangHanNo);
     }
@@ -269,9 +257,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         
         // 初始化搜索详情适配器
         setupSearchDetailAdapter();
-        
-        // 初始化历史记录适配器（如果需要）
-        setupHistoryAdapter();
+        // 历史记录适配器已在 initHistoryList() 中设置
     }
 
     /**
@@ -518,6 +504,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         mSearchHistories = mSearchHistoryService.findAllSearchHistory();
         
         if (isHistoryEmpty()) {
+            setupHistoryAdapter();
             hideHistoryViews();
         } else {
             setupHistoryAdapter();
@@ -624,8 +611,6 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         return totalResults;
     }
 
-    // 移除 extHandleShangHanData: 逻辑移至搜索内部
-
     /**
      * 开始搜索 (异步)
      * 优化了异常处理和性能
@@ -653,7 +638,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                     updateSearchResults(tempResults);
                 });
             } catch (Exception e) {
-                android.util.Log.e("BCSearchActivity", "Search failed: " + e.getMessage(), e);
+                Log.e("BCSearchActivity", "Search failed: " + e.getMessage(), e);
                 ThreadUtil.runOnUiThread(() -> {
                     if (!isFinishing() && !isDestroyed()) {
                         toast("搜索失败，请重试");
@@ -696,7 +681,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                     tempResults.add(searchResult);
                 }
             } catch (Exception e) {
-                android.util.Log.e("BCSearchActivity", "Search error for book " + bookId + ": " + e.getMessage(), e);
+                Log.e("BCSearchActivity", "Search error for book " + bookId + ": " + e.getMessage(), e);
             }
         }
         
@@ -760,7 +745,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                 mSearchHistoryService.addOrUpadteHistory(keyword);
             }
         } catch (Exception e) {
-            android.util.Log.e("BCSearchActivity", "Failed to save search history: " + e.getMessage(), e);
+            Log.e("BCSearchActivity", "Failed to save search history: " + e.getMessage(), e);
         }
     }
     
@@ -772,7 +757,11 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         if (contentList == null || contentList.isEmpty()) {
             return new ArrayList<>();
         }
-        
+        // fragmentSetting 为空时返回全部内容（与 SearchCoordinator 保持一致）
+        if (fragmentSetting == null) {
+            return new ArrayList<>(contentList);
+        }
+
         int size = contentList.size();
         int start = 0;
         int end = size;
@@ -818,7 +807,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             }
             super.onBackPressed();
         } catch (Exception e) {
-            android.util.Log.e("BCSearchActivity", "Error in onBackPressed", e);
+            Log.e("BCSearchActivity", "Error in onBackPressed", e);
             // 降级处理：直接调用父类方法
             super.onBackPressed();
         }
@@ -859,7 +848,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
                 handleSearchBookItemClick(position);
             }
         } catch (Exception e) {
-            android.util.Log.e("BCSearchActivity", "Error in onItemClick", e);
+            Log.e("BCSearchActivity", "Error in onItemClick", e);
             toast("操作失败，请重试");
         }
     }
@@ -910,7 +899,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             cleanupSearchResources();
             
         } catch (Exception e) {
-            android.util.Log.e("BCSearchActivity", "Error during onDestroy cleanup", e);
+            Log.e("BCSearchActivity", "Error during onDestroy cleanup", e);
         } finally {
             // 最后：调用父类销毁方法
             super.onDestroy();
