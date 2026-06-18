@@ -4,10 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.ClipboardManager;
 import android.content.ClipData;
-import android.os.Handler;
-import android.os.Looper;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.lifecycle.LifecycleOwner;
@@ -61,9 +66,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
     private TipsAiChatAdapter mChatAdapter;
     private Markwon mMarkwon;
     private ChatSessionBean currentSession;
-    
-    // UI 线程 Handler
-    private final Handler uiHandler = new Handler(Looper.getMainLooper());
 
     public static AiMsgFragment newInstance() {
         return new AiMsgFragment();
@@ -146,7 +148,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
                 mPresenter.generateSummary();
             }
 
-            // 以下回调在 MVP 中不再需要，因为 Presenter 会直接调用 View 的 updateMessage
             @Override public void onSummaryStreamUpdate(ChatMessageBean summaryMessage) {}
             @Override public void onSummaryStreamComplete(ChatMessageBean summaryMessage, boolean success) {}
             @Override public void onSummaryStreamError(ChatMessageBean summaryMessage, String error) {}
@@ -186,8 +187,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
         rv_chat.setItemAnimator(null);
         rv_chat.setNestedScrollingEnabled(false);
         
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        rv_chat.setLayoutManager(layoutManager);
+        rv_chat.setLayoutManager(new LinearLayoutManager(getContext()));
         rv_chat.setAdapter(mChatAdapter);
         rv_chat.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         
@@ -226,7 +226,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
         }
     }
     
-    // 为了支持 Sidebar 高亮，我们需要让 Presenter 告诉 View 当前 Session
     @Override
     public void updateCurrentSession(ChatSessionBean session) {
         this.currentSession = session;
@@ -355,15 +354,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
     // ================= Other UI Logic =================
 
     private void showMessageActionMenu(View view, ChatMessageBean message, float x, float y) {
-        // ... (保持原有的 PopupWindow 逻辑，但点击事件调用 Presenter)
-        // 为了节省篇幅，这里简化，实际应该保留原有的完整代码
-        // ...
-        // 这里需要把原代码的 showMessageActionMenu 复制过来，
-        // 并将 resendMessage -> mPresenter.sendMessage
-        // deleteMessage -> mPresenter.deleteMessage
-        // copyToClipboard -> local method
-        // adoptSummary -> mPresenter.adoptSummary
-        
         if (message == null || view == null || getContext() == null) return;
         
         String[] items;
@@ -375,35 +365,34 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
             default: return;
         }
 
-        // ... (创建 View 和 Popup 逻辑同原代码) ...
-        android.widget.LinearLayout menuLayout = new android.widget.LinearLayout(getContext());
-        menuLayout.setOrientation(android.widget.LinearLayout.VERTICAL);
-        android.graphics.drawable.GradientDrawable background = new android.graphics.drawable.GradientDrawable();
-        background.setColor(android.graphics.Color.WHITE);
+        LinearLayout menuLayout = new LinearLayout(getContext());
+        menuLayout.setOrientation(LinearLayout.VERTICAL);
+        GradientDrawable background = new GradientDrawable();
+        background.setColor(Color.WHITE);
         background.setCornerRadius(8);
-        background.setStroke(1, android.graphics.Color.LTGRAY);
+        background.setStroke(1, Color.LTGRAY);
         menuLayout.setBackground(background);
         menuLayout.setPadding(4, 4, 4, 4);
         
         final String[] menuItems = items;
         for (int i = 0; i < items.length; i++) {
-            android.widget.TextView menuItem = new android.widget.TextView(getContext());
+            TextView menuItem = new TextView(getContext());
             menuItem.setText(items[i]);
             menuItem.setPadding(24, 16, 24, 16);
             menuItem.setTextSize(14);
-            menuItem.setTextColor(android.graphics.Color.BLACK);
+            menuItem.setTextColor(Color.BLACK);
             menuItem.setBackgroundResource(android.R.drawable.list_selector_background);
             menuLayout.addView(menuItem);
         }
         
-        final android.widget.PopupWindow popupWindow = new android.widget.PopupWindow(
+        final PopupWindow popupWindow = new PopupWindow(
             menuLayout,
             ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT,
             true
         );
         popupWindow.setOutsideTouchable(true);
-        popupWindow.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         popupWindow.setElevation(4);
         
         for (int i = 0; i < menuLayout.getChildCount(); i++) {
@@ -429,7 +418,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
         decorView.getLocationOnScreen(location);
         int popupX = (int) x - location[0];
         int popupY = (int) y - location[1];
-        popupWindow.showAtLocation(decorView, android.view.Gravity.NO_GRAVITY, popupX, popupY);
+        popupWindow.showAtLocation(decorView, Gravity.NO_GRAVITY, popupX, popupY);
     }
 
     private void copyToClipboard(String content) {
