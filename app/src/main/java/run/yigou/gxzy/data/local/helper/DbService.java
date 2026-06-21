@@ -1,7 +1,7 @@
 /*
  * 项目名: AndroidProject
- * 类名: DbDao.java
- * 包名: run.yigou.gxzy.data.local.helper.DbDao
+ * 类名: DbService.java
+ * 包名: run.yigou.gxzy.data.local.helper.DbService
  * 作者 : Zhs (xiaoyang_02@qq.com)
  * 当前修改时间 : 2024年03月11日 22:22:07
  * 上次修改时间: 2024年03月11日 22:22:06

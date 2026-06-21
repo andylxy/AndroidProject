@@ -2,10 +2,7 @@ package run.yigou.gxzy.data.local.service;
 
 
 import run.yigou.gxzy.data.local.entity.About;
-import run.yigou.gxzy.data.local.entity.ZhongYaoAlia;
 import run.yigou.gxzy.data.local.gen.AboutDao;
-import run.yigou.gxzy.data.local.gen.ZhongYaoAliaDao;
-import run.yigou.gxzy.data.local.gen.ZhongYaoDao;
 
 public class AboutService extends BaseService<About, AboutDao> {
     private AboutService() {

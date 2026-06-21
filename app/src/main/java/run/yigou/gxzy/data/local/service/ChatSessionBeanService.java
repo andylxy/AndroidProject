@@ -5,9 +5,9 @@ import org.greenrobot.greendao.query.WhereCondition;
 
 import java.util.ArrayList;
 
-import run.yigou.gxzy.crypto.SecurityUtils;
 import run.yigou.gxzy.data.local.entity.ChatSessionBean;
 import run.yigou.gxzy.data.local.gen.ChatSessionBeanDao;
+import run.yigou.gxzy.data.local.helper.ConvertEntity;
 
 public class ChatSessionBeanService extends BaseService<ChatSessionBean, ChatSessionBeanDao> {
     private ChatSessionBeanService() {
@@ -122,40 +122,16 @@ public class ChatSessionBeanService extends BaseService<ChatSessionBean, ChatSes
      * 加密会话内容
      */
     private void encryptSession(ChatSessionBean entity) {
-        String title = entity.getTitle();
-        if (title != null && !title.isEmpty()) {
-            String encrypted = SecurityUtils.rc4Encrypt(title);
-            if (encrypted != null) {
-                entity.setTitle(encrypted);
-            }
-        }
-        String preview = entity.getPreview();
-        if (preview != null && !preview.isEmpty()) {
-            String encrypted = SecurityUtils.rc4Encrypt(preview);
-            if (encrypted != null) {
-                entity.setPreview(encrypted);
-            }
-        }
+        entity.setTitle(ConvertEntity.encryptIfNotEmpty(entity.getTitle()));
+        entity.setPreview(ConvertEntity.encryptIfNotEmpty(entity.getPreview()));
     }
     
     /**
      * 解密会话内容
      */
     private void decryptSession(ChatSessionBean entity) {
-        String title = entity.getTitle();
-        if (title != null && !title.isEmpty()) {
-            String decrypted = SecurityUtils.rc4Decrypt(title);
-            if (decrypted != null) {
-                entity.setTitle(decrypted);
-            }
-        }
-        String preview = entity.getPreview();
-        if (preview != null && !preview.isEmpty()) {
-            String decrypted = SecurityUtils.rc4Decrypt(preview);
-            if (decrypted != null) {
-                entity.setPreview(decrypted);
-            }
-        }
+        entity.setTitle(ConvertEntity.decryptIfNotEmpty(entity.getTitle()));
+        entity.setPreview(ConvertEntity.decryptIfNotEmpty(entity.getPreview()));
     }
 
     /**

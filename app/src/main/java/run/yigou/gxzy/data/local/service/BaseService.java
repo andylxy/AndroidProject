@@ -14,8 +14,11 @@ import java.util.UUID;
 
 import run.yigou.gxzy.data.local.GreenDaoManager;
 import run.yigou.gxzy.data.local.gen.DaoSession;
+import run.yigou.gxzy.log.EasyLog;
 
 public abstract class BaseService<T, TDao extends AbstractDao<T, ?>> {
+
+    private static final String TAG = "BaseService";
 
     public DaoSession daoSession = GreenDaoManager.getInstance().getSession();
     protected Database mDatabase;
@@ -114,7 +117,7 @@ public abstract class BaseService<T, TDao extends AbstractDao<T, ?>> {
         try {
             cursor = daoSession.getDatabase().rawQuery(sql, selectionArgs);
         } catch (Exception e) {
-            e.printStackTrace();
+            EasyLog.print(TAG, "SQL查询失败: " + e.getMessage());
             return null;
         }
         return cursor;

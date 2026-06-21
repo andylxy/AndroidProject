@@ -16,12 +16,14 @@ import java.util.List;
 
 import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.gen.UserInfoDao;
+import run.yigou.gxzy.log.EasyLog;
 
 /**
  * 版本:  1.0
  * 描述:
  */
 public class UserInfoService extends BaseService<UserInfo,UserInfoDao> {
+    private static final String TAG = "UserInfoService";
 
     private UserInfoService() {
         if (UserInfoService.class.desiredAssertionStatus()) {
@@ -69,7 +71,7 @@ public class UserInfoService extends BaseService<UserInfo,UserInfoDao> {
                 userInfo = userInfoList.get(0);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            EasyLog.print(TAG, "查询用户信息失败: " + e.getMessage());
         }
         return userInfo;
     }

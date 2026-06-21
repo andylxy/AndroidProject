@@ -6,9 +6,9 @@ import org.greenrobot.greendao.query.WhereCondition;
 import java.util.ArrayList;
 import java.util.List;
 
-import run.yigou.gxzy.crypto.SecurityUtils;
 import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
 import run.yigou.gxzy.data.local.gen.ChatSummaryBeanDao;
+import run.yigou.gxzy.data.local.helper.ConvertEntity;
 
 /**
  * 会话总结数据服务类
@@ -143,66 +143,19 @@ public class ChatSummaryBeanService extends BaseService<ChatSummaryBean, ChatSum
     }
 
     /**
-     * 获取会话的最新总结
-     * @param sessionId 会话ID
-     * @return 最新的总结，如果没有则返回null
-     */
-    public ChatSummaryBean findLatestBySessionId(Long sessionId) {
-        List<ChatSummaryBean> summaries = findBySessionId(sessionId);
-        return summaries.isEmpty() ? null : summaries.get(0);
-    }
-
-    /**
-     * 删除所有总结（软删除）
-     */
-    public void deleteAllSummaries() {
-        List<ChatSummaryBean> summaries = findAll();
-        for (ChatSummaryBean summary : summaries) {
-            summary.setIsDelete(ChatSummaryBean.IS_Delete_YES);
-            // 注意：这里需要先加密再更新，因为 findAll 已经解密了
-            encryptSummary(summary);
-            super.updateEntity(summary);
-        }
-    }
-    
-    /**
      * 加密总结内容
      */
     private void encryptSummary(ChatSummaryBean entity) {
-        String title = entity.getTitle();
-        if (title != null && !title.isEmpty()) {
-            String encrypted = SecurityUtils.rc4Encrypt(title);
-            if (encrypted != null) {
-                entity.setTitle(encrypted);
-            }
-        }
-        String content = entity.getContent();
-        if (content != null && !content.isEmpty()) {
-            String encrypted = SecurityUtils.rc4Encrypt(content);
-            if (encrypted != null) {
-                entity.setContent(encrypted);
-            }
-        }
+        entity.setTitle(ConvertEntity.encryptIfNotEmpty(entity.getTitle()));
+        entity.setContent(ConvertEntity.encryptIfNotEmpty(entity.getContent()));
     }
     
     /**
      * 解密总结内容
      */
     private void decryptSummary(ChatSummaryBean entity) {
-        String title = entity.getTitle();
-        if (title != null && !title.isEmpty()) {
-            String decrypted = SecurityUtils.rc4Decrypt(title);
-            if (decrypted != null) {
-                entity.setTitle(decrypted);
-            }
-        }
-        String content = entity.getContent();
-        if (content != null && !content.isEmpty()) {
-            String decrypted = SecurityUtils.rc4Decrypt(content);
-            if (decrypted != null) {
-                entity.setContent(decrypted);
-            }
-        }
+        entity.setTitle(ConvertEntity.decryptIfNotEmpty(entity.getTitle()));
+        entity.setContent(ConvertEntity.decryptIfNotEmpty(entity.getContent()));
     }
 
     @Override
