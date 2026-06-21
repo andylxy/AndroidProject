@@ -7,8 +7,8 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 
-import run.yigou.gxzy.ui.CrashActivity;
-import run.yigou.gxzy.ui.RestartActivity;
+import run.yigou.gxzy.ui.system.CrashActivity;
+import run.yigou.gxzy.ui.system.RestartActivity;
 
 /**
  *    author : Android 轮子哥

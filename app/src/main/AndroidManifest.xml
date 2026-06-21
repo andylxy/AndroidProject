@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- 清单文件合并指引：https://developer.android.google.cn/studio/build/manifest-merge?hl=zh-cn -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -79,7 +79,7 @@
 
         <!-- 权限引导页（对话框样式） -->
         <activity
-            android:name=".ui.PermissionGuideActivity"
+            android:name=".ui.system.PermissionGuideActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/PermissionGuideDialogTheme" />
@@ -125,13 +125,13 @@
 
         <!-- 崩溃展示（必须在独立进程） -->
         <activity
-            android:name=".ui.CrashActivity"
+            android:name=".ui.system.CrashActivity"
             android:launchMode="singleTop"
             android:process=":crash"
             android:screenOrientation="landscape" />
         <!-- 重启应用（必须在独立进程） -->
         <activity
-            android:name=".ui.RestartActivity"
+            android:name=".ui.system.RestartActivity"
             android:launchMode="singleTop"
             android:process=":restart" />
 

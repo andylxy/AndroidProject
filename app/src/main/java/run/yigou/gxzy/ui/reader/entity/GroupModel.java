@@ -29,6 +29,8 @@ import run.yigou.gxzy.utils.DebugLog;
 
 public class GroupModel {
 
+    private static final String TAG = "GroupModel";
+
     /**
      * 获取组列表数据
      */
@@ -112,13 +114,11 @@ public class GroupModel {
             return groups;
         } catch (NullPointerException e) {
             // 处理空指针异常
-            System.err.println("发生空指针异常: " + e.getMessage());
-            e.printStackTrace();
+            EasyLog.print(TAG, "发生空指针异常: " + e.getMessage());
             return new ArrayList<>();
         } catch (Exception e) {
             // 其他异常处理
-            System.err.println("发生异常: " + e.getMessage());
-            e.printStackTrace();
+            EasyLog.print(TAG, "发生异常: " + e.getMessage());
             return new ArrayList<>();
         }
     }

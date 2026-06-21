@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui;
+package run.yigou.gxzy.ui.system;
 
 import android.Manifest;
 import android.app.Application;

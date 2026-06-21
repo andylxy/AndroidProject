@@ -61,7 +61,7 @@ import run.yigou.gxzy.ui.reader.BookContentSearchActivity;
 import run.yigou.gxzy.data.remote.api.YaoAliaApi;
 import run.yigou.gxzy.data.remote.api.YaoContentApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
-import run.yigou.gxzy.ui.search.adapter.SearchHistoryAdapter;
+import run.yigou.gxzy.ui.reader.search.SearchHistoryAdapter;
 import run.yigou.gxzy.ui.reader.fragment.TipsWindowNetFragment;
 import run.yigou.gxzy.data.model.MingCiContent;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;

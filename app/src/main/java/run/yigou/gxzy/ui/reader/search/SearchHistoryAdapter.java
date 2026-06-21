@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.search.adapter;
+package run.yigou.gxzy.ui.reader.search;
 
 import android.content.Context;
 import android.view.ViewGroup;
@@ -15,7 +15,7 @@ import run.yigou.gxzy.data.local.entity.SearchHistory;
  *  时间:  2023-07-14 14:25:35
  *  类名:  SearchHistoryAdapter
  *  版本:  1.0
- *  描述:
+ *  描述:  搜索历史记录适配器
  *
 */
 public final class SearchHistoryAdapter extends AppAdapter<SearchHistory> {
@@ -23,11 +23,6 @@ public final class SearchHistoryAdapter extends AppAdapter<SearchHistory> {
     public SearchHistoryAdapter(Context context) {
         super(context);
     }
-
-//    @Override
-//    public int getItemCount() {
-//        return 10;
-//    }
 
     @NonNull
     @Override

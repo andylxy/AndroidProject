@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.search.adapter;
+package run.yigou.gxzy.ui.reader.search;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -12,14 +12,13 @@ import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
 
 import run.yigou.gxzy.ui.reader.BookContentSearchActivity;
-import run.yigou.gxzy.ui.reader.search.SearchKey;
 
 /**
- *  ??:  zhs
- *  ??:  2023-07-14 14:28:00
- *  ??:  SearchBookAdapter
- *  ??:  1.0
- *  ??:
+ *  作者:  zhs
+ *  时间:  2023-07-14 14:28:00
+ *  类名:  SearchBookAdapter
+ *  版本:  1.0
+ *  描述:  搜索书籍列表适配器
  *
 */
 public final class SearchBookAdapter extends AppAdapter<SearchKey> {
@@ -59,12 +58,10 @@ public final class SearchBookAdapter extends AppAdapter<SearchKey> {
         @Override
         public void onBindView(int position) {
           SearchKey keyText =  getItem(position);
-          //  EasyLog.print("ResCount:"+keyText.getSearchTextResCount());
             mTvSearchBookName.setText( keyText.getBookName());
             mTvSearchKeyCount.setText( keyText.getFilteredData().size()+"");
             if (!keyText.getFilteredData().isEmpty())
             {
-                // ?? drawable ??????
                 mIvSearchAvatar.setImageResource(R.drawable.success);
             }else {
                 mIvSearchAvatar.setImageResource(R.drawable.failed);

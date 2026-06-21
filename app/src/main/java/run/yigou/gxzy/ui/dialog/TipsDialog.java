@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.media.dialog;
+package run.yigou.gxzy.ui.dialog;
 
 import android.content.Context;
 import android.text.TextUtils;

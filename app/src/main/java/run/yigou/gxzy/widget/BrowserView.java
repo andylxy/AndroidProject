@@ -39,7 +39,7 @@ import run.yigou.gxzy.ui.media.activity.ImageSelectActivity;
 import run.yigou.gxzy.ui.media.activity.VideoSelectActivity;
 import run.yigou.gxzy.ui.dialog.InputDialog;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
-import run.yigou.gxzy.ui.media.dialog.TipsDialog;
+import run.yigou.gxzy.ui.dialog.TipsDialog;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.widget.layout.NestedScrollWebView;
