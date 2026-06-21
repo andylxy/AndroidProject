@@ -24,13 +24,4 @@ public class DatabaseVersionManager {
     public static int getCurrentVersion() {
         return CURRENT_VERSION;
     }
-    
-    /**
-     * 检查是否需要升级数据库
-     * @param currentVersion 当前数据库版本
-     * @return 如果需要升级则返回true，否则返回false
-     */
-    public static boolean isUpgradeNeeded(int currentVersion) {
-        return currentVersion < getCurrentVersion();
-    }
 }

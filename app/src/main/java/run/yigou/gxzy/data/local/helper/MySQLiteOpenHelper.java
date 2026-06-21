@@ -56,7 +56,7 @@ public class MySQLiteOpenHelper extends VersionedOpenHelper {
         SchemaHistoryRepository.ensureTable(db);
         GreenDaoUpgrade upgradeHelper = GreenDaoUpgrade.getInstance();
         try {
-            upgradeHelper.migrateByVersion(db, oldVersion, newVersion);
+            // smartMigrate 统一处理：新表自动创建，已有表自动迁移结构
             Class<? extends AbstractDao<?, ?>>[] allDaos = EntityRegistrationHelper.getAllDaos();
             upgradeHelper.smartMigrate(db, allDaos);
             SchemaHistoryRepository.recordUpgrade(db, oldVersion, newVersion, "success", "smartMigrate");

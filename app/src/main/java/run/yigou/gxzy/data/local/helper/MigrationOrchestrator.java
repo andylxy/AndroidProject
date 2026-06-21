@@ -2,13 +2,13 @@ package run.yigou.gxzy.data.local.helper;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 
 import org.greenrobot.greendao.database.Database;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import run.yigou.gxzy.data.local.GreenDaoManager;
+import run.yigou.gxzy.log.EasyLog;
 
 /**
  * Central entry point that guarantees database initialization happens exactly once on app start.
@@ -39,10 +39,10 @@ public final class MigrationOrchestrator {
                 SchemaHistoryRepository.ensureTable(database);
                 int currentVersion = readUserVersion(database);
                 int targetVersion = DatabaseVersionManager.getCurrentVersion();
-                Log.i(TAG, "Database user version=" + currentVersion + ", target=" + targetVersion);
+                EasyLog.print(TAG, "Database user version=" + currentVersion + ", target=" + targetVersion);
                 INITIALIZED.set(true);
             } catch (Exception e) {
-                Log.e(TAG, "Failed to prepare database", e);
+                EasyLog.print(TAG, "Failed to prepare database: " + e.getMessage());
                 throw new IllegalStateException("GreenDAO database initialization failed", e);
             }
         }

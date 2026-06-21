@@ -27,7 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import run.yigou.gxzy.data.local.entity.Chapter;
-import run.yigou.gxzy.data.local.helper.ConvertEntity;
+import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.ChapterContentApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
@@ -346,7 +346,7 @@ public class ChapterDownloadManager {
 
                             try {
                                 // ??????
-                                ConvertEntity.saveBookChapterDetailList(chapter, data.getData());
+                                DataRepository.saveBookChapterDetailList(chapter, data.getData());
                                 chapter.setIsDownload(true);
                                 DbService.getInstance().mChapterService.updateEntity(chapter);
 

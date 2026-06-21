@@ -24,6 +24,7 @@ import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.gen.BookDao;
 import run.yigou.gxzy.data.local.gen.ChapterDao;
 import run.yigou.gxzy.data.local.helper.ConvertEntity;
+import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.BookFangApi;
 import run.yigou.gxzy.data.remote.api.ChapterContentApi;
@@ -149,7 +150,7 @@ public class BookRepository {
 
                             try {
                                 // ??????
-                                ConvertEntity.saveBookChapterDetailList(chapter, data.getData());
+                                DataRepository.saveBookChapterDetailList(chapter, data.getData());
                                 chapter.setIsDownload(true);
                                 dbService.mChapterService.updateEntity(chapter);
 
@@ -203,7 +204,7 @@ public class BookRepository {
 
                             // ????????????????
                             new Thread(() -> {
-                                ConvertEntity.getFangDetailList(fangList, bookId);
+                                DataRepository.saveFangDetailList(fangList, bookId);
                             }).start();
 
                             if (callback != null) {
@@ -482,7 +483,7 @@ public class BookRepository {
 
                             try {
                                 // ??????
-                                ConvertEntity.saveBookChapterDetailList(chapter, data.getData());
+                                DataRepository.saveBookChapterDetailList(chapter, data.getData());
                                 chapter.setIsDownload(true);
                                 dbService.mChapterService.updateEntity(chapter);
 

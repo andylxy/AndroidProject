@@ -18,6 +18,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.data.local.entity.About;
 import run.yigou.gxzy.data.local.helper.ConvertEntity;
+import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.remote.api.AboutApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
@@ -134,7 +135,7 @@ public final class AboutActivity extends AppActivity {
                             
                             // ?????????????
                             ThreadUtil.runInBackground(() -> {
-                                ConvertEntity.saveAbout(aboutList);
+                                DataRepository.saveAbout(aboutList);
                                 updateCacheTime();
                                 EasyLog.print("AboutActivity", "Data saved and cache time updated");
                             });

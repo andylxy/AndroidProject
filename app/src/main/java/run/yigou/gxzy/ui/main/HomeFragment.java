@@ -52,7 +52,7 @@ import run.yigou.gxzy.data.local.entity.TabNav;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.service.SearchHistoryService;
 import run.yigou.gxzy.data.local.service.TabNavService;
-import run.yigou.gxzy.data.local.helper.ConvertEntity;
+import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.BookInfoNav;
 import run.yigou.gxzy.data.remote.api.MingCiContentApi;
@@ -418,7 +418,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                 }
                                 
                                 // 保存到数据库
-                                ConvertEntity.saveTabNvaInDb(navList, HomeFragment.this);
+                                DataRepository.saveTabNvaInDb(navList, HomeFragment.this);
                                 
                                 // 在主线程更新 UI
                                 ThreadUtil.runOnUiThread(() -> {
@@ -476,7 +476,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                     }
                                 }
                                 //持久化到数据库
-                                ConvertEntity.saveYaoData(detailList);
+                                DataRepository.saveYaoData(detailList);
                                 
                                 // 标记已完成，UI 层不再触发重复请求
                                 isGetYaoData = false;
@@ -507,7 +507,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                 }
 
                                 //持久化别名数据
-                                ConvertEntity.saveYaoAlia(data.getData());
+                                DataRepository.saveYaoAlia(data.getData());
                             });
                         }
                     }
@@ -540,7 +540,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                          }
                                          
                                          //持久化名词数据
-                                         ConvertEntity.saveMingCiContent(detailList);
+                                         DataRepository.saveMingCiContent(detailList);
                                          isGetMingCiData = false;
                                      });
                                  }
