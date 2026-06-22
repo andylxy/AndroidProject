@@ -7,18 +7,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import run.yigou.gxzy.crypto.SecurityUtils;
-import run.yigou.gxzy.data.local.entity.About;
 import run.yigou.gxzy.data.local.entity.BeiMingCi;
 import run.yigou.gxzy.data.local.entity.BookChapter;
 import run.yigou.gxzy.data.local.entity.BookChapterBody;
-import run.yigou.gxzy.data.local.entity.Chapter;
-import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.entity.YaoFang;
 import run.yigou.gxzy.data.local.entity.YaoFangBody;
 import run.yigou.gxzy.data.local.entity.ZhongYao;
-import run.yigou.gxzy.data.local.entity.ZhongYaoAlia;
-import run.yigou.gxzy.data.local.gen.BookChapterDao;
-import run.yigou.gxzy.data.local.gen.YaoFangDao;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.Fang;
 import run.yigou.gxzy.data.model.HH2SectionData;
@@ -29,14 +23,14 @@ import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.utils.StringHelper;
 
 /**
- * 数据实体转换工具类（重构后精简版）
+ * 数据实体转换与加解密工具类
  *
  * 专注于纯实体转换、加解密和序列化工具。
- * 数据库 CRUD 操作已迁移至 {@link DataRepository}，
+ * 数据库 CRUD 操作（含读取）已迁移至 {@link DataRepository}。
  *
  * 职责划分：
  * - ConvertEntity：实体⇔模型转换、RC4加解密、字符串序列化
- * - {@link DataRepository}：数据库读写操作编排
+ * - {@link DataRepository}：数据库读写操作编排 + 网络获取
  *
  * @author Android 开源项目
  * @author Zhs (xiaoyang_02@qq.com)
@@ -51,9 +45,9 @@ public class ConvertEntity {
     private static final String LIST_SEPARATOR = ",";
 
     /** 正则分隔符，用于中药别名等多分隔符场景 */
-    private static final String REGEX_SEPARATOR = "[,，、.;]";
+    private static final String REGEX_SEPARATOR = "[,\uff0c\u3001.;]";
 
-    // ==================== 数据库操作工具（供 DataRepository / NetworkDataFetcher 使用） ====================
+    // ==================== 数据库操作工具（供 DataRepository 使用） ====================
 
     /**
      * 数据库操作函数式接口
@@ -366,269 +360,5 @@ public class ConvertEntity {
             EasyLog.print(TAG, "转换名词数据失败: " + e.getMessage());
             return null;
         }
-    }
-
-    // ==================== 更新判断工具（供 DataRepository / NetworkDataFetcher 调用） ====================
-
-    /**
-     * 判断导航子项是否需要更新（章节数变化时需要重新下载）
-     */
-    public static boolean shouldUpdateTabNavBody(ArrayList<TabNavBody> existingBodyList, int newChapterCount) {
-        if (existingBodyList == null || existingBodyList.isEmpty()) {
-            return true;
-        }
-        return existingBodyList.get(0).getChapterCount() != newChapterCount;
-    }
-
-    /**
-     * 判断章节数据是否需要更新（数量变化时需要重新下载）
-     */
-    public static boolean shouldUpdateChapters(ArrayList<Chapter> existingChapters, int expectedChapterCount) {
-        if (existingChapters == null || existingChapters.isEmpty()) {
-            return true;
-        }
-        return existingChapters.size() != expectedChapterCount;
-    }
-
-    // ==================== 数据库读取方法 ====================
-
-    /**
-     * 获取药材别名列表
-     */
-    public static List<ZhongYaoAlia> getYaoAlia() {
-        return executeDatabaseOperation(
-            () -> DbService.getInstance().mYaoAliasService.findAll(),
-            "获取药材别名"
-        );
-    }
-
-    /**
-     * 获取关于信息列表
-     */
-    public static List<About> getAbout() {
-        return executeDatabaseOperation(
-            () -> DbService.getInstance().mAboutService.findAll(),
-            "获取关于信息"
-        );
-    }
-
-    /**
-     * 根据章节获取内容详情列表（解密后返回）
-     *
-     * @param chapter 章节标识
-     * @return 内容列表
-     */
-    public static List<DataItem> getBookChapterDetailList(Chapter chapter) {
-        if (chapter == null || chapter.getSignatureId() == null) {
-            EasyLog.print(TAG, "章节参数无效");
-            return new ArrayList<>();
-        }
-
-        ArrayList<BookChapter> bookChapterList = executeDatabaseOperation(() ->
-            DbService.getInstance().mBookChapterService.find(
-                BookChapterDao.Properties.SignatureId.eq(chapter.getSignatureId())),
-            "查询章节" + chapter.getSignatureId() + "的内容"
-        );
-
-        if (bookChapterList == null || bookChapterList.isEmpty()) {
-            EasyLog.print(TAG, "章节 " + chapter.getSignatureId() + " 无内容数据");
-            return new ArrayList<>();
-        }
-
-        return executeDatabaseOperation(() -> {
-            List<DataItem> dataList = new ArrayList<>();
-            int validChapterCount = 0;
-            int validBodyCount = 0;
-
-            for (BookChapter bookChapter : bookChapterList) {
-                if (bookChapter == null || bookChapter.getData() == null) {
-                    continue;
-                }
-                validChapterCount++;
-
-                for (BookChapterBody bookChapterBody : bookChapter.getData()) {
-                    if (bookChapterBody == null) {
-                        continue;
-                    }
-
-                    DataItem content = convertBookChapterBodyToDataItem(bookChapterBody);
-                    if (content != null) {
-                        dataList.add(content);
-                        validBodyCount++;
-                    }
-                }
-            }
-
-            EasyLog.print(TAG, "读取 " + dataList.size() + " 条内容 (有效章节:" + validChapterCount + ", 有效内容:" + validBodyCount + ")");
-            return dataList;
-
-        }, "读取章节内容");
-    }
-
-    /**
-     * 根据书籍ID获取章节详情列表（按 Section 分组）
-     *
-     * @param bookId 书籍ID
-     * @return 按章节分组的内容列表
-     */
-    public static List<HH2SectionData> getBookChapterDetailList(int bookId) {
-        if (bookId <= 0) {
-            EasyLog.print(TAG, "书籍ID无效: " + bookId);
-            return new ArrayList<>();
-        }
-
-        ArrayList<BookChapter> bookChapterList = executeDatabaseOperation(() ->
-            DbService.getInstance().mBookChapterService.find(BookChapterDao.Properties.BookId.eq(bookId)),
-            "查询书籍" + bookId + "的章节"
-        );
-
-        if (bookChapterList == null || bookChapterList.isEmpty()) {
-            EasyLog.print(TAG, "书籍 " + bookId + " 无章节数据");
-            return new ArrayList<>();
-        }
-
-        return executeDatabaseOperation(() -> {
-            List<HH2SectionData> detailList = new ArrayList<>();
-            int validChapterCount = 0;
-            int validContentCount = 0;
-
-            for (BookChapter bookChapter : bookChapterList) {
-                if (bookChapter == null || bookChapter.getData() == null) {
-                    continue;
-                }
-
-                List<DataItem> dataList = new ArrayList<>();
-                for (BookChapterBody bookChapterBody : bookChapter.getData()) {
-                    if (bookChapterBody == null) {
-                        continue;
-                    }
-
-                    DataItem content = convertBookChapterBodyToDataItem(bookChapterBody);
-                    if (content != null) {
-                        dataList.add(content);
-                        validContentCount++;
-                    }
-                }
-
-                if (!dataList.isEmpty()) {
-                    detailList.add(new HH2SectionData(dataList, bookChapter.getSection(), bookChapter.getHeader()));
-                    validChapterCount++;
-                }
-            }
-
-            EasyLog.print(TAG, "读取书籍 " + bookId + " 共 " + detailList.size() + " 章 (有效章节:" + validChapterCount + ", 有效内容:" + validContentCount + ")");
-            return detailList;
-
-        }, "读取书籍章节");
-    }
-
-    /**
-     * 根据书籍ID获取方剂详情列表（解密后返回）
-     *
-     * @param bookId 书籍ID
-     * @return 方剂列表
-     */
-    public static ArrayList<Fang> getFangDetailList(int bookId) {
-        if (bookId <= 0) {
-            EasyLog.print(TAG, "书籍ID无效: " + bookId);
-            return new ArrayList<>();
-        }
-
-        ArrayList<YaoFang> fangList = executeDatabaseOperation(
-            () -> DbService.getInstance().mYaoFangService.find(YaoFangDao.Properties.BookId.eq(bookId)),
-            "查询书籍" + bookId + "的方剂"
-        );
-
-        if (fangList == null || fangList.isEmpty()) {
-            EasyLog.print(TAG, "书籍 " + bookId + " 无方剂数据");
-            return new ArrayList<>();
-        }
-
-        return executeDatabaseOperation(() -> {
-            ArrayList<Fang> detailList = new ArrayList<>();
-
-            for (YaoFang yaoFang : fangList) {
-                if (yaoFang == null) {
-                    continue;
-                }
-
-                Fang fang = convertYaoFangToFang(yaoFang);
-                if (fang != null) {
-                    detailList.add(fang);
-                }
-            }
-
-            EasyLog.print(TAG, "读取 " + detailList.size() + "/" + fangList.size() + " 个方剂数据");
-            return detailList;
-
-        }, "读取方剂数据");
-    }
-
-    /**
-     * 获取所有药材数据（解密后返回）
-     */
-    public static ArrayList<Yao> getYaoData() {
-        ArrayList<ZhongYao> yaoList = executeDatabaseOperation(
-            () -> DbService.getInstance().mYaoService.findAll(),
-            "获取药材数据"
-        );
-
-        if (yaoList == null || yaoList.isEmpty()) {
-            EasyLog.print(TAG, "无药材数据");
-            return new ArrayList<>();
-        }
-
-        return executeDatabaseOperation(() -> {
-            ArrayList<Yao> detailList = new ArrayList<>();
-
-            for (ZhongYao yao : yaoList) {
-                if (yao == null) {
-                    continue;
-                }
-
-                Yao yao1 = convertZhongYaoToYao(yao);
-                if (yao1 != null) {
-                    detailList.add(yao1);
-                }
-            }
-
-            EasyLog.print(TAG, "读取 " + detailList.size() + "/" + yaoList.size() + " 条药材数据");
-            return detailList;
-
-        }, "转换药材数据");
-    }
-
-    /**
-     * 获取所有名词数据（解密后返回）
-     */
-    public static ArrayList<MingCiContent> getMingCi() {
-        ArrayList<BeiMingCi> beiMingCiList = executeDatabaseOperation(
-            () -> DbService.getInstance().mBeiMingCiService.findAll(),
-            "获取名词数据"
-        );
-
-        if (beiMingCiList == null || beiMingCiList.isEmpty()) {
-            EasyLog.print(TAG, "无名词数据");
-            return new ArrayList<>();
-        }
-
-        return executeDatabaseOperation(() -> {
-            ArrayList<MingCiContent> detailList = new ArrayList<>();
-
-            for (BeiMingCi beiMingCi : beiMingCiList) {
-                if (beiMingCi == null) {
-                    continue;
-                }
-
-                MingCiContent content = convertBeiMingCiToMingCiContent(beiMingCi);
-                if (content != null) {
-                    detailList.add(content);
-                }
-            }
-
-            EasyLog.print(TAG, "读取 " + detailList.size() + "/" + beiMingCiList.size() + " 条名词数据");
-            return detailList;
-
-        }, "转换名词数据");
     }
 }

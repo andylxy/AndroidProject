@@ -59,7 +59,7 @@ public class SearchCoordinator {
         
         // 1. 从数据库获取整本书所有章节内容 (与 BookContentSearchActivity 逻辑一致)
         java.util.List<run.yigou.gxzy.data.model.HH2SectionData> allContent = 
-            run.yigou.gxzy.data.local.helper.ConvertEntity.getBookChapterDetailList(bookId);
+            run.yigou.gxzy.data.local.helper.DataRepository.getBookChapterDetailList(bookId);
         
         if (allContent == null || allContent.isEmpty()) {
             EasyLog.print("❌ 无书籍数据");

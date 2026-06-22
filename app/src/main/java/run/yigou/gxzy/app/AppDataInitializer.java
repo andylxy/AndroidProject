@@ -19,7 +19,7 @@ import java.util.Map;
 import run.yigou.gxzy.data.local.entity.TabNav;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.entity.ZhongYaoAlia;
-import run.yigou.gxzy.data.local.helper.ConvertEntity;
+import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.model.MingCiContent;
 import run.yigou.gxzy.data.model.Yao;
@@ -137,7 +137,7 @@ public class AppDataInitializer {
      * 加载药物数据
      */
     private static void loadYaoData(GlobalDataHolder globalData) {
-        ArrayList<Yao> yaoList = ConvertEntity.getYaoData();
+        ArrayList<Yao> yaoList = DataRepository.getYaoData();
         if (yaoList != null && !yaoList.isEmpty()) {
             for (Yao yao : yaoList) {
                 globalData.putYao(yao.getName(), yao);
@@ -156,7 +156,7 @@ public class AppDataInitializer {
      * 加载名词数据
      */
     private static void loadMingCiData(GlobalDataHolder globalData) {
-        ArrayList<MingCiContent> mingCiList = ConvertEntity.getMingCi();
+        ArrayList<MingCiContent> mingCiList = DataRepository.getMingCi();
         if (mingCiList != null && !mingCiList.isEmpty()) {
             for (MingCiContent mingCi : mingCiList) {
                 globalData.putMingCiContent(mingCi.getName(), mingCi);
@@ -169,7 +169,7 @@ public class AppDataInitializer {
      * 加载药物别名数据
      */
     private static void loadYaoAliasData(GlobalDataHolder globalData) {
-        java.util.List<ZhongYaoAlia> aliasList = ConvertEntity.getYaoAlia();
+        java.util.List<ZhongYaoAlia> aliasList = DataRepository.getYaoAlia();
         if (aliasList != null && !aliasList.isEmpty()) {
             Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
             for (ZhongYaoAlia alias : aliasList) {
@@ -192,7 +192,7 @@ public class AppDataInitializer {
             int aliasCount = 0;
             for (TabNavBody bookInfo : navTabBodyMap.values()) {
                 int bookId = bookInfo.getBookNo();
-                ArrayList<Fang> fangList = ConvertEntity.getFangDetailList(bookId);
+                ArrayList<Fang> fangList = DataRepository.getFangDetailList(bookId);
                 
                 if (fangList != null && !fangList.isEmpty()) {
                     for (Fang fang : fangList) {

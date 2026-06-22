@@ -31,7 +31,7 @@ import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.data.local.entity.Book;
 import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
-import run.yigou.gxzy.data.local.helper.ConvertEntity;
+import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.ui.reader.bookread.contract.TipsBookReadContract;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.reader.entity.GroupModel;
@@ -745,7 +745,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         
         // 【优化】先检查数据库是否已有方剂数据
         ArrayList<run.yigou.gxzy.data.model.Fang> cachedFangList = 
-            ConvertEntity.getFangDetailList(currentBookId);
+            DataRepository.getFangDetailList(currentBookId);
         
         if (cachedFangList != null && !cachedFangList.isEmpty()) {
             // 数据库已有方剂数据，直接加载到BookData

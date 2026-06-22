@@ -34,7 +34,7 @@ import run.yigou.gxzy.data.local.entity.SearchHistory;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.service.SearchHistoryService;
 import run.yigou.gxzy.data.local.service.TabNavBodyService;
-import run.yigou.gxzy.data.local.helper.ConvertEntity;
+import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.ui.reader.search.SearchBookAdapter;
 import run.yigou.gxzy.ui.reader.search.SearchHistoryAdapter;
@@ -694,7 +694,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     private SearchKey searchInBook(int bookId, TabNavBody bookInfo, String keyword, 
                                   Map<String, String> yaoAliasDict, Map<String, String> fangAliasDict) {
         // 获取书籍内容 (直接从数据库读取，不污染BookDataManager缓存)
-        List<HH2SectionData> contentList = ConvertEntity.getBookChapterDetailList(bookId);
+        List<HH2SectionData> contentList = DataRepository.getBookChapterDetailList(bookId);
         
         if (contentList == null || contentList.isEmpty()) {
             return null;

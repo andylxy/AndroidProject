@@ -17,7 +17,6 @@ import java.util.List;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.data.local.entity.About;
-import run.yigou.gxzy.data.local.helper.ConvertEntity;
 import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.remote.api.AboutApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
@@ -68,7 +67,7 @@ public final class AboutActivity extends AppActivity {
     @Override
     protected void initData() {
         // ????????
-        List<About> localData = ConvertEntity.getAbout();
+        List<About> localData = DataRepository.getAbout();
         if (!localData.isEmpty()) {
             setAbout(localData);
             EasyLog.print("AboutActivity", "Loaded data from local cache");
@@ -147,7 +146,7 @@ public final class AboutActivity extends AppActivity {
                         super.onFail(e);
                         EasyLog.print("AboutActivity", "Network request failed: " + e.getMessage());
                         // ?????????????????????
-                        List<About> localData = ConvertEntity.getAbout();
+                        List<About> localData = DataRepository.getAbout();
                         if (!localData.isEmpty()) {
                             setAbout(localData);
                         }

@@ -23,7 +23,6 @@ import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.gen.BookDao;
 import run.yigou.gxzy.data.local.gen.ChapterDao;
-import run.yigou.gxzy.data.local.helper.ConvertEntity;
 import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.BookFangApi;
@@ -386,7 +385,7 @@ public class BookRepository {
      */
     public void loadChapterContent(BookData bookData, Chapter chapter) {
         try {
-            List<DataItem> content = ConvertEntity.getBookChapterDetailList(chapter);
+            List<DataItem> content = DataRepository.getBookChapterDetailList(chapter);
             
             Long signatureId = chapter.getSignatureId();
             if (content != null && !content.isEmpty()) {
@@ -409,7 +408,7 @@ public class BookRepository {
     private void loadFangDataToBookData(BookData bookData, int bookId) {
         try {
             // 获取方剂列表
-            ArrayList<Fang> fangList = ConvertEntity.getFangDetailList(bookId);
+            ArrayList<Fang> fangList = DataRepository.getFangDetailList(bookId);
             if (fangList != null && !fangList.isEmpty()) {
                 // 转换为 DataItem 列表
                 List<DataItem> fangItemList = new ArrayList<>(fangList);
