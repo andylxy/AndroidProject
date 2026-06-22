@@ -33,7 +33,7 @@ import run.yigou.gxzy.data.model.Yao;
 import run.yigou.gxzy.data.model.YaoAlia;
 import run.yigou.gxzy.data.model.YaoUse;
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.ui.main.HomeFragment;
+import androidx.lifecycle.LifecycleOwner;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
@@ -144,17 +144,17 @@ public final class DataRepository {
      * 
      * 对每个导航项执行去重检查后写入，并触发章节列表下载。
      *
-     * @param bookNavList  导航数据列表
-     * @param homeFragment 生命周期宿主，用于网络请求
+     * @param bookNavList     导航数据列表
+     * @param lifecycleOwner 生命周期宿主，用于网络请求
      */
-    public static void saveTabNvaInDb(List<TabNav> bookNavList, HomeFragment homeFragment) {
+    public static void saveTabNvaInDb(List<TabNav> bookNavList, LifecycleOwner lifecycleOwner) {
         if (bookNavList == null || bookNavList.isEmpty()) {
             EasyLog.print(TAG, "导航数据列表为空，跳过保存");
             return;
         }
 
-        if (homeFragment == null) {
-            EasyLog.print(TAG, "HomeFragment 为 null，跳过保存");
+        if (lifecycleOwner == null) {
+            EasyLog.print(TAG, "LifecycleOwner 为 null，跳过保存");
             return;
         }
 
@@ -179,7 +179,7 @@ public final class DataRepository {
                     continue;
                 }
 
-                if (processTabNavBody(item, tabNavId, homeFragment)) {
+                if (processTabNavBody(item, tabNavId, lifecycleOwner)) {
                     processedBodyCount++;
                 }
             }
@@ -228,7 +228,7 @@ public final class DataRepository {
     /**
      * 处理导航子项：检查更新条件后写入，并触发章节下载
      */
-    private static boolean processTabNavBody(TabNavBody item, String tabNavId, HomeFragment homeFragment) {
+    private static boolean processTabNavBody(TabNavBody item, String tabNavId, LifecycleOwner lifecycleOwner) {
         try {
             // 检查是否需要更新
             ArrayList<TabNavBody> existingBodyList = ConvertEntity.executeDatabaseOperation(() ->
@@ -254,7 +254,7 @@ public final class DataRepository {
 
             EasyLog.print(TAG, "已保存导航子项，触发章节下载: " + item.getBookNo());
             // 异步下载章节列表
-            ThreadUtil.runInBackground(() -> NetworkDataFetcher.getChapterList(homeFragment, item));
+            ThreadUtil.runInBackground(() -> NetworkDataFetcher.getChapterList(lifecycleOwner, item));
             return true;
 
         } catch (Exception e) {

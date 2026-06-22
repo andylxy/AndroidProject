@@ -10,7 +10,7 @@ import run.yigou.gxzy.data.local.gen.ChapterDao;
 import run.yigou.gxzy.data.remote.api.ChapterListApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.ui.main.HomeFragment;
+import androidx.lifecycle.LifecycleOwner;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 
 /**
@@ -35,18 +35,18 @@ public final class NetworkDataFetcher {
      * 
      * 流程：发起 HTTP 请求 → 处理响应 → 通过 DataRepository 批量保存
      *
-     * @param homeFragment 生命周期宿主（用于绑定请求生命周期）
-     * @param item         书籍导航项，包含 bookNo 等标识
+     * @param lifecycleOwner 生命周期宿主（用于绑定请求生命周期）
+     * @param item           书籍导航项，包含 bookNo 等标识
      */
-    public static void getChapterList(HomeFragment homeFragment, TabNavBody item) {
-        if (homeFragment == null || item == null) {
+    public static void getChapterList(LifecycleOwner lifecycleOwner, TabNavBody item) {
+        if (lifecycleOwner == null || item == null) {
             EasyLog.print(TAG, "参数无效，跳过章节列表获取");
             return;
         }
 
-        EasyHttp.get(homeFragment)
+        EasyHttp.get(lifecycleOwner)
                 .api(new ChapterListApi().setBookId(item.getBookNo()))
-                .request(new HttpCallback<HttpData<List<Chapter>>>(homeFragment) {
+                .request(new HttpCallback<HttpData<List<Chapter>>>(null) {
                     @Override
                     public void onSucceed(HttpData<List<Chapter>> data) {
                         if (data == null || data.getData() == null || data.getData().isEmpty()) {
