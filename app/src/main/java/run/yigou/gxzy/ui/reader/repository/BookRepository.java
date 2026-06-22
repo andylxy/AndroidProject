@@ -1,9 +1,9 @@
 /*
- * ???: AndroidProject
- * ??: BookRepository.java
- * ??: run.yigou.gxzy.ui.reader.repository
- * ?? : AI Assistant
- * ?????? : 2025?12?09?
+ * 项目名: AndroidProject
+ * 类名: BookRepository.java
+ * 包名: run.yigou.gxzy.ui.reader.repository
+ * 作者 : AI Assistant
+ * 当前修改时间 : 2025年12月09日
  * Copyright (c) 2025, Inc. All Rights Reserved
  */
 
@@ -14,7 +14,7 @@ import run.yigou.gxzy.log.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,17 +37,16 @@ import run.yigou.gxzy.ui.reader.data.DataConverter;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
-import run.yigou.gxzy.utils.DebugLog;
 
 
 /**
- * ??????
+ * 书籍数据仓库
  * 
- * ???
- * 1. ?????????
- * 2. ????????
- * 3. ???????????
- * 4. ????????
+ * 核心职责:
+ * 1. 管理书籍章节数据的加载和缓存
+ * 2. 处理章节和方剂的下载
+ * 3. 提供本地和远程数据访问
+ * 4. 管理 BookData 缓存
  */
 public class BookRepository {
 
@@ -55,11 +54,11 @@ public class BookRepository {
     private final BookDataManager dataManager;
     private final GlobalDataHolder globalData;
     
-    // ???????bookId -> ?????
-    private final Map<Integer, List<Chapter>> chapterCache = new HashMap<>();
+    // 章节缓存 bookId -> 章节列表（线程安全）
+    private final Map<Integer, List<Chapter>> chapterCache = new ConcurrentHashMap<>();
 
     /**
-     * ????????
+     * 数据回调接口
      */
     public interface DataCallback<T> {
         void onSuccess(T data);
@@ -73,65 +72,70 @@ public class BookRepository {
     }
 
     /**
-     * ??????
+     * 获取书籍信息
      * 
-     * @param bookId ?? ID
-     * @return ?????????? null
+     * @param bookId 书籍 ID
+     * @return 书籍信息对象，可能为 null
      */
     public TabNavBody getBookInfo(int bookId) {
         try {
             return globalData.getBookInfo(bookId);
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "????????: " + e.getMessage());
+            EasyLog.print("BookRepository", "获取书籍信息失败: " + e.getMessage());
             return null;
         }
     }
 
     /**
-     * ?????????????
+     * 获取章节列表（带缓存）
      * 
-     * @param bookId ?? ID
-     * @return ????
+     * @param bookId 书籍 ID
+     * @return 章节列表
      */
     public List<Chapter> getChapters(int bookId) {
-        // ????
-        if (chapterCache.containsKey(bookId)) {
-            EasyLog.print("BookRepository", "???????: " + chapterCache.get(bookId).size() + " ?");
-            return chapterCache.get(bookId);
+        List<Chapter> cached = chapterCache.get(bookId);
+        if (cached != null) {
+            return cached;
         }
 
         try {
-            // ??????
             ArrayList<Chapter> chapters = dbService.mChapterService.find(
                 ChapterDao.Properties.BookId.eq(bookId)
             );
 
             if (chapters != null) {
-                // ????
                 chapterCache.put(bookId, chapters);
-                EasyLog.print("BookRepository", "????????: " + chapters.size() + " ?");
                 return chapters;
             }
 
             return new ArrayList<>();
 
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "????????: " + e.getMessage());
+            EasyLog.print("BookRepository", "数据库加载失败: " + e.getMessage());
             return new ArrayList<>();
         }
     }
 
     /**
-     * ??????
+     * 下载章节内容
      * 
-     * @param chapter ????
-     * @param lifecycleOwner ???????
-     * @param callback ????
+     * @param chapter 章节对象
+     * @param lifecycleOwner 生命周期所有者
+     * @param callback 下载回调
      */
     public void downloadChapter(Chapter chapter, androidx.lifecycle.LifecycleOwner lifecycleOwner, DataCallback<HH2SectionData> callback) {
+        performChapterDownload(chapter, lifecycleOwner, callback);
+    }
+
+    /**
+     * 章节下载核心实现（网络请求 + DB 持久化）
+     * 由 downloadChapter 和 downloadChapterAsync 共享
+     */
+    private void performChapterDownload(Chapter chapter, androidx.lifecycle.LifecycleOwner lifecycleOwner,
+                                         DataCallback<HH2SectionData> callback) {
         if (chapter == null) {
             if (callback != null) {
-                callback.onFailure(new IllegalArgumentException("??????"));
+                callback.onFailure(new IllegalArgumentException("章节对象为空"));
             }
             return;
         }
@@ -147,17 +151,13 @@ public class BookRepository {
                     public void onSucceed(HttpData<List<HH2SectionData>> data) {
                         if (data != null && !data.getData().isEmpty()) {
                             HH2SectionData sectionData = data.getData().get(0);
-
                             try {
-                                // ??????
                                 DataRepository.saveBookChapterDetailList(chapter, data.getData());
                                 chapter.setIsDownload(true);
                                 dbService.mChapterService.updateEntity(chapter);
-
                                 if (callback != null) {
                                     callback.onSuccess(sectionData);
                                 }
-
                             } catch (Exception e) {
                                 if (callback != null) {
                                     callback.onFailure(e);
@@ -165,7 +165,7 @@ public class BookRepository {
                             }
                         } else {
                             if (callback != null) {
-                                callback.onFailure(new Exception("??????"));
+                                callback.onFailure(new Exception("章节内容为空"));
                             }
                         }
                     }
@@ -177,7 +177,6 @@ public class BookRepository {
                         }
                     }
                 });
-
         } catch (Exception e) {
             if (callback != null) {
                 callback.onFailure(e);
@@ -186,11 +185,11 @@ public class BookRepository {
     }
 
     /**
-     * ????????
+     * 下载书籍方剂
      * 
-     * @param bookId ?? ID
-     * @param lifecycleOwner ???????
-     * @param callback ????
+     * @param bookId 书籍 ID
+     * @param lifecycleOwner 生命周期所有者
+     * @param callback 下载回调
      */
     public void downloadBookFang(int bookId, androidx.lifecycle.LifecycleOwner lifecycleOwner, DataCallback<List<Fang>> callback) {
         try {
@@ -202,9 +201,13 @@ public class BookRepository {
                         if (data != null && !data.getData().isEmpty()) {
                             List<Fang> fangList = data.getData();
 
-                            // ????????????????
+                            // 异步保存方剂数据到本地
                             new Thread(() -> {
-                                DataRepository.saveFangDetailList(fangList, bookId);
+                                try {
+                                    DataRepository.saveFangDetailList(fangList, bookId);
+                                } catch (Exception e) {
+                                    EasyLog.print("BookRepository", "异步保存方剂数据失败: " + e.getMessage());
+                                }
                             }).start();
 
                             if (callback != null) {
@@ -213,7 +216,7 @@ public class BookRepository {
 
                         } else {
                             if (callback != null) {
-                                callback.onFailure(new Exception("??????"));
+                                callback.onFailure(new Exception("方剂内容为空"));
                             }
                         }
                     }
@@ -234,115 +237,109 @@ public class BookRepository {
     }
 
     /**
-     * ????????
+     * 查询书架书籍
      * 
-     * @param bookNo ????
-     * @return ????
+     * @param bookNo 书号
+     * @return 书籍列表
      */
     public ArrayList<Book> queryBookshelf(int bookNo) {
         try {
             return dbService.mBookService.find(BookDao.Properties.BookNo.eq(bookNo));
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "??????: " + e.getMessage());
+            EasyLog.print("BookRepository", "查询书架失败: " + e.getMessage());
             return new ArrayList<>();
         }
     }
 
     /**
-     * ???????
+     * 添加书籍到书架
      * 
-     * @param book ????
-     * @return true-??, false-??
+     * @param book 书籍对象
+     * @return true-成功, false-失败
      */
     public boolean addToBookshelf(Book book) {
         try {
             dbService.mBookService.addEntity(book);
             return true;
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "??????: " + e.getMessage());
+            EasyLog.print("BookRepository", "添加书架失败: " + e.getMessage());
             return false;
         }
     }
 
     /**
-     * ????????
+     * 更新阅读进度
      * 
-     * @param book ????
-     * @return true-??, false-??
+     * @param book 书籍对象
+     * @return true-成功, false-失败
      */
     public boolean updateReadingProgress(Book book) {
         try {
             dbService.mBookService.updateEntity(book);
             return true;
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "????????: " + e.getMessage());
+            EasyLog.print("BookRepository", "更新阅读进度失败: " + e.getMessage());
             return false;
         }
     }
 
     /**
-     * ????
+     * 清空所有缓存
      */
     public void clearCache() {
         chapterCache.clear();
-        EasyLog.print("BookRepository", "?????");
+        EasyLog.print("BookRepository", "清空所有缓存");
     }
 
     /**
-     * ?????????
+     * 清空指定书籍缓存
      * 
-     * @param bookId ?? ID
+     * @param bookId 书籍 ID
      */
     public void clearCacheForBook(int bookId) {
         chapterCache.remove(bookId);
-        EasyLog.print("BookRepository", "???????: bookId=" + bookId);
+        EasyLog.print("BookRepository", "清空书籍缓存: bookId=" + bookId);
     }
 
-    // ==================== ????? API ====================
+    // ==================== 懒加载 API ====================
 
     /**
-     * ?????? ID
+     * 生成书籍唯一ID
      */
     public String generateBookId() {
         return dbService.mBookService.getUUID();
     }
 
     /**
-     * ???????????
-     * ????????????????????
+     * 获取书籍数据（懒加载模式）
+     * 如果缓存未命中，触发懒加载流程
      * 
-     * @param bookId ?? ID
-     * @return ?????? null?
+     * @param bookId 书籍 ID
+     * @return 书籍数据对象，可能为 null
      */
     public BookData getBookData(int bookId) {
-        // 1. ??????
         BookData cached = dataManager.getFromCache(bookId);
         if (cached != null && cached.isFullyLoaded()) {
-            EasyLog.print("BookRepository", "???????: bookId=" + bookId);
             return cached;
         }
 
-        // 2. ??????
-        EasyLog.print("BookRepository", "????????: bookId=" + bookId);
         BookData bookData = loadBookDataFromDb(bookId);
-        
-        // 3. ????
         dataManager.putToCache(bookId, bookData);
         
         return bookData;
     }
 
     /**
-     * ??????????
+     * 从数据库加载书籍数据
      */
     private BookData loadBookDataFromDb(int bookId) {
         BookData bookData = new BookData(bookId);
         
         try {
-            // ??????
+            // 获取章节列表
             List<Chapter> chapters = getChapters(bookId);
             if (!chapters.isEmpty()) {
-                // ??????? ChapterData?????????????
+                // 创建 ChapterData 对象并加入 BookData
                 List<ChapterData> chapterDataList = new ArrayList<>();
                 for (Chapter chapter : chapters) {
                     Long signatureId = chapter.getSignatureId();
@@ -361,228 +358,166 @@ public class BookRepository {
                 bookData.setChapters(chapterDataList);
             }
             
-            // ??????????????????
+            // 加载已下载的章节内容
             for (Chapter chapter : chapters) {
                 if (chapter.getIsDownload()) {
-                    // ????????
+                    // 加载章节内容
                     loadChapterContent(bookData, chapter);
                 }
             }
             
-            // ? ????????????????????????
+            // 加载方剂数据到 BookData（如果是方剂类书籍）
             loadFangDataToBookData(bookData, bookId);
             
             bookData.markAsFullyLoaded();
             
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "????????: " + e.getMessage());
+            EasyLog.print("BookRepository", "加载书籍数据失败: " + e.getMessage());
         }
         
         return bookData;
     }
 
     /**
-     * ????????????
+     * 加载章节内容到 BookData
      * 
-     * @param bookData ????
-     * @param chapter ????
+     * @param bookData 书籍数据
+     * @param chapter 章节对象
      */
     public void loadChapterContent(BookData bookData, Chapter chapter) {
         try {
-            // ????????????
             List<DataItem> content = ConvertEntity.getBookChapterDetailList(chapter);
             
             Long signatureId = chapter.getSignatureId();
-            EasyLog.print("BookRepository", "??????: signatureId=" + signatureId + 
-                ", contentSize=" + (content != null ? content.size() : 0));
-            
             if (content != null && !content.isEmpty()) {
-                // ????? ChapterData
                 ChapterData chapterData = bookData.findChapterBySignature(signatureId);
                 if (chapterData != null) {
                     chapterData.setContent(content);
-                    EasyLog.print("BookRepository", "????????: signatureId=" + signatureId);
-                } else {
-                    EasyLog.print("BookRepository", "?????? ChapterData: signatureId=" + signatureId);
                 }
-            } else {
-                EasyLog.print("BookRepository", "?????????: signatureId=" + signatureId);
             }
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "????????: " + e.getMessage());
+            EasyLog.print("BookRepository", "加载章节内容失败: " + e.getMessage());
         }
     }
 
     /**
-     * ???????BookData???????????????
+     * 将方剂数据加载到 BookData（仅对方剂类书籍有效）
      * 
-     * @param bookData ????
-     * @param bookId ??ID
+     * @param bookData 书籍数据
+     * @param bookId 书籍ID
      */
     private void loadFangDataToBookData(BookData bookData, int bookId) {
         try {
-            // ??????????
-            ArrayList<run.yigou.gxzy.data.model.Fang> fangList = ConvertEntity.getFangDetailList(bookId);
-            
-            EasyLog.print("BookRepository", "??????: bookId=" + bookId + 
-                ", fangSize=" + (fangList != null ? fangList.size() : 0));
-            
+            // 获取方剂列表
+            ArrayList<Fang> fangList = ConvertEntity.getFangDetailList(bookId);
             if (fangList != null && !fangList.isEmpty()) {
-                // ????????
+                // 转换为 DataItem 列表
                 List<DataItem> fangItemList = new ArrayList<>(fangList);
                 
-                // ??????????
+                // 使用书籍名称作为方剂章节标题
                 TabNavBody bookInfo = getBookInfo(bookId);
-                String bookName = bookInfo != null ? bookInfo.getBookName() : "????";
+                String bookName = bookInfo != null ? bookInfo.getBookName() : "方剂";
                 
                 ChapterData fangChapterData = new ChapterData(
                     0L, 
-                    bookName + "?", 
+                    bookName + "方剂", 
                     0, 
                     fangItemList
                 );
                 
                 bookData.setFangData(fangChapterData);
-                EasyLog.print("BookRepository", "? ????????BookData: " + fangList.size() + " ?");
-            } else {
-                EasyLog.print("BookRepository", "?????????: bookId=" + bookId);
             }
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "????????: " + e.getMessage());
+            EasyLog.print("BookRepository", "加载方剂数据失败: " + e.getMessage());
         }
     }
 
     /**
-     * ?????????????
+     * 异步下载章节内容并加载
      * 
-     * @param chapter ????
-     * @param bookData ????
-     * @param callback ????
+     * @param chapter 章节对象
+     * @param bookData 书籍数据
+     * @param callback 下载回调
      */
     public void downloadChapterAsync(Chapter chapter, BookData bookData, 
                                     androidx.lifecycle.LifecycleOwner lifecycleOwner,
                                     DataCallback<ChapterData> callback) {
-        if (chapter == null) {
-            if (callback != null) {
-                callback.onFailure(new IllegalArgumentException("??????"));
-            }
-            return;
-        }
-
-        try {
-            EasyHttp.get(lifecycleOwner)
-                .api(new ChapterContentApi()
-                    .setContentId(chapter.getChapterSection())
-                    .setSignatureId(chapter.getSignatureId())
-                    .setBookId(chapter.getBookId()))
-                .request(new HttpCallback<HttpData<List<HH2SectionData>>>(null) {
-                    @Override
-                    public void onSucceed(HttpData<List<HH2SectionData>> data) {
-                        if (data != null && !data.getData().isEmpty()) {
-                            HH2SectionData sectionData = data.getData().get(0);
-
-                            try {
-                                // ??????
-                                DataRepository.saveBookChapterDetailList(chapter, data.getData());
-                                chapter.setIsDownload(true);
-                                dbService.mChapterService.updateEntity(chapter);
-
-                                // ????? ChapterData
-                                ChapterData chapterData = null;
-                                if (bookData != null) {
-                                    chapterData = bookData.findChapterBySignature(chapter.getSignatureId());
-                                }
-                                
-                                if (chapterData == null) {
-                                    // ???? ChapterData
-                                    Long signatureId = chapter.getSignatureId();
-                                    chapterData = new ChapterData(
-                                        signatureId != null ? signatureId : 0,
-                                        chapter.getChapterHeader() != null ? chapter.getChapterHeader() : "",
-                                        chapter.getChapterSection()
-                                    );
-                                }
-                                
-                                // ?????? HH2SectionData ???
-                                if (sectionData.getData() != null) {
-                                    List<DataItem> content = new ArrayList<>();
-                                    for (Object item : sectionData.getData()) {
-                                        if (item instanceof DataItem) {
-                                            content.add((DataItem) item);
-                                        }
-                                    }
-                                    chapterData.setContent(content);
-                                }
-
-                                if (callback != null) {
-                                    callback.onSuccess(chapterData);
-                                }
-
-                            } catch (Exception e) {
-                                if (callback != null) {
-                                    callback.onFailure(e);
-                                }
-                            }
-                        } else {
-                            if (callback != null) {
-                                callback.onFailure(new Exception("??????"));
+        performChapterDownload(chapter, lifecycleOwner, new DataCallback<HH2SectionData>() {
+            @Override
+            public void onSuccess(HH2SectionData sectionData) {
+                try {
+                    // 查找或创建 ChapterData
+                    ChapterData chapterData = null;
+                    if (bookData != null) {
+                        chapterData = bookData.findChapterBySignature(chapter.getSignatureId());
+                    }
+                    if (chapterData == null) {
+                        Long signatureId = chapter.getSignatureId();
+                        chapterData = new ChapterData(
+                            signatureId != null ? signatureId : 0,
+                            chapter.getChapterHeader() != null ? chapter.getChapterHeader() : "",
+                            chapter.getChapterSection()
+                        );
+                    }
+                    // 将 HH2SectionData 转换为内容列表
+                    if (sectionData.getData() != null) {
+                        List<DataItem> content = new ArrayList<>();
+                        for (Object item : sectionData.getData()) {
+                            if (item instanceof DataItem) {
+                                content.add((DataItem) item);
                             }
                         }
+                        chapterData.setContent(content);
                     }
-
-                    @Override
-                    public void onFail(Exception e) {
-                        if (callback != null) {
-                            callback.onFailure(e);
-                        }
+                    if (callback != null) {
+                        callback.onSuccess(chapterData);
                     }
-                });
-
-        } catch (Exception e) {
-            if (callback != null) {
-                callback.onFailure(e);
+                } catch (Exception e) {
+                    if (callback != null) {
+                        callback.onFailure(e);
+                    }
+                }
             }
-        }
+
+            @Override
+            public void onFailure(Exception e) {
+                if (callback != null) {
+                    callback.onFailure(e);
+                }
+            }
+        });
     }
 
     /**
-     * ???????
-     * ????????????????????
+     * 懒加载章节内容
+     * 根据章节下载状态自动选择加载或下载方式
      * 
-     * @param bookId ?? ID
-     * @param position ????
-     * @param lifecycleOwner ??????(Fragment/Activity),????????
-     * @param callback ????
+     * @param bookId 书籍 ID
+     * @param position 章节位置
+     * @param lifecycleOwner 生命周期所有者（Fragment/Activity），可为 null
+     * @param callback 回调接口
      */
     public void loadChapterLazy(int bookId, int position, androidx.lifecycle.LifecycleOwner lifecycleOwner, DataCallback<ChapterData> callback) {
         try {
             BookData bookData = getBookData(bookId);
             ChapterData chapterData = bookData.getChapter(position);
             
-            EasyLog.print("BookRepository", "?????: bookId=" + bookId + 
-                ", position=" + position + ", chapterData=" + (chapterData != null));
-            
             if (chapterData == null) {
-                EasyLog.print("BookRepository", "?????: ?????");
                 if (callback != null) {
-                    callback.onFailure(new Exception("?????"));
+                    callback.onFailure(new Exception("未找到章节数据"));
                 }
                 return;
             }
             
-            // ?????????
+            // 内容已就绪，直接返回
             if (chapterData.isContentLoaded() && !chapterData.isEmpty()) {
-                // ????????
-                EasyLog.print("BookRepository", "???????: signatureId=" + chapterData.getSignatureId());
                 if (callback != null) {
                     callback.onSuccess(chapterData);
                 }
                 return;
             }
             
-            EasyLog.print("BookRepository", "????????????: signatureId=" + chapterData.getSignatureId());
-            
-            // ????????? Chapter ??
+            // 通过签名ID找到对应的 Chapter 对象
             List<Chapter> chapters = getChapters(bookId);
             Chapter targetChapter = null;
             for (Chapter chapter : chapters) {
@@ -594,58 +529,27 @@ public class BookRepository {
             }
             
             if (targetChapter == null) {
-                EasyLog.print("BookRepository", "?????: ???????");
                 if (callback != null) {
-                    callback.onFailure(new Exception("???????"));
+                    callback.onFailure(new Exception("未找到目标章节"));
                 }
                 return;
             }
             
-            // ???????
-            boolean isDownloaded = targetChapter.getIsDownload();
-            EasyLog.print("BookRepository", "??????: isDownloaded=" + isDownloaded);
-            
-            if (isDownloaded) {
-                // ??????????
+            if (targetChapter.getIsDownload()) {
                 loadChapterContent(bookData, targetChapter);
                 if (callback != null) {
                     callback.onSuccess(chapterData);
                 }
             } else {
-                // ?????????
-                EasyLog.print("BookRepository", "????????????");
                 downloadChapterAsync(targetChapter, bookData, lifecycleOwner, callback);
             }
             
         } catch (Exception e) {
-            EasyLog.print("BookRepository", "?????: " + e.getMessage());
+            EasyLog.print("BookRepository", "懒加载失败: " + e.getMessage());
             if (callback != null) {
                 callback.onFailure(e);
             }
         }
     }
 
-    /**
-     * ??????????????
-     * 
-     * @param bookId ?? ID
-     * @return ????
-     */
-    public TabNavBody getBookInfoFromGlobal(int bookId) {
-        return globalData.getBookInfo(bookId);
-    }
-
-    /**
-     * ?????????
-     */
-    public BookDataManager getDataManager() {
-        return dataManager;
-    }
-
-    /**
-     * ?????????
-     */
-    public GlobalDataHolder getGlobalData() {
-        return globalData;
-    }
 }

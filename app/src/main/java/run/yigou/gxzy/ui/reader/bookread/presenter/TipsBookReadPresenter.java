@@ -151,7 +151,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
 
         try {
             // 获取书籍信息（使用全局数据）
-            TabNavBody book = repository.getBookInfoFromGlobal(bookId);
+            TabNavBody book = repository.getBookInfo(bookId);
             if (book == null) {
                 view.showLoading(false);
                 view.showError("书籍信息不存在");

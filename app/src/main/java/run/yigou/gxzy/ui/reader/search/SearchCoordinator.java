@@ -10,7 +10,6 @@ import java.util.List;
 
 import run.yigou.gxzy.ui.reader.entity.GroupData;
 import run.yigou.gxzy.ui.reader.entity.ItemData;
-import run.yigou.gxzy.ui.reader.repository.BookRepository;
 import run.yigou.gxzy.ui.reader.data.BookData;
 import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.ui.reader.data.ChapterData;
@@ -25,7 +24,6 @@ import run.yigou.gxzy.utils.DebugLog;
  */
 public class SearchCoordinator {
     
-    private BookRepository bookRepository;
     private int bookId;
     
     /**
@@ -35,7 +33,6 @@ public class SearchCoordinator {
      */
     public SearchCoordinator(int bookId) {
         this.bookId = bookId;
-        this.bookRepository = new BookRepository();
     }
     
     /**
