@@ -1,8 +1,5 @@
 package run.yigou.gxzy.ui.reader.helper;
 
-import run.yigou.gxzy.data.model.DataItem;
-import run.yigou.gxzy.data.model.HH2SectionData;
-
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -11,7 +8,6 @@ import android.graphics.Rect;
 import android.text.Layout;
 import android.text.Spanned;
 import android.text.style.ClickableSpan;
-import android.util.DisplayMetrics;
 import android.widget.TextView;
 import android.widget.Toast;
 

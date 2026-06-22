@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.reader.entity.ChildEntity;
-import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
 
 /**
  * 阅读模式点击处理器

@@ -55,7 +55,7 @@ import run.yigou.gxzy.ui.reader.adapter.RefactoredExpandableAdapter;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.reader.entity.GroupModel;
 import run.yigou.gxzy.data.model.HH2SectionData;
-import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
+import run.yigou.gxzy.ui.reader.helper.TipsDialogHelper;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.ui.reader.manager.ChapterDownloadManager;
 import run.yigou.gxzy.ui.reader.bookread.contract.TipsBookReadContract;
@@ -361,7 +361,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             public boolean onHeaderLongClick(GroupedRecyclerViewAdapter adapter2, BaseViewHolder holder, int groupPosition) {
                 // 搜索状态不响应长按
                 if (adapter.getSearch()) return true;
-                TipsNetHelper.showListDialog(getContext(), AppConst.reData_Type)
+                TipsDialogHelper.showListDialog(getContext(), TipsDialogHelper.DIALOG_TYPE_REDOWNLOAD)
                         .setListener((dialog, position, string) -> {
                             if (string.equals("重新下本章节")) {
                                 if (isShowUpdateNotification) {

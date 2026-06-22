@@ -23,6 +23,7 @@ import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
 
+import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
 import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.utils.DebugLog;
 
@@ -78,7 +79,7 @@ public class GroupModel {
                     ChildEntity child = getChildEntity(dataItem);
                     if (i == 0 && isFirst) {
                         isFirst = false;
-                        SpannableStringBuilder spannable = TipsNetHelper.renderText("$x{" + child.getName() + "}" + "\n");
+                        SpannableStringBuilder spannable = TipsClickHandler.renderText("$x{" + child.getName() + "}" + "\n");
                         child.setAttributed_child_section_text(spannable.append(child.getAttributed_child_section_text()));
                     }
                     children.add(child);
@@ -181,7 +182,7 @@ public class GroupModel {
             }
         }
         // 使用辅助类渲染分组头部文本
-        SpannableStringBuilder spannableHeader = TipsNetHelper.renderText(sectionData.getHeader());
+        SpannableStringBuilder spannableHeader = TipsClickHandler.renderText(sectionData.getHeader());
         // 构造可展开分组实体并添加到分组列表中
         ExpandableGroupEntity group = new ExpandableGroupEntity(sectionData.getHeader(), spannableHeader, "", isExpand, children);
         return group;

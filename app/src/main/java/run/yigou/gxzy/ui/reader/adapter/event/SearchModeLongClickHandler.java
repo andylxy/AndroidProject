@@ -13,11 +13,10 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.utils.ClipboardHelper;
 import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.entity.ChildEntity;
-import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
+import run.yigou.gxzy.ui.reader.helper.TipsDialogHelper;
 
 /**
  * 搜索模式长按处理器
@@ -68,7 +67,7 @@ public class SearchModeLongClickHandler implements LongClickEventHandler {
                                      @NonNull ChildEntity entity,
                                      @NonNull CharSequence text) {
         // 显示菜单(搜索模式菜单类型,仅复制功能)
-        TipsNetHelper.showListDialog(context, AppConst.noFooter_Type)
+        TipsDialogHelper.showListDialog(context, TipsDialogHelper.DIALOG_TYPE_COPY_AND_JUMP)
                 .setListener((dialog, position, string) -> {
                     if ("拷贝内容".equals(string)) {
                         handleCopyAction(text);
@@ -131,7 +130,7 @@ public class SearchModeLongClickHandler implements LongClickEventHandler {
                                      @NonNull ItemData itemData,
                                      @NonNull String text) {
         // 显示菜单(搜索模式菜单类型,仅复制功能)
-        TipsNetHelper.showListDialog(context, AppConst.noFooter_Type)
+        TipsDialogHelper.showListDialog(context, TipsDialogHelper.DIALOG_TYPE_COPY_AND_JUMP)
                 .setListener((dialog, position, string) -> {
                     if ("拷贝内容".equals(string)) {
                         handleCopyAction(text);

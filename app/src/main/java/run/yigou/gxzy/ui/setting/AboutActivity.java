@@ -20,7 +20,7 @@ import run.yigou.gxzy.data.local.entity.About;
 import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.remote.api.AboutApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
-import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
+import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 /**
@@ -185,7 +185,7 @@ public final class AboutActivity extends AppActivity {
 
             switch (name) {
                 case ABOUT_THKS:
-                    setText(tvThks, TipsNetHelper.renderText(text));
+                    setText(tvThks, TipsClickHandler.renderText(text));
                     break;
                 case ABOUT_MANUAL:
                     setSpannableText(tvDeveloper, text);
@@ -194,7 +194,7 @@ public final class AboutActivity extends AppActivity {
                     setSpannableText(tvUpdataLog, text);
                     break;
                 case ABOUT_BOOKNAME:
-                    setText(tvAuthorBook, TipsNetHelper.renderText(text));
+                    setText(tvAuthorBook, TipsClickHandler.renderText(text));
                     break;
                 default:
                     EasyLog.print("setAbout", "Unknown about name: " + name);
@@ -224,7 +224,7 @@ public final class AboutActivity extends AppActivity {
             for (String line : lines) {
                 spannableStringBuilder.append(line).append("\n");
             }
-            textView.setText(TipsNetHelper.renderText(spannableStringBuilder.toString()));
+            textView.setText(TipsClickHandler.renderText(spannableStringBuilder.toString()));
         } else {
             EasyLog.print("setSpannableText", "TextView is null for text: " + text);
         }

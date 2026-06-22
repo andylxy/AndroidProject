@@ -31,7 +31,7 @@ import run.yigou.gxzy.ui.reader.entity.ItemData;
 import run.yigou.gxzy.ui.reader.repository.BookRepository;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
-import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
+import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.utils.DebugLog;
 
@@ -267,7 +267,7 @@ public class SearchDataAdapter {
             List<ItemData> items = new ArrayList<>();
             ItemData itemData = new ItemData();
             
-            SpannableStringBuilder yaoText = TipsNetHelper.renderText("$x{" + yao.getName() + "}\n");
+            SpannableStringBuilder yaoText = TipsClickHandler.renderText("$x{" + yao.getName() + "}\n");
             if (yao.getAttributedText() != null) {
                 yaoText.append(yao.getAttributedText());
             }
@@ -366,7 +366,7 @@ public class SearchDataAdapter {
             List<ItemData> items = new ArrayList<>();
             ItemData itemData = new ItemData();
             
-            SpannableStringBuilder mingCiText = TipsNetHelper.renderText("$x{" + mingCiContent.getName() + "}\n");
+            SpannableStringBuilder mingCiText = TipsClickHandler.renderText("$x{" + mingCiContent.getName() + "}\n");
             if (mingCiContent.getAttributedText() != null) {
                 mingCiText.append(mingCiContent.getAttributedText());
             }
@@ -384,7 +384,7 @@ public class SearchDataAdapter {
             
             List<ItemData> items = new ArrayList<>();
             ItemData itemData = new ItemData();
-            itemData.setAttributedText(TipsNetHelper.renderText("$m{未见此名词。}"));
+            itemData.setAttributedText(TipsClickHandler.renderText("$m{未见此名词。}"));
             items.add(itemData);
             itemDataList.add(items);
             
@@ -406,7 +406,7 @@ public class SearchDataAdapter {
         
         List<ItemData> items = new ArrayList<>();
         ItemData itemData = new ItemData();
-        itemData.setAttributedText(TipsNetHelper.renderText("$m{未见方。}"));
+        itemData.setAttributedText(TipsClickHandler.renderText("$m{未见方。}"));
         items.add(itemData);
         itemDataList.add(items);
     }
@@ -419,7 +419,7 @@ public class SearchDataAdapter {
         
         List<ItemData> items = new ArrayList<>();
         ItemData itemData = new ItemData();
-        itemData.setAttributedText(TipsNetHelper.renderText("$m{未见此药。}"));
+        itemData.setAttributedText(TipsClickHandler.renderText("$m{未见此药。}"));
         items.add(itemData);
         itemDataList.add(items);
     }

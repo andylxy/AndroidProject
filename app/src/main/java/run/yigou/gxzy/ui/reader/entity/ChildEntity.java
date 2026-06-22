@@ -15,7 +15,7 @@ import android.text.style.ClickableSpan;
 
 import run.yigou.gxzy.log.EasyLog;
 
-import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
+import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**
@@ -66,7 +66,7 @@ public class ChildEntity {
                 EasyLog.print("text preview: " + child_section_text.substring(0, Math.min(100, child_section_text.length())));
                 
                 // 调用 renderText 渲染富文本
-                attributed_child_section_text = TipsNetHelper.renderText(child_section_text.trim());
+                attributed_child_section_text = TipsClickHandler.renderText(child_section_text.trim());
                 
                 EasyLog.print("renderText() 完成, attributed_child_section_text.length: " + attributed_child_section_text.length());
                 
@@ -99,7 +99,7 @@ public class ChildEntity {
     public synchronized SpannableStringBuilder getAttributed_child_section_video() {
         if (attributed_child_section_video == null) {
             if (child_section_video != null) {
-                attributed_child_section_video = TipsNetHelper.renderText(child_section_video);
+                attributed_child_section_video = TipsClickHandler.renderText(child_section_video);
             } else {
                 // 处理 child_sectionvideo 为 null 的情况
                 attributed_child_section_video = new SpannableStringBuilder(); // 或者返回一个默认值
@@ -119,7 +119,7 @@ public class ChildEntity {
                 // 防止空指针异常
                 attributed_child_section_note = new SpannableStringBuilder();
             } else {
-                attributed_child_section_note = TipsNetHelper.renderText(child_section_note);
+                attributed_child_section_note = TipsClickHandler.renderText(child_section_note);
             }
 
             // 记录日志

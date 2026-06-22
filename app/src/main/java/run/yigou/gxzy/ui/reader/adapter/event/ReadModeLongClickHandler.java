@@ -15,12 +15,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.utils.ClipboardHelper;
 import run.yigou.gxzy.ui.reader.adapter.BaseRefactoredAdapter;
 import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.entity.ChildEntity;
-import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
+import run.yigou.gxzy.ui.reader.helper.TipsDialogHelper;
 
 /**
  * 阅读模式长按处理器
@@ -92,7 +91,7 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
                                      @NonNull ChildEntity entity,
                                      @NonNull CharSequence text) {
         // 显示菜单(阅读模式菜单类型)
-        TipsNetHelper.showListDialog(context, AppConst.data_Type)
+        TipsDialogHelper.showListDialog(context, TipsDialogHelper.DIALOG_TYPE_COPY)
                 .setListener((dialog, position, string) -> {
                     handleMenuAction(String.valueOf(string), groupPosition, childPosition, text);
                 })

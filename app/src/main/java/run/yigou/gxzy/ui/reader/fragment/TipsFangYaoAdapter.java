@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
-import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
+import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
 import run.yigou.gxzy.tips.widget.LocalLinkMovementMethod;
 
 
@@ -43,14 +43,14 @@ public final class TipsFangYaoAdapter extends AppAdapter<String> {
                 case 1:
                     if (getData() != null) {
                         String f = (position + 1) + "、" + "$f{" + getData().get(position) + "}";
-                        mFang_Yao.setText(TipsNetHelper.renderText(f));
+                        mFang_Yao.setText(TipsClickHandler.renderText(f));
 
                     }
                     break;
                 case 2:
                     if (getData() != null) {
                         String u = (position + 1) + "、" + "$u{" + getData().get(position) + "}";
-                        mFang_Yao.setText(TipsNetHelper.renderText(u));
+                        mFang_Yao.setText(TipsClickHandler.renderText(u));
                     }
                     break;
                 case 3:
