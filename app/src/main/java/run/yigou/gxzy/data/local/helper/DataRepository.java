@@ -1,7 +1,5 @@
 package run.yigou.gxzy.data.local.helper;
 
-import androidx.annotation.NonNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +35,10 @@ import androidx.lifecycle.LifecycleOwner;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
+import run.yigou.gxzy.data.remote.api.ChapterListApi;
+import run.yigou.gxzy.data.remote.model.HttpData;
+import com.hjq.http.EasyHttp;
+import com.hjq.http.listener.HttpCallback;
 import org.greenrobot.greendao.query.WhereCondition;
 
 /**
@@ -46,12 +48,10 @@ import org.greenrobot.greendao.query.WhereCondition;
  * 使 ConvertEntity 专注于纯实体转换与加解密逻辑。
  *
  * 职责划分：
- * - DataRepository：数据库读写操作编排
+ * - DataRepository：数据库读写操作编排 + 章节列表网络获取与持久化
  * - ConvertEntity：实体⇔模型转换、加解密、序列化工具
- * - NetworkDataFetcher：网络数据获取
  *
  * @see ConvertEntity 实体转换与加解密工具
- * @see NetworkDataFetcher 网络数据获取
  * @since 2024/06/21
  */
 public final class DataRepository {
@@ -253,8 +253,8 @@ public final class DataRepository {
             }, "保存导航子项" + item.getBookNo());
 
             EasyLog.print(TAG, "已保存导航子项，触发章节下载: " + item.getBookNo());
-            // 异步下载章节列表
-            ThreadUtil.runInBackground(() -> NetworkDataFetcher.getChapterList(lifecycleOwner, item));
+            // 异步下载章节列表（原 NetworkDataFetcher 逻辑已合并）
+            ThreadUtil.runInBackground(() -> fetchAndSaveChapterList(lifecycleOwner, item));
             return true;
 
         } catch (Exception e) {
@@ -353,21 +353,6 @@ public final class DataRepository {
     }
 
     // ==================== 方剂数据 ====================
-
-    /**
-     * 保存方剂数据到数据库（先删后插）
-     * 
-     * 注意：此方法名为 get 但实际是写操作，历史命名遗留。
-     * 请使用 {@link #saveFangDetailList(List, int)} 替代。
-     *
-     * @param netFangDetailList 方剂数据列表
-     * @param bookId            书籍ID
-     * @deprecated 命名不一致，请使用 {@link #saveFangDetailList(List, int)}
-     */
-    @Deprecated
-    public static void getFangDetailListForSave(List<Fang> netFangDetailList, int bookId) {
-        saveFangDetailList(netFangDetailList, bookId);
-    }
 
     /**
      * 保存方剂数据到数据库（先删后插，含药味明细）
@@ -528,22 +513,6 @@ public final class DataRepository {
 
     /**
      * 保存书籍详情数据（按 bookId 维度，先删后插）
-     * 
-     * 注意：此方法名为 get 但实际是写操作，历史命名遗留。
-     * 请使用 {@link #saveBookDetailData(List, int)} 替代。
-     *
-     * @param netDetailList 章节内容数据
-     * @param bookId        书籍ID
-     * @return 保存是否成功
-     * @deprecated 命名不一致，请使用 {@link #saveBookDetailData(List, int)}
-     */
-    @Deprecated
-    public static boolean getBookDetailList(List<HH2SectionData> netDetailList, int bookId) {
-        return saveBookDetailData(netDetailList, bookId);
-    }
-
-    /**
-     * 保存书籍详情数据（按 bookId 维度，先删后插）
      *
      * @param netDetailList 章节内容数据
      * @param bookId        书籍ID
@@ -561,7 +530,7 @@ public final class DataRepository {
     }
 
     /**
-     * 书籍章节数据保存的通用实现（合并了 saveBookChapterDetailList 和 getBookDetailList 的重复逻辑）
+     * 书籍章节数据保存的通用实现
      *
      * @param netDetailList     章节内容数据
      * @param signatureId       签名ID（用于日志，可为 null）
@@ -639,5 +608,109 @@ public final class DataRepository {
             return true;
 
         }, operationName);
+    }
+
+    // ==================== 章节列表网络获取（原 NetworkDataFetcher 逻辑）====================
+
+    /**
+     * 从网络获取章节列表并保存到数据库
+     *
+     * 流程：发起 HTTP 请求 → 处理响应 → 判断是否需要更新 → 批量保存
+     *
+     * @param lifecycleOwner 生命周期宿主（用于绑定请求生命周期）
+     * @param item           书籍导航项，包含 bookNo 等标识
+     */
+    private static void fetchAndSaveChapterList(LifecycleOwner lifecycleOwner, TabNavBody item) {
+        if (lifecycleOwner == null || item == null) {
+            EasyLog.print(TAG, "参数无效，跳过章节列表获取");
+            return;
+        }
+
+        EasyHttp.get(lifecycleOwner)
+                .api(new ChapterListApi().setBookId(item.getBookNo()))
+                .request(new HttpCallback<HttpData<List<Chapter>>>(null) {
+                    @Override
+                    public void onSucceed(HttpData<List<Chapter>> data) {
+                        if (data == null || data.getData() == null || data.getData().isEmpty()) {
+                            EasyLog.print(TAG, "书籍 " + item.getBookNo() + " 无章节数据");
+                            return;
+                        }
+
+                        processChapterList(data.getData(), item);
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        EasyLog.print(TAG, "获取书籍 " + item.getBookNo() + " 章节列表失败: " + e.getMessage());
+                        super.onFail(e);
+                    }
+                });
+    }
+
+    /**
+     * 处理网络返回的章节列表，判断是否需要更新后批量保存
+     */
+    private static void processChapterList(List<Chapter> chapters, TabNavBody item) {
+        try {
+            // 查询已有章节
+            ArrayList<Chapter> existingChapters = ConvertEntity.executeDatabaseOperation(
+                () -> DbService.getInstance().mChapterService.find(
+                    ChapterDao.Properties.BookId.eq(item.getBookNo())),
+                "查询书籍" + item.getBookNo() + "的章节"
+            );
+
+            boolean needsUpdate = ConvertEntity.shouldUpdateChapters(existingChapters, item.getChapterCount());
+
+            if (!needsUpdate) {
+                EasyLog.print(TAG, "书籍 " + item.getBookNo() + " 章节数未变化，跳过更新");
+                return;
+            }
+
+            // 清除旧数据
+            if (existingChapters != null && !existingChapters.isEmpty()) {
+                DbService.getInstance().mChapterService.deleteAll(
+                    ChapterDao.Properties.BookId.eq(item.getBookNo()));
+                EasyLog.print(TAG, "已删除书籍 " + item.getBookNo() + " 旧章节数据");
+            }
+
+            // 批量保存新章节
+            int successCount = saveChaptersBatch(chapters, item.getBookNo());
+            EasyLog.print(TAG, "保存书籍 " + item.getBookNo() + " 共 " + successCount + "/" + chapters.size() + " 章");
+
+        } catch (Exception e) {
+            EasyLog.print(TAG, "处理书籍 " + item.getBookNo() + " 章节列表失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 批量保存章节数据
+     *
+     * @param chapters 章节列表
+     * @param bookId   书籍ID
+     * @return 成功保存的数量
+     */
+    private static int saveChaptersBatch(List<Chapter> chapters, int bookId) {
+        if (chapters == null || chapters.isEmpty()) {
+            return 0;
+        }
+
+        int successCount = 0;
+        for (Chapter chapter : chapters) {
+            if (chapter == null) {
+                continue;
+            }
+
+            try {
+                ConvertEntity.executeDatabaseOperation(() -> {
+                    DbService.getInstance().mChapterService.addEntity(chapter);
+                    return true;
+                }, "保存章节" + chapter.getId());
+                successCount++;
+            } catch (Exception e) {
+                EasyLog.print(TAG, "保存章节失败: " + e.getMessage());
+            }
+        }
+
+        return successCount;
     }
 }

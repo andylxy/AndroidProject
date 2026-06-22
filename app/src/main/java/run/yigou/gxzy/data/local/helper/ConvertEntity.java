@@ -33,12 +33,10 @@ import run.yigou.gxzy.utils.StringHelper;
  *
  * 专注于纯实体转换、加解密和序列化工具。
  * 数据库 CRUD 操作已迁移至 {@link DataRepository}，
- * 网络请求已迁移至 {@link NetworkDataFetcher}。
  *
  * 职责划分：
  * - ConvertEntity：实体⇔模型转换、RC4加解密、字符串序列化
  * - {@link DataRepository}：数据库读写操作编排
- * - {@link NetworkDataFetcher}：网络数据获取与持久化
  *
  * @author Android 开源项目
  * @author Zhs (xiaoyang_02@qq.com)
