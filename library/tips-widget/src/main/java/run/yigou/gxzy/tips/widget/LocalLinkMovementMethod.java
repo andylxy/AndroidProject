@@ -10,10 +10,17 @@ import android.widget.TextView;
 
 import run.yigou.gxzy.log.EasyLog;
 
+/**
+ * 支持 ClickableSpan 点击的 LinkMovementMethod 子类。
+ *
+ * 内部通过 setTag 机制在 ACTION_DOWN 阶段标记"正在处理 span 点击"，
+ * 用于阻止父容器在本次触摸序列中误触发 toggle 逻辑。
+ * 外部调用方通过 {@link #isHandlingClick(TextView)} 判断当前是否正在点击链接。
+ *
+ * 作为单例使用，通过 {@link #getInstance()} 获取全局实例。
+ */
 public class LocalLinkMovementMethod extends LinkMovementMethod {
-    private static final long CLICK_DELAY = 1000;
-    static LocalLinkMovementMethod sInstance;
-    private long lastClickTime;
+    private static final LocalLinkMovementMethod INSTANCE = new LocalLinkMovementMethod();
 
     // 用于弹窗定位修正
     private float lastRawX;
@@ -21,10 +28,19 @@ public class LocalLinkMovementMethod extends LinkMovementMethod {
     private long lastTouchTimestamp;
 
     public static LocalLinkMovementMethod getInstance() {
-        if (sInstance == null) {
-            sInstance = new LocalLinkMovementMethod();
-        }
-        return sInstance;
+        return INSTANCE;
+    }
+
+    /**
+     * 检查指定 TextView 当前是否正在处理 ClickableSpan 点击。
+     * 用于父容器在触摸事件中判断是否应跳过自身的 toggle 逻辑。
+     *
+     * @param textView 目标 TextView
+     * @return true 表示正在处理 span 点击
+     */
+    public static boolean isHandlingClick(TextView textView) {
+        Boolean isClick = (Boolean) textView.getTag(R.id.tag_is_clicking_link);
+        return isClick != null && isClick;
     }
 
     @Override
@@ -42,13 +58,9 @@ public class LocalLinkMovementMethod extends LinkMovementMethod {
             int x = (int) motionEvent.getX();
             int y = (int) motionEvent.getY();
 
-            // 计算相对于 TextView 内边距的坐标
-            int totalPaddingLeft = x - textView.getTotalPaddingLeft();
-            int totalPaddingTop = y - textView.getTotalPaddingTop();
-
-            // 考虑滚动偏移量，计算相对于 TextView 内容区域的坐标
-            int scrollX = totalPaddingLeft + textView.getScrollX();
-            int scrollY = totalPaddingTop + textView.getScrollY();
+            // 计算去除内边距并考虑滚动偏移后的内容区域坐标
+            int scrollX = x - textView.getTotalPaddingLeft() + textView.getScrollX();
+            int scrollY = y - textView.getTotalPaddingTop() + textView.getScrollY();
 
             // 获取 TextView 的布局对象
             Layout layout = textView.getLayout();
@@ -60,21 +72,18 @@ public class LocalLinkMovementMethod extends LinkMovementMethod {
             ClickableSpan[] clickableSpanArr = (ClickableSpan[]) spannable.getSpans(offsetForHorizontal, offsetForHorizontal, ClickableSpan.class);
 
             if (clickableSpanArr.length != 0) {
-                // 标记当前触摸操作是 点击动作 => 点击文本spannable对象
-                textView.setTag(true);
+                // 在 DOWN 阶段标记"正在处理 span 点击"，阻止父容器在本次触摸序列中误触发 toggle
+                textView.setTag(R.id.tag_is_clicking_link, true);
                 if (action == MotionEvent.ACTION_UP) {
-                    // 如果是抬起事件，检查是否在双击时间内处理点击事件
-                    if (System.currentTimeMillis() - this.lastClickTime < CLICK_DELAY) {
-                        clickableSpanArr[0].onClick(textView);
-                    }
+                    // 抬起事件：直接触发点击回调
+                    clickableSpanArr[0].onClick(textView);
                 } else if (action == MotionEvent.ACTION_DOWN) {
-                    // 如果是按下事件，高亮显示可点击的文本
+                    // 按下事件：高亮显示可点击的文本
                     Selection.setSelection(spannable, spannable.getSpanStart(clickableSpanArr[0]), spannable.getSpanEnd(clickableSpanArr[0]));
-                    this.lastClickTime = System.currentTimeMillis();
                 }
                 return true;
             }
-            textView.setTag(false);
+            textView.setTag(R.id.tag_is_clicking_link, false);
             Selection.removeSelection(spannable);
         }
         return super.onTouchEvent(textView, spannable, motionEvent);

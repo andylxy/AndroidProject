@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.tips.widget.LocalLinkMovementMethod;
 import run.yigou.gxzy.utils.TextViewHelper;
 import run.yigou.gxzy.ui.reader.entity.ChildEntity;
 
@@ -219,7 +220,6 @@ public class TipsChildViewHolder {
      * 检查 TextView 是否正在处理链接点击（由 LocalLinkMovementMethod 标记）
      */
     private static boolean isLinkClick(TextView textView) {
-        Boolean isClick = (Boolean) textView.getTag();
-        return isClick != null && isClick;
+        return LocalLinkMovementMethod.isHandlingClick(textView);
     }
 }
