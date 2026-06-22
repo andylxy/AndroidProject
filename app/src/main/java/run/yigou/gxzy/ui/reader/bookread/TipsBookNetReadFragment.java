@@ -1,14 +1,14 @@
 /*
  * 项目名: AndroidProject
  * 类名: TipsBookNetReadFragment.java
- * 包名: run.yigou.gxzy.ui.reader.fragment
+ * 包名: run.yigou.gxzy.ui.reader.bookread
  * 作者 : Zhs (xiaoyang_02@qq.com)
  * 当前修改时间 : 2024年09月08日 10:50:43
  * 上次修改时间: 2024年09月08日 10:50:43
  * Copyright (c) 2024 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.reader.fragment;
+package run.yigou.gxzy.ui.reader.bookread;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentCallbacks2;
@@ -58,8 +58,8 @@ import run.yigou.gxzy.data.model.HH2SectionData;
 import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.ui.reader.manager.ChapterDownloadManager;
-import run.yigou.gxzy.ui.reader.contract.TipsBookReadContract;
-import run.yigou.gxzy.ui.reader.presenter.TipsBookReadPresenter;
+import run.yigou.gxzy.ui.reader.bookread.contract.TipsBookReadContract;
+import run.yigou.gxzy.ui.reader.bookread.presenter.TipsBookReadPresenter;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 

@@ -1,13 +1,13 @@
 /*
  * 项目名: AndroidProject
  * 类名: TipsBookReadPresenter.java
- * 包名: run.yigou.gxzy.ui.reader.presenter
+ * 包名: run.yigou.gxzy.ui.reader.bookread.presenter
  * 作者 : AI Assistant
  * 当前修改时间 : 2025年12月09日
  * Copyright (c) 2025, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.reader.presenter;
+package run.yigou.gxzy.ui.reader.bookread.presenter;
 
 import run.yigou.gxzy.log.EasyLog;
 
@@ -32,7 +32,7 @@ import run.yigou.gxzy.data.local.entity.Book;
 import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.helper.ConvertEntity;
-import run.yigou.gxzy.ui.reader.contract.TipsBookReadContract;
+import run.yigou.gxzy.ui.reader.bookread.contract.TipsBookReadContract;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.reader.entity.GroupModel;
 import run.yigou.gxzy.ui.reader.data.BookData;

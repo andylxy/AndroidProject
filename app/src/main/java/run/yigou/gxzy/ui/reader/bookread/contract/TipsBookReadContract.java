@@ -1,13 +1,13 @@
 /*
  * 项目名: AndroidProject
  * 类名: TipsBookReadContract.java
- * 包名: run.yigou.gxzy.ui.reader.contract
+ * 包名: run.yigou.gxzy.ui.reader.bookread.contract
  * 作者 : AI Assistant
  * 当前修改时间 : 2025年12月09日
  * Copyright (c) 2025, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.reader.contract;
+package run.yigou.gxzy.ui.reader.bookread.contract;
 
 import android.content.Context;
 
