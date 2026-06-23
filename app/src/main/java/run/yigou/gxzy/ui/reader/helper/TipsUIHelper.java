@@ -1,7 +1,5 @@
 package run.yigou.gxzy.ui.reader.helper;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -9,7 +7,6 @@ import android.text.Layout;
 import android.text.Spanned;
 import android.text.style.ClickableSpan;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import run.yigou.gxzy.log.EasyLog;
 
@@ -151,13 +148,5 @@ public class TipsUIHelper {
         int scrollY = textView.getScrollY(); // 当前滚动的 Y 偏移量
         int paddingTop = textView.getCompoundPaddingTop(); // 上方内边距
         return positionY - scrollY + paddingTop;
-    }
-
-    // 复制内容到剪贴板
-    public static void copyToClipboard(Context context, String text) {
-        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("label", text);
-        clipboard.setPrimaryClip(clip);
-        Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
     }
 }

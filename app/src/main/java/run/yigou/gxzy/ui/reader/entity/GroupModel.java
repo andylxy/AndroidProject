@@ -24,106 +24,11 @@ import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
 
 import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
-import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
-import run.yigou.gxzy.utils.DebugLog;
 
 
 public class GroupModel {
 
     private static final String TAG = "GroupModel";
-
-    /**
-     * 获取组列表数据
-     */
-    public static ArrayList<GroupEntity> getGroups(List<HH2SectionData> showMingCiList, String charSequence, boolean isFang ) {
-        EasyLog.print("=== GroupModel.getGroups() 调用 ===");
-        EasyLog.print("showMingCiList: " + (showMingCiList != null ? showMingCiList.size() + " items" : "null"));
-        try {
-            // 获取别名字典
-            run.yigou.gxzy.base.GlobalDataHolder globalData = run.yigou.gxzy.base.GlobalDataHolder.getInstance();
-            java.util.Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
-            java.util.Map<String, String> fangAliasDict = globalData.getFangAliasDict();
-
-            // 创建搜索关键字实体
-            SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(charSequence));
-
-            // 获取过滤后的数据
-            ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(
-                    searchKeyEntity, 
-                    showMingCiList, 
-                    yaoAliasDict, 
-                    fangAliasDict
-            );
-
-            // 初始化组列表
-            ArrayList<GroupEntity> groups = new ArrayList<>();
-            boolean isFirst = true;
-            EasyLog.print("filteredData size: " + filteredData.size());
-            // 遍历过滤后的数据
-            for (HH2SectionData sectionData : filteredData) {
-                EasyLog.print("--- 处理sectionData: " + (sectionData != null ? sectionData.getHeader() : "null"));
-                if (sectionData == null) {
-                    continue; // 跳过空的数据
-                }
-
-
-                List<DataItem> dataList = (List<DataItem>) sectionData.getData();
-                if (dataList == null) {
-                    continue; // 数据为空，跳过
-                }
-                // 初始化子项列表
-                ArrayList<ChildEntity> children = new ArrayList<>();
-               if (isFang){
-                for (int i = 0; i < dataList.size(); i++) {
-                    DataItem dataItem = dataList.get(i);
-                    ChildEntity child = getChildEntity(dataItem);
-                    if (i == 0 && isFirst) {
-                        isFirst = false;
-                        SpannableStringBuilder spannable = TipsClickHandler.renderText("$x{" + child.getName() + "}" + "\n");
-                        child.setAttributed_child_section_text(spannable.append(child.getAttributed_child_section_text()));
-                    }
-                    children.add(child);
-
-                }}else {
-                   for (DataItem dataItem : dataList) {
-                       if (dataItem != null) {
-                           ChildEntity child = getChildEntity(dataItem);
-                           children.add(child);
-                       }
-                   }
-                }
-
-
-
-
-                // 创建组实体并添加到组列表
-                String header = sectionData.getHeader();
-                if (header == null) {
-                    header = ""; // 防止空指针异常
-                }
-                String footer = "第尾部"; // 可以改为配置文件或动态生成
-                EasyLog.print("创建GroupEntity - header: " + header + ", children size: " + children.size());
-                groups.add(new GroupEntity(header, footer, children));
-            }
-
-            EasyLog.print("=== GroupModel.getGroups() 完成 ===");
-            EasyLog.print("返回groups数量: " + groups.size());
-            for (int i = 0; i < groups.size(); i++) {
-                GroupEntity g = groups.get(i);
-                EasyLog.print("  Group[" + i + "]: header=" + g.getHeader() + ", children=" + (g.getChildren() != null ? g.getChildren().size() : "null"));
-            }
-            return groups;
-        } catch (NullPointerException e) {
-            // 处理空指针异常
-            EasyLog.print(TAG, "发生空指针异常: " + e.getMessage());
-            return new ArrayList<>();
-        } catch (Exception e) {
-            // 其他异常处理
-            EasyLog.print(TAG, "发生异常: " + e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
 
     private static @NonNull ChildEntity getChildEntity(DataItem dataItem) {
         ChildEntity child = new ChildEntity();

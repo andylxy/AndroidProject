@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,9 +54,6 @@ public abstract class TipsLittleWindow extends Fragment {
     protected ViewGroup mGroup;
     protected Rect rect;
     protected View view;
-
-    // 静态窗口栈，替代 TipsSingleData 中的管理
-    public static final java.util.List<TipsLittleWindow> windowStack = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     // 宿主接口（用于解耦 app 模块依赖）
     private ITipsWindowHost mHost;
@@ -109,9 +105,6 @@ public abstract class TipsLittleWindow extends Fragment {
 
         // 使用commitAllowingStateLoss来避免状态丢失问题
         transaction.commitAllowingStateLoss();
-
-        // 添加到弹窗栈
-        windowStack.add(this);
     }
 
     /**
@@ -120,9 +113,6 @@ public abstract class TipsLittleWindow extends Fragment {
      * 通过移除事务将Fragment从当前的活动列表中移除，并且退回到之前的BackStack状态
      */
     public void dismiss() {
-        // 从弹窗栈移除
-        windowStack.remove(this);
-
         // 获取FragmentManager
         FragmentManager fragmentManager = getParentFragmentManager();
         if (fragmentManager == null) {
@@ -135,35 +125,21 @@ public abstract class TipsLittleWindow extends Fragment {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.remove(this);
 
+        // 提交事务，兼容不同版本
         try {
-            // 异步提交事务，兼容不同版本
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 try {
                     transaction.commitNow();
-                    EasyLog.print("TipsLittleWindow", "事务提交成功，使用 commitNow()。");
                 } catch (IllegalStateException e) {
-                    EasyLog.print("TipsLittleWindow", "使用 commitNow() 提交事务失败。");
-                    // 尝试使用 commit() 方法
-                    try {
-                        transaction.commit();
-                        EasyLog.print("TipsLittleWindow", "事务提交成功，使用 commit()。");
-                    } catch (IllegalStateException ex) {
-                        EasyLog.print(ex);
-                    }
-                } catch (Exception e) {
-                    EasyLog.print(e);
+                    // commitNow 失败，降级为 commit
+                    transaction.commit();
                 }
             } else {
-                try {
-                    transaction.commit();
-                    EasyLog.print("TipsLittleWindow", "事务提交成功，使用 commit()。");
-                } catch (IllegalStateException e) {
-                    EasyLog.print("TipsLittleWindow", "使用 commit() 提交事务失败。");
-                } catch (Exception e) {
-                    EasyLog.print(e);
-                }
+                transaction.commit();
             }
         } catch (IllegalStateException e) {
+            EasyLog.print(e);
+        } catch (Exception e) {
             EasyLog.print(e);
         }
     }
@@ -181,7 +157,6 @@ public abstract class TipsLittleWindow extends Fragment {
 
         // 获取窗口的根视图和屏幕信息
         this.mGroup = (ViewGroup) activity.getWindow().getDecorView();
-        DisplayMetrics metrics = this.mGroup.getResources().getDisplayMetrics();
         int screenHeight = this.mGroup.getHeight();
         int screenWidth = this.mGroup.getWidth();
 
@@ -211,19 +186,13 @@ public abstract class TipsLittleWindow extends Fragment {
         setupButtons(config);
 
         // 创建内容视图（子类实现）
-        EasyLog.print("=== TipsLittleWindow.onCreateView() ===");
-        EasyLog.print("步骤1: 调用createContentView()");
-        View contentView = createContentView(inflater, container);
-        EasyLog.print("步骤2: createContentView()完成");
+        createContentView(inflater, container);
 
         // 绑定数据（子类实现）
-        EasyLog.print("步骤3: 调用bindData()");
         bindData();
-        EasyLog.print("步骤4: bindData()完成");
 
         // 将视图添加到根视图中
         this.mGroup.addView(this.view);
-        EasyLog.print("步骤5: 视图已添加到根视图");
 
         return super.onCreateView(inflater, container, savedInstanceState);
     }
@@ -240,7 +209,10 @@ public abstract class TipsLittleWindow extends Fragment {
      * 设置窗口位置和布局参数
      */
     protected void setupWindowPosition(PositionInfo positionInfo, WindowConfig config) {
-        int minSize = Math.min(50, positionInfo.screenWidth / 18);
+        // 默认动态计算 minSize，如果子类自定义了 margin 则使用自定义值
+        int minSize = config.isMarginCustomized()
+                ? config.getHorizontalMargin()
+                : Math.min(50, positionInfo.screenWidth / 18);
 
         FrameLayout.LayoutParams smallLayoutParams = new FrameLayout.LayoutParams(minSize, minSize);
         FrameLayout.LayoutParams largeLayoutParams = new FrameLayout.LayoutParams(
@@ -269,7 +241,7 @@ public abstract class TipsLittleWindow extends Fragment {
             this.mGroup.getWindowVisibleDisplayFrame(visibleRect);
             largeLayoutParams.setMargins(
                     minSize,
-                    visibleRect.top + 8,
+                    visibleRect.top + config.getVerticalMargin(),
                     minSize,
                     (positionInfo.screenHeight - this.rect.top) + minSize
             );
@@ -303,10 +275,21 @@ public abstract class TipsLittleWindow extends Fragment {
         TipsArrowView arrowView = this.view.findViewById(config.getArrowViewId());
         if (arrowView != null) {
             arrowView.setDirection(positionInfo.isUp ? TipsArrowView.UP : TipsArrowView.DOWN);
-            FrameLayout.LayoutParams arrowParams = this.mArrowParams;
-            if (arrowParams != null) {
-                arrowView.setLayoutParams(arrowParams);
+            // 使用 config 配置的箭头尺寸（替代原来的 mArrowParams）
+            FrameLayout.LayoutParams arrowParams = new FrameLayout.LayoutParams(
+                    config.getArrowWidth(),
+                    config.getArrowHeight()
+            );
+            // 复用 mArrowParams 的 margin（位置信息）
+            if (this.mArrowParams != null) {
+                arrowParams.setMargins(
+                        this.mArrowParams.leftMargin,
+                        this.mArrowParams.topMargin,
+                        this.mArrowParams.rightMargin,
+                        this.mArrowParams.bottomMargin
+                );
             }
+            arrowView.setLayoutParams(arrowParams);
         }
     }
 

@@ -40,6 +40,9 @@ public class WindowConfig {
     @IdRes
     private final int wrapperViewId;
 
+    // margin 是否被自定义（用于 TipsLittleWindow 判断是否覆盖默认动态计算）
+    private final boolean marginCustomized;
+
     private WindowConfig(Builder builder) {
         this.upLayoutRes = builder.upLayoutRes;
         this.downLayoutRes = builder.downLayoutRes;
@@ -54,6 +57,7 @@ public class WindowConfig {
         this.enableCopy = builder.enableCopy;
         this.enableMore = builder.enableMore;
         this.wrapperViewId = builder.wrapperViewId;
+        this.marginCustomized = builder.mMarginCustomized;
     }
 
     // Getters
@@ -70,6 +74,7 @@ public class WindowConfig {
     public boolean isEnableCopy() { return enableCopy; }
     public boolean isEnableMore() { return enableMore; }
     public int getWrapperViewId() { return wrapperViewId; }
+    public boolean isMarginCustomized() { return marginCustomized; }
 
     /**
      * Builder模式构建器
@@ -88,6 +93,7 @@ public class WindowConfig {
         private boolean enableCopy = true;  // 默认启用复制
         private boolean enableMore = true;  // 默认启用更多
         private int wrapperViewId = -1;     // 默认未配置
+        private boolean mMarginCustomized = false;  // margin 是否被自定义
 
         public Builder upLayout(@LayoutRes int layoutRes) {
             this.upLayoutRes = layoutRes;
@@ -124,6 +130,7 @@ public class WindowConfig {
         public Builder margins(int horizontal, int vertical) {
             this.horizontalMargin = horizontal;
             this.verticalMargin = vertical;
+            this.mMarginCustomized = true;
             return this;
         }
 

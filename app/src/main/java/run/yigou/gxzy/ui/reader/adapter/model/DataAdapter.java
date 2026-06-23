@@ -88,18 +88,6 @@ public class DataAdapter {
     }
     
     /**
-     * 批量转换 - ArrayList版本
-     */
-    @NonNull
-    public static ArrayList<GroupData> convertList(@NonNull ArrayList<ExpandableGroupEntity> oldList) {
-        ArrayList<GroupData> newList = new ArrayList<>(oldList.size());
-        for (ExpandableGroupEntity old : oldList) {
-            newList.add(fromExpandableGroupEntity(old));
-        }
-        return newList;
-    }
-    
-    /**
      * 批量转换 - List版本
      */
     @NonNull
@@ -109,18 +97,6 @@ public class DataAdapter {
             newList.add(fromExpandableGroupEntity(old));
         }
         return newList;
-    }
-    
-    /**
-     * 转换单个组的子项列表
-     */
-    @NonNull
-    public static List<ItemData> convertChildren(@NonNull ArrayList<ChildEntity> oldChildren) {
-        List<ItemData> items = new ArrayList<>(oldChildren.size());
-        for (ChildEntity child : oldChildren) {
-            items.add(fromChildEntity(child));
-        }
-        return items;
     }
     
     /**
