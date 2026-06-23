@@ -61,11 +61,7 @@ public class TipsArrowView extends View {
 
         int width = getWidth();
         int height = getHeight();
-        
-        // 计算合适的箭头尺寸：取宽高较小值，放大 3 倍以增强可见性
-        // - MATCH_PARENT 时自适应容器大小
-        // - 确保 border 不为 0
-        this.border = Math.max(Math.min(width, height) * 3, 1);
+        this.border = Math.max(Math.min(width, height), 1); // 确保 border 不为 0
 
         this.path.reset();
         if (this.direction == UP) {

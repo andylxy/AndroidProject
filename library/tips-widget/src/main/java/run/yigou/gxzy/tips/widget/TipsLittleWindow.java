@@ -275,22 +275,11 @@ public abstract class TipsLittleWindow extends Fragment {
         TipsArrowView arrowView = this.view.findViewById(config.getArrowViewId());
         if (arrowView != null) {
             arrowView.setDirection(positionInfo.isUp ? TipsArrowView.UP : TipsArrowView.DOWN);
-            // 使用 MATCH_PARENT 让箭头 View 自适应父容器大小
-            // 实际绘制尺寸由 TipsArrowView.onDraw() 根据可用空间动态计算（20-60px 范围）
-            FrameLayout.LayoutParams arrowParams = new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-            );
-            // 复用 mArrowParams 的 margin（位置信息）
-            if (this.mArrowParams != null) {
-                arrowParams.setMargins(
-                        this.mArrowParams.leftMargin,
-                        this.mArrowParams.topMargin,
-                        this.mArrowParams.rightMargin,
-                        this.mArrowParams.bottomMargin
-                );
+            // 使用 mArrowParams（包含动态计算的 minSize 和位置 margin）
+            FrameLayout.LayoutParams arrowParams = this.mArrowParams;
+            if (arrowParams != null) {
+                arrowView.setLayoutParams(arrowParams);
             }
-            arrowView.setLayoutParams(arrowParams);
         }
     }
 
