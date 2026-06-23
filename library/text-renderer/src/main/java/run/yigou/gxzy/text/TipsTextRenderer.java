@@ -3,15 +3,14 @@ package run.yigou.gxzy.text;
 import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.List;
 
 /**
  * Tips 模块文本渲染器
@@ -63,26 +62,7 @@ public class TipsTextRenderer {
         configMap.put("y", new StyleConfig(Color.parseColor("#9A764F"), false, 0));
     }
 
-    /**
-     * 更新样式配置
-     * @param newConfigs 新的样式配置映射
-     */
-    public static void updateStyleConfig(ConcurrentHashMap<String, StyleConfig> newConfigs) {
-        if (newConfigs != null) {
-            configMap.putAll(newConfigs);
-        }
-    }
 
-    /**
-     * 根据输入的字符串获取对应的颜色值。
-     *
-     * @param s 输入的字符串，表示颜色的键
-     * @return 对应的颜色值，如果找不到则返回黑色
-     */
-    public static int getColoredTextByStrClass(String s) {
-        StyleConfig config = configMap.get(s);
-        return config != null ? config.color : Color.BLACK;
-    }
 
     // 创建SpannableStringBuilder对象
     public static SpannableStringBuilder createSpannable(String text) {
@@ -99,8 +79,6 @@ public class TipsTextRenderer {
         return renderText(text, clickLink);
     }
 
-    //todo 所有的SpannableStringBuilder 都是在这里处理的.
-    //如果要改变样式，需要修改这里，同时修改renderItemNumber()
     public static SpannableStringBuilder renderText(String str) {
         return renderText(str, null);
     }
@@ -235,7 +213,7 @@ public class TipsTextRenderer {
                     new ForegroundColorSpan(ITEM_NUMBER_COLOR),  // 项编号高亮颜色
                     0,  // Span的起始索引
                     delimiterIndex,  // Span的结束索引
-                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE  // Span标志，避免影响周围文本
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE  // Span标志，避免影响周围文本
             );
         }
     }
@@ -247,57 +225,18 @@ public class TipsTextRenderer {
      * @return 如果字符串是数字，则返回 true；否则返回 false。
      */
     public static boolean isNumeric(String str) {
-        // 检查字符串是否为 null 或空字符串
         if (str == null || str.isEmpty()) {
             return false;
         }
-
-        // 从字符串的末尾开始检查每个字符
-        for (int i = str.length() - 1; i >= 0; i--) {
-            char charAt = str.charAt(i);
-            // 如果字符不是数字，则返回 false
-            if (charAt < '0' || charAt > '9') {
+        for (int i = 0; i < str.length(); i++) {
+            if (!Character.isDigit(str.charAt(i))) {
                 return false;
             }
         }
-
-        // 如果所有字符都是数字，则返回 true
         return true;
     }
 
-    /**
-     * 查找给定字符串 (str) 中所有子字符串 (str2) 的起始位置。
-     * 注意：此方法区分大小写匹配，与 SearchMatcher.findMatches() 不区分大小写的行为不同。
-     *
-     * @param str  主字符串。
-     * @param str2 要查找的子字符串。
-     * @return 包含子字符串在主字符串中所有起始位置的列表。
-     */
-    public static ArrayList<Integer> getAllSubStringPos(String str, String str2) {
-        // 改用 SearchMatcher 进行匹配（保持与文本工具模块的一致性）
-        // 注意：SearchMatcher 不区分大小写，此方法原实现区分大小写
-        // 为保持行为一致，直接使用 indexOf 实现
-        ArrayList<Integer> positions = new ArrayList<>();
 
-        if (str == null || str2 == null || str2.isEmpty() || str.isEmpty()) {
-            return positions;
-        }
-
-        int strLength = str.length();
-        int str2Length = str2.length();
-
-        int index = 0;
-        while (index <= strLength - str2Length) {
-            int foundIndex = str.indexOf(str2, index);
-            if (foundIndex == -1) {
-                break;
-            }
-            positions.add(foundIndex);
-            index = foundIndex + str2Length;
-        }
-
-        return positions;
-    }
 
     /**
      * 高亮匹配项
@@ -315,7 +254,7 @@ public class TipsTextRenderer {
         // 遍历所有匹配项并应用高亮
         while (matcher.find()) {
             // 设置文本高亮背景颜色
-            spannable.setSpan(new android.text.style.BackgroundColorSpan(color), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(new BackgroundColorSpan(color), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
     }
 }
