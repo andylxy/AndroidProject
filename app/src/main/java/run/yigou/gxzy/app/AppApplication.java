@@ -180,6 +180,9 @@ public final class AppApplication extends Application {
         // 注册样式配置提供者（依赖倒置：app 实现接口，library 调用）
         TipsTextRenderConfig.getInstance().setProvider(new AppStyleConfigProvider());
         
+        // 启动时加载样式配置（缓存或默认）
+        loadStyleConfigOnInit();
+        
         // 用户系统初始化
         initUserSystem();
         
@@ -249,6 +252,22 @@ public final class AppApplication extends Application {
     private void initDataAsync() {
         // 异步加载应用数据，需要在 initSdk 初始化 EasyLog 后再执行
         run.yigou.gxzy.utils.ThreadUtil.runInBackground(() -> AppDataInitializer.initializeIfNeeded(this));
+    }
+    
+    /**
+     * 启动时加载样式配置
+     * - 优先使用缓存
+     * - 缓存无数据时加载默认配置
+     */
+    private void loadStyleConfigOnInit() {
+        run.yigou.gxzy.config.AppStyleConfigProvider provider = 
+            new run.yigou.gxzy.config.AppStyleConfigProvider();
+        boolean cacheLoaded = provider.loadCacheConfig();
+        if (cacheLoaded) {
+            android.util.Log.i("AppApplication", "样式配置已从缓存加载");
+        } else {
+            android.util.Log.i("AppApplication", "无样式配置缓存，使用默认配置");
+        }
     }
     
     /**

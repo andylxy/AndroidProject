@@ -40,9 +40,13 @@ public class AppStyleConfigProvider implements IStyleConfigProvider {
     
     @Override
     public boolean loadConfig(LifecycleOwner lifecycleOwner) {
-        // 异步请求服务端配置（Application 不是 LifecycleOwner，传 null 表示不感知生命周期）
-        EasyHttp.post(lifecycleOwner)
-            .api(new StyleConfigApi())
+        // 获取当前配置版本号（用于增量更新）
+        int currentVersion = TipsTextRenderConfig.getInstance().getConfigVersion();
+        
+        // 异步请求服务端配置（使用 GET 请求，轻量级）
+        // Application 不是 LifecycleOwner，传 null 表示不感知生命周期
+        EasyHttp.get(lifecycleOwner)
+            .api(new StyleConfigApi().setVersion(currentVersion))
             .request(new HttpCallback<HttpData<StyleConfigApi.StyleConfigApiBean>>(null) {
                 @Override
                 public void onSucceed(HttpData<StyleConfigApi.StyleConfigApiBean> data) {
@@ -92,35 +96,38 @@ public class AppStyleConfigProvider implements IStyleConfigProvider {
      * 
      * 参考 loadBookNavigation() 模式：
      * - 优先使用本地缓存
-     * - 缓存无数据时不主动请求网络，等待后续触发
+     * - 缓存无数据时加载默认配置（保证配置就绪）
+     * - 不主动请求网络，等待后续触发
      * 
-     * @return true=缓存加载成功，false=无缓存或加载失败
+     * @return true=配置已加载（缓存或默认），false=加载失败
      */
     public boolean loadCacheConfig() {
         try {
-            // 从缓存文件读取配置
+            // 1. 尝试从缓存文件读取配置
             Serializable cachedData = run.yigou.gxzy.utils.CacheHelper.readObject("style_config_cache");
-            if (cachedData == null) {
-                return false;
+            
+            if (cachedData != null) {
+                Map<String, TipsTextRenderConfig.StyleConfig> cachedConfigs = 
+                    (Map<String, TipsTextRenderConfig.StyleConfig>) cachedData;
+                
+                if (!cachedConfigs.isEmpty()) {
+                    // 2. 缓存有数据 → 应用缓存配置
+                    TipsTextRenderConfig.getInstance().updateStyleConfig(cachedConfigs);
+                    isLoaded = true;
+                    version++;
+                    
+                    return true;
+                }
             }
             
-            Map<String, TipsTextRenderConfig.StyleConfig> cachedConfigs = 
-                (Map<String, TipsTextRenderConfig.StyleConfig>) cachedData;
-            
-            if (cachedConfigs.isEmpty()) {
-                return false;
-            }
-            
-            // 应用到配置中心
-            TipsTextRenderConfig.getInstance().updateStyleConfig(cachedConfigs);
-            
-            // 标记配置已加载
-            isLoaded = true;
+            // 3. 缓存无数据 → 加载默认配置（保证配置就绪）
+            TipsTextRenderConfig.getInstance().loadDefaultConfigs();
+            isLoaded = true;  // 标记配置已就绪
             version++;
             
-            return true;
+            return true;  // 返回 true 表示配置已加载（默认配置）
         } catch (Exception e) {
-            // 缓存加载失败，静默处理
+            // 加载失败，静默处理
             return false;
         }
     }

@@ -357,16 +357,28 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     /**
      * 加载样式配置
      * 参考 loadBookNavigation() 模式：
-     * - 优先使用本地缓存
-     * - 缓存无数据时不主动请求网络，由调用方按需触发
+     * - 优先检查缓存
+     * - 有缓存 → 使用缓存配置，不再请求后端
+     * - 无缓存 → 请求服务端最新配置
+     * - 成功后自动保存到缓存
+     * - 同步更新到当前配置列表
      */
     private void loadStyleConfig() {
         run.yigou.gxzy.config.AppStyleConfigProvider provider = new run.yigou.gxzy.config.AppStyleConfigProvider();
+        
+        // 1. 先检查缓存
         boolean cacheLoaded = provider.loadCacheConfig();
         if (cacheLoaded) {
-            EasyLog.print("HomeFragment", "样式配置已从缓存加载");
+            // 2. 有缓存 → 使用缓存配置，不再请求后端
+            EasyLog.print("HomeFragment", "样式配置已从缓存加载（不请求后端）");
         } else {
-            EasyLog.print("HomeFragment", "无样式配置缓存，等待后续触发加载");
+            // 3. 无缓存 → 请求后端配置
+            boolean triggered = provider.loadConfig(this);
+            if (triggered) {
+                EasyLog.print("HomeFragment", "已触发样式配置加载（从后端）");
+            } else {
+                EasyLog.print("HomeFragment", "样式配置加载失败");
+            }
         }
     }
 

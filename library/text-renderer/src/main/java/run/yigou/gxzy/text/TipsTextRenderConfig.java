@@ -21,13 +21,17 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * - 版本管理
  * 
  * 配置加载流程：
- * 1. 应用启动：configMap 预加载 13 个默认配置
- * 2. 首次渲染：checkConfigBeforeUse() 返回 false（未加载），返回触底配置 #CCCCCC
- * 3. 触发加载：异步请求服务端配置
- * 4. 配置加载中：checkConfigBeforeUse() 返回 false（isLoading=true），返回触底配置 #CCCCCC
- * 5. 服务端配置返回：应用到 configMap，替换默认配置
- * 6. 后续渲染：checkConfigBeforeUse() 返回 true，返回服务端配置
- * 7. 加载失败：configMap 保持默认配置，后续渲染返回默认配置
+ * 1. App 启动：AppApplication.onCreate() 调用 loadStyleConfigOnInit()
+ *    - 有缓存：从缓存加载配置 → isLoaded = true → 返回缓存配置
+ *    - 无缓存：加载默认配置（13个预定义）→ isLoaded = true → 返回默认配置
+ * 2. HomeFragment 初始化：HomeFragment.initData() 调用 loadStyleConfig()
+ *    - 先检查缓存：有缓存 → 使用缓存配置，不再请求后端
+ *    - 无缓存：请求服务端配置 → 应用到 configMap → 保存到缓存 → 更新配置列表
+ * 3. 首次渲染：checkConfigBeforeUse() 返回 true → 从 configMap 返回配置
+ *    - 后端已返回 → 返回服务端配置
+ *    - 后端未返回 → 返回默认配置（#FF0000）
+ * 4. 点击刷新：请求服务端配置 → 应用到 configMap → 保存到缓存
+ * 5. 下次启动：AppApplication 从缓存加载 → HomeFragment 检查缓存存在 → 不再请求后端
  * 
  * 使用示例：
  * <pre>
@@ -80,9 +84,6 @@ public class TipsTextRenderConfig {
     
     /** 配置提供者（由 app 模块设置） */
     private volatile IStyleConfigProvider provider;
-    
-    /** 是否正在加载配置（防止重复触发） */
-    private volatile boolean isLoading = false;
     
     /**
      * 设置配置提供者（由 app 模块在 Application.onCreate() 中调用）
@@ -208,7 +209,6 @@ public class TipsTextRenderConfig {
         // 应用校验后的配置
         if (!configs.isEmpty()) {
             updateStyleConfig(configs);
-            isLoading = false; // 标记加载完成
             log("✅ 服务端配置已应用");
         } else {
             log("无有效配置项，保持当前配置");
@@ -307,7 +307,6 @@ public class TipsTextRenderConfig {
         // 应用校验后的配置
         if (!configs.isEmpty()) {
             updateStyleConfig(configs);
-            isLoading = false; // 标记加载完成
             log("✅ 服务端配置已应用（通用接口）");
         } else {
             log("无有效配置项，保持当前配置");
@@ -326,15 +325,13 @@ public class TipsTextRenderConfig {
     }
     
     /**
-     * 检查配置是否已加载，未加载时自动触发加载
+     * 检查配置是否已加载（纯检查，不触发加载）
      * 
-     * 调用时机：首次渲染前调用
-     * 行为：
-     * - 如果已加载：直接返回 true
-     * - 如果未加载且未在加载中：触发异步加载，返回 false
-     * - 如果正在加载中：返回 false
+     * 职责：
+     * - 仅检查配置状态，不发起网络请求
+     * - 返回配置是否就绪
      * 
-     * @return true=配置已就绪，false=配置未就绪（使用默认配置）
+     * @return true=配置已就绪，false=配置未就绪
      */
     public boolean checkConfigBeforeUse() {
         if (provider == null) {
@@ -342,55 +339,32 @@ public class TipsTextRenderConfig {
             return false;
         }
         
-        if (provider.isConfigLoaded()) {
-            return true;
-        }
-        
-        // 配置未加载，尝试触发加载
-        synchronized (this) {
-            if (isLoading) {
-                log("配置正在加载中，跳过重复触发");
-                return false;
-            }
-            
-            isLoading = true;
-            log("配置未加载，触发自动加载...");
-            
-            boolean triggered = provider.loadConfig();
-            if (!triggered) {
-                isLoading = false;
-                log("⚠️ 配置加载触发失败");
-            } else {
-                log("✅ 已触发配置加载，等待异步完成");
-            }
-            return false;
-        }
+        return provider.isConfigLoaded();
     }
     
     /**
      * 获取样式配置（供 TipsTextRenderer 调用）
      * 
      * 执行流程：
-     * 1. 检查配置是否就绪（checkConfigBeforeUse）
-     * 2. 未就绪（未加载/正在加载）→ 返回触底配置 #CCCCCC
-     * 3. 已就绪（服务端配置/默认配置）→ 从 configMap 返回
+     * 1. 检查配置状态（checkConfigBeforeUse）
+     * 2. 从 configMap 返回配置（默认配置或服务端配置）
      * 
      * @param marker 标记（如 "r", "u", "f" 等）
-     * @return 样式配置（未就绪返回触底配置，未知标记返回默认配置）
+     * @return 样式配置（从 configMap 返回，未知标记返回默认配置）
      */
     public StyleConfig getStyleConfig(String marker) {
-        // 检查配置是否已加载
-        boolean configReady = checkConfigBeforeUse();
+        // 检查配置状态（仅检查，不触发加载）
+        checkConfigBeforeUse();
         
-        // 配置未就绪（未加载或正在加载），返回触底配置
-        if (!configReady) {
-            return getFallbackStyleConfig();
-        }
-        
-        // 配置已就绪（服务端配置加载成功或失败），从 configMap 返回
+        // 始终从 configMap 返回配置（默认配置或服务端配置）
         configLock.readLock().lock();
         try {
             StyleConfig config = configMap.get(marker);
+            if (config == null) {
+                log("⚠️ 标记 " + marker + " 不存在，返回默认配置，configMap.size=" + configMap.size());
+            } else {
+                log("✅ 获取配置 marker=" + marker + ", color=" + config.color + ", linkType=" + config.linkType);
+            }
             return config != null ? config : getDefaultStyleConfig();
         } finally {
             configLock.readLock().unlock();
@@ -470,9 +444,14 @@ public class TipsTextRenderConfig {
     
     /**
      * 加载默认配置（兜底方案）
+     * 
+     * 调用时机：
+     * - 缓存无数据时
+     * - 服务端配置加载失败时
+     * 
      * @return 默认配置映射
      */
-    private Map<String, StyleConfig> loadDefaultConfigs() {
+    public Map<String, StyleConfig> loadDefaultConfigs() {
         Map<String, StyleConfig> defaults = new HashMap<>();
         defaults.put("r", new StyleConfig(Color.RED, true, 0));
         defaults.put("n", new StyleConfig(Color.BLUE, false, 0));
@@ -517,23 +496,6 @@ public class TipsTextRenderConfig {
      */
     private StyleConfig getDefaultStyleConfig() {
         return new StyleConfig(Color.GRAY, false, 0);
-    }
-    
-    /**
-     * 获取触底样式配置（配置未加载时的临时占位）
-     * 
-     * 与 getDefaultStyleConfig() 的区别：
-     * - getFallbackStyleConfig()：配置未就绪时的触底配置（浅灰色 #CCCCCC，小字体）
-     * - getDefaultStyleConfig()：未知标记的默认配置（灰色 #808080，正常字体）
-     * 
-     * 触发时机：
-     * - 首次渲染（配置未加载）
-     * - 配置正在加载中
-     * 
-     * @return 触底配置（浅灰色 #CCCCCC，小字体，无链接）
-     */
-    private StyleConfig getFallbackStyleConfig() {
-        return new StyleConfig(Color.parseColor("#CCCCCC"), true, 0);
     }
     
     // ==================== 数据类 ====================

@@ -63,6 +63,12 @@ public class TipsClickHandler {
     public static final ClickLink DEFAULT_CLICK_LINK = new ClickLink() {
 
         @Override
+        public void onClickLink(int linkType, TextView textView, android.text.style.ClickableSpan span) {
+            // 使用配置中心的 linkType 动态路由
+            handleClickByLinkType(textView, span, linkType);
+        }
+
+        @Override
         public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
             handleClick(textView, clickableSpan, ClickType.YAO);
         }
@@ -89,6 +95,30 @@ public class TipsClickHandler {
      */
     public static SpannableStringBuilder renderText(String str) {
         return TipsTextRenderer.renderText(str, DEFAULT_CLICK_LINK);
+    }
+
+    /**
+     * 根据配置中心的 linkType 动态路由到对应的处理方法
+     * 
+     * @param textView  被点击的 TextView
+     * @param span      被点击的 ClickableSpan
+     * @param linkType  链接类型（由 StyleConfig.linkType 定义）
+     */
+    private static void handleClickByLinkType(TextView textView, ClickableSpan span, int linkType) {
+        switch (linkType) {
+            case 1:  // 药物
+                handleClick(textView, span, ClickType.YAO);
+                break;
+            case 2:  // 方剂
+                handleClick(textView, span, ClickType.FANG);
+                break;
+            case 3:  // 名词
+                handleClick(textView, span, ClickType.MING_CI);
+                break;
+            default:
+                EasyLog.print("❌ 未知的linkType: " + linkType);
+                break;
+        }
     }
 
     /**
