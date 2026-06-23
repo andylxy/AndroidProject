@@ -25,30 +25,13 @@ public class TipsUIHelper {
      * @return Rect对象，表示可点击文本在TextView中的矩形区域。如果发生异常，返回一个空Rect。
      */
     public static Rect getTextRect(ClickableSpan clickableSpan, TextView textView) {
-        // 检查参数是否为null
+        // 检查参数是否为 null
         if (textView == null || clickableSpan == null) {
             // 避免抛出异常导致崩溃，返回空Rect
             EasyLog.print("getTextRect: textView or clickableSpan is null");
             return new Rect();
         }
-
-        // 1. 优先尝试获取精确的点击坐标 (修复弹窗位置偏移问题)
-        run.yigou.gxzy.tips.widget.LocalLinkMovementMethod method = run.yigou.gxzy.tips.widget.LocalLinkMovementMethod.getInstance();
-        if (method != null) {
-            android.graphics.Point touchPoint = method.getLastTouchPoint();
-            if (touchPoint != null) {
-                // 返还一个以点击点为中心的微小矩形，TipsLittleWindow 会基于此计算偏移
-                return new Rect(
-                        touchPoint.x,
-                        touchPoint.y,
-                        touchPoint.x + 1,
-                        touchPoint.y + 1
-                );
-            }
-        }
-
-        // 2. Fallback 到原有的基于文本布局的计算逻辑
-
+        
         // 检查文本类型，避免 ClassCastException
         CharSequence text = textView.getText();
         if (!(text instanceof Spanned)) {

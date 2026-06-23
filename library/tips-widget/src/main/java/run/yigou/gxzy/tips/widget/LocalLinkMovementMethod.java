@@ -22,11 +22,6 @@ import run.yigou.gxzy.log.EasyLog;
 public class LocalLinkMovementMethod extends LinkMovementMethod {
     private static final LocalLinkMovementMethod INSTANCE = new LocalLinkMovementMethod();
 
-    // 用于弹窗定位修正
-    private float lastRawX;
-    private float lastRawY;
-    private long lastTouchTimestamp;
-
     public static LocalLinkMovementMethod getInstance() {
         return INSTANCE;
     }
@@ -49,11 +44,6 @@ public class LocalLinkMovementMethod extends LinkMovementMethod {
         int action = motionEvent.getAction();
 
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_DOWN) {
-            // 捕获原始坐标用于优化弹窗位置
-            this.lastRawX = motionEvent.getRawX();
-            this.lastRawY = motionEvent.getRawY();
-            this.lastTouchTimestamp = System.currentTimeMillis();
-
             // 获取相对于 TextView 的触摸坐标
             int x = (int) motionEvent.getX();
             int y = (int) motionEvent.getY();
@@ -84,20 +74,12 @@ public class LocalLinkMovementMethod extends LinkMovementMethod {
                 return true;
             }
             textView.setTag(R.id.tag_is_clicking_link, false);
-            Selection.removeSelection(spannable);
+            // 仅在非 span 点击且当前有选区时清除
+            if (Selection.getSelectionStart(spannable) >= 0) {
+                Selection.removeSelection(spannable);
+            }
         }
         return super.onTouchEvent(textView, spannable, motionEvent);
     }
 
-    /**
-     * 获取最近一次触摸的屏幕绝对坐标
-     * 有效期 500ms，避免使用陈旧数据
-     * @return Point 对象包含 x, y 坐标，如果无效则返回 null
-     */
-    public android.graphics.Point getLastTouchPoint() {
-        if (System.currentTimeMillis() - lastTouchTimestamp < 500) {
-            return new android.graphics.Point((int) lastRawX, (int) lastRawY);
-        }
-        return null;
-    }
 }
