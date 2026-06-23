@@ -30,6 +30,8 @@ import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BaseAdapter;
 import com.hjq.base.FragmentPagerAdapter;
 import com.hjq.http.EasyHttp;
+
+import run.yigou.gxzy.config.AppStyleConfigProvider;
 import run.yigou.gxzy.log.EasyLog;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
@@ -235,6 +237,10 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mTabNavService = DbService.getInstance().mTabNavService;
         // 加载导航数据
         loadBookNavigation();
+        
+        // 加载样式配置（优先使用缓存）
+        loadStyleConfig();
+        
         mTabAdapter.setOnTabListener(this);
 
         // 首次加载时获取药方数据
@@ -347,6 +353,22 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
             getBookInfoList();
         }
     }
+    
+    /**
+     * 加载样式配置
+     * 参考 loadBookNavigation() 模式：
+     * - 优先使用本地缓存
+     * - 缓存无数据时不主动请求网络，由调用方按需触发
+     */
+    private void loadStyleConfig() {
+        run.yigou.gxzy.config.AppStyleConfigProvider provider = new run.yigou.gxzy.config.AppStyleConfigProvider();
+        boolean cacheLoaded = provider.loadCacheConfig();
+        if (cacheLoaded) {
+            EasyLog.print("HomeFragment", "样式配置已从缓存加载");
+        } else {
+            EasyLog.print("HomeFragment", "无样式配置缓存，等待后续触发加载");
+        }
+    }
 
     /**
      * 从本地数据加载导航
@@ -375,6 +397,9 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         // 同时刷新药方和名词数据
         ThreadUtil.runInBackground(this::getAllYaoData);
         ThreadUtil.runInBackground(this::getAllMingCiData);
+        // 刷新样式配置（从服务端获取最新配置）
+        AppStyleConfigProvider provider = new AppStyleConfigProvider();
+        provider.loadConfig(this);
     }
 
     private void getBookInfoList() {
@@ -601,7 +626,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         getStatusBarConfig().statusBarDarkFont(shown).init();
         mHomeSearchView.setTextColor(ContextCompat.getColor(getAttachActivity(), shown ? R.color.black : R.color.white));
         mTvHomeSearchText.setBackgroundResource(shown ? R.drawable.home_search_bar_gray_bg : R.drawable.home_search_bar_transparent_bg);
-        mTvHomeSearchText.setTextColor(ContextCompat.getColor(getAttachActivity(), shown ? R.color.black60 : R.color.white60));
+        mTvHomeSearchText.setTextColor(ContextCompat.getColor(getAttachActivity(), shown ? R.color.black_66_percent : R.color.white_66_percent));
         mSearchView.setSupportImageTintList(ColorStateList.valueOf(getColor(shown ? R.color.common_icon_color : R.color.white)));
         mRefreshView.setSupportImageTintList(ColorStateList.valueOf(getColor(shown ? R.color.common_icon_color : R.color.white)));
     }

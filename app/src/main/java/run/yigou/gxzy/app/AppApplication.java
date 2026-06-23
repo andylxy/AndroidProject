@@ -34,6 +34,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.crypto.SecurityUtils;
 import run.yigou.gxzy.base.args.FragmentSetting;
 import run.yigou.gxzy.base.args.ManagerSetting;
+import run.yigou.gxzy.config.AppStyleConfigProvider;
 import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.service.UserInfoService;
 import run.yigou.gxzy.data.local.helper.DbService;
@@ -49,6 +50,7 @@ import run.yigou.gxzy.app.DebugLoggerTree;
 import run.yigou.gxzy.app.TitleBarStyle;
 import run.yigou.gxzy.app.ToastLogInterceptor;
 import run.yigou.gxzy.app.ToastStyle;
+import run.yigou.gxzy.text.TipsTextRenderConfig;
 import run.yigou.gxzy.widget.MaterialHeader;
 import run.yigou.gxzy.widget.SmartBallPulseFooter;
 
@@ -174,6 +176,9 @@ public final class AppApplication extends Application {
         
         // 基础配置
         initBasicConfig();
+        
+        // 注册样式配置提供者（依赖倒置：app 实现接口，library 调用）
+        TipsTextRenderConfig.getInstance().setProvider(new AppStyleConfigProvider());
         
         // 用户系统初始化
         initUserSystem();

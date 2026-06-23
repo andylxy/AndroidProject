@@ -1,6 +1,5 @@
 package run.yigou.gxzy.text;
 
-import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.BackgroundColorSpan;
@@ -10,11 +9,22 @@ import android.text.style.RelativeSizeSpan;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * Tips 模块文本渲染器
+ * <pre>
  * 负责解析自定义标签（如 $r{}, $g{} 等）并生成 SpannableString
+ * 
+ * 注意：本类仅负责渲染逻辑，样式配置由 TipsTextRenderConfig 统一管理
+ * 
+ * 使用示例：
+ *
+ * // 1. 应用启动时加载服务端配置
+ * List&lt;StyleConfigApiBean.StyleItem&gt; serverConfigs = ...; // 从 API 获取
+ * TipsTextRenderConfig.getInstance().applyServerConfig(serverConfigs);
+ * 
+ * // 2. 渲染文本
+ * SpannableStringBuilder ssb = TipsTextRenderer.renderText("$r{红色文本}$u{药链接}", clickLink);
+ * </pre>
  */
 public class TipsTextRenderer {
 
@@ -22,45 +32,8 @@ public class TipsTextRenderer {
     private static final java.util.regex.Pattern TAG_PATTERN =
         java.util.regex.Pattern.compile("\\$([a-zA-Z])\\{([^}]*)\\}");
 
-    /** 未知标记的默认样式：灰色、正常字体、无链接，保障任何 $x{} 标签至少可见 */
-    private static final StyleConfig DEFAULT_STYLE_CONFIG =
-        new StyleConfig(Color.GRAY, false, 0);
-
     /** 项编号高亮颜色：蓝色 */
     private static final int ITEM_NUMBER_COLOR = 0xFF0000FF;
-
-    // 定义样式配置类
-    public static class StyleConfig {
-        public final int color;
-        public final boolean isSmallFont; // 是否使用相对小字体
-        public final int linkType; // 链接类型: 0:无, 1:Yao, 2:Fang, 3:MingCi
-
-        public StyleConfig(int color, boolean isSmallFont, int linkType) {
-            this.color = color;
-            this.isSmallFont = isSmallFont;
-            this.linkType = linkType;
-        }
-    }
-
-    // 使用 ConcurrentHashMap 存储样式配置，支持并发线程安全更新
-    private static final ConcurrentHashMap<String, StyleConfig> configMap = new ConcurrentHashMap<>();
-
-    static {
-        // 初始化默认配置，保持与原有 switch 逻辑一致
-        configMap.put("r", new StyleConfig(Color.RED, true, 0));
-        configMap.put("n", new StyleConfig(Color.BLUE, false, 0));
-        configMap.put("f", new StyleConfig(Color.BLUE, false, ProxyClickableSpan.TYPE_FANG));
-        configMap.put("a", new StyleConfig(Color.GRAY, true, 0));
-        configMap.put("m", new StyleConfig(Color.RED, false, 0));
-        configMap.put("g", new StyleConfig(Color.argb(230, 0, 128, 255), false, ProxyClickableSpan.TYPE_MINGCI));
-        configMap.put("u", new StyleConfig(Color.BLUE, false, ProxyClickableSpan.TYPE_YAO));
-        configMap.put("v", new StyleConfig(Color.BLUE, false, 0));
-        configMap.put("w", new StyleConfig(Color.rgb(28, 181, 92), true, 0));
-        configMap.put("q", new StyleConfig(Color.rgb(61, 200, 120), false, 0));
-        configMap.put("h", new StyleConfig(Color.BLACK, false, 0));
-        configMap.put("x", new StyleConfig(Color.parseColor("#EA8E3B"), false, 0));
-        configMap.put("y", new StyleConfig(Color.parseColor("#9A764F"), false, 0));
-    }
 
 
 
@@ -136,20 +109,17 @@ public class TipsTextRenderer {
     private static void applyStyle(SpannableStringBuilder spannableStringBuilder, String marker, int start, int end, final ClickLink clickLink) {
         if (marker == null) return;
 
-        StyleConfig config = configMap.get(marker);
-        // 未知标记使用默认样式兜底，保障内容至少可见（灰色文本），而非静默丢弃
-        if (config == null) {
-            config = DEFAULT_STYLE_CONFIG;
-        }
+        // 从配置中心获取配置
+        TipsTextRenderConfig.StyleConfig config = TipsTextRenderConfig.getInstance().getStyleConfig(marker);
 
         // 1. 设置相对字体大小
         if (config.isSmallFont) {
             spannableStringBuilder.setSpan(new RelativeSizeSpan(0.7f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        // 2. 设置点击事件处理
+        // 2. 设置点击事件处理（策略模式）
         if (config.linkType != 0 && clickLink != null) {
-             spannableStringBuilder.setSpan(new ProxyClickableSpan(clickLink, config.linkType), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannableStringBuilder.setSpan(new ProxyClickableSpan(clickLink, config.linkType), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         // 3. 设置文本颜色
@@ -158,38 +128,26 @@ public class TipsTextRenderer {
     }
 
     /**
-     * 静态内部类实现 ClickableSpan，减少匿名类创建开销
+     * 代理 ClickableSpan，将点击事件路由到 ClickLink 的通用处理器
+     * 支持动态扩展链接类型，无需修改此类
      */
     private static class ProxyClickableSpan extends ClickableSpan {
-        static final int TYPE_YAO = 1;
-        static final int TYPE_FANG = 2;
-        static final int TYPE_MINGCI = 3;
-
         private final ClickLink clickLink;
-        private final int type;
-
-        ProxyClickableSpan(ClickLink clickLink, int type) {
+        private final int linkType;
+        
+        ProxyClickableSpan(ClickLink clickLink, int linkType) {
             this.clickLink = clickLink;
-            this.type = type;
+            this.linkType = linkType;
         }
-
+        
         @Override
         public void onClick(View view) {
             if (clickLink == null) return;
             // 防御：非 TextView 安全跳过，避免 ClassCastException
             if (!(view instanceof TextView)) return;
             TextView textView = (TextView) view;
-            switch (type) {
-                case TYPE_YAO:
-                    clickLink.clickYaoLink(textView, this);
-                    break;
-                case TYPE_FANG:
-                    clickLink.clickFangLink(textView, this);
-                    break;
-                case TYPE_MINGCI:
-                    clickLink.clickMingCiLink(textView, this);
-                    break;
-            }
+            // 路由到通用处理器（支持动态扩展）
+            clickLink.onClickLink(linkType, textView, this);
         }
     }
 

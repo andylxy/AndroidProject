@@ -9,6 +9,8 @@
 
 package run.yigou.gxzy.ui.reader.repository;
 
+import androidx.lifecycle.LifecycleOwner;
+
 import com.hjq.http.EasyHttp;
 import run.yigou.gxzy.log.EasyLog;
 import com.hjq.http.listener.HttpCallback;
@@ -496,7 +498,7 @@ public class BookRepository {
      * @param lifecycleOwner 生命周期所有者（Fragment/Activity），可为 null
      * @param callback 回调接口
      */
-    public void loadChapterLazy(int bookId, int position, androidx.lifecycle.LifecycleOwner lifecycleOwner, DataCallback<ChapterData> callback) {
+    public void loadChapterLazy(int bookId, int position, LifecycleOwner lifecycleOwner, DataCallback<ChapterData> callback) {
         try {
             BookData bookData = getBookData(bookId);
             ChapterData chapterData = bookData.getChapter(position);
