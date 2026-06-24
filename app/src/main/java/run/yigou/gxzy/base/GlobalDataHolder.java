@@ -145,6 +145,28 @@ public class GlobalDataHolder {
         return navTabBodyMap.get(bookId);
     }
     
+    /**
+     * 获取所有书籍信息（返回副本，保证线程安全）
+     * 
+     * <p>此方法封装内部 Map 访问，防止外部直接修改底层数据结构。
+     * 
+     * @return 书籍信息列表副本
+     */
+    @NonNull
+    public List<TabNavBody> getAllBookInfos() {
+        return new ArrayList<>(navTabBodyMap.values());
+    }
+    
+    /**
+     * 获取所有导航分类（返回副本，保证线程安全）
+     * 
+     * @return 导航分类列表副本
+     */
+    @NonNull
+    public List<TabNav> getAllNavTabs() {
+        return new ArrayList<>(navTabMap.values());
+    }
+    
     // ==================== 别名字典 ====================
     
     /**
@@ -231,6 +253,16 @@ public class GlobalDataHolder {
         return new ArrayList<>(yaoMap.keySet());
     }
     
+    /**
+     * 获取所有药物信息（返回副本，保证线程安全）
+     * 
+     * @return 药物信息列表副本
+     */
+    @NonNull
+    public List<Yao> getAllYaoData() {
+        return new ArrayList<>(yaoMap.values());
+    }
+    
     // ==================== 名词内容 ====================
     
     /**
@@ -255,6 +287,16 @@ public class GlobalDataHolder {
     @Nullable
     public MingCiContent getMingCiContent(@NonNull String name) {
         return mingCiContentMap.get(name);
+    }
+    
+    /**
+     * 获取所有名词内容（返回副本，保证线程安全）
+     * 
+     * @return 名词内容列表副本
+     */
+    @NonNull
+    public List<MingCiContent> getAllMingCiData() {
+        return new ArrayList<>(mingCiContentMap.values());
     }
     
     // ==================== AI 配置 ====================

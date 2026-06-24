@@ -432,9 +432,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                             ThreadUtil.runInBackground(() -> {
                                 List<TabNav> navList = new CopyOnWriteArrayList<>(data.getData());
                                 
-                                // 将导航数据缓存到 GlobalDataHolder
-                                Map<Integer, TabNav> navTabMap = GlobalDataHolder.getInstance().getNavTabMap();
-                                Map<Integer, TabNavBody> navTabBodyMap = GlobalDataHolder.getInstance().getNavTabBodyMap();
+                                GlobalDataHolder globalData = GlobalDataHolder.getInstance();
                                 int order = 0;
 
                                 // 收集有效导航数据用于 UI 更新
@@ -442,11 +440,12 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                 
                                 for (TabNav nav : navList) {
                                     if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
-                                        // 缓存导航项
-                                        navTabMap.put(order, nav);
+                                        // ✅ 使用 putNavTab 触发状态标记
+                                        globalData.putNavTab(order, nav);
                                         for (TabNavBody item : nav.getNavList()) {
                                             if (item.getBookNo() > 0) {
-                                                navTabBodyMap.put(item.getBookNo(), item);
+                                                // ✅ 使用 putBookInfo 触发状态标记
+                                                globalData.putBookInfo(item.getBookNo(), item);
                                             }
                                         }
                                         order++;
@@ -456,6 +455,34 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                                 
                                 // 保存到数据库
                                 DataRepository.saveTabNvaInDb(navList, HomeFragment.this);
+                                
+                                // ✅ 加载方剂别名数据（依赖导航数据）
+                                try {
+                                    java.util.List<run.yigou.gxzy.data.local.entity.TabNavBody> bookInfos = globalData.getAllBookInfos();
+                                    java.util.Map<String, String> fangAliasDict = new java.util.HashMap<>();
+                                    
+                                    int aliasCount = 0;
+                                    for (run.yigou.gxzy.data.local.entity.TabNavBody bookInfo : bookInfos) {
+                                        int bookId = bookInfo.getBookNo();
+                                        java.util.ArrayList<run.yigou.gxzy.data.model.Fang> fangList = 
+                                            run.yigou.gxzy.data.local.helper.DataRepository.getFangDetailList(bookId);
+                                        
+                                        if (fangList != null && !fangList.isEmpty()) {
+                                            for (run.yigou.gxzy.data.model.Fang fang : fangList) {
+                                                String fangName = fang.getName();
+                                                if (fangName != null && !fangName.trim().isEmpty()) {
+                                                    fangAliasDict.put(fangName.trim(), fangName.trim());
+                                                    aliasCount++;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    globalData.putAllFangAlias(fangAliasDict);
+                                    android.util.Log.i("HomeFragment", "✅ 网络加载：方剂别名 " + aliasCount + " 条（来自 " + bookInfos.size() + " 本书）");
+                                } catch (Exception e) {
+                                    android.util.Log.e("HomeFragment", "❌ 网络加载：方剂别名加载失败", e);
+                                }
                                 
                                 // 在主线程更新 UI
                                 ThreadUtil.runOnUiThread(() -> {
@@ -537,11 +564,13 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                         if (data != null && !data.getData().isEmpty()) {
                             // 后台处理别名数据
                             ThreadUtil.runInBackground(() -> {
-                                // 构建别名到正名的映射字典
-                                Map<String, String> yaoAliasDict = GlobalDataHolder.getInstance().getYaoAliasDict();
+                                // ✅ 使用临时 Map 收集数据，最后调用 putAllYaoAlias 触发状态标记
+                                java.util.Map<String, String> yaoAliasDict = new java.util.HashMap<>();
                                 for (YaoAlia yaoAlia : data.getData()) {
                                     yaoAliasDict.put(yaoAlia.getBieming(), yaoAlia.getName());
                                 }
+                                
+                                GlobalDataHolder.getInstance().putAllYaoAlias(yaoAliasDict);
 
                                 //持久化别名数据
                                 DataRepository.saveYaoAlia(data.getData());

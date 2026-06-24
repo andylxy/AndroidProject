@@ -87,6 +87,19 @@ public class FangSearchStrategy implements ContentSearchStrategy {
         // 1. 检查数据加载状态
         if (!fangProvider.isDataLoaded()) {
             EasyLog.print("⚠️ 方剂数据未加载");
+            EasyLog.print("🔍 诊断: fangProvider.isDataLoaded() = false");
+            EasyLog.print("🔍 诊断: fangProvider 类型 = " + fangProvider.getClass().getSimpleName());
+            
+            // 额外诊断：检查 GlobalDataHolder 的状态
+            try {
+                run.yigou.gxzy.base.GlobalDataHolder holder = run.yigou.gxzy.base.GlobalDataHolder.getInstance();
+                EasyLog.print("🔍 诊断: GlobalDataHolder.fangAliasDict.size() = " + holder.getFangAliasDict().size());
+                EasyLog.print("🔍 诊断: GlobalDataHolder.isFangAliasLoaded() = " + holder.isFangAliasLoaded());
+                EasyLog.print("🔍 诊断: GlobalDataHolder.navTabBodyMap.size() = " + holder.getNavTabBodyMap().size());
+            } catch (Exception e) {
+                EasyLog.print("🔍 诊断: 无法访问 GlobalDataHolder: " + e.getMessage());
+            }
+            
             return builder.notLoaded();
         }
         

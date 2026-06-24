@@ -14,6 +14,7 @@ import android.content.Context;
 import run.yigou.gxzy.log.EasyLog;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import run.yigou.gxzy.data.local.entity.TabNav;
@@ -50,6 +51,8 @@ public class AppDataInitializer {
      * @param context 应用上下文
      */
     public static void initializeIfNeeded(Context context) {
+        EasyLog.print(TAG, "🔍 [initializeIfNeeded] isInitialized=" + isInitialized);
+        
         if (isInitialized) {
             EasyLog.print(TAG, "Already initialized, skipping");
             return;
@@ -65,7 +68,10 @@ public class AppDataInitializer {
                 long startTime = System.currentTimeMillis();
                 
                 // 检查本地是否已有数据
-                if (hasLocalData()) {
+                boolean hasData = hasLocalData();
+                EasyLog.print(TAG, "🔍 [initializeIfNeeded] hasLocalData()=" + hasData);
+                
+                if (hasData) {
                     EasyLog.print(TAG, "Local data found, loading from database");
                     loadFromLocalDatabase();
                 } else {
@@ -104,31 +110,62 @@ public class AppDataInitializer {
     
     /**
      * 从本地数据库加载数据到 GlobalDataHolder
+     * 
+     * <p>加载顺序遵循依赖关系：
+     * <ol>
+     *   <li>导航数据（其他数据可能依赖书籍信息）</li>
+     *   <li>药物数据</li>
+     *   <li>名词数据</li>
+     *   <li>药物别名</li>
+     *   <li>方剂别名（依赖导航数据中的书籍信息）</li>
+     * </ol>
      */
     private static void loadFromLocalDatabase() {
         try {
+            // 数据源校验
             DbService dbService = DbService.getInstance();
+            if (dbService == null) {
+                EasyLog.print(TAG, "❌ DbService 未初始化，中止加载");
+                return;
+            }
+            
             GlobalDataHolder globalData = GlobalDataHolder.getInstance();
             
-            // 1. 加载药物数据
-            loadYaoData(globalData);
+            // 预检查数据可用性
+            long startTime = System.currentTimeMillis();
             
-            // 2. 加载名词数据
-            loadMingCiData(globalData);
+            EasyLog.print(TAG, "📊 开始加载本地数据...");
             
-            // 3. 加载药物别名
-            loadYaoAliasData(globalData);
-            
-            // 4. 加载方剂别名（从现有方剂数据中提取）
-            loadFangAliasData(globalData);
-            
-            // 5. 加载导航数据
+            // 1. 加载导航数据（必须先加载，方剂别名依赖此数据）
             loadNavigationData(dbService, globalData);
             
-            EasyLog.print(TAG, "Local data loaded successfully");
+            // 2. 加载药物数据
+            loadYaoData(globalData);
+            
+            // 3. 加载名词数据
+            loadMingCiData(globalData);
+            
+            // 4. 加载药物别名
+            loadYaoAliasData(globalData);
+            
+            // 5. 加载方剂别名（依赖导航数据中的书籍信息）
+            loadFangAliasData(globalData);
+            
+            // 加载结果统计
+            long duration = System.currentTimeMillis() - startTime;
+            
+            EasyLog.print(TAG, "📈 加载统计: " +
+                "导航=" + globalData.getNavTabMap().size() + 
+                ", 书籍=" + globalData.getNavTabBodyMap().size() +
+                ", 药物=" + globalData.getYaoMap().size() +
+                ", 名词=" + globalData.getMingCiContentMap().size() +
+                ", 方剂别名=" + globalData.getFangAliasDict().size() +
+                ", 耗时=" + duration + "ms");
+            
+            EasyLog.print(TAG, "✅ 本地数据加载完成");
             
         } catch (Exception e) {
-            EasyLog.print(TAG, "Error loading local data: " + e.getMessage());
+            EasyLog.print(TAG, "❌ 加载本地数据失败: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -182,18 +219,37 @@ public class AppDataInitializer {
     
     /**
      * 加载方剂别名数据（从现有方剂数据中提取别名）
-     * 由于当前系统没有专门的方剂别名实体，我们从方剂名称中提取可能的别名
+     * 
+     * <p>依赖关系：
+     * <ul>
+     *   <li>必须在 {@link #loadNavigationData(DbService, GlobalDataHolder)} 之后调用</li>
+     *   <li>依赖 {@code globalData.getNavTabBodyMap()} 中的书籍信息</li>
+     * </ul>
+     * 
+     * <p>由于当前系统没有专门的方剂别名实体，我们从方剂名称中提取可能的别名。
+     * 
+     * @param globalData 全局数据持有者
      */
     private static void loadFangAliasData(GlobalDataHolder globalData) {
         try {
+            EasyLog.print(TAG, "🔍 [loadFangAliasData] 开始加载...");
+            
             // 从所有书籍的方剂数据中提取别名信息
-            Map<Integer, TabNavBody> navTabBodyMap = globalData.getNavTabBodyMap();
+            List<TabNavBody> bookInfos = globalData.getAllBookInfos();
+            EasyLog.print(TAG, "🔍 [loadFangAliasData] bookInfos.size() = " + bookInfos.size());
+            
             Map<String, String> fangAliasDict = new java.util.HashMap<>();
             
             int aliasCount = 0;
-            for (TabNavBody bookInfo : navTabBodyMap.values()) {
+            int bookIndex = 0;
+            for (TabNavBody bookInfo : bookInfos) {
+                bookIndex++;
                 int bookId = bookInfo.getBookNo();
+                EasyLog.print(TAG, "🔍 [loadFangAliasData] 处理第 " + bookIndex + " 本书, bookId=" + bookId);
+                
                 ArrayList<Fang> fangList = DataRepository.getFangDetailList(bookId);
+                EasyLog.print(TAG, "🔍 [loadFangAliasData] bookId=" + bookId + ", fangList.size()=" + 
+                    (fangList != null ? fangList.size() : "null"));
                 
                 if (fangList != null && !fangList.isEmpty()) {
                     for (Fang fang : fangList) {
@@ -207,34 +263,24 @@ public class AppDataInitializer {
                 }
             }
             
+            EasyLog.print(TAG, "🔍 [loadFangAliasData] 收集到 " + aliasCount + " 条别名，准备调用 putAllFangAlias");
+            
             // 使用 putAllFangAlias 触发加载状态标记
             globalData.putAllFangAlias(fangAliasDict);
-            EasyLog.print(TAG, "Loaded " + aliasCount + " Fang aliases from " + navTabBodyMap.size() + " books");
+            
+            EasyLog.print(TAG, "🔍 [loadFangAliasData] putAllFangAlias 完成，isFangAliasLoaded=" + globalData.isFangAliasLoaded());
+            
+            // 校验加载结果
+            if (aliasCount == 0 && bookInfos.size() > 0) {
+                EasyLog.print(TAG, "⚠️ 方剂别名为 0，但导航数据有 " + bookInfos.size() + " 本书");
+            }
+            
+            EasyLog.print(TAG, "✅ 加载 " + aliasCount + " 条方剂别名（来自 " + bookInfos.size() + " 本书）");
             
         } catch (Exception e) {
             EasyLog.print(TAG, "Error loading Fang aliases: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-    
-    /**
-     * 提取方剂基础名称（去掉剂型后缀）
-     */
-    private static String extractFangBaseName(String fangName) {
-        if (fangName == null) return "";
-        
-        String baseName = fangName.trim();
-        
-        // 去掉常见的剂型后缀
-        String[] suffixes = {"汤", "散", "丸", "膏", "丹", "片", "胶囊", "颗粒", "口服液", "注射液"};
-        for (String suffix : suffixes) {
-            if (baseName.endsWith(suffix) && baseName.length() > suffix.length()) {
-                baseName = baseName.substring(0, baseName.length() - suffix.length());
-                break;
-            }
-        }
-        
-        return baseName.trim();
     }
     
     /**
