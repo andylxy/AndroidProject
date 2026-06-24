@@ -412,10 +412,18 @@ public class TipsTextRenderConfig {
             String marker = entry.getKey();
             StyleConfig config = entry.getValue();
             
-            // 校验 marker（必须是单个字母）
-            if (marker == null || marker.length() != 1 || !Character.isLetter(marker.charAt(0))) {
-                log("跳过非法 marker: " + marker);
+            // 校验 marker（必须是 1-10 个字母）
+            if (marker == null || marker.length() < 1 || marker.length() > 10) {
+                log("跳过非法 marker（长度必须在 1-10 之间）: " + marker);
                 continue;
+            }
+            
+            // 校验 marker 只能包含字母
+            for (int j = 0; j < marker.length(); j++) {
+                if (!Character.isLetter(marker.charAt(j))) {
+                    log("跳过非法 marker（只能包含字母）: " + marker);
+                    continue;
+                }
             }
             
             // 校验 config

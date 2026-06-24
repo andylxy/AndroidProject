@@ -77,4 +77,59 @@ public class TextHighlighter {
         SpannableStringBuilder copy = new SpannableStringBuilder(originalText);
         return highlight(copy, keyword);
     }
+
+    /**
+     * 高亮 Matcher 匹配项（使用默认黄色）
+     * 
+     * <p>使用场景：
+     * <ul>
+     *   <li>调用方已经创建了 Matcher 对象</li>
+     *   <li>需要复用 Matcher 的匹配结果</li>
+     * </ul>
+     * 
+     * @param matcher 已创建的 Matcher 对象（会自动 reset）
+     * @param spannable 要应用高亮的 SpannableStringBuilder
+     */
+    public static void highlightMatches(
+            java.util.regex.Matcher matcher, 
+            SpannableStringBuilder spannable) {
+        highlightMatches(matcher, spannable, DEFAULT_HIGHLIGHT_COLOR);
+    }
+
+    /**
+     * 高亮 Matcher 匹配项（支持自定义颜色）
+     * 
+     * <p>使用场景：
+     * <ul>
+     *   <li>调用方已经创建了 Matcher 对象</li>
+     *   <li>需要复用 Matcher 的匹配结果</li>
+     *   <li>需要自定义高亮颜色</li>
+     * </ul>
+     * 
+     * @param matcher 已创建的 Matcher 对象（会自动 reset）
+     * @param spannable 要应用高亮的 SpannableStringBuilder
+     * @param highlightColor 高亮颜色
+     */
+    public static void highlightMatches(
+            java.util.regex.Matcher matcher, 
+            SpannableStringBuilder spannable,
+            int highlightColor) {
+        
+        if (matcher == null || spannable == null) {
+            return;
+        }
+        
+        // 重置 Matcher 位置，确保无论调用方是否已消费，行为一致
+        matcher.reset();
+        
+        // 遍历所有匹配项并应用高亮
+        while (matcher.find()) {
+            spannable.setSpan(
+                new BackgroundColorSpan(highlightColor),
+                matcher.start(),
+                matcher.end(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+        }
+    }
 }

@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 import run.yigou.gxzy.data.model.Fang;
 import run.yigou.gxzy.ui.reader.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
-import run.yigou.gxzy.text.TipsTextRenderer;
+import run.yigou.gxzy.text.TextHighlighter;
 
 /**
  * Tips 模块搜索引擎
@@ -179,10 +179,10 @@ public class TipsSearchEngine {
         Matcher matcherNote = pattern.matcher(spannableNote);
         Matcher matcherSectionVideo = pattern.matcher(spannableSectionVideo);
 
-        // 对匹配到的文本应用高亮显示 - 调用 TipsTextRenderer
-        TipsTextRenderer.highlightMatches(matcherText, spannableText);
-        TipsTextRenderer.highlightMatches(matcherNote, spannableNote);
-        TipsTextRenderer.highlightMatches(matcherSectionVideo, spannableSectionVideo);
+        // 对匹配到的文本应用高亮显示 - 调用 TextHighlighter
+        TextHighlighter.highlightMatches(matcherText, spannableText);
+        TextHighlighter.highlightMatches(matcherNote, spannableNote);
+        TextHighlighter.highlightMatches(matcherSectionVideo, spannableSectionVideo);
 
         // 将高亮显示后的文本设置回DataItem对象
         dataItem.setAttributedText(spannableText);
