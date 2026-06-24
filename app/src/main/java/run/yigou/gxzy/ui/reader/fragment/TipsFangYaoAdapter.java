@@ -9,16 +9,19 @@ import androidx.annotation.NonNull;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
+import run.yigou.gxzy.ui.reader.constant.ContentTypes;
 import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
 import run.yigou.gxzy.tips.widget.LocalLinkMovementMethod;
 
 
 public final class TipsFangYaoAdapter extends AppAdapter<String> {
-    private final int typeFangYao;
+    
+    @ContentTypes.ContentType
+    private final int contentType;
 
-    public TipsFangYaoAdapter(Context context, int typeFangYao) {
+    public TipsFangYaoAdapter(Context context, @ContentTypes.ContentType int contentType) {
         super(context);
-        this.typeFangYao = typeFangYao;
+        this.contentType = contentType;
     }
 
     @NonNull
@@ -39,21 +42,21 @@ public final class TipsFangYaoAdapter extends AppAdapter<String> {
         @SuppressLint("SetTextI18n")
         @Override
         public void onBindView(int position) {
-            switch (typeFangYao) {
-                case 1:
+            switch (contentType) {
+                case ContentTypes.FANG:
                     if (getData() != null) {
                         String f = (position + 1) + "、" + "$f{" + getData().get(position) + "}";
                         mFang_Yao.setText(TipsClickHandler.renderText(f));
 
                     }
                     break;
-                case 2:
+                case ContentTypes.YAO:
                     if (getData() != null) {
                         String u = (position + 1) + "、" + "$u{" + getData().get(position) + "}";
                         mFang_Yao.setText(TipsClickHandler.renderText(u));
                     }
                     break;
-                case 3:
+                case ContentTypes.HAN_ZHI_UNIT:
                     if (getData() != null && !getData().isEmpty()) {
                         mFang_Yao.setText((position + 1) + "、" + getData().get(position));
                     }

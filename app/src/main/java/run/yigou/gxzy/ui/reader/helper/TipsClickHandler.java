@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.text.ClickLink;
 import run.yigou.gxzy.text.TipsTextRenderer;
+import run.yigou.gxzy.ui.reader.constant.ContentTypes;
 import run.yigou.gxzy.ui.reader.entity.GroupData;
 import run.yigou.gxzy.ui.reader.entity.ItemData;
 import run.yigou.gxzy.ui.reader.search.SearchDataAdapter;
@@ -45,16 +46,6 @@ import java.util.List;
  */
 public class TipsClickHandler {
 
-    /** 点击链接类型枚举，用于区分药物、方剂、名词三种链接 */
-    private enum ClickType {
-        /** 药物链接 */
-        YAO,
-        /** 方剂链接 */
-        FANG,
-        /** 名词链接 */
-        MING_CI
-    }
-
     /**
      * 默认的 ClickLink 实现，所有点击回调统一委托到 {@link #handleClick} 模板方法。
      *
@@ -64,23 +55,8 @@ public class TipsClickHandler {
 
         @Override
         public void onClickLink(int linkType, TextView textView, android.text.style.ClickableSpan span) {
-            // 使用配置中心的 linkType 动态路由
-            handleClickByLinkType(textView, span, linkType);
-        }
-
-        @Override
-        public void clickYaoLink(TextView textView, ClickableSpan clickableSpan) {
-            handleClick(textView, clickableSpan, ClickType.YAO);
-        }
-
-        @Override
-        public void clickFangLink(TextView textView, ClickableSpan clickableSpan) {
-            handleClick(textView, clickableSpan, ClickType.FANG);
-        }
-
-        @Override
-        public void clickMingCiLink(TextView textView, ClickableSpan clickableSpan) {
-            handleClick(textView, clickableSpan, ClickType.MING_CI);
+            // 直接路由到 handleClick，无需中间层
+            handleClick(textView, span, linkType);
         }
     };
 
@@ -98,46 +74,23 @@ public class TipsClickHandler {
     }
 
     /**
-     * 根据配置中心的 linkType 动态路由到对应的处理方法
-     * 
-     * @param textView  被点击的 TextView
-     * @param span      被点击的 ClickableSpan
-     * @param linkType  链接类型（由 StyleConfig.linkType 定义）
-     */
-    private static void handleClickByLinkType(TextView textView, ClickableSpan span, int linkType) {
-        switch (linkType) {
-            case 1:  // 药物
-                handleClick(textView, span, ClickType.YAO);
-                break;
-            case 2:  // 方剂
-                handleClick(textView, span, ClickType.FANG);
-                break;
-            case 3:  // 名词
-                handleClick(textView, span, ClickType.MING_CI);
-                break;
-            default:
-                EasyLog.print("❌ 未知的linkType: " + linkType);
-                break;
-        }
-    }
-
-    /**
      * 点击处理模板方法，统一处理药物/方剂/名词三种链接的点击交互流程。
      *
      * <p>处理流程：
      * <ol>
      *   <li>从 TextView 选中区域提取关键词</li>
      *   <li>校验 BookRepository 上下文是否已设置</li>
-     *   <li>根据 ClickType 选择对应的搜索方法和弹窗类型</li>
+     *   <li>根据 contentType 选择对应的搜索方法和弹窗类型</li>
      *   <li>计算点击位置矩形区域</li>
      *   <li>创建并显示对应的小窗（TipsLittleTableViewWindow 或 TipsLittleMingCiViewWindow）</li>
      * </ol>
      *
      * @param textView       被点击的 TextView
      * @param clickableSpan  被点击的 ClickableSpan
-     * @param clickType      点击链接类型（药物/方剂/名词）
+     * @param contentType    内容类型（ContentTypes.YAO/FANG/MING_CI）
      */
-    static void handleClick(TextView textView, ClickableSpan clickableSpan, ClickType clickType) {
+    static void handleClick(TextView textView, ClickableSpan clickableSpan, 
+                           @ContentTypes.ContentType int contentType) {
         // 1. 提取关键词：从 TextView 选中区域获取文本
         String keyword = textView.getText()
                 .subSequence(textView.getSelectionStart(), textView.getSelectionEnd())
@@ -149,22 +102,22 @@ public class TipsClickHandler {
             return;
         }
 
-        // 3. 根据点击类型执行对应的搜索
+        // 3. 根据内容类型执行对应的搜索
         SearchDataAdapter adapter = new SearchDataAdapter(
                 TipsNetHelper.getBookRepository(), TipsNetHelper.getCurrentBookId());
         Pair<List<GroupData>, List<List<ItemData>>> data;
-        switch (clickType) {
-            case YAO:
+        switch (contentType) {
+            case ContentTypes.YAO:
                 data = adapter.searchYaoContent(keyword.trim());
                 break;
-            case FANG:
+            case ContentTypes.FANG:
                 data = adapter.searchFangContent(keyword.trim());
                 break;
-            case MING_CI:
+            case ContentTypes.MING_CI:
                 data = adapter.searchMingCiContent(keyword.trim());
                 break;
             default:
-                EasyLog.print("❌ 未知的ClickType: " + clickType);
+                EasyLog.print("❌ 未知的contentType: " + contentType);
                 return;
         }
 
@@ -180,9 +133,9 @@ public class TipsClickHandler {
         AppCompatActivity activity = (AppCompatActivity) context;
 
         // 6. 根据类型创建对应的窗口并显示
-        switch (clickType) {
-            case YAO:
-            case FANG: {
+        switch (contentType) {
+            case ContentTypes.YAO:
+            case ContentTypes.FANG: {
                 TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
                 window.setData(context, data);
                 window.setFang(keyword);
@@ -191,7 +144,7 @@ public class TipsClickHandler {
                 window.show(activity.getSupportFragmentManager());
                 break;
             }
-            case MING_CI: {
+            case ContentTypes.MING_CI: {
                 TipsLittleMingCiViewWindow window = new TipsLittleMingCiViewWindow();
                 window.setData(context, data);
                 window.setRect(textRect);

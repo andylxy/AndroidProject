@@ -23,6 +23,7 @@ import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.base.args.BookArgs;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.ui.reader.bookread.TipsBookNetReadFragment;
+import run.yigou.gxzy.ui.reader.constant.ContentTypes;
 import run.yigou.gxzy.ui.reader.fragment.TipsFangYaoFragment;
 import run.yigou.gxzy.ui.reader.fragment.TipsSettingFragment;
 import run.yigou.gxzy.ui.main.NavigationAdapter;
@@ -399,11 +400,15 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
     }
 
     /**
-     * Fragment类型常量
+     * Fragment类型常量（已迁移到 ContentTypes）
+     * @deprecated 使用 ContentTypes.FANG/YAO/HAN_ZHI_UNIT 替代
      */
-    private static final int FRAGMENT_TYPE_FANG = 1;  // 方
-    private static final int FRAGMENT_TYPE_YAO = 2;   // 药
-    private static final int FRAGMENT_TYPE_UNIT = 3; // 单位
+    @Deprecated
+    private static final int FRAGMENT_TYPE_FANG = ContentTypes.FANG;
+    @Deprecated
+    private static final int FRAGMENT_TYPE_YAO = ContentTypes.YAO;
+    @Deprecated
+    private static final int FRAGMENT_TYPE_UNIT = ContentTypes.HAN_ZHI_UNIT;
     private static final int CASE_TAG_SHANGHAN = 5;  // 伤寒类书籍
 
     /**

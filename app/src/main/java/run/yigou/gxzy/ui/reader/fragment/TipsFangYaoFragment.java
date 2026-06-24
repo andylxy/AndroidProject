@@ -19,6 +19,7 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
+import run.yigou.gxzy.ui.reader.constant.ContentTypes;
 import run.yigou.gxzy.ui.reader.data.BookData;
 import run.yigou.gxzy.ui.reader.data.BookDataManager;
 import run.yigou.gxzy.ui.reader.data.ChapterData;
@@ -29,10 +30,12 @@ import run.yigou.gxzy.data.model.DataItem;
 public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
 
     public static final String TAG = "TipsFangYaoFragment";
+    
     /**
-     * 1 是方 2 是药 , 3 是汉制单位
+     * 列表展示类型（方剂/药物/汉制单位）
      */
-    private int typeFangYao;
+    @ContentTypes.ContentType
+    private int contentType;
     private int bookId;
     private TextView numTips;
     private WrapRecyclerView mRecyclerView;
@@ -43,14 +46,15 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
     private List<String> searchTextResults = new ArrayList<>();
 
     /**
-     * 创建一个实例，并设置类型。
+     * 创建实例
      *
-     * @param typeFangYao 1 是方 2 是药,3 是汉制单位
+     * @param contentType 内容类型（ContentTypes.FANG/YAO/HAN_ZHI_UNIT）
+     * @param bookId 书籍ID
      * @return TipsFangYaoFragment 实例
      */
-    public static TipsFangYaoFragment newInstance(int typeFangYao, int bookId) {
+    public static TipsFangYaoFragment newInstance(@ContentTypes.ContentType int contentType, int bookId) {
         TipsFangYaoFragment fragment = new TipsFangYaoFragment();
-        fragment.typeFangYao = typeFangYao;
+        fragment.contentType = contentType;
         fragment.bookId = bookId;
         return fragment;
     }
@@ -170,7 +174,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
 
     @Override
     protected void initData() {
-        mAdapter = new TipsFangYaoAdapter(getAttachActivity(), typeFangYao);
+        mAdapter = new TipsFangYaoAdapter(getAttachActivity(), contentType);
 
         mRecyclerView.setAdapter(mAdapter);
         //设置数据源
@@ -195,8 +199,8 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
 
     private List<String> loadData() {
         List<String> gvList;
-        switch (typeFangYao) {
-            case 1:
+        switch (contentType) {
+            case ContentTypes.FANG:
                 // 获取当前书籍的方剂数据
                 BookData bookData = BookDataManager.getInstance().getBookData(bookId);
                 ChapterData fangData = bookData.getFangData();
@@ -208,7 +212,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
                     }
                 }
                 break;
-            case 2:
+            case ContentTypes.YAO:
                 // 获取所有药物（正名 + 别名）
                 gvList = new ArrayList<>();
                 GlobalDataHolder globalData = GlobalDataHolder.getInstance();
@@ -223,8 +227,11 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
                     gvList.addAll(globalData.getYaoAliasDict().keySet());
                 }
                 break;
-            default:
+            case ContentTypes.HAN_ZHI_UNIT:
                 gvList = new ArrayList<>(Arrays.asList(HAN_ZHI_UNITS));
+                break;
+            default:
+                gvList = new ArrayList<>();
         }
         if (gvList != null && !gvList.isEmpty()) {
             return gvList;

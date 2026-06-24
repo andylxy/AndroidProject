@@ -35,26 +35,7 @@ public class TipsTextRenderer {
     /** 项编号高亮颜色：蓝色 */
     private static final int ITEM_NUMBER_COLOR = 0xFF0000FF;
 
-
-
-    // 创建SpannableStringBuilder对象
-    public static SpannableStringBuilder createSpannable(String text) {
-        return createSpannable(text, null);
-    }
-
     // 创建SpannableStringBuilder对象，用于渲染DataItem的文本、注释和视频部分
-    public static SpannableStringBuilder createSpannable(String text, final ClickLink clickLink) {
-        // 当输入的文本为null时，返回一个包含空字符串的SpannableStringBuilder对象
-        if (text == null) {
-            return new SpannableStringBuilder("");
-        }
-        // 返回渲染后的文本的SpannableStringBuilder对象
-        return renderText(text, clickLink);
-    }
-
-    public static SpannableStringBuilder renderText(String str) {
-        return renderText(str, null);
-    }
 
     public static SpannableStringBuilder renderText(String str, final ClickLink clickLink) {
         // 如果输入为 null，返回一个带有默认内容的 SpannableStringBuilder
