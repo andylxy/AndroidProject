@@ -140,23 +140,46 @@ public class SearchResultBuilder {
     }
     
     /**
-     * 构建"未找到名词"结果
+     * 构建“未找到名词”结果
      * 
-     * @return Pair<groups, items> 包含"未见此名词。"提示的结果
+     * @return Pair<groups, items> 包含“未见此名词。”提示的结果
      */
     public Pair<List<GroupData>, List<List<ItemData>>> notFoundMingCi() {
         List<GroupData> groups = new ArrayList<>();
         List<List<ItemData>> items = new ArrayList<>();
-        
+            
         GroupData group = buildGroup("名词解释", true);
         groups.add(group);
-        
+            
         List<ItemData> itemList = new ArrayList<>();
         ItemData item = new ItemData();
         item.setAttributedText(TipsClickHandler.renderText("$m{未见此名词。}"));
         itemList.add(item);
         items.add(itemList);
+            
+        return new Pair<>(groups, items);
+    }
         
+    /**
+     * 构建“数据未加载”结果
+     * 
+     * <p>用于数据提供者尚未加载数据时的提示。
+     * 
+     * @return Pair<groups, items> 包含“数据加载中...”提示的结果
+     */
+    public Pair<List<GroupData>, List<List<ItemData>>> notLoaded() {
+        List<GroupData> groups = new ArrayList<>();
+        List<List<ItemData>> items = new ArrayList<>();
+            
+        GroupData group = buildGroup("提示", true);
+        groups.add(group);
+            
+        List<ItemData> itemList = new ArrayList<>();
+        ItemData item = new ItemData();
+        item.setAttributedText(TipsClickHandler.renderText("$m{数据加载中，请稍后重试。}"));
+        itemList.add(item);
+        items.add(itemList);
+            
         return new Pair<>(groups, items);
     }
     

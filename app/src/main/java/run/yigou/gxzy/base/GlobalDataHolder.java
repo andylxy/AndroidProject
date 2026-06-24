@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import run.yigou.gxzy.data.local.entity.AiConfig;
 import run.yigou.gxzy.data.local.entity.TabNav;
@@ -53,8 +54,16 @@ public class GlobalDataHolder {
     // 名词内容映射（name -> MingCiContent）
     private final Map<String, MingCiContent> mingCiContentMap;
     
-    // AI 配置列表
-    private List<AiConfig> aiConfigList;
+    // AI 配置列表（读多写少场景，使用 CopyOnWriteArrayList）
+    private final CopyOnWriteArrayList<AiConfig> aiConfigList;
+    
+    // 数据加载状态标记（volatile 保证多线程可见性）
+    private volatile boolean navDataLoaded = false;
+    private volatile boolean yaoAliasLoaded = false;
+    private volatile boolean fangAliasLoaded = false;
+    private volatile boolean yaoDataLoaded = false;
+    private volatile boolean mingCiDataLoaded = false;
+    private volatile boolean aiConfigLoaded = false;
     
     /**
      * 私有构造函数
@@ -66,7 +75,7 @@ public class GlobalDataHolder {
         this.fangAliasDict = new ConcurrentHashMap<>();
         this.yaoMap = new ConcurrentHashMap<>();
         this.mingCiContentMap = new ConcurrentHashMap<>();
-        this.aiConfigList = new ArrayList<>();
+        this.aiConfigList = new CopyOnWriteArrayList<>();
     }
     
     /**
@@ -99,6 +108,7 @@ public class GlobalDataHolder {
      */
     public void putNavTab(int tabId, @NonNull TabNav nav) {
         navTabMap.put(tabId, nav);
+        navDataLoaded = true;
     }
     
     /**
@@ -124,6 +134,7 @@ public class GlobalDataHolder {
      */
     public void putBookInfo(int bookId, @NonNull TabNavBody bookInfo) {
         navTabBodyMap.put(bookId, bookInfo);
+        navDataLoaded = true;
     }
     
     /**
@@ -149,6 +160,7 @@ public class GlobalDataHolder {
      */
     public void putYaoAlias(@NonNull String alias, @NonNull String realName) {
         yaoAliasDict.put(alias, realName);
+        yaoAliasLoaded = true;
     }
     
     /**
@@ -156,6 +168,8 @@ public class GlobalDataHolder {
      */
     public void putAllYaoAlias(@NonNull Map<String, String> aliases) {
         yaoAliasDict.putAll(aliases);
+        yaoAliasLoaded = true;
+        android.util.Log.i("GlobalDataHolder", "药物别名字典更新: +" + aliases.size() + " 条");
     }
     
     /**
@@ -171,6 +185,7 @@ public class GlobalDataHolder {
      */
     public void putFangAlias(@NonNull String alias, @NonNull String realName) {
         fangAliasDict.put(alias, realName);
+        fangAliasLoaded = true;
     }
     
     /**
@@ -178,6 +193,8 @@ public class GlobalDataHolder {
      */
     public void putAllFangAlias(@NonNull Map<String, String> aliases) {
         fangAliasDict.putAll(aliases);
+        fangAliasLoaded = true;
+        android.util.Log.i("GlobalDataHolder", "方剂别名字典更新: +" + aliases.size() + " 条");
     }
     
     // ==================== 药物信息 ====================
@@ -195,6 +212,7 @@ public class GlobalDataHolder {
      */
     public void putYao(@NonNull String name, @NonNull Yao yao) {
         yaoMap.put(name, yao);
+        yaoDataLoaded = true;
     }
     
     /**
@@ -228,6 +246,7 @@ public class GlobalDataHolder {
      */
     public void putMingCiContent(@NonNull String name, @NonNull MingCiContent content) {
         mingCiContentMap.put(name, content);
+        mingCiDataLoaded = true;
     }
     
     /**
@@ -244,22 +263,114 @@ public class GlobalDataHolder {
      * 获取 AI 配置列表
      */
     @NonNull
-    public synchronized List<AiConfig> getAiConfigList() {
+    public List<AiConfig> getAiConfigList() {
         return new ArrayList<>(aiConfigList);
     }
     
     /**
      * 设置 AI 配置列表
      */
-    public synchronized void setAiConfigList(@Nullable List<AiConfig> configs) {
-        if (this.aiConfigList == null) {
-            this.aiConfigList = new ArrayList<>();
-        }
-        this.aiConfigList.clear();
+    public void setAiConfigList(@Nullable List<AiConfig> configs) {
+        aiConfigList.clear();
         
         if (configs != null) {
-            this.aiConfigList.addAll(configs);
+            aiConfigList.addAll(configs);
         }
+        aiConfigLoaded = true;
+    }
+    
+    // ==================== 数据加载状态 ====================
+    
+    /**
+     * 导航数据是否已加载
+     */
+    public boolean isNavDataLoaded() {
+        return navDataLoaded;
+    }
+    
+    /**
+     * 药物别名字典是否已加载
+     */
+    public boolean isYaoAliasLoaded() {
+        return yaoAliasLoaded;
+    }
+    
+    /**
+     * 方剂别名字典是否已加载
+     */
+    public boolean isFangAliasLoaded() {
+        return fangAliasLoaded;
+    }
+    
+    /**
+     * 药物详细信息是否已加载
+     */
+    public boolean isYaoDataLoaded() {
+        return yaoDataLoaded;
+    }
+    
+    /**
+     * 名词内容是否已加载
+     */
+    public boolean isMingCiDataLoaded() {
+        return mingCiDataLoaded;
+    }
+    
+    /**
+     * AI 配置是否已加载
+     */
+    public boolean isAiConfigLoaded() {
+        return aiConfigLoaded;
+    }
+    
+    // ==================== 数据刷新方法 ====================
+    
+    /**
+     * 清空导航数据（用于刷新）
+     * 
+     * <p>调用后需重新从数据库加载导航数据。
+     */
+    public synchronized void reloadNavigationData() {
+        navTabMap.clear();
+        navTabBodyMap.clear();
+        navDataLoaded = false;
+        android.util.Log.i("GlobalDataHolder", "导航数据已清空，待重新加载");
+    }
+    
+    /**
+     * 清空药物别名字典
+     */
+    public synchronized void reloadYaoAlias() {
+        yaoAliasDict.clear();
+        yaoAliasLoaded = false;
+        android.util.Log.i("GlobalDataHolder", "药物别名字典已清空，待重新加载");
+    }
+    
+    /**
+     * 清空方剂别名字典
+     */
+    public synchronized void reloadFangAlias() {
+        fangAliasDict.clear();
+        fangAliasLoaded = false;
+        android.util.Log.i("GlobalDataHolder", "方剂别名字典已清空，待重新加载");
+    }
+    
+    /**
+     * 清空药物详细信息
+     */
+    public synchronized void reloadYaoData() {
+        yaoMap.clear();
+        yaoDataLoaded = false;
+        android.util.Log.i("GlobalDataHolder", "药物详细信息已清空，待重新加载");
+    }
+    
+    /**
+     * 清空名词内容
+     */
+    public synchronized void reloadMingCiData() {
+        mingCiContentMap.clear();
+        mingCiDataLoaded = false;
+        android.util.Log.i("GlobalDataHolder", "名词内容已清空，待重新加载");
     }
     
     // ==================== 清理方法 ====================
@@ -291,7 +402,22 @@ public class GlobalDataHolder {
     
     /**
      * 估算内存占用（KB）
+     * 
+     * @deprecated 此方法使用硬编码估算（如假设每个 Yao 对象固定 500 字节），
+     *             但实际对象大小差异巨大（100 字节 ~ 10 KB），结果完全不可靠。
+     *             <p>
+     *             请使用以下工具进行准确的内存分析：
+     *             <ul>
+     *               <li>Android Studio Profiler - Memory 标签页</li>
+     *               <li>LeakCanary - 内存泄漏检测</li>
+     *               <li>Debug.getNativeHeapAllocatedSize() - 原生堆内存</li>
+     *             </ul>
+     *             <p>
+     *             将于 v2.0 移除此方法。
+     * 
+     * @return 估算的内存占用（KB），仅供参考，不建议用于业务逻辑判断
      */
+    @Deprecated
     public int estimateMemorySize() {
         int size = 0;
         

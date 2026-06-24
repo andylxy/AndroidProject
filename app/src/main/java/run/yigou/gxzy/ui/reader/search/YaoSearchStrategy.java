@@ -13,7 +13,6 @@ import android.text.SpannableStringBuilder;
 import android.util.Pair;
 
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.data.model.Yao;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.ui.reader.data.BookData;
@@ -23,6 +22,7 @@ import run.yigou.gxzy.ui.reader.entity.ItemData;
 import run.yigou.gxzy.ui.reader.repository.BookRepository;
 import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
 import run.yigou.gxzy.data.local.entity.Chapter;
+import run.yigou.gxzy.ui.reader.search.provider.IYaoDataProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,13 +33,14 @@ import java.util.Map;
  * 
  * <p>职责：实现药物内容搜索逻辑
  * <ul>
- *   <li>查询药物详细信息（从 GlobalDataHolder.getYaoMap()）</li>
+ *   <li>查询药物详细信息（通过 IYaoDataProvider）</li>
  *   <li>在章节中搜索包含该药物的内容</li>
  *   <li>支持别名解析</li>
  * </ul>
  * 
  * <p>搜索流程：
  * <ol>
+ *   <li>检查数据加载状态</li>
  *   <li>解析别名</li>
  *   <li>查询药物信息（显示药物详情）</li>
  *   <li>在章节中搜索包含该药物的内容</li>
@@ -51,6 +52,7 @@ public class YaoSearchStrategy implements ContentSearchStrategy {
     private final int bookId;
     private final BookData bookData;
     private final List<Chapter> chapters;
+    private final IYaoDataProvider yaoProvider;
     
     private final FangNameMatcher matcher;
     private final SearchResultBuilder builder;
@@ -60,12 +62,14 @@ public class YaoSearchStrategy implements ContentSearchStrategy {
      * 
      * @param bookRepository 书籍仓库
      * @param bookId 当前书籍ID
+     * @param yaoProvider 药物数据提供者（依赖注入）
      */
-    public YaoSearchStrategy(BookRepository bookRepository, int bookId) {
+    public YaoSearchStrategy(BookRepository bookRepository, int bookId, IYaoDataProvider yaoProvider) {
         this.bookRepository = bookRepository;
         this.bookId = bookId;
         this.bookData = bookRepository.getBookData(bookId);
         this.chapters = bookRepository.getChapters(bookId);
+        this.yaoProvider = yaoProvider;
         
         this.matcher = new FangNameMatcher();
         this.builder = new SearchResultBuilder();
@@ -100,12 +104,17 @@ public class YaoSearchStrategy implements ContentSearchStrategy {
         List<GroupData> groups = new ArrayList<>();
         List<List<ItemData>> items = new ArrayList<>();
         
-        Map<String, String> aliasDict = GlobalDataHolder.getInstance().getYaoAliasDict();
+        // 检查数据加载状态
+        if (!yaoProvider.isDataLoaded()) {
+            EasyLog.print("⚠️ 药物数据未加载");
+            return builder.notLoaded();
+        }
+        
+        // 通过接口查询数据
+        Map<String, String> aliasDict = yaoProvider.getYaoAliasDict();
         String aliasName = matcher.resolveAlias(aliasDict, keyword);
         
-        // 添加药物信息
-        Map<String, Yao> yaoMap = GlobalDataHolder.getInstance().getYaoMap();
-        Yao yao = yaoMap != null ? yaoMap.get(aliasName) : null;
+        Yao yao = yaoProvider.getYao(aliasName);
         
         if (yao != null) {
             GroupData group = builder.buildGroup("药物信息", true);
@@ -138,7 +147,8 @@ public class YaoSearchStrategy implements ContentSearchStrategy {
      * 在章节中搜索包含该药物的内容
      */
     private void searchYaoInChapters(String keyword, Pair<List<GroupData>, List<List<ItemData>>> result) {
-        Map<String, String> aliasDict = GlobalDataHolder.getInstance().getYaoAliasDict();
+        // 通过接口查询数据
+        Map<String, String> aliasDict = yaoProvider.getYaoAliasDict();
         String aliasName = matcher.resolveAlias(aliasDict, keyword);
         
         int matchedSections = 0;

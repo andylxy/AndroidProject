@@ -16,6 +16,13 @@ import run.yigou.gxzy.ui.reader.constant.ContentTypes;
 import run.yigou.gxzy.ui.reader.entity.GroupData;
 import run.yigou.gxzy.ui.reader.entity.ItemData;
 import run.yigou.gxzy.ui.reader.repository.BookRepository;
+import run.yigou.gxzy.base.GlobalDataHolder;
+import run.yigou.gxzy.ui.reader.search.provider.IMingCiDataProvider;
+import run.yigou.gxzy.ui.reader.search.provider.IYaoDataProvider;
+import run.yigou.gxzy.ui.reader.search.provider.IFangDataProvider;
+import run.yigou.gxzy.ui.reader.search.provider.GlobalDataMingCiProvider;
+import run.yigou.gxzy.ui.reader.search.provider.GlobalDataYaoProvider;
+import run.yigou.gxzy.ui.reader.search.provider.GlobalDataFangProvider;
 
 import java.util.HashMap;
 import java.util.List;
@@ -69,11 +76,17 @@ public class SearchDataAdapter {
         EasyLog.print("=== SearchDataAdapter 初始化（策略模式） ===");
         EasyLog.print("BookId: " + bookId);
         
-        // 注册策略
+        // 创建数据提供者
+        GlobalDataHolder holder = GlobalDataHolder.getInstance();
+        IMingCiDataProvider mingCiProvider = new GlobalDataMingCiProvider(holder);
+        IYaoDataProvider yaoProvider = new GlobalDataYaoProvider(holder);
+        IFangDataProvider fangProvider = new GlobalDataFangProvider(holder);
+        
+        // 注册策略（注入数据提供者）
         strategies = new HashMap<>();
-        strategies.put(ContentTypes.FANG, new FangSearchStrategy(bookRepository, bookId));
-        strategies.put(ContentTypes.YAO, new YaoSearchStrategy(bookRepository, bookId));
-        strategies.put(ContentTypes.MING_CI, new MingCiSearchStrategy());
+        strategies.put(ContentTypes.FANG, new FangSearchStrategy(bookRepository, bookId, fangProvider));
+        strategies.put(ContentTypes.YAO, new YaoSearchStrategy(bookRepository, bookId, yaoProvider));
+        strategies.put(ContentTypes.MING_CI, new MingCiSearchStrategy(mingCiProvider));
         
         EasyLog.print("已注册策略: 方剂(FANG), 药物(YAO), 名词(MING_CI)");
     }

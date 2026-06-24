@@ -171,10 +171,11 @@ public class AppDataInitializer {
     private static void loadYaoAliasData(GlobalDataHolder globalData) {
         java.util.List<ZhongYaoAlia> aliasList = DataRepository.getYaoAlia();
         if (aliasList != null && !aliasList.isEmpty()) {
-            Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
+            Map<String, String> yaoAliasDict = new java.util.HashMap<>();
             for (ZhongYaoAlia alias : aliasList) {
                 yaoAliasDict.put(alias.getBieming(), alias.getName());
             }
+            globalData.putAllYaoAlias(yaoAliasDict);
             EasyLog.print(TAG, "Loaded " + aliasList.size() + " Yao aliases");
         }
     }
@@ -187,7 +188,7 @@ public class AppDataInitializer {
         try {
             // 从所有书籍的方剂数据中提取别名信息
             Map<Integer, TabNavBody> navTabBodyMap = globalData.getNavTabBodyMap();
-            Map<String, String> fangAliasDict = globalData.getFangAliasDict();
+            Map<String, String> fangAliasDict = new java.util.HashMap<>();
             
             int aliasCount = 0;
             for (TabNavBody bookInfo : navTabBodyMap.values()) {
@@ -201,28 +202,13 @@ public class AppDataInitializer {
                             // 添加标准方剂名称
                             fangAliasDict.put(fangName.trim(), fangName.trim());
                             aliasCount++;
-                            
-//                            // 提取可能的别名（如去掉"汤"、"散"、"丸"等后缀）
-//                            String baseName = extractFangBaseName(fangName);
-//                            if (!baseName.equals(fangName.trim())) {
-//                                fangAliasDict.put(baseName, fangName.trim());
-//                                aliasCount++;
-//                            }
-//
-//                            // 如果方剂名称包含"加"字，提取加减方的基础方名
-//                            if (fangName.contains("加")) {
-//                                String[] parts = fangName.split("加");
-//                                if (parts.length > 0) {
-//                                    String baseFang = parts[0].trim();
-//                                    fangAliasDict.put(baseFang, fangName.trim());
-//                                    aliasCount++;
-//                                }
-//                            }
                         }
                     }
                 }
             }
             
+            // 使用 putAllFangAlias 触发加载状态标记
+            globalData.putAllFangAlias(fangAliasDict);
             EasyLog.print(TAG, "Loaded " + aliasCount + " Fang aliases from " + navTabBodyMap.size() + " books");
             
         } catch (Exception e) {
@@ -260,16 +246,13 @@ public class AppDataInitializer {
             return;
         }
         
-        Map<Integer, TabNav> navTabMap = globalData.getNavTabMap();
-        Map<Integer, TabNavBody> navTabBodyMap = globalData.getNavTabBodyMap();
-        
         for (TabNav nav : navList) {
-            navTabMap.put(nav.getOrder(), nav);
+            globalData.putNavTab(nav.getOrder(), nav);
             
             if (nav.getNavList() != null) {
                 for (TabNavBody item : nav.getNavList()) {
                     if (item.getBookNo() > 0) {
-                        navTabBodyMap.put(item.getBookNo(), item);
+                        globalData.putBookInfo(item.getBookNo(), item);
                     }
                 }
             }

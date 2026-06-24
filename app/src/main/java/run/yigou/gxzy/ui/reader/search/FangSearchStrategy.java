@@ -13,7 +13,6 @@ import android.text.SpannableStringBuilder;
 import android.util.Pair;
 
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.ui.reader.data.BookData;
 import run.yigou.gxzy.ui.reader.data.ChapterData;
@@ -21,6 +20,7 @@ import run.yigou.gxzy.ui.reader.entity.GroupData;
 import run.yigou.gxzy.ui.reader.entity.ItemData;
 import run.yigou.gxzy.ui.reader.repository.BookRepository;
 import run.yigou.gxzy.data.local.entity.Chapter;
+import run.yigou.gxzy.ui.reader.search.provider.IFangDataProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +38,7 @@ import java.util.Map;
  * 
  * <p>搜索流程：
  * <ol>
+ *   <li>检查数据加载状态</li>
  *   <li>解析别名</li>
  *   <li>优先查方剂数据（精确匹配）</li>
  *   <li>备选查章节内容（宽松匹配）</li>
@@ -50,6 +51,7 @@ public class FangSearchStrategy implements ContentSearchStrategy {
     private final int bookId;
     private final BookData bookData;
     private final List<Chapter> chapters;
+    private final IFangDataProvider fangProvider;
     
     private final FangNameMatcher matcher;
     private final SearchResultBuilder builder;
@@ -59,12 +61,14 @@ public class FangSearchStrategy implements ContentSearchStrategy {
      * 
      * @param bookRepository 书籍仓库
      * @param bookId 当前书籍ID
+     * @param fangProvider 方剂数据提供者（依赖注入）
      */
-    public FangSearchStrategy(BookRepository bookRepository, int bookId) {
+    public FangSearchStrategy(BookRepository bookRepository, int bookId, IFangDataProvider fangProvider) {
         this.bookRepository = bookRepository;
         this.bookId = bookId;
         this.bookData = bookRepository.getBookData(bookId);
         this.chapters = bookRepository.getChapters(bookId);
+        this.fangProvider = fangProvider;
         
         this.matcher = new FangNameMatcher();
         this.builder = new SearchResultBuilder();
@@ -80,8 +84,14 @@ public class FangSearchStrategy implements ContentSearchStrategy {
             return builder.notFoundFang();
         }
         
-        // 1. 获取别名字典
-        Map<String, String> aliasDict = GlobalDataHolder.getInstance().getFangAliasDict();
+        // 1. 检查数据加载状态
+        if (!fangProvider.isDataLoaded()) {
+            EasyLog.print("⚠️ 方剂数据未加载");
+            return builder.notLoaded();
+        }
+        
+        // 2. 获取别名字典
+        Map<String, String> aliasDict = fangProvider.getFangAliasDict();
         String aliasName = matcher.resolveAlias(aliasDict, keyword);
         
         EasyLog.print("搜索关键词: " + keyword + ", 别名: " + aliasName);
