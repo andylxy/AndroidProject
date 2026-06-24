@@ -44,6 +44,7 @@ import run.yigou.gxzy.log.EasyLog;
  *   <li>统一管理所有业务数据的加载（本地 + 网络）</li>
  *   <li>实现本地优先策略（缓存命中则不请求网络）</li>
  *   <li>保证启动时只加载一次（后续屏幕翻转不重复加载）</li>
+ *   <li>支持缓存过期自动更新</li>
  *   <li>提供异步回调机制</li>
  * </ul>
  * 
@@ -59,6 +60,7 @@ import run.yigou.gxzy.log.EasyLog;
  *   <li>首次启动：本地缓存 → 网络请求</li>
  *   <li>屏幕翻转：从 GlobalDataHolder 直接读取（不重新加载）</li>
  *   <li>进程重启：重新执行完整加载流程</li>
+ *   <li>缓存过期：根据用户配置自动更新</li>
  * </ul>
  * 
  * <p>使用示例：
@@ -132,20 +134,61 @@ public class AppDataManager {
     }
     
     /**
+     * 检查数据是否已过期，需要更新
+     * 
+     * <p>根据用户配置的更新频率判断缓存是否过期
+     * 
+     * @return true=需要更新，false=未过期
+     */
+    private boolean shouldUpdate() {
+        DataUpdateFrequency frequency = DataPreferences.getUpdateFrequency();
+        
+        // 手动更新模式：不自动更新
+        if (frequency == DataUpdateFrequency.MANUAL) {
+            EasyLog.print(TAG, "📊 当前为手动更新模式，不自动更新");
+            return false;
+        }
+        
+        // 每次启动模式：总是更新
+        if (frequency == DataUpdateFrequency.EVERY_START) {
+            EasyLog.print(TAG, "📊 当前为每次启动模式，强制更新");
+            return true;
+        }
+        
+        // 定时更新模式：检查时间间隔
+        long lastUpdateTime = DataPreferences.getLastUpdateTime();
+        if (lastUpdateTime == 0) {
+            EasyLog.print(TAG, "📊 从未更新过，需要加载");
+            return true;
+        }
+        
+        long now = System.currentTimeMillis();
+        long elapsed = now - lastUpdateTime;
+        long interval = frequency.getIntervalMillis();
+        boolean expired = elapsed > interval;
+        
+        EasyLog.print(TAG, "📊 缓存检查：已耗时=" + elapsed + "ms, 间隔=" + interval + 
+            "ms, 是否过期=" + expired);
+        
+        return expired;
+    }
+    
+    /**
      * 加载所有数据（本地优先，网络兜底）
      * 
      * <p>重要：此方法在应用生命周期内只执行一次！
      * <p>后续屏幕翻转、Fragment 重建都不会重复加载。
+     * <p>支持缓存过期自动更新。
      * 
      * @param lifecycleOwner LifecycleOwner（用于网络请求生命周期绑定，用完后自动释放）
      * @param callback 加载完成回调
      */
     public void loadAllDataIfNeeded(@NonNull LifecycleOwner lifecycleOwner, 
                                     @NonNull DataLoadCallback callback) {
-        // 1. 检查是否已加载
-        if (isInitialized) {
-            EasyLog.print(TAG, "✅ 数据已加载，跳过重复加载（已耗时 " + 
-                (System.currentTimeMillis() - loadCompleteTime) + "ms）");
+        // 1. 检查是否已加载且未过期
+        if (isInitialized && !shouldUpdate()) {
+            EasyLog.print(TAG, "✅ 数据未过期，跳过重复加载（已加载于 " + 
+                loadCompleteTime + "）");
             callback.onComplete();
             return;
         }
@@ -168,6 +211,9 @@ public class AppDataManager {
                 isInitialized = true;
                 isLoading = false;
                 loadCompleteTime = System.currentTimeMillis();
+                
+                // 记录更新时间
+                DataPreferences.setLastUpdateTime(loadCompleteTime);
                 
                 EasyLog.print(TAG, "🎉 所有数据加载完成（总耗时 " + 
                     loadCompleteTime + "ms）");
@@ -258,8 +304,11 @@ public class AppDataManager {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             List<TabNav> networkData = data.getData();
                             
-                            // 保存到本地（下次启动可用）
-                            DataRepository.saveTabNvaInDb(networkData, lifecycleOwner);
+                            // 清空 GlobalDataHolder 旧数据
+                            GlobalDataHolder.getInstance().reloadNavigationData();
+                            
+                            // 保存到本地（全量覆盖）
+                            DataRepository.clearAndSaveNavTabs(networkData, lifecycleOwner);
                             
                             // 同步到 GlobalDataHolder
                             syncNavigationToGlobalDataHolder(networkData);
@@ -347,7 +396,10 @@ public class AppDataManager {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             List<Yao> networkData = data.getData();
                             
-                            // 保存到本地
+                            // 清空 GlobalDataHolder 旧数据
+                            GlobalDataHolder.getInstance().reloadYaoData();
+                            
+                            // 保存到本地（全量覆盖）
                             DataRepository.saveYaoData(networkData);
                             
                             // 同步到 GlobalDataHolder
@@ -393,7 +445,10 @@ public class AppDataManager {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             List<YaoAlia> networkData = data.getData();
                             
-                            // 保存到本地
+                            // 清空 GlobalDataHolder 旧数据
+                            GlobalDataHolder.getInstance().reloadYaoAlias();
+                            
+                            // 保存到本地（全量覆盖）
                             DataRepository.saveYaoAlia(networkData);
                             
                             // 同步到 GlobalDataHolder
@@ -437,7 +492,10 @@ public class AppDataManager {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             List<MingCiContent> networkData = data.getData();
                             
-                            // 保存到本地
+                            // 清空 GlobalDataHolder 旧数据
+                            GlobalDataHolder.getInstance().reloadMingCiData();
+                            
+                            // 保存到本地（全量覆盖）
                             DataRepository.saveMingCiContent(networkData);
                             
                             // 同步到 GlobalDataHolder

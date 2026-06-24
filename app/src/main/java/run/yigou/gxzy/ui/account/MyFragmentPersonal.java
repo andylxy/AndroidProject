@@ -35,9 +35,13 @@ import run.yigou.gxzy.ui.setting.AboutActivity;
 import run.yigou.gxzy.ui.media.activity.ImageCropActivity;
 import run.yigou.gxzy.ui.media.activity.ImagePreviewActivity;
 import run.yigou.gxzy.ui.media.activity.ImageSelectActivity;
-import run.yigou.gxzy.ui.setting.SettingActivity;
 import run.yigou.gxzy.ui.main.HomeActivity;
 import run.yigou.gxzy.ui.dialog.InputDialog;
+import run.yigou.gxzy.ui.dialog.MenuDialog;
+import run.yigou.gxzy.app.DataPreferences;
+import run.yigou.gxzy.app.DataUpdateFrequency;
+import com.hjq.base.BaseDialog;
+import android.view.Gravity;
 
 /**
  * author : Android ???
@@ -60,6 +64,7 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
     private TextView mLoginExit;
     private SettingBar mAboutView;
     private SettingBar mPermissionView;
+    private SettingBar mDataUpdateView;
 //
 //    /** ? */
 //    private String mProvince = "...";
@@ -96,7 +101,8 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         mLoginExit = findViewById(R.id.my_Login_exit);
         mAboutView = findViewById(R.id.my_setting_about);
         mPermissionView = findViewById(R.id.my_permission_setting);
-        setOnClickListener(mAvatarLayout, mAvatarView, mNameView, mPersonDataSetting, mMyLogin, mLoginExit, mAboutView, mPermissionView);
+        mDataUpdateView = findViewById(R.id.sb_person_data_update);
+        setOnClickListener(mAvatarLayout, mAvatarView, mNameView, mPersonDataSetting, mMyLogin, mLoginExit, mAboutView, mPermissionView, mDataUpdateView);
     }
 
     @Override
@@ -124,6 +130,9 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         } else {
             mLoginExit.setVisibility(View.GONE);
         }
+
+        // 加载数据更新频率配置
+        loadDataUpdateFrequency();
 
     }
 
@@ -175,6 +184,9 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
             return true;
         } else if (view == mPermissionView) {
             XXPermissions.startPermissionActivity(this);
+            return true;
+        } else if (view == mDataUpdateView) {
+            showDataUpdateFrequencyDialog();
             return true;
         }
         return false;
@@ -228,7 +240,8 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
                     })
                     .show();
         } else if (view == mPersonDataSetting) {
-            startActivity(SettingActivity.class);
+            // 设置入口已废弃，数据更新频率已移至此处
+            toast("设置功能已迁移至用户信息页");
         } else if (view == mLoginExit) {
             handleLogout();
         }
@@ -320,5 +333,33 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
                         }
                     }
                 });
+    }
+    
+    /**
+     * 显示数据更新频率选择对话框
+     */
+    private void showDataUpdateFrequencyDialog() {
+        new MenuDialog.Builder(getAttachActivity())
+            .setList("每次启动", "每天一次", "每周一次", "每月一次", "手动更新")
+            .setListener((dialog, position, string) -> {
+                DataUpdateFrequency frequency = DataUpdateFrequency.values()[position];
+                DataPreferences.setUpdateFrequency(frequency);
+                mDataUpdateView.setRightText((String) string);
+                toast("已设置为：" + string);
+                
+                run.yigou.gxzy.log.EasyLog.print("MyFragmentPersonal", "数据更新频率已设置为: " + string);
+            })
+            .setGravity(Gravity.BOTTOM)
+            .setAnimStyle(BaseDialog.ANIM_BOTTOM)
+            .show();
+    }
+    
+    /**
+     * 加载数据更新频率配置
+     */
+    private void loadDataUpdateFrequency() {
+        DataUpdateFrequency frequency = DataPreferences.getUpdateFrequency();
+        mDataUpdateView.setRightText(frequency.getDisplayName());
+        run.yigou.gxzy.log.EasyLog.print("MyFragmentPersonal", "加载数据更新频率配置: " + frequency.getDisplayName());
     }
 }

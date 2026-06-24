@@ -87,6 +87,15 @@
             app:bar_rightDrawable="@drawable/arrows_right_ic" />
 
         <com.hjq.widget.layout.SettingBar
+            android:id="@+id/sb_person_data_update"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_10"
+            app:bar_leftText="数据更新频率"
+            app:bar_rightDrawable="@drawable/arrows_right_ic"
+            tools:bar_rightText="每周一次" />
+
+        <com.hjq.widget.layout.SettingBar
             android:id="@+id/sb_setting_auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

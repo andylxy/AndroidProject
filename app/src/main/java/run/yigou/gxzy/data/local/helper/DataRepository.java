@@ -187,6 +187,54 @@ public final class DataRepository {
 
         EasyLog.print(TAG, "共处理导航数据 " + processedNavCount + " 个导航, " + processedBodyCount + " 个子项");
     }
+    
+    /**
+     * 全量覆盖保存导航数据（DELETE + INSERT）
+     * 
+     * <p>用于数据更新场景，确保数据一致性：
+     * <ul>
+     *   <li>先清空 TabNav 和 TabNavBody 表的所有数据</li>
+     *   <li>再插入新的导航数据</li>
+     *   <li>自动处理服务端删除的导航分类</li>
+     * </ul>
+     * 
+     * <p>与 saveTabNvaInDb() 的区别：
+     * <ul>
+     *   <li>saveTabNvaInDb()：增量保存（检查已存在则跳过）</li>
+     *   <li>clearAndSaveNavTabs()：全量覆盖（先清空再插入）</li>
+     * </ul>
+     *
+     * @param navList        新的导航数据列表
+     * @param lifecycleOwner 生命周期宿主，用于网络请求
+     */
+    public static void clearAndSaveNavTabs(List<TabNav> navList, LifecycleOwner lifecycleOwner) {
+        if (navList == null || navList.isEmpty()) {
+            EasyLog.print(TAG, "导航数据列表为空，跳过保存");
+            return;
+        }
+        
+        if (lifecycleOwner == null) {
+            EasyLog.print(TAG, "LifecycleOwner 为 null，跳过保存");
+            return;
+        }
+        
+        EasyLog.print(TAG, "🔄 开始全量覆盖导航数据...");
+        
+        try {
+            // 1. 清空旧数据
+            DbService.getInstance().mTabNavService.deleteAll();
+            DbService.getInstance().mTabNavBodyService.deleteAll();
+            EasyLog.print(TAG, "✅ 已清空导航数据表");
+            
+            // 2. 保存新数据（复用 saveTabNvaInDb 逻辑）
+            saveTabNvaInDb(navList, lifecycleOwner);
+            
+            EasyLog.print(TAG, "🎉 导航数据全量覆盖完成");
+        } catch (Exception e) {
+            EasyLog.print(TAG, "❌ 导航数据全量覆盖失败: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 处理单个导航项：检查去重后写入数据库

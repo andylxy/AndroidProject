@@ -14,7 +14,6 @@ import run.yigou.gxzy.ui.browser.BrowserActivity;
 import run.yigou.gxzy.ui.main.GuideActivity;
 import run.yigou.gxzy.ui.media.activity.ImagePreviewActivity;
 import run.yigou.gxzy.ui.media.activity.ImageSelectActivity;
-import run.yigou.gxzy.ui.setting.SettingActivity;
 import run.yigou.gxzy.ui.media.activity.VideoPlayActivity;
 import run.yigou.gxzy.ui.media.activity.VideoSelectActivity;
 import run.yigou.gxzy.ui.main.HomeActivity;
@@ -85,7 +84,8 @@ public final class MineFragment extends TitleBarFragment<HomeActivity> {
                 startActivity(PersonalDataActivity.class);
                 break;
             case R.id.btn_mine_setting:
-                startActivity(SettingActivity.class);
+                // SettingActivity 已废弃，跳转至用户信息页
+                startActivity(PersonalDataActivity.class);
                 break;
             case R.id.btn_mine_about:
                 startActivity(AboutActivity.class);
