@@ -117,6 +117,18 @@ public final class AppApplication extends Application {
     public boolean isLogin = false;
     
     /**
+     * 样式配置中心启用开关
+     * - true: 允许从服务端加载样式配置
+     * - false: 禁用网络请求，使用默认配置（13 个预定义）
+     * 
+     * 使用场景：
+     * - 服务端配置异常时快速降级
+     * - 开发调试时禁用远程配置
+     * - 离线模式下避免网络请求
+     */
+    public volatile boolean enableStyleConfig = false;
+    
+    /**
      * 注册崩溃处理器
      */
     private UserInfoService mUserInfoService;

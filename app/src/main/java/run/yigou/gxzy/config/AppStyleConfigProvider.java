@@ -40,6 +40,13 @@ public class AppStyleConfigProvider implements IStyleConfigProvider {
     
     @Override
     public boolean loadConfig(LifecycleOwner lifecycleOwner) {
+        // 检查全局开关
+        if (run.yigou.gxzy.app.AppApplication.application != null 
+            && !run.yigou.gxzy.app.AppApplication.application.enableStyleConfig) {
+            android.util.Log.i("AppStyleConfigProvider", "样式配置中心已禁用（全局开关），使用默认配置");
+            return false;
+        }
+        
         // 获取当前配置版本号（用于增量更新）
         int currentVersion = TipsTextRenderConfig.getInstance().getConfigVersion();
         
