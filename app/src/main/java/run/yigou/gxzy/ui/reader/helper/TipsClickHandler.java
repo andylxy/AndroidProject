@@ -37,7 +37,7 @@ import java.util.List;
  * Tips 模块点击事件处理器，负责处理文本中药物、方剂、名词链接的点击交互。
  *
  * <p>从 {@link TipsNetHelper} 中提取，消除三个 click 回调方法（clickYaoLink / clickFangLink /
- * clickMingCiLink）之间约 90% 的重复代码，统一为模板方法 {@link #handleClick(TextView, ClickableSpan, ClickType)}。
+ * clickMingCiLink）之间约 90% 的重复代码，统一为模板方法 {@link #handleClick(TextView, ClickableSpan, int)}。
  *
  * <p>使用方式：
  * <pre>{@code
