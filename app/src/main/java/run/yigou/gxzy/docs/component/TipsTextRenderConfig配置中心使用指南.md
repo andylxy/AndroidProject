@@ -9,8 +9,10 @@
 - [核心 API](#核心-api)
 - [降级策略](#降级策略)
 - [配置格式](#配置格式)
+- [内容类型系统](#内容类型系统)
 - [典型场景](#典型场景)
 - [常见问题](#常见问题)
+- [相关重构](#相关重构)
 
 ---
 
@@ -26,11 +28,12 @@
 
 ### 核心优势
 
-| 特性 | 说明 |
+| **特性** | **说明** |
 |------|------|
 | **零侵入** | 调用方无需关心配置加载，首次渲染自动触发 |
 | **依赖倒置** | library 模块定义接口，app 模块实现，保持模块独立性 |
-| **触底配置** | 配置未加载时返回触底配置 #CCCCCC，视觉区分明显 |
+| **类型安全** | 使用 ContentTypes.@IntDef 编译期校验，消除 magic number |
+| **统一类型系统** | ContentTypes 统一管理内容类型（药物/方剂/名词/扩展） |
 | **自动降级** | 配置加载失败后降级到默认配置，保证功能可用性 |
 | **线程安全** | 使用 ReadWriteLock 保护配置读写 |
 
@@ -62,6 +65,19 @@
 │  ┌───────────────────────────────────────────────┐  │
 │  │ TipsTextRenderer.java                         │  │
 │  │ - renderText() → 调用 getStyleConfig()        │  │
+│  │ - applyStyle() → 创建 ProxyClickableSpan      │  │
+│  └───────────────────────────────────────────────┘  │
+│                                                      │
+│  ┌───────────────────────────────────────────────┐  │
+│  │ ProxyClickableSpan.java (独立类)              │  │
+│  │ - 代理 Android ClickableSpan                  │  │
+│  │ - 转发点击事件到 ClickLink                    │  │
+│  └───────────────────────────────────────────────┘  │
+│                                                      │
+│  ┌───────────────────────────────────────────────┐  │
+│  │ ItemNumberRenderer.java (独立类)              │  │
+│  │ - 渲染项编号 "1、" "2、"                       │  │
+│  │ - 可选启用/禁用                                │  │
 │  └───────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────┘
 
@@ -372,15 +388,156 @@ TipsTextRenderConfig.getInstance().applyServerConfigGeneric(
 
 ### 链接类型扩展
 
-当前支持 3 种链接类型，未来可扩展：
+当前支持 3 种链接类型，未来可扩展（详见 [内容类型系统](#内容类型系统)）：
 
-| linkType | 说明 | 点击行为 |
-|----------|------|----------|
-| 0 | 无链接 | 无交互 |
-| 1 | 药材链接 | 打开药材详情 |
-| 2 | 方剂链接 | 打开方剂详情 |
-| 3 | 名词链接 | 打开名词详情 |
-| 4+ | 自定义类型 | 由调用方实现 |
+| linkType | 说明 | 点击行为 | ContentTypes 常量 |
+|----------|------|----------|-------------------|
+| 0 | 无链接 | 无交互 | - |
+| 1 | 药材链接 | 打开药材详情 | `ContentTypes.YAO` |
+| 2 | 方剂链接 | 打开方剂详情 | `ContentTypes.FANG` |
+| 3 | 名词链接 | 打开名词详情 | `ContentTypes.MING_CI` |
+| 4 | 汉制单位 | 仅列表展示（无点击） | `ContentTypes.HAN_ZHI_UNIT` |
+| 5 | 视频（预留） | 由调用方实现 | `ContentTypes.VIDEO` |
+| 6 | 音频（预留） | 由调用方实现 | `ContentTypes.AUDIO` |
+| 7 | 图片（预留） | 由调用方实现 | `ContentTypes.IMAGE` |
+
+---
+
+## 内容类型系统
+
+### ContentTypes 常量类
+
+**位置**：`app/src/main/java/run/yigou/gxzy/ui/reader/constant/ContentTypes.java`
+
+**职责**：统一定义内容类型常量，用于配置中心、点击路由、列表展示等场景。
+
+### 设计原则
+
+| 原则 | 说明 |
+|------|------|
+| **统一标准** | 配置中心 `linkType`、点击处理、列表展示共用一套常量 |
+| **类型安全** | 使用 `@IntDef` 编译期校验，消除 magic number |
+| **易于扩展** | 新增类型只需在 `ContentTypes` 加常量 |
+| **性能优化** | 使用 `@IntDef` 而非枚举（Android 最佳实践） |
+
+### 常量定义
+
+```java
+public final class ContentTypes {
+    // 内容类型常量
+    public static final int YAO = 1;           // 药物
+    public static final int FANG = 2;          // 方剂
+    public static final int MING_CI = 3;       // 名词
+    public static final int HAN_ZHI_UNIT = 4;  // 汉制单位
+    
+    // 预留扩展类型
+    public static final int VIDEO = 5;         // 视频
+    public static final int AUDIO = 6;         // 音频
+    public static final int IMAGE = 7;         // 图片
+    
+    // 类型注解（编译期校验）
+    @IntDef({YAO, FANG, MING_CI, HAN_ZHI_UNIT, VIDEO, AUDIO, IMAGE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ContentType {}
+}
+```
+
+### 使用示例
+
+#### 1. 方法参数类型校验
+
+```java
+public void handleClick(@ContentTypes.ContentType int contentType) {
+    switch (contentType) {
+        case ContentTypes.YAO:
+            // 处理药物点击
+            break;
+        case ContentTypes.FANG:
+            // 处理方剂点击
+            break;
+    }
+}
+```
+
+#### 2. 字段类型声明
+
+```java
+@ContentTypes.ContentType
+private int contentType;
+```
+
+#### 3. Fragment 创建
+
+```java
+TipsFangYaoFragment fragment = TipsFangYaoFragment.newInstance(
+    ContentTypes.FANG,  // 方剂列表
+    bookId
+);
+```
+
+#### 4. Adapter 中使用
+
+```java
+public class TipsFangYaoAdapter extends AppAdapter<String> {
+    @ContentTypes.ContentType
+    private final int contentType;
+    
+    public TipsFangYaoAdapter(Context context, @ContentTypes.ContentType int contentType) {
+        this.contentType = contentType;
+    }
+    
+    @Override
+    public void onBindView(int position) {
+        switch (contentType) {
+            case ContentTypes.FANG:
+                // 渲染方剂列表：$f{...}
+                break;
+            case ContentTypes.YAO:
+                // 渲染药物列表：$u{...}
+                break;
+            case ContentTypes.HAN_ZHI_UNIT:
+                // 渲染汉制单位：纯文本
+                break;
+        }
+    }
+}
+```
+
+### 类型映射关系
+
+| ContentTypes 常量 | 值 | 配置中心 linkType | 文本标记 | 业务含义 |
+|-------------------|---|-------------------|---------|----------|
+| `YAO` | 1 | 1 | `$u{}` | 药物 |
+| `FANG` | 2 | 2 | `$f{}` | 方剂 |
+| `MING_CI` | 3 | 3 | `$m{}` | 名词 |
+| `HAN_ZHI_UNIT` | 4 | - | - | 汉制单位 |
+| `VIDEO` | 5 | 预留 | - | 视频 |
+| `AUDIO` | 6 | 预留 | - | 音频 |
+| `IMAGE` | 7 | 预留 | - | 图片 |
+
+### 历史背景
+
+**优化前的问题**：
+
+1. **两套类型系统并存**
+   - `TipsClickHandler.ClickType`（内部枚举）
+   - `TipsFangYaoFragment.typeFangYao`（int 类型）
+   - 二者值相同但语义相反（`typeFangYao=1` 表示方剂，`ClickType.YAO=1` 表示药物）
+
+2. **Magic Number 问题**
+   - 代码中大量使用 `1/2/3` 等数字，可读性差
+   - 编译期无类型校验，容易传错
+
+3. **接口臃肿**
+   - `ClickLink` 接口定义了 4 个方法（3 个抽象 + 1 个默认）
+   - 实际只使用 `onClickLink()`，其他 3 个方法已废弃
+
+**优化后**：
+
+- ✅ 统一使用 `ContentTypes` 常量类
+- ✅ `ClickLink` 接口精简为 1 个方法
+- ✅ 删除 `ClickType` 枚举和 `handleClickByLinkType()` 方法
+- ✅ 使用 `@IntDef` 提供编译期类型校验
 
 ---
 
@@ -544,29 +701,38 @@ boolean loaded = TipsTextRenderConfig.getInstance()
 
 ### Q4：如何自定义链接类型？
 
-**A**：在 `TipsClickHandler` 中扩展链接类型处理：
+**A**：使用 `ContentTypes` 常量，在 `TipsClickHandler` 中扩展链接类型处理：
 
 ```java
-public class TipsClickHandler implements ITipsClickHandler {
-    @Override
-    public void onClick(String marker, String content, int linkType) {
-        switch (linkType) {
-            case 1:
+public class TipsClickHandler {
+    public static final ClickLink DEFAULT_CLICK_LINK = new ClickLink() {
+        @Override
+        public void onClickLink(int linkType, TextView textView, ClickableSpan span) {
+            handleClick(textView, span, linkType);
+        }
+    };
+    
+    static void handleClick(TextView textView, ClickableSpan clickableSpan, 
+                           @ContentTypes.ContentType int contentType) {
+        switch (contentType) {
+            case ContentTypes.YAO:
                 // 药材链接
-                openHerbDetail(content);
+                openHerbDetail(keyword);
                 break;
-            case 2:
+            case ContentTypes.FANG:
                 // 方剂链接
-                openPrescriptionDetail(content);
+                openPrescriptionDetail(keyword);
                 break;
-            case 3:
+            case ContentTypes.MING_CI:
                 // 名词链接
-                openTermDetail(content);
+                openTermDetail(keyword);
                 break;
-            case 4:
-                // 自定义类型
-                openCustomDetail(content);
+            case ContentTypes.VIDEO:
+                // 自定义类型（视频）
+                openVideoDetail(keyword);
                 break;
+            default:
+                EasyLog.print("❌ 未知的contentType: " + contentType);
         }
     }
 }
@@ -637,7 +803,11 @@ public void testStyleConfig() {
 |---------|------|
 | `library/text-renderer/.../IStyleConfigProvider.java` | 配置提供者接口 |
 | `library/text-renderer/.../TipsTextRenderConfig.java` | 配置中心实现 |
-| `library/text-renderer/.../TipsTextRenderer.java` | 渲染引擎 |
+| `library/text-renderer/.../TipsTextRenderer.java` | 渲染引擎（核心） |
+| `library/text-renderer/.../ProxyClickableSpan.java` | 点击代理（独立类） |
+| `library/text-renderer/.../ItemNumberRenderer.java` | 项编号渲染器（独立类） |
+| `library/text-renderer/.../RenderOptions.java` | 渲染选项（Builder 模式） |
+| `library/text-utils/.../TextHighlighter.java` | 文本高亮工具（统一） |
 | `app/.../config/AppStyleConfigProvider.java` | app 模块配置提供者 |
 | `app/.../data/remote/api/StyleConfigApi.java` | HTTP 请求定义 |
 | `app/.../app/AppApplication.java` | Application 注册 |
@@ -650,6 +820,46 @@ public void testStyleConfig() {
 |------|------|------|
 | 2026-06-23 | v1.0 | 初始版本，实现接口驱动配置中心架构 |
 | 2026-06-23 | v1.1 | 优化 StyleConfigApiBean 继承复用，移除 ItemExtractor 适配 |
+| 2026-06-22 | v1.2 | 职责分离重构：拆分 ProxyClickableSpan、ItemNumberRenderer，统一高亮逻辑，增加 RenderOptions |
+
+---
+
+## 相关重构
+
+### TipsTextRenderer 职责分离（2026-06-22）
+
+本次重构对 `TipsTextRenderer` 进行了职责分离和架构优化：
+
+**主要变更**：
+1. ✅ **ProxyClickableSpan 独立化**：从内部类提取为独立类，增加日志和 `getLinkType()` 方法
+2. ✅ **ItemNumberRenderer 独立化**：项编号渲染逻辑分离，支持可选启用/禁用
+3. ✅ **高亮逻辑统一**：删除 `TipsTextRenderer.highlightMatches()`，统一使用 `TextHighlighter`
+4. ✅ **RenderOptions 增强**：引入 Builder 模式，支持可选渲染配置
+
+**架构改进**：
+```
+重构前：TipsTextRenderer (160 行)
+├── renderText()          ✅ 核心职责
+├── applyStyle()          ✅ 核心职责
+├── ProxyClickableSpan    ⚠️ 内部类（难测试）
+├── renderItemNumber()    ⚠️ 业务规则硬编码
+├── isNumeric()           ⚠️ 工具方法
+└── highlightMatches()    ⚠️ 与 TextHighlighter 重复
+
+重构后：
+TipsTextRenderer (118 行) ↓ 26%
+├── renderText()          ✅ 核心职责
+└── applyStyle()          ✅ 核心职责
+
+ProxyClickableSpan (76 行) ✅ 独立类
+ItemNumberRenderer (85 行) ✅ 新增
+RenderOptions (61 行)     ✅ 新增
+TextHighlighter (136 行)  ✅ 统一
+```
+
+**向后兼容**：完全兼容，旧代码无需修改
+
+**详细文档**：[TipsTextRenderer 重构总结](../optimization/TipsTextRenderer重构总结.md)
 
 ---
 

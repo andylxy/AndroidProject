@@ -39,7 +39,7 @@
 
 | 文档 | 说明 |
 |------|------|
-| [TipsTextRenderConfig配置中心使用指南.md](component/TipsTextRenderConfig配置中心使用指南.md) | TipsTextRenderConfig 配置中心完整使用指南（623 行） |
+| [TipsTextRenderConfig配置中心使用指南.md](component/TipsTextRenderConfig配置中心使用指南.md) | TipsTextRenderConfig 配置中心完整使用指南（含 ContentTypes 类型系统）（800 行） |
 
 ---
 
@@ -49,6 +49,7 @@
 |------|------|
 | [TipsSingleData模块优化总结.md](optimization/TipsSingleData模块优化总结.md) | TipsSingleData 模块优化总结（643 行） |
 | [TitleBar优化指南.md](optimization/TitleBar优化指南.md) | TitleBar 优化指南（82 行） |
+| [内容类型系统统一优化总结.md](optimization/内容类型系统统一优化总结.md) | ContentTypes 类型系统统一优化总结（290 行） |
 
 ---
 
@@ -62,8 +63,8 @@
 
 ## 📊 统计信息
 
-- **文档总数**：14 个
-- **总行数**：约 3,600+ 行
+- **文档总数**：15 个
+- **总行数**：约 4,100+ 行
 - **分类数**：6 个
 
 ---
@@ -122,6 +123,8 @@
 
 | 日期 | 说明 |
 |------|------|
+| 2026-06-23 | 新增内容类型系统优化总结文档 |
+| 2026-06-23 | 更新配置中心文档：添加 ContentTypes 类型系统章节 |
 | 2026-06-23 | 初始版本，整理所有文档到统一目录 |
 
 ---
