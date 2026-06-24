@@ -430,6 +430,16 @@ public class GlobalDataHolder {
         if (aiConfigList != null) {
             aiConfigList.clear();
         }
+        
+        // 重置状态标记
+        navDataLoaded = false;
+        yaoAliasLoaded = false;
+        fangAliasLoaded = false;
+        yaoDataLoaded = false;
+        mingCiDataLoaded = false;
+        aiConfigLoaded = false;
+        
+        android.util.Log.i("GlobalDataHolder", "所有数据已清空，待重新加载");
     }
     
     /**
@@ -440,6 +450,23 @@ public class GlobalDataHolder {
             instance.clearAll();
             instance = null;
         }
+    }
+    
+    /**
+     * 检查 GlobalDataHolder 是否为空
+     * 
+     * <p>用于判断数据是否已加载完成。
+     * 
+     * @return true=所有数据集合都为空，false=至少有一个集合非空
+     */
+    public boolean isEmpty() {
+        return navTabMap.isEmpty() && 
+               navTabBodyMap.isEmpty() && 
+               yaoAliasDict.isEmpty() && 
+               fangAliasDict.isEmpty() && 
+               yaoMap.isEmpty() && 
+               mingCiContentMap.isEmpty() && 
+               aiConfigList.isEmpty();
     }
     
     /**

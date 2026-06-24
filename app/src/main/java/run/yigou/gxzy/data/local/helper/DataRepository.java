@@ -975,4 +975,16 @@ public final class DataRepository {
 
         return successCount;
     }
+    
+    /**
+     * 获取导航数据列表
+     * 
+     * @return 导航数据列表
+     */
+    public static List<TabNav> getNavigationData() {
+        return ConvertEntity.executeDatabaseOperation(
+            () -> DbService.getInstance().mTabNavService.findAll(),
+            "获取导航数据"
+        );
+    }
 }

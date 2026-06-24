@@ -93,11 +93,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     private AppCompatImageView mRefreshView;
     private RecyclerView mTabView;
     private ViewPager mViewPager;
-    private boolean isGetYaoData = true;
-    private boolean isGetMingCiData = true;
     private TabAdapter mTabAdapter;
     private FragmentPagerAdapter<AppFragment<?>> mPagerAdapter;
-    private TabNavService mTabNavService;
 
 
     private WrapRecyclerView lvHistoryList;
@@ -233,29 +230,42 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
     @Override
     protected void initData() {
-        // 导航数据初始化（原 tipsSingleDataInit 已移至 AppDataInitializer 中处理）
-        mTabNavService = DbService.getInstance().mTabNavService;
-        // 加载导航数据
-        loadBookNavigation();
-        
-        // 加载样式配置（优先使用缓存）
+        // 1. 加载样式配置（优先使用缓存）
         loadStyleConfig();
         
-        mTabAdapter.setOnTabListener(this);
-
-        // 首次加载时获取药方数据
-        if (isGetYaoData && GlobalDataHolder.getInstance().getYaoMap().isEmpty()) {
-            ThreadUtil.runInBackground(this::getAllYaoData);
-        }
-        // 首次加载时获取名词数据
-        if (isGetMingCiData && GlobalDataHolder.getInstance().getMingCiContentMap().isEmpty()) {
-            ThreadUtil.runInBackground(this::getAllMingCiData);
-        }
+        // 2. 初始化搜索历史服务
         mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
-        // 清除搜索框焦点
+        
+        // 3. 检查数据加载状态
+        run.yigou.gxzy.app.AppDataManager dataManager = run.yigou.gxzy.app.AppDataManager.getInstance();
+        
+        if (dataManager.isAllDataLoaded()) {
+            // 数据已加载，直接从 GlobalDataHolder 恢复 UI（屏幕翻转、Fragment 重建场景）
+            EasyLog.print("HomeFragment", "✅ 数据已加载，从 GlobalDataHolder 恢复 UI");
+            loadNavFromGlobalDataHolder();
+            mTabAdapter.setOnTabListener(this);
+        } else {
+            // 首次加载（或进程重启）
+            EasyLog.print("HomeFragment", "🚀 首次加载，调用 DataManager");
+            
+            // 安全检查 LifecycleOwner 是否有效
+            if (isAdded() && getContext() != null) {
+                loadDataWithLifecycle();
+            } else {
+                // Fragment 未完全初始化，延迟到安全时机
+                EasyLog.print("HomeFragment", "⚠️ Fragment 未完全初始化，延迟加载");
+                if (getView() != null) {
+                    getView().post(this::loadDataWithLifecycle);
+                }
+            }
+        }
+        
+        // 4. 清除搜索框焦点
         clearSearchTextFocus();
-        //初始化搜索历史列表
+        
+        // 5. 初始化搜索历史列表
         initHistoryList();
+        
         llClearHistory.setOnClickListener(v -> {
             mSearchHistoryService.clearHistory();
             mSearchHistories.clear();
@@ -337,21 +347,50 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     }
 
     /**
-     * 加载书籍导航数据
+     * 使用 LifecycleOwner 加载数据
+     * 
+     * <p>通过 DataManager 统一加载所有业务数据。
      */
-    private void loadBookNavigation() {
-        // 从本地数据库查询导航数据
-        ArrayList<TabNav> localNavList = mTabNavService.findAll();
-        if (localNavList != null && !localNavList.isEmpty()) {
-            // 使用 post 确保 ViewPager 完成布局后再加载
-            mViewPager.post(() -> {
-                loadNavFromLocal(localNavList);
-                EasyLog.print("Loaded navigation from local database");
+    private void loadDataWithLifecycle() {
+        run.yigou.gxzy.app.AppDataManager.getInstance().loadAllDataIfNeeded(this, 
+            new run.yigou.gxzy.app.AppDataManager.DataLoadCallback() {
+                @Override
+                public void onComplete() {
+                    EasyLog.print("HomeFragment", "✅ 所有数据加载完成，更新 UI");
+                    
+                    // 数据加载完成，更新 UI
+                    ThreadUtil.runOnUiThread(() -> {
+                        loadNavFromGlobalDataHolder();
+                        mTabAdapter.setOnTabListener(HomeFragment.this);
+                    });
+                }
+                
+                @Override
+                public void onError(Exception e) {
+                    EasyLog.print("HomeFragment", "❌ 数据加载失败: " + e.getMessage());
+                    toast("数据加载失败，请检查网络");
+                }
             });
-        } else {
-            // 本地无数据，从网络获取
-            getBookInfoList();
+    }
+    
+    /**
+     * 从 GlobalDataHolder 加载导航到 UI
+     */
+    private void loadNavFromGlobalDataHolder() {
+        GlobalDataHolder globalData = GlobalDataHolder.getInstance();
+        List<TabNav> navTabs = globalData.getAllNavTabs();
+        
+        EasyLog.print("HomeFragment", "📊 从 GlobalDataHolder 加载导航：" + navTabs.size() + " 个分类");
+        
+        for (TabNav nav : navTabs) {
+            if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
+                mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
+                mTabAdapter.addItem(nav.getName());
+            }
         }
+        
+        // 通知 ViewPager 数据已改变（避免 IllegalStateException）
+        mPagerAdapter.notifyDataSetChanged();
     }
     
     /**
@@ -383,242 +422,26 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     }
 
     /**
-     * 从本地数据加载导航
-     */
-    private void loadNavFromLocal(List<TabNav> navList) {
-        for (TabNav nav : navList) {
-            if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
-                mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
-                mTabAdapter.addItem(nav.getName());
-            }
-        }
-    }
-
-    /**
      * 从网络刷新全部数据
      */
     private void refreshDataFromNetwork() {
         toast("加载中...");
+        
         // 清空现有数据
         while (mPagerAdapter.getCount() > 0) {
             mPagerAdapter.removeFragment(0);
         }
         mTabAdapter.clearData();
-        // 重新请求网络数据
-        getBookInfoList();
-        // 同时刷新药方和名词数据
-        ThreadUtil.runInBackground(this::getAllYaoData);
-        ThreadUtil.runInBackground(this::getAllMingCiData);
+        
+        // 重置 DataManager 状态
+        run.yigou.gxzy.app.AppDataManager.getInstance().reset();
+        
+        // 重新加载所有数据
+        loadDataWithLifecycle();
+        
         // 刷新样式配置（从服务端获取最新配置）
         AppStyleConfigProvider provider = new AppStyleConfigProvider();
         provider.loadConfig(this);
-    }
-
-    private void getBookInfoList() {
-
-        EasyHttp.get(this)
-                .api(new BookInfoNav())
-                .request(new HttpCallback<HttpData<List<TabNav>>>(this) {
-
-                    @Override
-                    public void onSucceed(HttpData<List<TabNav>> data) {
-                        if (data != null && data.getData() != null && !data.getData().isEmpty()) {
-                            if (mTabNavService == null || mPagerAdapter == null || mTabAdapter == null) {
-                                // 如果 Fragment 已销毁，直接返回
-                                return;
-                            }
-
-                            // 在后台线程中处理导航数据
-                            ThreadUtil.runInBackground(() -> {
-                                List<TabNav> navList = new CopyOnWriteArrayList<>(data.getData());
-                                
-                                GlobalDataHolder globalData = GlobalDataHolder.getInstance();
-                                int order = 0;
-
-                                // 收集有效导航数据用于 UI 更新
-                                final List<TabNav> validNavList = new ArrayList<>();
-                                
-                                for (TabNav nav : navList) {
-                                    if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
-                                        // ✅ 使用 putNavTab 触发状态标记
-                                        globalData.putNavTab(order, nav);
-                                        for (TabNavBody item : nav.getNavList()) {
-                                            if (item.getBookNo() > 0) {
-                                                // ✅ 使用 putBookInfo 触发状态标记
-                                                globalData.putBookInfo(item.getBookNo(), item);
-                                            }
-                                        }
-                                        order++;
-                                        validNavList.add(nav);
-                                    }
-                                }
-                                
-                                // 保存到数据库
-                                DataRepository.saveTabNvaInDb(navList, HomeFragment.this);
-                                
-                                // ✅ 加载方剂别名数据（依赖导航数据）
-                                try {
-                                    java.util.List<run.yigou.gxzy.data.local.entity.TabNavBody> bookInfos = globalData.getAllBookInfos();
-                                    java.util.Map<String, String> fangAliasDict = new java.util.HashMap<>();
-                                    
-                                    int aliasCount = 0;
-                                    for (run.yigou.gxzy.data.local.entity.TabNavBody bookInfo : bookInfos) {
-                                        int bookId = bookInfo.getBookNo();
-                                        java.util.ArrayList<run.yigou.gxzy.data.model.Fang> fangList = 
-                                            run.yigou.gxzy.data.local.helper.DataRepository.getFangDetailList(bookId);
-                                        
-                                        if (fangList != null && !fangList.isEmpty()) {
-                                            for (run.yigou.gxzy.data.model.Fang fang : fangList) {
-                                                String fangName = fang.getName();
-                                                if (fangName != null && !fangName.trim().isEmpty()) {
-                                                    fangAliasDict.put(fangName.trim(), fangName.trim());
-                                                    aliasCount++;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    
-                                    globalData.putAllFangAlias(fangAliasDict);
-                                    android.util.Log.i("HomeFragment", "✅ 网络加载：方剂别名 " + aliasCount + " 条（来自 " + bookInfos.size() + " 本书）");
-                                } catch (Exception e) {
-                                    android.util.Log.e("HomeFragment", "❌ 网络加载：方剂别名加载失败", e);
-                                }
-                                
-                                // 在主线程更新 UI
-                                ThreadUtil.runOnUiThread(() -> {
-                                    if (mPagerAdapter == null || mTabAdapter == null) return;
-                                    for (TabNav nav : validNavList) {
-                                        mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(nav.getNavList()));
-                                        mTabAdapter.addItem(nav.getName());
-                                    }
-                                });
-                            });
-
-                        } else {
-                        }
-                    }
-
-
-                    @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
-                        Map<Integer, TabNav> tabNavMap = GlobalDataHolder.getInstance().getNavTabMap();
-                        if (tabNavMap != null && !tabNavMap.isEmpty()) {
-                            // 从缓存 Map 恢复导航数据
-                            for (Map.Entry<Integer, TabNav> entry : tabNavMap.entrySet()) {
-                                TabNav value = entry.getValue();
-                                mPagerAdapter.addFragment(TipsWindowNetFragment.newInstance(value.getNavList()));
-                                mTabAdapter.addItem(value.getName());
-                            }
-                        } else {
-                            toast("加载失败: " + e.getMessage());
-                            EasyLog.print(e);
-                        }
-                    }
-                });
-    }
-
-
-    public void getAllYaoData() {
-
-        EasyHttp.get(this)
-                .api(new YaoContentApi())
-                .request(new HttpCallback<HttpData<List<Yao>>>(this) {
-                    @Override
-                    public void onSucceed(HttpData<List<Yao>> data) {
-                        if (data != null && !data.getData().isEmpty()) {
-                            // 在后台线程处理药方数据
-                            ThreadUtil.runInBackground(() -> {
-                                List<Yao> detailList = data.getData();
-                                //将药方数据及别名映射存入 GlobalDataHolder
-                                for (Yao yao : detailList) {
-                                    GlobalDataHolder.getInstance().putYao(yao.getName(), yao);
-                                    if (yao.getYaoList() != null) {
-                                        for (String alias : yao.getYaoList()) {
-                                            GlobalDataHolder.getInstance().putYao(alias, yao);
-                                        }
-                                    }
-                                }
-                                //持久化到数据库
-                                DataRepository.saveYaoData(detailList);
-                                
-                                // 标记已完成，UI 层不再触发重复请求
-                                isGetYaoData = false;
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
-                        isGetYaoData = false;
-                    }
-                });
-
-
-        EasyHttp.get(this)
-                .api(new YaoAliaApi())
-                .request(new HttpCallback<HttpData<List<YaoAlia>>>(this) {
-                    @Override
-                    public void onSucceed(HttpData<List<YaoAlia>> data) {
-                        if (data != null && !data.getData().isEmpty()) {
-                            // 后台处理别名数据
-                            ThreadUtil.runInBackground(() -> {
-                                // ✅ 使用临时 Map 收集数据，最后调用 putAllYaoAlias 触发状态标记
-                                java.util.Map<String, String> yaoAliasDict = new java.util.HashMap<>();
-                                for (YaoAlia yaoAlia : data.getData()) {
-                                    yaoAliasDict.put(yaoAlia.getBieming(), yaoAlia.getName());
-                                }
-                                
-                                GlobalDataHolder.getInstance().putAllYaoAlias(yaoAliasDict);
-
-                                //持久化别名数据
-                                DataRepository.saveYaoAlia(data.getData());
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onFail(Exception e) {
-                        super.onFail(e);
-                        isGetYaoData = false;
-                    }
-                });
-
-
-    }
-
-    public void getAllMingCiData() {
-
-
-        EasyHttp.get(this)
-                .api(new MingCiContentApi())
-                .request(new HttpCallback<HttpData<List<MingCiContent>>>(this) {
-                             @Override
-                             public void onSucceed(HttpData<List<MingCiContent>> data) {
-                                 if (data != null && !data.getData().isEmpty()) {
-                                     // 后台处理名词数据
-                                     ThreadUtil.runInBackground(() -> {
-                                         List<MingCiContent> detailList = data.getData();
-                                         //将名词数据存入 GlobalDataHolder
-                                         for (MingCiContent mingCi : detailList) {
-                                             GlobalDataHolder.getInstance().putMingCiContent(mingCi.getName(), mingCi);
-                                         }
-                                         
-                                         //持久化名词数据
-                                         DataRepository.saveMingCiContent(detailList);
-                                         isGetMingCiData = false;
-                                     });
-                                 }
-                             }
-
-                             @Override
-                             public void onFail(Exception e) {
-                                 super.onFail(e);
-                                 isGetMingCiData = false;
-                             }
-                         }
-                );
     }
 
     @Override
