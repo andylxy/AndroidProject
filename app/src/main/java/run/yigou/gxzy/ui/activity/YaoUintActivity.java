@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.reader.fragment;
+package run.yigou.gxzy.ui.activity;
 
 import android.annotation.SuppressLint;
 
@@ -11,6 +11,7 @@ import java.util.List;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.base.constant.AppConst;
+import run.yigou.gxzy.ui.reader.fragment.TipsUnitFragmentAdapter;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
 
 /**

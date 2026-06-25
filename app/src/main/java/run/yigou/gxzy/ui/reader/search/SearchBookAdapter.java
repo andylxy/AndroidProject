@@ -11,7 +11,7 @@ import androidx.appcompat.widget.AppCompatImageView;
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
 
-import run.yigou.gxzy.ui.reader.BookContentSearchActivity;
+import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 
 /**
  *  作者:  zhs

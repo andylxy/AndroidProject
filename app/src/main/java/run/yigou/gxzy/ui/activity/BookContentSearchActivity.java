@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.reader;
+package run.yigou.gxzy.ui.activity;
 
 import android.content.Intent;
 import android.text.Editable;

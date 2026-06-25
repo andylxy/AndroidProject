@@ -79,20 +79,20 @@
 
         <!-- 权限引导页（对话框样式） -->
         <activity
-            android:name=".ui.system.PermissionGuideActivity"
+            android:name=".ui.main.PermissionGuideActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/PermissionGuideDialogTheme" />
 
         <!-- 书本内容BookContentSearchActivity -->
         <activity
-            android:name=".ui.reader.BookContentSearchActivity"
+            android:name=".ui.activity.BookContentSearchActivity"
             android:label="@string/search_content"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".ui.reader.TipsFragmentActivity"
+            android:name=".ui.activity.TipsFragmentActivity"
             android:label="@string/tips_book_data_content"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
@@ -125,13 +125,13 @@
 
         <!-- 崩溃展示（必须在独立进程） -->
         <activity
-            android:name=".ui.system.CrashActivity"
+            android:name=".ui.main.CrashActivity"
             android:launchMode="singleTop"
             android:process=":crash"
             android:screenOrientation="landscape" />
         <!-- 重启应用（必须在独立进程） -->
         <activity
-            android:name=".ui.system.RestartActivity"
+            android:name=".ui.main.RestartActivity"
             android:launchMode="singleTop"
             android:process=":restart" />
 

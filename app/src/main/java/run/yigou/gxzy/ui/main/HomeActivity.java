@@ -24,9 +24,7 @@ import com.hjq.base.DoubleClickHelper;
 
 import run.yigou.gxzy.ui.reader.ai.AiMsgFragment;
 import run.yigou.gxzy.ui.account.MyFragmentPersonal;
-import run.yigou.gxzy.ui.reader.BookCollectCaseFragment;
-import run.yigou.gxzy.ui.main.HomeFragment;
-import run.yigou.gxzy.ui.main.NavigationAdapter;
+import run.yigou.gxzy.ui.reader.fragment.BookCollectCaseFragment;
 import run.yigou.gxzy.log.EasyLog;
 
 /**

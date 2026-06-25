@@ -7,9 +7,8 @@
  * Copyright (c) 2025, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.reader.manager;
+package run.yigou.gxzy.manager.chapter;
 
-import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
 
 import androidx.lifecycle.LifecycleOwner;
@@ -32,7 +31,6 @@ import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.ChapterContentApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
-import run.yigou.gxzy.utils.DebugLog;
 
 /**
  * 章节内容管理器

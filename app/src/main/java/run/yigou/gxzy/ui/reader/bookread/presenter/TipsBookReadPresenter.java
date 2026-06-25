@@ -15,17 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.ComponentCallbacks2;
-import android.text.SpannableStringBuilder;
 
-import run.yigou.gxzy.text.SearchMatcher;
-import run.yigou.gxzy.text.TextHighlighter;
-
-import run.yigou.gxzy.ui.reader.entity.SearchKeyEntity;
 import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.ui.reader.data.DataConverter; // Kept existing
-
-import run.yigou.gxzy.app.AppApplication;
-import run.yigou.gxzy.base.args.FragmentSetting;
 
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.data.local.entity.Book;
@@ -41,10 +33,9 @@ import run.yigou.gxzy.ui.reader.data.ChapterData;
 import run.yigou.gxzy.ui.reader.data.ChapterIndexBuilder;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.ui.reader.repository.BookRepository;
-import run.yigou.gxzy.ui.reader.manager.ChapterContentManager;
+import run.yigou.gxzy.manager.chapter.ChapterContentManager;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
-import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.manager.Callback;
 
 /**

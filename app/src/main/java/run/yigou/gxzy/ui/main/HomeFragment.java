@@ -29,20 +29,16 @@ import androidx.viewpager.widget.ViewPager;
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.base.BaseAdapter;
 import com.hjq.base.FragmentPagerAdapter;
-import com.hjq.http.EasyHttp;
 
 import run.yigou.gxzy.config.AppStyleConfigProvider;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.manager.Callback;
-import com.hjq.http.listener.HttpCallback;
+
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
@@ -52,24 +48,12 @@ import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.data.local.entity.SearchHistory;
 import run.yigou.gxzy.data.local.entity.TabNav;
-import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.service.SearchHistoryService;
-import run.yigou.gxzy.data.local.service.TabNavService;
-import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
-import run.yigou.gxzy.data.remote.api.BookInfoNav;
-import run.yigou.gxzy.data.remote.api.MingCiContentApi;
-import run.yigou.gxzy.ui.main.HomeActivity;
-import run.yigou.gxzy.ui.reader.BookContentSearchActivity;
-import run.yigou.gxzy.data.remote.api.YaoAliaApi;
-import run.yigou.gxzy.data.remote.api.YaoContentApi;
-import run.yigou.gxzy.data.remote.model.HttpData;
+import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.reader.search.SearchHistoryAdapter;
 import run.yigou.gxzy.ui.reader.fragment.TipsWindowNetFragment;
-import run.yigou.gxzy.data.model.MingCiContent;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
-import run.yigou.gxzy.data.model.Yao;
-import run.yigou.gxzy.data.model.YaoAlia;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;

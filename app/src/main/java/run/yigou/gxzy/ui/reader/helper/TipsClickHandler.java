@@ -29,7 +29,7 @@ import run.yigou.gxzy.ui.reader.search.SearchDataAdapter;
 import run.yigou.gxzy.ui.reader.widget.TipsLittleMingCiViewWindow;
 import run.yigou.gxzy.ui.reader.widget.TipsLittleTableViewWindow;
 import run.yigou.gxzy.tips.widget.ITipsWindowHost;
-import run.yigou.gxzy.ui.reader.TipsFragmentActivity;
+import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 
 import java.util.List;
 

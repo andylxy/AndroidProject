@@ -15,6 +15,7 @@ import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.base.args.BookArgs;
 import run.yigou.gxzy.base.args.FragmentSetting;
 import run.yigou.gxzy.base.args.ManagerSetting;
+import run.yigou.gxzy.ui.activity.YaoUintActivity;
 
 
 public final class TipsSettingFragment extends AppFragment<AppActivity> implements SwitchButton.OnCheckedChangeListener {
