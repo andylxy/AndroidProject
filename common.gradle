@@ -1,12 +1,12 @@
 // 通用配置
 android {
 
-    // 编译源码版本（升级到 Android 14）
+    // 编译源码版本（保持 Android 14，AGP 7.0.4 最高支持到 compileSdk 34）
     compileSdkVersion 34
     defaultConfig {
-        // 最低安装版本（保持 Android 5.0+ 兼容性）
-        minSdkVersion 21
-        // 目标适配版本（升级到 Android 14，符合 Google Play 要求）
+        // 最低安装版本（提升到 Android 6.0，以支持 MMKV 2.x 和 16 KB 页面对齐）
+        minSdkVersion 23
+        // 目标适配版本（保持 Android 14，符合 Google Play 要求）
         targetSdkVersion 34
         versionName '1.5'
         versionCode 10

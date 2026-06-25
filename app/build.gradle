@@ -64,9 +64,10 @@ android {
             addManifestPlaceholders([
                     'app_name': '@string/app_name_debug'
             ])
-            // 调试模式支持32位和64位架构
+            // 调试模式仅支持 64 位架构（arm64-v8a）
+            // MMKV 2.x 及 Google Play 16 KB 对齐要求不再支持 32 位设备
             ndk {
-                abiFilters 'armeabi-v7a', 'arm64-v8a'
+                abiFilters 'arm64-v8a'
             }
         }
 
@@ -79,9 +80,9 @@ android {
             addManifestPlaceholders([
                     'app_name': '@string/app_name_preview'
             ])
-            // Preview版本支持32位和64位架构
+            // Preview版本仅支持 64 位架构（arm64-v8a）
             ndk {
-                abiFilters 'armeabi-v7a', 'arm64-v8a'
+                abiFilters 'arm64-v8a'
             }
         }
 
@@ -101,12 +102,12 @@ android {
             addManifestPlaceholders([
                     'app_name': '@string/app_name'
             ])
-            // 仅保留两种架构的 so 库，根据 Bugly 统计得出
+            // 仅支持 64 位架构（arm64-v8a）
+            // armeabi-v7a：已移除（占用率约 5-10%，主要是 Android 5.0-7.0 旧设备）
+            // arm64-v8a：目前主流架构平台（占用率 95%+）
+            // 原因：MMKV 2.x 仅支持 arm64-v8a，且 Google Play 要求 16 KB 页面对齐
             ndk {
-                // armeabi：万金油架构平台（占用率：0%）
-                // armeabi-v7a：曾经主流的架构平台（占用率：10%）
-                // arm64-v8a：目前主流架构平台（占用率：95%）
-                abiFilters 'armeabi-v7a', 'arm64-v8a'
+                abiFilters 'arm64-v8a'
             }
         }
     }
@@ -267,12 +268,14 @@ dependencies {
     implementation 'me.relex:circleindicator:2.1.6'
 
     // 腾讯 MMKV：https://github.com/Tencent/MMKV
-    // 升级至 1.3.0+ 以支持 16 KB 页大小对齐（Google Play 要求）
-    implementation 'com.tencent:mmkv-static:1.3.0'
+    // 升级至 2.0.0+ 以支持 16 KB 页大小对齐（Google Play 2025 年 11 月起强制要求）
+    // 注意：MMKV 2.x 仅支持 arm64-v8a，不再支持 armeabi-v7a
+    implementation 'com.tencent:mmkv:2.0.0'
 
     // 内存泄漏监测框架：https://github.com/square/leakcanary
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
-    previewImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+    // 升级至 2.14 最新版本（修复 WorkManager 兼容性问题、Android 14 权限问题等）
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
+    previewImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
 
     implementation 'org.greenrobot:greendao:3.3.0'
 
