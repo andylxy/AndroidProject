@@ -15,6 +15,7 @@ import run.yigou.gxzy.data.local.entity.ChatSessionBean;
 import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
 import run.yigou.gxzy.manager.ai.AiChatManager;
 import run.yigou.gxzy.manager.ai.ChatSessionManager;
+import run.yigou.gxzy.manager.Callback;
 import run.yigou.gxzy.ui.reader.ai.contract.AiMsgContract;
 import run.yigou.gxzy.utils.DateHelper;
 
@@ -138,9 +139,9 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
 
     @Override
     public void createNewSession() {
-        AiChatManager.getInstance().startNewSession(mView.getLifecycleOwner(), new AiChatManager.SessionCheckCallback() {
+        AiChatManager.getInstance().startNewSession(mView.getLifecycleOwner(), new Callback<ChatSessionBean>() {
             @Override
-            public void onSessionValid(ChatSessionBean session) {
+            public void onSuccess(ChatSessionBean session) {
                 currentSession = session;
                 ChatSessionManager.getInstance().saveLastSessionId(session.getId());
                 
@@ -164,8 +165,8 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
             }
 
             @Override
-            public void onFailure(String error) {
-                mView.showError(ERROR_CREATE_SESSION_FAIL + error);
+            public void onError(Exception e) {
+                mView.showError(ERROR_CREATE_SESSION_FAIL + e.getMessage());
             }
         });
     }
@@ -180,17 +181,17 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
         ensureSessionSaved();
 
         // 使用 Manager 检查会话并执行
-        AiChatManager.getInstance().checkSessionAndExecute(mView.getLifecycleOwner(), currentSession, new AiChatManager.SessionCheckCallback() {
+        AiChatManager.getInstance().checkSessionAndExecute(mView.getLifecycleOwner(), currentSession, new Callback<ChatSessionBean>() {
             @Override
-            public void onSessionValid(ChatSessionBean session) {
+            public void onSuccess(ChatSessionBean session) {
                 currentSession = session;
                 mView.updateCurrentSession(currentSession); // 通知 View 更新状态 (以防 ID 变化)
                 executeSendMessage(content, time);
             }
 
             @Override
-            public void onFailure(String error) {
-                mView.showError(ERROR_SESSION_CHECK_FAIL + error);
+            public void onError(Exception e) {
+                mView.showError(ERROR_SESSION_CHECK_FAIL + e.getMessage());
             }
         });
     }

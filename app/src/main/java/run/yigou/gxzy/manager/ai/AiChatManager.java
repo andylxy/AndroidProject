@@ -17,12 +17,28 @@ import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.sse.SseChunk;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.manager.Callback;
 
 import java.util.List;
 
 /**
  * AI 聊天管理器
- * 基于 SSE 流式响应的聊天管理，负责会话创建、消息发送和摘要生成
+ * <p>
+ * 基于 SSE 流式响应的聊天管理，负责：
+ * <ul>
+ *   <li>会话创建与会话 ID 管理</li>
+ *   <li>消息发送与流式响应处理</li>
+ *   <li>会话总结生成</li>
+ * </ul>
+ * </p>
+ * <p>
+ * 回调分层设计：
+ * <ul>
+ *   <li>简单操作（会话检查/创建）：使用标准 {@link Callback}</li>
+ *   <li>流式操作（消息发送/总结生成）：使用 {@link ChatStreamListener}</li>
+ *   <li>特殊场景（会话ID请求）：使用 {@link SessionIdCallback}</li>
+ * </ul>
+ * </p>
  */
 public class AiChatManager {
     private static final String TAG = "AiChatManager";
@@ -54,38 +70,37 @@ public class AiChatManager {
     }
 
     /**
-     * 会话 ID 回调
+     * 会话 ID 回调（双参数场景，保留独立接口）
      */
     public interface SessionIdCallback {
         void onSuccess(String conversationId, String endUserId);
-        void onFailure(String error);
-    }
-
-    /**
-     * 会话检查回调
-     */
-    public interface SessionCheckCallback {
-        void onSessionValid(ChatSessionBean session);
-        void onFailure(String error);
+        void onError(Exception e);
     }
 
     /**
      * 检查会话有效性并执行回调
-     * 根据会话 ID 和创建时间判断是否需要重新获取会话
-     * 
-     * @param lifecycleOwner 生命周期持有者
+     * <p>
+     * 检查逻辑：
+     * <ol>
+     *   <li>会话 ID 缺失（conversationId 或 endUserId 为空）</li>
+     *   <li>会话过期（创建时间超过6天）</li>
+     *   <li>创建时间为 null</li>
+     * </ol>
+     * </p>
+     *
+     * @param lifecycleOwner 生命周期持有者，用于绑定网络请求
      * @param session 当前会话
-     * @param callback 回调接口
+     * @param callback 回调接口，会话有效时返回 session
      */
-    public void checkSessionAndExecute(LifecycleOwner lifecycleOwner, final ChatSessionBean session, final SessionCheckCallback callback) {
+    public void checkSessionAndExecute(LifecycleOwner lifecycleOwner, final ChatSessionBean session, final Callback<ChatSessionBean> callback) {
         if (session == null) {
-            callback.onFailure("会话为空");
+            callback.onError(new IllegalArgumentException("会话为空"));
             return;
         }
 
         boolean needRequest = false;
 
-        // 1. 会话 ID 回调??
+        // 1. 检查会话 ID 是否有效
         if (session.getConversationId() == null || 
             session.getConversationId().isEmpty() ||
             session.getEndUserId() == null ||
@@ -93,17 +108,17 @@ public class AiChatManager {
             needRequest = true;
             EasyLog.print(TAG, "Session missing conversationId or endUserId, need request");
         } 
-        // 2. 聊天流式监听器6??
+        // 2. 检查会话是否过期（6天）
         else if (session.getCreateTime() != null) {
             long createTime = DateHelper.strDateToLong(session.getCreateTime());
             long currentTime = System.currentTimeMillis();
-            // 6? = 6 * 24 * 60 * 60 * 1000 ??
+            // 6天 = 6 * 24 * 60 * 60 * 1000 毫秒
             if (currentTime - createTime > 6 * 24 * 60 * 60 * 1000L) {
                 needRequest = true;
                 EasyLog.print(TAG, "Session expired, need request");
             }
         } else {
-            // createTime 聊天流式监听器生成摘要?
+            // createTime 为 null，需要重新获取
             needRequest = true;
             EasyLog.print(TAG, "Session createTime is null, need request");
         }
@@ -112,33 +127,33 @@ public class AiChatManager {
             requestSessionId(lifecycleOwner, new SessionIdCallback() {
                 @Override
                 public void onSuccess(String conversationId, String endUserId) {
-                    // 会话检查回调
+                    // 更新会话信息
                     session.setConversationId(conversationId);
                     session.setEndUserId(endUserId);
                     session.setCreateTime(DateHelper.getSeconds1());
                     
-                    // 会话检查回调??
+                    // 保存到数据库
                     ChatSessionManager.getInstance().updateSession(session);
                     EasyLog.print(TAG, "Session ID refreshed: " + conversationId);
                     
                     // 回调通知
-                    callback.onSessionValid(session);
+                    callback.onSuccess(session);
                 }
 
                 @Override
-                public void onFailure(String error) {
-                    EasyLog.print(TAG, "Failed to refresh session ID: " + error);
-                    callback.onFailure(error);
+                public void onError(Exception e) {
+                    EasyLog.print(TAG, "Failed to refresh session ID: " + e.getMessage());
+                    callback.onError(e);
                 }
             });
         } else {
-            // 聊天流式监听器
-            callback.onSessionValid(session);
+            // 会话有效，直接回调
+            callback.onSuccess(session);
         }
     }
 
     /**
-     * 会话检查回调?ID
+     * 请求会话 ID
      */
     public void requestSessionId(LifecycleOwner lifecycleOwner, final SessionIdCallback callback) {
         EasyHttp.get(lifecycleOwner)
@@ -151,33 +166,45 @@ public class AiChatManager {
                             if (bean != null) {
                                 callback.onSuccess(bean.getRealConversationId(), bean.getEndUserId());
                             } else {
-                                callback.onFailure("会话检查回调");
+                                callback.onError(new IllegalStateException("响应数据为空"));
                             }
                         } else {
-                            callback.onFailure(data != null ? data.getMessage() : "会话为空");
+                            callback.onError(new IllegalStateException(data != null ? data.getMessage() : "会话为空"));
                         }
                     }
 
                     @Override
                     public void onFail(Exception e) {
                         super.onFail(e);
-                        callback.onFailure(e.getMessage());
+                        callback.onError(e);
                     }
                 });
     }
 
     /**
-     * 聊天流式监听器会话检查回调ID?
+     * 创建新会话
+     * <p>
+     * 流程：
+     * <ol>
+     *   <li>创建本地会话对象</li>
+     *   <li>请求服务器获取会话 ID</li>
+     *   <li>更新会话信息到数据库</li>
+     *   <li>回调通知调用方</li>
+     * </ol>
+     * </p>
+     *
+     * @param lifecycleOwner 生命周期持有者
+     * @param callback 回调接口，创建成功时返回新会话
      */
-    public void startNewSession(LifecycleOwner lifecycleOwner, final SessionCheckCallback callback) {
-        // 1. 会话检查回调
-        final ChatSessionBean newSession = ChatSessionManager.getInstance().createLocalSession("用户: ", "会话检查回调");
+    public void startNewSession(LifecycleOwner lifecycleOwner, final Callback<ChatSessionBean> callback) {
+        // 1. 创建本地会话
+        final ChatSessionBean newSession = ChatSessionManager.getInstance().createLocalSession("用户: ", "新对话");
         
         // 2. 请求会话 ID
         requestSessionId(lifecycleOwner, new SessionIdCallback() {
             @Override
             public void onSuccess(String conversationId, String endUserId) {
-                // 3. 会话检查回调
+                // 3. 更新会话信息
                 newSession.setConversationId(conversationId);
                 newSession.setEndUserId(endUserId);
                 newSession.setCreateTime(DateHelper.getSeconds1());
@@ -186,13 +213,13 @@ public class AiChatManager {
                 EasyLog.print(TAG, "New Session started: " + conversationId);
                 
                 // 4. 回调通知
-                callback.onSessionValid(newSession);
+                callback.onSuccess(newSession);
             }
 
             @Override
-            public void onFailure(String error) {
-                EasyLog.print(TAG, "Failed to start new session: " + error);
-                callback.onFailure(error);
+            public void onError(Exception e) {
+                EasyLog.print(TAG, "Failed to start new session: " + e.getMessage());
+                callback.onError(e);
             }
         });
     }
