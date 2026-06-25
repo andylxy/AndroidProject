@@ -437,11 +437,11 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
             }
 
             @Override
-            public void onError(String error) {
+            public void onError(Exception e) {
                 uiUpdateHandler.post(() -> {
                      summaryMsg.setStreaming(false);
                      mView.updateMessage(summaryMsg);
-                     mView.showError(ERROR_SUMMARY_FAIL + error);
+                     mView.showError(ERROR_SUMMARY_FAIL + e.getMessage());
                 });
             }
         });
@@ -533,9 +533,9 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
         }
 
         @Override
-        public void onError(String error) {
+        public void onError(Exception e) {
             uiUpdateHandler.post(() -> {
-                mView.showError(ERROR_REQUEST_FAIL + error);
+                mView.showError(ERROR_REQUEST_FAIL + e.getMessage());
             });
         }
     }

@@ -1,8 +1,5 @@
 package run.yigou.gxzy.manager.ai;
 
-import android.os.Handler;
-import android.os.Looper;
-
 import androidx.lifecycle.LifecycleOwner;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
@@ -34,9 +31,8 @@ import java.util.List;
  * <p>
  * 回调分层设计：
  * <ul>
- *   <li>简单操作（会话检查/创建）：使用标准 {@link Callback}</li>
+ *   <li>简单操作（会话检查/创建/ID请求）：使用标准 {@link Callback}</li>
  *   <li>流式操作（消息发送/总结生成）：使用 {@link ChatStreamListener}</li>
- *   <li>特殊场景（会话ID请求）：使用 {@link SessionIdCallback}</li>
  * </ul>
  * </p>
  */
@@ -59,22 +55,14 @@ public class AiChatManager {
     }
 
     /**
-     * 聊天流式监听器
+     * 聊天流式监听器（SSE 流式响应专用）
      */
     public interface ChatStreamListener {
         void onThinking(String content);
         void onAnswerStart(ChatMessageBean answerMessage);
         void onAnswerChunk(String content);
-        void onError(String error);
-        void onComplete();
-    }
-
-    /**
-     * 会话 ID 回调（双参数场景，保留独立接口）
-     */
-    public interface SessionIdCallback {
-        void onSuccess(String conversationId, String endUserId);
         void onError(Exception e);
+        void onComplete();
     }
 
     /**
@@ -124,17 +112,17 @@ public class AiChatManager {
         }
 
         if (needRequest) {
-            requestSessionId(lifecycleOwner, new SessionIdCallback() {
+            requestSessionId(lifecycleOwner, new Callback<AiSessionIdApi.Bean>() {
                 @Override
-                public void onSuccess(String conversationId, String endUserId) {
+                public void onSuccess(AiSessionIdApi.Bean bean) {
                     // 更新会话信息
-                    session.setConversationId(conversationId);
-                    session.setEndUserId(endUserId);
+                    session.setConversationId(bean.getRealConversationId());
+                    session.setEndUserId(bean.getEndUserId());
                     session.setCreateTime(DateHelper.getSeconds1());
                     
                     // 保存到数据库
                     ChatSessionManager.getInstance().updateSession(session);
-                    EasyLog.print(TAG, "Session ID refreshed: " + conversationId);
+                    EasyLog.print(TAG, "Session ID refreshed: " + bean.getRealConversationId());
                     
                     // 回调通知
                     callback.onSuccess(session);
@@ -153,23 +141,24 @@ public class AiChatManager {
     }
 
     /**
-     * 请求会话 ID
+     * 请求会话 ID（内部方法）
+     * 
+     * <p>仅在 {@link #checkSessionAndExecute} 和 {@link #startNewSession} 中调用，
+     * 不对外暴露。
+     * 
+     * @param lifecycleOwner 生命周期持有者，用于绑定网络请求
+     * @param callback 回调接口，成功时返回 AiSessionIdApi.Bean
      */
-    public void requestSessionId(LifecycleOwner lifecycleOwner, final SessionIdCallback callback) {
+    void requestSessionId(LifecycleOwner lifecycleOwner, final Callback<AiSessionIdApi.Bean> callback) {
         EasyHttp.get(lifecycleOwner)
                 .api(new AiSessionIdApi())
                 .request(new HttpCallback<HttpData<AiSessionIdApi.Bean>>((OnHttpListener) lifecycleOwner) {
                     @Override
                     public void onSucceed(HttpData<AiSessionIdApi.Bean> data) {
-                        if (data != null && data.isRequestSucceed()) {
-                            AiSessionIdApi.Bean bean = data.getData();
-                            if (bean != null) {
-                                callback.onSuccess(bean.getRealConversationId(), bean.getEndUserId());
-                            } else {
-                                callback.onError(new IllegalStateException("响应数据为空"));
-                            }
+                        if (data != null && data.isRequestSucceed() && data.getData() != null) {
+                            callback.onSuccess(data.getData());
                         } else {
-                            callback.onError(new IllegalStateException(data != null ? data.getMessage() : "会话为空"));
+                            callback.onError(new IllegalStateException("响应数据为空"));
                         }
                     }
 
@@ -201,16 +190,16 @@ public class AiChatManager {
         final ChatSessionBean newSession = ChatSessionManager.getInstance().createLocalSession("用户: ", "新对话");
         
         // 2. 请求会话 ID
-        requestSessionId(lifecycleOwner, new SessionIdCallback() {
+        requestSessionId(lifecycleOwner, new Callback<AiSessionIdApi.Bean>() {
             @Override
-            public void onSuccess(String conversationId, String endUserId) {
+            public void onSuccess(AiSessionIdApi.Bean bean) {
                 // 3. 更新会话信息
-                newSession.setConversationId(conversationId);
-                newSession.setEndUserId(endUserId);
+                newSession.setConversationId(bean.getRealConversationId());
+                newSession.setEndUserId(bean.getEndUserId());
                 newSession.setCreateTime(DateHelper.getSeconds1());
                 
                 ChatSessionManager.getInstance().updateSession(newSession);
-                EasyLog.print(TAG, "New Session started: " + conversationId);
+                EasyLog.print(TAG, "New Session started: " + bean.getRealConversationId());
                 
                 // 4. 回调通知
                 callback.onSuccess(newSession);
@@ -226,11 +215,20 @@ public class AiChatManager {
 
     /**
      * 发送消息（SSE 流式）
+     * <p>
+     * 流式响应阶段：
+     * <ol>
+     *   <li>思考阶段：onThinking() - AI 正在思考</li>
+     *   <li>回答阶段：onAnswerStart() → onAnswerChunk() - AI 开始回答并持续输出</li>
+     *   <li>完成阶段：onComplete() - 流式传输完成</li>
+     *   <li>错误处理：onError() - 网络或服务端错误</li>
+     * </ol>
+     * </p>
      *
      * @param session 当前会话
-     * @param query 聊天流式监听器会话检查回调?
-     * @param thinkingMessage 聊天流式监听器会话检查回调?
-     * @param listener 流式回调监听器
+     * @param query 用户发送的消息内容
+     * @param thinkingMessage 思考中的消息对象（用于更新思考内容）
+     * @param listener 流式响应监听器
      */
     public void sendMessage(final ChatSessionBean session, String query, 
                            final ChatMessageBean thinkingMessage, 
@@ -253,34 +251,33 @@ public class AiChatManager {
                     public void onChunk(SseChunk chunk) {
                         if (chunk == null) return;
 
-                        // 聊天流式监听器
+                        // 判断是否为思考阶段的数据块
                         boolean isThinkingChunk = "thinking".equals(chunk.getType()) || chunk.isThinking();
 
                         if (isThinkingChunk) {
-                            // === 会话检查回调 ===
+                            // === 处理思考阶段数据 ===
                             String content = chunk.getContent() != null ? chunk.getContent() : "";
-                            // 会话检查回调
                             String current = thinkingMessage.getContent();
                             if ("思考中...".equals(current)) {
                                 current = "";
                             }
                             thinkingMessage.setContent(current + content);
                             
-                            // ?? UI
+                            // 通知 UI 更新思考内容
                             listener.onThinking(content);
 
                         } else if ("chunk".equals(chunk.getType()) || "answer".equals(chunk.getType())) {
-                            // === 会话检查回调 ===
+                            // === 处理回答阶段数据 ===
                             
-                            // 聊天流式监听器生成摘要?
+                            // 从思考阶段切换到回答阶段
                             if (isThinkingPhase[0]) {
                                 isThinkingPhase[0] = false;
 
-                                // 1. 会话检查回调
+                                // 1. 折叠思考消息
                                 thinkingMessage.setThinkingCollapsed(true);
                                 ChatSessionManager.getInstance().updateMessage(thinkingMessage);
 
-                                // 2. 会话检查回调??
+                                // 2. 创建回答消息
                                 ChatMessageBean answerMsg = new ChatMessageBean(ChatMessageBean.TYPE_RECEIVED, "Ai", "", "");
                                 answerMsg.setSessionId(session.getId());
                                 answerMsg.setCreateDate(DateHelper.getSeconds1());
@@ -295,7 +292,7 @@ public class AiChatManager {
                                 listener.onAnswerStart(answerMsg);
                             }
 
-                            // 会话检查回调
+                            // 追加回答内容
                             if (answerMessageRef[0] != null && chunk.getContent() != null && !chunk.getContent().isEmpty()) {
                                 String content = chunk.getContent();
                                 String current = answerMessageRef[0].getContent();
@@ -308,27 +305,27 @@ public class AiChatManager {
                             String error = chunk.getError();
                             EasyLog.print(TAG, "SSE 错误: " + error);
                             
-                            // 会话检查回调??
+                            // 更新消息内容显示错误
                             if (answerMessageRef[0] != null) {
                                 answerMessageRef[0].setContent(answerMessageRef[0].getContent() + "\n[错误: " + error + "]");
                             } else {
                                 thinkingMessage.setContent(thinkingMessage.getContent() + "\n[错误: " + error + "]");
                             }
                             
-                            listener.onError(error);
+                            listener.onError(new RuntimeException(error));
                         }
                     }
 
                     @Override
                     public void onComplete() {
-                        EasyLog.print(TAG, "SSE 会话检查回调");
+                        EasyLog.print(TAG, "SSE 流式传输完成");
                         
                         // 回调通知
                         if (answerMessageRef[0] != null) {
                             answerMessageRef[0].setStreaming(false);
                             ChatSessionManager.getInstance().updateMessage(answerMessageRef[0]);
                             
-                            // 会话检查回调
+                            // 更新会话预览
                             String preview = answerMessageRef[0].getContent();
                             if (preview.length() > 30) {
                                 preview = preview.substring(0, 30) + "...";
@@ -337,7 +334,7 @@ public class AiChatManager {
                             session.setUpdateTime(DateHelper.getSeconds1());
                             ChatSessionManager.getInstance().updateSession(session);
                         } else {
-                            // 聊天流式监听器聊天流式监听器会话检查回调
+                            // 只有思考阶段，更新思考消息
                             ChatSessionManager.getInstance().updateMessage(thinkingMessage);
                         }
                         
@@ -348,7 +345,7 @@ public class AiChatManager {
                     public void onError(Exception e) {
                         EasyLog.print(TAG, "SSE 请求异常: " + e.getMessage());
                         
-                        String errStr = "会话检查回调: " + e.getMessage();
+                        String errStr = "请求失败: " + e.getMessage();
                         if (answerMessageRef[0] != null) {
                             answerMessageRef[0].setContent(answerMessageRef[0].getContent() + "\n" + errStr);
                             answerMessageRef[0].setStreaming(false);
@@ -359,13 +356,21 @@ public class AiChatManager {
                             ChatSessionManager.getInstance().updateMessage(thinkingMessage);
                         }
                         
-                        listener.onError(e.getMessage());
+                        listener.onError(e);
                     }
                 });
     }
 
     /**
-     * 生成摘要
+     * 生成会话总结（SSE 流式）
+     * <p>
+     * 与 sendMessage() 类似，但专注于生成会话摘要。
+     * 流式响应会直接输出总结内容，不区分思考和回答阶段。
+     * </p>
+     *
+     * @param session 当前会话
+     * @param prompt 总结提示词
+     * @param listener 流式响应监听器
      */
     public void generateSummary(ChatSessionBean session, String prompt, final ChatStreamListener listener) {
         new AiStreamApi()
@@ -375,7 +380,7 @@ public class AiChatManager {
                 .execute(new SseStreamCallback() {
                     @Override
                     public void onOpen() {
-                        EasyLog.print(TAG, "?? SSE 连接已打开");
+                        EasyLog.print(TAG, "摘要生成 SSE 连接已打开");
                     }
 
                     @Override
@@ -396,7 +401,7 @@ public class AiChatManager {
 
                     @Override
                     public void onError(Exception e) {
-                        listener.onError(e.getMessage());
+                        listener.onError(e);
                     }
                 });
     }
@@ -406,7 +411,7 @@ public class AiChatManager {
      */
     public String generateSummaryPrompt(List<ChatMessageBean> messages) {
         StringBuilder promptBuilder = new StringBuilder();
-        promptBuilder.append("聊天流式监听器聊天流式监听器??\n\n");
+        promptBuilder.append("请总结以下对话内容：\n\n");
         
         for (ChatMessageBean message : messages) {
             if (message.getType() == ChatMessageBean.TYPE_SEND) {
@@ -416,7 +421,7 @@ public class AiChatManager {
             }
         }
         
-        promptBuilder.append("\n聊天流式监听器聊天流式监听器会话检查回调");
+        promptBuilder.append("\n请生成简洁的摘要。");
         return promptBuilder.toString();
     }
 }
