@@ -41,7 +41,7 @@ import run.yigou.gxzy.ui.reader.data.ChapterData;
 import run.yigou.gxzy.ui.reader.data.ChapterIndexBuilder;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.ui.reader.repository.BookRepository;
-import run.yigou.gxzy.ui.reader.manager.ChapterDownloadManager;
+import run.yigou.gxzy.ui.reader.manager.ChapterContentManager;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
 import run.yigou.gxzy.utils.DebugLog;
@@ -54,7 +54,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
 
     private TipsBookReadContract.View view;
     private final BookRepository repository;
-    private final ChapterDownloadManager downloadManager;
+    private final ChapterContentManager contentManager;
     private final BookDataManager dataManager;
     private final GlobalDataHolder globalData;
 
@@ -75,7 +75,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     public TipsBookReadPresenter(TipsBookReadContract.View view) {
         this.view = view;
         this.repository = new BookRepository();
-        this.downloadManager = new ChapterDownloadManager();
+        this.contentManager = new ChapterContentManager();
         this.dataManager = BookDataManager.getInstance();
         this.globalData = GlobalDataHolder.getInstance();
     }
@@ -89,9 +89,9 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     public void onViewDestroy() {
         EasyLog.print("TipsBookReadPresenter", "View 销毁");
         
-        // 取消所有下载
-        if (downloadManager != null) {
-            downloadManager.cancelAll();
+        // 取消所有获取
+        if (contentManager != null) {
+            contentManager.cancelAll();
         }
         
         // 释放引用
@@ -231,8 +231,8 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         }
         EasyLog.print("TipsBookReadPresenter", "章节列表加载成功，共 " + allChapters.size() + " 个章节");
 
-        // 初始化下载管理器缓存
-        downloadManager.initDownloadedCache(allChapters);
+        // 初始化内容管理器缓存
+        contentManager.initContentCache(allChapters);
 
         // 构建搜索索引（新功能）
         indexBuilder = new ChapterIndexBuilder();
@@ -361,7 +361,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                 // 触发预加载
                 EasyLog.print("TipsBookReadPresenter", "触发预加载");
                 androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
-                downloadManager.preloadChapters(allChapters, position, lifecycleOwner);
+                contentManager.preloadNearbyChapters(allChapters, position, lifecycleOwner);
                 return;
             }
             
@@ -373,9 +373,9 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                 return;
             }
 
-            // 检查是否正在下载
-            if (downloadManager.isChapterDownloading(chapter)) {
-                view.showToast("章节正在下载中...");
+            // 检查是否正在获取
+            if (contentManager.isContentFetching(chapter)) {
+                view.showToast("章节正在获取中...");
                 return;
             }
 
@@ -386,7 +386,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             // TipsBookNetReadFragment extends AppFragment extends BaseFragment extends Fragment (LifecycleOwner)
             androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
             
-            downloadManager.downloadChapter(lifecycleOwner, chapter, new ChapterDownloadManager.DownloadCallback() {
+            contentManager.fetchChapterContent(lifecycleOwner, chapter, new ChapterContentManager.ContentCallback() {
                 @Override
                 public void onSuccess(Chapter chapter, HH2SectionData sectionData) {
                     // 生命周期检查（下载后）
@@ -400,7 +400,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                     view.showToast("章节下载完成");
                     
                     // 触发预加载(传递生命周期对象,Fragment 销毁时自动取消)
-                    downloadManager.preloadChapters(allChapters, position, lifecycleOwner);
+                    contentManager.preloadNearbyChapters(allChapters, position, lifecycleOwner);
                 }
 
                 @Override

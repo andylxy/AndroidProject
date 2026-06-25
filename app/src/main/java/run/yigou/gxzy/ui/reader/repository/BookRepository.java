@@ -28,7 +28,7 @@ import run.yigou.gxzy.data.local.gen.ChapterDao;
 import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.BookFangApi;
-import run.yigou.gxzy.data.remote.api.ChapterContentApi;
+import run.yigou.gxzy.ui.reader.manager.ChapterContentManager;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.data.model.Fang;
 import run.yigou.gxzy.ui.reader.data.BookData;
@@ -119,70 +119,29 @@ public class BookRepository {
 
     /**
      * 下载章节内容
+     * 委托给 ChapterContentManager 统一管理
      * 
      * @param chapter 章节对象
      * @param lifecycleOwner 生命周期所有者
      * @param callback 下载回调
      */
     public void downloadChapter(Chapter chapter, androidx.lifecycle.LifecycleOwner lifecycleOwner, DataCallback<HH2SectionData> callback) {
-        performChapterDownload(chapter, lifecycleOwner, callback);
-    }
-
-    /**
-     * 章节下载核心实现（网络请求 + DB 持久化）
-     * 由 downloadChapter 和 downloadChapterAsync 共享
-     */
-    private void performChapterDownload(Chapter chapter, androidx.lifecycle.LifecycleOwner lifecycleOwner,
-                                         DataCallback<HH2SectionData> callback) {
-        if (chapter == null) {
-            if (callback != null) {
-                callback.onFailure(new IllegalArgumentException("章节对象为空"));
-            }
-            return;
-        }
-
-        try {
-            EasyHttp.get(lifecycleOwner)
-                .api(new ChapterContentApi()
-                    .setContentId(chapter.getChapterSection())
-                    .setSignatureId(chapter.getSignatureId())
-                    .setBookId(chapter.getBookId()))
-                .request(new HttpCallback<HttpData<List<HH2SectionData>>>(null) {
-                    @Override
-                    public void onSucceed(HttpData<List<HH2SectionData>> data) {
-                        if (data != null && !data.getData().isEmpty()) {
-                            HH2SectionData sectionData = data.getData().get(0);
-                            try {
-                                DataRepository.saveBookChapterDetailList(chapter, data.getData());
-                                chapter.setIsDownload(true);
-                                dbService.mChapterService.updateEntity(chapter);
-                                if (callback != null) {
-                                    callback.onSuccess(sectionData);
-                                }
-                            } catch (Exception e) {
-                                if (callback != null) {
-                                    callback.onFailure(e);
-                                }
-                            }
-                        } else {
-                            if (callback != null) {
-                                callback.onFailure(new Exception("章节内容为空"));
-                            }
-                        }
+        // 委托给 ChapterContentManager 统一管理
+        ChapterContentManager.getInstance().fetchChapterContent(lifecycleOwner, chapter, 
+            new ChapterContentManager.ContentCallback() {
+                @Override
+                public void onSuccess(Chapter c, HH2SectionData data) {
+                    if (callback != null) {
+                        callback.onSuccess(data);
                     }
-
-                    @Override
-                    public void onFail(Exception e) {
-                        if (callback != null) {
-                            callback.onFailure(e);
-                        }
+                }
+                @Override
+                public void onFailure(Chapter c, Exception e) {
+                    if (callback != null) {
+                        callback.onFailure(e);
                     }
-                });
-        } catch (Exception e) {
-            if (callback != null) {
-                callback.onFailure(e);
-            }
-        }
+                }
+            });
     }
 
     /**
@@ -435,6 +394,7 @@ public class BookRepository {
 
     /**
      * 异步下载章节内容并加载
+     * 委托给 ChapterContentManager 统一管理
      * 
      * @param chapter 章节对象
      * @param bookData 书籍数据
@@ -443,50 +403,52 @@ public class BookRepository {
     public void downloadChapterAsync(Chapter chapter, BookData bookData, 
                                     androidx.lifecycle.LifecycleOwner lifecycleOwner,
                                     DataCallback<ChapterData> callback) {
-        performChapterDownload(chapter, lifecycleOwner, new DataCallback<HH2SectionData>() {
-            @Override
-            public void onSuccess(HH2SectionData sectionData) {
-                try {
-                    // 查找或创建 ChapterData
-                    ChapterData chapterData = null;
-                    if (bookData != null) {
-                        chapterData = bookData.findChapterBySignature(chapter.getSignatureId());
-                    }
-                    if (chapterData == null) {
-                        Long signatureId = chapter.getSignatureId();
-                        chapterData = new ChapterData(
-                            signatureId != null ? signatureId : 0,
-                            chapter.getChapterHeader() != null ? chapter.getChapterHeader() : "",
-                            chapter.getChapterSection()
-                        );
-                    }
-                    // 将 HH2SectionData 转换为内容列表
-                    if (sectionData.getData() != null) {
-                        List<DataItem> content = new ArrayList<>();
-                        for (Object item : sectionData.getData()) {
-                            if (item instanceof DataItem) {
-                                content.add((DataItem) item);
-                            }
+        // 委托给 ChapterContentManager 统一管理
+        ChapterContentManager.getInstance().fetchChapterContent(lifecycleOwner, chapter, 
+            new ChapterContentManager.ContentCallback() {
+                @Override
+                public void onSuccess(Chapter c, HH2SectionData sectionData) {
+                    try {
+                        // 查找或创建 ChapterData
+                        ChapterData chapterData = null;
+                        if (bookData != null) {
+                            chapterData = bookData.findChapterBySignature(chapter.getSignatureId());
                         }
-                        chapterData.setContent(content);
+                        if (chapterData == null) {
+                            Long signatureId = chapter.getSignatureId();
+                            chapterData = new ChapterData(
+                                signatureId != null ? signatureId : 0,
+                                chapter.getChapterHeader() != null ? chapter.getChapterHeader() : "",
+                                chapter.getChapterSection()
+                            );
+                        }
+                        // 将 HH2SectionData 转换为内容列表
+                        if (sectionData.getData() != null) {
+                            List<DataItem> content = new ArrayList<>();
+                            for (Object item : sectionData.getData()) {
+                                if (item instanceof DataItem) {
+                                    content.add((DataItem) item);
+                                }
+                            }
+                            chapterData.setContent(content);
+                        }
+                        if (callback != null) {
+                            callback.onSuccess(chapterData);
+                        }
+                    } catch (Exception e) {
+                        if (callback != null) {
+                            callback.onFailure(e);
+                        }
                     }
-                    if (callback != null) {
-                        callback.onSuccess(chapterData);
-                    }
-                } catch (Exception e) {
+                }
+
+                @Override
+                public void onFailure(Chapter c, Exception e) {
                     if (callback != null) {
                         callback.onFailure(e);
                     }
                 }
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                if (callback != null) {
-                    callback.onFailure(e);
-                }
-            }
-        });
+            });
     }
 
     /**

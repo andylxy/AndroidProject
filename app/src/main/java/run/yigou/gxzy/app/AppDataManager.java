@@ -14,6 +14,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
+import com.hjq.http.listener.OnHttpListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -298,7 +299,7 @@ public class AppDataManager {
         EasyLog.print(TAG, "🌐 本地无缓存，请求网络：导航数据");
         EasyHttp.get(lifecycleOwner)
                 .api(new BookInfoNav())
-                .request(new HttpCallback<HttpData<List<TabNav>>>(null) {
+                .request(new HttpCallback<HttpData<List<TabNav>>>((OnHttpListener) lifecycleOwner) {
                     @Override
                     public void onSucceed(HttpData<List<TabNav>> data) {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
@@ -390,7 +391,7 @@ public class AppDataManager {
         EasyLog.print(TAG, "🌐 本地无缓存，请求网络：药物数据");
         EasyHttp.get(lifecycleOwner)
                 .api(new YaoContentApi())
-                .request(new HttpCallback<HttpData<List<Yao>>>(null) {
+                .request(new HttpCallback<HttpData<List<Yao>>>((OnHttpListener) lifecycleOwner) {
                     @Override
                     public void onSucceed(HttpData<List<Yao>> data) {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
@@ -439,7 +440,7 @@ public class AppDataManager {
         EasyLog.print(TAG, "🌐 本地无缓存，请求网络：药物别名");
         EasyHttp.get(lifecycleOwner)
                 .api(new YaoAliaApi())
-                .request(new HttpCallback<HttpData<List<YaoAlia>>>(null) {
+                .request(new HttpCallback<HttpData<List<YaoAlia>>>((OnHttpListener) lifecycleOwner) {
                     @Override
                     public void onSucceed(HttpData<List<YaoAlia>> data) {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
@@ -486,7 +487,7 @@ public class AppDataManager {
         EasyLog.print(TAG, "🌐 本地无缓存，请求网络：名词数据");
         EasyHttp.get(lifecycleOwner)
                 .api(new MingCiContentApi())
-                .request(new HttpCallback<HttpData<List<MingCiContent>>>(null) {
+                .request(new HttpCallback<HttpData<List<MingCiContent>>>((OnHttpListener) lifecycleOwner) {
                     @Override
                     public void onSucceed(HttpData<List<MingCiContent>> data) {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {

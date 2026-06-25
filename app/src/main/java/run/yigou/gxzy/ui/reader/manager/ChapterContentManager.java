@@ -1,6 +1,6 @@
 /*
  * 项目名: AndroidProject
- * 类名: ChapterDownloadManager.java
+ * 类名: ChapterContentManager.java
  * 包名: run.yigou.gxzy.ui.reader.manager
  * 作者 : AI Assistant
  * 当前修改时间 : 2025年12月09日
@@ -16,6 +16,7 @@ import androidx.lifecycle.LifecycleOwner;
 import com.hjq.http.EasyHttp;
 import run.yigou.gxzy.log.EasyLog;
 import com.hjq.http.listener.HttpCallback;
+import com.hjq.http.listener.OnHttpListener;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,255 +35,274 @@ import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.utils.DebugLog;
 
 /**
- * 章节下载管理器
+ * 章节内容管理器
  * 
  * 核心功能:
  * 1. 优先级双线程池：高优先级（用户主动）+ 低优先级（预加载/批量）
- * 2. 并发控制：最多同时下载5个章节
- * 3. 状态管理：下载中 + 已下载双重去重
+ * 2. 并发控制：最多同时获取5个章节
+ * 3. 状态管理：获取中 + 已获取双重去重
  * 4. 智能预加载：当前章节前后各5章 + 限速策略
- * 5. 生命周期感知：Fragment 销毁时自动取消下载
+ * 5. 生命周期感知：Fragment 销毁时自动取消请求
  */
-public class ChapterDownloadManager {
+public class ChapterContentManager {
 
-    // 高优先级下载线程池（用户主动下载）
+    // 单例实例
+    private static volatile ChapterContentManager instance;
+
+    // 高优先级获取线程池（用户主动触发）
     private final ExecutorService highPriorityExecutor;
     
-    // 低优先级下载线程池（预加载/批量，3个线程）
+    // 低优先级获取线程池（预加载/批量，3个线程）
     private final ExecutorService lowPriorityExecutor;
     
     // 定时调度线程池（限速调度）
     private final ScheduledExecutorService scheduler;
     
-    // 下载中章节 ID 集合（线程安全）
-    private final Set<Long> downloadingChapters = new HashSet<>();
+    // 获取中章节 ID 集合（线程安全）
+    private final Set<Long> fetchingChapters = new HashSet<>();
     
-    // 已下载章节 ID 集合（内存缓存）
-    private final Set<Long> downloadedChapters = new HashSet<>();
+    // 已获取章节 ID 集合（内存缓存）
+    private final Set<Long> readyChapters = new HashSet<>();
 
     /**
-     * 下载回调接口
+     * 内容回调接口
      */
-    public interface DownloadCallback {
+    public interface ContentCallback {
         /**
-         * 下载成功回调
+         * 获取成功回调
          * @param chapter 章节对象
          * @param sectionData 章节内容数据
          */
         void onSuccess(Chapter chapter, HH2SectionData sectionData);
         
         /**
-         * 下载失败回调
+         * 获取失败回调
          * @param chapter 章节对象
          * @param e 异常信息
          */
         void onFailure(Chapter chapter, Exception e);
     }
 
-    public ChapterDownloadManager() {
-        // 高优先级：单线程，保证用户主动下载的顺序性
+    /**
+     * 获取单例实例
+     * 
+     * @return ChapterContentManager 实例
+     */
+    public static ChapterContentManager getInstance() {
+        if (instance == null) {
+            synchronized (ChapterContentManager.class) {
+                if (instance == null) {
+                    instance = new ChapterContentManager();
+                }
+            }
+        }
+        return instance;
+    }
+
+    public ChapterContentManager() {
+        // 高优先级：单线程，保证用户主动获取的顺序性
         this.highPriorityExecutor = Executors.newSingleThreadExecutor();
         
-        // 低优先级：3个线程，用于预加载和批量下载
+        // 低优先级：3个线程，用于预加载和批量获取
         this.lowPriorityExecutor = Executors.newFixedThreadPool(3);
         
         // 定时调度器：用于限速策略
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
         
-        EasyLog.print("ChapterDownloadManager", "ChapterDownloadManager 初始化完成");
+        EasyLog.print("ChapterContentManager", "ChapterContentManager 初始化完成");
     }
 
     /**
-     * 初始化已下载章节缓存
-     * 从数据库读取已下载的章节，构建内存缓存
+     * 初始化已获取章节缓存
+     * 从数据库读取已获取的章节，构建内存缓存
      * 
      * @param chapters 章节列表
      */
-    public void initDownloadedCache(List<Chapter> chapters) {
-        downloadedChapters.clear();
+    public void initContentCache(List<Chapter> chapters) {
+        readyChapters.clear();
         if (chapters != null) {
             for (Chapter chapter : chapters) {
                 if (chapter != null && chapter.getIsDownload()) {
-                    downloadedChapters.add(chapter.getSignatureId());
+                    readyChapters.add(chapter.getSignatureId());
                 }
             }
         }
-        EasyLog.print("ChapterDownloadManager", "已下载缓存初始化: " + downloadedChapters.size() + " 个章节");
+        EasyLog.print("ChapterContentManager", "已获取缓存初始化: " + readyChapters.size() + " 个章节");
     }
 
     /**
-     * 检查章节是否已下载
+     * 检查章节内容是否已就绪
      * 
      * @param chapter 章节对象
-     * @return true-已下载，false-未下载
+     * @return true-已获取，false-未获取
      */
-    public boolean isChapterDownloaded(Chapter chapter) {
-        return chapter != null && downloadedChapters.contains(chapter.getSignatureId());
+    public boolean isContentReady(Chapter chapter) {
+        return chapter != null && readyChapters.contains(chapter.getSignatureId());
     }
 
     /**
-     * 检查章节是否正在下载中
+     * 检查章节是否正在获取中
      * 
      * @param chapter 章节对象
-     * @return true-下载中，false-未下载或已完成
+     * @return true-获取中，false-未获取或已完成
      */
-    public boolean isChapterDownloading(Chapter chapter) {
-        return chapter != null && downloadingChapters.contains(chapter.getSignatureId());
+    public boolean isContentFetching(Chapter chapter) {
+        return chapter != null && fetchingChapters.contains(chapter.getSignatureId());
     }
 
     /**
-     * 下载单个章节内容
+     * 获取单个章节内容
      * 使用高优先级线程池，用户主动触发
      * 
      * 流程:
      * 1. 参数合法性校验
-     * 2. 检查是否已下载
-     * 3. 检查是否正在下载（防重复）
+     * 2. 检查是否已获取
+     * 3. 检查是否正在获取（防重复）
      * 4. 提交到高优先级线程池
      * 
      * @param lifecycleOwner Fragment/Activity 生命周期所有者
      * @param chapter 章节对象
-     * @param callback 下载回调
+     * @param callback 内容回调
      */
-    public void downloadChapter(LifecycleOwner lifecycleOwner, Chapter chapter, DownloadCallback callback) {
+    public void fetchChapterContent(LifecycleOwner lifecycleOwner, Chapter chapter, ContentCallback callback) {
         if (chapter == null) {
-            EasyLog.print("ChapterDownloadManager", "错误：章节对象为空");
+            EasyLog.print("ChapterContentManager", "错误：章节对象为空");
             return;
         }
 
         long signatureId = chapter.getSignatureId();
 
-        // 检查是否已下载
-        if (downloadedChapters.contains(signatureId)) {
-            EasyLog.print("ChapterDownloadManager", "章节已下载，跳过: " + chapter.getChapterHeader());
+        // 检查是否已获取
+        if (readyChapters.contains(signatureId)) {
+            EasyLog.print("ChapterContentManager", "章节已获取，跳过: " + chapter.getChapterHeader());
             return;
         }
 
-        // 检查是否正在下载，防止重复提交
-        synchronized (downloadingChapters) {
-            if (downloadingChapters.contains(signatureId)) {
-                EasyLog.print("ChapterDownloadManager", "章节正在下载中，跳过: " + chapter.getChapterHeader());
+        // 检查是否正在获取，防止重复提交
+        synchronized (fetchingChapters) {
+            if (fetchingChapters.contains(signatureId)) {
+                EasyLog.print("ChapterContentManager", "章节正在获取中，跳过: " + chapter.getChapterHeader());
                 return;
             }
-            downloadingChapters.add(signatureId);
+            fetchingChapters.add(signatureId);
         }
 
-        EasyLog.print("ChapterDownloadManager", "开始下载章节: " + chapter.getChapterHeader());
+        EasyLog.print("ChapterContentManager", "开始获取章节: " + chapter.getChapterHeader());
 
         // 提交到高优先级线程池
         highPriorityExecutor.execute(() -> {
-            executeDownload(lifecycleOwner, chapter, callback, true);
+            executeFetch(lifecycleOwner, chapter, callback, true);
         });
     }
 
     /**
-     * 批量下载所有章节内容
+     * 预加载所有章节内容
      * 使用低优先级线程池 + 限速策略
      * 适合应用启动时预加载
      * 
      * @param allChapters 所有章节列表
      * @param lifecycleOwner 生命周期所有者，传 null 则不感知生命周期
      */
-    public void batchDownloadAllChapters(List<Chapter> allChapters, LifecycleOwner lifecycleOwner) {
+    public void preloadAllChapters(List<Chapter> allChapters, LifecycleOwner lifecycleOwner) {
         if (allChapters == null || allChapters.isEmpty()) {
             return;
         }
 
-        List<Chapter> chaptersToDownload = new ArrayList<>();
+        List<Chapter> chaptersToFetch = new ArrayList<>();
         
-        // 收集需要下载的章节
-        synchronized (downloadingChapters) {
+        // 收集需要获取的章节
+        synchronized (fetchingChapters) {
             for (Chapter chapter : allChapters) {
                 if (chapter == null) continue;
                 
                 long signatureId = chapter.getSignatureId();
                 
-                // 排除已下载和正在下载的章节
-                if (!downloadedChapters.contains(signatureId) && !downloadingChapters.contains(signatureId)) {
-                    chaptersToDownload.add(chapter);
-                    downloadingChapters.add(signatureId);
+                // 排除已获取和正在获取的章节
+                if (!readyChapters.contains(signatureId) && !fetchingChapters.contains(signatureId)) {
+                    chaptersToFetch.add(chapter);
+                    fetchingChapters.add(signatureId);
                 }
             }
         }
 
-        if (chaptersToDownload.isEmpty()) {
-            EasyLog.print("ChapterDownloadManager", "所有章节已下载或正在下载，跳过批量下载");
+        if (chaptersToFetch.isEmpty()) {
+            EasyLog.print("ChapterContentManager", "所有章节已获取或正在获取，跳过批量预加载");
             return;
         }
 
-        // 限速策略：10分钟内下载完所有章节
-        int totalChapters = chaptersToDownload.size();
+        // 限速策略：10分钟内获取完所有章节
+        int totalChapters = chaptersToFetch.size();
         long totalDelayMillis = 10 * 60 * 1000; // 10分钟 = 600,000毫秒
         long intervalMillis = totalChapters > 0 ? totalDelayMillis / totalChapters : 1000;
         
-        EasyLog.print("ChapterDownloadManager", "开始批量下载 " + totalChapters + " 个章节");
-        EasyLog.print("ChapterDownloadManager", "限速策略：10分钟内下载完成，间隔 " + (intervalMillis / 1000.0) + " 秒/章");
+        EasyLog.print("ChapterContentManager", "开始批量预加载 " + totalChapters + " 个章节");
+        EasyLog.print("ChapterContentManager", "限速策略：10分钟内完成，间隔 " + (intervalMillis / 1000.0) + " 秒/章");
 
         // 定时提交到低优先级线程池
         for (int i = 0; i < totalChapters; i++) {
-            final Chapter chapter = chaptersToDownload.get(i);
+            final Chapter chapter = chaptersToFetch.get(i);
             final long delay = i * intervalMillis;
             
             scheduler.schedule(() -> {
                 lowPriorityExecutor.execute(() -> {
-                    executeDownload(lifecycleOwner, chapter, null, false);
+                    executeFetch(lifecycleOwner, chapter, null, false);
                 });
             }, delay, TimeUnit.MILLISECONDS);
         }
     }
 
     /**
-     * 智能预加载章节
+     * 智能预加载邻近章节
      * 预加载当前章节前后各5章
      * 
      * 流程:
      * 1. 计算预加载范围（前后各5章）
-     * 2. 排除已下载/下载中的章节
+     * 2. 排除已获取/获取中的章节
      * 3. 提交到低优先级线程池
      * 
      * @param allChapters 所有章节
      * @param currentIndex 当前阅读章节索引
      * @param lifecycleOwner 生命周期所有者，传 null 则不感知生命周期
      */
-    public void preloadChapters(List<Chapter> allChapters, int currentIndex, LifecycleOwner lifecycleOwner) {
+    public void preloadNearbyChapters(List<Chapter> allChapters, int currentIndex, LifecycleOwner lifecycleOwner) {
         if (allChapters == null || allChapters.isEmpty()) {
             return;
         }
 
         if (currentIndex < 0 || currentIndex >= allChapters.size()) {
-            EasyLog.print("ChapterDownloadManager", "无效索引: " + currentIndex);
+            EasyLog.print("ChapterContentManager", "无效索引: " + currentIndex);
             return;
         }
 
         // 计算预加载范围（前后各5章）
-        List<Integer> preloadIndices = calculatePreloadRange(currentIndex, allChapters.size());
+        List<Integer> preloadIndices = calculateNearbyRange(currentIndex, allChapters.size());
 
         List<Chapter> chaptersToPreload = new ArrayList<>();
         for (int index : preloadIndices) {
             Chapter chapter = allChapters.get(index);
             long signatureId = chapter.getSignatureId();
 
-            // 排除已下载和正在下载的章节
-            synchronized (downloadingChapters) {
-                if (!downloadedChapters.contains(signatureId) && !downloadingChapters.contains(signatureId)) {
+            // 排除已获取和正在获取的章节
+            synchronized (fetchingChapters) {
+                if (!readyChapters.contains(signatureId) && !fetchingChapters.contains(signatureId)) {
                     chaptersToPreload.add(chapter);
-                    downloadingChapters.add(signatureId);
+                    fetchingChapters.add(signatureId);
                 }
             }
         }
 
         if (chaptersToPreload.isEmpty()) {
-            EasyLog.print("ChapterDownloadManager", "所有预加载章节已下载或正在下载");
+            EasyLog.print("ChapterContentManager", "所有预加载章节已获取或正在获取");
             return;
         }
 
-        EasyLog.print("ChapterDownloadManager", "开始预加载 " + chaptersToPreload.size() + " 个章节");
+        EasyLog.print("ChapterContentManager", "开始预加载 " + chaptersToPreload.size() + " 个章节");
 
         // 提交到低优先级线程池异步预加载
         for (Chapter chapter : chaptersToPreload) {
             lowPriorityExecutor.execute(() -> {
-                // 注意：这里 lifecycleOwner 可能为 null，但不影响下载(异步执行)
-                executeDownload(lifecycleOwner, chapter, null, false);
+                // 注意：这里 lifecycleOwner 可能为 null，但不影响获取(异步执行)
+                executeFetch(lifecycleOwner, chapter, null, false);
             });
         }
     }
@@ -298,7 +318,7 @@ public class ChapterDownloadManager {
      * @param totalCount 章节总数
      * @return 预加载章节索引列表
      */
-    private List<Integer> calculatePreloadRange(int currentIndex, int totalCount) {
+    private List<Integer> calculateNearbyRange(int currentIndex, int totalCount) {
         List<Integer> indices = new ArrayList<>();
 
         // 添加前5章
@@ -317,8 +337,8 @@ public class ChapterDownloadManager {
     }
 
     /**
-     * 执行章节下载
-     * 核心下载逻辑
+     * 执行章节内容获取
+     * 核心获取逻辑
      * 
      * 流程:
      * 1. 调用 HTTP API 获取章节内容
@@ -328,19 +348,23 @@ public class ChapterDownloadManager {
      * 
      * @param lifecycleOwner Fragment/Activity 生命周期所有者
      * @param chapter 章节对象
-     * @param callback 下载回调（批量下载时可能为 null）
+     * @param callback 内容回调（批量获取时可能为 null）
      * @param isHighPriority 是否高优先级
      */
-    private void executeDownload(LifecycleOwner lifecycleOwner, Chapter chapter, DownloadCallback callback, boolean isHighPriority) {
+    private void executeFetch(LifecycleOwner lifecycleOwner, Chapter chapter, ContentCallback callback, boolean isHighPriority) {
+        if (lifecycleOwner == null) {
+            EasyLog.print("ChapterContentManager", "警告：lifecycleOwner 为 null，不感知生命周期");
+        }
+
         try {
             // EasyHttp.get(lifecycleOwner) 感知生命周期，Fragment 销毁时自动取消请求
-            // HttpCallback 即使为 null 也不会崩溃
+            // 使用 (OnHttpListener) lifecycleOwner 实现生命周期绑定
             EasyHttp.get(lifecycleOwner)
                 .api(new ChapterContentApi()
                     .setContentId(chapter.getChapterSection())
                     .setSignatureId(chapter.getSignatureId())
                     .setBookId(chapter.getBookId()))
-                .request(new HttpCallback<HttpData<List<HH2SectionData>>>(null) {
+                .request(new HttpCallback<HttpData<List<HH2SectionData>>>((OnHttpListener) lifecycleOwner) {
                     @Override
                     public void onSucceed(HttpData<List<HH2SectionData>> data) {
                         if (data != null && !data.getData().isEmpty()) {
@@ -352,14 +376,14 @@ public class ChapterDownloadManager {
                                 chapter.setIsDownload(true);
                                 DbService.getInstance().mChapterService.updateEntity(chapter);
 
-                                // 更新下载状态
-                                synchronized (downloadingChapters) {
-                                    downloadingChapters.remove(chapter.getSignatureId());
-                                    downloadedChapters.add(chapter.getSignatureId());
+                                // 更新获取状态
+                                synchronized (fetchingChapters) {
+                                    fetchingChapters.remove(chapter.getSignatureId());
+                                    readyChapters.add(chapter.getSignatureId());
                                 }
 
                                 String priority = isHighPriority ? "高优先级" : "低优先级";
-                                EasyLog.print("ChapterDownloadManager", priority + "下载成功: " + chapter.getChapterHeader());
+                                EasyLog.print("ChapterContentManager", priority + "获取成功: " + chapter.getChapterHeader());
 
                                 // 回调通知
                                 if (callback != null) {
@@ -367,39 +391,39 @@ public class ChapterDownloadManager {
                                 }
 
                             } catch (Exception e) {
-                                EasyLog.print("ChapterDownloadManager", "保存数据失败: " + e.getMessage());
-                                handleDownloadFailure(chapter, e, callback);
+                                EasyLog.print("ChapterContentManager", "保存数据失败: " + e.getMessage());
+                                handleFetchFailure(chapter, e, callback);
                             }
                         } else {
                             Exception e = new Exception("章节内容为空");
-                            handleDownloadFailure(chapter, e, callback);
+                            handleFetchFailure(chapter, e, callback);
                         }
                     }
 
                     @Override
                     public void onFail(Exception e) {
-                        handleDownloadFailure(chapter, e, callback);
+                        handleFetchFailure(chapter, e, callback);
                     }
                 });
 
         } catch (Exception e) {
-            handleDownloadFailure(chapter, e, callback);
+            handleFetchFailure(chapter, e, callback);
         }
     }
 
     /**
-     * 处理下载失败
+     * 处理获取失败
      * 
      * @param chapter 章节对象
      * @param e 异常信息
-     * @param callback 下载回调
+     * @param callback 内容回调
      */
-    private void handleDownloadFailure(Chapter chapter, Exception e, DownloadCallback callback) {
-        synchronized (downloadingChapters) {
-            downloadingChapters.remove(chapter.getSignatureId());
+    private void handleFetchFailure(Chapter chapter, Exception e, ContentCallback callback) {
+        synchronized (fetchingChapters) {
+            fetchingChapters.remove(chapter.getSignatureId());
         }
 
-        EasyLog.print("ChapterDownloadManager", "下载失败: " + chapter.getChapterHeader() + " - " + e.getMessage());
+        EasyLog.print("ChapterContentManager", "获取失败: " + chapter.getChapterHeader() + " - " + e.getMessage());
 
         if (callback != null) {
             callback.onFailure(chapter, e);
@@ -407,11 +431,11 @@ public class ChapterDownloadManager {
     }
 
     /**
-     * 取消所有下载
+     * 取消所有获取
      * 在 Fragment/Activity onDestroy 时调用
      */
     public void cancelAll() {
-        EasyLog.print("ChapterDownloadManager", "取消所有下载任务");
+        EasyLog.print("ChapterContentManager", "取消所有获取任务");
 
         if (highPriorityExecutor != null && !highPriorityExecutor.isShutdown()) {
             highPriorityExecutor.shutdownNow();
@@ -425,19 +449,19 @@ public class ChapterDownloadManager {
             scheduler.shutdownNow();
         }
 
-        synchronized (downloadingChapters) {
-            downloadingChapters.clear();
+        synchronized (fetchingChapters) {
+            fetchingChapters.clear();
         }
     }
 
     /**
-     * 获取下载统计信息
+     * 获取统计信息
      * 
      * @return 统计信息字符串
      */
     public String getStatistics() {
-        return String.format("已下载: %d, 下载中: %d", 
-            downloadedChapters.size(), 
-            downloadingChapters.size());
+        return String.format("已获取: %d, 获取中: %d", 
+            readyChapters.size(), 
+            fetchingChapters.size());
     }
 }

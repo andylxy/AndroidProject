@@ -4,6 +4,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
+import com.hjq.http.listener.OnHttpListener;
 
 import run.yigou.gxzy.data.remote.api.StyleConfigApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
@@ -54,7 +55,7 @@ public class AppStyleConfigProvider implements IStyleConfigProvider {
         // Application 不是 LifecycleOwner，传 null 表示不感知生命周期
         EasyHttp.get(lifecycleOwner)
             .api(new StyleConfigApi().setVersion(currentVersion))
-            .request(new HttpCallback<HttpData<StyleConfigApi.StyleConfigApiBean>>(null) {
+            .request(new HttpCallback<HttpData<StyleConfigApi.StyleConfigApiBean>>((OnHttpListener) lifecycleOwner) {
                 @Override
                 public void onSucceed(HttpData<StyleConfigApi.StyleConfigApiBean> data) {
                     if (data == null || data.getData() == null) {

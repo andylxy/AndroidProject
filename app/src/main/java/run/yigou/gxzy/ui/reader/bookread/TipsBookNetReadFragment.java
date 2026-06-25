@@ -57,7 +57,7 @@ import run.yigou.gxzy.ui.reader.entity.GroupModel;
 import run.yigou.gxzy.data.model.HH2SectionData;
 import run.yigou.gxzy.ui.reader.helper.TipsDialogHelper;
 import run.yigou.gxzy.base.GlobalDataHolder;
-import run.yigou.gxzy.ui.reader.manager.ChapterDownloadManager;
+import run.yigou.gxzy.ui.reader.manager.ChapterContentManager;
 import run.yigou.gxzy.ui.reader.bookread.contract.TipsBookReadContract;
 import run.yigou.gxzy.ui.reader.bookread.presenter.TipsBookReadPresenter;
 import run.yigou.gxzy.utils.ThreadUtil;
@@ -101,9 +101,9 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
     private TipsBookReadPresenter presenter;
     
     /**
-     * 章节下载管理器
+     * 章节内容管理器
      */
-    private ChapterDownloadManager chapterDownloadManager;
+    private ChapterContentManager chapterContentManager;
     
     /**
      * 全局搜索协调器
@@ -554,22 +554,22 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                 // Presenter 会自动加载药方数据
                 presenter.loadBookContent(book, bookId, bookLastReadPosition, isShowBookCollect);
                 
-                // 初始化章节下载管理器并启动后台下载
-                initChapterDownloadManager();
+                // 初始化章节内容管理器并启动后台预加载
+                initChapterContentManager();
             }
         }
     }
 
     /**
-     * 初始化章节下载管理器，启动后台低优先级下载
+     * 初始化章节内容管理器，启动后台低优先级预加载
      */
-    private void initChapterDownloadManager() {
-        if (chapterDownloadManager == null && chapterList != null) {
-            chapterDownloadManager = new ChapterDownloadManager();
-            chapterDownloadManager.initDownloadedCache(chapterList);
+    private void initChapterContentManager() {
+        if (chapterContentManager == null && chapterList != null) {
+            chapterContentManager = new ChapterContentManager();
+            chapterContentManager.initContentCache(chapterList);
             
-            // 启动后台批量下载所有未下载章节（低优先级）
-            chapterDownloadManager.batchDownloadAllChapters(chapterList, this);
+            // 启动后台批量预加载所有章节（低优先级）
+            chapterContentManager.preloadAllChapters(chapterList, this);
         }
     }
 
@@ -586,10 +586,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
     public void onDestroy() {
         super.onDestroy();
         
-        // 清理章节下载管理器
-        if (chapterDownloadManager != null) {
-            chapterDownloadManager.cancelAll();
-            chapterDownloadManager = null;
+        // 清理章节内容管理器
+        if (chapterContentManager != null) {
+            chapterContentManager.cancelAll();
+            chapterContentManager = null;
         }
         
         // 清理适配器监听器
