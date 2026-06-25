@@ -28,6 +28,7 @@ import run.yigou.gxzy.ui.main.HomeFragment;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.UpdateImageApi;
 import run.yigou.gxzy.manager.account.AccountDataManager;
+import run.yigou.gxzy.manager.Callback;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.ui.setting.AboutActivity;
 import run.yigou.gxzy.ui.media.activity.ImageCropActivity;
@@ -341,7 +342,7 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         // 使用 AccountDataManager 封装的网络请求
         mAccountDataManager.updateAvatar(this,
                 file,
-                new AccountDataManager.Callback<String>() {
+                new Callback<String>() {
                     @Override
                     public void onSuccess(String data) {
                         mAvatarUrl = Uri.parse(data);

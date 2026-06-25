@@ -17,6 +17,7 @@ import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.manager.InputTextManager;
 import run.yigou.gxzy.manager.account.AccountDataManager;
+import run.yigou.gxzy.manager.Callback;
 import run.yigou.gxzy.ui.dialog.TipsDialog;
 import com.hjq.toast.Toaster;
 import com.hjq.widget.view.CountdownView;
@@ -117,7 +118,7 @@ public final class PhoneResetActivity extends AppActivity
             // 使用 AccountDataManager 封装的网络请求
             mAccountDataManager.sendResetPhoneSmsCode(this,
                     mPhoneView.getText().toString(),
-                    new AccountDataManager.Callback<Void>() {
+                    new Callback<Void>() {
                         @Override
                         public void onSuccess(Void data) {
                             toast(R.string.common_code_send_hint);
@@ -182,7 +183,7 @@ public final class PhoneResetActivity extends AppActivity
                     mVerifyCode,
                     mPhoneView.getText().toString(),
                     mCodeView.getText().toString(),
-                    new AccountDataManager.Callback<Void>() {
+                    new Callback<Void>() {
                         @Override
                         public void onSuccess(Void data) {
                             new TipsDialog.Builder(getActivity())

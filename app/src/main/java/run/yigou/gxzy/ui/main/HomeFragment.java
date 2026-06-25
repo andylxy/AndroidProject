@@ -33,6 +33,7 @@ import com.hjq.http.EasyHttp;
 
 import run.yigou.gxzy.config.AppStyleConfigProvider;
 import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.manager.Callback;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
@@ -357,9 +358,9 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
      */
     private void loadDataWithLifecycle() {
         mAppDataManager.loadAllDataIfNeeded(this, 
-            new run.yigou.gxzy.manager.AppDataManager.DataLoadCallback() {
+            new Callback<Void>() {
                 @Override
-                public void onComplete() {
+                public void onSuccess(Void data) {
                     EasyLog.print("HomeFragment", "✅ 所有数据加载完成，更新 UI");
                     
                     // 数据加载完成，更新 UI

@@ -45,6 +45,7 @@ import run.yigou.gxzy.ui.reader.manager.ChapterContentManager;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
 import run.yigou.gxzy.utils.DebugLog;
+import run.yigou.gxzy.manager.Callback;
 
 /**
  * TipsBookRead Presenter 实现
@@ -445,7 +446,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             if (currentBookData != null) {
                 androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
                 repository.downloadChapterAsync(chapter, currentBookData, lifecycleOwner, 
-                    new BookRepository.DataCallback<ChapterData>() {
+                    new Callback<ChapterData>() {
                         @Override
                         public void onSuccess(ChapterData data) {
                             if (isViewActive()) {
@@ -457,7 +458,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                         }
                         
                         @Override
-                        public void onFailure(Exception e) {
+                        public void onError(Exception e) {
                             if (isViewActive()) {
                                 view.showError("重新下载失败: " + e.getMessage());
                             }
@@ -466,7 +467,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             } else {
                 // 降级：使用旧 API（带生命周期绑定）
                 androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
-                repository.downloadChapter(chapter, lifecycleOwner, new BookRepository.DataCallback<HH2SectionData>() {
+                repository.downloadChapter(chapter, lifecycleOwner, new Callback<HH2SectionData>() {
                     @Override
                     public void onSuccess(HH2SectionData data) {
                         if (isViewActive()) {
@@ -476,7 +477,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onError(Exception e) {
                         if (isViewActive()) {
                             view.showError("重新下载失败: " + e.getMessage());
                         }
@@ -765,7 +766,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         EasyLog.print("TipsBookReadPresenter", "数据库无方剂数据，开始从网络下载");
         
         androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
-        repository.downloadBookFang(currentBookId, lifecycleOwner, new BookRepository.DataCallback<List<run.yigou.gxzy.data.model.Fang>>() {
+        repository.downloadBookFang(currentBookId, lifecycleOwner, new Callback<List<run.yigou.gxzy.data.model.Fang>>() {
             @Override
             public void onSuccess(List<run.yigou.gxzy.data.model.Fang> data) {
                 EasyLog.print("TipsBookReadPresenter", "药方数据网络下载完成: " + data.size() + " 个");
@@ -782,7 +783,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             }
 
             @Override
-            public void onFailure(Exception e) {
+            public void onError(Exception e) {
                 EasyLog.print("TipsBookReadPresenter", "药方数据加载失败: " + e.getMessage());
                 // 失败时移除标记，允许重试
                 loadedBookFangs.remove(currentBookId);
@@ -892,7 +893,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         // 传递 Fragment 生命周期,确保 Fragment 销毁时自动取消网络请求
         androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
         repository.loadChapterLazy(currentBookId, position, lifecycleOwner, 
-            new BookRepository.DataCallback<ChapterData>() {
+            new Callback<ChapterData>() {
                 @Override
                 public void onSuccess(ChapterData data) {
                     // 生命周期检查（懒加载成功回调）
@@ -911,7 +912,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                 }
 
                 @Override
-                public void onFailure(Exception e) {
+                public void onError(Exception e) {
                     // 生命周期检查（懒加载失败回调）
                     if (!isViewActive()) {
                         EasyLog.print("TipsBookReadPresenter", "懒加载失败回调：View 已销毁，忽略错误");

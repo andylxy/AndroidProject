@@ -47,6 +47,7 @@ import run.yigou.gxzy.data.remote.api.GetCodeApi;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.manager.InputTextManager;
 import run.yigou.gxzy.manager.account.AccountDataManager;
+import run.yigou.gxzy.manager.Callback;
 import com.hjq.base.KeyboardWatcher;
 import run.yigou.gxzy.ui.main.HomeFragment;
 import run.yigou.gxzy.ui.main.HomeActivity;
@@ -352,7 +353,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         // 使用 AccountDataManager 封装的网络请求
         mAccountDataManager.sendLoginSmsCode(this,
                 phone,
-                new AccountDataManager.Callback<Void>() {
+                new Callback<Void>() {
                     @Override
                     public void onSuccess(Void data) {
                         toast(R.string.common_code_send_hint);
@@ -549,7 +550,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         // 使用 AccountDataManager 封装的网络请求
         mAccountDataManager.login(this,
                 requestApi,
-                new AccountDataManager.Callback<LoginApi.Bean>() {
+                new Callback<LoginApi.Bean>() {
                     @Override
                     public void onSuccess(LoginApi.Bean data) {
                         if (data == null) {
@@ -658,7 +659,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         
         // 使用 AccountDataManager 封装的网络请求
         mAccountDataManager.getLoginVcode(this,
-                new AccountDataManager.Callback<VierCode.Bean>() {
+                new Callback<VierCode.Bean>() {
                     @Override
                     public void onSuccess(VierCode.Bean data) {
                         try {

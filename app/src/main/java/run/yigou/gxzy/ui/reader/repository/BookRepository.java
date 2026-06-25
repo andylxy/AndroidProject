@@ -38,6 +38,7 @@ import run.yigou.gxzy.ui.reader.data.DataConverter;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
+import run.yigou.gxzy.manager.Callback;
 
 
 /**
@@ -57,14 +58,6 @@ public class BookRepository {
     
     // 章节缓存 bookId -> 章节列表（线程安全）
     private final Map<Integer, List<Chapter>> chapterCache = new ConcurrentHashMap<>();
-
-    /**
-     * 数据回调接口
-     */
-    public interface DataCallback<T> {
-        void onSuccess(T data);
-        void onFailure(Exception e);
-    }
 
     public BookRepository() {
         this.dbService = DbService.getInstance();
@@ -125,7 +118,7 @@ public class BookRepository {
      * @param lifecycleOwner 生命周期所有者
      * @param callback 下载回调
      */
-    public void downloadChapter(Chapter chapter, androidx.lifecycle.LifecycleOwner lifecycleOwner, DataCallback<HH2SectionData> callback) {
+    public void downloadChapter(Chapter chapter, androidx.lifecycle.LifecycleOwner lifecycleOwner, Callback<HH2SectionData> callback) {
         // 委托给 ChapterContentManager 统一管理
         ChapterContentManager.getInstance().fetchChapterContent(lifecycleOwner, chapter, 
             new ChapterContentManager.ContentCallback() {
@@ -138,7 +131,7 @@ public class BookRepository {
                 @Override
                 public void onFailure(Chapter c, Exception e) {
                     if (callback != null) {
-                        callback.onFailure(e);
+                        callback.onError(e);
                     }
                 }
             });
@@ -151,7 +144,7 @@ public class BookRepository {
      * @param lifecycleOwner 生命周期所有者
      * @param callback 下载回调
      */
-    public void downloadBookFang(int bookId, androidx.lifecycle.LifecycleOwner lifecycleOwner, DataCallback<List<Fang>> callback) {
+    public void downloadBookFang(int bookId, androidx.lifecycle.LifecycleOwner lifecycleOwner, Callback<List<Fang>> callback) {
         try {
             EasyHttp.get(lifecycleOwner)
                 .api(new BookFangApi().setBookId(bookId))
@@ -176,7 +169,7 @@ public class BookRepository {
 
                         } else {
                             if (callback != null) {
-                                callback.onFailure(new Exception("方剂内容为空"));
+                                callback.onError(new Exception("方剂内容为空"));
                             }
                         }
                     }
@@ -184,14 +177,14 @@ public class BookRepository {
                     @Override
                     public void onFail(Exception e) {
                         if (callback != null) {
-                            callback.onFailure(e);
+                            callback.onError(e);
                         }
                     }
                 });
 
         } catch (Exception e) {
             if (callback != null) {
-                callback.onFailure(e);
+                callback.onError(e);
             }
         }
     }
@@ -402,7 +395,7 @@ public class BookRepository {
      */
     public void downloadChapterAsync(Chapter chapter, BookData bookData, 
                                     androidx.lifecycle.LifecycleOwner lifecycleOwner,
-                                    DataCallback<ChapterData> callback) {
+                                    Callback<ChapterData> callback) {
         // 委托给 ChapterContentManager 统一管理
         ChapterContentManager.getInstance().fetchChapterContent(lifecycleOwner, chapter, 
             new ChapterContentManager.ContentCallback() {
@@ -437,7 +430,7 @@ public class BookRepository {
                         }
                     } catch (Exception e) {
                         if (callback != null) {
-                            callback.onFailure(e);
+                            callback.onError(e);
                         }
                     }
                 }
@@ -445,7 +438,7 @@ public class BookRepository {
                 @Override
                 public void onFailure(Chapter c, Exception e) {
                     if (callback != null) {
-                        callback.onFailure(e);
+                        callback.onError(e);
                     }
                 }
             });
@@ -460,14 +453,14 @@ public class BookRepository {
      * @param lifecycleOwner 生命周期所有者（Fragment/Activity），可为 null
      * @param callback 回调接口
      */
-    public void loadChapterLazy(int bookId, int position, LifecycleOwner lifecycleOwner, DataCallback<ChapterData> callback) {
+    public void loadChapterLazy(int bookId, int position, LifecycleOwner lifecycleOwner, Callback<ChapterData> callback) {
         try {
             BookData bookData = getBookData(bookId);
             ChapterData chapterData = bookData.getChapter(position);
             
             if (chapterData == null) {
                 if (callback != null) {
-                    callback.onFailure(new Exception("未找到章节数据"));
+                    callback.onError(new Exception("未找到章节数据"));
                 }
                 return;
             }
@@ -493,7 +486,7 @@ public class BookRepository {
             
             if (targetChapter == null) {
                 if (callback != null) {
-                    callback.onFailure(new Exception("未找到目标章节"));
+                    callback.onError(new Exception("未找到目标章节"));
                 }
                 return;
             }
@@ -510,7 +503,7 @@ public class BookRepository {
         } catch (Exception e) {
             EasyLog.print("BookRepository", "懒加载失败: " + e.getMessage());
             if (callback != null) {
-                callback.onFailure(e);
+                callback.onError(e);
             }
         }
     }

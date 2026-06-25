@@ -36,6 +36,7 @@ import run.yigou.gxzy.data.remote.api.YaoAliaApi;
 import run.yigou.gxzy.data.remote.api.YaoContentApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.manager.Callback;
 
 /**
  * 应用数据管理器
@@ -67,13 +68,13 @@ import run.yigou.gxzy.log.EasyLog;
  * <p>使用示例：
  * <pre>
  * // 首次加载
- * AppDataManager.getInstance().loadAllDataIfNeeded(this, new DataLoadCallback() {
- *     @Override
- *     public void onComplete() {
+ * AppDataManager.getInstance().loadAllDataIfNeeded(this, new Callback&lt;Void&gt;() {
+ *     &#64;Override
+ *     public void onSuccess(Void data) {
  *         // 数据加载完成，更新 UI
  *     }
  *     
- *     @Override
+ *     &#64;Override
  *     public void onError(Exception e) {
  *         // 加载失败
  *     }
@@ -185,19 +186,19 @@ public class AppDataManager {
      * @param callback 加载完成回调
      */
     public void loadAllDataIfNeeded(@NonNull LifecycleOwner lifecycleOwner, 
-                                    @NonNull DataLoadCallback callback) {
+                                    @NonNull Callback<Void> callback) {
         // 1. 检查是否已加载且未过期
         if (isInitialized && !shouldUpdate()) {
             EasyLog.print(TAG, "✅ 数据未过期，跳过重复加载（已加载于 " + 
                 loadCompleteTime + "）");
-            callback.onComplete();
+            callback.onSuccess(null);
             return;
         }
         
         // 2. 检查是否正在加载（防并发）
         if (isLoading) {
             EasyLog.print(TAG, "⚠️ 数据正在加载中，跳过重复请求");
-            callback.onComplete();  // 等待第一次加载完成
+            callback.onSuccess(null);  // 等待第一次加载完成
             return;
         }
         
@@ -206,9 +207,9 @@ public class AppDataManager {
         EasyLog.print(TAG, "🚀 开始加载所有数据...");
         
         // 4. 执行加载流程
-        executeLoadSequence(lifecycleOwner, new DataLoadCallback() {
+        executeLoadSequence(lifecycleOwner, new Callback<Void>() {
             @Override
-            public void onComplete() {
+            public void onSuccess(Void data) {
                 isInitialized = true;
                 isLoading = false;
                 loadCompleteTime = System.currentTimeMillis();
@@ -218,7 +219,7 @@ public class AppDataManager {
                 
                 EasyLog.print(TAG, "🎉 所有数据加载完成（总耗时 " + 
                     loadCompleteTime + "ms）");
-                callback.onComplete();
+                callback.onSuccess(null);
             }
             
             @Override
@@ -241,26 +242,26 @@ public class AppDataManager {
      * </ol>
      */
     private void executeLoadSequence(LifecycleOwner lifecycleOwner, 
-                                     DataLoadCallback callback) {
+                                     Callback<Void> callback) {
         EasyLog.print(TAG, "📋 加载序列：导航 → [药物 + 名词] → 方剂别名");
         
         // 1. 加载导航数据（独立）
-        loadNavigationData(lifecycleOwner, new DataCallback<List<TabNav>>() {
+        loadNavigationData(lifecycleOwner, new Callback<List<TabNav>>() {
             @Override
             public void onSuccess(List<TabNav> data) {
                 EasyLog.print(TAG, "✅ 步骤1：导航数据加载完成");
                 
                 // 2. 并行加载药物和名词数据（独立）
-                loadYaoAndMingCiDataParallel(lifecycleOwner, new SimpleCallback() {
+                loadYaoAndMingCiDataParallel(lifecycleOwner, new Callback<Void>() {
                     @Override
-                    public void onSuccess() {
+                    public void onSuccess(Void data) {
                         EasyLog.print(TAG, "✅ 步骤2：药物 + 名词数据加载完成");
                         
                         // 3. 加载方剂别名（依赖导航数据）
                         loadFangAliasData();
                         EasyLog.print(TAG, "✅ 步骤3：方剂别名加载完成");
                         
-                        callback.onComplete();
+                        callback.onSuccess(null);
                     }
                     
                     @Override
@@ -285,7 +286,7 @@ public class AppDataManager {
      * @param callback 加载完成回调
      */
     private void loadNavigationData(LifecycleOwner lifecycleOwner, 
-                                    DataCallback<List<TabNav>> callback) {
+                                    Callback<List<TabNav>> callback) {
         // 1. 尝试本地加载
         List<TabNav> localData = DataRepository.getNavigationData();
         if (localData != null && !localData.isEmpty()) {
@@ -334,16 +335,16 @@ public class AppDataManager {
      * <p>使用计数器模式等待两个异步任务完成。
      */
     private void loadYaoAndMingCiDataParallel(LifecycleOwner lifecycleOwner, 
-                                              SimpleCallback callback) {
+                                              Callback<Void> callback) {
         final int[] pendingTasks = {2};  // 等待 2 个任务
         final boolean[] hasError = {false};
         
         // 加载药物数据（含别名）
-        loadYaoDataWithAlias(lifecycleOwner, new SimpleCallback() {
+        loadYaoDataWithAlias(lifecycleOwner, new Callback<Void>() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(Void data) {
                 if (--pendingTasks[0] == 0 && !hasError[0]) {
-                    callback.onSuccess();
+                    callback.onSuccess(null);
                 }
             }
             
@@ -355,11 +356,11 @@ public class AppDataManager {
         });
         
         // 加载名词数据
-        loadMingCiData(lifecycleOwner, new SimpleCallback() {
+        loadMingCiData(lifecycleOwner, new Callback<Void>() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(Void data) {
                 if (--pendingTasks[0] == 0 && !hasError[0]) {
-                    callback.onSuccess();
+                    callback.onSuccess(null);
                 }
             }
             
@@ -375,7 +376,7 @@ public class AppDataManager {
      * 加载药物数据（含别名）
      */
     private void loadYaoDataWithAlias(LifecycleOwner lifecycleOwner, 
-                                      SimpleCallback callback) {
+                                      Callback<Void> callback) {
         // 1. 检查本地缓存
         List<Yao> localYaoData = DataRepository.getYaoData();
         if (localYaoData != null && !localYaoData.isEmpty()) {
@@ -426,13 +427,13 @@ public class AppDataManager {
      * 加载药物别名
      */
     private void loadYaoAliasData(LifecycleOwner lifecycleOwner, 
-                                  SimpleCallback callback) {
+                                  Callback<Void> callback) {
         // 1. 检查本地缓存
         List<ZhongYaoAlia> localAliasData = DataRepository.getYaoAlia();
         if (localAliasData != null && !localAliasData.isEmpty()) {
             EasyLog.print(TAG, "📦 使用本地缓存：药物别名 " + localAliasData.size() + " 条");
             syncYaoAliasToGlobalDataHolder(localAliasData);
-            callback.onSuccess();
+            callback.onSuccess(null);
             return;
         }
         
@@ -457,7 +458,7 @@ public class AppDataManager {
                             
                             EasyLog.print(TAG, "✅ 网络请求成功：药物别名 " + 
                                 networkData.size() + " 条");
-                            callback.onSuccess();
+                            callback.onSuccess(null);
                         }
                     }
                     
@@ -473,13 +474,13 @@ public class AppDataManager {
      * 加载名词数据
      */
     private void loadMingCiData(LifecycleOwner lifecycleOwner, 
-                                SimpleCallback callback) {
+                                Callback<Void> callback) {
         // 1. 检查本地缓存
         List<MingCiContent> localData = DataRepository.getMingCi();
         if (localData != null && !localData.isEmpty()) {
             EasyLog.print(TAG, "📦 使用本地缓存：名词数据 " + localData.size() + " 条");
             syncMingCiToGlobalDataHolder(localData);
-            callback.onSuccess();
+            callback.onSuccess(null);
             return;
         }
         
@@ -504,7 +505,7 @@ public class AppDataManager {
                             
                             EasyLog.print(TAG, "✅ 网络请求成功：名词数据 " + 
                                 networkData.size() + " 条");
-                            callback.onSuccess();
+                            callback.onSuccess(null);
                         }
                     }
                     
@@ -653,31 +654,5 @@ public class AppDataManager {
         return "isInitialized=" + isInitialized + 
             ", isLoading=" + isLoading + 
             ", loadCompleteTime=" + loadCompleteTime;
-    }
-    
-    // ========== 回调接口 ==========
-    
-    /**
-     * 数据加载完成回调
-     */
-    public interface DataLoadCallback {
-        void onComplete();
-        void onError(Exception e);
-    }
-    
-    /**
-     * 带数据的回调
-     */
-    public interface DataCallback<T> {
-        void onSuccess(T data);
-        void onError(Exception e);
-    }
-    
-    /**
-     * 简单回调（无数据）
-     */
-    public interface SimpleCallback {
-        void onSuccess();
-        void onError(Exception e);
     }
 }

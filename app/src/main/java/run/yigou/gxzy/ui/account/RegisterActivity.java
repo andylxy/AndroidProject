@@ -19,6 +19,7 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.data.remote.api.RegisterApi;
 import run.yigou.gxzy.manager.InputTextManager;
 import run.yigou.gxzy.manager.account.AccountDataManager;
+import run.yigou.gxzy.manager.Callback;
 import com.hjq.widget.view.CountdownView;
 import com.hjq.widget.view.SubmitButton;
 
@@ -145,7 +146,7 @@ public final class RegisterActivity extends AppActivity
             // 使用 AccountDataManager 封装的网络请求
             mAccountDataManager.sendRegisterSmsCode(this,
                     mPhoneView.getText().toString(),
-                    new AccountDataManager.Callback<Void>() {
+                    new Callback<Void>() {
                         @Override
                         public void onSuccess(Void data) {
                             toast(R.string.common_code_send_hint);
@@ -243,7 +244,7 @@ public final class RegisterActivity extends AppActivity
                     mPhoneView.getText().toString(),
                     mCodeView.getText().toString(),
                     mFirstPassword.getText().toString(),
-                    new AccountDataManager.Callback<RegisterApi.Bean>() {
+                    new Callback<RegisterApi.Bean>() {
                         @Override
                         public void onSuccess(RegisterApi.Bean data) {
                             mCommitView.showProgress();

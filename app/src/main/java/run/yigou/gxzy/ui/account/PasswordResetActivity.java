@@ -17,6 +17,7 @@ import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.manager.InputTextManager;
 import run.yigou.gxzy.manager.account.AccountDataManager;
+import run.yigou.gxzy.manager.Callback;
 import run.yigou.gxzy.ui.dialog.TipsDialog;
 
 /**
@@ -115,7 +116,7 @@ public final class PasswordResetActivity extends AppActivity
                     mPhoneNumber,
                     mVerifyCode,
                     mFirstPassword.getText().toString(),
-                    new AccountDataManager.Callback<Void>() {
+                    new Callback<Void>() {
                         @Override
                         public void onSuccess(Void data) {
                             new TipsDialog.Builder(getActivity())

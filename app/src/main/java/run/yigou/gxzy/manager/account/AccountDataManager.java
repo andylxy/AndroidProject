@@ -26,6 +26,7 @@ import run.yigou.gxzy.data.remote.api.VerifyCodeApi;
 import run.yigou.gxzy.data.remote.api.VierCode;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.manager.Callback;
 
 import java.io.File;
 
@@ -42,13 +43,13 @@ import java.io.File;
  * <p>使用示例：
  * <pre>
  * AccountDataManager.getInstance().login(this, account, password, vcode,
- *     new AccountDataManager.Callback<LoginApi.Bean>() {
- *         @Override
+ *     new Callback&lt;LoginApi.Bean&gt;() {
+ *         &#64;Override
  *         public void onSuccess(LoginApi.Bean data) {
  *             // 处理成功
  *         }
  *         
- *         @Override
+ *         &#64;Override
  *         public void onError(Exception e) {
  *             // 处理失败
  *         }
@@ -341,17 +342,5 @@ public class AccountDataManager {
                         callback.onError(e);
                     }
                 });
-    }
-    
-    // ========== 回调接口 ==========
-    
-    /**
-     * 统一回调接口
-     * 
-     * @param <T> 数据类型
-     */
-    public interface Callback<T> {
-        void onSuccess(T data);
-        void onError(Exception e);
     }
 }
