@@ -5,10 +5,55 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.widget.Toast;
 
+import io.noties.markwon.Markwon;
+import io.noties.markwon.core.CorePlugin;
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
+import io.noties.markwon.ext.tables.TablePlugin;
+import io.noties.markwon.ext.tasklist.TaskListPlugin;
+import io.noties.markwon.html.HtmlPlugin;
+import io.noties.markwon.image.ImagesPlugin;
+import io.noties.markwon.linkify.LinkifyPlugin;
+
 /**
  * Markdown 工具类
+ * 提供 Markdown 文本转换和 Markwon 渲染器实例的共享工厂方法
  */
 public class MarkdownUtils {
+
+    private static volatile Markwon sMarkwon;
+
+    /**
+     * 获取 Markwon 单例实例（线程安全）
+     * 使用双重检查锁定避免重复初始化
+     * 
+     * @param context Context 对象
+     * @return Markwon 实例
+     */
+    public static Markwon getMarkwon(Context context) {
+        if (sMarkwon == null) {
+            synchronized (MarkdownUtils.class) {
+                if (sMarkwon == null) {
+                    sMarkwon = Markwon.builder(context)
+                            .usePlugin(CorePlugin.create())
+                            .usePlugin(HtmlPlugin.create())
+                            .usePlugin(LinkifyPlugin.create())
+                            .usePlugin(StrikethroughPlugin.create())
+                            .usePlugin(TablePlugin.create(context))
+                            .usePlugin(TaskListPlugin.create(context))
+                            .usePlugin(ImagesPlugin.create())
+                            .build();
+                }
+            }
+        }
+        return sMarkwon;
+    }
+    
+    /**
+     * 重置 Markwon 实例（用于测试或配置变更）
+     */
+    public static void resetMarkwon() {
+        sMarkwon = null;
+    }
 
     // 预编译正则表达式
     private static final java.util.regex.Pattern CODE_BLOCK = java.util.regex.Pattern.compile("```[\\s\\S]*?```");

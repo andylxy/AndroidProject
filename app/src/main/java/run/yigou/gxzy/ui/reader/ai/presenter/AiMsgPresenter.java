@@ -5,8 +5,10 @@ import android.os.Looper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import run.yigou.gxzy.data.local.entity.ChatMessageBean;
 import run.yigou.gxzy.data.local.entity.ChatSessionBean;
@@ -16,6 +18,10 @@ import run.yigou.gxzy.manager.ai.ChatSessionManager;
 import run.yigou.gxzy.ui.reader.ai.contract.AiMsgContract;
 import run.yigou.gxzy.utils.DateHelper;
 
+/**
+ * AI 消息 Presenter
+ * 负责：会话管理、消息收发、总结生成
+ */
 public class AiMsgPresenter implements AiMsgContract.Presenter {
 
     private static final String TAG = "AiMsgPresenter";
@@ -25,10 +31,42 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
     // UI 更新节流相关
     private final Handler uiUpdateHandler = new Handler(Looper.getMainLooper());
     private Runnable answerUpdateRunnable = null;
-    private static final long UI_UPDATE_INTERVAL = 100; // 降低到 100ms，提高流畅度，避免一次性堆积太多
+    private static final long UI_UPDATE_INTERVAL_MS = 100;
     
-    @android.annotation.SuppressLint("SimpleDateFormat")
-    private final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+    // SimpleDateFormat 线程安全：使用 ThreadLocal 确保每个线程独立实例
+    private final ThreadLocal<SimpleDateFormat> sdf = ThreadLocal.withInitial(
+        () -> new SimpleDateFormat("HH:mm", Locale.getDefault())
+    );
+    
+    // 会话相关常量
+    private static final String SESSION_NEW_TITLE = "新对话";
+    private static final String SESSION_PREVIEW_PREFIX = "我: ";
+    private static final String SESSION_DEFAULT_TITLE = "AI助手";
+    private static final String SYSTEM_MESSAGE_PREFIX = "开始新的对话 ";
+    
+    // 消息相关常量
+    private static final String THINKING_CONTENT = "正在思考...";
+    private static final String SUMMARY_NICK = "会话总结";
+    
+    // 总结相关常量
+    private static final String SUMMARY_TAG_LATEST = "[最近历史总结]";
+    private static final String SUMMARY_TAG_ALL = "[全部历史总结]";
+    private static final String SUMMARY_CONTENT_PREFIX = "\n\n[历史总结]:\n";
+    private static final String SUMMARY_SEPARATOR = "\n\n---\n\n";
+    
+    // 错误提示常量
+    private static final String ERROR_SESSION_CHECK_FAIL = "会话检查失败: ";
+    private static final String ERROR_CREATE_SESSION_FAIL = "创建会话失败: ";
+    private static final String ERROR_NO_SESSION = "请先选择一个会话";
+    private static final String ERROR_NO_MESSAGES = "当前会话没有消息";
+    private static final String ERROR_SUMMARY_FAIL = "生成总结失败: ";
+    private static final String ERROR_REQUEST_FAIL = "请求出错: ";
+    private static final String TOAST_SESSION_CLEARED = "所有会话已清空";
+    private static final String TOAST_SUMMARY_SAVED = "总结已保存";
+    
+    // 集合索引常量
+    private static final int FIRST_INDEX = 0;
+    private static final int LAST_INDEX_OFFSET = 1;
 
     public AiMsgPresenter(AiMsgContract.View view) {
         this.mView = view;
@@ -107,27 +145,27 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
                 ChatSessionManager.getInstance().saveLastSessionId(session.getId());
                 
                 mView.clearMessages();
-                mView.updateTitle("新对话");
+                mView.updateTitle(SESSION_NEW_TITLE);
                 mView.updateCurrentSession(currentSession); // 通知 View 更新状态
                 
                 // 添加系统消息
-                String time = sdf.format(new Date());
+                String time = sdf.get().format(new Date());
                 ChatMessageBean systemMessage = new ChatMessageBean(
                         ChatMessageBean.TYPE_SYSTEM,
                         null,
                         null,
-                        "开始新的对话 " + time);
+                        SYSTEM_MESSAGE_PREFIX + time);
                 systemMessage.setCreateDate(DateHelper.getSeconds1());
                 systemMessage.setIsDelete(ChatMessageBean.IS_Delete_NO);
                 mView.appendMessage(systemMessage);
                 
                 // 刷新侧边栏
-                mView.showSessionList(ChatSessionManager.getInstance().getAllSessionsSorted());
+                refreshSessionList();
             }
 
             @Override
             public void onFailure(String error) {
-                mView.showError("创建会话失败: " + error);
+                mView.showError(ERROR_CREATE_SESSION_FAIL + error);
             }
         });
     }
@@ -136,14 +174,7 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
     public void sendMessage(String content) {
         if (content == null || content.trim().isEmpty()) return;
         
-        String time = sdf.format(new Date());
-
-        // 如果当前没有会话，创建一个新的会话
-        if (currentSession == null) {
-            // 这里应该是一个异步过程，但在 sendMsg 逻辑中通常是先创建临时的
-            // 为了简化，我们假设 createNewSession 已经调用过或在这里同步创建
-            // 但 AiChatManager.checkSessionAndExecute 会处理 ID 申请
-        }
+        String time = sdf.get().format(new Date());
 
         // 确保会话已保存到数据库 (为了确保有 ID)
         ensureSessionSaved();
@@ -159,7 +190,7 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
 
             @Override
             public void onFailure(String error) {
-                mView.showError("会话检查失败: " + error);
+                mView.showError(ERROR_SESSION_CHECK_FAIL + error);
             }
         });
     }
@@ -168,8 +199,8 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
         if (currentSession == null) {
             // 创建临时的内存 Session
             currentSession = new ChatSessionBean();
-            currentSession.setTitle("新对话");
-            currentSession.setPreview("新对话");
+            currentSession.setTitle(SESSION_NEW_TITLE);
+            currentSession.setPreview(SESSION_NEW_TITLE);
             currentSession.setCreateTime(DateHelper.getSeconds1());
             currentSession.setUpdateTime(DateHelper.getSeconds1());
             currentSession.setIsDelete(ChatSessionBean.IS_Delete_NO);
@@ -181,17 +212,14 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
             ChatSessionManager.getInstance().saveLastSessionId(sessionId);
             mView.updateTitle(currentSession.getTitle());
             mView.updateCurrentSession(currentSession); // 通知 View 更新状态
-            mView.showSessionList(ChatSessionManager.getInstance().getAllSessionsSorted());
+            refreshSessionList();
         }
     }
 
     private void executeSendMessage(String result, String time) {
         // 处理系统消息
         ChatMessageBean sysMsg = ChatSessionManager.getInstance().checkAndAddSystemMessage(
-                currentSession.getId(), time, new ArrayList<>()); // 这里无法获取 Adapter 数据，传空列表或需要调整 Manager 接口
-        // 注意：checkAndAddSystemMessage 依赖已有的消息列表来判断是否重复添加时间戳
-        // 由于 Presenter 不直接持有 Adapter 数据，这里可能需要优化。
-        // 暂时略过系统时间消息的去重逻辑，或者总是添加
+                currentSession.getId(), time, Collections.emptyList());
         if (sysMsg != null) {
              mView.appendMessage(sysMsg);
         }
@@ -208,23 +236,23 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
             if (summaries != null && !summaries.isEmpty()) {
                 StringBuilder summaryContent = new StringBuilder();
                 if (useLatestSummary) {
-                    ChatSummaryBean latestSummary = summaries.get(0);
+                    ChatSummaryBean latestSummary = summaries.get(FIRST_INDEX);
                     if (latestSummary.getContent() != null) {
                         summaryContent.append(latestSummary.getContent());
                     }
-                    summaryTag = "[最近历史总结]";
+                    summaryTag = SUMMARY_TAG_LATEST;
                 } else {
-                    for (int i = summaries.size() - 1; i >= 0; i--) {
+                    for (int i = summaries.size() - LAST_INDEX_OFFSET; i >= FIRST_INDEX; i--) {
                         ChatSummaryBean summary = summaries.get(i);
                         if (summary.getContent() != null) {
-                            if (summaryContent.length() > 0) summaryContent.append("\n\n---\n\n");
+                            if (summaryContent.length() > 0) summaryContent.append(SUMMARY_SEPARATOR);
                             summaryContent.append(summary.getContent());
                         }
                     }
-                    summaryTag = "[全部历史总结]";
+                    summaryTag = SUMMARY_TAG_ALL;
                 }
                 if (summaryContent.length() > 0) {
-                    messageToSend = result + "\n\n[历史总结]:\n" + summaryContent.toString();
+                    messageToSend = result + SUMMARY_CONTENT_PREFIX + summaryContent.toString();
                 }
             }
         }
@@ -245,10 +273,10 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
         mView.appendMessage(sendMsg);
 
         // 更新会话
-        currentSession.setPreview("我: " + result);
+        currentSession.setPreview(SESSION_PREVIEW_PREFIX + result);
         currentSession.setUpdateTime(DateHelper.getSeconds1());
         ChatSessionManager.getInstance().updateSession(currentSession);
-        mView.showSessionList(ChatSessionManager.getInstance().getAllSessionsSorted()); // 刷新侧边栏预览
+        refreshSessionList(); // 刷新侧边栏预览
 
         // 2. 创建思考中消息
         ChatMessageBean thinkingMsg = new ChatMessageBean(ChatMessageBean.TYPE_THINKING, "Ai", "", "正在思考...");
@@ -280,7 +308,7 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
             mView.clearMessages();
             loadAllSessions(); // 重新加载，可能会创建新会话或选中下一个
         } else {
-            mView.showSessionList(ChatSessionManager.getInstance().getAllSessionsSorted());
+            refreshSessionList();
         }
     }
 
@@ -288,7 +316,7 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
     public void renameSession(ChatSessionBean session, String newTitle) {
         session.setTitle(newTitle);
         ChatSessionManager.getInstance().updateSession(session);
-        mView.showSessionList(ChatSessionManager.getInstance().getAllSessionsSorted());
+        refreshSessionList();
         if (currentSession != null && currentSession.getId().equals(session.getId())) {
             mView.updateTitle(newTitle);
         }
@@ -299,9 +327,9 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
         ChatSessionManager.getInstance().clearAllSessions();
         currentSession = null;
         mView.clearMessages();
-        mView.updateTitle("AI助手");
-        mView.showSessionList(new ArrayList<>());
-        mView.showError("所有会话已清空");
+        mView.updateTitle(SESSION_DEFAULT_TITLE);
+        mView.showSessionList(Collections.emptyList());
+        mView.showError(TOAST_SESSION_CLEARED);
     }
 
     @Override
@@ -313,13 +341,13 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
     @Override
     public void generateSummary() {
         if (currentSession == null) {
-            mView.showError("请先选择一个会话");
+            mView.showError(ERROR_NO_SESSION);
             return;
         }
         
         List<ChatMessageBean> messages = ChatSessionManager.getInstance().getMessagesForSession(currentSession);
         if (messages == null || messages.isEmpty()) {
-            mView.showError("当前会话没有消息");
+            mView.showError(ERROR_NO_MESSAGES);
             return;
         }
 
@@ -329,7 +357,7 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
         // 创建思考消息
         final ChatMessageBean thinkingMsg = new ChatMessageBean();
         thinkingMsg.setType(ChatMessageBean.TYPE_THINKING);
-        thinkingMsg.setContent("正在思考...");
+        thinkingMsg.setContent(THINKING_CONTENT);
         thinkingMsg.setNick("Ai");
         thinkingMsg.setCreateDate(DateHelper.getSeconds1());
         thinkingMsg.setSessionId(currentSession.getId());
@@ -343,7 +371,7 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
         final ChatMessageBean summaryMsg = new ChatMessageBean();
         summaryMsg.setType(ChatMessageBean.TYPE_SUMMARY);
         summaryMsg.setContent("");
-        summaryMsg.setNick("会话总结");
+        summaryMsg.setNick(SUMMARY_NICK);
         summaryMsg.setCreateDate(DateHelper.getSeconds1());
         summaryMsg.setSessionId(currentSession.getId());
         summaryMsg.setIsDelete(ChatMessageBean.IS_Delete_NO);
@@ -359,7 +387,7 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
             public void onThinking(String content) {
                 uiUpdateHandler.post(() -> {
                     String current = thinkingMsg.getContent();
-                    if ("正在思考...".equals(current)) current = "";
+                    if (THINKING_CONTENT.equals(current)) current = "";
                     thinkingMsg.setContent(current + content);
                     mView.updateMessage(thinkingMsg);
                 });
@@ -367,7 +395,7 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
 
             @Override
             public void onAnswerStart(ChatMessageBean answerMessage) {
-                // 忽略
+                // 总结生成不需要处理 answerStart
             }
 
             @Override
@@ -384,8 +412,6 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
                 }
                 
                 // 节流更新
-                // 这里为了简单，直接复用 scheduleAnswerUIUpdate 逻辑，或者直接更新
-                // 原逻辑有节流，这里也应该有
                 uiUpdateHandler.post(() -> {
                     summaryMsg.setContent(summaryContent.toString());
                     mView.updateMessage(summaryMsg);
@@ -414,7 +440,7 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
                 uiUpdateHandler.post(() -> {
                      summaryMsg.setStreaming(false);
                      mView.updateMessage(summaryMsg);
-                     mView.showError("生成总结失败: " + error);
+                     mView.showError(ERROR_SUMMARY_FAIL + error);
                 });
             }
         });
@@ -432,20 +458,19 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
         summary.setIsDelete(ChatSummaryBean.IS_Delete_NO);
 
         ChatSessionManager.getInstance().saveSummary(summary);
-        mView.showError("总结已保存"); // Toast
-        // 原逻辑会显示 Dialog，这个 Dialog 属于 View 层，可以在 View 实现 adoptSummary 成功后的回调
-        // 这里 Presenter 只负责保存。
-        // 或者 View 层直接处理？原逻辑是 ChatSummaryHelper 处理的。
-        // 我们保留 ChatSummaryHelper 在 View 层，Presenter 负责数据保存。
-        // 这里 Presenter 保存完后，其实不需要回调 View 显示 Dialog，因为原逻辑就是保存后显示。
-        // 也许 adoptSummary 应该由 View 调用 Presenter 保存，然后 View 自己显示 Dialog。
+        mView.showError(TOAST_SUMMARY_SAVED);
     }
 
     @Override
     public void onDestroy() {
-        if (uiUpdateHandler != null) {
-            uiUpdateHandler.removeCallbacksAndMessages(null);
-        }
+        uiUpdateHandler.removeCallbacksAndMessages(null);
+    }
+    
+    /**
+     * 刷新侧边栏会话列表
+     */
+    private void refreshSessionList() {
+        mView.showSessionList(ChatSessionManager.getInstance().getAllSessionsSorted());
     }
     
     // ================= Internal Helper Classes =================
@@ -482,7 +507,7 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
             if (answerMessage == null) return;
 
             if (useThrottle) {
-                scheduleAnswerUIUpdate(answerMessage);
+                scheduleAnswerUIUpdate(answerMessage, UI_UPDATE_INTERVAL_MS);
             } else {
                 uiUpdateHandler.post(() -> {
                     mView.updateMessage(answerMessage);
@@ -501,9 +526,6 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
                 thinkingMessage.setThinkingCollapsed(true);
                 mView.updateMessage(thinkingMessage);
                 
-                // 确保 answerMessage 是最新的状态（如果用了节流，可能 content 还没更新进对象，但引用是同一个）
-                // 这里的 content 是在 Manager 里 append 的，所以对象里的 content 是新的。
-                // 主要是通知 View 刷新一下最终状态（比如 Markdown 渲染）
                 mView.updateMessage(answerMessage);
                 mView.scrollToBottom();
             });
@@ -512,14 +534,12 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
         @Override
         public void onError(String error) {
             uiUpdateHandler.post(() -> {
-                mView.showError("请求出错: " + error);
-                // 刷新界面以显示可能的错误状态
-                // mView.showMessages(ChatSessionManager.getInstance().getMessagesForSession(currentSession));
+                mView.showError(ERROR_REQUEST_FAIL + error);
             });
         }
     }
 
-    private void scheduleAnswerUIUpdate(ChatMessageBean answerMessage) {
+    private void scheduleAnswerUIUpdate(ChatMessageBean answerMessage, long interval) {
         if (answerUpdateRunnable != null) {
             uiUpdateHandler.removeCallbacks(answerUpdateRunnable);
         }
@@ -530,6 +550,6 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
                 answerUpdateRunnable = null;
             });
         };
-        uiUpdateHandler.postDelayed(answerUpdateRunnable, UI_UPDATE_INTERVAL);
+        uiUpdateHandler.postDelayed(answerUpdateRunnable, interval);
     }
 }

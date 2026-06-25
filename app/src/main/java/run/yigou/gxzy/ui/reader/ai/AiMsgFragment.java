@@ -27,13 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.noties.markwon.Markwon;
-import io.noties.markwon.core.CorePlugin;
-import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
-import io.noties.markwon.ext.tables.TablePlugin;
-import io.noties.markwon.ext.tasklist.TaskListPlugin;
-import io.noties.markwon.html.HtmlPlugin;
-import io.noties.markwon.image.ImagesPlugin;
-import io.noties.markwon.linkify.LinkifyPlugin;
 import run.yigou.gxzy.event.ChatMessageBeanEvent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.TitleBarFragment;
@@ -54,6 +47,23 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
         implements OnTitleBarListener, AiMsgContract.View {
 
     private static final String TAG = "AiMsgFragment";
+    
+    // 滚动相关常量
+    private static final int SCROLL_EXTRA_DISTANCE = 10000;
+    private static final int SCROLL_DELAY_MS = 100;
+    private static final int TYPEWRITER_SCROLL_DISTANCE = 200;
+    
+    // PopupWindow 样式常量
+    private static final int POPUP_CORNER_RADIUS = 8;
+    private static final int POPUP_STROKE_WIDTH = 1;
+    private static final int POPUP_LAYOUT_PADDING = 4;
+    private static final int POPUP_ITEM_PADDING_HORIZONTAL = 24;
+    private static final int POPUP_ITEM_PADDING_VERTICAL = 16;
+    private static final float POPUP_ITEM_TEXT_SIZE = 14;
+    private static final int POPUP_ELEVATION = 4;
+    
+    // Toast 文本常量
+    private static final String TOAST_LOADING = "处理中...";
     
     private RecyclerView rv_chat;
     
@@ -80,7 +90,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
     protected void initView() {
         EasyLog.print(TAG, "initView: Starting initialization (MVP Version)");
         
-        initMarkwon();
         initTitleBar();
         initChatRecyclerView();
         initHelpers();
@@ -97,6 +106,11 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
 
     private void initHelpers() {
         View rootView = rv_chat.getRootView();
+        
+        // 获取共享 Markwon 实例
+        Context context = getContext();
+        if (context == null) return;
+        mMarkwon = MarkdownUtils.getMarkwon(context);
 
         // Sidebar Helper
         sidebarHelper = new ChatSidebarHelper(getContext(), rootView, new ChatSidebarHelper.OnSidebarActionListener() {
@@ -112,13 +126,8 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
 
             @Override
             public void onSessionTitleEdited(ChatSessionBean session) {
-                // 原逻辑是在 Helper 里弹窗，确定后回调这里
-                // 这里我们假设 Helper 传递回了 session 对象（已修改标题）或者在这里弹窗？
-                // 查看 ChatSidebarHelper 源码（未提供），通常回调意味着“用户完成了编辑”
-                // 我们假设 session 对象已经包含了新标题，或者我们需要弹窗让用户输入。
-                // 根据原代码逻辑：sidebarHelper.refreshChatHistorySidebar(currentSession);
-                // 应该是 Helper 内部处理了编辑 UI，回调通知 Fragment 更新数据。
-                // 我们这里调用 Presenter 更新数据库。
+                // Helper 内部处理编辑 UI，回调时 session 已包含新标题
+                // 调用 Presenter 更新数据库
                 mPresenter.renameSession(session, session.getTitle());
             }
 
@@ -155,18 +164,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
         
         // Input Helper
         inputHelper = new ChatInputHelper(getActivity(), rootView, message -> mPresenter.sendMessage(message));
-    }
-
-    private void initMarkwon() {
-        mMarkwon = Markwon.builder(getContext())
-                .usePlugin(CorePlugin.create())
-                .usePlugin(HtmlPlugin.create())
-                .usePlugin(LinkifyPlugin.create())
-                .usePlugin(StrikethroughPlugin.create())
-                .usePlugin(TablePlugin.create(getContext()))
-                .usePlugin(TaskListPlugin.create(getContext()))
-                .usePlugin(ImagesPlugin.create())
-                .build();
     }
 
     private void initTitleBar() {
@@ -288,34 +285,33 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
             int count = mChatAdapter.getItemCount();
             if (count > 0) {
                 rv_chat.smoothScrollToPosition(count - 1);
-                rv_chat.postDelayed(() -> rv_chat.smoothScrollBy(0, 10000), 100);
+                rv_chat.postDelayed(() -> rv_chat.smoothScrollBy(0, SCROLL_EXTRA_DISTANCE), SCROLL_DELAY_MS);
             }
         });
     }
 
     private void onTypewriterScroll() {
         if (rv_chat == null) return;
-        rv_chat.post(() -> rv_chat.smoothScrollBy(0, 200));
+        rv_chat.post(() -> rv_chat.smoothScrollBy(0, TYPEWRITER_SCROLL_DISTANCE));
     }
 
     @Override
     public void showLoading(boolean isShow) {
+        if (!isAdded() || getContext() == null) return;
+        
         if (isShow) {
-            // showDialog(); // 如果有加载框
-            Toast.makeText(getContext(), "处理中...", Toast.LENGTH_SHORT).show();
-        } else {
-            // hideDialog();
+            Toast.makeText(getContext(), TOAST_LOADING, Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     public void showError(String msg) {
+        if (!isAdded() || getContext() == null) return;
         Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public Long getCurrentSessionId() {
-        // 暂时不需要，Presenter 自己维护
         return null;
     }
 
@@ -369,17 +365,19 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
         menuLayout.setOrientation(LinearLayout.VERTICAL);
         GradientDrawable background = new GradientDrawable();
         background.setColor(Color.WHITE);
-        background.setCornerRadius(8);
-        background.setStroke(1, Color.LTGRAY);
+        background.setCornerRadius(POPUP_CORNER_RADIUS);
+        background.setStroke(POPUP_STROKE_WIDTH, Color.LTGRAY);
         menuLayout.setBackground(background);
-        menuLayout.setPadding(4, 4, 4, 4);
+        menuLayout.setPadding(POPUP_LAYOUT_PADDING, POPUP_LAYOUT_PADDING, 
+                              POPUP_LAYOUT_PADDING, POPUP_LAYOUT_PADDING);
         
         final String[] menuItems = items;
         for (int i = 0; i < items.length; i++) {
             TextView menuItem = new TextView(getContext());
             menuItem.setText(items[i]);
-            menuItem.setPadding(24, 16, 24, 16);
-            menuItem.setTextSize(14);
+            menuItem.setPadding(POPUP_ITEM_PADDING_HORIZONTAL, POPUP_ITEM_PADDING_VERTICAL,
+                                POPUP_ITEM_PADDING_HORIZONTAL, POPUP_ITEM_PADDING_VERTICAL);
+            menuItem.setTextSize(POPUP_ITEM_TEXT_SIZE);
             menuItem.setTextColor(Color.BLACK);
             menuItem.setBackgroundResource(android.R.drawable.list_selector_background);
             menuLayout.addView(menuItem);
@@ -393,7 +391,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
         );
         popupWindow.setOutsideTouchable(true);
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        popupWindow.setElevation(4);
+        popupWindow.setElevation(POPUP_ELEVATION);
         
         for (int i = 0; i < menuLayout.getChildCount(); i++) {
             final int index = i;
@@ -413,7 +411,10 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
             });
         }
         
-        View decorView = getActivity().getWindow().getDecorView();
+        Activity activity = getActivity();
+        if (activity == null) return;
+        
+        View decorView = activity.getWindow().getDecorView();
         int[] location = new int[2];
         decorView.getLocationOnScreen(location);
         int popupX = (int) x - location[0];
@@ -430,7 +431,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
     }
 
     @Subscribe(priority = 1)
-    public void ChatMessageEvent(ChatMessageBeanEvent event) {
+    public void onChatMessageEvent(ChatMessageBeanEvent event) {
         ThreadUtil.runOnUiThread(() -> {
             if (event.isClear()) {
                 mPresenter.start(); // 重新加载
@@ -442,7 +443,22 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
     public void onDestroy() {
         if (mPresenter != null) {
             mPresenter.onDestroy();
+            mPresenter = null;
         }
+        
+        // 清理 Adapter 数据
+        if (mChatAdapter != null) {
+            mChatAdapter.clearData();
+        }
+        
+        // 清理 Helper 引用，防止内存泄漏
+        sidebarHelper = null;
+        summaryHelper = null;
+        inputHelper = null;
+        
+        // 清理 Markwon 引用
+        mMarkwon = null;
+        
         XEventBus.getDefault().unregister(this);
         super.onDestroy();
     }
