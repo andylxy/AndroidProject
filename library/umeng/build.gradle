@@ -27,10 +27,12 @@ android {
 
 // 友盟统计集成文档：https://developer.umeng.com/docs/119267/detail/118584
 // 友盟社会化集成文档：https://developer.umeng.com/docs/128606/detail/193879
+// 16 KB 页面对齐状态：截至 2025-06，友盟 libumeng-spy.so 仍存在 16 KB 对齐问题
+// 官方最新 9.9.0 版本仍在修复中，先升级到最新版，如仍有问题需考虑移除或替换
 dependencies {
-    // 友盟公共库
-    api 'com.umeng.umsdk:common:9.4.0'
-    api 'com.umeng.umsdk:asms:1.2.3'
+    // 友盟公共库（升级至最新版本以获取 16 KB 对齐修复）
+    api 'com.umeng.umsdk:common:9.9.0'
+    api 'com.umeng.umsdk:asms:1.8.5'
     // 友盟分享库
     api 'com.umeng.umsdk:share-core:7.1.5'
     // 友盟微信分享
