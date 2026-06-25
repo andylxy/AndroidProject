@@ -84,6 +84,12 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         implements TabAdapter.OnTabListener, ViewPager.OnPageChangeListener,
         XCollapsingToolbarLayout.OnScrimsListener, BaseAdapter.OnItemClickListener {
 
+    /** 应用数据管理器 */
+    private final run.yigou.gxzy.manager.AppDataManager mAppDataManager = run.yigou.gxzy.manager.AppDataManager.getInstance();
+    
+    /** 旧版应用数据管理器（兼容代码） */
+    private final run.yigou.gxzy.app.AppDataManager mOldAppDataManager = run.yigou.gxzy.app.AppDataManager.getInstance();
+
     private XCollapsingToolbarLayout mCollapsingToolbarLayout;
     private Toolbar mToolbar;
 
@@ -237,9 +243,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
         
         // 3. 检查数据加载状态
-        run.yigou.gxzy.app.AppDataManager dataManager = run.yigou.gxzy.app.AppDataManager.getInstance();
-        
-        if (dataManager.isAllDataLoaded()) {
+        if (mOldAppDataManager.isAllDataLoaded()) {
             // 数据已加载，直接从 GlobalDataHolder 恢复 UI（屏幕翻转、Fragment 重建场景）
             EasyLog.print("HomeFragment", "✅ 数据已加载，从 GlobalDataHolder 恢复 UI");
             loadNavFromGlobalDataHolder();
@@ -352,8 +356,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
      * <p>通过 DataManager 统一加载所有业务数据。
      */
     private void loadDataWithLifecycle() {
-        run.yigou.gxzy.app.AppDataManager.getInstance().loadAllDataIfNeeded(this, 
-            new run.yigou.gxzy.app.AppDataManager.DataLoadCallback() {
+        mAppDataManager.loadAllDataIfNeeded(this, 
+            new run.yigou.gxzy.manager.AppDataManager.DataLoadCallback() {
                 @Override
                 public void onComplete() {
                     EasyLog.print("HomeFragment", "✅ 所有数据加载完成，更新 UI");
@@ -434,7 +438,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mTabAdapter.clearData();
         
         // 重置 DataManager 状态
-        run.yigou.gxzy.app.AppDataManager.getInstance().reset();
+        mAppDataManager.reset();
         
         // 重新加载所有数据
         loadDataWithLifecycle();

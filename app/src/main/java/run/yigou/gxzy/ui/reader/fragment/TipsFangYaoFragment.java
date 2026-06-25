@@ -31,6 +31,9 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
 
     public static final String TAG = "TipsFangYaoFragment";
     
+    /** 书籍数据管理器 */
+    private final BookDataManager mBookDataManager = BookDataManager.getInstance();
+    
     /**
      * 列表展示类型（方剂/药物/汉制单位）
      */
@@ -202,7 +205,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
         switch (contentType) {
             case ContentTypes.FANG:
                 // 获取当前书籍的方剂数据
-                BookData bookData = BookDataManager.getInstance().getBookData(bookId);
+                BookData bookData = mBookDataManager.getBookData(bookId);
                 ChapterData fangData = bookData.getFangData();
                 gvList = new ArrayList<>();
                 if (fangData != null) {

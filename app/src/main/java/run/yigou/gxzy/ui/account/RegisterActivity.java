@@ -16,16 +16,11 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.data.remote.api.GetCodeApi;
 import run.yigou.gxzy.data.remote.api.RegisterApi;
-import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
-import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
+import run.yigou.gxzy.manager.account.AccountDataManager;
 import com.hjq.widget.view.CountdownView;
 import com.hjq.widget.view.SubmitButton;
-
-import okhttp3.Call;
 
 /**
  *    author : Android ???
@@ -38,6 +33,9 @@ public final class RegisterActivity extends AppActivity
 
     private static final String INTENT_KEY_PHONE = "phone";
     private static final String INTENT_KEY_PASSWORD = "password";
+
+    /** 账户数据管理器 */
+    private final AccountDataManager mAccountDataManager = AccountDataManager.getInstance();
 
     @Log
     public static void start(BaseActivity activity, String phone, String password, OnRegisterListener listener) {
@@ -116,13 +114,15 @@ public final class RegisterActivity extends AppActivity
                 return;
             }
 
+            // 临时注释：TODO 待网络接口就绪后恢复
+            /*
             if (true) {
                 toast(R.string.common_code_send_hint);
                 mCountdownView.start();
                 return;
             }
 
-            // ?????
+            // 获取验证码
             EasyHttp.post(this)
                     .api(new GetCodeApi()
                             .setPhone(mPhoneView.getText().toString()))
@@ -138,6 +138,23 @@ public final class RegisterActivity extends AppActivity
                         public void onFail(Exception e) {
                             super.onFail(e);
                             mCountdownView.start();
+                        }
+                    });
+            */
+            
+            // 使用 AccountDataManager 封装的网络请求
+            mAccountDataManager.sendRegisterSmsCode(this,
+                    mPhoneView.getText().toString(),
+                    new AccountDataManager.Callback<Void>() {
+                        @Override
+                        public void onSuccess(Void data) {
+                            toast(R.string.common_code_send_hint);
+                            mCountdownView.start();
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            toast("发送验证码失败：" + e.getMessage());
                         }
                     });
         } else if (view == mCommitView) {
@@ -166,6 +183,8 @@ public final class RegisterActivity extends AppActivity
             // ?????
             hideKeyboard(getCurrentFocus());
 
+            // 临时注释：TODO 待网络接口就绪后恢复
+            /*
             if (true) {
                 mCommitView.showProgress();
                 postDelayed(() -> {
@@ -180,7 +199,7 @@ public final class RegisterActivity extends AppActivity
                 return;
             }
 
-            // ????
+            // 注册
             EasyHttp.post(this)
                     .api(new RegisterApi()
                             .setPhone(mPhoneView.getText().toString())
@@ -215,6 +234,36 @@ public final class RegisterActivity extends AppActivity
                             postDelayed(() -> {
                                 mCommitView.showError(3000);
                             }, 1000);
+                        }
+                    });
+            */
+            
+            // 使用 AccountDataManager 封装的网络请求
+            mAccountDataManager.register(this,
+                    mPhoneView.getText().toString(),
+                    mCodeView.getText().toString(),
+                    mFirstPassword.getText().toString(),
+                    new AccountDataManager.Callback<RegisterApi.Bean>() {
+                        @Override
+                        public void onSuccess(RegisterApi.Bean data) {
+                            mCommitView.showProgress();
+                            postDelayed(() -> {
+                                mCommitView.showSucceed();
+                                postDelayed(() -> {
+                                    setResult(RESULT_OK, new Intent()
+                                            .putExtra(INTENT_KEY_PHONE, mPhoneView.getText().toString())
+                                            .putExtra(INTENT_KEY_PASSWORD, mFirstPassword.getText().toString()));
+                                    finish();
+                                }, 1000);
+                            }, 1000);
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            postDelayed(() -> {
+                                mCommitView.showError(3000);
+                            }, 1000);
+                            toast("注册失败：" + e.getMessage());
                         }
                     });
         }

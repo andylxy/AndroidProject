@@ -11,12 +11,8 @@ import android.widget.TextView;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.data.remote.api.GetCodeApi;
-import run.yigou.gxzy.data.remote.api.VerifyCodeApi;
-import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
-import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
+import run.yigou.gxzy.manager.account.AccountDataManager;
 import com.hjq.widget.view.CountdownView;
 
 /**
@@ -27,6 +23,9 @@ import com.hjq.widget.view.CountdownView;
  */
 public final class PasswordForgetActivity extends AppActivity
         implements TextView.OnEditorActionListener {
+
+    /** 账户数据管理器 */
+    private final AccountDataManager mAccountDataManager = AccountDataManager.getInstance();
 
     private EditText mPhoneView;
     private EditText mCodeView;
@@ -77,19 +76,22 @@ public final class PasswordForgetActivity extends AppActivity
                 return;
             }
 
-            // ?????
+            // 发送验证码
             hideKeyboard(getCurrentFocus());
 
-            // ?????
-            EasyHttp.post(this)
-                    .api(new GetCodeApi()
-                            .setPhone(mPhoneView.getText().toString()))
-                    .request(new HttpCallback<HttpData<Void>>(this) {
-
+            // 调用 AccountDataManager
+            mAccountDataManager.sendForgetPasswordSmsCode(this,
+                    mPhoneView.getText().toString(),
+                    new AccountDataManager.Callback<Void>() {
                         @Override
-                        public void onSucceed(HttpData<Void> data) {
+                        public void onSuccess(Void data) {
                             toast(R.string.common_code_send_hint);
                             mCountdownView.start();
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            toast("发送验证码失败：" + e.getMessage());
                         }
                     });
         } else if (view == mCommitView) {
@@ -112,17 +114,20 @@ public final class PasswordForgetActivity extends AppActivity
                 return;
             }
 
-            // ?????
-            EasyHttp.post(this)
-                    .api(new VerifyCodeApi()
-                            .setPhone(mPhoneView.getText().toString())
-                            .setCode(mCodeView.getText().toString()))
-                    .request(new HttpCallback<HttpData<Void>>(this) {
-
+            // 调用 AccountDataManager
+            mAccountDataManager.verifySmsCodeForForgetPassword(this,
+                    mPhoneView.getText().toString(),
+                    mCodeView.getText().toString(),
+                    new AccountDataManager.Callback<Void>() {
                         @Override
-                        public void onSucceed(HttpData<Void> data) {
+                        public void onSuccess(Void data) {
                             PasswordResetActivity.start(getActivity(), mPhoneView.getText().toString(), mCodeView.getText().toString());
                             finish();
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            toast("验证码校验失败：" + e.getMessage());
                         }
                     });
         }

@@ -15,12 +15,9 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.data.remote.api.PasswordApi;
-import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
+import run.yigou.gxzy.manager.account.AccountDataManager;
 import run.yigou.gxzy.ui.dialog.TipsDialog;
-import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
 
 /**
  *    author : Android ???
@@ -33,6 +30,9 @@ public final class PasswordResetActivity extends AppActivity
 
     private static final String INTENT_KEY_IN_PHONE = "phone";
     private static final String INTENT_KEY_IN_CODE = "code";
+
+    /** 账户数据管理器 */
+    private final AccountDataManager mAccountDataManager = AccountDataManager.getInstance();
 
     @Log
     public static void start(Context context, String phone, String code) {
@@ -97,6 +97,8 @@ public final class PasswordResetActivity extends AppActivity
             // ?????
             hideKeyboard(getCurrentFocus());
 
+            // 临时注释：TODO 待网络接口就绪后恢复
+            /*
             if (true) {
                 new TipsDialog.Builder(this)
                         .setIcon(TipsDialog.ICON_FINISH)
@@ -106,23 +108,27 @@ public final class PasswordResetActivity extends AppActivity
                         .show();
                 return;
             }
+            */
 
-            // ????
-            EasyHttp.post(this)
-                    .api(new PasswordApi()
-                            .setPhone(mPhoneNumber)
-                            .setCode(mVerifyCode)
-                            .setPassword(mFirstPassword.getText().toString()))
-                    .request(new HttpCallback<HttpData<Void>>(this) {
-
+            // 使用 AccountDataManager 封装的网络请求
+            mAccountDataManager.resetPassword(this,
+                    mPhoneNumber,
+                    mVerifyCode,
+                    mFirstPassword.getText().toString(),
+                    new AccountDataManager.Callback<Void>() {
                         @Override
-                        public void onSucceed(HttpData<Void> data) {
+                        public void onSuccess(Void data) {
                             new TipsDialog.Builder(getActivity())
                                     .setIcon(TipsDialog.ICON_FINISH)
                                     .setMessage(R.string.password_reset_success)
                                     .setDuration(2000)
                                     .addOnDismissListener(dialog -> finish())
                                     .show();
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            toast("重置密码失败：" + e.getMessage());
                         }
                     });
         }

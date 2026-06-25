@@ -45,8 +45,8 @@ import run.yigou.gxzy.data.remote.api.VierCode;
 import run.yigou.gxzy.data.remote.api.GetCodeApi;
 
 import run.yigou.gxzy.network.glide.GlideApp;
-import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
+import run.yigou.gxzy.manager.account.AccountDataManager;
 import com.hjq.base.KeyboardWatcher;
 import run.yigou.gxzy.ui.main.HomeFragment;
 import run.yigou.gxzy.ui.main.HomeActivity;
@@ -54,17 +54,12 @@ import run.yigou.gxzy.utils.Base64ConverBitmapHelper;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.wxapi.WXEntryActivity;
 
-import com.hjq.http.EasyHttp;
 import com.hjq.http.config.IRequestApi;
-import com.hjq.http.listener.HttpCallback;
 import com.hjq.umeng.Platform;
 import com.hjq.umeng.UmengClient;
 import com.hjq.umeng.UmengLogin;
 import com.hjq.widget.view.CountdownView;
 import com.hjq.widget.view.SubmitButton;
-
-
-import okhttp3.Call;
 
 
 /**
@@ -77,6 +72,9 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
 
     private static final String INTENT_KEY_IN_PHONE = "phone";
     private static final String INTENT_KEY_IN_PASSWORD = "password";
+
+    /** 账户数据管理器 */
+    private final AccountDataManager mAccountDataManager = AccountDataManager.getInstance();
 
 
     public static void start(Context context, String phone, String password) {
@@ -328,7 +326,9 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         // ?????
         hideKeyboard(getCurrentFocus());
 
-        // ?????
+        // 临时注释：TODO 待网络接口就绪后恢复
+        /*
+        // 获取验证码
         EasyHttp.post(this)
                 .api(new GetCodeApi()
                         .setPhone(phone))
@@ -345,6 +345,24 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                         super.onFail(e);
                         Log.e("LoginActivity", "Get SMS code failed: " + e.getMessage(), e);
                         toast("???????????????");
+                    }
+                });
+        */
+        
+        // 使用 AccountDataManager 封装的网络请求
+        mAccountDataManager.sendLoginSmsCode(this,
+                phone,
+                new AccountDataManager.Callback<Void>() {
+                    @Override
+                    public void onSuccess(Void data) {
+                        toast(R.string.common_code_send_hint);
+                        mCountdownView.start();
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Log.e("LoginActivity", "Get SMS code failed: " + e.getMessage(), e);
+                        toast("发送验证码失败：" + e.getMessage());
                     }
                 });
     }
@@ -463,15 +481,17 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     }
 
     private void login(IRequestApi requestApi) {
+        // 临时注释：TODO 待网络接口就绪后恢复
+        /*
         EasyHttp.post(this)
                 .api(requestApi)
                 .request(new HttpCallback<HttpData<LoginApi.Bean>>(this) {
-
+    
                     @Override
                     public void onStart(Call call) {
                         mCommitView.showProgress();
                     }
-
+    
                     @Override
                     public void onSucceed(HttpData<LoginApi.Bean> data) {
                         if (data == null || data.getData() == null) {
@@ -480,7 +500,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                             mCommitView.showError(3000);
                             return;
                         }
-                        
+                            
                         try {
                             // ??????
                             AppApplication.getApplication().mUserInfoToken = data.getData();
@@ -489,10 +509,10 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                             if (userLoginAccount != null && !userLoginAccount.isEmpty()) {
                                 UserInfo userInfo = DbService.getInstance().mUserInfoService.findUserInfoByLoginAccount(userLoginAccount);
                                 AppApplication.application.isLogin = true;
-                                
+                                    
                                 try {
                                     if (userInfo == null) {
-                                        // ????????????
+                                        // ????????
                                         DbService.getInstance().mUserInfoService.deleteAll();
                                         // ?????
                                         DbService.getInstance().mUserInfoService.addEntity(data.getData());
@@ -506,7 +526,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                                     toast("????????");
                                 }
                             }
-                            
+                                
                             homeActivityStart();
                         } catch (Exception e) {
                             Log.e("LoginActivity", "Login success handler failed: " + e.getMessage(), e);
@@ -514,7 +534,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                             mCommitView.showError(3000);
                         }
                     }
-
+    
                     @Override
                     public void onFail(Exception e) {
                         super.onFail(e);
@@ -522,6 +542,64 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                         postDelayed(() -> {
                             mCommitView.showError(3000);
                         }, 1000);
+                    }
+                });
+        */
+            
+        // 使用 AccountDataManager 封装的网络请求
+        mAccountDataManager.login(this,
+                requestApi,
+                new AccountDataManager.Callback<LoginApi.Bean>() {
+                    @Override
+                    public void onSuccess(LoginApi.Bean data) {
+                        if (data == null) {
+                            Log.e("LoginActivity", "Login failed: data is empty or null");
+                            toast("登录返回数据为空");
+                            mCommitView.showError(3000);
+                            return;
+                        }
+                            
+                        try {
+                            // 保存登录信息
+                            AppApplication.getApplication().mUserInfoToken = data;
+                            // 更新数据库
+                            String userLoginAccount = data.getAccessKeyId();
+                            if (userLoginAccount != null && !userLoginAccount.isEmpty()) {
+                                UserInfo userInfo = DbService.getInstance().mUserInfoService.findUserInfoByLoginAccount(userLoginAccount);
+                                AppApplication.application.isLogin = true;
+                                    
+                                try {
+                                    if (userInfo == null) {
+                                        // 删除所有旧数据
+                                        DbService.getInstance().mUserInfoService.deleteAll();
+                                        // 添加新数据
+                                        DbService.getInstance().mUserInfoService.addEntity(data);
+                                    } else {
+                                        // 更新数据
+                                        DbService.getInstance().mUserInfoService.deleteEntity(data);
+                                    }
+                                } catch (Exception e) {
+                                    // 数据库操作失败
+                                    Log.e("LoginActivity", "Database operation failed: " + e.getMessage(), e);
+                                    toast("数据库操作失败");
+                                }
+                            }
+                                
+                            homeActivityStart();
+                        } catch (Exception e) {
+                            Log.e("LoginActivity", "Login success handler failed: " + e.getMessage(), e);
+                            toast("登录处理失败");
+                            mCommitView.showError(3000);
+                        }
+                    }
+    
+                    @Override
+                    public void onError(Exception e) {
+                        Log.e("LoginActivity", "Login request failed: " + e.getMessage(), e);
+                        postDelayed(() -> {
+                            mCommitView.showError(3000);
+                        }, 1000);
+                        toast("登录失败：" + e.getMessage());
                     }
                 });
     }
@@ -541,6 +619,8 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     }
 
     private void getLoginVcode() {
+        // 临时注释：TODO 待网络接口就绪后恢复
+        /*
         EasyHttp.get(this)
                 .api(new VierCode())
                 .request(new HttpCallback<HttpData<VierCode.Bean>>(this) {
@@ -572,6 +652,40 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                         super.onFail(e);
                         Log.e("LoginActivity", "Get verification code request failed: " + e.getMessage(), e);
                         toast("???????????????");
+                    }
+                });
+        */
+        
+        // 使用 AccountDataManager 封装的网络请求
+        mAccountDataManager.getLoginVcode(this,
+                new AccountDataManager.Callback<VierCode.Bean>() {
+                    @Override
+                    public void onSuccess(VierCode.Bean data) {
+                        try {
+                            if (data != null) {
+                                if (data.isCode()) {
+                                    String img = data.getImg();
+                                    if (!StringHelper.isEmpty(img)) {
+                                        Bitmap bitmap = Base64ConverBitmapHelper.getBase64ToImage(img);
+                                        setLoginVcode(bitmap);
+                                    }
+                                }
+                                mVierificationCode = data;
+                                setViewShow(mIvLoginAccount);
+                            } else {
+                                Log.e("LoginActivity", "Get verification code failed: data is null");
+                                toast("获取验证码失败");
+                            }
+                        } catch (Exception e) {
+                            Log.e("LoginActivity", "Get verification code failed: " + e.getMessage(), e);
+                            toast("获取验证码失败：" + e.getMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Log.e("LoginActivity", "Get verification code request failed: " + e.getMessage(), e);
+                        toast("获取验证码失败：" + e.getMessage());
                     }
                 });
     }

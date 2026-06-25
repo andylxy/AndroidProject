@@ -15,13 +15,9 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.data.remote.api.GetCodeApi;
-import run.yigou.gxzy.data.remote.api.PhoneApi;
-import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.InputTextManager;
+import run.yigou.gxzy.manager.account.AccountDataManager;
 import run.yigou.gxzy.ui.dialog.TipsDialog;
-import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
 import com.hjq.toast.Toaster;
 import com.hjq.widget.view.CountdownView;
 
@@ -35,6 +31,9 @@ public final class PhoneResetActivity extends AppActivity
         implements TextView.OnEditorActionListener {
 
     private static final String INTENT_KEY_IN_CODE = "code";
+
+    /** 账户数据管理器 */
+    private final AccountDataManager mAccountDataManager = AccountDataManager.getInstance();
 
     @Log
     public static void start(Context context, String code) {
@@ -93,13 +92,15 @@ public final class PhoneResetActivity extends AppActivity
                 return;
             }
 
+            // 临时注释：TODO 待网络接口就绪后恢复
+            /*
             if (true) {
                 toast(R.string.common_code_send_hint);
                 mCountdownView.start();
                 return;
             }
 
-            // ?????
+            // 获取验证码
             EasyHttp.post(this)
                     .api(new GetCodeApi()
                             .setPhone(mPhoneView.getText().toString()))
@@ -109,6 +110,23 @@ public final class PhoneResetActivity extends AppActivity
                         public void onSucceed(HttpData<Void> data) {
                             toast(R.string.common_code_send_hint);
                             mCountdownView.start();
+                        }
+                    });
+            */
+            
+            // 使用 AccountDataManager 封装的网络请求
+            mAccountDataManager.sendResetPhoneSmsCode(this,
+                    mPhoneView.getText().toString(),
+                    new AccountDataManager.Callback<Void>() {
+                        @Override
+                        public void onSuccess(Void data) {
+                            toast(R.string.common_code_send_hint);
+                            mCountdownView.start();
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            toast("发送验证码失败：" + e.getMessage());
                         }
                     });
         } else if (view == mCommitView) {
@@ -127,6 +145,8 @@ public final class PhoneResetActivity extends AppActivity
             // ?????
             hideKeyboard(getCurrentFocus());
 
+            // 临时注释：TODO 待网络接口就绪后恢复
+            /*
             if (true) {
                 new TipsDialog.Builder(this)
                         .setIcon(TipsDialog.ICON_FINISH)
@@ -153,6 +173,29 @@ public final class PhoneResetActivity extends AppActivity
                                     .setDuration(2000)
                                     .addOnDismissListener(dialog -> finish())
                                     .show();
+                        }
+                    });
+            */
+            
+            // 使用 AccountDataManager 封装的网络请求
+            mAccountDataManager.resetPhone(this,
+                    mVerifyCode,
+                    mPhoneView.getText().toString(),
+                    mCodeView.getText().toString(),
+                    new AccountDataManager.Callback<Void>() {
+                        @Override
+                        public void onSuccess(Void data) {
+                            new TipsDialog.Builder(getActivity())
+                                    .setIcon(TipsDialog.ICON_FINISH)
+                                    .setMessage(R.string.phone_reset_commit_succeed)
+                                    .setDuration(2000)
+                                    .addOnDismissListener(dialog -> finish())
+                                    .show();
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            toast("重置手机号失败：" + e.getMessage());
                         }
                     });
         }

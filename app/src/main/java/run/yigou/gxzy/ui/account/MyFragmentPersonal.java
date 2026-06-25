@@ -10,8 +10,6 @@ import android.widget.TextView;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.hjq.http.EasyHttp;
-import com.hjq.http.listener.HttpCallback;
 import run.yigou.gxzy.data.remote.model.FileContentResolver;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.widget.layout.SettingBar;
@@ -29,8 +27,8 @@ import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.ui.main.HomeFragment;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.UpdateImageApi;
+import run.yigou.gxzy.manager.account.AccountDataManager;
 import run.yigou.gxzy.network.glide.GlideApp;
-import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.ui.setting.AboutActivity;
 import run.yigou.gxzy.ui.media.activity.ImageCropActivity;
 import run.yigou.gxzy.ui.media.activity.ImagePreviewActivity;
@@ -54,6 +52,9 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
     public static MyFragmentPersonal newInstance() {
         return new MyFragmentPersonal();
     }
+
+    /** 账户数据管理器 */
+    private final AccountDataManager mAccountDataManager = AccountDataManager.getInstance();
 
     private ViewGroup mAvatarLayout;
     private ImageView mAvatarView;
@@ -303,6 +304,8 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
      * ????????
      */
     private void updateCropImage(File file, boolean deleteFile) {
+        // 临时注释：TODO 待网络接口就绪后恢复
+        /*
         if (true) {
             if (file instanceof FileContentResolver) {
                 mAvatarUrl = ((FileContentResolver) file).getContentUri();
@@ -331,6 +334,29 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
                         if (deleteFile) {
                             file.delete();
                         }
+                    }
+                });
+        */
+        
+        // 使用 AccountDataManager 封装的网络请求
+        mAccountDataManager.updateAvatar(this,
+                file,
+                new AccountDataManager.Callback<String>() {
+                    @Override
+                    public void onSuccess(String data) {
+                        mAvatarUrl = Uri.parse(data);
+                        GlideApp.with(getActivity())
+                                .load(mAvatarUrl)
+                                .transform(new MultiTransformation<>(new CenterCrop(), new CircleCrop()))
+                                .into(mAvatarView);
+                        if (deleteFile) {
+                            file.delete();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        toast("更新头像失败：" + e.getMessage());
                     }
                 });
     }
