@@ -9,3 +9,6 @@ captures
 *.iml
 .DS_Store
 local.properties
+
+# 自动生成的代码（Room 数据库等）
+app/src/main/java/run/yigou/gxzy/data/local/gen/
