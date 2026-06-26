@@ -167,7 +167,7 @@
             android:windowSoftInputMode="stateHidden" />
         <!-- 汉制单位 -->
         <activity
-            android:name=".ui.reader.YaoUintActivity"
+            android:name=".ui.activity.YaoUintActivity"
             android:label="@string/yao_unit_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
