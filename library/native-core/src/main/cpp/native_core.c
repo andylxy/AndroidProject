@@ -1,7 +1,108 @@
 #include <jni.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "include/native_core.h"
+
+/* ── JNI: NativeBridge.hmacSha256 ── */
+JNIEXPORT jstring JNICALL
+Java_run_yigou_gxzy_nativecore_NativeBridge_hmacSha256(
+    JNIEnv *env, jclass clazz, jstring data, jstring key) {
+
+    const char *data_utf = NULL, *key_utf = NULL;
+    jstring result = NULL;
+    uint8_t hmac_out[32];
+
+    if (!data || !key) return NULL;
+
+    data_utf = (*env)->GetStringUTFChars(env, data, NULL);
+    key_utf = (*env)->GetStringUTFChars(env, key, NULL);
+    if (!data_utf || !key_utf) goto cleanup;
+
+    native_hmac_sha256(
+        (const uint8_t *)key_utf, strlen(key_utf),
+        (const uint8_t *)data_utf, strlen(data_utf),
+        hmac_out);
+
+    result = (*env)->NewStringUTF(env, native_base64_encode(hmac_out, 32));
+    memset(hmac_out, 0, sizeof(hmac_out));
+
+cleanup:
+    if (data_utf) (*env)->ReleaseStringUTFChars(env, data, data_utf);
+    if (key_utf) (*env)->ReleaseStringUTFChars(env, key, key_utf);
+    return result;
+}
+
+/* ── native_sign_request ──
+ * 构造 method + "\n" + host + "\n" + path + "\n" + timestamp + "\n" + nonce
+ * → HMAC-SHA256 → Base64
+ */
+const char *native_sign_request(const char *method, const char *host,
+    const char *path, const char *timestamp,
+    const char *nonce, const char *secret) {
+
+    static __thread char b64_buf[64];
+    uint8_t hmac_out[32];
+    char string_to_sign[1024];
+    int written;
+
+    written = snprintf(string_to_sign, sizeof(string_to_sign),
+        "%s\n%s\n%s\n%s\n%s", method, host, path, timestamp, nonce);
+    if (written < 0 || (size_t)written >= sizeof(string_to_sign))
+        return NULL;
+
+    native_hmac_sha256(
+        (const uint8_t *)secret, strlen(secret),
+        (const uint8_t *)string_to_sign, (size_t)written,
+        hmac_out);
+
+    const char *b64 = native_base64_encode(hmac_out, 32);
+    if (!b64) {
+        memset(hmac_out, 0, sizeof(hmac_out));
+        return NULL;
+    }
+    strncpy(b64_buf, b64, sizeof(b64_buf) - 1);
+    b64_buf[sizeof(b64_buf) - 1] = '\0';
+    memset(hmac_out, 0, sizeof(hmac_out));
+    return b64_buf;
+}
+
+/* ── JNI: NativeBridge.signRequest ── */
+JNIEXPORT jstring JNICALL
+Java_run_yigou_gxzy_nativecore_NativeBridge_signRequest(
+    JNIEnv *env, jclass clazz,
+    jstring method, jstring host, jstring path,
+    jstring timestamp, jstring nonce, jstring secret) {
+
+    const char *m = NULL, *h = NULL, *p = NULL;
+    const char *ts = NULL, *n = NULL, *s = NULL;
+    jstring result = NULL;
+
+    if (!method || !host || !path || !timestamp || !nonce || !secret)
+        return NULL;
+
+    m = (*env)->GetStringUTFChars(env, method, NULL);
+    h = (*env)->GetStringUTFChars(env, host, NULL);
+    p = (*env)->GetStringUTFChars(env, path, NULL);
+    ts = (*env)->GetStringUTFChars(env, timestamp, NULL);
+    n = (*env)->GetStringUTFChars(env, nonce, NULL);
+    s = (*env)->GetStringUTFChars(env, secret, NULL);
+    if (!m || !h || !p || !ts || !n || !s) goto cleanup_sign;
+
+    const char *sig = native_sign_request(m, h, p, ts, n, s);
+    if (sig) {
+        result = (*env)->NewStringUTF(env, sig);
+    }
+
+cleanup_sign:
+    if (m) (*env)->ReleaseStringUTFChars(env, method, m);
+    if (h) (*env)->ReleaseStringUTFChars(env, host, h);
+    if (p) (*env)->ReleaseStringUTFChars(env, path, p);
+    if (ts) (*env)->ReleaseStringUTFChars(env, timestamp, ts);
+    if (n) (*env)->ReleaseStringUTFChars(env, nonce, n);
+    if (s) (*env)->ReleaseStringUTFChars(env, secret, s);
+    return result;
+}
 
 /*
  * Class:     run_yigou_gxzy_nativecore_NativeBridge

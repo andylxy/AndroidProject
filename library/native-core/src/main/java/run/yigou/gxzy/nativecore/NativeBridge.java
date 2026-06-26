@@ -29,6 +29,15 @@ public final class NativeBridge {
     @Nullable
     public static native byte[] sm4Encrypt(byte[] data, byte[] iv);
 
+    /** HMAC-SHA256 签名（返回 Base64 编码结果） */
+    @Nullable
+    public static native String hmacSha256(String data, String key);
+
+    /** 完整请求签名（构造原文 → HMAC-SHA256 → Base64） */
+    @Nullable
+    public static native String signRequest(String method, String host, String path,
+        String timestamp, String nonce, String secret);
+
     /** 检测调试器是否附加 */
     public static native boolean isDebuggerAttached();
 

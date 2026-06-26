@@ -25,6 +25,22 @@ const uint8_t *native_get_sm4_key(void);
 const uint8_t *native_get_sm4_iv(void);
 const char *native_get_sm2_public_key(void);
 
+/* ── HMAC-SHA256 ── */
+void native_hmac_sha256(const uint8_t *key, size_t key_len,
+                        const uint8_t *data, size_t data_len,
+                        uint8_t out[32]);
+
+/* ── 完整请求签名 ──
+ * 构造 method + "\n" + host + "\n" + path + "\n" + timestamp + "\n" + nonce
+ * → HMAC-SHA256 → Base64，返回静态缓冲区指针
+ */
+const char *native_sign_request(const char *method, const char *host,
+    const char *path, const char *timestamp,
+    const char *nonce, const char *secret);
+
+/* ── Base64 编码 ── */
+const char *native_base64_encode(const uint8_t *in, size_t len);
+
 /* ── 反调试检测 ──
  * 通过 ptrace /proc/self/status TracerPid 检测调试器
  */
