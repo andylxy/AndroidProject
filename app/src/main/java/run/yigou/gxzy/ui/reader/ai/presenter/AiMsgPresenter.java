@@ -35,9 +35,13 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
     private static final long UI_UPDATE_INTERVAL_MS = 100;
     
     // SimpleDateFormat 线程安全：使用 ThreadLocal 确保每个线程独立实例
-    private final ThreadLocal<SimpleDateFormat> sdf = ThreadLocal.withInitial(
-        () -> new SimpleDateFormat("HH:mm", Locale.getDefault())
-    );
+    // 注意：不用 ThreadLocal.withInitial() 以兼容 API 23+（withInitial 需要 API 26+）
+    private final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("HH:mm", Locale.getDefault());
+        }
+    };
     
     // 会话相关常量
     private static final String SESSION_NEW_TITLE = "新对话";
