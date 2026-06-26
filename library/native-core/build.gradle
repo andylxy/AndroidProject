@@ -1,0 +1,20 @@
+apply plugin: 'com.android.library'
+apply from: '../../common.gradle'
+
+android {
+    namespace 'run.yigou.gxzy.nativecore'
+
+    defaultConfig {
+        externalNativeBuild {
+            cmake {
+                abiFilters 'arm64-v8a'
+            }
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path 'src/main/cpp/CMakeLists.txt'
+            version '3.22.1'
+        }
+    }
+}

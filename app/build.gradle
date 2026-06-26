@@ -279,6 +279,9 @@ dependencies {
     // 注意：MMKV 2.x 仅支持 arm64-v8a，不再支持 armeabi-v7a
     implementation 'com.tencent:mmkv:2.0.0'
 
+    // Native 核心能力模块（NDK：SM2/SM4 加密、密钥保护、反调试）
+    implementation project(':library:native-core')
+
     // 内存泄漏监测框架：https://github.com/square/leakcanary
     // 升级至 2.14 最新版本（修复 WorkManager 兼容性问题、Android 14 权限问题等）
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'

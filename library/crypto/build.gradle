@@ -14,4 +14,7 @@ dependencies {
     implementation 'org.bouncycastle:bcprov-jdk15to18:1.76'
     // RSA 工具（RC4Helper 需要 RC4Utils）
     implementation 'com.github.gzu-liyujiang:RSAUtils:2.0.0'
+
+    // Native 核心能力模块（优先使用 NDK 加密，回退 Java 实现）
+    implementation project(':library:native-core')
 }

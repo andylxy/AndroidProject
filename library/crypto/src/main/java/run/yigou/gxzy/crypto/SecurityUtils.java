@@ -130,10 +130,22 @@ public final class SecurityUtils {
     }
 
     /**
-     * SM2 加密门面调用。
+     * SM2 加密门面调用（仅测试 NDK 路径）。
+     * <p>仅使用 native 实现 + JNI 回调，不保留 Java 回退。
      */
     public static String doSm2Encrypt(String msgString) {
-        return CryptogramUtil.sm2Encrypt(msgString);
+        Log.d(TAG, "[NDK] doSm2Encrypt 进入，明文长度=" + msgString.length());
+
+        byte[] input = msgString.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        String result = run.yigou.gxzy.nativecore.NativeBridge.sm2Encrypt(input);
+
+        if (result != null && !result.isEmpty()) {
+            Log.d(TAG, "[NDK] doSm2Encrypt 成功，密文长度=" + result.length() +
+                    "，前20字符=" + result.substring(0, Math.min(20, result.length())));
+        } else {
+            Log.e(TAG, "[NDK] doSm2Encrypt 失败：NativeBridge.sm2Encrypt 返回空");
+        }
+        return result;
     }
 
     /**
