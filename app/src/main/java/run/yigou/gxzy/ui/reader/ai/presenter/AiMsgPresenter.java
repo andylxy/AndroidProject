@@ -229,44 +229,10 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
              mView.appendMessage(sysMsg);
         }
 
-        // 检查是否选中了总结
-        String messageToSend = result;
-        String summaryTag = null;
-
-        boolean useLatestSummary = mView.isLatestSummaryChecked();
-        boolean useAllSummary = mView.isAllSummaryChecked();
-
-        if (useLatestSummary || useAllSummary) {
-            List<ChatSummaryBean> summaries = ChatSessionManager.getInstance().getSessionSummaries(currentSession.getId());
-            if (summaries != null && !summaries.isEmpty()) {
-                StringBuilder summaryContent = new StringBuilder();
-                if (useLatestSummary) {
-                    ChatSummaryBean latestSummary = summaries.get(FIRST_INDEX);
-                    if (latestSummary.getContent() != null) {
-                        summaryContent.append(latestSummary.getContent());
-                    }
-                    summaryTag = SUMMARY_TAG_LATEST;
-                } else {
-                    for (int i = summaries.size() - LAST_INDEX_OFFSET; i >= FIRST_INDEX; i--) {
-                        ChatSummaryBean summary = summaries.get(i);
-                        if (summary.getContent() != null) {
-                            if (summaryContent.length() > 0) summaryContent.append(SUMMARY_SEPARATOR);
-                            summaryContent.append(summary.getContent());
-                        }
-                    }
-                    summaryTag = SUMMARY_TAG_ALL;
-                }
-                if (summaryContent.length() > 0) {
-                    messageToSend = result + SUMMARY_CONTENT_PREFIX + summaryContent.toString();
-                }
-            }
-        }
-
-        // 确定显示内容
-        String displayContent = result;
-        if (summaryTag != null && !messageToSend.equals(result)) {
-            displayContent = result + "\n" + summaryTag;
-        }
+        // 构建消息总结附件（检查总结选项，拼接总结内容）
+        SummaryAttachment attachment = buildSummaryAttachment(result);
+        String messageToSend = attachment.fullMessage;
+        String displayContent = attachment.displayContent;
 
         // 1. 保存发送消息
         ChatMessageBean sendMsg = new ChatMessageBean(ChatMessageBean.TYPE_SEND, "", "", displayContent);
@@ -478,7 +444,68 @@ public class AiMsgPresenter implements AiMsgContract.Presenter {
         mView.showSessionList(ChatSessionManager.getInstance().getAllSessionsSorted());
     }
     
+    /**
+     * 构建消息总结附件
+     * 
+     * <p>根据当前会话的总结选项和已有的总结记录，
+     * 将总结内容拼接到用户消息末尾，用于发送给 AI 模型。
+     */
+    private SummaryAttachment buildSummaryAttachment(String message) {
+        String messageToSend = message;
+        String summaryTag = null;
+
+        boolean useLatestSummary = mView.isLatestSummaryChecked();
+        boolean useAllSummary = mView.isAllSummaryChecked();
+
+        if (useLatestSummary || useAllSummary) {
+            List<ChatSummaryBean> summaries = ChatSessionManager.getInstance().getSessionSummaries(currentSession.getId());
+            if (summaries != null && !summaries.isEmpty()) {
+                StringBuilder summaryContent = new StringBuilder();
+                if (useLatestSummary) {
+                    ChatSummaryBean latestSummary = summaries.get(FIRST_INDEX);
+                    if (latestSummary.getContent() != null) {
+                        summaryContent.append(latestSummary.getContent());
+                    }
+                    summaryTag = SUMMARY_TAG_LATEST;
+                } else {
+                    for (int i = summaries.size() - LAST_INDEX_OFFSET; i >= FIRST_INDEX; i--) {
+                        ChatSummaryBean summary = summaries.get(i);
+                        if (summary.getContent() != null) {
+                            if (summaryContent.length() > 0) summaryContent.append(SUMMARY_SEPARATOR);
+                            summaryContent.append(summary.getContent());
+                        }
+                    }
+                    summaryTag = SUMMARY_TAG_ALL;
+                }
+                if (summaryContent.length() > 0) {
+                    messageToSend = message + SUMMARY_CONTENT_PREFIX + summaryContent.toString();
+                }
+            }
+        }
+
+        // 确定显示内容
+        String displayContent = message;
+        if (summaryTag != null && !messageToSend.equals(message)) {
+            displayContent = message + "\n" + summaryTag;
+        }
+
+        return new SummaryAttachment(messageToSend, displayContent);
+    }
+    
     // ================= Internal Helper Classes =================
+
+    /**
+     * 总结附件：存储拼接总结后的完整消息和 UI 展示文本
+     */
+    private static class SummaryAttachment {
+        final String fullMessage;
+        final String displayContent;
+
+        SummaryAttachment(String fullMessage, String displayContent) {
+            this.fullMessage = fullMessage;
+            this.displayContent = displayContent;
+        }
+    }
 
     private class ChatUiStreamListener implements AiChatManager.ChatStreamListener {
         private final ChatMessageBean thinkingMessage;

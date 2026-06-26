@@ -564,8 +564,11 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                             // 保存登录信息
                             AppApplication.getApplication().mUserInfoToken = data;
                             // 更新数据库
-                            String userLoginAccount = data.getAccessKeyId();
+                            // 使用表单输入的账号作为 userLoginAccount（而非 accessKeyId）
+                            String userLoginAccount = mPhoneView.getText().toString().trim();
                             if (userLoginAccount != null && !userLoginAccount.isEmpty()) {
+                                // 将正确账号设置到实体中，确保持久化时保存
+                                data.setUserLoginAccount(userLoginAccount);
                                 UserInfo userInfo = DbService.getInstance().mUserInfoService.findUserInfoByLoginAccount(userLoginAccount);
                                 AppApplication.application.isLogin = true;
                                     
