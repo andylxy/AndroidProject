@@ -71,9 +71,6 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
 
     /** 应用数据管理器 */
     private final run.yigou.gxzy.manager.AppDataManager mAppDataManager = run.yigou.gxzy.manager.AppDataManager.getInstance();
-    
-    /** 旧版应用数据管理器（兼容代码） */
-    private final run.yigou.gxzy.app.AppDataManager mOldAppDataManager = run.yigou.gxzy.app.AppDataManager.getInstance();
 
     private XCollapsingToolbarLayout mCollapsingToolbarLayout;
     private Toolbar mToolbar;
@@ -228,7 +225,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
         
         // 3. 检查数据加载状态
-        if (mOldAppDataManager.isAllDataLoaded()) {
+        if (mAppDataManager.isAllDataLoaded()) {
             // 数据已加载，直接从 GlobalDataHolder 恢复 UI（屏幕翻转、Fragment 重建场景）
             EasyLog.print("HomeFragment", "✅ 数据已加载，从 GlobalDataHolder 恢复 UI");
             loadNavFromGlobalDataHolder();
