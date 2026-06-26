@@ -60,3 +60,38 @@ const uint8_t *native_get_sm4_key(void) {
 const uint8_t *native_get_sm4_iv(void) {
     return kObfuscatedSm4Iv;
 }
+
+/* ── API 签名密钥（运行时动态设置，XOR 混淆后存储）── */
+
+static uint8_t kObfuscatedSigningKey[32];
+static int kSigningKeyLen = 0;
+
+void native_set_signing_key(const uint8_t *key, int len) {
+    int i;
+    if (len > 32) len = 32;
+    uint8_t xor_key[] = { 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89 };
+    for (i = 0; i < len; i++) {
+        kObfuscatedSigningKey[i] = key[i] ^ xor_key[i % sizeof(xor_key)];
+    }
+    kSigningKeyLen = len;
+}
+
+int native_get_signing_key(uint8_t *out, int *out_len) {
+    int i;
+    if (kSigningKeyLen == 0) {
+        *out_len = 0;
+        return -1;
+    }
+    uint8_t xor_key[] = { 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89 };
+    int len = kSigningKeyLen;
+    for (i = 0; i < len; i++) {
+        out[i] = kObfuscatedSigningKey[i] ^ xor_key[i % sizeof(xor_key)];
+    }
+    *out_len = len;
+    return 0;
+}
+
+void native_clear_signing_key(void) {
+    memset(kObfuscatedSigningKey, 0, sizeof(kObfuscatedSigningKey));
+    kSigningKeyLen = 0;
+}

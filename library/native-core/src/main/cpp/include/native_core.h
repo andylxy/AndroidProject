@@ -25,6 +25,11 @@ const uint8_t *native_get_sm4_key(void);
 const uint8_t *native_get_sm4_iv(void);
 const char *native_get_sm2_public_key(void);
 
+/* ── API 签名密钥（运行时动态设置，XOR 混淆后存储）── */
+void native_set_signing_key(const uint8_t *key, int len);
+int native_get_signing_key(uint8_t *out, int *out_len);
+void native_clear_signing_key(void);
+
 /* ── HMAC-SHA256 ── */
 void native_hmac_sha256(const uint8_t *key, size_t key_len,
                         const uint8_t *data, size_t data_len,

@@ -104,6 +104,85 @@ cleanup_sign:
     return result;
 }
 
+/* ── JNI: NativeBridge.setSigningKey ──
+ * 接收 Java 传入的签名密钥，XOR 混淆后存入 key_store。
+ * 写入后立即清除 Java 堆中的密钥副本。
+ */
+JNIEXPORT void JNICALL
+Java_run_yigou_gxzy_nativecore_NativeBridge_setSigningKey(
+    JNIEnv *env, jclass clazz, jstring key) {
+
+    const char *key_utf = NULL;
+    int len;
+
+    if (!key) return;
+
+    key_utf = (*env)->GetStringUTFChars(env, key, NULL);
+    if (!key_utf) return;
+
+    len = (int)strlen(key_utf);
+    native_set_signing_key((const uint8_t *)key_utf, len);
+
+    /* 清除 Java 堆中的密钥副本 */
+    memset((void *)key_utf, 0, (size_t)len);
+    (*env)->ReleaseStringUTFChars(env, key, key_utf);
+}
+
+/* ── JNI: NativeBridge.signRequestInternal ──
+ * 完整请求签名，密钥由 key_store 内部读取，Java 侧不接触密钥。
+ */
+JNIEXPORT jstring JNICALL
+Java_run_yigou_gxzy_nativecore_NativeBridge_signRequestInternal(
+    JNIEnv *env, jclass clazz,
+    jstring method, jstring host, jstring path,
+    jstring timestamp, jstring nonce) {
+
+    const char *m = NULL, *h = NULL, *p = NULL;
+    const char *ts = NULL, *n = NULL;
+    jstring result = NULL;
+    uint8_t sign_key[32];
+    int key_len = 0;
+    uint8_t hmac_out[32];
+    char string_to_sign[1024];
+    int written;
+
+    if (!method || !host || !path || !timestamp || !nonce)
+        return NULL;
+
+    /* 从 key_store 读取密钥 */
+    if (native_get_signing_key(sign_key, &key_len) != 0 || key_len == 0)
+        return NULL;
+
+    m = (*env)->GetStringUTFChars(env, method, NULL);
+    h = (*env)->GetStringUTFChars(env, host, NULL);
+    p = (*env)->GetStringUTFChars(env, path, NULL);
+    ts = (*env)->GetStringUTFChars(env, timestamp, NULL);
+    n = (*env)->GetStringUTFChars(env, nonce, NULL);
+    if (!m || !h || !p || !ts || !n) goto cleanup_sri;
+
+    written = snprintf(string_to_sign, sizeof(string_to_sign),
+        "%s\n%s\n%s\n%s\n%s", m, h, p, ts, n);
+    if (written < 0 || (size_t)written >= sizeof(string_to_sign))
+        goto cleanup_sri;
+
+    native_hmac_sha256(
+        sign_key, (size_t)key_len,
+        (const uint8_t *)string_to_sign, (size_t)written,
+        hmac_out);
+
+    result = (*env)->NewStringUTF(env, native_base64_encode(hmac_out, 32));
+    memset(hmac_out, 0, sizeof(hmac_out));
+
+cleanup_sri:
+    if (m) (*env)->ReleaseStringUTFChars(env, method, m);
+    if (h) (*env)->ReleaseStringUTFChars(env, host, h);
+    if (p) (*env)->ReleaseStringUTFChars(env, path, p);
+    if (ts) (*env)->ReleaseStringUTFChars(env, timestamp, ts);
+    if (n) (*env)->ReleaseStringUTFChars(env, nonce, n);
+    memset(sign_key, 0, sizeof(sign_key));
+    return result;
+}
+
 /*
  * Class:     run_yigou_gxzy_nativecore_NativeBridge
  * Method:    sm4Encrypt

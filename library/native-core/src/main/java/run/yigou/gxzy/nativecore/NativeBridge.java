@@ -41,5 +41,13 @@ public final class NativeBridge {
     /** 检测调试器是否附加 */
     public static native boolean isDebuggerAttached();
 
+    /** 设置 API 签名密钥（立即存入 native 层，Java 堆中主动清除） */
+    public static native void setSigningKey(@Nullable String key);
+
+    /** 完整请求签名（密钥由 native 层管理，无需 Java 传入） */
+    @Nullable
+    public static native String signRequestInternal(String method, String host, String path,
+        String timestamp, String nonce);
+
     private NativeBridge() {}
 }

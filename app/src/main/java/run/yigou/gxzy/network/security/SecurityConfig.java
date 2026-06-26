@@ -1,16 +1,9 @@
 package run.yigou.gxzy.network.security;
 
-import android.util.Base64;
 import android.util.Log;
 
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.util.Map;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 import run.yigou.gxzy.log.EasyLog;
 import com.hjq.http.config.IRequestApi;
@@ -67,6 +60,9 @@ public class SecurityConfig {
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
         Security.addProvider(new BouncyCastleProvider());
         Log.i(TAG, "BouncyCastleProvider registered in SecurityConfig");
+
+        // 将初始默认密钥同步到 native key_store
+        run.yigou.gxzy.nativecore.NativeBridge.setSigningKey(sAccessKeySecret);
     }
 
     /**
@@ -80,11 +76,14 @@ public class SecurityConfig {
 
     /**
      * 设置 AccessKey 密钥
+     *
+     * <p>密钥同步写入 native 层（XOR 混淆存储），Java 堆引用保留用于开关判断。
      * 
      * @param accessKeySecret AccessKey 密钥
      */
     public static void setAccessKeySecret(String accessKeySecret) {
         sAccessKeySecret = accessKeySecret;
+        run.yigou.gxzy.nativecore.NativeBridge.setSigningKey(accessKeySecret);
     }
 
     /**
@@ -222,41 +221,22 @@ public class SecurityConfig {
         if (!sEnableAntiReplayAttack || sAccessKeyId.isEmpty() || sAccessKeySecret.isEmpty()) {
             return "";
         }
-        
-        // 构造签名字符串 (根据2025-12变更，仅包含Method/Host/Path/Timestamp/Nonce)
-        String stringToSign = method + "\n" +
-                host + "\n" +
-                path + "\n" +
-                timestamp + "\n" +
-                nonce;
-        
-        // 使用默认的HmacSHA256签名
-        String signature = hmacSha256(stringToSign, sAccessKeySecret);
-        
-        EasyLog.print("签名字符串：\n" + stringToSign);
-        EasyLog.print("签名结果：" + signature +"签名密匙：" + sAccessKeySecret);
+
+        // 使用 native 层签名（密钥由 key_store 内部读取，Java 侧不接触）
+        String signature = run.yigou.gxzy.nativecore.NativeBridge.signRequestInternal(
+                method, host, path, timestamp, nonce);
+        if (signature == null) {
+            EasyLog.print("签名失败：native 层密钥未设置或签名异常");
+            return "";
+        }
+
+        EasyLog.print("签名字符串：\n" + method + "\n" + host + "\n" + path + "\n" + timestamp + "\n" + nonce);
+        EasyLog.print("签名结果：" + signature);
         
         return signature;
     }
     
     /**
-     * 使用 HmacSHA256 算法对字符串进行签名
-     *
-     * @param content    待签名的字符串
-     * @param secretKey  密钥
-     * @return           签名结果
-     */
-    private static String hmacSha256(String content, String secretKey) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            mac.init(secretKeySpec);
-            byte[] result = mac.doFinal(content.getBytes(StandardCharsets.UTF_8));
-            return Base64.encodeToString(result, Base64.NO_WRAP);
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            EasyLog.print("签名过程出现异常：" + e.getMessage());
-            e.printStackTrace();
-            return "";
         }
     }
     
