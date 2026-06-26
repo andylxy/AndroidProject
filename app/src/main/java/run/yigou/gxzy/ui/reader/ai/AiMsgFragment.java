@@ -2,17 +2,8 @@ package run.yigou.gxzy.ui.reader.ai;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.ClipboardManager;
-import android.content.ClipData;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.GradientDrawable;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.lifecycle.LifecycleOwner;
@@ -36,6 +27,7 @@ import run.yigou.gxzy.ui.reader.ai.contract.AiMsgContract;
 import run.yigou.gxzy.ui.reader.ai.presenter.AiMsgPresenter;
 import run.yigou.gxzy.ui.main.HomeActivity;
 import run.yigou.gxzy.ui.reader.ai.helper.ChatInputHelper;
+import run.yigou.gxzy.ui.reader.ai.helper.ChatMessageMenuHelper;
 import run.yigou.gxzy.ui.reader.ai.helper.ChatSidebarHelper;
 import run.yigou.gxzy.ui.reader.ai.helper.ChatSummaryHelper;
 import run.yigou.gxzy.ui.reader.ai.adapter.TipsAiChatAdapter;
@@ -53,15 +45,6 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
     private static final int SCROLL_DELAY_MS = 100;
     private static final int TYPEWRITER_SCROLL_DISTANCE = 200;
     
-    // PopupWindow 样式常量
-    private static final int POPUP_CORNER_RADIUS = 8;
-    private static final int POPUP_STROKE_WIDTH = 1;
-    private static final int POPUP_LAYOUT_PADDING = 4;
-    private static final int POPUP_ITEM_PADDING_HORIZONTAL = 24;
-    private static final int POPUP_ITEM_PADDING_VERTICAL = 16;
-    private static final float POPUP_ITEM_TEXT_SIZE = 14;
-    private static final int POPUP_ELEVATION = 4;
-    
     // Toast 文本常量
     private static final String TOAST_LOADING = "处理中...";
     
@@ -71,6 +54,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
     private ChatSidebarHelper sidebarHelper;
     private ChatSummaryHelper summaryHelper;
     private ChatInputHelper inputHelper;
+    private ChatMessageMenuHelper menuHelper;
     
     private AiMsgContract.Presenter mPresenter;
     private TipsAiChatAdapter mChatAdapter;
@@ -164,6 +148,24 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
         
         // Input Helper
         inputHelper = new ChatInputHelper(getActivity(), rootView, message -> mPresenter.sendMessage(message));
+        
+        // Message Menu Helper
+        menuHelper = new ChatMessageMenuHelper(getActivity(), new ChatMessageMenuHelper.OnMessageMenuActionListener() {
+            @Override
+            public void onResendMessage(String content) {
+                mPresenter.sendMessage(content);
+            }
+
+            @Override
+            public void onDeleteMessage(ChatMessageBean message) {
+                mPresenter.deleteMessage(message);
+            }
+
+            @Override
+            public void onAdoptSummary(ChatMessageBean message) {
+                mPresenter.adoptSummary(message);
+            }
+        });
     }
 
     private void initTitleBar() {
@@ -203,7 +205,9 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
         mChatAdapter.setOnMessageActionListener(new TipsAiChatAdapter.OnMessageActionListener() {
             @Override
             public void onMessageClick(View view, ChatMessageBean message, float x, float y) {
-                showMessageActionMenu(view, message, x, y);
+                if (menuHelper != null) {
+                    menuHelper.showMenu(view, message, x, y);
+                }
             }
 
             @Override
@@ -347,88 +351,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
     @Override
     public void onTitleClick(View view) {}
 
-    // ================= Other UI Logic =================
-
-    private void showMessageActionMenu(View view, ChatMessageBean message, float x, float y) {
-        if (message == null || view == null || getContext() == null) return;
-        
-        String[] items;
-        switch (message.getType()) {
-            case ChatMessageBean.TYPE_SEND: items = new String[]{"重发", "删除", "复制"}; break;
-            case ChatMessageBean.TYPE_RECEIVED:
-            case ChatMessageBean.TYPE_THINKING: items = new String[]{"删除", "复制"}; break;
-            case ChatMessageBean.TYPE_SUMMARY: items = new String[]{"复制", "删除", "采用"}; break;
-            default: return;
-        }
-
-        LinearLayout menuLayout = new LinearLayout(getContext());
-        menuLayout.setOrientation(LinearLayout.VERTICAL);
-        GradientDrawable background = new GradientDrawable();
-        background.setColor(Color.WHITE);
-        background.setCornerRadius(POPUP_CORNER_RADIUS);
-        background.setStroke(POPUP_STROKE_WIDTH, Color.LTGRAY);
-        menuLayout.setBackground(background);
-        menuLayout.setPadding(POPUP_LAYOUT_PADDING, POPUP_LAYOUT_PADDING, 
-                              POPUP_LAYOUT_PADDING, POPUP_LAYOUT_PADDING);
-        
-        final String[] menuItems = items;
-        for (int i = 0; i < items.length; i++) {
-            TextView menuItem = new TextView(getContext());
-            menuItem.setText(items[i]);
-            menuItem.setPadding(POPUP_ITEM_PADDING_HORIZONTAL, POPUP_ITEM_PADDING_VERTICAL,
-                                POPUP_ITEM_PADDING_HORIZONTAL, POPUP_ITEM_PADDING_VERTICAL);
-            menuItem.setTextSize(POPUP_ITEM_TEXT_SIZE);
-            menuItem.setTextColor(Color.BLACK);
-            menuItem.setBackgroundResource(android.R.drawable.list_selector_background);
-            menuLayout.addView(menuItem);
-        }
-        
-        final PopupWindow popupWindow = new PopupWindow(
-            menuLayout,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            true
-        );
-        popupWindow.setOutsideTouchable(true);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        popupWindow.setElevation(POPUP_ELEVATION);
-        
-        for (int i = 0; i < menuLayout.getChildCount(); i++) {
-            final int index = i;
-            menuLayout.getChildAt(i).setOnClickListener(v -> {
-                popupWindow.dismiss();
-                String clickedItem = menuItems[index];
-                
-                if ("重发".equals(clickedItem)) {
-                    mPresenter.sendMessage(message.getContent());
-                } else if ("删除".equals(clickedItem)) {
-                    mPresenter.deleteMessage(message);
-                } else if ("复制".equals(clickedItem)) {
-                    copyToClipboard(message.getContent());
-                } else if ("采用".equals(clickedItem)) {
-                    mPresenter.adoptSummary(message);
-                }
-            });
-        }
-        
-        Activity activity = getActivity();
-        if (activity == null) return;
-        
-        View decorView = activity.getWindow().getDecorView();
-        int[] location = new int[2];
-        decorView.getLocationOnScreen(location);
-        int popupX = (int) x - location[0];
-        int popupY = (int) y - location[1];
-        popupWindow.showAtLocation(decorView, Gravity.NO_GRAVITY, popupX, popupY);
-    }
-
-    private void copyToClipboard(String content) {
-        String plainText = MarkdownUtils.convertMarkdownToPlainText(content);
-        ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("聊天内容", plainText);
-        clipboard.setPrimaryClip(clip);
-        Toast.makeText(getContext(), "已复制到剪贴板", Toast.LENGTH_SHORT).show();
-    }
+    // ================= Lifecycle =================
 
     @Subscribe(priority = 1)
     public void onChatMessageEvent(ChatMessageBeanEvent event) {
@@ -455,6 +378,7 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
         sidebarHelper = null;
         summaryHelper = null;
         inputHelper = null;
+        menuHelper = null;
         
         // 清理 Markwon 引用
         mMarkwon = null;
