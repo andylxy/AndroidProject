@@ -8,6 +8,11 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ptrace.h>
 #include "include/native_core.h"
 
 /* ── SM4 S 盒 ── */
@@ -160,17 +165,36 @@ static void sm4_decrypt_block(const uint32_t rk[32], const uint8_t in[16], uint8
     sm4_encrypt_block(rk_rev, in, out);
 }
 
-/* ── SM2 存根（需引入完整国密库）──
- * TODO(P1): 引入 GmSSL/libsm 后实现 SM2 公钥加密
+/* ── SM2 存根 ──
+ * SM2 加密通过 JNI 回调 Java SM2CryptoUtil.encrypt() 实现（native_core.c），
+ * 密钥由 key_store.c 管理。纯 C 实现需集成 GmSSL（当前不必要）。
  */
 jbyteArray native_sm2_encrypt(JNIEnv *env, const uint8_t *data, int len) {
-    (void)data; (void)len;
+    (void)env; (void)data; (void)len;
     return NULL;
 }
 
-/* ── 反调试检测存根 ──
- * TODO(P2): 实现 ptrace /proc/self/status TracerPid 检测
+/* ── 反调试检测 ──
+ * 通过读取 /proc/self/status 中的 TracerPid 判断调试器是否附加。
+ * TracerPid > 0 表示有进程正在跟踪当前进程（即调试器）。
+ * 此方法兼容 Android 5.0+，无需 root 权限。
  */
 int native_is_debugger_attached(void) {
-    return 0;
+    char buf[512];
+    int tracer_pid = 0;
+    int fd = open("/proc/self/status", O_RDONLY);
+    if (fd < 0) return 0;
+
+    ssize_t n = read(fd, buf, sizeof(buf) - 1);
+    close(fd);
+    if (n <= 0) return 0;
+    buf[n] = '\0';
+
+    /* 在 /proc/self/status 中查找 "TracerPid:\t" */
+    const char *tracer = strstr(buf, "TracerPid:");
+    if (tracer) {
+        tracer_pid = atoi(tracer + 10); /* 跳过 "TracerPid:\t" */
+    }
+
+    return tracer_pid > 0 ? 1 : 0;
 }

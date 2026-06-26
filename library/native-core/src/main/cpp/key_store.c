@@ -8,7 +8,8 @@
  * SM4 密钥拆分为多段，编译时通过 XOR 混淆，
  * 运行时还原。Java 侧始终无法直接读取密钥原文。
  *
- * TODO(P1): 编译时脚本自动生成混淆后的密钥字节数组
+ *   tools/obfuscate_keys.py 脚本可自动生成混淆后的字节数组
+ *   用法: python tools/obfuscate_keys.py --key <hex> --iv <hex> --sm2pub <hex>
  * 当前使用测试密钥（仅供验证编译和接口正确性）
  */
 

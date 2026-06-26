@@ -128,7 +128,7 @@ cleanup:
  * Method:    isDebuggerAttached
  * Signature: ()Z
  *
- * TODO(P2): 实现 ptrace /proc/self/status 反调试检测
+ * 通过 /proc/self/status TracerPid 检测调试器是否附加。
  */
 JNIEXPORT jboolean JNICALL
 Java_run_yigou_gxzy_nativecore_NativeBridge_isDebuggerAttached(
