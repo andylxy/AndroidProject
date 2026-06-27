@@ -31,7 +31,7 @@ import com.google.gson.stream.JsonToken;
 import com.hjq.bar.TitleBar;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.crypto.SecurityUtils;
+import run.yigou.gxzy.security.SecurityUtils;
 import run.yigou.gxzy.base.args.FragmentSetting;
 import run.yigou.gxzy.base.args.ManagerSetting;
 import run.yigou.gxzy.config.AppStyleConfigProvider;

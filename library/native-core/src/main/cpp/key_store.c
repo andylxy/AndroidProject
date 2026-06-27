@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <string.h>
+#include <stdio.h>
 #include "include/native_core.h"
 
 /*
@@ -29,17 +30,42 @@ static const uint8_t kObfuscatedSm4Iv[] = {
  * SM2 公钥（16 进制字符串，以 04 开头）
  * 原始值：04CF658C65FB80CB5C7B91D3BD881521C2BD421202D29812785322F6366B8856B6
  *          2D38D3AB5B5C299B03DD2EC0033370875A2787C6222E801AF87DDA53093322E2
- * 拆分为两段存储，运行时拼接，防止静态分析一步提取。
+ * 拆分为两段 XOR 混淆后存储，运行时还原，防止静态分析一步提取。
+ * 使用 tools/obfuscate_keys.py --sm2pub <hex> 重新生成。
  */
-#define SM2_PUB_KEY_FRAG1 "04CF658C65FB80CB5C7B91D3BD881521C2BD421202D29812785322F6366B8856B6"
-#define SM2_PUB_KEY_FRAG2 "2D38D3AB5B5C299B03DD2EC0033370875A2787C6222E801AF87DDA53093322E2"
+static const uint8_t kObfuscatedSm2PubFrag1[] = {
+    0xAF, 0x02, 0x8A, 0x8D, 0x46, 0xBE, 0xE7, 0x42, 0xA2, 0xA7, 0x2B, 0x4B,
+    0xCB, 0xDC, 0x27, 0x31, 0x69, 0x70, 0xAD, 0x13, 0x21, 0x97, 0xFF, 0x9B,
+    0x86, 0x8F, 0x98, 0x6E, 0x40, 0x3F, 0xBA, 0x46,
+};
+
+static const uint8_t kObfuscatedSm2PubFrag2[] = {
+    0x1D, 0xE0, 0xD7, 0xD2, 0x88, 0x1E, 0x3B, 0xA0, 0x65, 0xDF, 0x67, 0xB6,
+    0xB6, 0x57, 0x01, 0x60, 0x2C, 0x97, 0xC8, 0x86, 0xE5, 0x67, 0x49, 0x09,
+    0xE4, 0x24, 0xC7, 0x42, 0x25, 0x5D, 0x01, 0x32, 0x49,
+};
 
 static char kSm2PubKeyBuf[131]; /* 65 bytes hex = 130 chars + null */
 
 const char *native_get_sm2_public_key(void) {
     if (kSm2PubKeyBuf[0] == '\0') {
-        strcpy(kSm2PubKeyBuf, SM2_PUB_KEY_FRAG1);
-        strcat(kSm2PubKeyBuf, SM2_PUB_KEY_FRAG2);
+        int i, offset = 0;
+        uint8_t xor_key[] = { 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89,
+                              0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10 };
+        int frag1_len = sizeof(kObfuscatedSm2PubFrag1);
+        int frag2_len = sizeof(kObfuscatedSm2PubFrag2);
+
+        for (i = 0; i < frag1_len; i++) {
+            uint8_t plain = kObfuscatedSm2PubFrag1[i] ^ xor_key[i % sizeof(xor_key)];
+            sprintf(kSm2PubKeyBuf + offset, "%02X", plain);
+            offset += 2;
+        }
+        for (i = 0; i < frag2_len; i++) {
+            uint8_t plain = kObfuscatedSm2PubFrag2[i] ^ xor_key[(frag1_len + i) % sizeof(xor_key)];
+            sprintf(kSm2PubKeyBuf + offset, "%02X", plain);
+            offset += 2;
+        }
+        kSm2PubKeyBuf[offset] = '\0';
     }
     return kSm2PubKeyBuf;
 }

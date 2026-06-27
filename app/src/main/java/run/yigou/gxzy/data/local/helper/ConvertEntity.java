@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import run.yigou.gxzy.crypto.SecurityUtils;
+import run.yigou.gxzy.security.SecurityUtils;
 import run.yigou.gxzy.data.local.entity.BeiMingCi;
 import run.yigou.gxzy.data.local.entity.BookChapter;
 import run.yigou.gxzy.data.local.entity.BookChapterBody;

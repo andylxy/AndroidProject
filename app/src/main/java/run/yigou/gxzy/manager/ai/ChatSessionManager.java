@@ -14,7 +14,7 @@ import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.crypto.SecurityUtils;
+import run.yigou.gxzy.security.SecurityUtils;
 
 /**
  * 会话管理器

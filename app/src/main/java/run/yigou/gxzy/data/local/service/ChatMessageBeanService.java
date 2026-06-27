@@ -6,7 +6,7 @@ import org.greenrobot.greendao.query.WhereCondition;
 
 import java.util.ArrayList;
 
-import run.yigou.gxzy.crypto.SecurityUtils;
+import run.yigou.gxzy.security.SecurityUtils;
 import run.yigou.gxzy.data.local.entity.ChatMessageBean;
 import run.yigou.gxzy.data.local.gen.ChatMessageBeanDao;
 

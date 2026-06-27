@@ -23,6 +23,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    
 
+}
+
+dependencies {
+    // RC4 加密（RC4Helper 依赖）
+    implementation 'com.github.gzu-liyujiang:RSAUtils:2.0.0'
 }

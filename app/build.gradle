@@ -171,8 +171,6 @@ dependencies {
     implementation project(':library:xbus')
     // 日志模块
     implementation project(':library:log')
-    // 加密安全库
-    implementation project(':library:crypto')
     // SSE 客户端库
     implementation project(':library:sse-client')
     // 文本工具模块（搜索匹配 + 高亮）

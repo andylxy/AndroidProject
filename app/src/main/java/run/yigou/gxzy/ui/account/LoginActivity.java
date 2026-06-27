@@ -33,7 +33,7 @@ import androidx.annotation.Nullable;
 import com.gyf.immersionbar.ImmersionBar;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.crypto.SecurityUtils;
+import run.yigou.gxzy.security.SecurityUtils;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;

@@ -3,7 +3,7 @@ package run.yigou.gxzy.utils;
 import android.annotation.SuppressLint;
 import android.provider.Settings;
 import android.content.Context;
-import run.yigou.gxzy.crypto.MD5Util;
+import run.yigou.gxzy.base.util.MD5Util;
 
 /**
  * 设备序列号工具类
