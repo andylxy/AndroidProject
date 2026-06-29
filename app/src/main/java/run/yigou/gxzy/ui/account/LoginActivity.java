@@ -1,10 +1,10 @@
 /*
- * ???: AndroidProject
- * ??: LoginActivity.java
- * ??: com.intellij.copyright.JavaCopyrightVariablesProvider$1@a563d04,qualifiedClassName
- * ?? : Zhs (xiaoyang_02@qq.com)
- * ?????? : 2023?07?05? 19:07:17
- * ??????: 2023?07?05? 17:23:50
+ * 项目名: AndroidProject
+ * 类名: LoginActivity.java
+ * 包名: run.yigou.gxzy.ui.account
+ * 作者 : Zhs (xiaoyang_02@qq.com)
+ * 当前修改时间 : 2023年07月05日 19:07:17
+ * 上次修改时间: 2023年07月05日 17:23:50
  * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
  */
 
@@ -64,10 +64,10 @@ import com.hjq.widget.view.SubmitButton;
 
 
 /**
- * author : Android ???
+ * author : Android 轮子哥
  * github : https://github.com/getActivity/AndroidProject
  * time   : 2018/10/18
- * desc   : ????
+ * desc   : 登录页面
  */
 public final class LoginActivity extends AppActivity implements UmengLogin.OnLoginListener, KeyboardWatcher.SoftKeyboardStateListener, TextView.OnEditorActionListener {
 
@@ -89,100 +89,100 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     }
 
     /**
-     * Logo??
+     * Logo 动画
      */
     private ImageView mLogoView;
 
     /**
-     * ????
+     * 主体布局
      */
     private ViewGroup mBodyLayout;
     /**
-     * ??????
+     * 手机号输入框
      */
     private EditText mPhoneView;
     /**
-     * ????????
+     * 短信验证码输入框
      */
     private EditText mEtLoginSmsCode;
     /**
-     * ?????
+     * 密码输入框
      */
     private EditText mPasswordView;
 
     /**
-     * ??????
+     * 忘记密码
      */
     private View mForgetView;
     /**
-     * ????
+     * 提交按钮
      */
     private SubmitButton mCommitView;
 
     /**
-     * ????????
+     * 第三方登录区域
      */
     private View mOtherView;
     /**
-     * QQ????
+     * QQ 登录
      */
     private View mQQView;
     /**
-     * ??????
+     * 微信登录
      */
     private View mWeChatView;
 
     /**
-     * ????????
+     * 账号密码切换
      */
     private View mIvLoginAccount;
     /**
-     * ????????
+     * 手机号切换
      */
     private View mIvLoginPhone;
     /**
-     * ???????
+     * 短信验证码区域
      */
     private View mLlLoginSmsCodeLinear;
     /**
-     * ???????
+     * 图形验证码区域
      */
     private View mEtLoginVcodeLinear;
 
     /**
-     * logo ????
+     * logo 缩放比例
      */
     private final float mLogoScale = 0.8f;
     /**
-     * ????
+     * 动画时长
      */
     private final int mAnimTime = 300;
     /**
-     * ?????
+     * 短信倒计时
      */
     private CountdownView mCountdownView;
     /**
-     * ???????
+     * 图形验证码图片
      */
     private ImageView mEtLoginVcode;
     /**
-     * ????????
+     * 图形验证码输入框
      */
     private EditText mEtLoginTextCode;
     /**
-     * ?????
+     * 验证码数据
      */
     private VierCode.Bean mVierificationCode;
     /**
-     * ????????????
+     * 当前登录类型
      */
     private int mLongInType = LoginType.mLoginAccount;
     /**
-     * ?????
+     * 键盘监听器
      */
     private KeyboardWatcher mKeyboardWatcher;
     /**
-     * ??????????
+     * 当前正在执行的动画
      */
     private AnimatorSet mCurrentAnimatorSet;
 
@@ -193,7 +193,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
 
     @Override
     protected void initView() {
-        // ?????
+        // 初始化控件
         mLogoView = findViewById(R.id.iv_login_logo);
         mBodyLayout = findViewById(R.id.ll_login_body);
         mPhoneView = findViewById(R.id.et_login_phone);
@@ -212,60 +212,60 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         mEtLoginVcode = findViewById(R.id.et_login_vcode);
         mEtLoginTextCode = findViewById(R.id.et_login_text_code);
         
-        // ????????
+        // 检查登录状态
         if (inLoginOrNoLogin()) return;
         
-        // ???????
+        // 设置点击事件
         setOnClickListener(mForgetView, mCommitView, mQQView, mWeChatView, mIvLoginAccount, mIvLoginPhone, mCountdownView, mEtLoginVcode);
-        // ??????????
+        // 设置编辑器动作监听
         mPasswordView.setOnEditorActionListener(this);
         mEtLoginTextCode.setOnEditorActionListener(this);
         mEtLoginSmsCode.setOnEditorActionListener(this);
         
-        // ?????
+        // 获取验证码
         getLoginVcode();
     }
 
 
     @Override
     protected void initData() {
-        // ??????????
+        // 延迟初始化键盘监听器
         postDelayed(() -> {
             mKeyboardWatcher = KeyboardWatcher.with(LoginActivity.this);
             mKeyboardWatcher.setListener(LoginActivity.this);
         }, 500);
         
-        // ??????????
+        // 默认显示账号密码登录
         mIvLoginAccount.setVisibility(View.GONE);
         mLlLoginSmsCodeLinear.setVisibility(View.GONE);
         
-        // ??????????? QQ
+        // 未安装 QQ 时隐藏 QQ 登录
         if (!UmengClient.isAppInstalled(this, Platform.QQ)) {
             mQQView.setVisibility(View.GONE);
         }
 
-        // ?????????????
+        // 未安装微信时隐藏微信登录
         if (!UmengClient.isAppInstalled(this, Platform.WECHAT)) {
             mWeChatView.setVisibility(View.GONE);
         }
 
-        // ?????????????????????
+        // 所有第三方登录都隐藏时隐藏第三方区域
         if (mQQView.getVisibility() == View.GONE && mWeChatView.getVisibility() == View.GONE) {
             mOtherView.setVisibility(View.GONE);
         }
 
-        // ??????????
+        // 填充传递过来的手机号和密码
         mPhoneView.setText(getString(INTENT_KEY_IN_PHONE));
         mPasswordView.setText(getString(INTENT_KEY_IN_PASSWORD));
     }
 
     /**
-     * ????????
+     * 检查是否已登录
      *
-     * @return true ???,false ???
+     * @return true 已登录, false 未登录
      */
     private boolean inLoginOrNoLogin() {
-        //?????,??????
+        //已登录，直接跳转主页
         if (AppApplication.application.isLogin) {
             homeActivityStart();
             return true;
@@ -275,9 +275,9 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
 
     @Override
     public void onRightClick(View view) {
-        // ???????
+        // 跳转注册页面
         RegisterActivity.start(this, mPhoneView.getText().toString(), mPasswordView.getText().toString(), (phone, password) -> {
-            // ????????????????
+            // 注册完成后回填手机号和密码
             mPhoneView.setText(phone);
             mPasswordView.setText(password);
             mPasswordView.requestFocus();
@@ -307,14 +307,14 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     }
 
     /**
-     * ??????
+     * 忘记密码
      */
     private void handleForgetPassword() {
         startActivity(PasswordForgetActivity.class);
     }
 
     /**
-     * ???????
+     * 获取短信验证码
      */
     private void handleGetVerificationCode() {
         String phone = mPhoneView.getText().toString();
@@ -324,7 +324,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             return;
         }
 
-        // ?????
+        // 隐藏键盘
         hideKeyboard(getCurrentFocus());
 
         // 临时注释：TODO 待网络接口就绪后恢复
@@ -369,7 +369,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     }
 
     /**
-     * ???????
+     * 切换为账号密码登录
      */
     private void handleSwitchToAccountLogin() {
         setViewShow(mIvLoginAccount);
@@ -377,7 +377,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     }
 
     /**
-     * ???????
+     * 切换为短信验证码登录
      */
     private void handleSwitchToPhoneLogin() {
         setViewShow(mIvLoginPhone);
@@ -385,20 +385,26 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     }
 
     /**
-     * ?????
+     * 刷新验证码
      */
     private void handleRefreshVerificationCode() {
         getLoginVcode();
     }
 
     /**
-     * ????
+     * 处理登录
      */
     private void handleLogin() {
-        // ?????
+        // 隐藏键盘
         hideKeyboard(getCurrentFocus());
 
-        // ??????
+        // 验证码尚未加载完成时阻止提交（异步竞态条件防护）
+        if (mVierificationCode == null) {
+            toast("验证码加载中，请稍候...");
+            return;
+        }
+
+        // 构建请求参数
         LoginApi requestApi = buildLoginRequest();
         if (requestApi != null) {
             login(requestApi);
@@ -406,7 +412,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     }
 
     /**
-     * ??????
+     * 构建登录请求参数
      */
     private LoginApi buildLoginRequest() {
         if (mLongInType == LoginType.mLoginAccount) {
@@ -414,13 +420,13 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             String password = mPasswordView.getText().toString();
             
             if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
-                toast("????????");
+                toast("账号或密码不能为空");
                 return null;
             }
             
             String passwd = SecurityUtils.doSm2Encrypt(password);
             if (passwd == null || passwd.isEmpty()) {
-                toast("??????????");
+                toast("密码加密失败");
                 return null;
             }
             
@@ -428,18 +434,17 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                     .setUserName(username)
                     .setPassword(passwd);
 
-            if (mVierificationCode != null) {
-                if (mVierificationCode.isCode()) {
-                    String verificationCode = mEtLoginTextCode.getText().toString();
-                    if (verificationCode == null || verificationCode.isEmpty()) {
-                        toast("??????");
-                        return null;
-                    }
-                    requestApi.setVerificationCode(verificationCode)
-                            .setUUID(mVierificationCode.getUuid());
-                } else if (mVierificationCode.getUuid() != null) {
-                    requestApi.setUUID(mVierificationCode.getUuid());
+            // 服务端要求图形验证码时，校验验证码输入并附加参数
+            if (mVierificationCode != null && mVierificationCode.isCode()) {
+                String verificationCode = mEtLoginTextCode.getText().toString();
+                if (verificationCode == null || verificationCode.isEmpty()) {
+                    toast("验证码不能为空");
+                    return null;
                 }
+                requestApi.setVerificationCode(verificationCode)
+                        .setUUID(mVierificationCode.getUuid());
+            } else if (mVierificationCode != null && mVierificationCode.getUuid() != null) {
+                requestApi.setUUID(mVierificationCode.getUuid());
             }
             return requestApi;
         } else if (mLongInType == LoginType.mLoginPhone) {
@@ -453,7 +458,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             }
             
             if (smsCode == null || smsCode.isEmpty()) {
-                toast("??????");
+                toast("短信验证码不能为空");
                 return null;
             }
             
@@ -465,16 +470,16 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     }
 
     /**
-     * ???????
+     * 第三方登录
      */
     private void handleThirdPartyLogin(View view) {
-        toast("??????? AppID ? Secret?????????");
+        toast("请先配置 QQ/微信 AppID 和 Secret 后才能使用");
         Platform platform;
         if (view == mQQView) {
             platform = Platform.QQ;
         } else if (view == mWeChatView) {
             platform = Platform.WECHAT;
-            toast("??????? " + WXEntryActivity.class.getSimpleName() + " ???????");
+            toast("请先配置 " + WXEntryActivity.class.getSimpleName() + " 相关参数");
         } else {
             throw new IllegalStateException("are you ok?");
         }
@@ -497,7 +502,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                     public void onSucceed(HttpData<LoginApi.Bean> data) {
                         if (data == null || data.getData() == null) {
                             Log.e("LoginActivity", "Login failed: data is empty or null");
-                            toast("????????????????");
+                            toast("登录返回数据为空");
                             mCommitView.showError(3000);
                             return;
                         }
@@ -609,8 +614,8 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     }
 
     private void homeActivityStart() {
-        // ????? , ?????
-        // ?????
+        // 清空所有 Activity，跳转主页
+        // 重置 Fragment
         HomeActivity.start(getContext(), HomeFragment.class);
         finish();
     }
@@ -618,7 +623,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // ???????Activity??????????????
+        // 避免 Activity 销毁后键盘监听器持有引用
         mKeyboardWatcher = null;
     }
 
@@ -643,11 +648,11 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                                 setViewShow(mIvLoginAccount);
                             } else {
                                 Log.e("LoginActivity", "Get verification code failed: data is null");
-                                toast("???????????");
+                                toast("获取验证码失败");
                             }
                         } catch (Exception e) {
                             Log.e("LoginActivity", "Get verification code failed: " + e.getMessage(), e);
-                            toast("???????????");
+                            toast("获取验证码失败");
                         }
                     }
 
@@ -655,7 +660,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                     public void onFail(Exception e) {
                         super.onFail(e);
                         Log.e("LoginActivity", "Get verification code request failed: " + e.getMessage(), e);
-                        toast("???????????????");
+                        toast("获取验证码请求失败");
                     }
                 });
         */
@@ -709,7 +714,9 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             mForgetView.setVisibility(View.VISIBLE);
             mEtLoginTextCode.setVisibility(View.VISIBLE);
             mEtLoginSmsCode.setText("");
-            //?????????
+            // 切换回账号密码时清空验证码输入，避免 UUID 刷新后旧验证码残留
+            mEtLoginTextCode.setText("");
+            // 根据验证码状态显示或隐藏验证码区域
             if (mVierificationCode != null && mVierificationCode.isCode()) {
                 mEtLoginVcodeLinear.setVisibility(View.VISIBLE);
                 createInputTextManager(true);
@@ -733,8 +740,8 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
     }
 
     /**
-     * ??????????????
-     * @param needVerificationCode ???????
+     * 创建输入框文本管理器
+     * @param needVerificationCode 是否需要验证码输入框
      */
     private void createInputTextManager(boolean needVerificationCode) {
         InputTextManager.Builder builder = InputTextManager.with(this)

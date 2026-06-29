@@ -10,27 +10,28 @@ import com.google.gson.Gson;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.sse.EventSource;
-import okhttp3.sse.EventSources;
-import run.yigou.gxzy.app.AppApplication;
-import run.yigou.gxzy.network.security.SecurityConfig;
-import run.yigou.gxzy.sse.SseStreamCallback;
-import run.yigou.gxzy.sse.SseEventHandler;
+import run.yigou.gxzy.network.security.InterceptorHelper;
+import run.yigou.gxzy.network.security.RequestHelper;
+import run.yigou.gxzy.sse.SseClient;
 import run.yigou.gxzy.sse.SseClientHelper;
+import run.yigou.gxzy.sse.SseStreamCallback;
 import run.yigou.gxzy.app.AppConfig;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.utils.SerialUtil;
 
 /**
- * AI 流式对话 API
- * 
- * ✅ 实现 EasyHttp 接口，利用拦截器、签名等基础设施
- * ✅ 保持 SSE 流式响应特性
+ * AI 流式对话 API（声明式 API 模型）
+ * <p>
+ * 实现 {@link IRequestApi} / {@link IRequestHost} 接口以声明 API 路径和 Host 地址。
+ * SSE 流式执行委派给 {@link SseClient}，安全签名委派给 {@link InterceptorHelper#addSseSecurityHeaders}，
+ * 避免将请求构建、签名、SSE 执行等职责揉合在一个类中。
+ * </p>
  * 
  * @author Zhs
  * @date 2025-12-17
@@ -103,14 +104,6 @@ public final class AiStreamApi implements IRequestApi, IRequestHost {
             return "https://aime.881019.xyz:8443";
         }
     }
-    
-    private String getFullUrl() {
-        String host = getHost();
-        if (!host.endsWith("/")) {
-            host += "/";
-        }
-        return host + "api/AppBookRequest/" + getApi();
-    }
 
     private String buildRequestBody() {
         RequestData data = new RequestData();
@@ -120,105 +113,68 @@ public final class AiStreamApi implements IRequestApi, IRequestHost {
         return new Gson().toJson(data);
     }
 
-    private Request buildSignedRequest() {
+    /**
+     * 构建带有安全签名的 OkHttp Request
+     * <p>
+     * URL 路径复用 {@link RequestHelper#getPath}，安全签名委派给
+     * {@link InterceptorHelper#addSseSecurityHeaders}，避免在此类内重复签名逻辑。
+     * </p>
+     */
+    private Request buildRequest() {
         String jsonBody = buildRequestBody();
         RequestBody body = RequestBody.create(jsonBody.getBytes(StandardCharsets.UTF_8), JSON);
 
+        // RequestHelper.getPath() 返回的路径已包含前置 "/"，直接拼接即可
+        String url = getHost() + RequestHelper.getPath(this);
+
         Request.Builder requestBuilder = new Request.Builder()
-                .url(getFullUrl())
+                .url(url)
                 .post(body)
                 .addHeader("Content-Type", CONTENT_TYPE)
                 .addHeader("Accept", "text/event-stream")
                 .addHeader("Cache-Control", "no-cache")
                 .addHeader("Connection", "keep-alive")
                 .addHeader("app", "2")
-                .addHeader("SessionId", getSessionIdHeader());
+                .addHeader("SessionId", SerialUtil.getSerial());
 
-        addSecurityHeaders(requestBuilder);
+        // 安全签名：委派给 InterceptorHelper（与 EasyHttp 拦截器共享同一签名逻辑）
+        InterceptorHelper.addSseSecurityHeaders(requestBuilder, this,
+                RequestHelper.getHost(), RequestHelper.getPath(this));
+
         return requestBuilder.build();
-    }
-
-    private String getSessionIdHeader() {
-        String sessionId = SerialUtil.getSerial();
-        return sessionId != null ? sessionId : "";
-    }
-
-    private void addSecurityHeaders(Request.Builder requestBuilder) {
-        if (!SecurityConfig.isAntiReplayAttackEnabled()) {
-            return;
-        }
-
-        String accessKeyId = SecurityConfig.getAccessKeyId();
-        String accessKeySecret = SecurityConfig.getAccessKeySecret();
-        if (AppApplication.application != null && AppApplication.application.mUserInfoToken != null) {
-            accessKeyId = AppApplication.application.mUserInfoToken.getAccessKeyId();
-            accessKeySecret = AppApplication.application.mUserInfoToken.getAccessKeySecret();
-        }
-
-        if (accessKeyId == null || accessKeyId.isEmpty() || accessKeySecret == null || accessKeySecret.isEmpty()) {
-            EasyLog.print(TAG, "SSE 请求缺少移动端登录签名凭证");
-            return;
-        }
-
-        String method = "POST";
-        String path = "/api/AppBookRequest/" + getApi();
-        String timestamp = SecurityConfig.getCurrentTimestamp();
-        String nonce = SecurityConfig.generateNonce();
-        String hostForSign = getHostForSign();
-
-        SecurityConfig.setAccessKeyId(accessKeyId);
-        SecurityConfig.setAccessKeySecret(accessKeySecret);
-        String signature = SecurityConfig.generateSignature(this, method, hostForSign, path, timestamp, nonce);
-
-        requestBuilder.addHeader("Signature", "Signature " + signature);
-        requestBuilder.addHeader("X-AccessKeyId", accessKeyId);
-        requestBuilder.addHeader("X-Timestamp", timestamp);
-        requestBuilder.addHeader("X-Nonce", nonce);
-    }
-
-    private String getHostForSign() {
-        String host = getHost();
-        if (host.startsWith("http://")) {
-            host = host.substring(7);
-        } else if (host.startsWith("https://")) {
-            host = host.substring(8);
-        }
-        if (host.endsWith("/")) {
-            host = host.substring(0, host.length() - 1);
-        }
-        return host;
     }
 
     // ========== SSE 流式请求方法 ==========
     
     /**
      * 执行 SSE 流式请求
-     * 
+     * <p>
+     * 使用 {@link SseClient} 执行 SSE 事件流监听，消除内联 {@code EventSources.createFactory} 样板代码。
+     * </p>
+     *
      * @param callback 流式数据回调
      */
     public void execute(@NonNull SseStreamCallback callback) {
         EasyLog.print(TAG, "开始执行 SSE 流式请求");
         
         try {
-            // 1. 获取配置好的 OkHttpClient (TLS 1.2 等)
+            // 1. 获取配置好的 OkHttpClient，设置长超时以适配流式响应
             OkHttpClient client = EasyConfig.getInstance()
                     .getClient()
                     .newBuilder()
-                    .readTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
-                    .writeTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
-                    .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                    .readTimeout(300, TimeUnit.SECONDS)
+                    .writeTimeout(300, TimeUnit.SECONDS)
+                    .connectTimeout(30, TimeUnit.SECONDS)
                     .build();
             
-            // 2. 配置 TLS 1.2
+            // 2. 配置 TLS 1.2（Android 低版本兼容）
             client = SseClientHelper.configureTls12(client.newBuilder(), getHost());
             
             // 3. 构建请求 (Header, Body, 签名)
-            Request request = buildSignedRequest();
+            Request request = buildRequest();
             
-            // 4. 创建并启动 EventSource
-            EventSource.Factory factory = EventSources.createFactory(client);
-            SseEventHandler eventHandler = new SseEventHandler(callback);
-            factory.newEventSource(request, eventHandler);
+            // 4. 使用 SseClient 执行 SSE 流式请求（委派 EventSource 创建和管理）
+            new SseClient(client, null).execute(request, callback);
             
             EasyLog.print(TAG, "EventSource 已创建并启动");
             
