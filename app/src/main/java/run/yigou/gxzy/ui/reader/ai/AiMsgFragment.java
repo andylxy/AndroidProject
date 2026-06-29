@@ -4,7 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+
+import com.hjq.toast.Toaster;
 
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -304,14 +305,14 @@ public final class AiMsgFragment extends TitleBarFragment<HomeActivity>
         if (!isAdded() || getContext() == null) return;
         
         if (isShow) {
-            Toast.makeText(getContext(), TOAST_LOADING, Toast.LENGTH_SHORT).show();
+            Toaster.show(TOAST_LOADING);
         }
     }
 
     @Override
     public void showError(String msg) {
         if (!isAdded() || getContext() == null) return;
-        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+        Toaster.show(msg);
     }
 
     @Override

@@ -7,7 +7,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
+
+import com.hjq.toast.Toaster;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -209,7 +210,7 @@ public class ChatSidebarHelper {
                     actionListener.onSessionTitleEdited(session);
                 }
                 
-                Toast.makeText(context, "标题已更新", Toast.LENGTH_SHORT).show();
+                Toaster.show("标题已更新");
             }
         });
 

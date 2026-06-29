@@ -12,7 +12,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+
+import com.hjq.toast.Toaster;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -302,7 +303,7 @@ public abstract class TipsLittleWindow extends Fragment {
             if (copyButton != null) {
                 copyButton.setOnClickListener(v -> {
                     onCopyButtonClick();
-                    Toast.makeText(activity, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+                    Toaster.show("已复制到剪贴板");
                 });
             }
         }

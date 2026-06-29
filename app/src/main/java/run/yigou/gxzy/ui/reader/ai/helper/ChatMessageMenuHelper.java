@@ -13,7 +13,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.hjq.toast.Toaster;
 
 import run.yigou.gxzy.data.local.entity.ChatMessageBean;
 import run.yigou.gxzy.utils.MarkdownUtils;
@@ -147,6 +148,6 @@ public class ChatMessageMenuHelper {
         ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("聊天内容", plainText);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(activity, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+        Toaster.show("已复制到剪贴板");
     }
 }

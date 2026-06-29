@@ -5,7 +5,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.hjq.toast.Toaster;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -136,7 +137,7 @@ public final class ChatSummaryListDialog {
                 mRecyclerView.setVisibility(View.GONE);
             }
 
-            Toast.makeText(getContext(), "总结已删除", Toast.LENGTH_SHORT).show();
+            Toaster.show("总结已删除");
 
             // 通知外部
             if (mOnSummaryChangedListener != null) {
@@ -186,7 +187,7 @@ public final class ChatSummaryListDialog {
                                 (android.content.ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
                         android.content.ClipData clip = android.content.ClipData.newPlainText("会话总结", renderedText);
                         clipboard.setPrimaryClip(clip);
-                        Toast.makeText(getContext(), "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+                        Toaster.show("已复制到剪贴板");
                     })
                     .setNegativeButton("关闭", null)
                     .create();

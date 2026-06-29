@@ -7,7 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.hjq.toast.Toaster;
 
 import java.util.Date;
 import java.util.List;
@@ -114,11 +115,11 @@ public class ChatSummaryHelper {
     public void adoptSummary(ChatMessageBean summaryMessage) {
         ChatSessionBean currentSession = actionListener.getCurrentSession();
         if (summaryMessage == null) {
-            Toast.makeText(context, "总结内容为空", Toast.LENGTH_SHORT).show();
+            Toaster.show("总结内容为空");
             return;
         }
         if (currentSession == null) {
-            Toast.makeText(context, "会话状态异常，请重试", Toast.LENGTH_SHORT).show();
+            Toaster.show("会话状态异常，请重试");
             return;
         }
 
@@ -132,7 +133,7 @@ public class ChatSummaryHelper {
         long id = ChatSessionManager.getInstance().saveSummary(summary);
         summary.setId(id);
 
-        Toast.makeText(context, "总结已保存", Toast.LENGTH_SHORT).show();
+        Toaster.show("总结已保存");
         
         // 显示总结内容
         showSummaryContentDialog(summary);
@@ -187,7 +188,7 @@ public class ChatSummaryHelper {
                 .setNeutralButton("删除", (d, which) -> {
                     summary.setIsDelete(ChatSummaryBean.IS_Delete_YES);
                     ChatSessionManager.getInstance().updateSummary(summary);
-                    Toast.makeText(context, "总结已删除", Toast.LENGTH_SHORT).show();
+                    Toaster.show("总结已删除");
                 })
                 .setNegativeButton("关闭", null)
                 .create();

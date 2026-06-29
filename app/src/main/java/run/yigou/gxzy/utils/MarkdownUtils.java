@@ -3,7 +3,8 @@ package run.yigou.gxzy.utils;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.widget.Toast;
+
+import com.hjq.toast.Toaster;
 
 import io.noties.markwon.Markwon;
 import io.noties.markwon.core.CorePlugin;
@@ -126,6 +127,6 @@ public class MarkdownUtils {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("聊天内容", text);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+        Toaster.show("已复制到剪贴板");
     }
 }

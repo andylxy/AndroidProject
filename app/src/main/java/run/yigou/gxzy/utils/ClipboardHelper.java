@@ -12,7 +12,8 @@ package run.yigou.gxzy.utils;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.widget.Toast;
+
+import com.hjq.toast.Toaster;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -47,7 +48,7 @@ public class ClipboardHelper {
                                     boolean showToast) {
         if (text == null || text.isEmpty()) {
             if (showToast) {
-                Toast.makeText(context, "没有可复制的内容", Toast.LENGTH_SHORT).show();
+                Toaster.show("没有可复制的内容");
             }
             return false;
         }
@@ -56,7 +57,7 @@ public class ClipboardHelper {
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard == null) {
                 if (showToast) {
-                    Toast.makeText(context, "复制失败", Toast.LENGTH_SHORT).show();
+                    Toaster.show("复制失败");
                 }
                 return false;
             }
@@ -65,13 +66,13 @@ public class ClipboardHelper {
             clipboard.setPrimaryClip(clip);
 
             if (showToast) {
-                Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+                Toaster.show("已复制到剪贴板");
             }
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             if (showToast) {
-                Toast.makeText(context, "复制失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toaster.show("复制失败: " + e.getMessage());
             }
             return false;
         }
@@ -106,7 +107,7 @@ public class ClipboardHelper {
                                              boolean showToast) {
         if (text == null || text.isEmpty()) {
             if (showToast) {
-                Toast.makeText(context, "没有可复制的内容", Toast.LENGTH_SHORT).show();
+                Toaster.show("没有可复制的内容");
             }
             return false;
         }
@@ -115,7 +116,7 @@ public class ClipboardHelper {
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard == null) {
                 if (showToast) {
-                    Toast.makeText(context, "复制失败", Toast.LENGTH_SHORT).show();
+                    Toaster.show("复制失败");
                 }
                 return false;
             }
@@ -124,13 +125,13 @@ public class ClipboardHelper {
             clipboard.setPrimaryClip(clip);
 
             if (showToast) {
-                Toast.makeText(context, "已复制: " + label, Toast.LENGTH_SHORT).show();
+                Toaster.show("已复制: " + label);
             }
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             if (showToast) {
-                Toast.makeText(context, "复制失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toaster.show("复制失败: " + e.getMessage());
             }
             return false;
         }

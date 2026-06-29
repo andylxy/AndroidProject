@@ -14,4 +14,6 @@ dependencies {
     implementation project(':library:log')
     // AndroidX Fragment（替代废弃的 android.app.Fragment）
     api 'androidx.fragment:fragment:1.5.0'
+    // Toast 框架
+    implementation 'com.github.getActivity:Toaster:12.6'
 }

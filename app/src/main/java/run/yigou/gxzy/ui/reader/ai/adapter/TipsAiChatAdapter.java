@@ -7,6 +7,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.hjq.toast.Toaster;
+
 import io.noties.markwon.Markwon;
 import io.noties.markwon.core.CorePlugin;
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
@@ -512,7 +514,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     (android.content.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
                 android.content.ClipData clip = android.content.ClipData.newPlainText("AI回复", content);
                 clipboard.setPrimaryClip(clip);
-                android.widget.Toast.makeText(context, "已复制到剪贴板", android.widget.Toast.LENGTH_SHORT).show();
+                Toaster.show("已复制到剪贴板");
             })
             .setNegativeButton("关闭", null)
             .create();
@@ -577,7 +579,7 @@ public final class TipsAiChatAdapter extends AppAdapter<ChatMessageBean> {
                     (android.content.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
                 android.content.ClipData clip = android.content.ClipData.newPlainText("会话总结", renderedText);
                 clipboard.setPrimaryClip(clip);
-                android.widget.Toast.makeText(context, "已复制到剪贴板", android.widget.Toast.LENGTH_SHORT).show();
+                Toaster.show("已复制到剪贴板");
             })
             .setNegativeButton("关闭", null)
             .create();
