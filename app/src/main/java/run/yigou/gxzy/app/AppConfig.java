@@ -65,4 +65,15 @@ public final class AppConfig {
     public static String getHostUrl() {
         return BuildConfig.HOST_URL;
     }
+
+    /**
+     * 当前是否指向 microfeed。
+     * <p>
+     * 鉴权适配：microfeed 走 Bearer + 明文口令 + 防重放头（X-Timestamp/X-Nonce）；
+     * 预发布/正式（netcore）保持 SM2 口令加密与 HMAC 签名。仅测试服为 true。
+     * </p>
+     */
+    public static boolean isMicrofeedAuth() {
+        return BuildConfig.MICROFEED_AUTH;
+    }
 }

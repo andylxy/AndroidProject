@@ -97,8 +97,8 @@ public final class AiStreamApi implements IRequestApi, IRequestHost {
     @Override
     public String getHost() {
         if (Objects.equals(AppConfig.getBuildType(), "debug")) {
-            // 开发环境：使用 HTTP
-            return "http://192.168.2.158:9991";
+            // 适配 microfeed（http://192.168.2.158:4321/）
+            return "http://192.168.2.158:4321";
         } else {
             // 正式/预览环境：使用 HTTPS
             return "https://aime.881019.xyz:8443";

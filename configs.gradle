@@ -29,6 +29,10 @@ ext {
     // 打印当前服务器配置
     println "GradleLog ServerTypeOutput " + serverType
 
+    // 是否指向 microfeed（仅测试服）。microfeed 适配：鉴权走 Bearer + 明文口令 + 防重放头；
+    // 预发布/正式（netcore）保持 SM2 口令加密与 HMAC 签名。
+    MICROFEED_AUTH = (serverType == SERVER_TYPE_TEST)
+
     // 友盟 AppKey
     UMENG_APP_KEY = "65ed567d3ace4f7d71976da4"
     // QQ AppId
@@ -49,7 +53,8 @@ ext {
                // HOST_URL = "http://192.168.2.158:9991"
                 HOST_URL = "https://shapi.881019.xyz:8443"
             } else {
-                HOST_URL = "http://192.168.2.158:9991"
+                // 适配 microfeed（http://192.168.2.158:4321/）
+                HOST_URL = "http://192.168.2.158:4321"
                // HOST_URL = "https://shapi.881019.xyz:8443"
             }
             break

@@ -17,25 +17,26 @@ import run.yigou.gxzy.log.EasyLog;
 /**
  * 请求拦截辅助类
  * <p>
- * 为 EasyHttp 请求提供统一的安全签名 Header 注入（{@link #handleIntercept}），
- * 同时为绕过 EasyHttp 拦截器链的 SSE 等请求提供签名辅助（{@link #addSseSecurityHeaders}）。
- * 签名逻辑集中于此处，避免分散到各 API 类中重复实现。
+ * 为 EasyHttp 请求提供统一的 Header 注入（{@link #handleIntercept}），
+ * 同时为绕过 EasyHttp 拦截器链的 SSE 等请求提供 Header 辅助（{@link #addSseSecurityHeaders}）。
+ * 逻辑集中于此处，避免分散到各 API 类中重复实现。
+ * </p>
+ * <p>
+ * 鉴权模型（microfeed 适配）：Bearer = 当前登录用户的 microfeed 登录凭证（{@code mflc_}）；
+ * 服务端据此解析「用户 → 角色 → 权限」——AppBookRequest 内容端点需 {@code app:mobile:access}。
+ * 不再使用固定设备密钥（HMAC / AccessKey / mf_ API Key 均已废弃）。
+ * </p>
+ * <p>
+ * 防重放：始终注入 {@code X-Timestamp} / {@code X-Nonce}——microfeed 的 {@code checkReplay}
+ * 靠这两个头做时间窗校验 + nonce 去重，**不需要共享密钥**。HMAC 签名
+ * （{@code Signature} / {@code X-AccessKeyId}）是 netcore 需要的，仅在 AccessKey 凭证有效时注入；
+ * microfeed 不校验签名。
  * </p>
  */
 public class InterceptorHelper {
 
     /**
-     * EasyHttp 请求拦截器核心方法
-     * <p>
-     * 为所有 EasyHttp 请求统一注入公共 Header（app、SessionId、Content-Type、Accept），
-     * 并在防重放攻击启用时计算并注入签名 Header（Signature、X-AccessKeyId、X-Timestamp、X-Nonce）。
-     * 签名逻辑与 {@link #addSseSecurityHeaders} 保持一致，避免分散到各 API 类中重复实现。
-     * </p>
-     *
-     * @param api            IRequestApi 实例，用于获取 API 路径和请求方法
-     * @param params         请求参数
-     * @param headers        请求 Header 集合，签名 Header 将注入此处
-     * @param appApplication 应用上下文，用于获取用户 Token 中的 AccessKey 凭证
+     * EasyHttp 请求拦截器核心方法：注入公共 Header、Bearer 鉴权、防重放头。
      */
     public static void handleIntercept(IRequestApi api, HttpParams params, HttpHeaders headers, AppApplication appApplication) {
 
@@ -47,90 +48,102 @@ public class InterceptorHelper {
         headers.put("Content-Type", "application/json;charset=UTF-8");
         headers.put("Accept", "application/json, text/plain, */*");
 
-        // 防重放攻击签名
+        // 鉴权适配：Bearer = 当前登录用户的 mflc_ 登录凭证（由 login 接口签发）。
+        String bearer = loginBearer(appApplication);
+        if (bearer != null && !bearer.isEmpty()) {
+            headers.put("Authorization", "Bearer " + bearer);
+        }
+
+        // 防重放
         if (SecurityConfig.isAntiReplayAttackEnabled()) {
+            String timestamp = SecurityConfig.getCurrentTimestamp();
+            String nonce = SecurityConfig.generateNonce();
+            headers.put("X-Timestamp", timestamp);
+            headers.put("X-Nonce", nonce);
+
             String accessKeyId = SecurityConfig.getAccessKeyId();
             String accessKeySecret = SecurityConfig.getAccessKeySecret();
-            // 用户登录后，使用用户 Token 中的 AccessKeyId 和 AccessKeySecret 覆盖默认凭证
-            if (appApplication.mUserInfoToken != null){
-                accessKeyId = appApplication.mUserInfoToken.getAccessKeyId();
-                accessKeySecret = appApplication.mUserInfoToken.getAccessKeySecret();
-                // 同步到 SecurityConfig，确保签名计算使用最新凭证
-                SecurityConfig.setAccessKeyId(accessKeyId);
-                SecurityConfig.setAccessKeySecret(accessKeySecret);
+            if (appApplication != null && appApplication.mUserInfoToken != null) {
+                String tokenKeyId = appApplication.mUserInfoToken.getAccessKeyId();
+                String tokenKeySecret = appApplication.mUserInfoToken.getAccessKeySecret();
+                // 仅当用户 token 携带有效 AccessKey 时才覆盖设备默认值（microfeed 的登录响应不含
+                // AccessKey，此时保留设备默认值，不影响 timestamp/nonce 的防重放）。
+                if (tokenKeyId != null && !tokenKeyId.isEmpty()
+                        && tokenKeySecret != null && !tokenKeySecret.isEmpty()) {
+                    accessKeyId = tokenKeyId;
+                    accessKeySecret = tokenKeySecret;
+                    SecurityConfig.setAccessKeyId(accessKeyId);
+                    SecurityConfig.setAccessKeySecret(accessKeySecret);
+                }
             }
-            // 校验 AccessKey 凭证是否有效
-            if (accessKeyId != null && !accessKeyId.isEmpty() &&
-                    accessKeySecret != null && !accessKeySecret.isEmpty()) {
-
-                // 获取请求方法
+            if (accessKeyId != null && !accessKeyId.isEmpty()
+                    && accessKeySecret != null && !accessKeySecret.isEmpty()) {
                 String method = RequestHelper.getRequestMethod(api, params);
                 String host = RequestHelper.getHost();
                 String path = RequestHelper.getPath(api);
-                
-                // 生成时间戳和 Nonce（防止重放攻击）
-                String timestamp = SecurityConfig.getCurrentTimestamp();
-                String nonce = SecurityConfig.generateNonce();
-
-                // 计算签名
                 String signature = SecurityConfig.generateSignature(api, method, host, path, timestamp, nonce);
-
-                // 注入签名 Header
                 headers.put("Signature", "Signature " + signature);
                 headers.put("X-AccessKeyId", accessKeyId);
-                headers.put("X-Timestamp", timestamp);
-                headers.put("X-Nonce", nonce);
-                
-                // 如启用 SM2 国密算法，注入算法标识
-                if (SecurityConfig.isSM2Enabled()) {
-                    headers.put("X-Encryption-Algorithm", "SM2");
-                }
             }
         }
     }
 
     /**
-     * 为绕过 EasyHttp 的请求（如 SSE）添加安全签名 Header
+     * 为绕过 EasyHttp 的请求（如 SSE）添加 Bearer + 防重放 Header
      * <p>
      * 当请求无法使用 EasyHttp 拦截器链时（例如 SSE 流式请求直接操作 OkHttp {@link Request.Builder}），
-     * 调用此方法手动注入签名 Header，签名逻辑与 {@link #handleIntercept} 保持一致。
+     * 调用此方法手动注入，逻辑与 {@link #handleIntercept} 保持一致。
      * </p>
-     *
-     * @param builder OkHttp Request.Builder，签名 Header 将添加到该构建器
-     * @param api     IRequestApi 实例（用于 {@link SecurityConfig#generateSignature} 签名计算）
-     * @param host    请求主机（不含 scheme，例如 "aime.881019.xyz:8443"）
-     * @param path    请求路径（例如 "/api/AppBookRequest/streamConversation"）
      */
     public static void addSseSecurityHeaders(Request.Builder builder, IRequestApi api,
                                               String host, String path) {
-        if (!SecurityConfig.isAntiReplayAttackEnabled()) {
-            return;
+        String bearer = loginBearer(AppApplication.application);
+        if (bearer != null && !bearer.isEmpty()) {
+            builder.addHeader("Authorization", "Bearer " + bearer);
         }
 
-        String accessKeyId = SecurityConfig.getAccessKeyId();
-        String accessKeySecret = SecurityConfig.getAccessKeySecret();
-        if (AppApplication.application != null && AppApplication.application.mUserInfoToken != null) {
-            accessKeyId = AppApplication.application.mUserInfoToken.getAccessKeyId();
-            accessKeySecret = AppApplication.application.mUserInfoToken.getAccessKeySecret();
+        if (SecurityConfig.isAntiReplayAttackEnabled()) {
+            String timestamp = SecurityConfig.getCurrentTimestamp();
+            String nonce = SecurityConfig.generateNonce();
+            builder.addHeader("X-Timestamp", timestamp);
+            builder.addHeader("X-Nonce", nonce);
+
+            String accessKeyId = SecurityConfig.getAccessKeyId();
+            String accessKeySecret = SecurityConfig.getAccessKeySecret();
+            if (AppApplication.application != null && AppApplication.application.mUserInfoToken != null) {
+                String tokenKeyId = AppApplication.application.mUserInfoToken.getAccessKeyId();
+                String tokenKeySecret = AppApplication.application.mUserInfoToken.getAccessKeySecret();
+                if (tokenKeyId != null && !tokenKeyId.isEmpty()
+                        && tokenKeySecret != null && !tokenKeySecret.isEmpty()) {
+                    accessKeyId = tokenKeyId;
+                    accessKeySecret = tokenKeySecret;
+                    SecurityConfig.setAccessKeyId(accessKeyId);
+                    SecurityConfig.setAccessKeySecret(accessKeySecret);
+                }
+            }
+            if (accessKeyId != null && !accessKeyId.isEmpty()
+                    && accessKeySecret != null && !accessKeySecret.isEmpty()) {
+                String method = "POST";
+                String signature = SecurityConfig.generateSignature(api, method, host, path, timestamp, nonce);
+                builder.addHeader("Signature", "Signature " + signature);
+                builder.addHeader("X-AccessKeyId", accessKeyId);
+            }
         }
+    }
 
-        if (accessKeyId == null || accessKeyId.isEmpty()
-                || accessKeySecret == null || accessKeySecret.isEmpty()) {
-            EasyLog.print("InterceptorHelper", "SSE 请求缺少移动端登录签名凭证");
-            return;
+    /**
+     * 当前登录用户携带的 microfeed 登录凭证（{@code mflc_}）；未登录时返回 null。
+     * <p>
+     * 不再回落到固定设备密钥——AppBookRequest 内容端点需 {@code app:mobile:access}，
+     * 该权限必须由登录用户承担（用户 → 角色 → 权限）。
+     * </p>
+     */
+    private static String loginBearer(AppApplication appApplication) {
+        if (appApplication != null && appApplication.mUserInfoToken != null
+                && appApplication.mUserInfoToken.getToken() != null
+                && !appApplication.mUserInfoToken.getToken().isEmpty()) {
+            return appApplication.mUserInfoToken.getToken();
         }
-
-        String method = "POST";
-        String timestamp = SecurityConfig.getCurrentTimestamp();
-        String nonce = SecurityConfig.generateNonce();
-
-        SecurityConfig.setAccessKeyId(accessKeyId);
-        SecurityConfig.setAccessKeySecret(accessKeySecret);
-        String signature = SecurityConfig.generateSignature(api, method, host, path, timestamp, nonce);
-
-        builder.addHeader("Signature", "Signature " + signature);
-        builder.addHeader("X-AccessKeyId", accessKeyId);
-        builder.addHeader("X-Timestamp", timestamp);
-        builder.addHeader("X-Nonce", nonce);
+        return null;
     }
 }

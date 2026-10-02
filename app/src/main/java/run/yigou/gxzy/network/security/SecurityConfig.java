@@ -34,7 +34,7 @@ public class SecurityConfig {
      * AccessKey 密钥
      */
     private static String sAccessKeySecret = "KZbbYBtUeMXbIimx";
-    
+
     /**
      * 是否启用防重放攻击功能
      */

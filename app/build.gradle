@@ -31,6 +31,8 @@ android {
         buildConfigField('String', 'BUGLY_ID', '"' + BUGLY_ID + '"')
         // 测试服务器的主机地址
         buildConfigField('String', 'HOST_URL', '"' + HOST_URL + '"')
+        // 是否指向 microfeed（鉴权适配：Bearer + 明文口令 + 防重放头）
+        buildConfigField('boolean', 'MICROFEED_AUTH', '' + MICROFEED_AUTH + '')
     }
 
     // Apk 签名的那些事：https://www.jianshu.com/p/a1f8e5896aa2

@@ -16,6 +16,8 @@ import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.NotNull;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * 版本:  1.0
  * 描述: 用户数据
@@ -24,15 +26,21 @@ import org.greenrobot.greendao.annotation.NotNull;
 public class UserInfo  {
     @Id
     private  String  id;
+    @SerializedName(value = "AccessKeyId", alternate = {"accessKeyId"})
     private  String  accessKeyId;
+    @SerializedName(value = "AccessKeySecret", alternate = {"accessKeySecret"})
     private  String  accessKeySecret;
     //jwt
+    @SerializedName(value = "Token", alternate = {"token"})
     private String token;
     //用户名
+    @SerializedName(value = "UserName", alternate = {"userName"})
     private String userName;
     //头像
+    @SerializedName(value = "Img", alternate = {"img"})
     private String img;
-    
+
+    @SerializedName(value = "Account", alternate = {"account", "userLoginAccount"})
     private String userLoginAccount;
     @Generated(hash = 805363686)
     public UserInfo(String id, String accessKeyId, String accessKeySecret,

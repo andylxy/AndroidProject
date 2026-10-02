@@ -37,6 +37,7 @@ import run.yigou.gxzy.security.SecurityUtils;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
+import run.yigou.gxzy.app.AppConfig;
 import run.yigou.gxzy.base.constant.LoginType;
 import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.helper.DbService;
@@ -424,12 +425,17 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                 return null;
             }
             
-            String passwd = SecurityUtils.doSm2Encrypt(password);
-            if (passwd == null || passwd.isEmpty()) {
-                toast("密码加密失败");
-                return null;
+            // microfeed 适配：指向 microfeed 时发送**明文**口令（better-auth 校验明文，
+            // 依赖 HTTPS 保护）；netcore（预发布/正式）仍走 SM2 加密。
+            String passwd = password;
+            if (!AppConfig.isMicrofeedAuth()) {
+                passwd = SecurityUtils.doSm2Encrypt(password);
+                if (passwd == null || passwd.isEmpty()) {
+                    toast("密码加密失败");
+                    return null;
+                }
             }
-            
+
             LoginApi requestApi = new LoginApi()
                     .setUserName(username)
                     .setPassword(passwd);
