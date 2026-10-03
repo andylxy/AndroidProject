@@ -13,11 +13,10 @@ import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.manager.CacheDataManager;
 import run.yigou.gxzy.manager.ThreadPoolManager;
-import run.yigou.gxzy.app.AppConfig;
+import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.ui.browser.BrowserActivity;
 import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.ui.dialog.SafeDialog;
-import run.yigou.gxzy.ui.dialog.UpdateDialog;
 import run.yigou.gxzy.ui.main.HomeFragment;
 import run.yigou.gxzy.ui.main.HomeActivity;
 import run.yigou.gxzy.ui.account.PhoneResetActivity;
@@ -96,18 +95,9 @@ public final class SettingActivity extends AppActivity
 
         } else if (viewId == R.id.sb_setting_update) {
 
-            // ???????????????
-            if (20 > AppConfig.getVersionCode()) {
-                new UpdateDialog.Builder(this)
-                        .setVersionName("2.0")
-                        .setForceUpdate(false)
-                        .setUpdateLog("??Bug\n??????")
-                        .setDownloadUrl("https://down.qq.com/qqweb/QQ_1/android_apk/Android_8.5.0.5025_537066738.apk")
-                        .setFileMd5("560017dc94e8f9b65f4ca997c7feb326")
-                        .show();
-            } else {
-                toast(R.string.update_no_update);
-            }
+            // 版本信息改由后端 `GET /api/app/version` 下发（spec §7）：不再写死版本号、
+            // 下载地址与 MD5；有更新才弹 UpdateDialog，无更新则 toast 提示。
+            UpdateManager.checkManually(this);
 
         } else if (viewId == R.id.sb_setting_phone) {
 

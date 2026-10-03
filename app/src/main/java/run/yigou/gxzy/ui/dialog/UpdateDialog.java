@@ -27,6 +27,7 @@ import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.OnDownloadListener;
 import com.hjq.http.model.HttpMethod;
 import com.hjq.permissions.Permission;
+import com.hjq.toast.Toaster;
 
 import java.io.File;
 
@@ -151,6 +152,12 @@ public final class UpdateDialog {
         @CheckNet
         @Permissions({Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE, Permission.REQUEST_INSTALL_PACKAGES})
         private void downloadApk() {
+            // 下载地址由后端下发（UpdateInfo.downloadUrl），可能尚未配置。此处兜底，
+            // 避免把空 URL 交给下载器直接抛异常（后端刚抬高版本码、地址还没填的场景）。
+            if (mDownloadUrl == null || mDownloadUrl.trim().isEmpty()) {
+                Toaster.show(R.string.update_download_url_missing);
+                return;
+            }
             // 设置对话框不能被取消
             setCancelable(false);
 

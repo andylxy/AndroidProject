@@ -12,6 +12,7 @@ import run.yigou.gxzy.network.server.RequestServer;
 import run.yigou.gxzy.utils.SerialUtil;
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.app.AppApplication;
+import run.yigou.gxzy.app.AppConfig;
 import run.yigou.gxzy.log.EasyLog;
 
 /**
@@ -47,6 +48,13 @@ public class InterceptorHelper {
         headers.put("SessionId", SerialUtil.getSerial());
         headers.put("Content-Type", "application/json;charset=UTF-8");
         headers.put("Accept", "application/json, text/plain, */*");
+
+        // 设备标识 + 版本码（spec §7）。后端据此：
+        //   - `X-Device-Id` → ext_user_devices 设备登记 / 吊销判定；
+        //   - `app-version`（整数 versionCode）→ 版本门判 426。
+        // app-version 必须**始终**发送：后端对缺头/非整数一律按「低于地板」返回 426，
+        // 不发头等于自己把自己挡在门外。
+        putDeviceHeaders(headers);
 
         // 鉴权适配：Bearer = 当前登录用户的 mflc_ 登录凭证（由 login 接口签发）。
         String bearer = loginBearer(appApplication);
@@ -97,6 +105,9 @@ public class InterceptorHelper {
      */
     public static void addSseSecurityHeaders(Request.Builder builder, IRequestApi api,
                                               String host, String path) {
+        // SSE 绕过 EasyHttp 拦截器链，设备/版本头需手动补上，否则该请求缺头 → 426。
+        putDeviceHeaders(builder);
+
         String bearer = loginBearer(AppApplication.application);
         if (bearer != null && !bearer.isEmpty()) {
             builder.addHeader("Authorization", "Bearer " + bearer);
@@ -129,6 +140,36 @@ public class InterceptorHelper {
                 builder.addHeader("X-AccessKeyId", accessKeyId);
             }
         }
+    }
+
+    /**
+     * 设备/版本头的**唯一取值来源**（EasyHttp 与 SSE 两条路径共用，避免取值漂移）。
+     *
+     * <p>头名与取值都只在这里定义一次；两个 {@code putDeviceHeaders} 重载只是把它们
+     * 分别写进 {@link HttpHeaders} / {@link Request.Builder}。</p>
+     */
+    private static final String HEADER_DEVICE_ID = "X-Device-Id";
+
+    private static final String HEADER_APP_VERSION = "app-version";
+
+    /** 稳定设备标识（首次启动生成并持久化，重装才变）。 */
+    private static String deviceIdValue() {
+        return DeviceIdStore.get();
+    }
+
+    /** 整数 versionCode；后端整数比较，缺头一律 426。 */
+    private static String appVersionValue() {
+        return String.valueOf(AppConfig.getVersionCode());
+    }
+
+    private static void putDeviceHeaders(HttpHeaders headers) {
+        headers.put(HEADER_DEVICE_ID, deviceIdValue());
+        headers.put(HEADER_APP_VERSION, appVersionValue());
+    }
+
+    private static void putDeviceHeaders(Request.Builder builder) {
+        builder.addHeader(HEADER_DEVICE_ID, deviceIdValue());
+        builder.addHeader(HEADER_APP_VERSION, appVersionValue());
     }
 
     /**

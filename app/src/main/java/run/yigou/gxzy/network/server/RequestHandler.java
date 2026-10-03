@@ -12,6 +12,7 @@ import com.google.gson.JsonSyntaxException;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.ActivityManager;
+import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.ui.account.LoginActivity;
 import com.hjq.gson.factory.GsonFactory;
 import run.yigou.gxzy.log.EasyLog;
@@ -54,6 +55,20 @@ public final class RequestHandler implements IRequestHandler {
     private final Application mApplication;
     private final MMKV mMmkv;
 
+    /** 版本门状态码：低于地板 → 426（spec §6.4）。 */
+    private static final int HTTP_UPGRADE_REQUIRED = 426;
+
+    /** 未授权状态码。 */
+    private static final int HTTP_UNAUTHORIZED = 401;
+
+    /**
+     * 吊销区分信号：401 + 该响应头为 {@link #DEVICE_REVOKED_FLAG} 表示「设备被管理员禁用」
+     * （与「会话过期」的普通 401 区分，ADR-0003）。
+     */
+    private static final String HEADER_DEVICE_REVOKED = "X-Device-Revoked";
+
+    private static final String DEVICE_REVOKED_FLAG = "1";
+
     public RequestHandler(Application application) {
         mApplication = application;
         mMmkv = MMKV.mmkvWithID("http_cache_id");
@@ -67,6 +82,16 @@ public final class RequestHandler implements IRequestHandler {
         }
 
         if (!response.isSuccessful()) {
+            // 版本门与设备吊销需要 App 侧联动处理，必须在抛异常前拦下（spec §7）：
+            //   - 426：拉 /api/app/version 弹强制升级（UpdateManager 内部去重）；
+            //   - 401 + X-Device-Revoked: 1：提示设备被禁用，**不**跳登录，避免死循环（ADR-0003）。
+            // 这里抛的是 ResponseException（非 TokenException），requestFail 不会跳登录页。
+            if (response.code() == HTTP_UPGRADE_REQUIRED) {
+                UpdateManager.onVersionTooLow();
+            } else if (response.code() == HTTP_UNAUTHORIZED
+                    && DEVICE_REVOKED_FLAG.equals(response.header(HEADER_DEVICE_REVOKED))) {
+                UpdateManager.onDeviceRevoked();
+            }
             // 返回响应异常
             throw new ResponseException(mApplication.getString(R.string.http_response_error) + "，responseCode：" + response.code() + "，message：" + response.message(), response);
         }
