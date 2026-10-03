@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  debug 变体专用 manifest。
+
+  背景：LeakCanary 在发现疑似泄漏时会弹通知提醒，但主 manifest 没有声明
+  POST_NOTIFICATIONS（Android 13+ / API33+ 的运行时通知权限），于是它在 logcat 里反复刷
+  `E LeakCanary: Not showing notification: requesting missing POST_NOTIFICATIONS permission`
+  并拉起 leakcanary.internal.RequestPermissionActivity。
+
+  这条E 级日志是**无害噪音**（不是内存泄漏本身），但会干扰真机排查时的日志阅读，
+  让人误以为出了什么严重问题。
+
+  这里只在 debug 源集声明该权限：release 包不包含它，生产环境不会多申请任何权限。
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+</manifest>
