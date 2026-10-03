@@ -12,3 +12,27 @@ local.properties
 
 # 自动生成的代码（Room 数据库等）
 app/src/main/java/run/yigou/gxzy/data/local/gen/
+
+# 本地排查产物（不进仓库）
+# 说明：这些是联调/排查时生成的一次性文件，含设备信息与日志体积较大，
+#提交后只会污染历史，也会泄露设备 ID、token 等调试信息。
+# 需要保留时建议归档到项目外的本地目录，而不是提交。
+*.log
+logcat_*.txt
+/build_current.log
+/build_errors.log
+
+# uiautomator dump 产物（UI 层级快照）
+ui.xml
+ui2.xml
+home.xml
+
+# 接口响应样本（可能含真实数据）
+getnav.json
+
+# 一次性数据迁移脚本（ID 类型迁移等，跑完即弃）
+convert_ids*.py
+fix_generated.py
+
+# Agent 本地记忆目录（含会话记录与本机绝对路径）
+.workbuddy/

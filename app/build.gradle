@@ -3,7 +3,6 @@ apply plugin: 'android-aspectjx'
 apply plugin: 'org.greenrobot.greendao'//greendao插件dependencies
 apply from: '../common.gradle'
 
-
 // Android 代码规范文档：https://github.com/getActivity/AndroidCodeStandard
 android {
 
@@ -212,7 +211,10 @@ dependencies {
 
     // 网络请求框架：https://github.com/getActivity/EasyHttp
     // 升级到 13.5 版本以适配新 API
-    implementation 'com.github.getActivity:EasyHttp:13.5'
+    // 注意：JitPack 未给 13.5 生成 Gradle Module Metadata（EasyHttp-13.5.module 返回 404），
+    // 直接写坐标会解析失败（去找不存在的 .jar）。改为把 EasyHttp-13.5.aar 放进 app/libs/，
+    // 由 common.gradle 的 fileTree(include:['*.jar','*.aar'], dir:'libs') 自动引入。
+    // 见 app/libs/EasyHttp-13.5.aar（不要再用 com.github.getActivity:EasyHttp 坐标，否则重复类）
     // OkHttp 框架：https://github.com/square/okhttp
     // noinspection GradleDependency
     implementation 'com.squareup.okhttp3:okhttp:5.3.0'
