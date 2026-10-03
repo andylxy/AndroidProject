@@ -21,7 +21,7 @@ public class Book implements Serializable {
 
     @Id
     private String bookId;
-    private int bookNo;
+    private String bookNo;
     private String bookName;//书名
     private String author;//作者
     private int historiographerNumb;//上次关闭时的章节数
@@ -37,8 +37,8 @@ public class Book implements Serializable {
 
 
 
-    @Generated(hash = 2101327507)
-    public Book(String bookId, int bookNo, String bookName, String author,
+    @Generated(hash = 1106631658)
+    public Book(String bookId, String bookNo, String bookName, String author,
             int historiographerNumb, int sortCode, int lastReadPosition) {
         this.bookId = bookId;
         this.bookNo = bookNo;
@@ -51,11 +51,11 @@ public class Book implements Serializable {
 
 
 
-    public int getBookNo() {
+    public String getBookNo() {
         return this.bookNo;
     }
 
-    public void setBookNo(int bookNo) {
+    public void setBookNo(String bookNo) {
         this.bookNo = bookNo;
     }
 

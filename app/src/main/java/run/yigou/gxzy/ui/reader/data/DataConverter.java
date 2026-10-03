@@ -47,8 +47,8 @@ public class DataConverter {
         );
         
         // 设置签名 ID
-        Long signatureId = chapter.getSignatureId();
-        section.setSignatureId(signatureId != null ? signatureId : 0);
+        String signatureId = chapter.getSignatureId();
+        section.setSignatureId(signatureId);
         
         return section;
     }
@@ -75,7 +75,7 @@ public class DataConverter {
             // 查找对应的 ChapterData
             ChapterData chapterData = null;
             if (bookData != null) {
-                Long signatureId = chapter.getSignatureId();
+                String signatureId = chapter.getSignatureId();
                 if (signatureId != null) {
                     chapterData = bookData.findChapterBySignature(signatureId);
                 }

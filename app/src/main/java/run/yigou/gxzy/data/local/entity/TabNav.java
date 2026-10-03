@@ -19,7 +19,7 @@ public class TabNav  implements Serializable {
     private static final long serialVersionUID = 55544L;
     @Id
     private String tabNavId;
-    private int caseId;
+    private String caseId;
     private String name;
     private  int order;
     @ToMany(referencedJoinProperty = "tabNavId")
@@ -30,8 +30,8 @@ public class TabNav  implements Serializable {
     /** Used for active entity operations. */
     @Generated(hash = 353333401)
     private transient TabNavDao myDao;
-    @Generated(hash = 1330423056)
-    public TabNav(String tabNavId, int caseId, String name, int order) {
+    @Generated(hash = 844469473)
+    public TabNav(String tabNavId, String caseId, String name, int order) {
         this.tabNavId = tabNavId;
         this.caseId = caseId;
         this.name = name;
@@ -46,10 +46,10 @@ public class TabNav  implements Serializable {
     public void setTabNavId(String tabNavId) {
         this.tabNavId = tabNavId;
     }
-    public int getCaseId() {
+    public String getCaseId() {
         return this.caseId;
     }
-    public void setCaseId(int caseId) {
+    public void setCaseId(String caseId) {
         this.caseId = caseId;
     }
     public String getName() {

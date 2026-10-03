@@ -244,7 +244,7 @@ public class AppDataInitializer {
             int bookIndex = 0;
             for (TabNavBody bookInfo : bookInfos) {
                 bookIndex++;
-                int bookId = bookInfo.getBookNo();
+                String bookId = bookInfo.getBookNo();
                 EasyLog.print(TAG, "🔍 [loadFangAliasData] 处理第 " + bookIndex + " 本书, bookId=" + bookId);
                 
                 ArrayList<Fang> fangList = DataRepository.getFangDetailList(bookId);
@@ -297,7 +297,7 @@ public class AppDataInitializer {
             
             if (nav.getNavList() != null) {
                 for (TabNavBody item : nav.getNavList()) {
-                    if (item.getBookNo() > 0) {
+                    if (item.getBookNo() != null && !item.getBookNo().isEmpty()) {
                         globalData.putBookInfo(item.getBookNo(), item);
                     }
                 }

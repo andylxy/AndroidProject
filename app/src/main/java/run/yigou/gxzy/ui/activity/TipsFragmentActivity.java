@@ -59,7 +59,7 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
     /**
      * 当前书籍ID
      */
-    private int bookId = 0;
+    private String bookId = null;
 
     @Override
     protected int getLayoutId() {
@@ -72,7 +72,11 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
     protected void initView() {
         setupViews();
         setupViewPager();
-        setupNavigationAdapter();
+        // 注意：底部导航不能在 here 建。BaseActivity.initActivity() 的调用顺序是
+        // initLayout() → initView() → initData()，而 bookInfo 要到 initData() 里的
+        // validateAndGetBookArgs() 才赋值。若在 initView() 建导航，会因 bookInfo==null
+        // 提前 return，导航项一个都不加，RecyclerView 高度塌成 0 → 底部整排标签消失。
+        // 因此改到 initData() 中「Fragment 列表建好之后」再构建，见 buildNavigation()。
     }
 
     /**
@@ -102,14 +106,18 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
 
     @Override
     protected void initData() {
-        // 验证书籍信息并获取参数
+        // 验证书籍信息并获取参数（内部会给 bookInfo 赋值）
         BookArgs bookArgs = validateAndGetBookArgs();
         if (bookArgs == null) {
             return;
         }
         
-        // 设置Fragment适配器
+        // 设置Fragment适配器（决定底部标签的数量与顺序）
         setupFragmentAdapter(bookArgs);
+        
+        // 建底部导航：必须排在 setupFragmentAdapter 之后，
+        // 既需要 bookInfo，也需要 mPagerAdapter 已就位（标签数量要与 Fragment 数量一致）
+        buildNavigation();
         
         // 设置页面切换监听
         setupPageChangeCallback();
@@ -123,8 +131,8 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
      */
     private BookArgs validateAndGetBookArgs() {
         // 获取书籍ID
-        bookId = getIntent().getIntExtra("bookId", 0);
-        if (bookId == 0) {
+        bookId = getIntent().getStringExtra("bookId");
+        if (bookId == null || bookId.isEmpty()) {
             handleBookInfoError("书籍ID无效");
             return null;
         }
@@ -214,10 +222,14 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
      * 验证Fragment索引是否有效
      */
     private boolean isValidFragmentIndex(int fragmentIndex) {
-        return fragmentIndex >= 0 && 
-               fragmentIndex < mPagerAdapter.getItemCount() &&
-               mPagerAdapter != null && 
-               mNavigationAdapter != null;
+        // 先判空再取 size：原写法是`fragmentIndex < mPagerAdapter.getItemCount()` 在前、
+        // `mPagerAdapter != null` 在后，mPagerAdapter 为 null 时会先解引用抛 NPE，
+        // 后面的判空形同虚设。
+        if (mPagerAdapter == null || mNavigationAdapter == null) {
+            return false;
+        }
+        return fragmentIndex >= 0 &&
+               fragmentIndex < mPagerAdapter.getItemCount();
     }
 
     /**
@@ -412,6 +424,18 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
     private static final int CASE_TAG_SHANGHAN = 5;  // 伤寒类书籍
 
     /**
+     * caseTag（书籍分类，取自后端 WorkInfo.Case）具名常量。
+     *
+     * <p>注意：这些是「书籍分类」，与 {@link ContentTypes} 的「内容类型」是两套东西，
+     * 数值并不通用，不要混用。
+     *
+     * <p>判读规则：黄帝内经(1)、本草(2、3) 不展示方药/单位标签；伤寒(5) 展示单位标签。
+     */
+    private static final int CASE_TAG_NEIJING = 1;
+    private static final int CASE_TAG_BENCAO_A = 2;
+    private static final int CASE_TAG_BENCAO_B = 3;
+
+    /**
      * 根据书籍类型动态创建 Fragment 列表
      */
     private void setupFragments(BookArgs bookArgs) {
@@ -451,7 +475,7 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
      * 添加单位Fragment（如果需要）
      */
     private void addUnitFragmentIfNeeded() {
-        if (bookInfo != null && bookInfo.getCaseTag() == CASE_TAG_SHANGHAN) {
+        if (shouldShowUnitTab()) {
             mPagerAdapter.addFragment(TipsFangYaoFragment.newInstance(FRAGMENT_TYPE_UNIT, bookId));
         }
     }
@@ -467,42 +491,86 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
      * 判断是否显示方药标签
      */
     private boolean shouldShowFangYaoTabs() {
+        // 黄帝内经(1)、本草(2、3) 不显示方药，其余显示
+        return !isBookCaseTag(CASE_TAG_NEIJING, CASE_TAG_BENCAO_A, CASE_TAG_BENCAO_B);
+    }
+
+    /**
+     * 判断是否显示单位（汉制单位）标签
+     */
+    private boolean shouldShowUnitTab() {
+        return isBookCaseTag(CASE_TAG_SHANGHAN);
+    }
+
+    /**
+     * 统一的 caseTag 判读入口：bookInfo 为 null 时一律返回 false。
+     *
+     * <p>原先散落在 shouldShowFangYaoTabs() 与 addUnitFragmentIfNeeded() /
+     * addUnitNavigationItemIfNeeded() 里各写一遍 `bookInfo != null && bookInfo.getCaseTag() == x`，
+     * 容易漏判null。这里收口后，Fragment 列表与底部导航标签共用同一套判读，
+     * 两者数量必然一致（不一致会导致标签点得动、内容不换页）。
+     */
+    private boolean isBookCaseTag(int... caseTags) {
         if (bookInfo == null) {
             return false;
         }
         int caseTag = bookInfo.getCaseTag();
-        // 黄帝内经(1)、本草(2,3) 不显示方药
-        return caseTag != 1 && caseTag != 2 && caseTag != 3;
+        for (int tag : caseTags) {
+            if (caseTag == tag) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * 设置导航适配器
+     * 构建底部导航（FRM 标签栏）
+     *
+     * <p>分两步：先建adapter 并挂到 RecyclerView，再按 bookInfo 填充导航项。
+     * 这样即使 bookInfo 为 null 也不会「一建就整体放弃」，而是得到一个空但可用的栏，
+     * 不会静默塌成高度 0 而让人以为整排标签消失。
+     *
+     * <p>必须在 setupFragmentAdapter() 之后调用：标签项要与 Fragment 列表逐项对应。
      */
-    private void setupNavigationAdapter() {
-        if (mNavigationView == null || bookInfo == null) {
+    private void buildNavigation() {
+        if (mNavigationView == null) {
             return;
         }
-        
+
         mNavigationAdapter = new NavigationAdapter(this);
-        
-        // 缓存处理后的书名，避免重复调用
-        String processedBookName = extractBookName(bookInfo.getBookName());
-        
-        // 添加基础导航项
-        addBaseNavigationItems(processedBookName);
-        
-        // 添加方药导航项
-        addFangYaoNavigationItems(processedBookName);
-        
-        // 添加单位导航项（如果需要）
-        addUnitNavigationItemIfNeeded();
-        
-        // 添加设置导航项
-        addSettingsNavigationItem();
-        
-        // 设置监听器
         mNavigationAdapter.setOnNavigationListener(this);
         mNavigationView.setAdapter(mNavigationAdapter);
+
+        if (bookInfo == null) {
+            // 无书籍信息时不编造标签；validateAndGetBookArgs() 已 toast 并 finish()，
+            // 这里只保证 RecyclerView 已 attach，不会是一片空白塌陷。
+            return;
+        }
+
+        // 缓存处理后的书名，避免重复调用
+        String processedBookName = extractBookName(bookInfo.getBookName());
+
+        // 添加基础导航项
+        addBaseNavigationItems(processedBookName);
+
+        // 添加方药导航项
+        addFangYaoNavigationItems(processedBookName);
+
+        // 添加单位导航项（如果需要）
+        addUnitNavigationItemIfNeeded();
+
+        // 添加设置导航项
+        addSettingsNavigationItem();
+
+        // NavigationAdapter 的列数是在 onAttachedToRecyclerView 时按当时的 getCount() 定的，
+        // 而挂载发生在上面的 setAdapter()、此时还没加项 → 列数会按空数据的默认 4 列算。
+        // 填充完必须重设一次列数，否则标签个数与列数不匹配会排版错乱。
+        mNavigationAdapter.updateLayoutManager(mNavigationView);
+
+        // 选中态跟随当前页，避免首屏无高亮
+        mNavigationAdapter.setSelectedPosition(mViewPager != null
+                ? mViewPager.getCurrentItem()
+                : 0);
     }
 
     /**
@@ -538,7 +606,7 @@ public final class TipsFragmentActivity extends AppActivity implements Navigatio
      * 添加单位导航项（如果需要）
      */
     private void addUnitNavigationItemIfNeeded() {
-        if (bookInfo != null && bookInfo.getCaseTag() == CASE_TAG_SHANGHAN) {
+        if (shouldShowUnitTab()) {
             mNavigationAdapter.addItem(new NavigationAdapter.MenuItem(
                     getString(R.string.tips_nav_unit),
                     ContextCompat.getDrawable(this, R.drawable.ruler_selector)

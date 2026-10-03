@@ -9,7 +9,7 @@ import java.io.Serializable;
  * Desc:
  */
 public class ChapterList implements Serializable {
-   private int Id ;
+   private String Id ;
    private String mTitle;
     private String mNo ;
 
@@ -22,11 +22,11 @@ public class ChapterList implements Serializable {
         return this;
     }
 
-    public int getId() {
+    public String getId() {
         return Id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         Id = id;
     }
 

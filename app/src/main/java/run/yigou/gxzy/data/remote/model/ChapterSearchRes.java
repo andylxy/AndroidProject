@@ -18,9 +18,9 @@ import java.io.Serializable;
  */
 public class ChapterSearchRes implements Serializable {
 
-        private int Id;
+        private String Id;
 
-        public int getId() {
+        public String getId() {
             return Id;
         }
 

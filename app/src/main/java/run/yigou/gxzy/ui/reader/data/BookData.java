@@ -9,7 +9,7 @@
 
 package run.yigou.gxzy.ui.reader.data;
 
-import android.util.SparseArray;
+import java.util.HashMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,10 +30,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BookData {
     
     // 书籍 ID
-    private final int bookId;
+    private final String bookId;
     
     // 章节索引映射（signatureId -> ChapterData）用于 O(1) 查找
-    private final SparseArray<ChapterData> chapterMap;
+    private final HashMap<String, ChapterData> chapterMap;
     
     // 章节列表（顺序）
     private final List<ChapterData> chapterList;
@@ -51,9 +51,9 @@ public class BookData {
      * 构造函数
      * @param bookId 书籍 ID
      */
-    public BookData(int bookId) {
+    public BookData(String bookId) {
         this.bookId = bookId;
-        this.chapterMap = new SparseArray<>();
+        this.chapterMap = new HashMap<>();
         this.chapterList = new CopyOnWriteArrayList<>();
         this.isFullyLoaded = new AtomicBoolean(false);
     }
@@ -61,7 +61,7 @@ public class BookData {
     /**
      * 获取书籍 ID
      */
-    public int getBookId() {
+    public String getBookId() {
         return bookId;
     }
     
@@ -71,8 +71,8 @@ public class BookData {
      */
     public synchronized void addChapter(@NonNull ChapterData chapter) {
         chapterList.add(chapter);
-        if (chapter.getSignatureId() > 0) {
-            chapterMap.put((int) chapter.getSignatureId(), chapter);
+        if (chapter.getSignatureId() != null && !chapter.getSignatureId().isEmpty()) {
+            chapterMap.put(chapter.getSignatureId(), chapter);
         }
     }
     
@@ -86,8 +86,8 @@ public class BookData {
         
         for (ChapterData chapter : chapters) {
             chapterList.add(chapter);
-            if (chapter.getSignatureId() > 0) {
-                chapterMap.put((int) chapter.getSignatureId(), chapter);
+            if (chapter.getSignatureId() != null && !chapter.getSignatureId().isEmpty()) {
+                chapterMap.put(chapter.getSignatureId(), chapter);
             }
         }
         
@@ -113,8 +113,8 @@ public class BookData {
      * @return 章节数据，未找到返回 null
      */
     @Nullable
-    public ChapterData findChapterBySignature(long signatureId) {
-        return chapterMap.get((int) signatureId);
+    public ChapterData findChapterBySignature(String signatureId) {
+        return chapterMap.get(signatureId);
     }
     
     /**

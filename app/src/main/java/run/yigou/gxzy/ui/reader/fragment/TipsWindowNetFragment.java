@@ -40,7 +40,7 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
         bookInfoFragment.mNavList = navList;
         return bookInfoFragment;
     }
-    private int bookId;
+    private String bookId;
     private List<TabNavBody> mNavList;
     private SmartRefreshLayout mRefreshLayout;
     private WrapRecyclerView mRecyclerView;

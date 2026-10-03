@@ -21,21 +21,21 @@ public class Chapter implements Serializable {
     @Id(autoincrement = true)
     private Long  id ;
     // 书籍id
-    private int bookId;
+    private String bookId;
     // 章节序号
     private int chapterSection;
     // 章节标题
     private String chapterHeader;
     // 书签id
-    private Long signatureId;
+    private String signatureId;
     // 是否下载
     private boolean isDownload=false;
 
 
 
-    @Generated(hash = 443104719)
-    public Chapter(Long id, int bookId, int chapterSection, String chapterHeader,
-            Long signatureId, boolean isDownload) {
+    @Generated(hash = 95735039)
+    public Chapter(Long id, String bookId, int chapterSection, String chapterHeader,
+            String signatureId, boolean isDownload) {
         this.id = id;
         this.bookId = bookId;
         this.chapterSection = chapterSection;
@@ -46,19 +46,16 @@ public class Chapter implements Serializable {
     @Generated(hash = 393170288)
     public Chapter() {
     }
-
-
-
     public Long getId() {
         return this.id;
     }
     public void setId(Long id) {
         this.id = id;
     }
-    public int getBookId() {
+    public String getBookId() {
         return this.bookId;
     }
-    public void setBookId(int bookId) {
+    public void setBookId(String bookId) {
         this.bookId = bookId;
     }
     public int getChapterSection() {
@@ -80,10 +77,10 @@ public class Chapter implements Serializable {
     public void setIsDownload(boolean isDownload) {
         this.isDownload = isDownload;
     }
-    public Long getSignatureId() {
+    public String getSignatureId() {
         return this.signatureId;
     }
-    public void setSignatureId(Long signatureId) {
+    public void setSignatureId(String signatureId) {
         this.signatureId = signatureId;
     }
 

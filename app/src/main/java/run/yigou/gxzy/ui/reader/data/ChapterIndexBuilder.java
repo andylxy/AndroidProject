@@ -10,7 +10,6 @@
 package run.yigou.gxzy.ui.reader.data;
 
 import android.text.TextUtils;
-import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,7 +37,7 @@ public class ChapterIndexBuilder {
     private static final String TAG = "ChapterIndexBuilder";
     
     // signatureId -> Chapter 索引
-    private final SparseArray<Chapter> signatureIndex;
+    private final HashMap<String, Chapter> signatureIndex;
     
     // 关键词倒排索引：keyword -> List<Chapter>
     private final Map<String, List<Chapter>> keywordIndex;
@@ -53,7 +52,7 @@ public class ChapterIndexBuilder {
      * 构造函数
      */
     public ChapterIndexBuilder() {
-        this.signatureIndex = new SparseArray<>();
+        this.signatureIndex = new HashMap<>();
         this.keywordIndex = new HashMap<>();
         this.titleIndex = new HashMap<>();
     }
@@ -74,9 +73,9 @@ public class ChapterIndexBuilder {
             }
             
             // 1. 构建 signatureId 索引
-            Long signatureId = chapter.getSignatureId();
-            if (signatureId != null && signatureId > 0) {
-                signatureIndex.put(signatureId.intValue(), chapter);
+            String signatureId = chapter.getSignatureId();
+            if (signatureId != null && !signatureId.isEmpty()) {
+                signatureIndex.put(signatureId, chapter);
             }
             
             // 2. 构建标题索引
@@ -156,13 +155,13 @@ public class ChapterIndexBuilder {
      * @return 章节对象，未找到返回 null
      */
     @Nullable
-    public Chapter findBySignature(long signatureId) {
+    public Chapter findBySignature(String signatureId) {
         if (!isBuilt) {
             EasyLog.print(TAG, "Index not built yet!");
             return null;
         }
         
-        return signatureIndex.get((int) signatureId);
+        return signatureIndex.get(signatureId);
     }
     
     /**

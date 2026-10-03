@@ -10,14 +10,14 @@ public class YaoUse implements Serializable {
     private  String showName;
     private  String suffix;
     private float weight;
-    private long signatureId;
+    private String signatureId;
     private String signature;
 
-    public long getSignatureId() {
+    public String getSignatureId() {
         return signatureId;
     }
 
-    public void setSignatureId(long signatureId) {
+    public void setSignatureId(String signatureId) {
         this.signatureId = signatureId;
     }
 

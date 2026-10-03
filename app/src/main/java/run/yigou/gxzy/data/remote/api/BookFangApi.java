@@ -16,11 +16,11 @@ public final class BookFangApi implements IRequestApi {
         return "GetBookIdFang";
     }
 
-    public int getBookId() {
+    public String getBookId() {
         return bookId;
     }
 
-    public BookFangApi setBookId(int bookId) {
+    public BookFangApi setBookId(String bookId) {
         this.bookId = bookId;
         return this;
     }
@@ -28,7 +28,7 @@ public final class BookFangApi implements IRequestApi {
     public String getMethod() {
         return "GET"; // ??"POST", "PUT" ??
     }
-    private int bookId;
+    private String bookId;
     public final static class Bean extends HH2SectionData{
 
     }

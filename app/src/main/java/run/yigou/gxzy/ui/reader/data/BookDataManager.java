@@ -42,22 +42,22 @@ public class BookDataManager implements ComponentCallbacks2 {
     private static volatile BookDataManager instance;
     
     // LRU 缓存（bookId -> BookData）
-    private final LruCache<Integer, BookData> bookCache;
+    private final LruCache<String, BookData> bookCache;
     
     // 当前活跃的书籍 ID（防止被 LRU 淘汰）
-    private volatile int currentBookId = -1;
+    private volatile String currentBookId = null;
     
     // 加载状态映射（bookId -> isLoading）
-    private final Map<Integer, Boolean> loadingStates;
+    private final Map<String, Boolean> loadingStates;
     
     /**
      * 私有构造函数
      */
     private BookDataManager() {
         // 初始化 LRU 缓存
-        this.bookCache = new LruCache<Integer, BookData>(CACHE_SIZE_KB) {
+        this.bookCache = new LruCache<String, BookData>(CACHE_SIZE_KB) {
             @Override
-            protected int sizeOf(Integer key, BookData value) {
+            protected int sizeOf(String key, BookData value) {
                 // 返回书籍数据的内存占用（KB）
                 int size = value.estimateMemorySize();
                 EasyLog.print(TAG, "Book " + key + " size: " + size + " KB");
@@ -65,7 +65,7 @@ public class BookDataManager implements ComponentCallbacks2 {
             }
             
             @Override
-            protected void entryRemoved(boolean evicted, Integer key, 
+            protected void entryRemoved(boolean evicted, String key, 
                                        BookData oldValue, BookData newValue) {
                 if (evicted) {
                     // LRU 淘汰时清理数据
@@ -101,7 +101,7 @@ public class BookDataManager implements ComponentCallbacks2 {
      * @return 书籍数据，未缓存返回 null
      */
     @Nullable
-    public synchronized BookData getFromCache(int bookId) {
+    public synchronized BookData getFromCache(String bookId) {
         return bookCache.get(bookId);
     }
     
@@ -112,7 +112,7 @@ public class BookDataManager implements ComponentCallbacks2 {
      * @return 书籍数据（非 null）
      */
     @NonNull
-    public synchronized BookData getBookData(int bookId) {
+    public synchronized BookData getBookData(String bookId) {
         BookData bookData = bookCache.get(bookId);
         
         if (bookData == null) {
@@ -132,7 +132,7 @@ public class BookDataManager implements ComponentCallbacks2 {
      * @param bookId 书籍 ID
      * @param bookData 书籍数据
      */
-    public synchronized void putToCache(int bookId, @NonNull BookData bookData) {
+    public synchronized void putToCache(String bookId, @NonNull BookData bookData) {
         bookCache.put(bookId, bookData);
         EasyLog.print(TAG, "Book " + bookId + " cached, cache size: " + 
                      bookCache.size() + ", memory: " + bookCache.size() + " KB");
@@ -142,7 +142,7 @@ public class BookDataManager implements ComponentCallbacks2 {
      * 从缓存中移除书籍
      * @param bookId 书籍 ID
      */
-    public synchronized void removeFromCache(int bookId) {
+    public synchronized void removeFromCache(String bookId) {
         BookData removed = bookCache.remove(bookId);
         if (removed != null) {
             removed.onEvicted();
@@ -155,7 +155,7 @@ public class BookDataManager implements ComponentCallbacks2 {
      * 活跃书籍不会被 LRU 淘汰
      * @param bookId 书籍 ID
      */
-    public void setCurrentBook(int bookId) {
+    public void setCurrentBook(String bookId) {
         this.currentBookId = bookId;
         EasyLog.print(TAG, "Current book set to: " + bookId);
     }
@@ -163,7 +163,7 @@ public class BookDataManager implements ComponentCallbacks2 {
     /**
      * 获取当前活跃的书籍 ID
      */
-    public int getCurrentBookId() {
+    public String getCurrentBookId() {
         return currentBookId;
     }
     
@@ -172,7 +172,7 @@ public class BookDataManager implements ComponentCallbacks2 {
      */
     @Nullable
     public BookData getCurrentBookData() {
-        if (currentBookId <= 0) {
+        if (currentBookId == null || currentBookId.isEmpty()) {
             return null;
         }
         return getBookData(currentBookId);
@@ -181,7 +181,7 @@ public class BookDataManager implements ComponentCallbacks2 {
     /**
      * 检查书籍是否正在加载
      */
-    public boolean isLoading(int bookId) {
+    public boolean isLoading(String bookId) {
         Boolean loading = loadingStates.get(bookId);
         return loading != null && loading;
     }
@@ -189,7 +189,7 @@ public class BookDataManager implements ComponentCallbacks2 {
     /**
      * 设置书籍加载状态
      */
-    public void setLoading(int bookId, boolean loading) {
+    public void setLoading(String bookId, boolean loading) {
         loadingStates.put(bookId, loading);
     }
     
@@ -199,7 +199,7 @@ public class BookDataManager implements ComponentCallbacks2 {
     public synchronized void clearAllCache() {
         bookCache.evictAll();
         loadingStates.clear();
-        currentBookId = -1;
+        currentBookId = null;
         EasyLog.print(TAG, "All cache cleared");
     }
     
@@ -242,7 +242,7 @@ public class BookDataManager implements ComponentCallbacks2 {
      * 清理非活跃书籍（保留当前书籍）
      */
     private synchronized void clearInactiveBooks() {
-        if (currentBookId <= 0) {
+        if (currentBookId == null || currentBookId.isEmpty()) {
             clearAllCache();
             return;
         }

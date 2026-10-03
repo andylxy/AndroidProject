@@ -56,7 +56,7 @@ public class BookRepository {
     private final GlobalDataHolder globalData;
     
     // 章节缓存 bookId -> 章节列表（线程安全）
-    private final Map<Integer, List<Chapter>> chapterCache = new ConcurrentHashMap<>();
+    private final Map<String, List<Chapter>> chapterCache = new ConcurrentHashMap<>();
 
     public BookRepository() {
         this.dbService = DbService.getInstance();
@@ -70,7 +70,7 @@ public class BookRepository {
      * @param bookId 书籍 ID
      * @return 书籍信息对象，可能为 null
      */
-    public TabNavBody getBookInfo(int bookId) {
+    public TabNavBody getBookInfo(String bookId) {
         try {
             return globalData.getBookInfo(bookId);
         } catch (Exception e) {
@@ -85,7 +85,7 @@ public class BookRepository {
      * @param bookId 书籍 ID
      * @return 章节列表
      */
-    public List<Chapter> getChapters(int bookId) {
+    public List<Chapter> getChapters(String bookId) {
         List<Chapter> cached = chapterCache.get(bookId);
         if (cached != null) {
             return cached;
@@ -143,7 +143,7 @@ public class BookRepository {
      * @param lifecycleOwner 生命周期所有者
      * @param callback 下载回调
      */
-    public void downloadBookFang(int bookId, androidx.lifecycle.LifecycleOwner lifecycleOwner, Callback<List<Fang>> callback) {
+    public void downloadBookFang(String bookId, androidx.lifecycle.LifecycleOwner lifecycleOwner, Callback<List<Fang>> callback) {
         try {
             EasyHttp.get(lifecycleOwner)
                 .api(new BookFangApi().setBookId(bookId))
@@ -194,7 +194,7 @@ public class BookRepository {
      * @param bookNo 书号
      * @return 书籍列表
      */
-    public ArrayList<Book> queryBookshelf(int bookNo) {
+    public ArrayList<Book> queryBookshelf(String bookNo) {
         try {
             return dbService.mBookService.find(BookDao.Properties.BookNo.eq(bookNo));
         } catch (Exception e) {
@@ -248,7 +248,7 @@ public class BookRepository {
      * 
      * @param bookId 书籍 ID
      */
-    public void clearCacheForBook(int bookId) {
+    public void clearCacheForBook(String bookId) {
         chapterCache.remove(bookId);
         EasyLog.print("BookRepository", "清空书籍缓存: bookId=" + bookId);
     }
@@ -269,7 +269,7 @@ public class BookRepository {
      * @param bookId 书籍 ID
      * @return 书籍数据对象，可能为 null
      */
-    public BookData getBookData(int bookId) {
+    public BookData getBookData(String bookId) {
         BookData cached = dataManager.getFromCache(bookId);
         if (cached != null && cached.isFullyLoaded()) {
             return cached;
@@ -284,7 +284,7 @@ public class BookRepository {
     /**
      * 从数据库加载书籍数据
      */
-    private BookData loadBookDataFromDb(int bookId) {
+    private BookData loadBookDataFromDb(String bookId) {
         BookData bookData = new BookData(bookId);
         
         try {
@@ -294,15 +294,15 @@ public class BookRepository {
                 // 创建 ChapterData 对象并加入 BookData
                 List<ChapterData> chapterDataList = new ArrayList<>();
                 for (Chapter chapter : chapters) {
-                    Long signatureId = chapter.getSignatureId();
-                    String title = chapter.getChapterHeader() != null ? chapter.getChapterHeader() : "";
-                    Integer section = chapter.getChapterSection();
-                    
-                    ChapterData chapterData = new ChapterData(
-                        signatureId != null ? signatureId : 0,
-                        title,
-                        section != null ? section : 0
-                    );
+                String signatureId = chapter.getSignatureId();
+                String title = chapter.getChapterHeader() != null ? chapter.getChapterHeader() : "";
+                Integer section = chapter.getChapterSection();
+                
+                ChapterData chapterData = new ChapterData(
+                    signatureId != null ? signatureId : "",
+                    title,
+                    section != null ? section : 0
+                );
                     
                     chapterDataList.add(chapterData);
                 }
@@ -340,7 +340,7 @@ public class BookRepository {
         try {
             List<DataItem> content = DataRepository.getBookChapterDetailList(chapter);
             
-            Long signatureId = chapter.getSignatureId();
+            String signatureId = chapter.getSignatureId();
             if (content != null && !content.isEmpty()) {
                 ChapterData chapterData = bookData.findChapterBySignature(signatureId);
                 if (chapterData != null) {
@@ -358,7 +358,7 @@ public class BookRepository {
      * @param bookData 书籍数据
      * @param bookId 书籍ID
      */
-    private void loadFangDataToBookData(BookData bookData, int bookId) {
+    private void loadFangDataToBookData(BookData bookData, String bookId) {
         try {
             // 获取方剂列表
             ArrayList<Fang> fangList = DataRepository.getFangDetailList(bookId);
@@ -371,7 +371,7 @@ public class BookRepository {
                 String bookName = bookInfo != null ? bookInfo.getBookName() : "方剂";
                 
                 ChapterData fangChapterData = new ChapterData(
-                    0L, 
+                    "", 
                     bookName + "方剂", 
                     0, 
                     fangItemList
@@ -407,9 +407,9 @@ public class BookRepository {
                             chapterData = bookData.findChapterBySignature(chapter.getSignatureId());
                         }
                         if (chapterData == null) {
-                            Long signatureId = chapter.getSignatureId();
+                            String signatureId = chapter.getSignatureId();
                             chapterData = new ChapterData(
-                                signatureId != null ? signatureId : 0,
+                                signatureId != null ? signatureId : "",
                                 chapter.getChapterHeader() != null ? chapter.getChapterHeader() : "",
                                 chapter.getChapterSection()
                             );
@@ -452,7 +452,7 @@ public class BookRepository {
      * @param lifecycleOwner 生命周期所有者（Fragment/Activity），可为 null
      * @param callback 回调接口
      */
-    public void loadChapterLazy(int bookId, int position, LifecycleOwner lifecycleOwner, Callback<ChapterData> callback) {
+    public void loadChapterLazy(String bookId, int position, LifecycleOwner lifecycleOwner, Callback<ChapterData> callback) {
         try {
             BookData bookData = getBookData(bookId);
             ChapterData chapterData = bookData.getChapter(position);
@@ -477,7 +477,7 @@ public class BookRepository {
             Chapter targetChapter = null;
             for (Chapter chapter : chapters) {
                 if (chapter.getSignatureId() != null && 
-                    chapter.getSignatureId() == chapterData.getSignatureId()) {
+                    chapter.getSignatureId().equals(chapterData.getSignatureId())) {
                     targetChapter = chapter;
                     break;
                 }

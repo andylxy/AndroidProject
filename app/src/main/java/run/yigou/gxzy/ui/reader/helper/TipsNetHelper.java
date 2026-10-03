@@ -25,12 +25,12 @@ public class TipsNetHelper {
 
     // 【新架构】BookRepository上下文
     private static BookRepository sBookRepository = null;
-    private static int sCurrentBookId = -1;
+    private static String sCurrentBookId = null;
 
     /**
      * 设置当前BookRepository上下文（在TipsBookReadPresenter中调用）
      */
-    public static void setBookContext(BookRepository repository, int bookId) {
+    public static void setBookContext(BookRepository repository, String bookId) {
         sBookRepository = repository;
         sCurrentBookId = bookId;
         EasyLog.print("=== TipsNetHelper.setBookContext ===");
@@ -59,7 +59,7 @@ public class TipsNetHelper {
     /**
      * 获取当前书籍 ID（package-private，供同包 TipsClickHandler 使用）。
      */
-    static int getCurrentBookId() {
+    static String getCurrentBookId() {
         return sCurrentBookId;
     }
 }

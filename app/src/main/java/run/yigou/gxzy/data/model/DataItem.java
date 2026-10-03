@@ -57,7 +57,7 @@ public class DataItem implements Serializable {
     /**
      * 签名ID
      */
-    private long signatureId;
+    private String signatureId;
     /**
      * 签名
      */
@@ -107,7 +107,7 @@ public class DataItem implements Serializable {
      * 获取签名ID
      * @return 签名ID
      */
-    public long getSignatureId() {
+    public String getSignatureId() {
         return signatureId;
     }
 
@@ -115,7 +115,7 @@ public class DataItem implements Serializable {
      * 设置签名ID
      * @param signatureId 签名ID
      */
-    public void setSignatureId(long signatureId) {
+    public void setSignatureId(String signatureId) {
         this.signatureId = signatureId;
     }
 

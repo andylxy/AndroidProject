@@ -78,7 +78,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
     /**
      *
      */
-    private int bookId = 0;
+    private String bookId = null;
     private int bookLastReadPosition;
     private String searchText = null;
     private Button tipsBtnSearch;
@@ -251,7 +251,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             bookLastReadPosition = bookArgs.getBookLastReadPosition();
             isShowBookCollect = bookArgs.isShowBookCollect();
         } else {
-            bookId = 0;
+            bookId = null;
             bookLastReadPosition = 0;
             isShowBookCollect = false;
             searchText = null;
@@ -649,7 +649,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      */
 
     private void reListAdapter(boolean init, boolean isExpand) {
-        if (bookId != 0 && presenter != null) {
+        if (bookId != null && !bookId.isEmpty() && presenter != null) {
             if (init) {
                 // ✅ 从 Presenter 获取章节内容列表
                 List<HH2SectionData> contentList = presenter.getChapterContentList();

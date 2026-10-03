@@ -17,11 +17,11 @@ public class ZhongYaoAlia implements Serializable {
     private String bieming;
     private int height;
     private String text;
-    private long signatureId;
+    private String signatureId;
     private String signature;
-    @Generated(hash = 1207603431)
+    @Generated(hash = 1009290049)
     public ZhongYaoAlia(Long yaoAliaId, int id, String name, String bieming,
-            int height, String text, long signatureId, String signature) {
+            int height, String text, String signatureId, String signature) {
         this.yaoAliaId = yaoAliaId;
         this.id = id;
         this.name = name;
@@ -70,10 +70,10 @@ public class ZhongYaoAlia implements Serializable {
     public void setText(String text) {
         this.text = text;
     }
-    public long getSignatureId() {
+    public String getSignatureId() {
         return this.signatureId;
     }
-    public void setSignatureId(long signatureId) {
+    public void setSignatureId(String signatureId) {
         this.signatureId = signatureId;
     }
     public String getSignature() {

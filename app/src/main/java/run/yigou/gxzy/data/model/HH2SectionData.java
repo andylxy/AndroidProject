@@ -18,14 +18,14 @@ public class HH2SectionData implements Serializable {
     private List<? extends DataItem> data;
     private String header;
     private int section;
-    private long signatureId;
+    private String signatureId;
     private String signature;
 
-    public long getSignatureId() {
+    public String getSignatureId() {
         return signatureId;
     }
 
-    public void setSignatureId(long signatureId) {
+    public void setSignatureId(String signatureId) {
         this.signatureId = signatureId;
     }
 

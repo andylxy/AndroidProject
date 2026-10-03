@@ -170,7 +170,7 @@ public interface TipsBookReadContract {
          * @param lastReadPosition 上次阅读位置
          * @param isShowBookCollect 是否显示书架
          */
-        void loadBookContent(int bookId, int lastReadPosition, boolean isShowBookCollect);
+        void loadBookContent(String bookId, int lastReadPosition, boolean isShowBookCollect);
         
         /**
          * 刷新数据

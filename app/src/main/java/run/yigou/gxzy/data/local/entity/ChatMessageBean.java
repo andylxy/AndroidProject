@@ -158,7 +158,7 @@ public class ChatMessageBean implements Serializable {
     @Generated(hash = 1557449535)
     public ChatMessageBean() {
     }
-    
+
     /**
      * 构造方法
      *

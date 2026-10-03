@@ -17,13 +17,13 @@ public class BookChapterBody implements Serializable {
     private int height;
     private String fangList;
 
-    private long signatureId;
+    private String signatureId;
     private String signature;
 
-    @Generated(hash = 861768021)
+    @Generated(hash = 251570732)
     public BookChapterBody(String bookChapterBodyId, String bookChapterId, int ID,
             String text, String note, String sectionvideo, int height,
-            String fangList, long signatureId, String signature) {
+            String fangList, String signatureId, String signature) {
         this.bookChapterBodyId = bookChapterBodyId;
         this.bookChapterId = bookChapterId;
         this.ID = ID;
@@ -40,11 +40,11 @@ public class BookChapterBody implements Serializable {
     public BookChapterBody() {
     }
 
-    public long getSignatureId() {
+    public String getSignatureId() {
         return signatureId;
     }
 
-    public void setSignatureId(long signatureId) {
+    public void setSignatureId(String signatureId) {
         this.signatureId = signatureId;
     }
 

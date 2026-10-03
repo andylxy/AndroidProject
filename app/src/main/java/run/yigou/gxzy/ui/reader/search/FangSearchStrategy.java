@@ -48,7 +48,7 @@ import java.util.Map;
 public class FangSearchStrategy implements ContentSearchStrategy {
     
     private final BookRepository bookRepository;
-    private final int bookId;
+    private final String bookId;
     private final BookData bookData;
     private final List<Chapter> chapters;
     private final IFangDataProvider fangProvider;
@@ -63,7 +63,7 @@ public class FangSearchStrategy implements ContentSearchStrategy {
      * @param bookId 当前书籍ID
      * @param fangProvider 方剂数据提供者（依赖注入）
      */
-    public FangSearchStrategy(BookRepository bookRepository, int bookId, IFangDataProvider fangProvider) {
+    public FangSearchStrategy(BookRepository bookRepository, String bookId, IFangDataProvider fangProvider) {
         this.bookRepository = bookRepository;
         this.bookId = bookId;
         this.bookData = bookRepository.getBookData(bookId);

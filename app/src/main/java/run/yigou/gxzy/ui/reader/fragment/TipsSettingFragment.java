@@ -30,7 +30,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
     private SettingBar sb_setting_shu_jie;
     private SwitchButton sb_setting_shu_jie_switch;
 
-    private int bookId = 0;
+    private String bookId = null;
 
 
     private FragmentSetting fragmentSetting;
@@ -102,7 +102,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
 
         fragmentSetting = AppApplication.getApplication().fragmentSetting;
 
-        if (bookId != AppConst.ShangHanNo) {
+        if (!AppConst.ShangHanNo.equals(bookId)) {
             sb_setting_sh.setVisibility(View.GONE);
             sb_setting_jk.setVisibility(View.GONE);
         }else{

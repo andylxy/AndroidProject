@@ -408,8 +408,8 @@ public final class DataRepository {
      * @param netFangDetailList 方剂数据列表
      * @param bookId            书籍ID
      */
-    public static void saveFangDetailList(List<Fang> netFangDetailList, int bookId) {
-        if (netFangDetailList == null || netFangDetailList.isEmpty() || bookId <= 0) {
+    public static void saveFangDetailList(List<Fang> netFangDetailList, String bookId) {
+        if (netFangDetailList == null || netFangDetailList.isEmpty() || bookId == null || bookId.isEmpty()) {
             EasyLog.print(TAG, "方剂数据列表为空或书籍ID无效，跳过保存");
             return;
         }
@@ -548,7 +548,7 @@ public final class DataRepository {
      * @return 保存是否成功
      */
     public static boolean saveBookChapterDetailList(Chapter chapter, List<HH2SectionData> netDetailList) {
-        if (chapter == null || netDetailList == null || netDetailList.isEmpty() || chapter.getBookId() <= 0) {
+        if (chapter == null || netDetailList == null || netDetailList.isEmpty() || chapter.getBookId() == null || chapter.getBookId().isEmpty()) {
             EasyLog.print(TAG, "参数无效: chapter=" + chapter + ", netDetailList长度=" +
                        (netDetailList != null ? netDetailList.size() : "null") + ", bookId=" + (chapter != null ? chapter.getBookId() : -1));
             return false;
@@ -566,8 +566,8 @@ public final class DataRepository {
      * @param bookId        书籍ID
      * @return 保存是否成功
      */
-    public static boolean saveBookDetailData(List<HH2SectionData> netDetailList, int bookId) {
-        if (netDetailList == null || netDetailList.isEmpty() || bookId <= 0) {
+    public static boolean saveBookDetailData(List<HH2SectionData> netDetailList, String bookId) {
+        if (netDetailList == null || netDetailList.isEmpty() || bookId == null || bookId.isEmpty()) {
             EasyLog.print(TAG, "书籍详情数据为空或书籍ID无效，跳过保存");
             return false;
         }
@@ -588,7 +588,7 @@ public final class DataRepository {
      * @return 保存是否成功
      */
     private static boolean saveBookChapterData(List<HH2SectionData> netDetailList,
-                                                Long signatureId, int bookId,
+                                                String signatureId, String bookId,
                                                 WhereCondition deleteCondition,
                                                 String operationName) {
         return ConvertEntity.executeDatabaseOperation(() -> {
@@ -759,8 +759,8 @@ public final class DataRepository {
      * @param bookId 书籍ID
      * @return 按章节分组的内容列表
      */
-    public static List<HH2SectionData> getBookChapterDetailList(int bookId) {
-        if (bookId <= 0) {
+    public static List<HH2SectionData> getBookChapterDetailList(String bookId) {
+        if (bookId == null || bookId.isEmpty()) {
             EasyLog.print(TAG, "书籍ID无效: " + bookId);
             return new ArrayList<>();
         }
@@ -816,8 +816,8 @@ public final class DataRepository {
      * @param bookId 书籍ID
      * @return 方剂列表
      */
-    public static ArrayList<Fang> getFangDetailList(int bookId) {
-        if (bookId <= 0) {
+    public static ArrayList<Fang> getFangDetailList(String bookId) {
+        if (bookId == null || bookId.isEmpty()) {
             EasyLog.print(TAG, "书籍ID无效: " + bookId);
             return new ArrayList<>();
         }
@@ -999,7 +999,7 @@ public final class DataRepository {
      * @param bookId   书籍ID
      * @return 成功保存的数量
      */
-    private static int saveChaptersBatch(List<Chapter> chapters, int bookId) {
+    private static int saveChaptersBatch(List<Chapter> chapters, String bookId) {
         if (chapters == null || chapters.isEmpty()) {
             return 0;
         }

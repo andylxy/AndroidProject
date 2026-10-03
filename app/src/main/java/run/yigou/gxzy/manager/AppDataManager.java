@@ -535,7 +535,7 @@ public class AppDataManager {
             int bookIndex = 0;
             for (TabNavBody bookInfo : bookInfos) {
                 bookIndex++;
-                int bookId = bookInfo.getBookNo();
+                String bookId = bookInfo.getBookNo();
                 ArrayList<Fang> fangList = DataRepository.getFangDetailList(bookId);
                 
                 if (fangList != null && !fangList.isEmpty()) {
@@ -572,7 +572,7 @@ public class AppDataManager {
             if (nav.getNavList() != null && !nav.getNavList().isEmpty()) {
                 globalData.putNavTab(order, nav);
                 for (TabNavBody item : nav.getNavList()) {
-                    if (item.getBookNo() > 0) {
+                    if (item.getBookNo() != null && !item.getBookNo().isEmpty()) {
                         globalData.putBookInfo(item.getBookNo(), item);
                     }
                 }

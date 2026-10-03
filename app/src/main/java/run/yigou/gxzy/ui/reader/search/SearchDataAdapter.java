@@ -72,7 +72,7 @@ public class SearchDataAdapter {
      * @param bookRepository 书籍仓库
      * @param bookId 当前书籍ID
      */
-    public SearchDataAdapter(BookRepository bookRepository, int bookId) {
+    public SearchDataAdapter(BookRepository bookRepository, String bookId) {
         EasyLog.print("=== SearchDataAdapter 初始化（策略模式） ===");
         EasyLog.print("BookId: " + bookId);
         

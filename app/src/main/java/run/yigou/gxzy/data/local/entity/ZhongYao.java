@@ -18,12 +18,12 @@ public class ZhongYao implements Serializable {
     private String name;
     private int height;
     private String text;
-    private long signatureId;
+    private String signatureId;
     private String signature;
 
-    @Generated(hash = 678019167)
+    @Generated(hash = 48562884)
     public ZhongYao(Long yaoId, int ID, String yaoList, String name, int height,
-            String text, long signatureId, String signature) {
+            String text, String signatureId, String signature) {
         this.yaoId = yaoId;
         this.ID = ID;
         this.yaoList = yaoList;
@@ -38,11 +38,11 @@ public class ZhongYao implements Serializable {
     public ZhongYao() {
     }
 
-    public long getSignatureId() {
+    public String getSignatureId() {
         return signatureId;
     }
 
-    public void setSignatureId(long signatureId) {
+    public void setSignatureId(String signatureId) {
         this.signatureId = signatureId;
     }
 

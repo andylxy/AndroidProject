@@ -51,7 +51,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     private final GlobalDataHolder globalData;
 
     // 状态管理
-    private int currentBookId;
+    private String currentBookId;
     private TabNavBody currentBookInfo; // 当前书籍信息
     private int currentChapterIndex = -1;
     private boolean isShowBookCollect = false;
@@ -61,7 +61,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     private List<Chapter> allChapters;
     private BookData currentBookData;  // 新数据模型
     private ChapterIndexBuilder indexBuilder;  // 搜索索引
-    private java.util.Set<Integer> loadedBookFangs = new java.util.HashSet<>();  // 已加载药方的书籍集合
+    private java.util.Set<String> loadedBookFangs = new java.util.HashSet<>();  // 已加载药方的书籍集合
     private boolean isShanghanBook = false;  // 是否为宋版伤寒书籍
 
     public TipsBookReadPresenter(TipsBookReadContract.View view) {
@@ -130,7 +130,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     }
 
     @Override
-    public void loadBookContent(int bookId, int lastReadPosition, boolean isShowBookCollect) {
+    public void loadBookContent(String bookId, int lastReadPosition, boolean isShowBookCollect) {
         if (!isViewActive()) {
             return;
         }
@@ -164,7 +164,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     /**
      * 加载书籍内容（重载方法，接受 TabNavBody）
      */
-    public void loadBookContent(TabNavBody book, int bookId, int lastReadPosition, boolean isShowBookCollect) {
+    public void loadBookContent(TabNavBody book, String bookId, int lastReadPosition, boolean isShowBookCollect) {
         if (!isViewActive()) {
             return;
         }
@@ -196,7 +196,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     /**
      * 内部实现：加载书籍内容
      */
-    private void loadBookContentInternal(TabNavBody book, int bookId, int lastReadPosition, boolean isShowBookCollect) {
+    private void loadBookContentInternal(TabNavBody book, String bookId, int lastReadPosition, boolean isShowBookCollect) {
         this.currentBookInfo = book;
         EasyLog.print("TipsBookReadPresenter", "开始加载书籍内容: " + book.getBookName());
 
@@ -232,7 +232,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         EasyLog.print("TipsBookReadPresenter", "搜索索引构建完成");
 
         // 兼容处理宋版伤寒
-        if (bookId == AppConst.ShangHanNo) {
+        if (AppConst.ShangHanNo.equals(bookId)) {
             setupShanghanContentListener();
         }
 
@@ -254,7 +254,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
 
     @Override
     public void refreshData() {
-        if (currentBookId > 0) {
+        if (currentBookId != null && !currentBookId.isEmpty()) {
             // 清除缓存并重新加载
             repository.clearCacheForBook(currentBookId);
             loadBookContent(currentBookId, currentChapterIndex, isShowBookCollect);
@@ -292,7 +292,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             
             // 直接从 allChapters 获取章节实体
             Chapter chapter = allChapters.get(position);
-            Long signatureId = chapter.getSignatureId();
+            String signatureId = chapter.getSignatureId();
             
             EasyLog.print("TipsBookReadPresenter", "章节信息: signatureId=" + signatureId + 
                 ", header=" + chapter.getChapterHeader());
@@ -507,7 +507,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             List<HH2SectionData> allContent = ConvertEntity.getBookChapterDetailList(currentBookId);
             
             // 2.1 针对伤寒论进行特殊过滤 (与 BookContentSearchActivity 逻辑保持一致)
-            if (currentBookId == AppConst.ShangHanNo) {
+            if (AppConst.ShangHanNo.equals(currentBookId)) {
                  allContent = filterShangHanData(allContent);
             }
             
@@ -744,7 +744,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             EasyLog.print("TipsBookReadPresenter", "从数据库加载方剂: " + cachedFangList.size() + " 个");
             
             List<DataItem> fangItemList = new ArrayList<>(cachedFangList);
-            ChapterData fangChapterData = new ChapterData(0L, book.getBookName() + "方", 0, fangItemList);
+            ChapterData fangChapterData = new ChapterData("", book.getBookName() + "方", 0, fangItemList);
             
             if (currentBookData != null) {
                 currentBookData.setFangData(fangChapterData);
@@ -766,7 +766,7 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
                 if (data != null && !data.isEmpty() && currentBookData != null) {
                     // 创建ChapterData包装方剂列表
                     List<DataItem> fangItemList = new ArrayList<>(data);
-                    ChapterData fangChapterData = new ChapterData(0L, book.getBookName() + "方", 0, fangItemList);
+                    ChapterData fangChapterData = new ChapterData("", book.getBookName() + "方", 0, fangItemList);
                     
                     currentBookData.setFangData(fangChapterData);
                     EasyLog.print("TipsBookReadPresenter", "✅ 方剂数据已设置到BookData: " + data.size() + " 个");
@@ -939,14 +939,14 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
      * 根据 signatureId 查找章节（保留用于兼容）
      * 注意：新代码应优先使用 BookData.findChapterBySignature() O(1) 查找
      */
-    private Chapter findChapterBySignatureId(long signatureId) {
+    private Chapter findChapterBySignatureId(String signatureId) {
         // 优先使用 O(1) 查找
         if (currentBookData != null) {
             ChapterData chapterData = currentBookData.findChapterBySignature(signatureId);
             if (chapterData != null) {
                 // 从 allChapters 中找到对应的 Chapter 实体
                 for (Chapter chapter : allChapters) {
-                    if (chapter != null && chapter.getSignatureId() == signatureId) {
+                    if (chapter != null && signatureId.equals(chapter.getSignatureId())) {
                         return chapter;
                     }
                 }

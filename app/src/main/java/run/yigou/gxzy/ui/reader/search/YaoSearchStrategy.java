@@ -49,7 +49,7 @@ import java.util.Map;
 public class YaoSearchStrategy implements ContentSearchStrategy {
     
     private final BookRepository bookRepository;
-    private final int bookId;
+    private final String bookId;
     private final BookData bookData;
     private final List<Chapter> chapters;
     private final IYaoDataProvider yaoProvider;
@@ -64,7 +64,7 @@ public class YaoSearchStrategy implements ContentSearchStrategy {
      * @param bookId 当前书籍ID
      * @param yaoProvider 药物数据提供者（依赖注入）
      */
-    public YaoSearchStrategy(BookRepository bookRepository, int bookId, IYaoDataProvider yaoProvider) {
+    public YaoSearchStrategy(BookRepository bookRepository, String bookId, IYaoDataProvider yaoProvider) {
         this.bookRepository = bookRepository;
         this.bookId = bookId;
         this.bookData = bookRepository.getBookData(bookId);

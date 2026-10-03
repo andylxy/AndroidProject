@@ -39,7 +39,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
      */
     @ContentTypes.ContentType
     private int contentType;
-    private int bookId;
+    private String bookId;
     private TextView numTips;
     private WrapRecyclerView mRecyclerView;
     private Button tipsBtnSearch;
@@ -55,7 +55,7 @@ public final class TipsFangYaoFragment extends TitleBarFragment<AppActivity> {
      * @param bookId 书籍ID
      * @return TipsFangYaoFragment 实例
      */
-    public static TipsFangYaoFragment newInstance(@ContentTypes.ContentType int contentType, int bookId) {
+    public static TipsFangYaoFragment newInstance(@ContentTypes.ContentType int contentType, String bookId) {
         TipsFangYaoFragment fragment = new TipsFangYaoFragment();
         fragment.contentType = contentType;
         fragment.bookId = bookId;

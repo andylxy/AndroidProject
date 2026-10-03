@@ -80,7 +80,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     /**
      * 伤寒论书籍ID
      */
-    private static final int SHANGHAN_BOOK_ID = AppConst.ShangHanNo;
+    private static final String SHANGHAN_BOOK_ID = AppConst.ShangHanNo;
     
     /**
      * 伤寒论金匮要略开始索引（从0开始，第9章）
@@ -656,7 +656,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         ArrayList<SearchKey> tempResults = new ArrayList<>();
         
         // 获取所有书籍信息
-        Map<Integer, TabNavBody> bookMap = GlobalDataHolder.getInstance().getNavTabBodyMap();
+        Map<String, TabNavBody> bookMap = GlobalDataHolder.getInstance().getNavTabBodyMap();
         if (bookMap == null || bookMap.isEmpty()) {
             return tempResults;
         }
@@ -667,8 +667,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         Map<String, String> fangAliasDict = globalData.getFangAliasDict();
         
         // 遍历书籍进行搜索
-        for (Map.Entry<Integer, TabNavBody> entry : bookMap.entrySet()) {
-            int bookId = entry.getKey();
+        for (Map.Entry<String, TabNavBody> entry : bookMap.entrySet()) {
+            String bookId = entry.getKey();
             TabNavBody bookInfo = entry.getValue();
             
             if (bookInfo == null) {
@@ -691,7 +691,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     /**
      * 在单本书籍中搜索
      */
-    private SearchKey searchInBook(int bookId, TabNavBody bookInfo, String keyword, 
+    private SearchKey searchInBook(String bookId, TabNavBody bookInfo, String keyword, 
                                   Map<String, String> yaoAliasDict, Map<String, String> fangAliasDict) {
         // 获取书籍内容 (直接从数据库读取，不污染BookDataManager缓存)
         List<HH2SectionData> contentList = DataRepository.getBookChapterDetailList(bookId);
@@ -701,7 +701,7 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         }
         
         // 伤寒论特殊过滤逻辑
-        if (bookId == SHANGHAN_BOOK_ID) {
+        if (SHANGHAN_BOOK_ID.equals(bookId)) {
              contentList = filterShangHanData(contentList);
         }
         

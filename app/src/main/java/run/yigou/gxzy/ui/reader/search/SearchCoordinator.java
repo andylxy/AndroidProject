@@ -24,14 +24,14 @@ import run.yigou.gxzy.utils.DebugLog;
  */
 public class SearchCoordinator {
     
-    private int bookId;
+    private String bookId;
     
     /**
      * 构造函数
      * 
      * @param bookId 书籍ID
      */
-    public SearchCoordinator(int bookId) {
+    public SearchCoordinator(String bookId) {
         this.bookId = bookId;
     }
     
@@ -69,7 +69,7 @@ public class SearchCoordinator {
         EasyLog.print("开始搜索，总章节数: " + allContent.size());
         
         // 2. 针对伤寒论进行特殊过滤
-        if (bookId == run.yigou.gxzy.base.constant.AppConst.ShangHanNo) {
+        if (run.yigou.gxzy.base.constant.AppConst.ShangHanNo.equals(bookId)) {
             allContent = filterShangHanData(allContent);
         }
         

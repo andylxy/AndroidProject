@@ -7,7 +7,7 @@ import run.yigou.gxzy.data.model.HH2SectionData;
 
 public class SearchKey extends SearchKeyEntity {
     private String bookName;
-    private int bookNo;
+    private String bookNo;
     private ArrayList<HH2SectionData> filteredData;
 
     /**
@@ -18,7 +18,7 @@ public class SearchKey extends SearchKeyEntity {
      * @param bookNo 书本编号
      * @param filteredData 搜索结果
      */
-    public SearchKey(String searchKeyText, int searchResTotalNum, String bookName, int bookNo, ArrayList<HH2SectionData> filteredData) {
+    public SearchKey(String searchKeyText, int searchResTotalNum, String bookName, String bookNo, ArrayList<HH2SectionData> filteredData) {
         super(new StringBuilder(searchKeyText), searchResTotalNum);
         this.bookName = bookName;
         this.bookNo = bookNo;
@@ -32,11 +32,11 @@ public class SearchKey extends SearchKeyEntity {
         this.bookName = bookName;
     }
 
-    public int getBookNo() {
+    public String getBookNo() {
         return bookNo;
     }
 
-    public void setBookNo(int bookNo) {
+    public void setBookNo(String bookNo) {
         this.bookNo = bookNo;
     }
 

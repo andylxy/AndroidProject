@@ -20,7 +20,7 @@ public class YaoFang implements Serializable {
 
     @Id
     private String yaoFangID;
-    private int bookId;
+    private String bookId;
     private int yaoCount;
     private int height;
     private String name;
@@ -29,14 +29,14 @@ public class YaoFang implements Serializable {
     private String text;
     private String fangList;
     private String yaoList;
-    private long signatureId;
+    private String signatureId;
     private String signature;
 
-    public long getSignatureId() {
+    public String getSignatureId() {
         return signatureId;
     }
 
-    public void setSignatureId(long signatureId) {
+    public void setSignatureId(String signatureId) {
         this.signatureId = signatureId;
     }
 
@@ -58,9 +58,9 @@ public class YaoFang implements Serializable {
     @Generated(hash = 800854105)
     private transient YaoFangDao myDao;
 
-    @Generated(hash = 1295549483)
-    public YaoFang(String yaoFangID, int bookId, int yaoCount, int height, String name, int ID,
-            float drinkNum, String text, String fangList, String yaoList, long signatureId,
+    @Generated(hash = 2112515929)
+    public YaoFang(String yaoFangID, String bookId, int yaoCount, int height, String name, int ID,
+            float drinkNum, String text, String fangList, String yaoList, String signatureId,
             String signature) {
         this.yaoFangID = yaoFangID;
         this.bookId = bookId;
@@ -79,8 +79,6 @@ public class YaoFang implements Serializable {
     @Generated(hash = 1325300536)
     public YaoFang() {
     }
-
-
 
     public String getYaoFangID() {
         return this.yaoFangID;
@@ -143,8 +141,7 @@ public class YaoFang implements Serializable {
                 throw new DaoException("Entity is detached from DAO context");
             }
             YaoFangBodyDao targetDao = daoSession.getYaoFangBodyDao();
-            List<YaoFangBody> standardYaoListNew = targetDao
-                    ._queryYaoFang_StandardYaoList(yaoFangID);
+            List<YaoFangBody> standardYaoListNew = targetDao._queryYaoFang_StandardYaoList(yaoFangID);
             synchronized (this) {
                 if (standardYaoList == null) {
                     standardYaoList = standardYaoListNew;
@@ -153,11 +150,13 @@ public class YaoFang implements Serializable {
         }
         return standardYaoList;
     }
+
     /** Resets a to-many relationship, making the next get call to query for a fresh result. */
     @Generated(hash = 2023334037)
     public synchronized void resetStandardYaoList() {
         standardYaoList = null;
     }
+
     /**
      * Convenient call for {@link org.greenrobot.greendao.AbstractDao#delete(Object)}.
      * Entity must attached to an entity context.
@@ -169,6 +168,7 @@ public class YaoFang implements Serializable {
         }
         myDao.delete(this);
     }
+
     /**
      * Convenient call for {@link org.greenrobot.greendao.AbstractDao#refresh(Object)}.
      * Entity must attached to an entity context.
@@ -180,6 +180,7 @@ public class YaoFang implements Serializable {
         }
         myDao.refresh(this);
     }
+
     /**
      * Convenient call for {@link org.greenrobot.greendao.AbstractDao#update(Object)}.
      * Entity must attached to an entity context.
@@ -191,10 +192,11 @@ public class YaoFang implements Serializable {
         }
         myDao.update(this);
     }
-    public int getBookId() {
+
+    public String getBookId() {
         return this.bookId;
     }
-    public void setBookId(int bookId) {
+    public void setBookId(String bookId) {
         this.bookId = bookId;
     }
     public float getDrinkNum() {

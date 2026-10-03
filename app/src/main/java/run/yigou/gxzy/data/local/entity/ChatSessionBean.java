@@ -155,8 +155,7 @@ public class ChatSessionBean {
                 throw new DaoException("Entity is detached from DAO context");
             }
             ChatMessageBeanDao targetDao = daoSession.getChatMessageBeanDao();
-            List<ChatMessageBean> messagesNew = targetDao
-                    ._queryChatSessionBean_Messages(id);
+            List<ChatMessageBean> messagesNew = targetDao._queryChatSessionBean_Messages(id);
             synchronized (this) {
                 if (messages == null) {
                     messages = messagesNew;

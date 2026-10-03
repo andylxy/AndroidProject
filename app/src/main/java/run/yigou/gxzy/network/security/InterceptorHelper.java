@@ -139,11 +139,13 @@ public class InterceptorHelper {
      * </p>
      */
     private static String loginBearer(AppApplication appApplication) {
+        // 登录后优先用用户凭证（`mflc_…`，按用户维度签发）。
         if (appApplication != null && appApplication.mUserInfoToken != null
                 && appApplication.mUserInfoToken.getToken() != null
                 && !appApplication.mUserInfoToken.getToken().isEmpty()) {
             return appApplication.mUserInfoToken.getToken();
         }
-        return null;
+        // 未登录时回落到默认凭证（对应 App 原有的「固定设备密钥」兜底模型）。
+        return SecurityConfig.getApiKey();
     }
 }

@@ -18,13 +18,13 @@ public final class ChapterListApi implements IRequestApi {
     public String getMethod() {
         return "GET"; // ??"POST", "PUT" ??
     }
-    public int getBookId() {
+    public String getBookId() {
         return bookId;
     }
-    public ChapterListApi setBookId(int bookId) {
+    public ChapterListApi setBookId(String bookId) {
         this.bookId = bookId;
         return this;
     }
-    private int bookId;
+    private String bookId;
 
 }

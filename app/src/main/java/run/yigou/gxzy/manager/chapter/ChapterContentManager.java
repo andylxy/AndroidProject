@@ -57,10 +57,10 @@ public class ChapterContentManager {
     private final ScheduledExecutorService scheduler;
     
     // 获取中章节 ID 集合（线程安全）
-    private final Set<Long> fetchingChapters = new HashSet<>();
+    private final Set<String> fetchingChapters = new HashSet<>();
     
     // 已获取章节 ID 集合（内存缓存）
-    private final Set<Long> readyChapters = new HashSet<>();
+    private final Set<String> readyChapters = new HashSet<>();
 
     /**
      * 内容回调接口
@@ -168,7 +168,7 @@ public class ChapterContentManager {
             return;
         }
 
-        long signatureId = chapter.getSignatureId();
+        String signatureId = chapter.getSignatureId();
 
         // 检查是否已获取
         if (readyChapters.contains(signatureId)) {
@@ -213,7 +213,7 @@ public class ChapterContentManager {
             for (Chapter chapter : allChapters) {
                 if (chapter == null) continue;
                 
-                long signatureId = chapter.getSignatureId();
+                String signatureId = chapter.getSignatureId();
                 
                 // 排除已获取和正在获取的章节
                 if (!readyChapters.contains(signatureId) && !fetchingChapters.contains(signatureId)) {
@@ -278,7 +278,7 @@ public class ChapterContentManager {
         List<Chapter> chaptersToPreload = new ArrayList<>();
         for (int index : preloadIndices) {
             Chapter chapter = allChapters.get(index);
-            long signatureId = chapter.getSignatureId();
+            String signatureId = chapter.getSignatureId();
 
             // 排除已获取和正在获取的章节
             synchronized (fetchingChapters) {

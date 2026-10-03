@@ -18,13 +18,13 @@ public class YaoFangBody implements Serializable {
     private float weight;
     private String showName;
     private String extraProcess;
-    private long signatureId;
+    private String signatureId;
     private String signature;
 
-    @Generated(hash = 290227427)
+    @Generated(hash = 267384739)
     public YaoFangBody(String yaoFangBodyId, String yaoFangID, String suffix,
             String amount, int yaoID, float weight, String showName,
-            String extraProcess, long signatureId, String signature) {
+            String extraProcess, String signatureId, String signature) {
         this.yaoFangBodyId = yaoFangBodyId;
         this.yaoFangID = yaoFangID;
         this.suffix = suffix;
@@ -41,11 +41,11 @@ public class YaoFangBody implements Serializable {
     public YaoFangBody() {
     }
 
-    public long getSignatureId() {
+    public String getSignatureId() {
         return signatureId;
     }
 
-    public void setSignatureId(long signatureId) {
+    public void setSignatureId(String signatureId) {
         this.signatureId = signatureId;
     }
 

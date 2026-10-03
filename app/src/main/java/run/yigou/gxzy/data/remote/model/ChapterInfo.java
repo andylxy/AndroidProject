@@ -12,7 +12,7 @@ import java.util.List;
  * ???:
  */
 public class ChapterInfo implements Serializable {
-    private int Id;
+    private String Id;
     private String mTitle;
 
     private String mTitleColor;
@@ -36,11 +36,11 @@ public class ChapterInfo implements Serializable {
     private List<ChapterInfoBody> ChapterInfoBody;
     private String Creator;
 
-    public int getId() {
+    public String getId() {
         return Id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         Id = id;
     }
 

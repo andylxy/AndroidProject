@@ -97,7 +97,7 @@ public class TipsClickHandler {
                 .toString();
 
         // 2. 校验 BookRepository 上下文
-        if (TipsNetHelper.getBookRepository() == null || TipsNetHelper.getCurrentBookId() == -1) {
+        if (TipsNetHelper.getBookRepository() == null || TipsNetHelper.getCurrentBookId() == null || TipsNetHelper.getCurrentBookId().isEmpty()) {
             EasyLog.print("❌ BookRepository未设置，无法搜索");
             return;
         }

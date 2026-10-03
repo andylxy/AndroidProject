@@ -22,9 +22,9 @@ public class BookChapter implements Serializable {
     @Id
     private String bookChapterId;
     private int section;
-    private int bookId;
+    private String bookId;
     private String header;
-    private long signatureId;
+    private String signatureId;
     private String signature;
     @ToMany(referencedJoinProperty = "bookChapterId")
     private List<BookChapterBody> data;
@@ -38,8 +38,8 @@ public class BookChapter implements Serializable {
     private transient BookChapterDao myDao;
 
 
-    @Generated(hash = 551523080)
-    public BookChapter(String bookChapterId, int section, int bookId, String header, long signatureId,
+    @Generated(hash = 1461483181)
+    public BookChapter(String bookChapterId, int section, String bookId, String header, String signatureId,
             String signature) {
         this.bookChapterId = bookChapterId;
         this.section = section;
@@ -53,11 +53,11 @@ public class BookChapter implements Serializable {
     public BookChapter() {
     }
 
-    public long getSignatureId() {
+    public String getSignatureId() {
         return signatureId;
     }
 
-    public void setSignatureId(long signatureId) {
+    public void setSignatureId(String signatureId) {
         this.signatureId = signatureId;
     }
 
@@ -93,11 +93,11 @@ public class BookChapter implements Serializable {
 
 
 
-    public int getBookId() {
+    public String getBookId() {
         return this.bookId;
     }
 
-    public void setBookId(int bookId) {
+    public void setBookId(String bookId) {
         this.bookId = bookId;
     }
 
@@ -121,8 +121,7 @@ public class BookChapter implements Serializable {
                 throw new DaoException("Entity is detached from DAO context");
             }
             BookChapterBodyDao targetDao = daoSession.getBookChapterBodyDao();
-            List<BookChapterBody> dataNew = targetDao
-                    ._queryBookChapter_Data(bookChapterId);
+            List<BookChapterBody> dataNew = targetDao._queryBookChapter_Data(bookChapterId);
             synchronized (this) {
                 if (data == null) {
                     data = dataNew;

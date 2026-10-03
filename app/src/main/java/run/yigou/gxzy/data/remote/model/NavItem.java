@@ -21,15 +21,15 @@ public class NavItem implements Serializable {
     private String Author;
     private String Desc;
 
-    public int getBookNo() {
+    public String getBookNo() {
         return BookNo;
     }
 
-    public void setBookNo(int bookNo) {
+    public void setBookNo(String bookNo) {
         BookNo = bookNo;
     }
 
-    private int BookNo;
+    private String BookNo;
 
 
     public long getId() {

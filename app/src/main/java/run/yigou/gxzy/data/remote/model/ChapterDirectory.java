@@ -9,7 +9,7 @@ import java.util.List;
  * Desc:
  */
 public class ChapterDirectory extends ChapterList {
-  private  int  mBookId;
+  private  String  mBookId;
   private String  mComment ;
     private String mParentId;
     private String mTitleColor;
@@ -34,11 +34,11 @@ public class ChapterDirectory extends ChapterList {
     }
   private List<ChapterList> mChapterLists;
 
-    public int getBookId() {
+    public String getBookId() {
         return mBookId;
     }
 
-    public void setBookId(int bookId) {
+    public void setBookId(String bookId) {
         mBookId = bookId;
     }
 

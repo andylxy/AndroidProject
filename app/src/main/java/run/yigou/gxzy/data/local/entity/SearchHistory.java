@@ -29,7 +29,7 @@ public class SearchHistory implements Serializable {
 
     @Generated(hash = 1175489714)
     public SearchHistory(String id, @NotNull String content,
-                         @NotNull String createDate) {
+            @NotNull String createDate) {
         this.id = id;
         this.content = content;
         this.createDate = createDate;

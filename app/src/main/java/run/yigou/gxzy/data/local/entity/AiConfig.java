@@ -31,8 +31,7 @@ public class AiConfig implements Serializable {
     @Generated(hash = 1138359028)
     private transient AiConfigDao myDao;
     @Generated(hash = 1199439553)
-    public AiConfig(String AiConfigId, String ProvideAi, String ApiKey,
-            String AiUrl) {
+    public AiConfig(String AiConfigId, String ProvideAi, String ApiKey, String AiUrl) {
         this.AiConfigId = AiConfigId;
         this.ProvideAi = ProvideAi;
         this.ApiKey = ApiKey;
@@ -77,8 +76,7 @@ public class AiConfig implements Serializable {
                 throw new DaoException("Entity is detached from DAO context");
             }
             AiConfigBodyDao targetDao = daoSession.getAiConfigBodyDao();
-            List<AiConfigBody> ModelListNew = targetDao
-                    ._queryAiConfig_ModelList(AiConfigId);
+            List<AiConfigBody> ModelListNew = targetDao._queryAiConfig_ModelList(AiConfigId);
             synchronized (this) {
                 if (ModelList == null) {
                     ModelList = ModelListNew;

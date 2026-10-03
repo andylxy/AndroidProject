@@ -39,7 +39,7 @@ public class AppConst {
     /**
      * 伤寒论书籍编号
      */
-    public static final int ShangHanNo = 10001;
+    public static final String ShangHanNo = "10001";
 
     /**
      * 图片服务器地址

@@ -36,6 +36,17 @@ public class SecurityConfig {
     private static String sAccessKeySecret = "KZbbYBtUeMXbIimx";
 
     /**
+     * 默认 microfeed 登录凭证（Bearer Token，{@code mflc_…}）。
+     * <p>
+     * 参考 App 原有的「固定设备密钥」模型：未登录时用它兜底，使 App 在登录前
+     * 也能访问内容端点；登录后 {@link InterceptorHelper} 改用登录返回的用户凭证。
+     * 该凭证在 microfeed 后台「登录凭证」创建，绑定持有 {@code app:mobile:access}
+     * 权限的账号。
+     * </p>
+     */
+    private static String sApiKey = "mflc_4ee17b881c8aaf49005522b1254950727985a9260321247c4cd0b8ebdc655a82";
+
+    /**
      * 是否启用防重放攻击功能
      */
     private static boolean sEnableAntiReplayAttack = true;
@@ -84,6 +95,20 @@ public class SecurityConfig {
     public static void setAccessKeySecret(String accessKeySecret) {
         sAccessKeySecret = accessKeySecret;
         run.yigou.gxzy.nativecore.NativeBridge.setSigningKey(accessKeySecret);
+    }
+
+    /**
+     * 获取默认 microfeed 登录凭证（Bearer Token，{@code mflc_…}）
+     */
+    public static String getApiKey() {
+        return sApiKey;
+    }
+
+    /**
+     * 设置默认 microfeed 登录凭证（Bearer Token）
+     */
+    public static void setApiKey(String apiKey) {
+        sApiKey = apiKey;
     }
 
     /**

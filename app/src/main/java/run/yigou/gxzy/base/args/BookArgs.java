@@ -2,15 +2,15 @@ package run.yigou.gxzy.base.args;
 
 public class BookArgs {
 
-   private int  bookNo;
+   private String  bookNo;
    private int bookLastReadPosition;
    private boolean isShowBookCollect;
 
-    public int getBookNo() {
+    public String getBookNo() {
         return bookNo;
     }
 
-    public void setBookNo(int bookNo) {
+    public void setBookNo(String bookNo) {
         this.bookNo = bookNo;
     }
 
@@ -30,7 +30,7 @@ public class BookArgs {
         isShowBookCollect = showBookCollect;
     }
 
-    public static BookArgs newInstance(int bookNo, int bookLastReadPosition, boolean isShowBookCollect) {
+    public static BookArgs newInstance(String bookNo, int bookLastReadPosition, boolean isShowBookCollect) {
         BookArgs bookArgs = new BookArgs();
         bookArgs.setBookNo(bookNo);
         bookArgs.setBookLastReadPosition(bookLastReadPosition);

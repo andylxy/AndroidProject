@@ -30,7 +30,7 @@ import run.yigou.gxzy.data.model.DataItem;
 public class ChapterData {
     
     // 章节 ID
-    private final long signatureId;
+    private final String signatureId;
     
     // 章节标题
     private final String title;
@@ -56,7 +56,7 @@ public class ChapterData {
      * @param title 章节标题
      * @param section 章节编号
      */
-    public ChapterData(long signatureId, @NonNull String title, int section) {
+    public ChapterData(String signatureId, @NonNull String title, int section) {
         this.signatureId = signatureId;
         this.title = title;
         this.section = section;
@@ -67,7 +67,7 @@ public class ChapterData {
     /**
      * 完整构造函数（带内容）
      */
-    public ChapterData(long signatureId, @NonNull String title, int section, 
+    public ChapterData(String signatureId, @NonNull String title, int section, 
                       @Nullable List<DataItem> content) {
         this(signatureId, title, section);
         if (content != null) {
@@ -78,7 +78,7 @@ public class ChapterData {
     /**
      * 获取章节 ID
      */
-    public long getSignatureId() {
+    public String getSignatureId() {
         return signatureId;
     }
     

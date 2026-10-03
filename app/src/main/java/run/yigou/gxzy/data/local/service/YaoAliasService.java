@@ -2,7 +2,6 @@ package run.yigou.gxzy.data.local.service;
 
 
 import run.yigou.gxzy.data.local.entity.ZhongYaoAlia;
-import run.yigou.gxzy.data.local.gen.YaoAliaDao;
 import run.yigou.gxzy.data.local.gen.ZhongYaoAliaDao;
 import run.yigou.gxzy.data.local.gen.ZhongYaoDao;
 

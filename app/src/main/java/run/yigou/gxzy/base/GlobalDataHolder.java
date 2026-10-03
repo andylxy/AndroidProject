@@ -40,7 +40,7 @@ public class GlobalDataHolder {
     private final Map<Integer, TabNav> navTabMap;
     
     // 书籍信息映射（bookId -> TabNavBody）
-    private final Map<Integer, TabNavBody> navTabBodyMap;
+    private final Map<String, TabNavBody> navTabBodyMap;
     
     // 药物别名字典（全局唯一）
     private final Map<String, String> yaoAliasDict;
@@ -125,14 +125,14 @@ public class GlobalDataHolder {
      * 获取书籍信息映射
      */
     @NonNull
-    public Map<Integer, TabNavBody> getNavTabBodyMap() {
+    public Map<String, TabNavBody> getNavTabBodyMap() {
         return navTabBodyMap;
     }
     
     /**
      * 添加书籍信息
      */
-    public void putBookInfo(int bookId, @NonNull TabNavBody bookInfo) {
+    public void putBookInfo(String bookId, @NonNull TabNavBody bookInfo) {
         navTabBodyMap.put(bookId, bookInfo);
         navDataLoaded = true;
     }
@@ -141,7 +141,7 @@ public class GlobalDataHolder {
      * 获取书籍信息
      */
     @Nullable
-    public TabNavBody getBookInfo(int bookId) {
+    public TabNavBody getBookInfo(String bookId) {
         return navTabBodyMap.get(bookId);
     }
     

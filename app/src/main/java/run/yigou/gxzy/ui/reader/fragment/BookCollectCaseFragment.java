@@ -145,7 +145,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
         if (books == null || books.isEmpty()) {
             toast("书本异常.请删除后,重新加入书架");
         } else {
-            int bookId = books.get(0).getBookNo();
+            String bookId = books.get(0).getBookNo();
             int bookLastReadPosition = books.get(0).getLastReadPosition();
             // 启动跳转 到阅读窗口
             Intent intent = new Intent(getContext(), TipsFragmentActivity.class);

@@ -138,7 +138,7 @@ public class ConvertEntity {
     /**
      * Fang 模型 → YaoFang 数据库实体
      */
-    public static YaoFang convertFangToYaoFang(Fang fang, int bookId, String yaoFangId) {
+    public static YaoFang convertFangToYaoFang(Fang fang, String bookId, String yaoFangId) {
         if (fang == null || yaoFangId == null) {
             return null;
         }
@@ -211,8 +211,8 @@ public class ConvertEntity {
     /**
      * HH2SectionData + bookId → BookChapter 数据库实体
      */
-    public static BookChapter createBookChapterByBookId(int bookId, HH2SectionData sectionData, String chapterId) {
-        if (bookId <= 0 || sectionData == null || chapterId == null) {
+    public static BookChapter createBookChapterByBookId(String bookId, HH2SectionData sectionData, String chapterId) {
+        if (bookId == null || bookId.isEmpty() || sectionData == null || chapterId == null) {
             return null;
         }
 
