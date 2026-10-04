@@ -38,6 +38,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.ConnectException;
@@ -186,6 +187,14 @@ public final class RequestHandler implements IRequestHandler {
         }
 
         if (e instanceof SocketTimeoutException) {
+            return new TimeoutException(mApplication.getString(R.string.http_server_out_time), e);
+        }
+
+        // OkHttp 的 callTimeout / readTimeout 抛的是 InterruptedIOException("timeout")，
+        // **不是** SocketTimeoutException，所以上面那个分支接不到；它此前落进 IOException
+        // 兜底被当成「取消」而静默，用户看不到任何反馈。实测记录见
+        // .scratch/app-device-version/okhttp-cancel-probe.txt（票据 22 遗留项）。
+        if (e instanceof InterruptedIOException) {
             return new TimeoutException(mApplication.getString(R.string.http_server_out_time), e);
         }
 
