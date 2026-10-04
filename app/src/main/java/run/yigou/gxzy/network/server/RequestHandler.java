@@ -14,6 +14,7 @@ import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.network.exception.DeviceRevokedException;
+import run.yigou.gxzy.network.exception.HandledHttpFailure;
 import run.yigou.gxzy.network.exception.VersionGateException;
 import run.yigou.gxzy.ui.account.LoginActivity;
 import com.hjq.gson.factory.GsonFactory;
@@ -58,34 +59,8 @@ public final class RequestHandler implements IRequestHandler {
     private final Application mApplication;
     private final MMKV mMmkv;
 
-    /** 版本门状态码：低于地板 → 426（spec §6.4）。 */
-    private static final int HTTP_UPGRADE_REQUIRED = 426;
-
-    /** 未授权状态码。 */
-    private static final int HTTP_UNAUTHORIZED = 401;
-
-    /**
-     * 吊销区分信号：401 + 该响应头为 {@link #DEVICE_REVOKED_FLAG} 表示「设备被管理员禁用」
-     * （与「会话过期」的普通 401 区分，ADR-0003）。
-     */
-    private static final String HEADER_DEVICE_REVOKED = "X-Device-Revoked";
-
-    private static final String DEVICE_REVOKED_FLAG = "1";
-
-    /**
-     * 该响应是否属于「已由 {@code UpdateManager} 给出专用提示」的失败：426（强制升级框）
-     * 或 401 + {@code X-Device-Revoked: 1}（设备已被禁用）。此类失败不再弹通用错误 toast
-     * （票据 21）。
-     *
-     * 判定放这里而不是调用方：响应语义归本类所有，避免别处各写一份魔数。
-     */
-    public static boolean isHandledFailure(Response response) {
-        if (response.code() == HTTP_UPGRADE_REQUIRED) {
-            return true;
-        }
-        return response.code() == HTTP_UNAUTHORIZED
-                && DEVICE_REVOKED_FLAG.equals(response.header(HEADER_DEVICE_REVOKED));
-    }
+    // 响应语义（哪些失败已有专用提示）已移到 network.exception.HandledHttpFailure：
+    // 那里是纯 JVM 可测的判定入口，也避免本类与异常类互相依赖。
 
     public RequestHandler(Application application) {
         mApplication = application;
@@ -108,8 +83,8 @@ public final class RequestHandler implements IRequestHandler {
             // 抛的不是 TokenException，requestFail 不会跳登录页。
             final String httpError = mApplication.getString(R.string.http_response_error) + "，responseCode："
                     + response.code() + "，message：" + response.message();
-            if (isHandledFailure(response)) {
-                if (response.code() == HTTP_UPGRADE_REQUIRED) {
+            if (HandledHttpFailure.isHandled(response)) {
+                if (response.code() == HandledHttpFailure.HTTP_UPGRADE_REQUIRED) {
                     UpdateManager.onVersionTooLow();
                     throw new VersionGateException(httpError);
                 }

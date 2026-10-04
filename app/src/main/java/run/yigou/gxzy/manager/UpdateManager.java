@@ -66,7 +66,7 @@ public final class UpdateManager {
      * <p>{@code onApplicationForeground} 在冷启动（首个 Activity resume）与「从后台回到前台」时
      * 都会触发，所以任何页面回到前台都会被检查；只挂某个 Activity 的 {@code onResume} 则不然。</p>
      *
-     * <p>由 {@code AppApplication} 在启动时调用一次。重复触发由 {@code sDialogShowing} 去重，
+     * <p>由 {@code AppApplication} 在启动时调用一次。弹窗由 {@code sDialogShowing} 去重（**拉取层不去重**，否则 426 触发的强制检查会被挤掉，见 spec §7.1 坑 3），
      * 最多一个弹窗。</p>
      */
     public static void registerForegroundCheck() {
@@ -168,10 +168,9 @@ public final class UpdateManager {
         if (activity == null) {
             return;
         }
-        if (sDialogShowing.get()) {
-            EasyLog.print(TAG, "已有升级弹窗在显示，跳过本次检查");
-            return;
-        }
+        // 这里**不**做「已有弹窗就跳过本次检查」的去重：那是**拉取层**去重，会把 426 触发的
+        // 强制检查挤掉（软弹窗在场时到达的 426 就被丢弃，用户被内容门拦死却看不到提示）。
+        // 去重只放在弹窗层 showUpdateDialog；拉取是幂等只读 GET，重复几次没有代价（spec §7.1 坑 3）。
         // 本项目的 Activity 都继承 AppActivity → BaseActivity → AppCompatActivity，
         // 即都是 LifecycleOwner；仍显式判断一次，避免把非生命周期宿主交给 EasyHttp。
         if (!(activity instanceof LifecycleOwner)) {

@@ -17,6 +17,8 @@
 | `X-AccessKeyId` | 发放给调用方的 AccessKeyId |
 | `X-Timestamp` | 13 位毫秒时间戳，必须与服务器时间相差不超过 5 秒（默认值） |
 | `X-Nonce` | 本次请求的随机字符串，10 秒内不可重复 |
+| `X-Device-Id` | 设备标识（首次启动生成的 UUID 存于 MMKV），**不参与签名**。用于设备登记与吊销：吊销后该设备请求会被 401 + `X-Device-Revoked: 1` 拒绝 |
+| `app-version` | 客户端 `versionCode`（整数），**不参与签名、且必须恒发**。版本门据此判 426 强制升级；地板为 0 时该头缺失也不拦 |
 | `Authorization` *(可选)* | 若接口还需要平台登录态，使用 `Bearer <jwt>` |
 
 ## 3. 签名步骤

@@ -157,6 +157,10 @@ ext {
 }
 
 dependencies {
+    // 纯 JVM 单元测试（不依赖 Android 运行时）：版本门的 426 / 401+设备吊销判定等
+    // 纯逻辑在此覆盖，不必每次都靠真机 logcat 验证。
+    testImplementation 'junit:junit:4.13.1'
+
     // MultiDex 支持（解决方法数超过 64K 限制）
     implementation 'androidx.multidex:multidex:2.0.1'
 

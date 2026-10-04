@@ -18,7 +18,7 @@ import run.yigou.gxzy.base.action.ToastAction;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.ui.dialog.WaitDialog;
 import com.hjq.http.listener.OnHttpListener;
-import run.yigou.gxzy.network.exception.HandledHttpException;
+import run.yigou.gxzy.network.exception.HandledHttpFailure;
 
 import okhttp3.Call;
 
@@ -216,7 +216,7 @@ public abstract class AppActivity extends BaseActivity
     @Override
     public void onHttpFail(Throwable throwable) {
         // 426 / 设备吊销已有专用提示，不再补通用 toast（票据 21）。
-        if (!HandledHttpException.shouldSilence(throwable)) {
+        if (!HandledHttpFailure.shouldSilence(throwable)) {
             toast(throwable.getMessage());
         }
         onFail(throwable instanceof Exception ? (Exception) throwable : new Exception(throwable));
