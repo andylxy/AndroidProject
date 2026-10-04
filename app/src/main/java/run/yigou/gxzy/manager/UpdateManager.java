@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.hjq.base.BaseDialog;
@@ -42,8 +41,8 @@ import run.yigou.gxzy.ui.dialog.UpdateDialog;
  * 426 触发的**强制**检查会被在飞的前台检查挤掉，结果一个弹窗都不弹。拉取是幂等的只读
  * GET，重复几次没有代价。</p>
  *
- * <p><b>不在此类做设备禁用提示之外的事</b>：{@link #onDeviceRevoked} 处理
- * {@code 401 + X-Device-Revoked: 1}（ADR-0003）。</p>
+ * <p><b>职责边界</b>：本类只管版本升级；「设备已被禁用」的提示由
+ * {@link DeviceNoticeManager} 处理（{@code 401 + X-Device-Revoked: 1}，ADR-0003）。</p>
  */
 public final class UpdateManager {
 
@@ -51,9 +50,6 @@ public final class UpdateManager {
 
     /** 弹窗去重：同一时刻只允许一个升级弹窗。弹窗消失后复位。 */
     private static final AtomicBoolean sDialogShowing = new AtomicBoolean(false);
-
-    /** 设备禁用提示只弹一次（该设备的每个请求都会 401，不能每次都弹）。 */
-    private static final AtomicBoolean sDeviceRevokedShown = new AtomicBoolean(false);
 
     private static final Handler MAIN_HANDLER = new Handler(Looper.getMainLooper());
 
@@ -95,7 +91,7 @@ public final class UpdateManager {
 
     /** 设置页「检查更新」：拉取后无更新则 toast 提示已是最新。 */
     public static void checkManually(Activity activity) {
-        fetchAndShow(activity, false, true);
+        fetchAndShow(activity, Trigger.MANUAL);
     }
 
     /**
@@ -104,7 +100,7 @@ public final class UpdateManager {
      * <p>静默：无更新或请求失败都不给用户任何打扰；只有确实要提示时才弹窗。</p>
      */
     public static void checkOnForeground(Activity activity) {
-        fetchAndShow(activity, false, false);
+        fetchAndShow(activity, Trigger.FOREGROUND);
     }
 
     /**
@@ -114,60 +110,30 @@ public final class UpdateManager {
      */
     public static void onVersionTooLow() {
         EasyLog.print(TAG, "收到 HTTP 426（版本门），拉取 /api/app/version 并弹强制升级");
-        MAIN_HANDLER.post(() -> fetchAndShow(topActivity(), true, false));
+        MAIN_HANDLER.post(() -> fetchAndShow(ForegroundActivities.topIfUsable(), Trigger.FORCE_426));
     }
 
-    /**
-     * 收到 {@code 401 + X-Device-Revoked: 1}：提示「此设备已被禁用」，**不**跳登录。
-     *
-     * <p>若与「会话过期」一样去弹登录框，会陷入「登录成功 → 又被 401」的死循环
-     * （ADR-0003）。</p>
-     */
-    public static void onDeviceRevoked() {
-        MAIN_HANDLER.post(() -> {
-            if (sDeviceRevokedShown.get()) {
-                return;
-            }
-            Activity activity = topActivity();
-            if (activity == null) {
-                // 没有可用的前台 Activity：**不消费**标志，等下一次请求再提示，
-                // 否则这一台设备的禁用提示就永远不会出现。
-                EasyLog.print(TAG, "设备已禁用，但当前没有可用的 Activity，稍后重试提示");
-                return;
-            }
-            if (!sDeviceRevokedShown.compareAndSet(false, true)) {
-                return;
-            }
-            EasyLog.print(TAG, "收到 401 + X-Device-Revoked，提示设备已被禁用（不跳登录）");
-            new AlertDialog.Builder(activity)
-                    .setTitle(R.string.device_revoked_title)
-                    .setMessage(R.string.device_revoked_message)
-                    .setCancelable(false)
-                    .setPositiveButton(R.string.device_revoked_confirm, (dialog, which) ->
-                            ActivityManager.getInstance().finishAllActivities())
-                    .show();
-        });
-    }
-
-    /** 当前可用的前台 Activity；没有或正在销毁时返回 null。 */
-    private static Activity topActivity() {
-        Activity activity = ActivityManager.getInstance().getTopActivity();
-        if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
-            return null;
-        }
-        return activity;
+    /** 触发来源：比两个 boolean 更不容易传错顺序。 */
+    private enum Trigger {
+        /** 进入前台自动检查：静默，无更新或失败都不打扰用户。 */
+        FOREGROUND,
+        /** 用户手动点「检查更新」：无更新/失败都给 toast 反馈。 */
+        MANUAL,
+        /** 内容端点返回 426：本机已低于后端地板，必须升级。 */
+        FORCE_426,
     }
 
     /**
      * 拉取 {@code /api/app/version} 并按结果弹窗。
      *
-     * @param forceUpgrade 调用方已知必须强制升级（426 触发时为 true）
-     * @param manual       用户手动触发（无更新/失败时给出 toast 反馈）
+     * @param trigger 触发来源；比两个 boolean 更不容易传错顺序
      */
-    private static void fetchAndShow(Activity activity, boolean forceUpgrade, boolean manual) {
+    private static void fetchAndShow(Activity activity, Trigger trigger) {
         if (activity == null) {
             return;
         }
+        final boolean forceUpgrade = trigger == Trigger.FORCE_426;
+        final boolean manual = trigger == Trigger.MANUAL;
         // 这里**不**做「已有弹窗就跳过本次检查」的去重：那是**拉取层**去重，会把 426 触发的
         // 强制检查挤掉（软弹窗在场时到达的 426 就被丢弃，用户被内容门拦死却看不到提示）。
         // 去重只放在弹窗层 showUpdateDialog；拉取是幂等只读 GET，重复几次没有代价（spec §7.1 坑 3）。

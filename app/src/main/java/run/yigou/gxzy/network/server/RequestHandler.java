@@ -12,6 +12,7 @@ import com.google.gson.JsonSyntaxException;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.ActivityManager;
+import run.yigou.gxzy.manager.DeviceNoticeManager;
 import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.network.exception.DeviceRevokedException;
 import run.yigou.gxzy.network.exception.HandledHttpFailure;
@@ -89,7 +90,7 @@ public final class RequestHandler implements IRequestHandler {
                     UpdateManager.onVersionTooLow();
                     throw new VersionGateException(httpError);
                 }
-                UpdateManager.onDeviceRevoked();
+                DeviceNoticeManager.onDeviceRevoked();
                 throw new DeviceRevokedException(httpError);
             }
             // 返回响应异常
