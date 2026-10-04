@@ -20,7 +20,6 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.manager.ActivityManager;
-import run.yigou.gxzy.manager.UpdateManager;
 import com.hjq.base.DoubleClickHelper;
 
 import run.yigou.gxzy.ui.reader.ai.AiMsgFragment;
@@ -584,9 +583,8 @@ public final class HomeActivity extends AppActivity
         super.onResume();
         // 刷新导航菜单，根据登录状态动态显示AI聊天
         refreshNavigationMenu();
-        // 进入前台自动检查版本（spec §7）：由后端 /api/app/version 驱动，
-        // 有更新或需强制升级时弹 UpdateDialog；无更新/失败静默，不打扰用户。
-        UpdateManager.checkOnForeground(this);
+        // 版本检查已上移到应用级前台回调（UpdateManager.registerForegroundCheck，
+        // spec §7）：冷启动与从后台回到前台都会触发，这里不再重复调用。
     }
 
     /**

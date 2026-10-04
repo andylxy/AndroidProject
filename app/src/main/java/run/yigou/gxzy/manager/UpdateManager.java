@@ -60,6 +60,39 @@ public final class UpdateManager {
     private UpdateManager() {
     }
 
+    /**
+     * 把版本检查挂到**应用级**前台回调（spec §7）。
+     *
+     * <p>{@code onApplicationForeground} 在冷启动（首个 Activity resume）与「从后台回到前台」时
+     * 都会触发，所以任何页面回到前台都会被检查；只挂某个 Activity 的 {@code onResume} 则不然。</p>
+     *
+     * <p>由 {@code AppApplication} 在启动时调用一次。重复触发由 {@code sDialogShowing} 去重，
+     * 最多一个弹窗。</p>
+     */
+    public static void registerForegroundCheck() {
+        EasyLog.print(TAG, "版本检查已挂到应用级前台回调（spec §7）");
+        ActivityManager.getInstance().registerApplicationLifecycleCallback(
+                new ActivityManager.ApplicationLifecycleCallback() {
+                    @Override
+                    public void onApplicationCreate(Activity activity) {
+                        // 冷启动也走 onApplicationForeground，这里无需处理。
+                    }
+
+                    @Override
+                    public void onApplicationDestroy(Activity activity) {
+                    }
+
+                    @Override
+                    public void onApplicationBackground(Activity activity) {
+                    }
+
+                    @Override
+                    public void onApplicationForeground(Activity activity) {
+                        checkOnForeground(activity);
+                    }
+                });
+    }
+
     /** 设置页「检查更新」：拉取后无更新则 toast 提示已是最新。 */
     public static void checkManually(Activity activity) {
         fetchAndShow(activity, false, true);

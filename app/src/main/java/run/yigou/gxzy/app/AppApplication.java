@@ -44,6 +44,7 @@ import run.yigou.gxzy.network.server.RequestHandler;
 import run.yigou.gxzy.network.server.RequestServer;
 import run.yigou.gxzy.network.security.InterceptorHelper;
 import run.yigou.gxzy.manager.ActivityManager;
+import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.app.AppConfig;
 import run.yigou.gxzy.app.CrashHandler;
 import run.yigou.gxzy.app.DebugLoggerTree;
@@ -522,9 +523,14 @@ public final class AppApplication extends Application {
         
         // Activity 注册崩溃处理器
         ActivityManager.getInstance().init(application);
-        
-        // 初始化 MMKV 存储
+
+        // 初始化 MMKV 存储 —— 必须**早于**版本检查注册：前台回调会发起请求，
+        // 而 RequestHandler 构造时要取 MMKV，未初始化会崩。
         MMKV.initialize(application);
+
+        // 版本检查挂到应用级前台回调（spec §7）：冷启动与「从后台回到前台」都会触发，
+        // 因此不依赖各 Activity 自己调。必须在 ActivityManager.init 与 MMKV.initialize 之后注册。
+        UpdateManager.registerForegroundCheck();
     }
     
     /**

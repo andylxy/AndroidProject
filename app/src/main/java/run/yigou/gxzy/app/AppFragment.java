@@ -5,6 +5,7 @@ import run.yigou.gxzy.base.action.ToastAction;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import com.hjq.http.config.IRequestApi;
 import com.hjq.http.listener.OnHttpListener;
+import run.yigou.gxzy.network.exception.HandledHttpException;
 
 import okhttp3.Call;
 
@@ -69,7 +70,10 @@ public abstract class AppFragment<A extends AppActivity> extends BaseFragment<A>
 
     @Override
     public void onHttpFail(Throwable e) {
-        toast(e.getMessage());
+        // 426 / 设备吊销已有专用提示，不再补通用 toast（票据 21）。
+        if (!HandledHttpException.shouldSilence(e)) {
+            toast(e.getMessage());
+        }
     }
 
     @Override

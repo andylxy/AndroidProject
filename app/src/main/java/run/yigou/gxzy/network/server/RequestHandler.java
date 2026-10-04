@@ -13,6 +13,8 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.manager.UpdateManager;
+import run.yigou.gxzy.network.exception.DeviceRevokedException;
+import run.yigou.gxzy.network.exception.VersionGateException;
 import run.yigou.gxzy.ui.account.LoginActivity;
 import com.hjq.gson.factory.GsonFactory;
 import run.yigou.gxzy.log.EasyLog;
@@ -37,6 +39,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
@@ -69,6 +72,21 @@ public final class RequestHandler implements IRequestHandler {
 
     private static final String DEVICE_REVOKED_FLAG = "1";
 
+    /**
+     * 该响应是否属于「已由 {@code UpdateManager} 给出专用提示」的失败：426（强制升级框）
+     * 或 401 + {@code X-Device-Revoked: 1}（设备已被禁用）。此类失败不再弹通用错误 toast
+     * （票据 21）。
+     *
+     * 判定放这里而不是调用方：响应语义归本类所有，避免别处各写一份魔数。
+     */
+    public static boolean isHandledFailure(Response response) {
+        if (response.code() == HTTP_UPGRADE_REQUIRED) {
+            return true;
+        }
+        return response.code() == HTTP_UNAUTHORIZED
+                && DEVICE_REVOKED_FLAG.equals(response.header(HEADER_DEVICE_REVOKED));
+    }
+
     public RequestHandler(Application application) {
         mApplication = application;
         mMmkv = MMKV.mmkvWithID("http_cache_id");
@@ -85,15 +103,21 @@ public final class RequestHandler implements IRequestHandler {
             // 版本门与设备吊销需要 App 侧联动处理，必须在抛异常前拦下（spec §7）：
             //   - 426：拉 /api/app/version 弹强制升级（UpdateManager 内部去重）；
             //   - 401 + X-Device-Revoked: 1：提示设备被禁用，**不**跳登录，避免死循环（ADR-0003）。
-            // 这里抛的是 ResponseException（非 TokenException），requestFail 不会跳登录页。
-            if (response.code() == HTTP_UPGRADE_REQUIRED) {
-                UpdateManager.onVersionTooLow();
-            } else if (response.code() == HTTP_UNAUTHORIZED
-                    && DEVICE_REVOKED_FLAG.equals(response.header(HEADER_DEVICE_REVOKED))) {
+            // 这两类已由 UpdateManager 给出专用提示，故抛 HandledHttpException 子类：调用方
+            // （AppActivity / AppFragment#onHttpFail）据此**不弹通用错误 toast**（票据 21）。
+            // 抛的不是 TokenException，requestFail 不会跳登录页。
+            final String httpError = mApplication.getString(R.string.http_response_error) + "，responseCode："
+                    + response.code() + "，message：" + response.message();
+            if (isHandledFailure(response)) {
+                if (response.code() == HTTP_UPGRADE_REQUIRED) {
+                    UpdateManager.onVersionTooLow();
+                    throw new VersionGateException(httpError);
+                }
                 UpdateManager.onDeviceRevoked();
+                throw new DeviceRevokedException(httpError);
             }
             // 返回响应异常
-            throw new ResponseException(mApplication.getString(R.string.http_response_error) + "，responseCode：" + response.code() + "，message：" + response.message(), response);
+            throw new ResponseException(httpError, response);
         }
 
         if (Headers.class.equals(type)) {
@@ -211,8 +235,17 @@ public final class RequestHandler implements IRequestHandler {
             return new ServerException(mApplication.getString(R.string.http_server_error), e);
         }
 
+        // 后端不可达 / 连接被拒是**真实网络失败**，不能落进下面 IOException 的
+        // CancelException 静默分支——EasyHttp 对 CancelException 跳过失败回调，
+        // 用户点了书会毫无反馈（票据 22）。
+        if (e instanceof ConnectException) {
+            return new NetworkException(mApplication.getString(R.string.http_network_error), e);
+        }
+
         if (e instanceof IOException) {
             //e = new CancelException(context.getString(R.string.http_request_cancel), e);
+            // 其余 IOException 保持静默：OkHttp 主动取消请求常以普通 IOException 抛出，
+            // 若一并转成网络错误，会把正常的取消误报成网络故障。
             return new CancelException("", e);
         }
 
