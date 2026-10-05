@@ -87,6 +87,14 @@
             app:bar_rightDrawable="@drawable/arrows_right_ic" />
 
         <com.hjq.widget.layout.SettingBar
+            android:id="@+id/sb_person_data_check_update"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_10"
+            app:bar_leftText="@string/mine_check_update"
+            app:bar_rightDrawable="@drawable/arrows_right_ic" />
+
+        <com.hjq.widget.layout.SettingBar
             android:id="@+id/sb_person_data_update"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

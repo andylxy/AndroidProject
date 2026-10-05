@@ -58,6 +58,9 @@ public final class UpdateDialog {
         /** 是否强制更新 */
         private boolean mForceUpdate;
 
+        /** 强制升级被用户「取消」时的回调（需求 2：强制升级也提供取消按钮） */
+        private Runnable mForceCancelRunnable;
+
         /** 当前是否下载中 */
         private boolean mDownloading;
         /** 当前是否下载完毕 */
@@ -103,10 +106,21 @@ public final class UpdateDialog {
          */
         public Builder setForceUpdate(boolean force) {
             mForceUpdate = force;
-            mCloseView.setVisibility(force ? View.GONE : View.VISIBLE);
+            // 需求 2：强制升级也提供「取消」按钮（不再隐藏）。仍保持 setCancelable(false)，
+            // 即只能通过「取消」按钮关闭，点外部/返回键不会误关。
+            mCloseView.setVisibility(View.VISIBLE);
             setCancelable(!force);
             return this;
         }
+
+        /**
+         * 设置「强制升级被取消」回调（需求 2）。仅在 force 时由 UpdateManager 注入。
+         */
+        public Builder setForceCancelRunnable(Runnable runnable) {
+            mForceCancelRunnable = runnable;
+            return this;
+        }
+
 
         /**
          * 设置下载 url
@@ -128,6 +142,10 @@ public final class UpdateDialog {
         @Override
         public void onClick(View view) {
             if (view == mCloseView) {
+                // 强制升级被取消：先通知调用方（用于抑制普通导航重弹），再关闭。
+                if (mForceUpdate && mForceCancelRunnable != null) {
+                    mForceCancelRunnable.run();
+                }
                 dismiss();
             } else if (view == mUpdateView) {
                 // 判断下载状态
@@ -243,7 +261,17 @@ public final class UpdateDialog {
                                     // 设置下载的进度
                                     .setProgress(100, 100, false)
                                     // 设置通知点击之后的意图
-                                    .setContentIntent(PendingIntent.getActivity(getContext(), 1, getInstallIntent(), Intent.FILL_IN_ACTION))
+                                    .setContentIntent(PendingIntent.getActivity(
+                                            getContext(), 1, getInstallIntent(),
+                                            // ⚠️ Android 12+（targetSdk 31+）**强制**要求 PendingIntent
+                                            // 显式带 FLAG_IMMUTABLE 或 FLAG_MUTABLE，否则 getActivity 直接抛
+                                            // `IllegalArgumentException: … requires that one of
+                                            // FLAG_IMMUTABLE or FLAG_MUTABLE be specified`。
+                                            // 原代码传的是 `Intent.FILL_IN_ACTION` —— 那是 Intent 的 flag、
+                                            // 不是 PendingIntent 的，等于一个都没给 → 本 App targetSdk 34，
+                                            // **下载一完成就崩**，「立即更新」永远走不到安装那一步。
+                                            PendingIntent.FLAG_UPDATE_CURRENT
+                                                    | PendingIntent.FLAG_IMMUTABLE))
                                     // 设置点击通知后是否自动消失
                                     .setAutoCancel(true)
                                     // 是否正在交互中

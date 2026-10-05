@@ -46,6 +46,7 @@ import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.reader.entity.GroupModel;
 import run.yigou.gxzy.ui.reader.entity.SearchKeyEntity;
 import run.yigou.gxzy.data.model.HH2SectionData;
+import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.ui.reader.repository.BookRepository;
 import run.yigou.gxzy.utils.StringHelper;
@@ -867,6 +868,11 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      * 处理搜索书籍项点击
      */
     private void handleSearchBookItemClick(int position) {
+        // 需求 2：这里把搜索命中的正文**直接渲染在本页**（不经 TipsFragmentActivity），
+        // 所以它是第四条阅读入口 —— 少了这道守卫，用户就能在搜索结果里绕过升级门读到正文。
+        if (UpdateManager.checkForceOnReading(this)) {
+            return;
+        }
         if (position >= 0 && position < searchKeyTextList.size()) {
             lvSearchBooksList.setVisibility(View.VISIBLE);
             mLvSearchBooks.setVisibility(View.GONE);

@@ -29,6 +29,7 @@ import run.yigou.gxzy.ui.reader.search.SearchDataAdapter;
 import run.yigou.gxzy.ui.reader.widget.TipsLittleMingCiViewWindow;
 import run.yigou.gxzy.ui.reader.widget.TipsLittleTableViewWindow;
 import run.yigou.gxzy.tips.widget.ITipsWindowHost;
+import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 
 import java.util.List;
@@ -174,6 +175,10 @@ public class TipsClickHandler {
 
             @Override
             public void navigateToDetail(Intent intent) {
+                // 需求 2：进入阅读前，若有待强制升级则重弹升级框并阻断本次导航（不依赖网络/缓存）。
+                if (UpdateManager.checkForceOnReading(activity)) {
+                    return;
+                }
                 intent.setClass(activity, TipsFragmentActivity.class);
                 activity.startActivity(intent);
             }

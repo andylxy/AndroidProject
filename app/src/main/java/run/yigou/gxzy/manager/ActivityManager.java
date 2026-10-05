@@ -28,6 +28,9 @@ public final class ActivityManager implements Application.ActivityLifecycleCallb
     /** 应用生命周期回调 */
     private final ArrayList<ApplicationLifecycleCallback> mLifecycleCallbacks = new ArrayList<>();
 
+    /** 每个 Activity resume 的回调（票据 24 方案 C 用） */
+    private final ArrayList<ActivityResumeCallback> mResumeCallbacks = new ArrayList<>();
+
     /** 当前应用上下文对象 */
     private Application mApplication;
     /** 栈顶的 Activity 对象 */
@@ -95,6 +98,27 @@ public final class ActivityManager implements Application.ActivityLifecycleCallb
      */
     public void unregisterApplicationLifecycleCallback(ApplicationLifecycleCallback callback) {
         mLifecycleCallbacks.remove(callback);
+    }
+
+    /**
+     * 注册「每个 Activity resume」回调（票据 24 方案 C）。
+     *
+     * <p>与 {@link #registerApplicationLifecycleCallback} 的区别：后者只在**首个** Activity
+     * resume（应用整体从后台回前台）时触发一次；本回调在**每一次** Activity resume 时触发。
+     * 升级弹窗需要在启动页切到首页后补弹（那张票据的根因），所以必须挂在这里。</p>
+     */
+    public void registerActivityResumeCallback(ActivityResumeCallback callback) {
+        mResumeCallbacks.add(callback);
+    }
+
+    /** 取消注册「每个 Activity resume」回调。 */
+    public void unregisterActivityResumeCallback(ActivityResumeCallback callback) {
+        mResumeCallbacks.remove(callback);
+    }
+
+    /** 每个 Activity resume 都会回调（含冷启动的启动页 → 首页切换）。 */
+    public interface ActivityResumeCallback {
+        void onActivityResumed(Activity activity);
     }
 
     /**
@@ -180,6 +204,11 @@ public final class ActivityManager implements Application.ActivityLifecycleCallb
     @Override
     public void onActivityResumed(@NonNull Activity activity) {
         Timber.i("%s - onResume", activity.getClass().getSimpleName());
+        // 先跑 resume 回调：升级弹窗要在启动页切到首页后补弹（票据 24），
+        // 必须早于下面那次「应用回前台」的检查，否则补弹会被随后的逻辑盖过时机。
+        for (ActivityResumeCallback callback : mResumeCallbacks) {
+            callback.onActivityResumed(activity);
+        }
         if (mTopActivity == activity && mResumedActivity == null) {
             for (ApplicationLifecycleCallback callback : mLifecycleCallbacks) {
                 callback.onApplicationForeground(activity);

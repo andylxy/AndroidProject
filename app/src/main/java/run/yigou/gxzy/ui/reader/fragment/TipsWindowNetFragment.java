@@ -17,6 +17,7 @@ import java.util.List;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.TitleBarFragment;
+import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.ui.main.HomeActivity;
@@ -83,7 +84,14 @@ public final class TipsWindowNetFragment extends TitleBarFragment<HomeActivity>
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
         bookId = mAdapter.getItem(position).getBookNo();
-        
+
+        // 需求 2：发起阅读意图时，若内存里记着有待强制升级，主动重弹升级框
+        // （不依赖网络/缓存，即使内容已本地缓存命中也会弹）。
+        // 弹窗已弹出则放弃本次导航，否则阅读页会把弹窗盖住、用户根本看不到提示。
+        if (UpdateManager.checkForceOnReading(getAttachActivity())) {
+            return;
+        }
+
         // 验证书籍信息是否存在
         TabNavBody book = GlobalDataHolder.getInstance().getNavTabBodyMap().get(bookId);
         if (book != null) {

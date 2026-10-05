@@ -17,6 +17,7 @@ import run.yigou.gxzy.ui.media.activity.ImageSelectActivity;
 import run.yigou.gxzy.ui.media.activity.VideoPlayActivity;
 import run.yigou.gxzy.ui.media.activity.VideoSelectActivity;
 import run.yigou.gxzy.ui.main.HomeActivity;
+import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.ui.account.LoginActivity;
 import run.yigou.gxzy.ui.account.RegisterActivity;
 import run.yigou.gxzy.ui.account.PasswordForgetActivity;
@@ -52,7 +53,8 @@ public final class MineFragment extends TitleBarFragment<HomeActivity> {
         setOnClickListener(R.id.btn_mine_login, R.id.btn_mine_register, R.id.btn_mine_forget,
                 R.id.btn_mine_reset, R.id.btn_mine_change, R.id.btn_mine_personal, R.id.btn_mine_setting, R.id.btn_mine_about,
                 R.id.btn_mine_guide, R.id.btn_mine_browser, R.id.btn_mine_image_select, R.id.btn_mine_image_preview,
-                R.id.btn_mine_video_select, R.id.btn_mine_video_play, R.id.btn_mine_crash, R.id.btn_mine_pay);
+                R.id.btn_mine_video_select, R.id.btn_mine_video_play, R.id.btn_mine_crash, R.id.btn_mine_pay,
+                R.id.btn_mine_check_update);
     }
 
     @Override
@@ -89,6 +91,10 @@ public final class MineFragment extends TitleBarFragment<HomeActivity> {
                 break;
             case R.id.btn_mine_about:
                 startActivity(AboutActivity.class);
+                break;
+            case R.id.btn_mine_check_update:
+                // 需求 1：检查更新按钮 → 调既有 UpdateManager.checkManually（逻辑不重写，只补 UI 入口）
+                UpdateManager.checkManually(getAttachActivity());
                 break;
             case R.id.btn_mine_guide:
                 startActivity(GuideActivity.class);

@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.manager.UpdateManager;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.TitleBarFragment;
@@ -67,6 +68,7 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
     private SettingBar mAboutView;
     private SettingBar mPermissionView;
     private SettingBar mDataUpdateView;
+    private SettingBar mCheckUpdateView;
 //
 //    /** ? */
 //    private String mProvince = "...";
@@ -104,7 +106,8 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         mAboutView = findViewById(R.id.my_setting_about);
         mPermissionView = findViewById(R.id.my_permission_setting);
         mDataUpdateView = findViewById(R.id.sb_person_data_update);
-        setOnClickListener(mAvatarLayout, mAvatarView, mNameView, mPersonDataSetting, mMyLogin, mLoginExit, mAboutView, mPermissionView, mDataUpdateView);
+        mCheckUpdateView = findViewById(R.id.sb_person_data_check_update);
+        setOnClickListener(mAvatarLayout, mAvatarView, mNameView, mPersonDataSetting, mMyLogin, mLoginExit, mAboutView, mPermissionView, mDataUpdateView, mCheckUpdateView);
     }
 
     @Override
@@ -189,6 +192,10 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
             return true;
         } else if (view == mDataUpdateView) {
             showDataUpdateFrequencyDialog();
+            return true;
+        } else if (view == mCheckUpdateView) {
+            // 需求 1：检查更新入口 → 调既有 UpdateManager.checkManually（逻辑不重写，只补 UI）
+            UpdateManager.checkManually(getAttachActivity());
             return true;
         }
         return false;

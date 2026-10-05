@@ -17,6 +17,7 @@ import run.yigou.gxzy.data.local.service.BookService;
 import run.yigou.gxzy.data.local.helper.DbService;
 
 import run.yigou.gxzy.ui.main.HomeActivity;
+import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.reader.adapter.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
@@ -140,6 +141,12 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     @Override
     public void onItemClick(RecyclerView recyclerView, View itemView, int position) {
         // toast(mBookCollectCaseAdapter.getItem(position));
+
+        // 需求 2：进入阅读前，若有待强制升级则重弹升级框并阻断本次导航（不依赖网络/缓存）。
+        if (getContext() instanceof Activity
+                && UpdateManager.checkForceOnReading((Activity) getContext())) {
+            return;
+        }
 
         ArrayList<Book> books = mBookService.find(BookDao.Properties.BookNo.eq(mBookCollectCaseAdapter.getItem(position).getBookNo()));
         if (books == null || books.isEmpty()) {
