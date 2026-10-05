@@ -383,6 +383,9 @@
 
     <string name="update_notification_channel_id">update</string>
     <string name="update_notification_channel_name">升级通知</string>
+    <!-- 公告弹窗（后端下发的运营/系统消息） -->
+    <string name="announcement_close">我知道了</string>
+
 
     <!-- 分享对话框 -->
     <string name="share_title">分享到&#8230;</string>

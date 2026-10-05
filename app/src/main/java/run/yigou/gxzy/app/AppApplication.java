@@ -44,6 +44,7 @@ import run.yigou.gxzy.network.server.RequestHandler;
 import run.yigou.gxzy.network.server.RequestServer;
 import run.yigou.gxzy.network.security.InterceptorHelper;
 import run.yigou.gxzy.manager.ActivityManager;
+import run.yigou.gxzy.manager.AnnouncementManager;
 import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.app.AppConfig;
 import run.yigou.gxzy.app.CrashHandler;
@@ -531,6 +532,12 @@ public final class AppApplication extends Application {
         // 版本检查挂到应用级前台回调（spec §7）：冷启动与「从后台回到前台」都会触发，
         // 因此不依赖各 Activity 自己调。必须在 ActivityManager.init 与 MMKV.initialize 之后注册。
         UpdateManager.registerForegroundCheck();
+
+        // 公告拉取同样挂到应用级前台回调，一次启动只拉一次（DESIGN §6.1）。
+        // 排在版本检查之后：两个回调都靠前台事件触发，注册顺序即弹窗优先级（升级框先），
+        // 且真出现竞争时由 AppModalGate 兜底——公告拿不到闸门就排队等，不丢消息。
+        // 同样必须在 MMKV.initialize 之后：已读记忆存在 MMKV 里。
+        AnnouncementManager.registerForegroundCheck();
     }
     
     /**

@@ -60,7 +60,7 @@ public final class UpdateManager {
      * <p>只闸自动检查：手动「检查更新」({@link #checkManually}) 与 426
      * ({@link #onVersionTooLow}) 各自独立，不受影响。</p>
      */
-    private static final AtomicBoolean sLaunchCheckDone = new AtomicBoolean(false);
+    private static final LaunchOnceGate sLaunchGate = new LaunchOnceGate();
 
     /**
      * 弹窗去重：同一时刻只允许一个升级弹窗。弹窗消失后复位。
@@ -112,7 +112,7 @@ public final class UpdateManager {
      * 把版本检查挂到**应用级**前台回调（spec §7）。
      *
      * <p>{@code onApplicationForeground} 在冷启动（首个 Activity resume）与「从后台回到前台」时
-     * 都会触发；需求只要求**启动完成时检查一次**，所以用 {@link #sLaunchCheckDone}
+     * 都会触发；需求只要求**启动完成时检查一次**，所以用 {@link LaunchOnceGate}
      * 做一次性闸门：首个前台检查并置位，之后的前台转换只跳过。</p>
      *
      * <p>由 {@code AppApplication} 在启动时调用一次。弹窗由 {@code sDialogShowing} 去重（**拉取层不去重**，否则 426 触发的强制检查会被挤掉，见 spec §7.1 坑 3），
@@ -137,28 +137,47 @@ public final class UpdateManager {
 
                     @Override
                     public void onApplicationForeground(Activity activity) {
-                        // 只在**启动完成**（本次进程的首个前台）检查一次；之后回到前台都跳过。
-                        // 冷启动会重建这个标志，所以「多次启动 = 多次检查」。
-                        if (!sLaunchCheckDone.compareAndSet(false, true)) {
-                            EasyLog.print(TAG, "本次启动已检查过版本，跳过本次前台检查");
-                            return;
-                        }
-                        checkOnForeground(activity);
+                        tryLaunchCheck(activity);
                     }
                 });
         // 补弹的挂载点（票据 24 方案 C）：上面那个回调只在**首个 Activity resume** 时触发一次，
         // 冷启动 Splash→Home 的切换不会再触发。而启动页恰恰不能承载 Dialog，
         // 所以必须额外在**每个** Activity resume 时补一次，否则冷启动的强制升级提示会丢。
+        // 该回调同时充当「首次检查」的兜底触发点：实测存在整个进程只有一次
+        // onApplicationForeground、且那次宿主不是 LifecycleOwner 的情况，只靠它会一次都不检查。
+        // 闸门空了就把「待补弹的强制升级」也试一次（2026-10-05 评审修复）。
+        // 为什么必须订阅闸门而不是只靠 resume：公告框在屏时**不会**再有 resume 事件，
+        // 而强制升级走的是 sPendingForceUpgrade + resume 补弹那条路 → 公告关掉后
+        // 没人再触发它，用户被 426 内容门拦死却看不到提示（实测复现）。
+        AppModalGate.addOnReleasedListener(() -> {
+            Activity host = ForegroundActivities.topIfUsable();
+            if (host != null) {
+                showPendingDialogIfAny(host);
+            }
+        });
         ActivityManager.getInstance().registerActivityResumeCallback(
-                UpdateManager::showPendingDialogIfAny);
+                new ActivityManager.ActivityResumeCallback() {
+                    @Override
+                    public void onActivityResumed(Activity activity) {
+                        tryLaunchCheck(activity);
+                        showPendingDialogIfAny(activity);
+                    }
+                });
     }
 
     /**
-     * 有「该弹但没弹成」的升级结果时，在新的可用宿主上补弹（票据 24 方案 C）。
+     * 「本次启动检查一次」的唯一入口：宿主可用**且**闸门未置位时才检查。
      *
-     * <p>每个 Activity resume 都会走这里；宿主仍不可用（如 resume 的还是启动页）则继续等，
-     * 直到出现第一个能承载 Dialog 的页面。</p>
+     * <p>⚠️ 顺序不能反（2026-10-05 adb 实测）：原先先 CAS 置位、再发现宿主不是
+     * {@code LifecycleOwner}（实测日志「宿主不是 LifecycleOwner，跳过版本检查」），
+     * 「本次启动唯一一次」机会被白白烧掉 → 本次启动永远不再检查版本。
+     * 冷启动后每次 App 启动都漏检一次，直到用户碰巧再回前台才补上。</p>
      */
+    private static void tryLaunchCheck(Activity activity) {
+        // 顺序与语义都封装在 LaunchOnceGate：先判宿主可用、再置位，失败不消耗机会。
+        sLaunchGate.runOnceIfHostUsable(activity, () -> checkOnForeground(activity));
+    }
+
     static void showPendingDialogIfAny(Activity activity) {
         // 需求 2：用户已取消强制升级则不再补弹（仅抑制普通导航/前台，不抑制阅读）。
         if (!sPendingForceUpgrade.get() || sForceUpgradeDismissed.get()
@@ -430,14 +449,37 @@ public final class UpdateManager {
             return false;
         }
         // 真正的去重点：并发的多个 426 里只有一个能弹出来。
-        if (!sDialogShowing.compareAndSet(false, true)) {
-            EasyLog.print(TAG, "已有升级弹窗在显示，跳过本次");
+        // 走**全局**模态闸门而非本类的 sDialogShowing：公告框也在这条路上排队，
+        // 两边各用各的标志会同时弹出来叠在一起（DESIGN §6.5，升级框优先）。
+        if (!AppModalGate.tryAcquire()) {
+            // ⚠️ 闸门被**公告框**占着时，强制升级不能就这么丢掉（2026-10-05 评审修复）。
+            // 原实现直接 return，而公告框既不置 sPendingForceUpgrade、也不重排 →
+            // 「公告先抢到闸门」时本次启动的强制升级**永久丢失**：用户被 426 内容门
+            // 拦死，却只看到一个可关掉的公告框，关掉之后书也读不了 ——
+            // 正是本 ADR 反复要消除的「既读不了又没提示」。
+            //
+            // 修法：强制升级**排队**等闸门空出来（升级框优先，DESIGN §6.5），并如实
+            // 返回「提示已送达」——它马上就会弹，调用方据此阻断阅读导航是对的。
+            // 软提示（force=false）不排队：错过可以等下次版本检查，不值得占着队列。
+            if (force && !sForceUpgradeDismissed.get()) {
+                EasyLog.print(TAG, "公告框在屏，强制升级排队等待（DESIGN §6.5 升级框优先）");
+                AppModalGate.runWhenClear(() -> showUpdateDialog(activity, info, true));
+                // 提示马上会送达（公告框一关就弹），所以如实报 true 让调用方阻断阅读导航。
+                return true;
+            }
+            // 用户已取消过强制升级（需求 2），或这只是软提示（force=false）：
+            // 本次进程内不排队、不阻断阅读 —— 软提示错过可以等下次版本检查。
+            // ⚠️ 此刻若返回 true 就等于「拦住了却不给提示」，正是要消除的那个失败模式。
+            EasyLog.print(TAG, force
+                    ? "公告框在屏，且用户已取消强制升级：不排队、不阻断"
+                    : "公告框在屏，软升级提示跳过（下次检查再弹）");
             // ⚠️ 只有「在屏的是**强制**弹窗」才算提示已送达（2026-10-05 评审修正）。
             // 软提示在场时也返回 true 会让 `checkForceOnReading` 谎报成功 → 调用方放弃
             // 阅读导航，可用户眼前只是一个可取消的软提示，关掉之后书也读不了 ——
             // 正是本 ADR 反复要消除的「既读不了又没提示」。
             return sDialogShowingIsForce.get();
         }
+        sDialogShowing.set(true);
         try {
             UpdateDialog.Builder builder = new UpdateDialog.Builder(activity)
                     .setVersionName(info.getLatestVersionName())
@@ -460,6 +502,8 @@ public final class UpdateManager {
                 public void onDismiss(BaseDialog dialog) {
                     sDialogShowing.set(false);
                     sDialogShowingIsForce.set(false);
+                    // 释放全局闸门，并让排队中的公告框补弹（DESIGN §6.5：升级框优先）。
+                    AppModalGate.release();
                 }
             });
             builder.show();
@@ -475,6 +519,8 @@ public final class UpdateManager {
             // 必须释放标志，否则之后所有版本检查都会被静默跳过。
             sDialogShowing.set(false);
             sDialogShowingIsForce.set(false);
+            // 闸门也必须还回去：否则公告框会永远排队等一个已经关闭的弹窗。
+            AppModalGate.release();
             // 展示失败同样要保留「待补弹」，否则强制升级提示就此丢失。
             if (force) {
                 sPendingForceUpgrade.set(true);
