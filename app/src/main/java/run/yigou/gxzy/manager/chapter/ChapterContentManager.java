@@ -31,6 +31,7 @@ import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.remote.api.ChapterContentApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
+import run.yigou.gxzy.utils.ThreadUtil;
 
 /**
  * 章节内容管理器
@@ -367,31 +368,37 @@ public class ChapterContentManager {
                     public void onSucceed(HttpData<List<HH2SectionData>> data) {
                         if (data != null && !data.getData().isEmpty()) {
                             HH2SectionData sectionData = data.getData().get(0);
+                            String priority = isHighPriority ? "高优先级" : "低优先级";
 
-                            try {
-                                // 保存到数据库
-                                DataRepository.saveBookChapterDetailList(chapter, data.getData());
-                                chapter.setIsDownload(true);
-                                DbService.getInstance().mChapterService.updateEntity(chapter);
+                            // hjq 的回调在主线程，DB 写必须切回本类线程池执行（否则主线程写库会 ANR）。
+                            // 用本类 high/low 池而非全局池，以保留 cancelAll() 的任务取消语义。
+                            ExecutorService writeExecutor = isHighPriority ? highPriorityExecutor : lowPriorityExecutor;
+                            writeExecutor.execute(() -> {
+                                try {
+                                    // 保存到数据库
+                                    DataRepository.saveBookChapterDetailList(chapter, data.getData());
+                                    chapter.setIsDownload(true);
+                                    DbService.getInstance().mChapterService.updateEntity(chapter);
 
-                                // 更新获取状态
-                                synchronized (fetchingChapters) {
-                                    fetchingChapters.remove(chapter.getSignatureId());
-                                    readyChapters.add(chapter.getSignatureId());
+                                    // 更新获取状态
+                                    synchronized (fetchingChapters) {
+                                        fetchingChapters.remove(chapter.getSignatureId());
+                                        readyChapters.add(chapter.getSignatureId());
+                                    }
+
+                                    EasyLog.print("ChapterContentManager", priority + "获取成功: " + chapter.getChapterHeader());
+
+                                    // 回调通知（UI 操作，切回主线程）
+                                    ThreadUtil.runOnUiThread(() -> {
+                                        if (callback != null) {
+                                            callback.onSuccess(chapter, sectionData);
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    EasyLog.print("ChapterContentManager", "保存数据失败: " + e.getMessage());
+                                    handleFetchFailure(chapter, e, callback);
                                 }
-
-                                String priority = isHighPriority ? "高优先级" : "低优先级";
-                                EasyLog.print("ChapterContentManager", priority + "获取成功: " + chapter.getChapterHeader());
-
-                                // 回调通知
-                                if (callback != null) {
-                                    callback.onSuccess(chapter, sectionData);
-                                }
-
-                            } catch (Exception e) {
-                                EasyLog.print("ChapterContentManager", "保存数据失败: " + e.getMessage());
-                                handleFetchFailure(chapter, e, callback);
-                            }
+                            });
                         } else {
                             Exception e = new Exception("章节内容为空");
                             handleFetchFailure(chapter, e, callback);
@@ -424,7 +431,9 @@ public class ChapterContentManager {
         EasyLog.print("ChapterContentManager", "获取失败: " + chapter.getChapterHeader() + " - " + e.getMessage());
 
         if (callback != null) {
-            callback.onFailure(chapter, e);
+            // 本方法可能从主线程（onFail/空内容分支）或后台线程（DB 写失败）被调用，
+            // 统一切回主线程执行 UI 回调，避免成功/失败两条路径线程不一致
+            ThreadUtil.runOnUiThread(() -> callback.onFailure(chapter, e));
         }
     }
 

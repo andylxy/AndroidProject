@@ -38,6 +38,7 @@ import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.app.DataPreferences;
 import run.yigou.gxzy.app.DataUpdateFrequency;
+import run.yigou.gxzy.utils.ThreadUtil;
 
 /**
  * 应用数据管理器
@@ -399,19 +400,23 @@ public class AppDataManager {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             List<Yao> networkData = data.getData();
                             
-                            // 清空 GlobalDataHolder 旧数据
+                            // 清空 GlobalDataHolder 旧数据（内存操作，主线程即时完成）
                             GlobalDataHolder.getInstance().reloadYaoData();
                             
-                            // 保存到本地（全量覆盖）
-                            DataRepository.saveYaoData(networkData);
-                            
-                            // 同步到 GlobalDataHolder
+                            // 同步到 GlobalDataHolder（内存操作，主线程即时完成，保证 UI 立即可用）
                             syncYaoToGlobalDataHolder(networkData);
                             
                             EasyLog.print(TAG, "✅ 网络请求成功：药物数据 " + 
                                 networkData.size() + " 条");
                             
-                            // 加载药物别名
+                            // 落库挪到后台线程：hjq 成功回调跑在主线程，saveYaoData 会清表+批量写库，
+                            // 同步执行会阻塞主线程造成 ANR（HomeActivity 曾因此 Input dispatching timed out）。
+                            // 边界：内存态已在上面同步完成、UI 立即可用；此处的落库是 fire-and-forget，
+                            // 失败只记录日志并保留旧数据（事务已回滚），不重试、不回滚内存态。
+                            // 若未来 hjq 支持配置回调线程，或该数据量证明可忽略，可移除此异步包裹。
+                            ThreadUtil.runInBackground(() -> DataRepository.saveYaoData(networkData));
+
+                            // 加载药物别名（读的是别名表，与上面药材表的落库无依赖，无需等待）
                             loadYaoAliasData(lifecycleOwner, callback);
                         }
                     }
@@ -448,17 +453,19 @@ public class AppDataManager {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             List<YaoAlia> networkData = data.getData();
                             
-                            // 清空 GlobalDataHolder 旧数据
+                            // 清空 GlobalDataHolder 旧数据（内存操作，主线程即时完成）
                             GlobalDataHolder.getInstance().reloadYaoAlias();
                             
-                            // 保存到本地（全量覆盖）
-                            DataRepository.saveYaoAlia(networkData);
-                            
-                            // 同步到 GlobalDataHolder
+                            // 同步到 GlobalDataHolder（内存操作，主线程即时完成）
                             syncYaoAliasToGlobalDataHolderFromNetwork(networkData);
                             
                             EasyLog.print(TAG, "✅ 网络请求成功：药物别名 " + 
                                 networkData.size() + " 条");
+
+                            // 落库挪到后台线程：同 loadYaoDataWithAlias，避免主线程同步写库造成 ANR。
+                            // 边界：内存态已先行同步、UI 立即可用；落库失败只记录日志，不影响本次回调结果。
+                            ThreadUtil.runInBackground(() -> DataRepository.saveYaoAlia(networkData));
+
                             callback.onSuccess(null);
                         }
                     }
@@ -495,17 +502,19 @@ public class AppDataManager {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             List<MingCiContent> networkData = data.getData();
                             
-                            // 清空 GlobalDataHolder 旧数据
+                            // 清空 GlobalDataHolder 旧数据（内存操作，主线程即时完成）
                             GlobalDataHolder.getInstance().reloadMingCiData();
                             
-                            // 保存到本地（全量覆盖）
-                            DataRepository.saveMingCiContent(networkData);
-                            
-                            // 同步到 GlobalDataHolder
+                            // 同步到 GlobalDataHolder（内存操作，主线程即时完成）
                             syncMingCiToGlobalDataHolder(networkData);
                             
                             EasyLog.print(TAG, "✅ 网络请求成功：名词数据 " + 
                                 networkData.size() + " 条");
+
+                            // 落库挪到后台线程：同 loadYaoDataWithAlias，避免主线程同步写库造成 ANR。
+                            // 边界：内存态已先行同步、UI 立即可用；落库失败只记录日志，不影响本次回调结果。
+                            ThreadUtil.runInBackground(() -> DataRepository.saveMingCiContent(networkData));
+
                             callback.onSuccess(null);
                         }
                     }

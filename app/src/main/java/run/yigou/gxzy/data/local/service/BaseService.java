@@ -10,6 +10,7 @@ import org.greenrobot.greendao.query.QueryBuilder;
 import org.greenrobot.greendao.query.WhereCondition;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import run.yigou.gxzy.data.local.GreenDaoManager;
@@ -58,6 +59,33 @@ public abstract class BaseService<T, TDao extends AbstractDao<T, ?>> {
     public long addEntity(T entity) {
         if (entity==null) return 0;
       return   daoConn.insert(entity);
+    }
+
+    /**
+     * 全量替换表内容：清空旧数据后写入新数据，整体包在同一个数据库事务里。
+     *
+     * <p>不变量：{@code deleteAll()} 与批量插入同处一个事务，二者要么都提交、要么都回滚。
+     * 若把两步拆成各自独立的事务，先提交的清空会在后续插入失败时留下空表（数据丢失），
+     * 且两步之间的窗口期其它线程可能读到空表。因此全量替换必须走本方法。
+     *
+     * <p>适用边界：仅用于「整表内容一次性替换」且允许失败时保留旧数据的场景；
+     * 需要「部分成功」语义的逐条写入请用 {@code addEntity}。
+     *
+     * <p>失败时抛出异常（由调用方决定重试或降级），不会静默吞掉。
+     *
+     * @param entities 待写入的新数据；为空时只清空、不写入
+     */
+    public void replaceAllInTx(List<T> entities) {
+        mDatabase.beginTransaction();
+        try {
+            daoConn.deleteAll();
+            if (entities != null && !entities.isEmpty()) {
+                daoConn.insertInTx(entities);
+            }
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
     }
     public void updateEntity(T entity) {
         if (entity!=null)

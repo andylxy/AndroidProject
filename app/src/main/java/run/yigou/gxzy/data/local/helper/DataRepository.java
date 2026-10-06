@@ -361,6 +361,12 @@ public final class DataRepository {
     /**
      * 保存药材数据列表（全量替换，加密存储）
      *
+     * <p>清空旧数据与写入新数据在同一事务内完成（见 {@code BaseService#replaceAllInTx}）：
+     * 写入失败时整体回滚并保留旧数据，避免出现「表被清空且新数据没写进去」的数据丢失。
+     *
+     * <p>本方法只做数据持久化，不负责内存态（GlobalDataHolder）同步；
+     * 调用方需保证在后台线程执行，避免主线程同步写库造成 ANR。
+     *
      * @param detailList 药材数据列表
      */
     public static void saveYaoData(List<Yao> detailList) {
@@ -369,34 +375,28 @@ public final class DataRepository {
             return;
         }
 
-        try {
-            DbService.getInstance().mYaoService.deleteAll();
-
-            int successCount = 0;
-            for (Yao yao : detailList) {
-                if (yao == null) {
-                    continue;
-                }
-
-                ZhongYao zhongYao = new ZhongYao();
-                zhongYao.setText(ConvertEntity.encryptIfNotEmpty(yao.getText()));
-                zhongYao.setName(yao.getName());
-                zhongYao.setYaoList(ConvertEntity.listToString(yao.getYaoList()));
-                zhongYao.setID(yao.getID());
-                zhongYao.setSignature(yao.getSignature());
-                zhongYao.setSignatureId(yao.getSignatureId());
-
-                try {
-                    DbService.getInstance().mYaoService.addEntity(zhongYao);
-                    successCount++;
-                } catch (Exception e) {
-                    EasyLog.print(TAG, "保存药材失败: " + e.getMessage());
-                }
+        List<ZhongYao> entities = new ArrayList<>(detailList.size());
+        for (Yao yao : detailList) {
+            if (yao == null) {
+                continue;
             }
 
-            EasyLog.print(TAG, "保存 " + successCount + "/" + detailList.size() + " 条药材数据");
+            ZhongYao zhongYao = new ZhongYao();
+            zhongYao.setText(ConvertEntity.encryptIfNotEmpty(yao.getText()));
+            zhongYao.setName(yao.getName());
+            zhongYao.setYaoList(ConvertEntity.listToString(yao.getYaoList()));
+            zhongYao.setID(yao.getID());
+            zhongYao.setSignature(yao.getSignature());
+            zhongYao.setSignatureId(yao.getSignatureId());
+            entities.add(zhongYao);
+        }
+
+        try {
+            DbService.getInstance().mYaoService.replaceAllInTx(entities);
+            EasyLog.print(TAG, "保存 " + entities.size() + "/" + detailList.size() + " 条药材数据");
         } catch (Exception e) {
-            EasyLog.print(TAG, "保存药材数据总异常: " + e.getMessage());
+            // 事务已回滚，旧数据仍在；此处只记录，不重试——重试策略由调用方决定
+            EasyLog.print(TAG, "保存药材数据失败（已回滚，保留旧数据）: " + e.getMessage());
         }
     }
 
