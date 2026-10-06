@@ -33,6 +33,8 @@ import com.hjq.base.FragmentPagerAdapter;
 import run.yigou.gxzy.config.AppStyleConfigProvider;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.manager.SearchEntry;
+import run.yigou.gxzy.manager.SearchPermissionManager;
 
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
@@ -42,7 +44,6 @@ import java.util.Objects;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
-import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.base.constant.AppConst;
@@ -283,9 +284,11 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
      */
     private void search() {
 
-        //全局开关判断
-        if (!AppApplication.application.global_openness) {
-            toast(AppConst.Key_Window_Tips);
+        // 搜索权限判定（microfeed 仓 .scratch/search-permission/DESIGN.md §5.2）：
+        // 进程内未成功拉到权限 / 当前账号无首页搜索权限 → 禁用。
+        // 拉取失败保持静默（INV-1），此处只负责按判定结果拦截并提示。
+        if (!SearchPermissionManager.isSearchAllowed(SearchEntry.GLOBAL)) {
+            toast(R.string.search_permission_denied);
             return;
         }
         //搜索关键词不为空时保存历史并跳转

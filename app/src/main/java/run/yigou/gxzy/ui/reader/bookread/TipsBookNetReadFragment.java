@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import run.yigou.gxzy.event.TipsFragmentSettingEventNotification;
+import run.yigou.gxzy.manager.SearchEntry;
+import run.yigou.gxzy.manager.SearchPermissionManager;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
@@ -704,7 +706,14 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         if (searchCoordinator == null) {
             return;
         }
-        
+
+        // 搜索权限判定（microfeed 仓 .scratch/search-permission/DESIGN.md §5.2）：
+        // 书内搜索需当前账号有 book 权限；未拉到 / 无权限则不发起搜索。
+        if (!SearchPermissionManager.isSearchAllowed(SearchEntry.BOOK)) {
+            toast(getString(R.string.search_permission_denied));
+            return;
+        }
+
         // 使用 SearchCoordinator 进行全局搜索
         android.util.Pair<List<run.yigou.gxzy.ui.reader.entity.GroupData>, 
                           List<List<run.yigou.gxzy.ui.reader.entity.ItemData>>> result = 

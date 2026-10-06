@@ -74,7 +74,6 @@
     <!-- 隐私权限申请 -->
     <string name="permission_request_title">权限申请</string>
     <string name="permission_request_storage_message">为了保证您正常使用本应用的阅读、下载等核心功能，需要授予存储权限。</string>
-    <string name="permission_denied_exit_message">您拒绝了必要权限，应用将无法正常使用，即将退出。</string>
     <string name="permission_denied_goto_settings">您已拒绝授权，请前往设置手动开启权限，否则应用将退出。</string>
     <string name="permission_btn_agree">同意并继续</string>
     <string name="permission_btn_exit">退出应用</string>
@@ -565,4 +564,6 @@
 
     <string name="download_already_all_tips">书籍已经缓存整本！</string>
     <string name="clear_history_success">清除历史记录成功</string>
+    <!-- 搜索权限未开通时的入口提示；首页全局与书内两个搜索入口共用此文案（票据 0005 §6） -->
+    <string name="search_permission_denied">全局搜索功能正在开发，敬请期待</string>
 </resources>

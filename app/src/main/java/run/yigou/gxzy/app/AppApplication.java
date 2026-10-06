@@ -44,14 +44,6 @@ import run.yigou.gxzy.network.server.RequestHandler;
 import run.yigou.gxzy.network.server.RequestServer;
 import run.yigou.gxzy.network.security.InterceptorHelper;
 import run.yigou.gxzy.manager.ActivityManager;
-import run.yigou.gxzy.manager.AnnouncementManager;
-import run.yigou.gxzy.manager.UpdateManager;
-import run.yigou.gxzy.app.AppConfig;
-import run.yigou.gxzy.app.CrashHandler;
-import run.yigou.gxzy.app.DebugLoggerTree;
-import run.yigou.gxzy.app.TitleBarStyle;
-import run.yigou.gxzy.app.ToastLogInterceptor;
-import run.yigou.gxzy.app.ToastStyle;
 import run.yigou.gxzy.text.TipsTextRenderConfig;
 import run.yigou.gxzy.widget.MaterialHeader;
 import run.yigou.gxzy.widget.SmartBallPulseFooter;
@@ -67,14 +59,11 @@ import run.yigou.gxzy.log.EasyLog;
 import com.hjq.toast.Toaster;
 import com.lucas.annotations.Subscribe;
 import com.lucas.xbus.XEventBus;
-import com.lucas.xbus.XEventBus;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
-import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.mmkv.MMKV;
 
 import okhttp3.OkHttpClient;
 
-import run.yigou.gxzy.utils.DebugLog;
 import run.yigou.gxzy.utils.SerialUtil;
 import timber.log.Timber;
 
@@ -111,7 +100,7 @@ public final class AppApplication extends Application {
     /**
      * 启用 Header 偏移
      */
-    public boolean global_openness = true;
+    public boolean ai_global_openness = true;
 
     /**
      * 登录状态
@@ -529,15 +518,12 @@ public final class AppApplication extends Application {
         // 而 RequestHandler 构造时要取 MMKV，未初始化会崩。
         MMKV.initialize(application);
 
-        // 版本检查挂到应用级前台回调（spec §7）：冷启动与「从后台回到前台」都会触发，
-        // 因此不依赖各 Activity 自己调。必须在 ActivityManager.init 与 MMKV.initialize 之后注册。
-        UpdateManager.registerForegroundCheck();
-
-        // 公告拉取同样挂到应用级前台回调，一次启动只拉一次（DESIGN §6.1）。
-        // 排在版本检查之后：两个回调都靠前台事件触发，注册顺序即弹窗优先级（升级框先），
-        // 且真出现竞争时由 AppModalGate 兜底——公告拿不到闸门就排队等，不丢消息。
-        // 同样必须在 MMKV.initialize 之后：已读记忆存在 MMKV 里。
-        AnnouncementManager.registerForegroundCheck();
+        // ⚠️ 版本检查 / 公告 / 搜索权限三者的「应用级前台回调」**不在这里注册**。
+        // Application.onCreate 比任何 Activity 都早，若在此注册，进程一启动回调就挂上了——
+        // 即使用户还没在协议页点「同意」，回前台事件也会触发一次网络请求。
+        // 现改为由 SplashActivity 在「协议已同意 **且** 权限已授予」后才调用
+        // SplashActivity#onConsentAndPermissionGranted()，见该方法注释。
+        // 顺序要求不变：必须晚于 MMKV.initialize、ActivityManager.init。
     }
     
     /**

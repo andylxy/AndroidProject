@@ -162,7 +162,7 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
         }
 
 //        // ????????
-//        if (!AppApplication.application.global_openness) {
+//        if (!AppApplication.application.ai_global_openness) {
 //            toast(AppConst.Key_Window_Tips);
 //            return;
 //        }

@@ -42,7 +42,7 @@ public class InterceptorHelper {
     public static void handleIntercept(IRequestApi api, HttpParams params, HttpHeaders headers, AppApplication appApplication) {
 
         // 设置公共 Header
-        //if (appApplication.global_openness && appApplication.mUserInfoToken == null)
+        //if (appApplication.ai_global_openness && appApplication.mUserInfoToken == null)
         //    headers.put("Authorization", AppConst.AllowAnonymous_Token);
         headers.put("app", "2");
         headers.put("SessionId", SerialUtil.getSerial());

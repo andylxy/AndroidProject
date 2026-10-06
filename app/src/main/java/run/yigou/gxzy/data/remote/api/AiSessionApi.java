@@ -80,7 +80,7 @@ public final class AiSessionApi implements IRequestApi, IRequestHost {
 
     @Override
     public String getHost() {
-        if(AppApplication.application.global_openness){
+        if(AppApplication.application.ai_global_openness){
             return host;
         }
        return AppConfig.getHostUrl() + "/";

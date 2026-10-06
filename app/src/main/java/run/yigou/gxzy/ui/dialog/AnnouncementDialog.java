@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.hjq.base.BaseDialog;
-import com.hjq.base.action.SingleClick;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.data.remote.model.Announcement;
@@ -35,10 +34,19 @@ public final class AnnouncementDialog {
         private final TextView mContentView;
         private final TextView mCloseView;
 
-        /** 用户**主动**关闭时的回调（用于记已读并弹下一条）。宿主销毁不会触发它。 */
+        /**
+         * 用户**主动**关闭时的回调（推进队列 + 弹下一条）。宿主销毁不会触发它。
+         *
+         * <p>⚠️ 必须同时挂在 {@link #dismiss()} 与 {@link #onCancel} 两条路径上：
+         * Android 的返回键/点外部走 {@code Dialog.cancel()}，它内部调的是
+         * <b>Dialog 自己的</b> {@code dismiss()}，<b>绕过 Builder 的覆写</b>。
+         * 早期实现只挂在 {@code dismiss()} 上，注释还声称已处理返回键 —— 真机实测
+         * 用户按返回键后同一条公告被当成「宿主销毁」放回队列立刻重弹，且把队列里
+         * 后面的公告<b>永久堵住</b>（实测第二条弹出计数为 0）。</p>
+         */
         private Runnable mOnClose;
 
-        /** 本次关闭是否由用户主动发起（点关闭 / 返回键 / 点外部）。 */
+        /** 本次关闭是否由用户主动发起（点「我知道了」/ 返回键 / 点外部）。 */
         private boolean mUserClosed;
 
         public Builder(Context context) {
@@ -52,15 +60,26 @@ public final class AnnouncementDialog {
             mTitleView = findViewById(R.id.tv_announcement_title);
             mContentView = findViewById(R.id.tv_announcement_content);
             mCloseView = findViewById(R.id.tv_announcement_close);
-            setOnClickListener(mCloseView);
+            // 必须用带 listener 的重载：`setOnClickListener(View...)` 只把 View 记进
+            // 点击数组，事件仍派发到 ClickAction 的空实现，点击进不到下面的 listener。
+            setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onCloseViewClicked();
+                }
+            }, mCloseView);
 
             // 返回键 / 点外部是**用户主动关闭**，与点「我知道了」同义。
-            // Android 把这条路径走 OnCancel（不是 dismiss），所以必须单独挂：
-            // 漏了它，用户明明关掉了公告却不会被记已读，下次又弹一遍。
+            // Android 把这条路径走 OnCancel（不是 dismiss），所以必须单独挂；
+            // 且这里要**直接回调 mOnClose**（不能只置 mUserClosed）——因为
+            // Dialog.cancel() 不会经过 Builder.dismiss()，那个标志没人读。
             addOnCancelListener(new BaseDialog.OnCancelListener() {
                 @Override
                 public void onCancel(BaseDialog dialog) {
                     mUserClosed = true;
+                    if (mOnClose != null) {
+                        mOnClose.run();
+                    }
                 }
             });
 
@@ -92,26 +111,23 @@ public final class AnnouncementDialog {
             return this;
         }
 
-        @SingleClick
-        @Override
-        public void onClick(View view) {
-            if (view == mCloseView) {
-                // 明确标记为「用户主动关闭」：只有这种关闭才算「已读」。
-                mUserClosed = true;
-                dismiss();
-            }
+        /** 「我知道了」被点：标记为用户主动关闭并关掉弹窗。 */
+        private void onCloseViewClicked() {
+            // 只有这种关闭才算「用户主动关闭」；宿主销毁不走这里。
+            mUserClosed = true;
+            dismiss();
         }
 
         @Override
         public void dismiss() {
-            super.dismiss();
-            // ⚠️ **只**在用户主动关闭时才回调。宿主被销毁（Activity 切换/被回收）也会走到
-            // dismiss()，而那时用户**根本没看到**这条公告；若照样回调，调用方会把它记成
-            // 「已读」，于是这条公告再也不会弹——用户从未读过的消息被当成读过了
-            // （adb 实测踩到：三条公告在 Activity 切换瞬间全部被记已读）。
+            // ⚠️ 顺序要紧：先回调 onClose，再 super.dismiss()。
+            // super.dismiss() 内部会通知 BaseDialog 的 onDismiss 监听器；若先调它，
+            // 接收方会看到「用户没主动关闭」（onClose 还没跑）而判定为宿主销毁，
+            // 把这条公告放回队列 → 立刻又弹一次，死循环（实测 id=6 连弹 4 次）。
             if (mUserClosed && mOnClose != null) {
                 mOnClose.run();
             }
+            super.dismiss();
         }
     }
 }

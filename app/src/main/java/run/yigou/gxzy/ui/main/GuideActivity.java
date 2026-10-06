@@ -9,6 +9,8 @@ import androidx.viewpager2.widget.ViewPager2;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
+import run.yigou.gxzy.manager.ActivityManager;
+import run.yigou.gxzy.manager.PrivacyAgreement;
 
 import me.relex.circleindicator.CircleIndicator3;
 
@@ -29,6 +31,26 @@ public final class GuideActivity extends AppActivity {
     @Override
     protected int getLayoutId() {
         return R.layout.guide_activity;
+    }
+
+    @Override
+    protected void initActivity() {
+        // ⚠️ 本页最后一屏会 startActivity(HomeActivity.class)，是一条**绕过启动硬门**的路径：
+        // 它不检查协议同意、也不检查系统权限，一旦被接上，用户就能在未同意时直达首页，
+        // 首页随即触发书本 tab 加载与三个 Manager 的前台回调（它们在
+        // SplashActivity 放行时才注册，但 HomeFragment 自身的加载不受那道闸门管）。
+        //
+        // 当前它在 Manifest 里没有 intent-filter、exported 默认为 false、也没有任何地方
+        // start 它，所以实际进不来，这里加校验是**为了让不变量无条件成立**：将来若有人
+        // 把它接回启动流程，闸门已经在，而不是靠「谁都没接」这种约定。
+        if (!PrivacyAgreement.isAgreed()) {
+            // 不弹提示、不引导：协议都没同意，引导页本身就是不该出现的内容。
+            finish();
+            ActivityManager.getInstance().finishAllActivities();
+            System.exit(0);
+            return;
+        }
+        super.initActivity();
     }
 
     @Override

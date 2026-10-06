@@ -1,7 +1,6 @@
 package run.yigou.gxzy.manager;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.gson.Gson;
@@ -9,51 +8,38 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
 
 import run.yigou.gxzy.data.remote.model.Announcement;
 
 /**
- * 公告「已读判定」与「本次该弹哪几条」的单元测试（DESIGN §6.2/§6.4）。
+ * 公告挑选与排序的单元测试。
  *
- * <p>纯 JVM：被测的 {@link AnnouncementStore#isSeenVersion(Integer, int)} 与
- * {@link AnnouncementQueue#select(List, int, AnnouncementQueue.SeenFilter)} 刻意不碰
- * MMKV / Android（已读判定由 {@code SeenFilter} 注入），所以调用它们不会触发 native
- * 库加载 —— 这条是既有教训：把纯逻辑放进持有 Android 依赖的类里，单测直接
- * {@code ExceptionInInitializerError}。</p>
+ * <p>纯 JVM：被测的 {@code AnnouncementQueue.select} 刻意不碰 MMKV / Android / 网络。</p>
  *
- * <p>用 Gson 从 JSON 构造 {@link Announcement}（它没有 setter，是只读响应模型），
- * 顺带验证字段名映射 —— 该模型刻意不加 {@code @SerializedName}，字段名一旦与后端
- * JSON 不符就会静默变成 0，而 {@code version=0} 正好会让「改过内容就重弹」失效。</p>
+ * <p>需求是「<b>每次 App 启动都弹出全部有效公告</b>」，所以这里锁的是：
+ * 不做已读过滤（关掉过也照弹）、不设条数上限（几条就弹几条）、
+ * 只剔除无效的（无标题、已过期）、按优先级排序。</p>
  */
 public class AnnouncementQueueTest {
 
     private static final Gson GSON = new Gson();
+    private static final long NOW = 1_000_000L;
 
-    private static Announcement item(int id, int priority, int version) {
+    /** 造一条公告；validTo 为 null 表示无结束时间（永不过期）。 */
+    private static Announcement item(int id, int priority, int version, Long validTo) {
+        String to = validTo == null ? "null" : String.valueOf(validTo);
         return GSON.fromJson(
                 "{\"id\":" + id + ",\"title\":\"公告" + id + "\",\"body\":\"正文\","
                         + "\"priority\":" + priority + ",\"version\":" + version
-                        + ",\"validFrom\":null,\"validTo\":null}",
+                        + ",\"validFrom\":null,\"validTo\":" + to + "}",
                 Announcement.class);
     }
 
-    /** 已读表：id → seenVersion。 */
-    private static AnnouncementQueue.SeenFilter seen(final Map<Integer, Integer> table) {
-        return new AnnouncementQueue.SeenFilter() {
-            @Override
-            public boolean isSeen(int id, int version) {
-                return AnnouncementStore.isSeenVersion(table.get(id), version);
-            }
-        };
-    }
-
-    private static AnnouncementQueue.SeenFilter noneSeen() {
-        return seen(new HashMap<Integer, Integer>());
+    private static Announcement item(int id, int priority, int version) {
+        return item(id, priority, version, null);
     }
 
     private static List<Integer> ids(List<Announcement> list) {
@@ -66,57 +52,95 @@ public class AnnouncementQueueTest {
 
     @Test
     public void gsonMapsFieldsAsExpected() {
-        // 先钉住映射本身：若这条挂了，下面所有断言都失去意义（version 会静默变 0）。
+        // 字段名映射一旦不符，version/priority 会静默变 0，排序就全乱了。
         Announcement announcement = item(7, 3, 2);
         assertEquals(7, announcement.getId());
         assertEquals("公告7", announcement.getTitle());
         assertEquals("正文", announcement.getBody());
         assertEquals(3, announcement.getPriority());
         assertEquals(2, announcement.getVersion());
-        assertTrue(announcement.getValidFrom() == null);
         assertTrue(announcement.getValidTo() == null);
         assertTrue(announcement.hasTitle());
     }
 
-    // ---------- 已读判定 ----------
+    // ---------- 全选、无上限 ----------
 
     @Test
-    public void neverSeenIsNotSeen() {
-        assertFalse(AnnouncementStore.isSeenVersion(null, 1));
+    public void returnsAllValidAnnouncements() {
+        // 需求：几条有效就弹几条，不设上限。
+        List<Announcement> input = Arrays.asList(
+                item(1, 0, 1), item(2, 1, 1), item(3, 2, 1), item(4, 3, 1));
+        assertEquals(4, AnnouncementQueue.select(input, NOW).size());
     }
 
     @Test
-    public void sameVersionCountsAsSeen() {
-        assertTrue(AnnouncementStore.isSeenVersion(1, 1));
+    public void doesNotCapAtAnyNumber() {
+        // 曾经的 K=3 上限已按需求移除：8 条也要全弹。
+        List<Announcement> input = new ArrayList<>();
+        for (int i = 1; i <= 8; i++) {
+            input.add(item(i, 0, 1));
+        }
+        assertEquals(8, AnnouncementQueue.select(input, NOW).size());
     }
 
     @Test
-    public void higherSeenVersionStillCountsAsSeen() {
-        // 见过 v3 而后端仍下发 v2（后端回滚版本号）不该重弹。
-        assertTrue(AnnouncementStore.isSeenVersion(3, 2));
+    public void ignoresSeenStateBecauseEveryLaunchPopsAgain() {
+        // 同一条公告连着两次启动都要弹：这里用「上一版已读过」模拟上次启动关闭过，
+        // 期望仍被选中——已读记忆已整套删除，select 不再接收任何已读判定。
+        List<Announcement> input = Collections.singletonList(item(5, 0, 2));
+        assertEquals(Collections.singletonList(5),
+                ids(AnnouncementQueue.select(input, NOW)));
+    }
+
+    // ---------- 有效性过滤 ----------
+
+    @Test
+    public void dropsExpiredAnnouncements() {
+        // 「有效」的第一层：未过期。validTo 小于 now 即无效。
+        List<Announcement> input = Arrays.asList(
+                item(1, 10, 1, NOW - 1),      // 过期
+                item(2, 5, 1, NOW + 1));      // 仍有效
+        assertEquals(Collections.singletonList(2),
+                ids(AnnouncementQueue.select(input, NOW)));
     }
 
     @Test
-    public void lowerSeenVersionMeansContentChangedSoNotSeen() {
-        // 需求 D2：后端改了标题/正文 → version+1 → 必须重弹一次。
-        assertFalse(AnnouncementStore.isSeenVersion(1, 2));
+    public void keepsAnnouncementExpiringExactlyNow() {
+        // 与后端 SQL 的 valid_to >= now 口径一致：等于 now 仍算有效。
+        List<Announcement> input = Collections.singletonList(item(1, 0, 1, NOW));
+        assertEquals(1, AnnouncementQueue.select(input, NOW).size());
     }
 
-    // ---------- 挑选 ----------
+    @Test
+    public void keepsAnnouncementWithoutEndTime() {
+        assertEquals(1, AnnouncementQueue.select(
+                Collections.singletonList(item(1, 0, 1, null)), NOW).size());
+    }
+
+    @Test
+    public void dropsEntriesWithoutTitleAndNulls() {
+        // 脏数据不得弹成空框标题。
+        Announcement noTitle = GSON.fromJson(
+                "{\"id\":9,\"title\":\"  \",\"priority\":0,\"version\":1}", Announcement.class);
+        List<Announcement> input = Arrays.asList(noTitle, null, item(1, 0, 1));
+        assertEquals(Collections.singletonList(1),
+                ids(AnnouncementQueue.select(input, NOW)));
+    }
 
     @Test
     public void emptyAndNullInputsYieldEmptyQueue() {
-        // 后端返回 {"announcements":[]} 时（INV-2）不得弹任何东西。
-        assertTrue(AnnouncementQueue.select(null, 3, noneSeen()).isEmpty());
-        assertTrue(AnnouncementQueue.select(Collections.<Announcement>emptyList(), 3, noneSeen())
-                .isEmpty());
+        assertTrue(AnnouncementQueue.select(null, NOW).isEmpty());
+        assertTrue(AnnouncementQueue.select(
+                Collections.<Announcement>emptyList(), NOW).isEmpty());
     }
+
+    // ---------- 排序 ----------
 
     @Test
     public void ordersByPriorityDesc() {
         List<Announcement> input = Arrays.asList(
                 item(1, 0, 1), item(2, 10, 1), item(3, 5, 1));
-        assertEquals(Arrays.asList(2, 3, 1), ids(AnnouncementQueue.select(input, 3, noneSeen())));
+        assertEquals(Arrays.asList(2, 3, 1), ids(AnnouncementQueue.select(input, NOW)));
     }
 
     @Test
@@ -124,59 +148,26 @@ public class AnnouncementQueueTest {
         // 不指定平手次序的话排序结果依赖输入顺序，同一份数据两次弹出顺序可能不同。
         List<Announcement> input = Arrays.asList(
                 item(9, 5, 1), item(3, 5, 1), item(6, 5, 1));
-        assertEquals(Arrays.asList(3, 6, 9), ids(AnnouncementQueue.select(input, 3, noneSeen())));
+        assertEquals(Arrays.asList(3, 6, 9), ids(AnnouncementQueue.select(input, NOW)));
     }
 
     @Test
-    public void skipsAlreadySeen() {
-        Map<Integer, Integer> table = new HashMap<>();
-        table.put(1, 1);
-        table.put(2, 1);
+    public void sortingIsIndependentOfInputOrder() {
         List<Announcement> input = Arrays.asList(
-                item(1, 10, 1), item(2, 5, 1), item(3, 1, 1));
-        assertEquals(Collections.singletonList(3), ids(AnnouncementQueue.select(input, 3, seen(table))));
+                item(1, 1, 1), item(2, 9, 1), item(3, 5, 1));
+        List<Integer> forward = ids(AnnouncementQueue.select(input, NOW));
+        List<Announcement> reversed = new ArrayList<>(input);
+        Collections.reverse(reversed);
+        List<Integer> backward = ids(AnnouncementQueue.select(reversed, NOW));
+        assertEquals(forward, backward);
     }
 
     @Test
-    public void reShowsSeenItemWhoseContentChanged() {
-        // 已关闭过 v1，后端把内容改成 v2 → 必须再弹一次（需求 D2 的核心）。
-        Map<Integer, Integer> table = new HashMap<>();
-        table.put(1, 1);
-        List<Announcement> input = Collections.singletonList(item(1, 0, 2));
-        assertEquals(Collections.singletonList(1), ids(AnnouncementQueue.select(input, 3, seen(table))));
-    }
-
-    @Test
-    public void capsAtMaxPerLaunch() {
-        // 「太多公告」的处置：一次启动最多弹 N 条，其余不丢、下次补弹（DESIGN §6.4）。
+    public void expiredHighPriorityAnnouncementYieldsToValidLowPriorityOne() {
+        // 过期的高优先级不该挤掉有效的低优先级。
         List<Announcement> input = Arrays.asList(
-                item(1, 5, 1), item(2, 4, 1), item(3, 3, 1), item(4, 2, 1), item(5, 1, 1));
-        List<Announcement> queue = AnnouncementQueue.select(input, 3, noneSeen());
-        assertEquals(3, queue.size());
-        // 取的是优先级最高的三条，剩下的仍在后端、未读，下次启动继续。
-        assertEquals(Arrays.asList(1, 2, 3), ids(queue));
-    }
-
-    @Test
-    public void treatsNonPositiveMaxAsOne() {
-        // 上限传 0/负数时宁可只弹一条，也不要「不弹」或「全弹」。
-        List<Announcement> input = Arrays.asList(item(1, 1, 1), item(2, 2, 1));
-        assertEquals(1, AnnouncementQueue.select(input, 0, noneSeen()).size());
-        assertEquals(1, AnnouncementQueue.select(input, -5, noneSeen()).size());
-    }
-
-    @Test
-    public void dropsEntriesWithoutTitleAndNulls() {
-        // 脏数据不得弹成空框标题。
-        Announcement noTitle = GSON.fromJson("{\"id\":9,\"title\":\"  \",\"version\":1}",
-                Announcement.class);
-        List<Announcement> input = Arrays.asList(noTitle, null, item(1, 0, 1));
-        assertEquals(Collections.singletonList(1), ids(AnnouncementQueue.select(input, 3, noneSeen())));
-    }
-
-    @Test
-    public void maxPopPerLaunchIsThree() {
-        // D1 已锁定 3；改动它会改变打扰频次，必须显式改测试与设计文档。
-        assertEquals(3, AnnouncementQueue.MAX_POP_PER_LAUNCH);
+                item(1, 100, 1, NOW - 1), item(2, 0, 1));
+        assertEquals(Collections.singletonList(2),
+                ids(AnnouncementQueue.select(input, NOW)));
     }
 }
