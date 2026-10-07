@@ -16,7 +16,10 @@ import run.yigou.gxzy.data.local.gen.BookDao;
 import run.yigou.gxzy.data.local.service.BookService;
 import run.yigou.gxzy.data.local.helper.DbService;
 
+import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.manager.Callback;
 import run.yigou.gxzy.ui.main.HomeActivity;
+import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
 import run.yigou.gxzy.ui.reader.adapter.BookCollectCaseAdapter;
@@ -31,6 +34,7 @@ import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshLoadMoreListener;
 
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 import java.util.List;
 
 /**
@@ -148,7 +152,35 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
             return;
         }
 
-        ArrayList<Book> books = mBookService.find(BookDao.Properties.BookNo.eq(mBookCollectCaseAdapter.getItem(position).getBookNo()));
+        // 按书号查出这本书再决定跳不跳转（读发生在后台，结果回主线程后再 startActivity）
+        final String bookNo = mBookCollectCaseAdapter.getItem(position).getBookNo();
+        DbService.getInstance().readInBackground(
+                new Callable<ArrayList<Book>>() {
+                    @Override
+                    public ArrayList<Book> call() {
+                        return mBookService.find(BookDao.Properties.BookNo.eq(bookNo));
+                    }
+                },
+                new Callback<ArrayList<Book>>() {
+                    @Override
+                    public void onSuccess(ArrayList<Book> books) {
+                        openBookOrWarn(books);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        // 读失败与"查不到"同义：同样提示书本异常
+                        openBookOrWarn(null);
+                    }
+                });
+    }
+
+    /** 拿到书架记录后：有就进阅读页，没有就提示重加。 */
+    private void openBookOrWarn(ArrayList<Book> books) {
+        // 读在后台：回调回来时 Fragment 可能已被销毁，此时 startActivity/toast 会出问题
+        if (!isAdded()) {
+            return;
+        }
         if (books == null || books.isEmpty()) {
             toast("书本异常.请删除后,重新加入书架");
         } else {
@@ -205,12 +237,34 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
                     .setListener(new MessageDialog.OnListener() {
                         @Override
                         public void onConfirm(BaseDialog dialog) {
-                            ArrayList<Book> books = mBookService.find(BookDao.Properties.BookNo.eq(mBookCollectCaseAdapter.getItem(position).getBookNo()));
-                            if (books != null && !books.isEmpty()) {
-                                mBookService.deleteEntity(books.get(0));
-                                //刷新书架
-                                refreshLayout();
-                            }
+                            // 读与删必须在同一个后台任务里：拆成两次提交会让"删除前的状态"被其他任务看到。
+                            final String bookNo = mBookCollectCaseAdapter.getItem(position).getBookNo();
+                            DbService.getInstance().runInBackgroundSerial(new Runnable() {
+                                @Override
+                                public void run() {
+                                    boolean removed = false;
+                                    try {
+                                        ArrayList<Book> books = mBookService.find(
+                                                BookDao.Properties.BookNo.eq(bookNo));
+                                        if (books != null && !books.isEmpty()) {
+                                            mBookService.deleteEntity(books.get(0));
+                                            removed = true;
+                                        }
+                                    } catch (Throwable t) {
+                                        EasyLog.print(t);
+                                    }
+                                    final boolean didRemove = removed;
+                                    ThreadUtil.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (didRemove) {
+                                                // 刷新书架（UI 操作必须在主线程）
+                                                refreshLayout();
+                                            }
+                                        }
+                                    });
+                                }
+                            });
                         }
                     })
                     .show();

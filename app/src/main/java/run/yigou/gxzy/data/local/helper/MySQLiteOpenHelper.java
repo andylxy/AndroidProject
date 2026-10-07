@@ -8,6 +8,8 @@ import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.query.QueryBuilder;
 
+import run.yigou.gxzy.log.EasyLog;
+
 /**
  * 自定义数据库OpenHelper
  * 处理数据库创建和版本升级
@@ -18,6 +20,8 @@ import org.greenrobot.greendao.query.QueryBuilder;
  * 3. 当修改现有表结构时，需要实现特定的迁移逻辑
  */
 public class MySQLiteOpenHelper extends VersionedOpenHelper {
+
+    private static final String TAG = "MySQLiteOpenHelper";
 
     private Context mContext;
 
@@ -61,7 +65,14 @@ public class MySQLiteOpenHelper extends VersionedOpenHelper {
             upgradeHelper.smartMigrate(db, allDaos);
             SchemaHistoryRepository.recordUpgrade(db, oldVersion, newVersion, "success", "smartMigrate");
         } catch (Exception upgradeError) {
-            SchemaHistoryRepository.recordUpgrade(db, oldVersion, newVersion, "failed", upgradeError.getMessage());
+            // 修补（2026-10-06）：这里原先在本连接上写 "failed" 记录，但那条记录是**无效的**——
+            // onUpgrade 抛异常时 SQLiteOpenHelper 会回滚整个事务，刚写的记录被一起滚掉。
+            // 实测证据：升级崩溃后 SCHEMA_HISTORY 里只有旧的 create 行，没有任何 failed。
+            // 失败记录改由 MigrationOrchestrator 在"连接已关闭、事务已回滚"之后用独立连接补写；
+            // 这里只把原因与堆栈打进日志，保留现场。
+            EasyLog.print(TAG, "升级失败 old=" + oldVersion + " new=" + newVersion
+                    + "：" + upgradeError.getMessage());
+            EasyLog.print(upgradeError);
             throw upgradeError;
         }
     }

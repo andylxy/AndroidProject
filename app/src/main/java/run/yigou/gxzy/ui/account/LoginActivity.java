@@ -33,6 +33,7 @@ import androidx.annotation.Nullable;
 import com.gyf.immersionbar.ImmersionBar;
 
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.security.SecurityUtils;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
@@ -54,6 +55,7 @@ import run.yigou.gxzy.ui.main.HomeFragment;
 import run.yigou.gxzy.ui.main.HomeActivity;
 import run.yigou.gxzy.utils.Base64ConverBitmapHelper;
 import run.yigou.gxzy.utils.StringHelper;
+import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.wxapi.WXEntryActivity;
 
 import com.hjq.http.config.IRequestApi;
@@ -580,24 +582,9 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                             if (userLoginAccount != null && !userLoginAccount.isEmpty()) {
                                 // 将正确账号设置到实体中，确保持久化时保存
                                 data.setUserLoginAccount(userLoginAccount);
-                                UserInfo userInfo = DbService.getInstance().mUserInfoService.findUserInfoByLoginAccount(userLoginAccount);
                                 AppApplication.application.isLogin = true;
-                                    
-                                try {
-                                    if (userInfo == null) {
-                                        // 删除所有旧数据
-                                        DbService.getInstance().mUserInfoService.deleteAll();
-                                        // 添加新数据
-                                        DbService.getInstance().mUserInfoService.addEntity(data);
-                                    } else {
-                                        // 更新数据
-                                        DbService.getInstance().mUserInfoService.deleteEntity(data);
-                                    }
-                                } catch (Exception e) {
-                                    // 数据库操作失败
-                                    Log.e("LoginActivity", "Database operation failed: " + e.getMessage(), e);
-                                    toast("数据库操作失败");
-                                }
+                                // 读账号 + 分支写入整体交给 DB 串行后台线程（见 persistLoginUserInfo 的注释）
+                                persistLoginUserInfo(data, userLoginAccount);
                             }
                                 
                             homeActivityStart();
@@ -624,6 +611,60 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
         // 重置 Fragment
         HomeActivity.start(getContext(), HomeFragment.class);
         finish();
+    }
+
+    /**
+     * 把登录信息写入本地库的 USER_INFO 表。
+     *
+     * <p>为什么整体放到后台：这条路径包含 {@code deleteAll()} 整表删除 + 新增，
+     * 放在主线程正是历史上 ANR 的成因类别。改用 {@code DbService.runInBackgroundSerial}
+     * 后执行顺序与原先一致（串行单线程），只是换了线程。
+     *
+     * <p>为什么任务内必须自己 try/catch：串行入口内部用 {@code Executor.execute} 提交，
+     * 异常不会进 Future，只会杀掉 worker 线程——自己不记日志就等于什么都看不到。
+     * 失败仍按原行为给一次吐司，所以要把提示切回主线程。
+     *
+     * <p>不改判定结果：到底走"首次登录"还是"已有账号"分支，与原先完全相同。
+     *
+     * @param data             登录返回的实体（账号字段已在外层设置好）
+     * @param userLoginAccount 登录账号
+     */
+    private void persistLoginUserInfo(final UserInfo data, final String userLoginAccount) {
+        DbService.getInstance().runInBackgroundSerial(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    UserInfo userInfo = DbService.getInstance().mUserInfoService
+                            .findUserInfoByLoginAccount(userLoginAccount);
+                    if (userInfo == null) {
+                        // 首次登录：删除所有旧数据后新增
+                        DbService.getInstance().mUserInfoService.deleteAll();
+                        DbService.getInstance().mUserInfoService.addEntity(data);
+                    } else {
+                        // 已有该账号：用服务端返回的最新凭证**更新已有的那一行**。
+                        //
+                        // 这里原来是 deleteEntity(data)，等于把刚拿到的登录信息从库里删掉：
+                        // AppApplication.initUserLogin() 在下次启动时读不到行就判 isLogin=false，
+                        // 结果是每次冷启动都要重新登录（见 greendao 加固票 10 的取证记录）。
+                        //
+                        // 也不能直接 updateEntity(data)：UserInfoService.addEntity 会给新增的行
+                        // 生成一个随机 UUID 主键，而服务端返回的实体不带这个主键，
+                        // update(data) 一条都匹配不上，是静默无更新。
+                        // ⇒ 先沿用本地已有行的主键，再整体更新。
+                        data.setId(userInfo.getId());
+                        DbService.getInstance().mUserInfoService.updateEntity(data);
+                    }
+                } catch (Throwable t) {
+                    EasyLog.print(t);
+                    ThreadUtil.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            toast("数据库操作失败");
+                        }
+                    });
+                }
+            }
+        });
     }
 
     @Override

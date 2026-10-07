@@ -38,6 +38,7 @@ import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
 import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.utils.ThreadUtil;
 
 
 /**
@@ -107,6 +108,73 @@ public class BookRepository {
             EasyLog.print("BookRepository", "数据库加载失败: " + e.getMessage());
             return new ArrayList<>();
         }
+    }
+
+    /**
+     * 异步获取章节列表（数据库读取发生在串行后台线程，结果回主线程）。
+     *
+     * <p>为什么单独给一个异步入口：{@link #getChapters(String)} 是同步返回值型的，
+     * 调用方拿到列表后还要接着做一连串 UI 工作，把方法体整体挪到后台会破坏返回值约定。
+     * 新方法用 {@code *Async} 命名，是为了让调用方一眼看出"结果不再同步返回"。
+     *
+     * <p>读失败按"没有章节"回调（空列表），与同步版失败返回空列表的语义一致。
+     *
+     * @param bookId   书籍 ID
+     * @param callback 结果回调（主线程），可为 null
+     */
+    public void getChaptersAsync(final String bookId, final Callback<List<Chapter>> callback) {
+        final List<Chapter> cached = chapterCache.get(bookId);
+        if (cached != null) {
+            deliverOnUi(callback, cached);
+            return;
+        }
+        DbService.getInstance().runInBackgroundSerial(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    deliverOnUi(callback, getChapters(bookId));
+                } catch (Throwable t) {
+                    // 读失败按"没有章节"回调，而不是走 onError：
+                    // 同步版 getChapters 的失败语义就是返回空列表，调用方（Presenter）
+                    // 对两种情况的处理都是"章节列表为空"提示，改成 onError 会变成另一种文案。
+                    EasyLog.print(t);
+                    deliverOnUi(callback, new ArrayList<Chapter>());
+                }
+            }
+        });
+    }
+
+    /**
+     * 异步查询书架书籍（数据库读取发生在串行后台线程，结果回主线程）。
+     *
+     * @param bookNo   书号
+     * @param callback 结果回调（主线程），可为 null
+     */
+    public void queryBookshelfAsync(final String bookNo, final Callback<ArrayList<Book>> callback) {
+        DbService.getInstance().runInBackgroundSerial(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    deliverOnUi(callback, queryBookshelf(bookNo));
+                } catch (Throwable t) {
+                    // 同 getChaptersAsync：同步版失败返回空列表，这里保持同一种语义。
+                    EasyLog.print(t);
+                    deliverOnUi(callback, new ArrayList<Book>());
+                }
+            }
+        });
+    }
+
+    /** 后台任务的结果统一回主线程。 */
+    private static <T> void deliverOnUi(final Callback<T> callback, final T data) {
+        ThreadUtil.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (callback != null) {
+                    callback.onSuccess(data);
+                }
+            }
+        });
     }
 
     /**
@@ -220,6 +288,32 @@ public class BookRepository {
     }
 
     /**
+     * 加入书架（写入发生在串行后台线程）。
+     *
+     * <p>为什么与 {@link #addToBookshelf(Book)} 分开重命名：后者返回 boolean 表示"写成功了没"，
+     * 挪到后台之后就没有这个值可用了。名字里带 Async 是要让调用方一眼看出结果不再同步返回——
+     * 比"返回一个其实恒为 true 的布尔"诚实。
+     *
+     * <p>任务内必须自己 try/catch：串行入口用 {@code Executor.execute} 提交，异常不进 Future，
+     * 只会杀掉 worker 线程。
+     *
+     * @param book 书籍对象
+     */
+    public void addToBookshelfAsync(final Book book) {
+        DbService.getInstance().runInBackgroundSerial(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    dbService.mBookService.addEntity(book);
+                } catch (Throwable t) {
+                    EasyLog.print("BookRepository", "添加书架失败: " + t.getMessage());
+                    EasyLog.print(t);
+                }
+            }
+        });
+    }
+
+    /**
      * 更新阅读进度
      * 
      * @param book 书籍对象
@@ -233,6 +327,28 @@ public class BookRepository {
             EasyLog.print("BookRepository", "更新阅读进度失败: " + e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * 更新阅读进度（写入发生在串行后台线程）。
+     *
+     * <p>命名理由与 {@link #addToBookshelfAsync(Book)} 相同：调用方不再能拿到"是否写成功"，
+     * 方法名必须把这一点讲清楚。
+     *
+     * @param book 书籍对象
+     */
+    public void updateReadingProgressAsync(final Book book) {
+        DbService.getInstance().runInBackgroundSerial(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    dbService.mBookService.updateEntity(book);
+                } catch (Throwable t) {
+                    EasyLog.print("BookRepository", "更新阅读进度失败: " + t.getMessage());
+                    EasyLog.print(t);
+                }
+            }
+        });
     }
 
     /**

@@ -14,9 +14,13 @@ import com.hjq.base.BaseDialog;
 import com.hjq.widget.layout.WrapRecyclerView;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import io.noties.markwon.Markwon;
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.ui.reader.ai.adapter.ChatSummaryAdapter;
@@ -107,10 +111,38 @@ public final class ChatSummaryListDialog {
                 return;
             }
 
-            List<ChatSummaryBean> summaries = DbService.getInstance()
-                    .mChatSummaryBeanService.findBySessionId(mSessionId);
+            // 摘要读取挪到串行后台线程（统一入口见 DbService.readInBackground）；
+            // findBySessionId 查出后会就地解密（RC4），这个语义由 Service 保证，换线程不影响。
+            final Long sessionId = mSessionId;
+            DbService.getInstance().readInBackground(
+                    new Callable<List<ChatSummaryBean>>() {
+                        @Override
+                        public List<ChatSummaryBean> call() {
+                            return DbService.getInstance()
+                                    .mChatSummaryBeanService.findBySessionId(sessionId);
+                        }
+                    },
+                    new Callback<List<ChatSummaryBean>>() {
+                        @Override
+                        public void onSuccess(List<ChatSummaryBean> loaded) {
+                            applySummaries(loaded);
+                        }
 
-            if (summaries.isEmpty()) {
+                        @Override
+                        public void onError(Exception e) {
+                            // 读失败按"没有摘要"渲染，与迁移前一致
+                            applySummaries(null);
+                        }
+                    });
+        }
+
+        /** 把后台读到的摘要交给 UI（主线程）。 */
+        private void applySummaries(List<ChatSummaryBean> summaries) {
+            // 读在后台，回调回来时弹窗可能已经关掉：此时再动 View 就是操作一个已回收的窗口。
+            if (!isShowing()) {
+                return;
+            }
+            if (summaries == null || summaries.isEmpty()) {
                 mEmptyHintView.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.GONE);
             } else {
@@ -124,9 +156,20 @@ public final class ChatSummaryListDialog {
          * 删除总结
          */
         private void deleteSummary(int position, ChatSummaryBean item) {
-            // 软删除
-            item.setIsDelete(ChatSummaryBean.IS_Delete_YES);
-            DbService.getInstance().mChatSummaryBeanService.updateEntity(item);
+            // 软删除：写库进串行后台线程（ChatSummaryBeanService 会先加密再写库、
+            // 写完把明文改回实体，这个语义与在哪条线程上执行无关）
+            final ChatSummaryBean removing = item;
+            DbService.getInstance().runInBackgroundSerial(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        removing.setIsDelete(ChatSummaryBean.IS_Delete_YES);
+                        DbService.getInstance().mChatSummaryBeanService.updateEntity(removing);
+                    } catch (Throwable t) {
+                        EasyLog.print(t);
+                    }
+                }
+            });
 
             // 从列表中移除
             mAdapter.removeItem(position);

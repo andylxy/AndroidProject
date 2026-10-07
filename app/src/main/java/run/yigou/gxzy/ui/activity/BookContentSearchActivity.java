@@ -24,11 +24,13 @@ import com.hjq.widget.view.ClearEditText;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.base.constant.AppConst;
+import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.base.args.FragmentSetting;
 import run.yigou.gxzy.data.local.entity.SearchHistory;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
@@ -46,6 +48,7 @@ import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.reader.entity.GroupModel;
 import run.yigou.gxzy.ui.reader.entity.SearchKeyEntity;
 import run.yigou.gxzy.data.model.HH2SectionData;
+import run.yigou.gxzy.manager.Callback;
 import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.ui.reader.repository.BookRepository;
@@ -159,9 +162,10 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      */
     private String searchKey;
     /**
-     * 搜索历史列表
+     * 搜索历史列表（在声明处初始化：改为后台读取后，UI 首屏可能还没数据，
+     * 留 null 会让 "clear()" 那类调用踩空指针）
      */
-    private List<SearchHistory> mSearchHistories;
+    private final List<SearchHistory> mSearchHistories = new ArrayList<>();
     /**
      * 搜索书籍列表视图
      */
@@ -374,10 +378,24 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      * 清空搜索历史
      */
     private void clearSearchHistory() {
-        mSearchHistoryService.clearHistory();
+        clearSearchHistoryInBackground();
         mSearchHistories.clear();
         toast("清空历史记录成功");
         llClearHistory.setVisibility(View.GONE);
+    }
+
+    /** 清空历史（整表删除放进串行后台线程）。任务内必须自己记录异常。 */
+    private void clearSearchHistoryInBackground() {
+        DbService.getInstance().runInBackgroundSerial(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mSearchHistoryService.clearHistory();
+                } catch (Throwable t) {
+                    EasyLog.print(t);
+                }
+            }
+        });
     }
 
     /**
@@ -502,13 +520,42 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      * 初始化历史列表
      */
     private void initHistoryList() {
-        mSearchHistories = mSearchHistoryService.findAllSearchHistory();
-        
+        // 原来这里在主线程直查。改为"后台读 → 回主线程应用"（统一入口见 DbService.readInBackground）
+        DbService.getInstance().readInBackground(
+                new Callable<List<SearchHistory>>() {
+                    @Override
+                    public List<SearchHistory> call() {
+                        return mSearchHistoryService.findAllSearchHistory();
+                    }
+                },
+                new Callback<List<SearchHistory>>() {
+                    @Override
+                    public void onSuccess(List<SearchHistory> loaded) {
+                        applyHistoryList(loaded);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        // 读失败按"没有历史"处理，与迁移前一致
+                        applyHistoryList(null);
+                    }
+                });
+    }
+
+    /** 把后台读到的历史填进列表并决定显隐（主线程）。 */
+    private void applyHistoryList(List<SearchHistory> loaded) {
+        // 读在后台：回调回来时 Activity 可能已经 finishing
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        mSearchHistories.clear();
+        if (loaded != null) {
+            mSearchHistories.addAll(loaded);
+        }
+        setupHistoryAdapter();
         if (isHistoryEmpty()) {
-            setupHistoryAdapter();
             hideHistoryViews();
         } else {
-            setupHistoryAdapter();
             showHistoryViews();
         }
     }
@@ -740,14 +787,21 @@ public final class BookContentSearchActivity extends AppActivity implements Base
     /**
      * 保存搜索历史
      */
-    private void saveSearchHistory(String keyword) {
-        try {
-            if (mSearchHistoryService != null) {
-                mSearchHistoryService.addOrUpadteHistory(keyword);
+    private void saveSearchHistory(final String keyword) {
+        // 写库进后台；原先"失败不阻断搜索主流程"的语义保持不变，
+        // 只是异常的记录方式改成 EasyLog.print(Throwable)（带堆栈）。
+        DbService.getInstance().runInBackgroundSerial(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (mSearchHistoryService != null) {
+                        mSearchHistoryService.addOrUpadteHistory(keyword);
+                    }
+                } catch (Throwable t) {
+                    EasyLog.print(t);
+                }
             }
-        } catch (Exception e) {
-            Log.e("BCSearchActivity", "Failed to save search history: " + e.getMessage(), e);
-        }
+        });
     }
     
     /**

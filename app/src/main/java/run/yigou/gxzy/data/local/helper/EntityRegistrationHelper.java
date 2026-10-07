@@ -12,6 +12,15 @@ import java.util.List;
  * 使用说明：
  * 1. 当添加新的实体类时，只需将其对应的 Dao 类添加到对应分类方法中
  * 2. 系统会在数据库升级时通过 getAllDaos() 自动处理所有实体
+ *
+ * ⚠️ 强制约束：本类登记的表集合，必须与生成代码
+ * {@code DaoMaster.createAllTables()} 声明的表集合**完全一致**。
+ * 原因：{@code GreenDaoUpgrade.smartMigrate} 只 DROP 本类登记的表，却会重建全部表；
+ * 一旦漏登记，那张表**永不被 DROP 却仍被重建**，{@code onUpgrade} 一触发就抛
+ * {@code table ... already exists} → 经 {@code MySQLiteOpenHelper} 重抛 → 启动崩溃。
+ * 历史上 {@code ChatSummaryBeanDao} 漏登记就是这样潜伏了很久（升级路径从未被真实走过）。
+ * 门禁由 {@code EntityRegistrationHelperTest} 提供：新增实体后跑
+ * {@code gradlew.bat testDebugUnitTest}，漏登记会红。
  */
 public class EntityRegistrationHelper {
     
@@ -53,6 +62,7 @@ public class EntityRegistrationHelper {
         List<Class<? extends AbstractDao<?, ?>>> daos = new ArrayList<>();
         daos.add(run.yigou.gxzy.data.local.gen.ChatMessageBeanDao.class);
         daos.add(run.yigou.gxzy.data.local.gen.ChatSessionBeanDao.class);
+        daos.add(run.yigou.gxzy.data.local.gen.ChatSummaryBeanDao.class);
         return daos;
     }
     

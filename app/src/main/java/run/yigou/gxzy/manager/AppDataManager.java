@@ -26,6 +26,7 @@ import run.yigou.gxzy.data.local.entity.TabNav;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.entity.ZhongYaoAlia;
 import run.yigou.gxzy.data.local.helper.DataRepository;
+import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.model.Fang;
 import run.yigou.gxzy.data.model.MingCiContent;
 import run.yigou.gxzy.data.model.Yao;
@@ -260,10 +261,10 @@ public class AppDataManager {
                         EasyLog.print(TAG, "✅ 步骤2：药物 + 名词数据加载完成");
                         
                         // 3. 加载方剂别名（依赖导航数据）
-                        loadFangAliasData();
-                        EasyLog.print(TAG, "✅ 步骤3：方剂别名加载完成");
-                        
-                        callback.onSuccess(null);
+                        loadFangAliasData(() -> {
+                            EasyLog.print(TAG, "✅ 步骤3：方剂别名加载完成");
+                            callback.onSuccess(null);
+                        });
                     }
                     
                     @Override
@@ -289,16 +290,40 @@ public class AppDataManager {
      */
     private void loadNavigationData(LifecycleOwner lifecycleOwner, 
                                     Callback<List<TabNav>> callback) {
-        // 1. 尝试本地加载
-        List<TabNav> localData = DataRepository.getNavigationData();
+        // 本地读取走统一入口：原来这里在主线程直读导航表，严格模式下实测为
+        // DiskReadViolation（全 navigations 一次性 loadAll）。失败按"本地无数据"处理，
+        // 于是自动落到网络分支——与迁移前的行为一致。
+        DbService.getInstance().readInBackground(
+                () -> DataRepository.getNavigationData(),
+                new Callback<List<TabNav>>() {
+                    @Override
+                    public void onSuccess(List<TabNav> localData) {
+                        useLocalNavigation(localData, lifecycleOwner, callback);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        useLocalNavigation(null, lifecycleOwner, callback);
+                    }
+                });
+    }
+
+    /** 有本地数据就用它并回调；没有就发网络请求（主线程）。 */
+    private void useLocalNavigation(List<TabNav> localData, LifecycleOwner lifecycleOwner,
+                                    Callback<List<TabNav>> callback) {
         if (localData != null && !localData.isEmpty()) {
             EasyLog.print(TAG, "📦 使用本地缓存：导航数据 " + localData.size() + " 条");
             syncNavigationToGlobalDataHolder(localData);
             callback.onSuccess(localData);
             return;
         }
-        
-        // 2. 本地无数据，请求网络
+        requestNavigationDataFromNetwork(lifecycleOwner, callback);
+    }
+
+    /** 本地无数据时的网络分支（主线程）。 */
+    private void requestNavigationDataFromNetwork(LifecycleOwner lifecycleOwner,
+                                                  Callback<List<TabNav>> callback) {
+        // 请求网络
         EasyLog.print(TAG, "🌐 本地无缓存，请求网络：导航数据");
         EasyHttp.get(lifecycleOwner)
                 .api(new BookInfoNav())
@@ -308,15 +333,19 @@ public class AppDataManager {
                         if (data != null && data.getData() != null && !data.getData().isEmpty()) {
                             List<TabNav> networkData = data.getData();
                             
-                            // 清空 GlobalDataHolder 旧数据
+                            // 清空 GlobalDataHolder 旧数据（内存操作，主线程即时完成）
                             GlobalDataHolder.getInstance().reloadNavigationData();
                             
-                            // 保存到本地（全量覆盖）
-                            DataRepository.clearAndSaveNavTabs(networkData, lifecycleOwner);
-                            
-                            // 同步到 GlobalDataHolder
+                            // 同步到 GlobalDataHolder（内存操作，主线程即时完成，保证 UI 立即可用）
                             syncNavigationToGlobalDataHolder(networkData);
                             
+                            // 落库交给 DataRepository 的异步入口（内部走 DbService 的串行后台线程）：
+                            // clearAndSaveNavTabs 会清空导航表 + 逐项查询/写入，还会为每本书触发
+                            // 章节列表下载，同步执行会阻塞主线程（实测约 0.4s）。
+                            // 边界：内存态已先行同步、UI 立即可用；步骤3 读的是 GlobalDataHolder
+                            // 而不是库，因此不依赖此处落库完成。
+                            DataRepository.clearAndSaveNavTabsAsync(networkData, lifecycleOwner);
+
                             EasyLog.print(TAG, "✅ 网络请求成功：导航数据 " + 
                                 networkData.size() + " 条");
                             callback.onSuccess(networkData);
@@ -379,18 +408,40 @@ public class AppDataManager {
      */
     private void loadYaoDataWithAlias(LifecycleOwner lifecycleOwner, 
                                       Callback<Void> callback) {
-        // 1. 检查本地缓存
-        List<Yao> localYaoData = DataRepository.getYaoData();
+        // 本地读取走统一入口（原主线程直读药材表）；失败按"本地无数据"处理
+        DbService.getInstance().readInBackground(
+                () -> DataRepository.getYaoData(),
+                new Callback<List<Yao>>() {
+                    @Override
+                    public void onSuccess(List<Yao> localYaoData) {
+                        useLocalYao(localYaoData, lifecycleOwner, callback);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        useLocalYao(null, lifecycleOwner, callback);
+                    }
+                });
+    }
+
+    /** 有本地药材就用它并继续加载别名；没有就发网络请求（主线程）。 */
+    private void useLocalYao(List<Yao> localYaoData, LifecycleOwner lifecycleOwner,
+                             Callback<Void> callback) {
         if (localYaoData != null && !localYaoData.isEmpty()) {
             EasyLog.print(TAG, "📦 使用本地缓存：药物数据 " + localYaoData.size() + " 条");
             syncYaoToGlobalDataHolder(localYaoData);
-            
+
             // 加载药物别名
             loadYaoAliasData(lifecycleOwner, callback);
             return;
         }
-        
-        // 2. 请求网络
+        requestYaoDataFromNetwork(lifecycleOwner, callback);
+    }
+
+    /** 本地无数据时的网络分支（主线程）。 */
+    private void requestYaoDataFromNetwork(LifecycleOwner lifecycleOwner,
+                                           Callback<Void> callback) {
+        // 请求网络
         EasyLog.print(TAG, "🌐 本地无缓存，请求网络：药物数据");
         EasyHttp.get(lifecycleOwner)
                 .api(new YaoContentApi())
@@ -409,12 +460,15 @@ public class AppDataManager {
                             EasyLog.print(TAG, "✅ 网络请求成功：药物数据 " + 
                                 networkData.size() + " 条");
                             
-                            // 落库挪到后台线程：hjq 成功回调跑在主线程，saveYaoData 会清表+批量写库，
-                            // 同步执行会阻塞主线程造成 ANR（HomeActivity 曾因此 Input dispatching timed out）。
+                            // 落库提交到 DbService 的串行后台线程：hjq 成功回调跑在主线程，
+                            // saveYaoData 会清表+批量写库，同步执行会阻塞主线程造成 ANR
+                            // （HomeActivity 曾因此 Input dispatching timed out）。
+                            // 走串行执行器而不是通用缓存池，是为了让本 App 的所有落库共用同一条线程，
+                            // 避免两条线程来源并发写同一个 SQLite 库互相抢锁。
                             // 边界：内存态已在上面同步完成、UI 立即可用；此处的落库是 fire-and-forget，
                             // 失败只记录日志并保留旧数据（事务已回滚），不重试、不回滚内存态。
-                            // 若未来 hjq 支持配置回调线程，或该数据量证明可忽略，可移除此异步包裹。
-                            ThreadUtil.runInBackground(() -> DataRepository.saveYaoData(networkData));
+                            DbService.getInstance().runInBackgroundSerial(
+                                () -> DataRepository.saveYaoData(networkData));
 
                             // 加载药物别名（读的是别名表，与上面药材表的落库无依赖，无需等待）
                             loadYaoAliasData(lifecycleOwner, callback);
@@ -434,16 +488,38 @@ public class AppDataManager {
      */
     private void loadYaoAliasData(LifecycleOwner lifecycleOwner, 
                                   Callback<Void> callback) {
-        // 1. 检查本地缓存
-        List<ZhongYaoAlia> localAliasData = DataRepository.getYaoAlia();
+        // 本地读取走统一入口（原主线程直读别名表）；失败按"本地无数据"处理
+        DbService.getInstance().readInBackground(
+                () -> DataRepository.getYaoAlia(),
+                new Callback<List<ZhongYaoAlia>>() {
+                    @Override
+                    public void onSuccess(List<ZhongYaoAlia> localAliasData) {
+                        useLocalYaoAlias(localAliasData, lifecycleOwner, callback);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        useLocalYaoAlias(null, lifecycleOwner, callback);
+                    }
+                });
+    }
+
+    /** 有本地别名就用它并回调完成；没有就发网络请求（主线程）。 */
+    private void useLocalYaoAlias(List<ZhongYaoAlia> localAliasData, LifecycleOwner lifecycleOwner,
+                                  Callback<Void> callback) {
         if (localAliasData != null && !localAliasData.isEmpty()) {
             EasyLog.print(TAG, "📦 使用本地缓存：药物别名 " + localAliasData.size() + " 条");
             syncYaoAliasToGlobalDataHolder(localAliasData);
             callback.onSuccess(null);
             return;
         }
-        
-        // 2. 请求网络
+        requestYaoAliasDataFromNetwork(lifecycleOwner, callback);
+    }
+
+    /** 本地无数据时的网络分支（主线程）。 */
+    private void requestYaoAliasDataFromNetwork(LifecycleOwner lifecycleOwner,
+                                                Callback<Void> callback) {
+        // 请求网络
         EasyLog.print(TAG, "🌐 本地无缓存，请求网络：药物别名");
         EasyHttp.get(lifecycleOwner)
                 .api(new YaoAliaApi())
@@ -462,9 +538,11 @@ public class AppDataManager {
                             EasyLog.print(TAG, "✅ 网络请求成功：药物别名 " + 
                                 networkData.size() + " 条");
 
-                            // 落库挪到后台线程：同 loadYaoDataWithAlias，避免主线程同步写库造成 ANR。
+                            // 落库提交到 DbService 串行后台线程：同 loadYaoDataWithAlias，
+                            // 避免主线程同步写库造成 ANR，并与其它落库共用同一条线程。
                             // 边界：内存态已先行同步、UI 立即可用；落库失败只记录日志，不影响本次回调结果。
-                            ThreadUtil.runInBackground(() -> DataRepository.saveYaoAlia(networkData));
+                            DbService.getInstance().runInBackgroundSerial(
+                                () -> DataRepository.saveYaoAlia(networkData));
 
                             callback.onSuccess(null);
                         }
@@ -483,16 +561,38 @@ public class AppDataManager {
      */
     private void loadMingCiData(LifecycleOwner lifecycleOwner, 
                                 Callback<Void> callback) {
-        // 1. 检查本地缓存
-        List<MingCiContent> localData = DataRepository.getMingCi();
+        // 本地读取走统一入口（原主线程直读名词表）；失败按"本地无数据"处理
+        DbService.getInstance().readInBackground(
+                () -> DataRepository.getMingCi(),
+                new Callback<List<MingCiContent>>() {
+                    @Override
+                    public void onSuccess(List<MingCiContent> localData) {
+                        useLocalMingCi(localData, lifecycleOwner, callback);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        useLocalMingCi(null, lifecycleOwner, callback);
+                    }
+                });
+    }
+
+    /** 有本地名词就用它并回调完成；没有就发网络请求（主线程）。 */
+    private void useLocalMingCi(List<MingCiContent> localData, LifecycleOwner lifecycleOwner,
+                                Callback<Void> callback) {
         if (localData != null && !localData.isEmpty()) {
             EasyLog.print(TAG, "📦 使用本地缓存：名词数据 " + localData.size() + " 条");
             syncMingCiToGlobalDataHolder(localData);
             callback.onSuccess(null);
             return;
         }
-        
-        // 2. 请求网络
+        requestMingCiDataFromNetwork(lifecycleOwner, callback);
+    }
+
+    /** 本地无数据时的网络分支（主线程）。 */
+    private void requestMingCiDataFromNetwork(LifecycleOwner lifecycleOwner,
+                                              Callback<Void> callback) {
+        // 请求网络
         EasyLog.print(TAG, "🌐 本地无缓存，请求网络：名词数据");
         EasyHttp.get(lifecycleOwner)
                 .api(new MingCiContentApi())
@@ -511,9 +611,11 @@ public class AppDataManager {
                             EasyLog.print(TAG, "✅ 网络请求成功：名词数据 " + 
                                 networkData.size() + " 条");
 
-                            // 落库挪到后台线程：同 loadYaoDataWithAlias，避免主线程同步写库造成 ANR。
+                            // 落库提交到 DbService 串行后台线程：同 loadYaoDataWithAlias，
+                            // 避免主线程同步写库造成 ANR，并与其它落库共用同一条线程。
                             // 边界：内存态已先行同步、UI 立即可用；落库失败只记录日志，不影响本次回调结果。
-                            ThreadUtil.runInBackground(() -> DataRepository.saveMingCiContent(networkData));
+                            DbService.getInstance().runInBackgroundSerial(
+                                () -> DataRepository.saveMingCiContent(networkData));
 
                             callback.onSuccess(null);
                         }
@@ -530,42 +632,71 @@ public class AppDataManager {
     /**
      * 加载方剂别名（仅本地，从方剂数据提取）
      * 
-     * <p>依赖关系：必须在导航数据加载完成后调用。
+     * <p>依赖关系：必须在导航数据加载完成后调用（读的是 GlobalDataHolder 里的书籍列表，
+     * 不是数据库，所以不依赖导航数据的落库）。
+     *
+     * <p>执行线程：逐本书读库提取方剂名，实测 13 本书约 1.4s，同步跑在主线程会卡顿，
+     * 因此整体提交到 {@link DbService#runInBackgroundSerial} 的串行后台线程（与落库同一条线程），
+     * 完成后回主线程写 GlobalDataHolder 并回调。
+     *
+     * <p>为什么参数是 {@link Runnable} 而不是 {@code Callback<Void>}：本方法内部消化所有异常，
+     * 不存在失败分支，用一个永不触发的 onError 只会制造死代码。
+     *
+     * @param onDone 加载完成回调；一定会被调用，且在主线程
      */
-    private void loadFangAliasData() {
+    private void loadFangAliasData(Runnable onDone) {
         EasyLog.print(TAG, "🔍 开始加载方剂别名（依赖导航数据）...");
         
-        try {
-            GlobalDataHolder globalData = GlobalDataHolder.getInstance();
-            List<TabNavBody> bookInfos = globalData.getAllBookInfos();
+        // 在主线程取一次书籍列表快照：getAllBookInfos() 本身返回副本，
+        // 且不让后台线程直接读 GlobalDataHolder 的内存态，避免并发读写。
+        final List<TabNavBody> bookInfos = GlobalDataHolder.getInstance().getAllBookInfos();
+
+        // 逐本书读库属于数据库操作，统一提交到 DbService 的串行后台执行器：
+        // ① 与落库共用同一条线程，不再有「缓存池 + 串行池」两种线程来源；
+        // ② 该执行器是无界队列、提交即受理，不存在缓存池满载抛 RejectedExecutionException
+        //    导致「回调永不触发、isLoading 永久卡住」的风险，故不需要额外的失败兜底。
+        DbService.getInstance().runInBackgroundSerial(() -> {
             Map<String, String> fangAliasDict = new HashMap<>();
-            
             int aliasCount = 0;
-            int bookIndex = 0;
-            for (TabNavBody bookInfo : bookInfos) {
-                bookIndex++;
-                String bookId = bookInfo.getBookNo();
-                ArrayList<Fang> fangList = DataRepository.getFangDetailList(bookId);
-                
-                if (fangList != null && !fangList.isEmpty()) {
-                    for (Fang fang : fangList) {
-                        String fangName = fang.getName();
-                        if (fangName != null && !fangName.trim().isEmpty()) {
-                            fangAliasDict.put(fangName.trim(), fangName.trim());
-                            aliasCount++;
+
+            try {
+                for (TabNavBody bookInfo : bookInfos) {
+                    String bookId = bookInfo.getBookNo();
+                    ArrayList<Fang> fangList = DataRepository.getFangDetailList(bookId);
+
+                    if (fangList != null && !fangList.isEmpty()) {
+                        for (Fang fang : fangList) {
+                            String fangName = fang.getName();
+                            if (fangName != null && !fangName.trim().isEmpty()) {
+                                fangAliasDict.put(fangName.trim(), fangName.trim());
+                                aliasCount++;
+                            }
                         }
                     }
                 }
+            } catch (Exception e) {
+                EasyLog.print(TAG, "❌ 方剂别名加载失败: " + e.getMessage());
+                // 这个任务体跑在 DbService 的串行线程上：异常必须由自己记录并带堆栈，
+                // 否则日志里只有一句话，排查时拿不到现场（设计文档 §4）。
+                EasyLog.print(e);
             }
             
-            globalData.putAllFangAlias(fangAliasDict);
-            EasyLog.print(TAG, "✅ 方剂别名加载完成：" + aliasCount + " 条（来自 " + 
-                bookInfos.size() + " 本书）");
-            
-        } catch (Exception e) {
-            EasyLog.print(TAG, "❌ 方剂别名加载失败: " + e.getMessage());
-            e.printStackTrace();
-        }
+            final int total = aliasCount;
+            ThreadUtil.runOnUiThread(() -> {
+                try {
+                    GlobalDataHolder.getInstance().putAllFangAlias(fangAliasDict);
+                    EasyLog.print(TAG, "✅ 方剂别名加载完成：" + total + " 条（来自 " +
+                        bookInfos.size() + " 本书）");
+                } catch (Exception e) {
+                    EasyLog.print(TAG, "❌ 方剂别名字典写入失败: " + e.getMessage());
+                    EasyLog.print(e);
+                } finally {
+                    // 回调必须一定触发：否则 isLoading 永远为 true，之后每次 loadAllDataIfNeeded
+                    // 都会在「正在加载」分支直接返回，App 会静默地再也不加载数据。
+                    onDone.run();
+                }
+            });
+        });
     }
     
     // ========== 同步方法（数据 → GlobalDataHolder） ==========

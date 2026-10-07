@@ -52,6 +52,7 @@ public class GreenDaoUpgrade {
             }
         } catch (Exception e) {
             EasyLog.print(TAG, "获取表列名失败 [" + tableName + "]: " + e.getMessage());
+            EasyLog.print(e);
         }
         return columns;
     }
@@ -146,6 +147,7 @@ public class GreenDaoUpgrade {
             EasyLog.print(TAG, "自动迁移完成: " + tableName);
         } catch (Exception e) {
             EasyLog.print(TAG, "自动迁移失败: " + daoClass.getSimpleName() + " - " + e.getMessage());
+            EasyLog.print(e);
         }
     }
 
@@ -206,6 +208,7 @@ public class GreenDaoUpgrade {
             createTableMethod.invoke(null, db, false);
         } catch (Exception e) {
             EasyLog.print(TAG, "反射创建表失败: " + daoClass.getSimpleName() + " - " + e.getMessage());
+            EasyLog.print(e);
         }
     }
 
@@ -327,6 +330,7 @@ public class GreenDaoUpgrade {
                 }
             } catch (Exception e) {
                 EasyLog.print(TAG, "检查表存在失败: " + daoClass.getSimpleName() + " - " + e.getMessage());
+                EasyLog.print(e);
                 // 出错时保守处理，加入existingTables
                 existingTables.add(daoClass);
             }
@@ -352,9 +356,16 @@ public class GreenDaoUpgrade {
                     dropTableMethod.invoke(null, db, true);
                 } catch (Exception e) {
                     EasyLog.print(TAG, "删除旧表失败: " + daoClass.getSimpleName() + " - " + e.getMessage());
+                    EasyLog.print(e);
                 }
             }
-            DaoMaster.createAllTables(db, false);
+            // 修补（2026-10-06）：这里原为 createAllTables(db, false)，即不带 IF NOT EXISTS。
+            // 但 getAllDaos() 是手工登记的，一旦漏登记某张表，该表不会被上面的 dropTable 删掉，
+            // 却仍会被这一行重建 → 抛 "table ... already exists" → 经 MySQLiteOpenHelper 重抛
+            // → 最终表现为"升级即启动崩溃"（ChatSummaryBeanDao 就是实际反例）。
+            // 改成 true 后，漏登记只会导致该表在本轮不重建（数据保留），不再阻断启动。
+            // 根因修复在 EntityRegistrationHelper（把表登记齐），这里只是兜底，两者都需要。
+            DaoMaster.createAllTables(db, true);
             restoreData(db, existingArray);
             EasyLog.print(TAG, "已迁移 " + existingTables.size() + " 个已存在的表");
         }
@@ -377,6 +388,13 @@ public class GreenDaoUpgrade {
             createTableStringBuilder.append("CREATE TABLE ").append(tempTableName).append(" (");
 
             List<String> originalColumns = getColumns(db, tableName);
+            if (originalColumns.isEmpty()) {
+                // 修补（2026-10-06）：getColumns 在"表不存在 / 读列失败"时返回空列表，
+                // 继续走下去会拼出 `CREATE TABLE X_TEMP ();` 这种非法 SQL，
+                // 把真实错误（表缺失）掩盖成 SQL 语法错。这里显式跳过并记录，让原因可见。
+                EasyLog.print(TAG, "跳过不存在的表（不生成临时表）：" + tableName);
+                continue;
+            }
             for (int j = 0; j < daoConfig.properties.length; j++) {
                 String columnName = daoConfig.properties[j].columnName;
 

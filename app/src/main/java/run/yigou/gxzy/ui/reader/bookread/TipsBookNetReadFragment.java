@@ -28,6 +28,7 @@ import com.hjq.base.BaseDialog;
 
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.manager.Callback;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 import com.lucas.annotations.Subscribe;
@@ -36,6 +37,7 @@ import com.lucas.xbus.XEventBus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import run.yigou.gxzy.event.TipsFragmentSettingEventNotification;
 import run.yigou.gxzy.manager.SearchEntry;
@@ -536,9 +538,32 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         TabNavBody book = GlobalDataHolder.getInstance().getNavTabBodyMap().get(bookId);
         
         if (book != null) {
-            chapterList = DbService.getInstance().mChapterService.find(ChapterDao.Properties.BookId.eq(book.getBookNo()));
-            //加载书本相关的章节
-            getBookData(book);
+            // 章节列表读取挪到后台（统一入口见 DbService.readInBackground）；
+            // 读完之后回主线程再走 getBookData（它后面全是 UI 与 Presenter 调用）
+            final TabNavBody target = book;
+            DbService.getInstance().readInBackground(
+                    new Callable<ArrayList<Chapter>>() {
+                        @Override
+                        public ArrayList<Chapter> call() {
+                            return DbService.getInstance().mChapterService.find(
+                                    ChapterDao.Properties.BookId.eq(target.getBookNo()));
+                        }
+                    },
+                    new Callback<ArrayList<Chapter>>() {
+                        @Override
+                        public void onSuccess(ArrayList<Chapter> loaded) {
+                            chapterList = loaded;
+                            // 加载书本相关的章节
+                            getBookData(target);
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            // 读失败时 chapterList 保持 null，getBookData 内部对 null 有兜底
+                            chapterList = null;
+                            getBookData(target);
+                        }
+                    });
         } else {
             toast("书籍信息错误,退出后重新打开!!!!");
         }

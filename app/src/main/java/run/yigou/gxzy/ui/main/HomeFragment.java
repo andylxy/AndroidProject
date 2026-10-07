@@ -39,8 +39,10 @@ import run.yigou.gxzy.manager.SearchPermissionManager;
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
@@ -91,7 +93,9 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
     private SearchHistoryService mSearchHistoryService;
 
     private SearchHistoryAdapter mSearchHistoryAdapter;
-    private List<SearchHistory> mSearchHistories;
+    // 初始化在这里：搜索历史改为后台读取后，列表可能在 UI 首屏渲染时还空着，
+    // 留 null 会让"还没读到数据就点一条历史"变成空指针。
+    private final List<SearchHistory> mSearchHistories = new ArrayList<>();
     private LinearLayout llClearHistory;
     private String searchKey;//搜索关键词
 
@@ -155,12 +159,8 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                     mTabView.setVisibility(View.GONE);
                     mViewPager.setVisibility(View.GONE);
                     llHistoryView.setVisibility(View.VISIBLE);
-                    mSearchHistories = mSearchHistoryService.findAllSearchHistory();
-                    if (!mSearchHistories.isEmpty()) {
-                        mSearchHistoryAdapter.notifyDataSetChanged();
-                        lvHistoryList.setVisibility(View.VISIBLE);
-                        llClearHistory.setVisibility(View.VISIBLE);
-                    }
+                    // 搜索历史改为后台读取，读到之后回主线程填列表
+                    loadSearchHistories();
 
                 } else {
                     // 当 EditText 失去焦点时，恢复主界面
@@ -254,7 +254,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         initHistoryList();
         
         llClearHistory.setOnClickListener(v -> {
-            mSearchHistoryService.clearHistory();
+            clearSearchHistoryInBackground();
             mSearchHistories.clear();
             mSearchHistoryAdapter.notifyDataSetChanged();
             llClearHistory.setVisibility(View.GONE);
@@ -264,12 +264,89 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         });
     }
 
+    /**
+     * 后台读搜索历史，回主线程应用。
+     *
+     * <p>为什么读要进后台：这是列表页的主线程 IO，历史越长越慢。
+     * 串行入口内部用 {@code Executor.execute} 提交，异常不进 Future，
+     * 所以任务内必须自己记录，否则读失败永远看不到。
+     */
+    private void loadSearchHistories() {
+        DbService.getInstance().readInBackground(
+                new Callable<List<SearchHistory>>() {
+                    @Override
+                    public List<SearchHistory> call() {
+                        return mSearchHistoryService.findAllSearchHistory();
+                    }
+                },
+                new Callback<List<SearchHistory>>() {
+                    @Override
+                    public void onSuccess(List<SearchHistory> loaded) {
+                        applySearchHistories(loaded);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        // 读失败按"没有历史"处理：与迁移前一致（原来 catch 之后就是传空结果）
+                        applySearchHistories(null);
+                    }
+                });
+    }
+
+    /** 把后台读到的历史填进列表（主线程）。 */
+    private void applySearchHistories(List<SearchHistory> loaded) {
+        // 读在后台：回调回来时 Fragment 可能已被销毁，此时再碰 View 就是操作已回收的视图树
+        if (!isAdded()) {
+            return;
+        }
+        mSearchHistories.clear();
+        if (loaded != null) {
+            mSearchHistories.addAll(loaded);
+        }
+        if (mSearchHistoryAdapter != null) {
+            mSearchHistoryAdapter.notifyDataSetChanged();
+        }
+        if (!mSearchHistories.isEmpty()) {
+            lvHistoryList.setVisibility(View.VISIBLE);
+            llClearHistory.setVisibility(View.VISIBLE);
+        } else {
+            llClearHistory.setVisibility(View.GONE);
+        }
+    }
+
+    /** 清空搜索历史（写操作进后台，UI 反馈留在主线程）。 */
+    private void clearSearchHistoryInBackground() {
+        DbService.getInstance().runInBackgroundSerial(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mSearchHistoryService.clearHistory();
+                } catch (Throwable t) {
+                    EasyLog.print(t);
+                }
+            }
+        });
+    }
+
+    /** 保存本次搜索关键词（写操作进后台，跳转留在主线程）。 */
+    private void saveSearchHistoryInBackground(final String keyword) {
+        DbService.getInstance().runInBackgroundSerial(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mSearchHistoryService.addOrUpadteHistory(keyword);
+                } catch (Throwable t) {
+                    EasyLog.print(t);
+                }
+            }
+        });
+    }
+
 
     /**
      * 初始化搜索历史列表
      */
     private void initHistoryList() {
-        mSearchHistories = mSearchHistoryService.findAllSearchHistory();
         mSearchHistoryAdapter = new SearchHistoryAdapter(getActivity());
         mSearchHistoryAdapter.setData(mSearchHistories);
         mSearchHistoryAdapter.setOnItemClickListener(this);
@@ -277,6 +354,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         lvHistoryList.addItemDecoration(new CustomDividerItemDecoration(AppConst.CustomDivider_BookList_RecyclerView_Color, AppConst.CustomDivider_Height));
         llHistoryView.setVisibility(View.GONE);
         llClearHistory.setVisibility(View.GONE);
+        loadSearchHistories();
     }
 
     /**
@@ -293,7 +371,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         }
         //搜索关键词不为空时保存历史并跳转
         if (!StringHelper.isEmpty(searchKey)) {
-            mSearchHistoryService.addOrUpadteHistory(searchKey);
+            saveSearchHistoryInBackground(searchKey);
             Intent intent = new Intent(getActivity(), BookContentSearchActivity.class);
             // 通过 Extra 传递搜索关键词到 Intent
             intent.putExtra("searchQuery", searchKey);
@@ -392,22 +470,32 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
      * - 同步更新到当前配置列表
      */
     private void loadStyleConfig() {
-        run.yigou.gxzy.config.AppStyleConfigProvider provider = new run.yigou.gxzy.config.AppStyleConfigProvider();
-        
-        // 1. 先检查缓存
-        boolean cacheLoaded = provider.loadCacheConfig();
-        if (cacheLoaded) {
-            // 2. 有缓存 → 使用缓存配置，不再请求后端
-            EasyLog.print("HomeFragment", "样式配置已从缓存加载（不请求后端）");
-        } else {
-            // 3. 无缓存 → 请求后端配置
-            boolean triggered = provider.loadConfig(this);
-            if (triggered) {
-                EasyLog.print("HomeFragment", "已触发样式配置加载（从后端）");
-            } else {
-                EasyLog.print("HomeFragment", "样式配置加载失败");
+        final run.yigou.gxzy.config.AppStyleConfigProvider provider =
+                new run.yigou.gxzy.config.AppStyleConfigProvider();
+
+        // 1. 先检查缓存（读文件改到后台，严格模式实测这里在主线程读盘，见 greendao 加固票 11 A 项）
+        provider.loadCacheConfigAsync(new Callback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean cacheLoaded) {
+                if (cacheLoaded != null && cacheLoaded) {
+                    // 2. 有缓存 → 使用缓存配置，不再请求后端
+                    EasyLog.print("HomeFragment", "样式配置已从缓存加载（不请求后端）");
+                } else {
+                    // 3. 无缓存 → 请求后端配置（loadConfig 绑定生命周期，必须在主线程）
+                    boolean triggered = provider.loadConfig(HomeFragment.this);
+                    if (triggered) {
+                        EasyLog.print("HomeFragment", "已触发样式配置加载（从后端）");
+                    } else {
+                        EasyLog.print("HomeFragment", "样式配置加载失败");
+                    }
+                }
             }
-        }
+
+            @Override
+            public void onError(Exception e) {
+                EasyLog.print("HomeFragment", "样式配置缓存读取失败");
+            }
+        });
     }
 
     /**

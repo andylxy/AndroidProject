@@ -26,7 +26,9 @@ import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.ui.main.HomeFragment;
+import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.data.remote.api.UpdateImageApi;
 import run.yigou.gxzy.manager.account.AccountDataManager;
 import run.yigou.gxzy.manager.Callback;
@@ -260,7 +262,21 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
      * ????????
      */
     private void handleLogout() {
-        DbService.getInstance().mUserInfoService.deleteEntity(AppApplication.application.mUserInfoToken);
+        // 删除 USER_INFO 记录放进串行后台线程（原本在主线程）。
+        // 先把引用抓成局部变量：下面紧接着会把静态字段置空，那时后台任务就取不到要删的对象了。
+        final UserInfo token = AppApplication.application.mUserInfoToken;
+        DbService.getInstance().runInBackgroundSerial(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (token != null) {
+                        DbService.getInstance().mUserInfoService.deleteEntity(token);
+                    }
+                } catch (Throwable t) {
+                    EasyLog.print(t);
+                }
+            }
+        });
         AppApplication.application.mUserInfoToken = null;
         AppApplication.application.isLogin = false;
         HomeActivity.start(getContext(), HomeFragment.class);

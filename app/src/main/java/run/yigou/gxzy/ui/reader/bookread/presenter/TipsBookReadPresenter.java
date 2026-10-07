@@ -213,9 +213,50 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         TipsNetHelper.setBookContext(repository, bookId);
 
         // 获取章节列表
+        // 原来这里在主线程直接查库。改走 BookRepository.getChaptersAsync：
+        // 读发生在 DB 串行后台线程，下面依赖这份列表的工作搬进 onChaptersLoaded，回调回主线程接上。
+        final int lastPosition = lastReadPosition;
+        final String finalBookId = bookId;
+        final TabNavBody finalBook = book;
+        repository.getChaptersAsync(bookId, new Callback<List<Chapter>>() {
+            @Override
+            public void onSuccess(List<Chapter> chapters) {
+                try {
+                    onChaptersLoaded(chapters, lastPosition, finalBookId, finalBook);
+                } catch (Exception e) {
+                    EasyLog.print("TipsBookReadPresenter", "加载章节列表后处理失败: " + e.getMessage());
+                    view.showLoading(false);
+                    view.showError("加载失败: " + e.getMessage());
+                }
+            }
 
-        // 获取章节列表
-        allChapters = repository.getChapters(bookId);
+            @Override
+            public void onError(Exception e) {
+                EasyLog.print("TipsBookReadPresenter", "章节列表加载失败: " + e.getMessage());
+                view.showLoading(false);
+                view.showError("加载失败: " + e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * 章节列表到手之后的那一段工作（主线程）。
+     *
+     * <p>原来这段代码是 {@code loadBookContentInternal} 的下半段。因为现在章节要异步取，
+     * 只能切成两步——这是这次线程迁移唯一必需的流程改动，其余逻辑逐行照搬。
+     *
+     * @param chapters         章节列表（可能为 null / 空）
+     * @param lastReadPosition 上次阅读位置
+     * @param bookId           书籍 ID
+     * @param book             书籍信息
+     */
+    private void onChaptersLoaded(List<Chapter> chapters, int lastReadPosition, String bookId, TabNavBody book) {
+        // 章节是异步读的：回调回来时阅读页可能已经退出（用户返回、切换书籍），
+        // 此时继续 showLoading / 操作 View 就是在向一个已失效的页面发指令。
+        if (!isViewActive()) {
+            return;
+        }
+        allChapters = chapters;
         if (allChapters == null || allChapters.isEmpty()) {
             view.showLoading(false);
             view.showError("章节列表为空");
@@ -611,27 +652,37 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             return;
         }
 
-        try {
-            // 查询书架
-            ArrayList<Book> books = repository.queryBookshelf(currentBookInfo.getBookNo());
-
-            if (books == null || books.isEmpty()) {
-                // 不在书架中，提示添加
-                view.showAddToBookshelfConfirmDialog(currentBookInfo);
-            } else {
-                // 在书架中，更新进度并退出
-                if (currentChapterIndex != -1) {
-                    Book bookEntity = books.get(0);
-                    bookEntity.setLastReadPosition(currentChapterIndex);
-                    bookEntity.setHistoriographerNumb(currentChapterIndex);
-                    repository.updateReadingProgress(bookEntity);
+        // 查询书架：原来在主线程直查。后台读完之后按结果决定"弹加入书架"还是"更新进度后关闭"。
+        final TabNavBody bookInfo = currentBookInfo;
+        repository.queryBookshelfAsync(bookInfo.getBookNo(), new Callback<ArrayList<Book>>() {
+            @Override
+            public void onSuccess(ArrayList<Book> books) {
+                if (!isViewActive()) {
+                    return;
                 }
-                view.closeView();
+                if (books == null || books.isEmpty()) {
+                    // 不在书架中，提示添加
+                    view.showAddToBookshelfConfirmDialog(bookInfo);
+                } else {
+                    // 在书架中，更新进度并退出
+                    if (currentChapterIndex != -1) {
+                        Book bookEntity = books.get(0);
+                        bookEntity.setLastReadPosition(currentChapterIndex);
+                        bookEntity.setHistoriographerNumb(currentChapterIndex);
+                        repository.updateReadingProgressAsync(bookEntity);
+                    }
+                    view.closeView();
+                }
             }
-        } catch (Exception e) {
-            EasyLog.print("TipsBookReadPresenter", "检查书籍状态失败: " + e.getMessage());
-            view.closeView();
-        }
+
+            @Override
+            public void onError(Exception e) {
+                EasyLog.print("TipsBookReadPresenter", "检查书籍状态失败: " + e.getMessage());
+                if (isViewActive()) {
+                    view.closeView();
+                }
+            }
+        });
     }
 
     @Override
@@ -650,7 +701,8 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             book.setHistoriographerNumb(currentChapterIndex == -1 ? 0 : currentChapterIndex);
             book.setLastReadPosition(currentChapterIndex == -1 ? 0 : currentChapterIndex);
 
-            repository.addToBookshelf(book);
+            // 加入书架的写入交给串行后台线程，界面不用等它完成
+            repository.addToBookshelfAsync(book);
             
             // 通知刷新书架 (通过 EventBus 或回调，这里假设 View 关闭后 Activity 会刷新，或者需要显式刷新)
             // Fragment 原逻辑调用了 BookCollectCaseFragment.newInstance().RefreshLayout();

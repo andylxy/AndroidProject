@@ -66,6 +66,10 @@ public final class DataRepository {
     /**
      * 保存药材别名列表（全量替换）
      *
+     * <p>清空与写入在同一事务内完成（见 {@code BaseService#replaceAllInTx}）：失败整体回滚、
+     * 保留旧数据。原实现是「先 deleteAll 再逐条插入 + 逐条吞异常」——失败会留下空表/半截数据；
+     * 且 343 条逐条提交实测约 2.7s（事务内批量插入约 0.1s），是启动序列的主要耗时项。
+     *
      * @param yaoAliaList 别名数据列表
      */
     public static void saveYaoAlia(List<YaoAlia> yaoAliaList) {
@@ -75,9 +79,7 @@ public final class DataRepository {
         }
 
         try {
-            DbService.getInstance().mYaoAliasService.deleteAll();
-
-            int successCount = 0;
+            List<ZhongYaoAlia> entities = new ArrayList<>(yaoAliaList.size());
             for (YaoAlia yaoAlia : yaoAliaList) {
                 if (yaoAlia == null) {
                     continue;
@@ -86,18 +88,13 @@ public final class DataRepository {
                 ZhongYaoAlia zhongYaoAlia = new ZhongYaoAlia();
                 zhongYaoAlia.setName(yaoAlia.getName());
                 zhongYaoAlia.setBieming(yaoAlia.getBieming());
-
-                try {
-                    DbService.getInstance().mYaoAliasService.addEntity(zhongYaoAlia);
-                    successCount++;
-                } catch (Exception e) {
-                    EasyLog.print(TAG, "保存别名失败: " + e.getMessage());
-                }
+                entities.add(zhongYaoAlia);
             }
 
-            EasyLog.print(TAG, "保存 " + successCount + "/" + yaoAliaList.size() + " 条药材别名");
+            DbService.getInstance().mYaoAliasService.replaceAllInTx(entities);
+            EasyLog.print(TAG, "保存 " + entities.size() + "/" + yaoAliaList.size() + " 条药材别名");
         } catch (Exception e) {
-            EasyLog.print(TAG, "保存药材别名总异常: " + e.getMessage());
+            EasyLog.print(TAG, "保存药材别名失败（已回滚，保留旧数据）: " + e.getMessage());
         }
     }
 
@@ -221,19 +218,48 @@ public final class DataRepository {
         EasyLog.print(TAG, "🔄 开始全量覆盖导航数据...");
         
         try {
-            // 1. 清空旧数据
-            DbService.getInstance().mTabNavService.deleteAll();
-            DbService.getInstance().mTabNavBodyService.deleteAll();
-            EasyLog.print(TAG, "✅ 已清空导航数据表");
-            
-            // 2. 保存新数据（复用 saveTabNvaInDb 逻辑）
-            saveTabNvaInDb(navList, lifecycleOwner);
+            // 清空与写入包在同一个事务里：中途失败整体回滚，旧导航数据完整保留。
+            // 跨 TabNav / TabNavBody 两张表（分属两个 service），故用 DbService 的跨表事务入口。
+            // ⚠️ 事务内抛出的异常必须能传出来，否则会照常提交、留下删了一半的表——
+            // 这正是下面 processTabNav / processTabNavBody 不再用 executeDatabaseOperation 的原因。
+            DbService db = DbService.getInstance();
+            db.runInTransaction(() -> {
+                // 1. 清空旧数据
+                db.mTabNavService.deleteAll();
+                db.mTabNavBodyService.deleteAll();
+                EasyLog.print(TAG, "✅ 已清空导航数据表");
+
+                // 2. 保存新数据（复用 saveTabNvaInDb 逻辑）
+                saveTabNvaInDb(navList, lifecycleOwner);
+            });
             
             EasyLog.print(TAG, "🎉 导航数据全量覆盖完成");
         } catch (Exception e) {
-            EasyLog.print(TAG, "❌ 导航数据全量覆盖失败: " + e.getMessage());
-            e.printStackTrace();
+            EasyLog.print(TAG, "❌ 导航数据全量覆盖失败（已回滚，保留旧数据）: " + e.getMessage());
+            EasyLog.print(e);
         }
+    }
+
+    /**
+     * 全量覆盖保存导航数据（异步版）：内存态由调用方先行同步（UI 立即可用），
+     * 落库本身提交到 {@link DbService#runInBackgroundSerial} 的串行后台线程执行。
+     *
+     * <p>为什么必须异步：本方法会清空导航表并逐项写入，还会为每本书触发章节列表下载，
+     * 同步执行会阻塞主线程（实测约 0.4s）。
+     *
+     * <p>为什么必须串行：它与紧随其后的「按书删除 + 批量插入」章节落库写同一个 SQLite 库，
+     * 并发执行会互相抢锁。
+     *
+     * <p>失败语义：{@link #clearAndSaveNavTabs} 内部已把「清空 + 写入」包在同一个事务里，
+     * 失败会整体回滚并记录日志（旧导航数据保留），不向调用方抛出，
+     * 也不影响调用方已同步好的内存态。
+     *
+     * @param navList        新的导航数据列表
+     * @param lifecycleOwner 生命周期宿主，用于章节列表的网络请求
+     */
+    public static void clearAndSaveNavTabsAsync(List<TabNav> navList, LifecycleOwner lifecycleOwner) {
+        DbService.getInstance().runInBackgroundSerial(
+            () -> clearAndSaveNavTabs(navList, lifecycleOwner));
     }
 
     /**
@@ -243,11 +269,10 @@ public final class DataRepository {
      */
     private static String processTabNav(TabNav nav, int order) {
         try {
-            // 检查是否已存在
-            ArrayList<TabNav> existingNavList = ConvertEntity.executeDatabaseOperation(() ->
-                DbService.getInstance().mTabNavService.find(TabNavDao.Properties.CaseId.eq(nav.getCaseId())),
-                "查询导航" + nav.getCaseId()
-            );
+            // 直接调用 service，不经 ConvertEntity.executeDatabaseOperation：
+            // 那个包装会吞掉异常，导致 clearAndSaveNavTabs 的事务照常提交、留下删了一半的表。
+            ArrayList<TabNav> existingNavList = DbService.getInstance().mTabNavService.find(
+                TabNavDao.Properties.CaseId.eq(nav.getCaseId()));
 
             if (existingNavList != null && !existingNavList.isEmpty()) {
                 EasyLog.print(TAG, "导航已存在，CaseID: " + nav.getCaseId());
@@ -259,17 +284,15 @@ public final class DataRepository {
             nav.setTabNavId(tabNavId);
             nav.setOrder(order);
 
-            ConvertEntity.executeDatabaseOperation(() -> {
-                DbService.getInstance().mTabNavService.addEntity(nav);
-                return true;
-            }, "保存导航" + nav.getCaseId());
+            DbService.getInstance().mTabNavService.addEntity(nav);
 
             EasyLog.print(TAG, "已保存导航: " + nav.getCaseId());
             return tabNavId;
 
         } catch (Exception e) {
             EasyLog.print(TAG, "处理导航失败 " + nav.getCaseId() + ": " + e.getMessage());
-            return null;
+            // 向上抛：让 clearAndSaveNavTabs 的事务整体回滚，保留旧导航数据
+            throw new IllegalStateException("处理导航失败: " + nav.getCaseId(), e);
         }
     }
 
@@ -278,11 +301,9 @@ public final class DataRepository {
      */
     private static boolean processTabNavBody(TabNavBody item, String tabNavId, LifecycleOwner lifecycleOwner) {
         try {
-            // 检查是否需要更新
-            ArrayList<TabNavBody> existingBodyList = ConvertEntity.executeDatabaseOperation(() ->
-                DbService.getInstance().mTabNavBodyService.find(TabNavBodyDao.Properties.BookNo.eq(item.getBookNo())),
-                "查询导航子项" + item.getBookNo()
-            );
+            // 同 processTabNav：直接调用 service，避免异常被吞掉后事务照常提交
+            ArrayList<TabNavBody> existingBodyList = DbService.getInstance().mTabNavBodyService.find(
+                TabNavBodyDao.Properties.BookNo.eq(item.getBookNo()));
 
             boolean needsUpdate = shouldUpdateTabNavBody(existingBodyList, item.getChapterCount());
 
@@ -295,19 +316,20 @@ public final class DataRepository {
             item.setTabNavId(tabNavId);
             item.setTabNavBodyId(StringHelper.getUuid());
 
-            ConvertEntity.executeDatabaseOperation(() -> {
-                DbService.getInstance().mTabNavBodyService.addEntity(item);
-                return true;
-            }, "保存导航子项" + item.getBookNo());
+            DbService.getInstance().mTabNavBodyService.addEntity(item);
 
             EasyLog.print(TAG, "已保存导航子项，触发章节下载: " + item.getBookNo());
-            // 异步下载章节列表（原 NetworkDataFetcher 逻辑已合并）
+            // 异步下载章节列表（原 NetworkDataFetcher 逻辑已合并）。
+            // 只发起网络请求；章节落库走 DbService 串行执行器，会排在本事务之后，不会并发写库。
+            // 边界：若本事务随后回滚，已发出的下载仍可能落库成「孤儿章节」——章节按 bookId 存放、
+            // 与导航行无外键关系，下次导航保存成功即恢复可见，故不额外处理。
             ThreadUtil.runInBackground(() -> fetchAndSaveChapterList(lifecycleOwner, item));
             return true;
 
         } catch (Exception e) {
             EasyLog.print(TAG, "处理导航子项失败 " + item.getBookNo() + ": " + e.getMessage());
-            return false;
+            // 向上抛：让 clearAndSaveNavTabs 的事务整体回滚，保留旧导航数据
+            throw new IllegalStateException("处理导航子项失败: " + item.getBookNo(), e);
         }
     }
 
@@ -315,6 +337,9 @@ public final class DataRepository {
 
     /**
      * 保存名词内容列表（全量替换，加密存储）
+     *
+     * <p>清空与写入在同一事务内完成（见 {@code BaseService#replaceAllInTx}）：失败整体回滚、
+     * 保留旧数据。原实现是「先 deleteAll 再逐条插入 + 逐条吞异常」，失败会留下空表/半截数据。
      *
      * @param detailList 名词数据列表
      */
@@ -325,9 +350,7 @@ public final class DataRepository {
         }
 
         try {
-            DbService.getInstance().mBeiMingCiService.deleteAll();
-
-            int successCount = 0;
+            List<BeiMingCi> entities = new ArrayList<>(detailList.size());
             for (MingCiContent mingCiContent : detailList) {
                 if (mingCiContent == null) {
                     continue;
@@ -341,18 +364,13 @@ public final class DataRepository {
                 beiMingCi.setSignatureId(mingCiContent.getSignatureId());
                 beiMingCi.setImageUrl(mingCiContent.getImageUrl());
                 beiMingCi.setID(mingCiContent.getID());
-
-                try {
-                    DbService.getInstance().mBeiMingCiService.addEntity(beiMingCi);
-                    successCount++;
-                } catch (Exception e) {
-                    EasyLog.print(TAG, "保存名词失败: " + e.getMessage());
-                }
+                entities.add(beiMingCi);
             }
 
-            EasyLog.print(TAG, "保存 " + successCount + "/" + detailList.size() + " 条名词数据");
+            DbService.getInstance().mBeiMingCiService.replaceAllInTx(entities);
+            EasyLog.print(TAG, "保存 " + entities.size() + "/" + detailList.size() + " 条名词数据");
         } catch (Exception e) {
-            EasyLog.print(TAG, "保存名词数据总异常: " + e.getMessage());
+            EasyLog.print(TAG, "保存名词数据失败（已回滚，保留旧数据）: " + e.getMessage());
         }
     }
 
@@ -946,7 +964,12 @@ public final class DataRepository {
                             return;
                         }
 
-                        processChapterList(data.getData(), item);
+                        // 落库交给 DbService 的串行后台线程：hjq 的成功回调跑在主线程，而
+                        // processChapterList 会「按书删旧章 + 批量插入」（单本最多 81 章），
+                        // 13 本书串行跑在主线程时实测占用约 16s（HWUI 长帧 Vsync 迟到 12.97s），
+                        // 是启动卡顿的主因。必须串行：这些落库写同一个 SQLite 库，并发会抢锁。
+                        DbService.getInstance().runInBackgroundSerial(
+                            () -> processChapterList(data.getData(), item));
                     }
 
                     @Override
@@ -976,14 +999,9 @@ public final class DataRepository {
                 return;
             }
 
-            // 清除旧数据
-            if (existingChapters != null && !existingChapters.isEmpty()) {
-                DbService.getInstance().mChapterService.deleteAll(
-                    ChapterDao.Properties.BookId.eq(item.getBookNo()));
-                EasyLog.print(TAG, "已删除书籍 " + item.getBookNo() + " 旧章节数据");
-            }
-
-            // 批量保存新章节
+            // 事务内「按书替换」：删旧章与批量插入要么都提交、要么都回滚，失败时旧数据完整保留
+            // （与 saveYaoData 的 replaceAllInTx 同一契约）。原来这里是「先 deleteAll 再逐条插入」，
+            // 两步各自独立、且逐条吞异常，一旦中途失败就留下已删/半截的章节表——静默的数据丢失。
             int successCount = saveChaptersBatch(chapters, item.getBookNo());
             EasyLog.print(TAG, "保存书籍 " + item.getBookNo() + " 共 " + successCount + "/" + chapters.size() + " 章");
 
@@ -993,35 +1011,34 @@ public final class DataRepository {
     }
 
     /**
-     * 批量保存章节数据
+     * 批量保存章节数据（事务内按书全量替换）。
+     *
+     * <p>先按 bookId 删除旧章节，再批量插入新章节，整体一个事务：失败时旧数据完整保留。
+     * 旧实现是逐条插入 + 逐条吞异常，不具备这个保证——中途失败会留下已删/半截的数据。
+     *
+     * <p>写入失败会抛出异常，由 {@link #processChapterList} 统一记录日志。
      *
      * @param chapters 章节列表
      * @param bookId   书籍ID
-     * @return 成功保存的数量
+     * @return 实际写入的章节数
      */
     private static int saveChaptersBatch(List<Chapter> chapters, String bookId) {
         if (chapters == null || chapters.isEmpty()) {
             return 0;
         }
 
-        int successCount = 0;
+        // 先剔除 null：事务内遇到 null 元素会让整批回滚，不如提前过滤掉
+        List<Chapter> entities = new ArrayList<>(chapters.size());
         for (Chapter chapter : chapters) {
-            if (chapter == null) {
-                continue;
-            }
-
-            try {
-                ConvertEntity.executeDatabaseOperation(() -> {
-                    DbService.getInstance().mChapterService.addEntity(chapter);
-                    return true;
-                }, "保存章节" + chapter.getId());
-                successCount++;
-            } catch (Exception e) {
-                EasyLog.print(TAG, "保存章节失败: " + e.getMessage());
+            if (chapter != null) {
+                entities.add(chapter);
             }
         }
 
-        return successCount;
+        DbService.getInstance().mChapterService.replaceWhereInTx(
+            entities, ChapterDao.Properties.BookId.eq(bookId));
+
+        return entities.size();
     }
     
     /**

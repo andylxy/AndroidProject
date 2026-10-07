@@ -9,7 +9,9 @@ import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
+import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.manager.CacheDataManager;
 import run.yigou.gxzy.manager.ThreadPoolManager;
@@ -146,7 +148,21 @@ public final class SettingActivity extends AppActivity
 
             if (true) {
 
-                DbService.getInstance().mUserInfoService.deleteEntity(AppApplication.application.mUserInfoToken);
+                // 删除 USER_INFO 记录放进串行后台线程（原本在主线程）；
+                // 先把引用抓成局部变量，因为下一行就会把静态字段置空。
+                final UserInfo token = AppApplication.application.mUserInfoToken;
+                DbService.getInstance().runInBackgroundSerial(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            if (token != null) {
+                                DbService.getInstance().mUserInfoService.deleteEntity(token);
+                            }
+                        } catch (Throwable t) {
+                            EasyLog.print(t);
+                        }
+                    }
+                });
                 AppApplication.application.mUserInfoToken = null;
                 // startActivity(LoginActivity.class);
                 AppApplication.application.isLogin=false;

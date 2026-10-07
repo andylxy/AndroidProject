@@ -16,6 +16,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.os.Build;
+import android.os.StrictMode;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -39,11 +40,13 @@ import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.service.UserInfoService;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.local.helper.MigrationOrchestrator;
+import run.yigou.gxzy.data.local.helper.StartupIoExemption;
 import com.bumptech.glide.Glide;
 import run.yigou.gxzy.network.server.RequestHandler;
 import run.yigou.gxzy.network.server.RequestServer;
 import run.yigou.gxzy.network.security.InterceptorHelper;
 import run.yigou.gxzy.manager.ActivityManager;
+import run.yigou.gxzy.manager.Callback;
 import run.yigou.gxzy.text.TipsTextRenderConfig;
 import run.yigou.gxzy.widget.MaterialHeader;
 import run.yigou.gxzy.widget.SmartBallPulseFooter;
@@ -65,6 +68,7 @@ import com.tencent.mmkv.MMKV;
 import okhttp3.OkHttpClient;
 
 import run.yigou.gxzy.utils.SerialUtil;
+import run.yigou.gxzy.utils.ThreadUtil;
 import timber.log.Timber;
 
 import java.util.concurrent.TimeUnit;
@@ -176,7 +180,11 @@ public final class AppApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        
+
+        // 只在 debug 构建里打开严格模式：主线程磁盘/网络读写会以日志形式报出来。
+        // 必须在其他初始化之前打开，否则抓不到它们自己产生的违例。
+        enableStrictModeForDebug();
+
         // 基础配置
         initBasicConfig();
         
@@ -200,22 +208,108 @@ public final class AppApplication extends Application {
     }
     
     /**
+     * 后台读取"片段设置"缓存文件，读回来后在主线程赋值。
+     *
+     * <p>为什么敢改成异步：{@code fragmentSetting} 的两个使用方
+     * （{@code BookContentSearchActivity} 与 {@code TipsBookReadPresenter}）都有
+     * {@code null} 分支兜底——读不到就按"返回全部内容"处理，所以短暂为 null 不会崩，
+     * 只是这一瞬间不过滤。而同步读会把文件 IO 留在主线程（严格模式实测为
+     * DiskReadViolation + DiskWriteViolation，票 `.scratch/greendao-hardening/issues/11-home-load-chain-main-thread-io.md` A 项）。
+     */
+    private void loadFragmentSettingAsync() {
+        ThreadUtil.runInBackground(new Runnable() {
+            @Override
+            public void run() {
+                final FragmentSetting setting = ManagerSetting.getFragmentSetting();
+                ThreadUtil.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fragmentSetting = setting;
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * debug 构建的主线程行为检测（GreenDAO 加固·P1-1 的验收手段）。
+     *
+     * <p>为什么放在这里而不是 BaseActivity：启动路径上的 IO（数据库迁移、$userInfo 读取等）
+     * 都发生在任何 Activity 之前，只给 Activity 加会漏掉最该看的那一段。
+     *
+     * <p>为什么只用 {@code penaltyLog} 而不是 {@code penaltyDeath}：第三方 SDK（友盟、Glide 等）
+     * 本身就在主线程读写，一被发现就杀进程会让验收无法进行。日志方案允许我们按栈区分
+     * "本包的违例"（要修）与"第三方违例"（记录在案）。
+     *
+     * <p>发布构建不受影响：{@link AppConfig#isDebug()} 为 false 时整个方法体直接返回。
+     *
+     * <p>为什么这里用 {@link AppConfig#isDebug()} 而不是直接引用 BuildConfig：本仓统一由
+     * {@code AppConfig} 收口构建开关（见 {@code AppApplication} 同包下的其他用法），便于将来替换来源。
+     */
+    private void enableStrictModeForDebug() {
+        if (!AppConfig.isDebug()) {
+            return;
+        }
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                .detectDiskReads()
+                .detectDiskWrites()
+                .detectNetwork()
+                .penaltyLog()
+                .build());
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                .detectLeakedSqlLiteObjects()
+                .detectLeakedClosableObjects()
+                .penaltyLog()
+                .build());
+    }
+
+    /**
      * 基础配置初始化
      */
     private void initBasicConfig() {
         application = this;
-        
-        // 执行数据库迁移
-        MigrationOrchestrator.ensureUpToDate(this);
-        
+
+        // 进程启动时打开数据库并完成首次初始化（含 DbService 单例的建立）
+        initDatabaseOnStartup();
+
         // 初始化用户信息服务
         mUserInfoService = DbService.getInstance().mUserInfoService;
-        
-        // 加载用户设置
-        fragmentSetting = ManagerSetting.getFragmentSetting();
-        
+
+        // 加载用户设置（读缓存文件，改到后台：原来在主线程同步读写，票 `.scratch/greendao-hardening/issues/11-home-load-chain-main-thread-io.md` A 项）
+        loadFragmentSettingAsync();
+
         // 注册 EventBus
         registryByReflect();
+    }
+
+    /**
+     * 进程启动时打开并处理数据库。
+     *
+     * <p>覆盖两段：① {@code MigrationOrchestrator} 内部的 {@code getWritableDatabase()}；
+     * ② {@code DbService} 单例首次构造——它会在构造器里逐个 new 出 19 个 Service，
+     * 而 {@code BaseService} 的构造器又各自查一次 sqlite_master（{@code initTable}）。
+     * 两者都是"后续任何数据操作都依赖它"的一次性前置动作，属于同一个窗口。
+     *
+     * <p>实测（2026-10-06，冷启）：严格模式下报出的 12 条违例中，10 条全部来自这里，
+     * 栈底是 {@code AppApplication.onCreate}，耗时约 396 ms + 160 ms，每个进程只发生一次。
+     *
+     * <p>放开的粒度刻意很窄：只有"打开库"（在 {@link MigrationOrchestrator} 内部）与
+     * "建立 DbService 单例"两段进入 {@link StartupIoExemption} 窗口，退出时立即恢复原策略。
+     * 之后的任何主线程 IO 照旧会被记下来（开库、建升级历史表、首次建索引、读版本号这几件
+     * 一次性启动动作在 {@code MigrationOrchestrator} 里同样显式声明豁免，理由见那里的注释）。
+     */
+    private void initDatabaseOnStartup() {
+        // 迁移与开库
+        MigrationOrchestrator.ensureUpToDate(this);
+        // 建立 DbService 单例：它会 new 出全部 Service（各自在构造器里确认表是否存在）。
+        // 这一步与开库同属"进程一次性前置"，放进窄粒度的豁免窗口；
+        // 开库之后的工作（索引维护等）不在窗口内，见 StartupIoExemption 的类注释。
+        StartupIoExemption.runExempted(new Runnable() {
+            @Override
+            public void run() {
+                DbService.getInstance();
+            }
+        });
     }
     
     /**
@@ -263,14 +357,25 @@ public final class AppApplication extends Application {
      * - 缓存无数据时加载默认配置
      */
     private void loadStyleConfigOnInit() {
-        run.yigou.gxzy.config.AppStyleConfigProvider provider = 
+        // 读缓存文件改到后台：原来是主线程同步读（严格模式实测 DiskReadViolation，票 `.scratch/greendao-hardening/issues/11-home-load-chain-main-thread-io.md` A 项）。
+        // 样式配置有内置默认值兜底，晚一帧应用不影响功能。
+        run.yigou.gxzy.config.AppStyleConfigProvider provider =
             new run.yigou.gxzy.config.AppStyleConfigProvider();
-        boolean cacheLoaded = provider.loadCacheConfig();
-        if (cacheLoaded) {
-            android.util.Log.i("AppApplication", "样式配置已从缓存加载");
-        } else {
-            android.util.Log.i("AppApplication", "无样式配置缓存，使用默认配置");
-        }
+        provider.loadCacheConfigAsync(new Callback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean cacheLoaded) {
+                if (cacheLoaded != null && cacheLoaded) {
+                    EasyLog.print("AppApplication", "样式配置已从缓存加载");
+                } else {
+                    EasyLog.print("AppApplication", "无样式配置缓存，使用默认配置");
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                EasyLog.print("AppApplication", "无样式配置缓存，使用默认配置");
+            }
+        });
     }
     
     /**
@@ -304,23 +409,43 @@ public final class AppApplication extends Application {
      * - 凭证无效时设置登录状态为 false
      */
     private void initUserLogin() {
-        try {
-            // 1. 检查用户服务是否可用
-            if (mUserInfoService == null) {
-                EasyLog.print("InitUserLogin", "用户服务未初始化");
-                isLogin = false;
-                return;
+        // 1. 检查用户服务是否可用
+        if (mUserInfoService == null) {
+            EasyLog.print("InitUserLogin", "用户服务未初始化");
+            isLogin = false;
+            return;
+        }
+
+        // 2. 读本地登录用户。
+        //    这里**必须同步完成**，不能挪到后台：HomeActivity 建导航时只读一次 isLogin
+        //    （setupNavigation → addAiChatNavigationItemIfNeeded / getMaxFragmentIndex），
+        //    之后不会重建。异步化会让"已登录用户整个会话都看不到 AI 聊天入口"，
+        //    而且串行队列上还排着启动落库任务，恢复时机不可控。
+        //    这一读与开库同属"进程一次性前置"，放进窄粒度豁免窗口（见 StartupIoExemption）。
+        StartupIoExemption.runExempted(new Runnable() {
+            @Override
+            public void run() {
+                UserInfo userInfo = null;
+                try {
+                    userInfo = mUserInfoService.getLoginUserInfo();
+                } catch (Throwable t) {
+                    EasyLog.print("InitUserLogin", "登录初始化异常: " + t.getMessage());
+                    EasyLog.print(t);
+                }
+                applyRestoredLoginState(userInfo);
             }
-            
-            // 2. 从数据库获取上次登录用户
-            UserInfo userInfo = mUserInfoService.getLoginUserInfo();
+        });
+    }
+
+    /** 把读到的登录记录应用成登录态。 */
+    private void applyRestoredLoginState(UserInfo userInfo) {
+        try {
             if (userInfo == null) {
                 EasyLog.print("InitUserLogin", "无本地用户数据");
                 isLogin = false;
                 return;
             }
-            
-            // 3. 校验用户凭证有效性
+
             if (isValidUserCredentials(userInfo)) {
                 // 凭证有效，恢复登录状态
                 mUserInfoToken = userInfo; // 设置当前登录用户
@@ -332,9 +457,7 @@ public final class AppApplication extends Application {
                 isLogin = false;
                 mUserInfoToken = null;
             }
-            
         } catch (Exception e) {
-            // 初始化过程异常，清除登录状态
             EasyLog.print("InitUserLogin", "登录初始化异常: " + e.getMessage());
             isLogin = false;
             mUserInfoToken = null;

@@ -8,7 +8,10 @@ import com.hjq.http.listener.OnHttpListener;
 
 import run.yigou.gxzy.data.remote.api.StyleConfigApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
+import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.manager.Callback;
 import run.yigou.gxzy.text.IStyleConfigProvider;
+import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.text.StyleConfigApiBean;
 import run.yigou.gxzy.text.TipsTextRenderConfig;
 
@@ -72,7 +75,7 @@ public class AppStyleConfigProvider implements IStyleConfigProvider {
                     TipsTextRenderConfig.getInstance().applyServerConfig(response.getStyles());
                     
                     // 保存到缓存（供下次启动使用）
-                    saveCacheConfig(TipsTextRenderConfig.getInstance().getAllConfig());
+                    saveCacheConfigAsync(TipsTextRenderConfig.getInstance().getAllConfig());
                     
                     // 标记加载成功
                     isLoaded = true;
@@ -141,15 +144,53 @@ public class AppStyleConfigProvider implements IStyleConfigProvider {
     }
     
     /**
-     * 保存配置到缓存
-     * 
+     * 异步从本地缓存加载配置（文件读写在后台线程，结果回主线程）。
+     *
+     * <p>为什么要有异步版本：{@link #loadCacheConfig()} 会读缓存文件，同步调用发生在
+     * {@code AppApplication.onCreate} 与 {@code HomeFragment.initData}，严格模式下实测为
+     * DiskReadViolation（见 greendao 加固票 11 A 项）。样式配置本身有内置默认值兜底，晚一帧应用不影响功能。
+     *
+     * @param callback 主线程回调：true=已应用缓存（或默认）配置
+     */
+    public void loadCacheConfigAsync(final Callback<Boolean> callback) {
+        ThreadUtil.runInBackground(new Runnable() {
+            @Override
+            public void run() {
+                final boolean loaded = loadCacheConfig();
+                ThreadUtil.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (callback != null) {
+                            callback.onSuccess(loaded);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * 保存配置到缓存（写文件在后台线程）。
+     *
+     * <p>为什么改名带 Async：写入不再同步发生在调用线程上，调用方拿不到"写没写完"，
+     * 方法名必须把这点讲清楚（见 greendao 加固票 11 A 项）。
+     *
      * @param configs 样式配置
      */
-    public void saveCacheConfig(Map<String, TipsTextRenderConfig.StyleConfig> configs) {
-        try {
-            run.yigou.gxzy.utils.CacheHelper.saveObject((java.io.Serializable) configs, "style_config_cache");
-        } catch (Exception e) {
-            // 缓存保存失败，静默处理
-        }
+    public void saveCacheConfigAsync(final Map<String, TipsTextRenderConfig.StyleConfig> configs) {
+        ThreadUtil.runInBackground(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    run.yigou.gxzy.utils.CacheHelper.saveObject(
+                            (java.io.Serializable) configs, "style_config_cache");
+                } catch (Throwable t) {
+                    // 缓存写失败不影响本次运行（有默认值兜底），但必须留下记录：
+                    // 静默吞掉会让"样式配置怎么没生效"变成查不出来的问题。
+                    EasyLog.print("AppStyleConfigProvider", "样式配置缓存写入失败: " + t.getMessage());
+                    EasyLog.print(t);
+                }
+            }
+        });
     }
 }
