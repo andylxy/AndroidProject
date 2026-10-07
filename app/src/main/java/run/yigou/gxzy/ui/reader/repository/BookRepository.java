@@ -27,6 +27,7 @@ import run.yigou.gxzy.data.local.gen.BookDao;
 import run.yigou.gxzy.data.local.gen.ChapterDao;
 import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.data.remote.api.BookFangApi;
 import run.yigou.gxzy.manager.chapter.ChapterContentManager;
 import run.yigou.gxzy.data.remote.model.HttpData;
@@ -52,7 +53,7 @@ import run.yigou.gxzy.utils.ThreadUtil;
  */
 public class BookRepository {
 
-    private final DbService dbService;
+    private final LocalServices dbService;
     private final BookDataManager dataManager;
     private final GlobalDataHolder globalData;
     
@@ -60,7 +61,7 @@ public class BookRepository {
     private final Map<String, List<Chapter>> chapterCache = new ConcurrentHashMap<>();
 
     public BookRepository() {
-        this.dbService = DbService.getInstance();
+        this.dbService = LocalServices.getInstance();
         this.dataManager = BookDataManager.getInstance();
         this.globalData = GlobalDataHolder.getInstance();
     }

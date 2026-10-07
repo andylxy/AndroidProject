@@ -42,6 +42,7 @@ import run.yigou.gxzy.app.AppConfig;
 import run.yigou.gxzy.base.constant.LoginType;
 import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.data.remote.api.LoginApi;
 import run.yigou.gxzy.data.remote.api.VierCode;
 import run.yigou.gxzy.data.remote.api.GetCodeApi;
@@ -521,18 +522,18 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                             // ??????????
                             String userLoginAccount = data.getData().getAccessKeyId();
                             if (userLoginAccount != null && !userLoginAccount.isEmpty()) {
-                                UserInfo userInfo = DbService.getInstance().mUserInfoService.findUserInfoByLoginAccount(userLoginAccount);
+                                UserInfo userInfo = LocalServices.getInstance().mUserInfoService.findUserInfoByLoginAccount(userLoginAccount);
                                 AppApplication.application.isLogin = true;
                                     
                                 try {
                                     if (userInfo == null) {
                                         // ????????
-                                        DbService.getInstance().mUserInfoService.deleteAll();
+                                        LocalServices.getInstance().mUserInfoService.deleteAll();
                                         // ?????
-                                        DbService.getInstance().mUserInfoService.addEntity(data.getData());
+                                        LocalServices.getInstance().mUserInfoService.addEntity(data.getData());
                                     } else {
                                         // ?????
-                                        DbService.getInstance().mUserInfoService.deleteEntity(data.getData());
+                                        LocalServices.getInstance().mUserInfoService.deleteEntity(data.getData());
                                     }
                                 } catch (Exception e) {
                                     // ??????
@@ -634,12 +635,12 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
             @Override
             public void run() {
                 try {
-                    UserInfo userInfo = DbService.getInstance().mUserInfoService
+                    UserInfo userInfo = LocalServices.getInstance().mUserInfoService
                             .findUserInfoByLoginAccount(userLoginAccount);
                     if (userInfo == null) {
                         // 首次登录：删除所有旧数据后新增
-                        DbService.getInstance().mUserInfoService.deleteAll();
-                        DbService.getInstance().mUserInfoService.addEntity(data);
+                        LocalServices.getInstance().mUserInfoService.deleteAll();
+                        LocalServices.getInstance().mUserInfoService.addEntity(data);
                     } else {
                         // 已有该账号：用服务端返回的最新凭证**更新已有的那一行**。
                         //
@@ -652,7 +653,7 @@ public final class LoginActivity extends AppActivity implements UmengLogin.OnLog
                         // update(data) 一条都匹配不上，是静默无更新。
                         // ⇒ 先沿用本地已有行的主键，再整体更新。
                         data.setId(userInfo.getId());
-                        DbService.getInstance().mUserInfoService.updateEntity(data);
+                        LocalServices.getInstance().mUserInfoService.updateEntity(data);
                     }
                 } catch (Throwable t) {
                     EasyLog.print(t);

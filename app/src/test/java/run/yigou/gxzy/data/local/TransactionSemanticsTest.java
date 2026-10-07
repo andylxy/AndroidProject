@@ -19,10 +19,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
 
+import run.yigou.gxzy.data.local.GreenDaoManager;
 import run.yigou.gxzy.data.local.gen.DaoMaster;
 import run.yigou.gxzy.data.local.gen.DaoSession;
 import run.yigou.gxzy.data.local.gen.SearchHistoryDao;
@@ -93,9 +96,15 @@ public class TransactionSemanticsTest {
 
         mDatabase = db;
 
-        // 用 Unsafe 跳过私有构造（构造会碰 AppApplication / GreenDaoManager 真构造），直接注入内存库
+        // runInTransaction 现在从 GreenDaoManager.getDatabase() 取库并自我串行化，故这里：
+        // 1) 把 GreenDaoManager 的静态 daoMaster 直接指向内存库（不触发其私有构造 / AppApplication）；
+        // 2) 给 DbService 注入一个真实串行执行器（Unsafe 跳过了字段初始化，原 mSerialExecutor 为 null）。
+        // 完全不触碰 GreenDaoManager.getInstance()，因此其真构造（碰 AppApplication.getContext()）不会执行。
         mDbService = allocateInstance(DbService.class);
-        setField(DbService.class, mDbService, "mDatabase", db);
+        // Unsafe 跳过字段初始化器，故 mSerialExecutor / mSerialThread 需手动注入真实对象
+        setField(DbService.class, mDbService, "mSerialExecutor", Executors.newSingleThreadExecutor());
+        setField(DbService.class, mDbService, "mSerialThread", new AtomicReference<Thread>());
+        setField(GreenDaoManager.class, null, "daoMaster", daoMaster);
 
         mSearchHistoryService = allocateInstance(SearchHistoryService.class);
         setField(BaseService.class, mSearchHistoryService, "daoSession", session);

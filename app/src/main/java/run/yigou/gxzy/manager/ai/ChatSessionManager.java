@@ -12,6 +12,7 @@ import run.yigou.gxzy.data.local.entity.ChatMessageBean;
 import run.yigou.gxzy.data.local.entity.ChatSessionBean;
 import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.security.SecurityUtils;
@@ -50,7 +51,7 @@ public class ChatSessionManager {
      * 获取所有会话并按时间倒序排序
      */
     public List<ChatSessionBean> getAllSessionsSorted() {
-        List<ChatSessionBean> sessions = DbService.getInstance().mChatSessionBeanService.findAll();
+        List<ChatSessionBean> sessions = LocalServices.getInstance().mChatSessionBeanService.findAll();
         if (sessions == null) {
             sessions = new ArrayList<>();
         }
@@ -71,7 +72,7 @@ public class ChatSessionManager {
      */
     public ChatSessionBean getSessionById(Long sessionId) {
         if (sessionId == null) return null;
-        return DbService.getInstance().mChatSessionBeanService.findById(sessionId);
+        return LocalServices.getInstance().mChatSessionBeanService.findById(sessionId);
     }
 
     /**
@@ -87,7 +88,7 @@ public class ChatSessionManager {
         newSession.setIsDelete(ChatSessionBean.IS_Delete_NO);
         
         // 保存到数据库
-        long sessionId = DbService.getInstance().mChatSessionBeanService.addEntity(newSession);
+        long sessionId = LocalServices.getInstance().mChatSessionBeanService.addEntity(newSession);
         newSession.setId(sessionId);
         
         EasyLog.print(TAG, "Created new local session with ID: " + sessionId);
@@ -99,7 +100,7 @@ public class ChatSessionManager {
      */
     public long saveSession(ChatSessionBean session) {
         if (session == null) return -1;
-        return DbService.getInstance().mChatSessionBeanService.addEntity(session);
+        return LocalServices.getInstance().mChatSessionBeanService.addEntity(session);
     }
 
     /**
@@ -107,7 +108,7 @@ public class ChatSessionManager {
      */
     public void updateSession(ChatSessionBean session) {
         if (session != null) {
-            DbService.getInstance().mChatSessionBeanService.updateEntity(session);
+            LocalServices.getInstance().mChatSessionBeanService.updateEntity(session);
         }
     }
 
@@ -121,24 +122,24 @@ public class ChatSessionManager {
         List<ChatMessageBean> messages = getMessagesForSession(session);
         if (messages != null && !messages.isEmpty()) {
             for (ChatMessageBean msg : messages) {
-                DbService.getInstance().mChatMessageBeanService.deleteEntity(msg);
+                LocalServices.getInstance().mChatMessageBeanService.deleteEntity(msg);
             }
         }
 
         // 2. 删除相关的总结
-        DbService.getInstance().mChatSummaryBeanService.deleteBySessionId(session.getId());
+        LocalServices.getInstance().mChatSummaryBeanService.deleteBySessionId(session.getId());
         
         // 3. 删除会话本身
-        DbService.getInstance().mChatSessionBeanService.deleteEntity(session);
+        LocalServices.getInstance().mChatSessionBeanService.deleteEntity(session);
     }
 
     /**
      * 清空所有会话数据
      */
     public void clearAllSessions() {
-        DbService.getInstance().mChatMessageBeanService.deleteAll();
-        DbService.getInstance().mChatSummaryBeanService.deleteAll();
-        DbService.getInstance().mChatSessionBeanService.deleteAll();
+        LocalServices.getInstance().mChatMessageBeanService.deleteAll();
+        LocalServices.getInstance().mChatSummaryBeanService.deleteAll();
+        LocalServices.getInstance().mChatSessionBeanService.deleteAll();
         
         // 清除本地存储的ID
         if (context != null) {
@@ -199,42 +200,42 @@ public class ChatSessionManager {
      */
     public List<ChatSummaryBean> getSessionSummaries(Long sessionId) {
         if (sessionId == null) return new ArrayList<>();
-        return DbService.getInstance().mChatSummaryBeanService.findBySessionId(sessionId);
+        return LocalServices.getInstance().mChatSummaryBeanService.findBySessionId(sessionId);
     }
 
     /**
      * 保存消息到数据库
      */
     public long saveMessage(ChatMessageBean message) {
-        return DbService.getInstance().mChatMessageBeanService.addEntity(message);
+        return LocalServices.getInstance().mChatMessageBeanService.addEntity(message);
     }
     
     /**
      * 更新消息到数据库
      */
     public void updateMessage(ChatMessageBean message) {
-        DbService.getInstance().mChatMessageBeanService.updateEntity(message);
+        LocalServices.getInstance().mChatMessageBeanService.updateEntity(message);
     }
     
     /**
      * 删除消息
      */
     public void deleteMessage(ChatMessageBean message) {
-        DbService.getInstance().mChatMessageBeanService.deleteEntity(message);
+        LocalServices.getInstance().mChatMessageBeanService.deleteEntity(message);
     }
 
     /**
      * 保存总结
      */
     public long saveSummary(ChatSummaryBean summary) {
-        return DbService.getInstance().mChatSummaryBeanService.addEntity(summary);
+        return LocalServices.getInstance().mChatSummaryBeanService.addEntity(summary);
     }
 
     /**
      * 更新总结
      */
     public void updateSummary(ChatSummaryBean summary) {
-        DbService.getInstance().mChatSummaryBeanService.updateEntity(summary);
+        LocalServices.getInstance().mChatSummaryBeanService.updateEntity(summary);
     }
 
     /**

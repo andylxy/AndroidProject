@@ -13,82 +13,30 @@ package run.yigou.gxzy.data.local.helper;
 import org.greenrobot.greendao.database.Database;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 import run.yigou.gxzy.data.local.GreenDaoManager;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.manager.Callback;
 import run.yigou.gxzy.utils.ThreadUtil;
-import run.yigou.gxzy.data.local.service.AboutService;
-import run.yigou.gxzy.data.local.service.AiConfigBodyService;
-import run.yigou.gxzy.data.local.service.AiConfigService;
-import run.yigou.gxzy.data.local.service.BeiMingCiService;
-import run.yigou.gxzy.data.local.service.BookChapterBodyService;
-import run.yigou.gxzy.data.local.service.BookChapterService;
-import run.yigou.gxzy.data.local.service.BookService;
-import run.yigou.gxzy.data.local.service.ChapterService;
-import run.yigou.gxzy.data.local.service.ChatMessageBeanService;
-import run.yigou.gxzy.data.local.service.ChatSessionBeanService;
-import run.yigou.gxzy.data.local.service.ChatSummaryBeanService;
-import run.yigou.gxzy.data.local.service.SearchHistoryService;
-import run.yigou.gxzy.data.local.service.TabNavBodyService;
-import run.yigou.gxzy.data.local.service.TabNavService;
-import run.yigou.gxzy.data.local.service.UserInfoService;
-import run.yigou.gxzy.data.local.service.YaoAliasService;
-import run.yigou.gxzy.data.local.service.YaoFangBodyService;
-import run.yigou.gxzy.data.local.service.YaoFangService;
-import run.yigou.gxzy.data.local.service.YaoService;
 
 /**
- * 版本:  1.0
- * 描述: 统一创建数据Dao.需要的时候直接引用
+ * 数据库执行协调器（非领域 service）：
+ * <ul>
+ *   <li>串行后台执行器——所有写操作按提交顺序在单线程上执行，避免 SQLiteDatabaseLockedException；</li>
+ *   <li>后台读入口 {@link #readInBackground}；</li>
+ *   <li>跨表事务入口 {@link #runInTransaction}（自我串行化，保证与写操作不并发访问同一连接）。</li>
+ * </ul>
+ * 本地数据 Service 的定位器已拆到 {@link LocalServices}（ADR-0001 Q1=C）。
  */
 public class DbService {
-    public UserInfoService mUserInfoService;
-    public BookService mBookService;
-    public SearchHistoryService mSearchHistoryService;
-    public YaoService mYaoService;
-    public BeiMingCiService mBeiMingCiService;
-    public BookChapterService mBookChapterService;
-    public BookChapterBodyService mBookChapterBodyService;
-    public YaoFangService mYaoFangService;
-    public YaoFangBodyService mYaoFangBodyService;
-    public TabNavBodyService mTabNavBodyService;
-    public TabNavService mTabNavService;
-    public AboutService mAboutService;
-    public YaoAliasService  mYaoAliasService;
-    public ChapterService mChapterService;
-    public ChatMessageBeanService mChatMessageBeanService;
-    public ChatSessionBeanService mChatSessionBeanService;
-    public AiConfigService mAiConfigService;
-    public AiConfigBodyService mAiConfigBodyService;
-    public ChatSummaryBeanService mChatSummaryBeanService;
 
     private DbService() {
-        // 防止反射攻击
-        if (instance != null) {
-            throw new IllegalStateException("Singleton instance already created!");
-        }
-        mUserInfoService =  UserInfoService.getInstance();
-        mBookService =  BookService.getInstance();
-        mSearchHistoryService =   SearchHistoryService.getInstance();
-        mYaoService =  YaoService.getInstance();
-        mBeiMingCiService =  BeiMingCiService.getInstance();
-        mBookChapterService = BookChapterService.getInstance();
-        mBookChapterBodyService =  BookChapterBodyService.getInstance();
-        mYaoFangService =  YaoFangService.getInstance();
-        mYaoFangBodyService =  YaoFangBodyService.getInstance();
-        mTabNavBodyService =  TabNavBodyService.getInstance();
-        mTabNavService =  TabNavService.getInstance();
-        mAboutService =  AboutService.getInstance();
-        mYaoAliasService =  YaoAliasService.getInstance();
-        mChapterService =  ChapterService.getInstance();
-        mChatMessageBeanService =  ChatMessageBeanService.getInstance();
-        mChatSessionBeanService =  ChatSessionBeanService.getInstance();
-        mAiConfigService =  AiConfigService.getInstance();
-        mAiConfigBodyService =  AiConfigBodyService.getInstance();
-        mChatSummaryBeanService =  ChatSummaryBeanService.getInstance();
+        // 无状态协调器：不持有任何 service 引用，构造无副作用（原「防反射攻击」守卫因 instance 在构造后才赋值而永不触发，已删）。
     }
 
     private volatile static DbService instance;
@@ -114,14 +62,18 @@ public class DbService {
      * <p>无界队列：提交即受理，不会因池满抛 RejectedExecutionException。调用方可以依赖
      * 「任务一定被执行」这一点——例如把它当作完成回调的兜底通道。
      */
+    /**
+     * 串行后台线程的身份引用。用于 {@link #runInTransaction} 判断是否「已在串行线程内」，
+     * 从而选择内联执行（防自我死锁）还是提交到执行器。
+     */
+    private final AtomicReference<Thread> mSerialThread = new AtomicReference<>();
+
     private final ExecutorService mSerialExecutor = Executors.newSingleThreadExecutor(runnable -> {
         Thread thread = new Thread(runnable, "mf-db-serial");
         thread.setPriority(Thread.NORM_PRIORITY - 1);
+        mSerialThread.set(thread);
         return thread;
     });
-
-    /** 所有 service 共用的同一个数据库句柄，用于跨表事务（见 {@link #runInTransaction}）。 */
-    private final Database mDatabase = GreenDaoManager.getDaoMaster().getDatabase();
 
     /**
      * 在串行后台线程里读数据，结果回主线程交付（"读后回 UI"的标准入口）。
@@ -186,7 +138,18 @@ public class DbService {
         if (task == null) {
             return;
         }
-        mSerialExecutor.execute(task);
+        // 包一层：任务内抛出的任何异常都统一交由 EasyLog 记录（与 readInBackground 同一套纪律），
+        // 避免写任务失败时异常被执行器默认的 afterExecute 静默吞掉、排障时成为黑盒。
+        mSerialExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    task.run();
+                } catch (final Throwable t) {
+                    EasyLog.print(t);
+                }
+            }
+        });
     }
 
     /**
@@ -208,12 +171,40 @@ public class DbService {
         if (task == null) {
             return;
         }
-        mDatabase.beginTransaction();
-        try {
-            task.run();
-            mDatabase.setTransactionSuccessful();
-        } finally {
-            mDatabase.endTransaction();
+        // 整段事务包成 Runnable，统一在「串行线程」上执行，保证不会与 runInBackgroundSerial 的写任务
+        // 并发访问同一 SQLite 连接（否则会出现 SQLiteDatabaseLockedException / SQLITE_BUSY）。
+        // - 调用线程已经是 mf-db-serial：直接内联执行，避免向自己所在的单线程再排队导致自我死锁；
+        // - 否则：提交到串行执行器并阻塞等结果，异常（含 task 内抛出的）原样向上透传。
+        final Runnable tx = new Runnable() {
+            @Override
+            public void run() {
+                // 每次调用现取库句柄（不在构造时 final 捕获）：消除初始化顺序地雷与未来重开库时的悬空句柄。
+                final Database db = GreenDaoManager.getDatabase();
+                db.beginTransaction();
+                try {
+                    task.run();
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+            }
+        };
+        if (Thread.currentThread() == mSerialThread.get()) {
+            tx.run();
+        } else {
+            final Future<?> future = mSerialExecutor.submit(tx);
+            try {
+                future.get();
+            } catch (final ExecutionException e) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof RuntimeException) {
+                    throw (RuntimeException) cause;
+                }
+                throw new RuntimeException(cause);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
         }
     }
 

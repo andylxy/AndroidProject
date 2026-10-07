@@ -28,6 +28,7 @@ import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.ui.main.HomeFragment;
 import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.data.remote.api.UpdateImageApi;
 import run.yigou.gxzy.manager.account.AccountDataManager;
@@ -270,7 +271,7 @@ public final class MyFragmentPersonal extends TitleBarFragment<HomeActivity> {
             public void run() {
                 try {
                     if (token != null) {
-                        DbService.getInstance().mUserInfoService.deleteEntity(token);
+                        LocalServices.getInstance().mUserInfoService.deleteEntity(token);
                     }
                 } catch (Throwable t) {
                     EasyLog.print(t);

@@ -23,6 +23,7 @@ import run.yigou.gxzy.manager.Callback;
 import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.ui.reader.ai.adapter.ChatSummaryAdapter;
 
 /**
@@ -118,7 +119,7 @@ public final class ChatSummaryListDialog {
                     new Callable<List<ChatSummaryBean>>() {
                         @Override
                         public List<ChatSummaryBean> call() {
-                            return DbService.getInstance()
+                            return LocalServices.getInstance()
                                     .mChatSummaryBeanService.findBySessionId(sessionId);
                         }
                     },
@@ -164,7 +165,7 @@ public final class ChatSummaryListDialog {
                 public void run() {
                     try {
                         removing.setIsDelete(ChatSummaryBean.IS_Delete_YES);
-                        DbService.getInstance().mChatSummaryBeanService.updateEntity(removing);
+                        LocalServices.getInstance().mChatSummaryBeanService.updateEntity(removing);
                     } catch (Throwable t) {
                         EasyLog.print(t);
                     }

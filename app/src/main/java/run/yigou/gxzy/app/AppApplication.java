@@ -39,6 +39,7 @@ import run.yigou.gxzy.config.AppStyleConfigProvider;
 import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.service.UserInfoService;
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.data.local.helper.MigrationOrchestrator;
 import run.yigou.gxzy.data.local.helper.StartupIoExemption;
 import com.bumptech.glide.Glide;
@@ -273,7 +274,7 @@ public final class AppApplication extends Application {
         initDatabaseOnStartup();
 
         // 初始化用户信息服务
-        mUserInfoService = DbService.getInstance().mUserInfoService;
+        mUserInfoService = LocalServices.getInstance().mUserInfoService;
 
         // 加载用户设置（读缓存文件，改到后台：原来在主线程同步读写，票 `.scratch/greendao-hardening/issues/11-home-load-chain-main-thread-io.md` A 项）
         loadFragmentSettingAsync();

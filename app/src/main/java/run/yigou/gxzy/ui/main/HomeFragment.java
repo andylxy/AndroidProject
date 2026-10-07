@@ -53,6 +53,7 @@ import run.yigou.gxzy.data.local.entity.SearchHistory;
 import run.yigou.gxzy.data.local.entity.TabNav;
 import run.yigou.gxzy.data.local.service.SearchHistoryService;
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.reader.search.SearchHistoryAdapter;
 import run.yigou.gxzy.ui.reader.fragment.TipsWindowNetFragment;
@@ -223,7 +224,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         loadStyleConfig();
         
         // 2. 初始化搜索历史服务
-        mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
+        mSearchHistoryService = LocalServices.getInstance().mSearchHistoryService;
         
         // 3. 检查数据加载状态
         if (mAppDataManager.isAllDataLoaded()) {

@@ -1,4 +1,5 @@
 package run.yigou.gxzy.data.local.helper;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,7 +92,7 @@ public final class DataRepository {
                 entities.add(zhongYaoAlia);
             }
 
-            DbService.getInstance().mYaoAliasService.replaceAllInTx(entities);
+            LocalServices.getInstance().mYaoAliasService.replaceAllInTx(entities);
             EasyLog.print(TAG, "保存 " + entities.size() + "/" + yaoAliaList.size() + " 条药材别名");
         } catch (Exception e) {
             EasyLog.print(TAG, "保存药材别名失败（已回滚，保留旧数据）: " + e.getMessage());
@@ -112,7 +113,7 @@ public final class DataRepository {
         }
 
         try {
-            DbService.getInstance().mAboutService.deleteAll();
+            LocalServices.getInstance().mAboutService.deleteAll();
 
             int successCount = 0;
             for (About about : aboutList) {
@@ -121,7 +122,7 @@ public final class DataRepository {
                 }
 
                 try {
-                    DbService.getInstance().mAboutService.addEntity(about);
+                    LocalServices.getInstance().mAboutService.addEntity(about);
                     successCount++;
                 } catch (Exception e) {
                     EasyLog.print(TAG, "保存关于信息失败: " + e.getMessage());
@@ -224,9 +225,9 @@ public final class DataRepository {
             // 这正是下面 processTabNav / processTabNavBody 不再用 executeDatabaseOperation 的原因。
             DbService db = DbService.getInstance();
             db.runInTransaction(() -> {
-                // 1. 清空旧数据
-                db.mTabNavService.deleteAll();
-                db.mTabNavBodyService.deleteAll();
+                // 1. 清空旧数据（service 定位已拆到 LocalServices，见 ADR-0001 Q1=C）
+                LocalServices.getInstance().mTabNavService.deleteAll();
+                LocalServices.getInstance().mTabNavBodyService.deleteAll();
                 EasyLog.print(TAG, "✅ 已清空导航数据表");
 
                 // 2. 保存新数据（复用 saveTabNvaInDb 逻辑）
@@ -271,7 +272,7 @@ public final class DataRepository {
         try {
             // 直接调用 service，不经 ConvertEntity.executeDatabaseOperation：
             // 那个包装会吞掉异常，导致 clearAndSaveNavTabs 的事务照常提交、留下删了一半的表。
-            ArrayList<TabNav> existingNavList = DbService.getInstance().mTabNavService.find(
+            ArrayList<TabNav> existingNavList = LocalServices.getInstance().mTabNavService.find(
                 TabNavDao.Properties.CaseId.eq(nav.getCaseId()));
 
             if (existingNavList != null && !existingNavList.isEmpty()) {
@@ -284,7 +285,7 @@ public final class DataRepository {
             nav.setTabNavId(tabNavId);
             nav.setOrder(order);
 
-            DbService.getInstance().mTabNavService.addEntity(nav);
+            LocalServices.getInstance().mTabNavService.addEntity(nav);
 
             EasyLog.print(TAG, "已保存导航: " + nav.getCaseId());
             return tabNavId;
@@ -302,7 +303,7 @@ public final class DataRepository {
     private static boolean processTabNavBody(TabNavBody item, String tabNavId, LifecycleOwner lifecycleOwner) {
         try {
             // 同 processTabNav：直接调用 service，避免异常被吞掉后事务照常提交
-            ArrayList<TabNavBody> existingBodyList = DbService.getInstance().mTabNavBodyService.find(
+            ArrayList<TabNavBody> existingBodyList = LocalServices.getInstance().mTabNavBodyService.find(
                 TabNavBodyDao.Properties.BookNo.eq(item.getBookNo()));
 
             boolean needsUpdate = shouldUpdateTabNavBody(existingBodyList, item.getChapterCount());
@@ -316,7 +317,7 @@ public final class DataRepository {
             item.setTabNavId(tabNavId);
             item.setTabNavBodyId(StringHelper.getUuid());
 
-            DbService.getInstance().mTabNavBodyService.addEntity(item);
+            LocalServices.getInstance().mTabNavBodyService.addEntity(item);
 
             EasyLog.print(TAG, "已保存导航子项，触发章节下载: " + item.getBookNo());
             // 异步下载章节列表（原 NetworkDataFetcher 逻辑已合并）。
@@ -367,7 +368,7 @@ public final class DataRepository {
                 entities.add(beiMingCi);
             }
 
-            DbService.getInstance().mBeiMingCiService.replaceAllInTx(entities);
+            LocalServices.getInstance().mBeiMingCiService.replaceAllInTx(entities);
             EasyLog.print(TAG, "保存 " + entities.size() + "/" + detailList.size() + " 条名词数据");
         } catch (Exception e) {
             EasyLog.print(TAG, "保存名词数据失败（已回滚，保留旧数据）: " + e.getMessage());
@@ -410,7 +411,7 @@ public final class DataRepository {
         }
 
         try {
-            DbService.getInstance().mYaoService.replaceAllInTx(entities);
+            LocalServices.getInstance().mYaoService.replaceAllInTx(entities);
             EasyLog.print(TAG, "保存 " + entities.size() + "/" + detailList.size() + " 条药材数据");
         } catch (Exception e) {
             // 事务已回滚，旧数据仍在；此处只记录，不重试——重试策略由调用方决定
@@ -434,14 +435,14 @@ public final class DataRepository {
 
         ConvertEntity.executeDatabaseOperation(() -> {
             // 清除旧数据
-            ArrayList<YaoFang> yaoFangList = DbService.getInstance().mYaoFangService.find(
+            ArrayList<YaoFang> yaoFangList = LocalServices.getInstance().mYaoFangService.find(
                 YaoFangDao.Properties.BookId.eq(bookId));
             if (yaoFangList != null && !yaoFangList.isEmpty()) {
                 for (YaoFang fang : yaoFangList) {
                     if (fang != null) {
-                        DbService.getInstance().mYaoFangBodyService.deleteAll(
+                        LocalServices.getInstance().mYaoFangBodyService.deleteAll(
                             YaoFangBodyDao.Properties.YaoFangID.eq(fang.getYaoFangID()));
-                        DbService.getInstance().mYaoFangService.deleteEntity(fang);
+                        LocalServices.getInstance().mYaoFangService.deleteEntity(fang);
                     }
                 }
                 EasyLog.print(TAG, "已删除书籍" + bookId + "旧方剂数据");
@@ -457,7 +458,7 @@ public final class DataRepository {
                 String yaoFangId = StringHelper.getUuid();
                 YaoFang yaoFang = ConvertEntity.convertFangToYaoFang(fang, bookId, yaoFangId);
                 if (yaoFang != null) {
-                    DbService.getInstance().mYaoFangService.addEntity(yaoFang);
+                    LocalServices.getInstance().mYaoFangService.addEntity(yaoFang);
                     successCount++;
 
                     // 保存药味明细
@@ -487,7 +488,7 @@ public final class DataRepository {
 
             YaoFangBody yaoFangBody = ConvertEntity.convertYaoUseToYaoFangBody(content, yaoFangId);
             if (yaoFangBody != null) {
-                DbService.getInstance().mYaoFangBodyService.addEntity(yaoFangBody);
+                LocalServices.getInstance().mYaoFangBodyService.addEntity(yaoFangBody);
                 successCount++;
             }
         }
@@ -513,8 +514,8 @@ public final class DataRepository {
 
         return ConvertEntity.executeDatabaseOperation(() -> {
             // 清除旧数据
-            DbService.getInstance().mAiConfigService.deleteAll();
-            DbService.getInstance().mAiConfigBodyService.deleteAll();
+            LocalServices.getInstance().mAiConfigService.deleteAll();
+            LocalServices.getInstance().mAiConfigBodyService.deleteAll();
 
             int configCount = 0;
             int bodyCount = 0;
@@ -532,7 +533,7 @@ public final class DataRepository {
                     aiConfig.setApiKey(ConvertEntity.encryptIfNotEmpty(aiConfig.getApiKey()));
                 }
 
-                DbService.getInstance().mAiConfigService.addEntity(aiConfig);
+                LocalServices.getInstance().mAiConfigService.addEntity(aiConfig);
                 configCount++;
 
                 // 保存模型列表
@@ -544,7 +545,7 @@ public final class DataRepository {
 
                         aiConfigBody.setAiConfigBodyId(StringHelper.getUuid());
                         aiConfigBody.setAiConfigId(aiConfigId);
-                        DbService.getInstance().mAiConfigBodyService.addEntity(aiConfigBody);
+                        LocalServices.getInstance().mAiConfigBodyService.addEntity(aiConfigBody);
                         bodyCount++;
                     }
                 }
@@ -612,16 +613,16 @@ public final class DataRepository {
         return ConvertEntity.executeDatabaseOperation(() -> {
             // 清除旧数据
             ArrayList<BookChapter> existingChapters = ConvertEntity.executeDatabaseOperation(() ->
-                DbService.getInstance().mBookChapterService.find(deleteCondition),
+                LocalServices.getInstance().mBookChapterService.find(deleteCondition),
                 "查询旧章节" + (signatureId != null ? signatureId : bookId)
             );
 
             if (existingChapters != null && !existingChapters.isEmpty()) {
                 for (BookChapter existingChapter : existingChapters) {
                     if (existingChapter != null) {
-                        DbService.getInstance().mBookChapterBodyService
+                        LocalServices.getInstance().mBookChapterBodyService
                                 .deleteAll(BookChapterBodyDao.Properties.BookChapterId.eq(existingChapter.getBookChapterId()));
-                        DbService.getInstance().mBookChapterService.deleteEntity(existingChapter);
+                        LocalServices.getInstance().mBookChapterService.deleteEntity(existingChapter);
                     }
                 }
                 EasyLog.print(TAG, "已删除 " + existingChapters.size() + " 条旧章节数据");
@@ -644,7 +645,7 @@ public final class DataRepository {
                 }
 
                 ConvertEntity.executeDatabaseOperation(() -> {
-                    DbService.getInstance().mBookChapterService.addEntity(bookChapter);
+                    LocalServices.getInstance().mBookChapterService.addEntity(bookChapter);
                     return true;
                 }, "保存章节" + bookChapter.getSignatureId());
 
@@ -660,7 +661,7 @@ public final class DataRepository {
                         BookChapterBody bookChapterBody = ConvertEntity.createBookChapterBody(chapterId, content);
                         if (bookChapterBody != null) {
                             ConvertEntity.executeDatabaseOperation(() -> {
-                                DbService.getInstance().mBookChapterBodyService.addEntity(bookChapterBody);
+                                LocalServices.getInstance().mBookChapterBodyService.addEntity(bookChapterBody);
                                 return true;
                             }, "保存章节内容" + content.getID());
 
@@ -703,7 +704,7 @@ public final class DataRepository {
      */
     public static List<ZhongYaoAlia> getYaoAlia() {
         return ConvertEntity.executeDatabaseOperation(
-            () -> DbService.getInstance().mYaoAliasService.findAll(),
+            () -> LocalServices.getInstance().mYaoAliasService.findAll(),
             "获取药材别名"
         );
     }
@@ -713,7 +714,7 @@ public final class DataRepository {
      */
     public static List<About> getAbout() {
         return ConvertEntity.executeDatabaseOperation(
-            () -> DbService.getInstance().mAboutService.findAll(),
+            () -> LocalServices.getInstance().mAboutService.findAll(),
             "获取关于信息"
         );
     }
@@ -731,7 +732,7 @@ public final class DataRepository {
         }
 
         ArrayList<BookChapter> bookChapterList = ConvertEntity.executeDatabaseOperation(() ->
-            DbService.getInstance().mBookChapterService.find(
+            LocalServices.getInstance().mBookChapterService.find(
                 BookChapterDao.Properties.SignatureId.eq(chapter.getSignatureId())),
             "查询章节" + chapter.getSignatureId() + "的内容"
         );
@@ -784,7 +785,7 @@ public final class DataRepository {
         }
 
         ArrayList<BookChapter> bookChapterList = ConvertEntity.executeDatabaseOperation(() ->
-            DbService.getInstance().mBookChapterService.find(BookChapterDao.Properties.BookId.eq(bookId)),
+            LocalServices.getInstance().mBookChapterService.find(BookChapterDao.Properties.BookId.eq(bookId)),
             "查询书籍" + bookId + "的章节"
         );
 
@@ -841,7 +842,7 @@ public final class DataRepository {
         }
 
         ArrayList<YaoFang> fangList = ConvertEntity.executeDatabaseOperation(
-            () -> DbService.getInstance().mYaoFangService.find(YaoFangDao.Properties.BookId.eq(bookId)),
+            () -> LocalServices.getInstance().mYaoFangService.find(YaoFangDao.Properties.BookId.eq(bookId)),
             "查询书籍" + bookId + "的方剂"
         );
 
@@ -875,7 +876,7 @@ public final class DataRepository {
      */
     public static ArrayList<Yao> getYaoData() {
         ArrayList<ZhongYao> yaoList = ConvertEntity.executeDatabaseOperation(
-            () -> DbService.getInstance().mYaoService.findAll(),
+            () -> LocalServices.getInstance().mYaoService.findAll(),
             "获取药材数据"
         );
 
@@ -909,7 +910,7 @@ public final class DataRepository {
      */
     public static ArrayList<MingCiContent> getMingCi() {
         ArrayList<BeiMingCi> beiMingCiList = ConvertEntity.executeDatabaseOperation(
-            () -> DbService.getInstance().mBeiMingCiService.findAll(),
+            () -> LocalServices.getInstance().mBeiMingCiService.findAll(),
             "获取名词数据"
         );
 
@@ -987,7 +988,7 @@ public final class DataRepository {
         try {
             // 查询已有章节
             ArrayList<Chapter> existingChapters = ConvertEntity.executeDatabaseOperation(
-                () -> DbService.getInstance().mChapterService.find(
+                () -> LocalServices.getInstance().mChapterService.find(
                     ChapterDao.Properties.BookId.eq(item.getBookNo())),
                 "查询书籍" + item.getBookNo() + "的章节"
             );
@@ -1035,7 +1036,7 @@ public final class DataRepository {
             }
         }
 
-        DbService.getInstance().mChapterService.replaceWhereInTx(
+        LocalServices.getInstance().mChapterService.replaceWhereInTx(
             entities, ChapterDao.Properties.BookId.eq(bookId));
 
         return entities.size();
@@ -1048,7 +1049,7 @@ public final class DataRepository {
      */
     public static List<TabNav> getNavigationData() {
         return ConvertEntity.executeDatabaseOperation(
-            () -> DbService.getInstance().mTabNavService.findAll(),
+            () -> LocalServices.getInstance().mTabNavService.findAll(),
             "获取导航数据"
         );
     }

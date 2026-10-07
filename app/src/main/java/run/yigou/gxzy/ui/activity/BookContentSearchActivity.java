@@ -38,6 +38,7 @@ import run.yigou.gxzy.data.local.service.SearchHistoryService;
 import run.yigou.gxzy.data.local.service.TabNavBodyService;
 import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.ui.reader.search.SearchBookAdapter;
 import run.yigou.gxzy.ui.reader.search.SearchHistoryAdapter;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
@@ -214,8 +215,8 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      * 设置服务
      */
     private void setupServices() {
-        mTabNavBodyService = DbService.getInstance().mTabNavBodyService;
-        mSearchHistoryService = DbService.getInstance().mSearchHistoryService;
+        mTabNavBodyService = LocalServices.getInstance().mTabNavBodyService;
+        mSearchHistoryService = LocalServices.getInstance().mSearchHistoryService;
         mBookRepository = new BookRepository();
     }
 

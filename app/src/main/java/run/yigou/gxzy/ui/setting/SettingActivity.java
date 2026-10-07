@@ -11,6 +11,7 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.manager.CacheDataManager;
@@ -156,7 +157,7 @@ public final class SettingActivity extends AppActivity
                     public void run() {
                         try {
                             if (token != null) {
-                                DbService.getInstance().mUserInfoService.deleteEntity(token);
+                                LocalServices.getInstance().mUserInfoService.deleteEntity(token);
                             }
                         } catch (Throwable t) {
                             EasyLog.print(t);

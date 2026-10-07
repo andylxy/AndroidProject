@@ -21,7 +21,7 @@ import run.yigou.gxzy.data.local.entity.TabNav;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.entity.ZhongYaoAlia;
 import run.yigou.gxzy.data.local.helper.DataRepository;
-import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.data.model.MingCiContent;
 import run.yigou.gxzy.data.model.Yao;
 import run.yigou.gxzy.data.model.Fang;
@@ -95,7 +95,7 @@ public class AppDataInitializer {
      */
     public static boolean hasLocalData() {
         try {
-            DbService dbService = DbService.getInstance();
+            LocalServices dbService = LocalServices.getInstance();
             if (dbService == null || dbService.mTabNavService == null) {
                 return false;
             }
@@ -123,7 +123,7 @@ public class AppDataInitializer {
     private static void loadFromLocalDatabase() {
         try {
             // 数据源校验
-            DbService dbService = DbService.getInstance();
+            LocalServices dbService = LocalServices.getInstance();
             if (dbService == null) {
                 EasyLog.print(TAG, "❌ DbService 未初始化，中止加载");
                 return;
@@ -286,7 +286,7 @@ public class AppDataInitializer {
     /**
      * 加载导航数据
      */
-    private static void loadNavigationData(DbService dbService, GlobalDataHolder globalData) {
+    private static void loadNavigationData(LocalServices dbService, GlobalDataHolder globalData) {
         ArrayList<TabNav> navList = dbService.mTabNavService.findAll();
         if (navList == null || navList.isEmpty()) {
             return;

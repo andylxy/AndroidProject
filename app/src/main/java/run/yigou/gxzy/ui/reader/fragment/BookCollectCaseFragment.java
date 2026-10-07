@@ -15,6 +15,7 @@ import run.yigou.gxzy.data.local.entity.Book;
 import run.yigou.gxzy.data.local.gen.BookDao;
 import run.yigou.gxzy.data.local.service.BookService;
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.manager.Callback;
@@ -113,7 +114,7 @@ public final class BookCollectCaseFragment extends TitleBarFragment<HomeActivity
     @Override
     protected void initData() {
         setTitle("书架");
-        mBookService = DbService.getInstance().mBookService;
+        mBookService = LocalServices.getInstance().mBookService;
         loadData();
     }
 

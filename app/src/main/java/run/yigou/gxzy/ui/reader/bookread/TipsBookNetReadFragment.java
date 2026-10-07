@@ -27,6 +27,7 @@ import com.donkingliang.groupedadapter.holder.BaseViewHolder;
 import com.hjq.base.BaseDialog;
 
 import run.yigou.gxzy.data.local.helper.DbService;
+import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.manager.Callback;
 import com.hjq.widget.layout.WrapRecyclerView;
@@ -545,7 +546,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                     new Callable<ArrayList<Chapter>>() {
                         @Override
                         public ArrayList<Chapter> call() {
-                            return DbService.getInstance().mChapterService.find(
+                            return LocalServices.getInstance().mChapterService.find(
                                     ChapterDao.Properties.BookId.eq(target.getBookNo()));
                         }
                     },
