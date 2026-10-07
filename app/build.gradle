@@ -149,6 +149,16 @@ android {
             outputFileName += '.apk'
         }
     }
+
+    // 让 Robolectric 单测处理并加载 app 的合并资源（而非「legacy resources 模式」）。
+    // 不开启时，Robolectric Gradle 插件会强制 legacyResources=true，而该模式在 SDK > 28(P) 上不支持
+    // → 测试被整体 skip（"doesn't support legacy resources mode after P"）。
+    // 开启后事务语义测试（票 12 的 A2）才能在 JVM 上真正跑起来。
+    testOptions {
+        unitTests {
+            includeAndroidResources true
+        }
+    }
 }
 
 // Define versions
@@ -160,6 +170,10 @@ dependencies {
     // 纯 JVM 单元测试（不依赖 Android 运行时）：版本门的 426 / 401+设备吊销判定等
     // 纯逻辑在此覆盖，不必每次都靠真机 logcat 验证。
     testImplementation 'junit:junit:4.13.1'
+
+    // Robolectric：在 JVM 单测里提供真实可用的 SQLite（绕开会抛 Stub! 的 mockable android.jar），
+    // 用于覆盖「事务原子性 / 回滚」这类无法在真机脚本里注入异常的场景（票 12 的 A2）。
+    testImplementation 'org.robolectric:robolectric:4.10.3'
 
     // MultiDex 支持（解决方法数超过 64K 限制）
     implementation 'androidx.multidex:multidex:2.0.1'
