@@ -31,7 +31,6 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.base.args.FragmentSetting;
 import run.yigou.gxzy.data.local.entity.SearchHistory;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.service.SearchHistoryService;
@@ -64,7 +63,6 @@ import run.yigou.gxzy.utils.ThreadUtil;
  * 1. 实时搜索：支持500ms防抖的实时搜索
  * 2. 历史记录：保存和显示搜索历史
  * 3. 结果展示：支持书籍列表和详细内容两种展示方式
- * 4. 智能过滤：针对伤寒论等特殊书籍提供过滤功能
  * 
  * 搜索流程：
  * 1. 用户输入搜索关键词
@@ -82,25 +80,6 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      */
     private static final long SEARCH_DEBOUNCE_DELAY_MS = 500L;
     
-    /**
-     * 伤寒论书籍ID
-     */
-    private static final String SHANGHAN_BOOK_ID = AppConst.ShangHanNo;
-    
-    /**
-     * 伤寒论金匮要略开始索引（从0开始，第9章）
-     */
-    private static final int SHANGHAN_JINKUI_START_INDEX = 8;
-    
-    /**
-     * 伤寒论金匮要略结束索引（第18章）
-     */
-    private static final int SHANGHAN_JINKUI_END_INDEX = 18;
-    
-    /**
-     * 伤寒论主体部分结束索引（第26章）
-     */
-    private static final int SHANGHAN_MAIN_END_INDEX = 26;
     /**
      * 搜索输入框
      */
@@ -225,8 +204,6 @@ public final class BookContentSearchActivity extends AppActivity implements Base
      */
     private void setupInitialData() {
         initHistoryList();
-        // 从全局 Application 获取伤寒论过滤设置
-        fragmentSetting = AppApplication.getApplication().fragmentSetting;
         // 默认初始化 TipsNetHelper 上下文，防止空指针（使用伤寒论作为默认值）
         TipsNetHelper.setBookContext(mBookRepository, AppConst.ShangHanNo);
     }
@@ -598,11 +575,6 @@ public final class BookContentSearchActivity extends AppActivity implements Base
 
 
     /**
-     * 片段设置
-     */
-    private FragmentSetting fragmentSetting;
-
-    /**
      * 初始化搜索列表
      */
     private void initSearchList() {
@@ -749,11 +721,6 @@ public final class BookContentSearchActivity extends AppActivity implements Base
             return null;
         }
         
-        // 伤寒论特殊过滤逻辑
-        if (SHANGHAN_BOOK_ID.equals(bookId)) {
-             contentList = filterShangHanData(contentList);
-        }
-        
         // 执行搜索
         SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(keyword));
         ArrayList<HH2SectionData> searchResults = TipsNetHelper.getSearchHh2SectionData(
@@ -805,48 +772,6 @@ public final class BookContentSearchActivity extends AppActivity implements Base
         });
     }
     
-    /**
-     * 伤寒论特殊过滤逻辑
-     * 根据设置过滤伤寒论的不同部分
-     */
-    private ArrayList<HH2SectionData> filterShangHanData(List<HH2SectionData> contentList) {
-        if (contentList == null || contentList.isEmpty()) {
-            return new ArrayList<>();
-        }
-        // fragmentSetting 为空时返回全部内容（与 SearchCoordinator 保持一致）
-        if (fragmentSetting == null) {
-            return new ArrayList<>(contentList);
-        }
-
-        int size = contentList.size();
-        int start = 0;
-        int end = size;
-
-        // 根据设置确定过滤范围
-        if (!fragmentSetting.isSong_JinKui()) {
-            if (!fragmentSetting.isSong_ShangHan()) {
-                // 只显示金匮要略部分（第9-18章）
-                start = SHANGHAN_JINKUI_START_INDEX;
-                end = Math.min(SHANGHAN_JINKUI_END_INDEX, size);
-            } else {
-                // 只显示伤寒论部分（第1-26章）
-                end = Math.min(SHANGHAN_MAIN_END_INDEX, size);
-            }
-        } else {
-            if (!fragmentSetting.isSong_ShangHan()) {
-                // 从金匮要略开始显示
-                start = SHANGHAN_JINKUI_START_INDEX;
-            }
-            // 否则显示全部内容
-        }
-
-        if (start < size) {
-            return new ArrayList<>(contentList.subList(start, end));
-        } else {
-            return new ArrayList<>(contentList);
-        }
-    }
-
     @Override
     public void onBackPressed() {
         try {

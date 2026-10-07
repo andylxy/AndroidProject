@@ -35,12 +35,10 @@ public class SearchCoordinator {
      * 两者都带 {@code signatureId} 且逐章对应，故以它为跨表键反查位置。
      *
      * <p><b>为什么基准必须是「显示列表」而不是「全量章节列表」</b>：{@code chapterIndex}
-     * 的用途是滚动 / 展开 / 重新下载，这些动作都作用在适配器当前的列表上。而宋版伤寒在设置
-     * 未全开时，{@code getChapterContentList()} 会经 {@code filterShanghanContent} 返回
-     * {@code subList(start, end)} —— 显示列表只是全量章节的一个截断片段。若此处按全量
-     * 章节列表反查，得到的下标会偏移 {@code start}，滚动到短列表时越界被静默忽略，
-     * 跳转无声失效。以显示列表为基准，两种状态的 {@code chapterIndex} 才是同一坐标系。
-     * 被过滤掉的章节反查不到，会得到 {@link GroupData#NO_CHAPTER_INDEX}，由 UI 层拦截。
+     * 的用途是滚动 / 展开 / 重新下载，这些动作都作用在适配器当前的列表上。显示列表即
+     * {@code getChapterContentList()} 的返回值，现在恒等于该书全量章节（宋版伤寒截取已移除），
+     * 故显示列表与全量章节是同一坐标系。以显示列表为基准，{@code chapterIndex} 才正确。
+     * 查不到的章节反查会得到 {@link GroupData#NO_CHAPTER_INDEX}，由 UI 层拦截。
      */
     private final List<run.yigou.gxzy.data.model.HH2SectionData> displayedSections;
 
@@ -90,18 +88,13 @@ public class SearchCoordinator {
         
         EasyLog.print("开始搜索，总章节数: " + allContent.size());
         
-        // 2. 针对伤寒论进行特殊过滤
-        if (run.yigou.gxzy.base.constant.AppConst.ShangHanNo.equals(bookId)) {
-            allContent = filterShangHanData(allContent);
-        }
-        
-        // 3. 获取别名字典
+        // 2. 获取别名字典
         run.yigou.gxzy.base.GlobalDataHolder globalData = 
             run.yigou.gxzy.base.GlobalDataHolder.getInstance();
         java.util.Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
         java.util.Map<String, String> fangAliasDict = globalData.getFangAliasDict();
         
-        // 4. 调用 TipsNetHelper 进行过滤和高亮
+        // 3. 调用 TipsNetHelper 进行过滤和高亮
         run.yigou.gxzy.ui.reader.entity.SearchKeyEntity searchKeyEntity = 
             new run.yigou.gxzy.ui.reader.entity.SearchKeyEntity(new StringBuilder(trimmedKeyword));
         
@@ -113,7 +106,7 @@ public class SearchCoordinator {
                 fangAliasDict
             );
         
-        // 5. 转换为 GroupData/ItemData 格式
+        // 4. 转换为 GroupData/ItemData 格式
         int unboundCount = 0;
         for (run.yigou.gxzy.data.model.HH2SectionData section : filteredData) {
             GroupData groupData = new GroupData();
@@ -152,7 +145,7 @@ public class SearchCoordinator {
     /**
      * 按 signatureId 在「显示列表」中反查下标（T6）。
      *
-     * <p>基准是显示列表而非全量章节列表——两者长度可能不同（宋版伤寒过滤），
+     * <p>基准是显示列表而非全量章节列表——两表填充顺序不保证一致（见类注释 T6），
      * 只有与适配器当前列表同坐标系，后续滚动 / 展开才不会越界。
      *
      * @param signatureId 章节签名 id
@@ -169,45 +162,6 @@ public class SearchCoordinator {
             }
         }
         return GroupData.NO_CHAPTER_INDEX;
-    }
-    
-    /**
-     * 伤寒论特殊过滤逻辑
-     */
-    private java.util.List<run.yigou.gxzy.data.model.HH2SectionData> filterShangHanData(
-            java.util.List<run.yigou.gxzy.data.model.HH2SectionData> contentList) {
-        if (contentList == null || contentList.isEmpty()) {
-            return new ArrayList<>();
-        }
-        
-        run.yigou.gxzy.base.args.FragmentSetting fragmentSetting = 
-            run.yigou.gxzy.app.AppApplication.getApplication().fragmentSetting;
-        if (fragmentSetting == null) {
-            return contentList;
-        }
-
-        int size = contentList.size();
-        int start = 0;
-        int end = size;
-
-        if (!fragmentSetting.isSong_JinKui()) {
-            if (!fragmentSetting.isSong_ShangHan()) {
-                start = 8;
-                end = Math.min(18, size);
-            } else {
-                end = Math.min(26, size);
-            }
-        } else {
-            if (!fragmentSetting.isSong_ShangHan()) {
-                start = 8;
-            }
-        }
-
-        if (start < size) {
-            return new ArrayList<>(contentList.subList(start, end));
-        } else {
-            return new ArrayList<>(contentList);
-        }
     }
     
     /**

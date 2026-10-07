@@ -19,7 +19,6 @@ import android.content.ComponentCallbacks2;
 import run.yigou.gxzy.ui.reader.helper.TipsNetHelper;
 import run.yigou.gxzy.ui.reader.data.DataConverter; // Kept existing
 
-import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.data.local.entity.Book;
 import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
@@ -65,7 +64,6 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     private BookData currentBookData;  // 新数据模型
     private ChapterIndexBuilder indexBuilder;  // 搜索索引
     private java.util.Set<String> loadedBookFangs = new java.util.HashSet<>();  // 已加载药方的书籍集合
-    private boolean isShanghanBook = false;  // 是否为宋版伤寒书籍
 
     /** D8：搜索在途序号，只认最后一次搜索结果，避免过期结果覆盖新结果 */
     private int searchSeq = 0;
@@ -293,11 +291,6 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         indexBuilder = new ChapterIndexBuilder();
         indexBuilder.buildIndex(allChapters);
         EasyLog.print("TipsBookReadPresenter", "搜索索引构建完成");
-
-        // 兼容处理宋版伤寒
-        if (AppConst.ShangHanNo.equals(bookId)) {
-            setupShanghanContentListener();
-        }
 
         // 加载药方数据
         loadBookFang(book);
@@ -582,9 +575,8 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             public void run() {
                 try {
                     android.util.Pair<List<GroupData>, List<List<ItemData>>> result =
-                            // T6：传入「显示列表」而非 allChapters —— 两者长度可能不同
-                            // （宋版伤寒过滤后是 subList），只有与适配器当前列表同坐标系，
-                            // 后续滚动 / 展开才不会越界。见 SearchCoordinator 的类注释。
+                            // T6：传入「显示列表」而非 allChapters —— 两表填充顺序不保证一致（见 SearchCoordinator 类注释），
+                            // 只有与适配器当前列表同坐标系，后续滚动 / 展开才不会越界。
                             new SearchCoordinator(bookId, getChapterContentList())
                                     .searchGlobal(trimmed);
 
@@ -846,17 +838,8 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     }
 
     /**
-     * 设置宋版伤寒内容监听器
-     */
-    private void setupShanghanContentListener() {
-        // 标记为宋版伤寒书籍
-        isShanghanBook = true;
-        EasyLog.print("TipsBookReadPresenter", "宋版伤寒内容监听器已设置");
-    }
-
-    /**
      * 获取当前章节内容列表（转换为 HH2SectionData）
-     * 用于 Fragment UI 展示，支持宋版伤寒过滤
+     * 用于 Fragment UI 展示
      */
     public List<HH2SectionData> getChapterContentList() {
         if (currentBookData == null || allChapters == null) {
@@ -865,51 +848,8 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         
         // 转换为 HH2SectionData
         ArrayList<HH2SectionData> contentList = convertChaptersToSectionData(allChapters);
-        
-        // 如果是宋版伤寒，应用内容过滤
-        if (isShanghanBook) {
-            contentList = filterShanghanContent(contentList);
-        }
-        
+
         return contentList;
-    }
-
-    /**
-     * 宋版伤寒内容过滤逻辑
-     */
-    private ArrayList<HH2SectionData> filterShanghanContent(ArrayList<HH2SectionData> contentList) {
-        if (contentList == null || contentList.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        int size = contentList.size();
-        int start = 0;
-        int end = size;
-
-        // 读取设置
-        run.yigou.gxzy.app.AppApplication app = run.yigou.gxzy.app.AppApplication.getApplication();
-        if (app == null || app.fragmentSetting == null) {
-            return contentList;
-        }
-
-        if (!app.fragmentSetting.isSong_JinKui()) {
-            if (!app.fragmentSetting.isSong_ShangHan()) {
-                start = 8;
-                end = Math.min(18, size);
-            } else {
-                end = Math.min(26, size);
-            }
-        } else {
-            if (!app.fragmentSetting.isSong_ShangHan()) {
-                start = 8;
-            }
-        }
-
-        if (start < size) {
-            return new ArrayList<>(contentList.subList(start, end));
-        } else {
-            return contentList;
-        }
     }
 
     /**

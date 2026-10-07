@@ -38,8 +38,6 @@ public class ManagerSetting {
      */
     private static FragmentSetting getFragmentDefaultSetting(){
         FragmentSetting setting = new FragmentSetting();
-        setting.setSong_JinKui(true);
-        setting.setSong_ShangHan(false);
         setting.setShuJie(false);
 //        setting.setReadWordSize(20);
 //        setting.setReadWordColor(R.color.sys_protect_eye_word);

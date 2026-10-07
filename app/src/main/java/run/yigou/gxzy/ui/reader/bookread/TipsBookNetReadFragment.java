@@ -193,7 +193,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
             // 获取指定书籍数据
             // ✅ 不再需要初始化 singletonNetData
-            // ✅ 宋版伤寒逻辑已移至 Presenter
             
             // Fragment 处理返回键动作,是否保存阅读
 
@@ -236,8 +235,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         }
     }
 
-    // ✅ 宋版伤寒监听器已移至 Presenter 内部处理
-    // ✅ 不再需要 Fragment 中的监听器
+    // 阅读设置（术解等）变更后由 XEventBus 通知本 Fragment 刷新列表
 
     @Subscribe(priority = 1)
     public void onEvent(TipsFragmentSettingEventNotification event) {
@@ -375,7 +373,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                 public void onJumpSpecifiedItem(int chapterIndex, int childPosition) {
                     // 入参是「显示列表下标」（T6：Handler 已把 groupPosition 换算成
                     // chapterIndex）。显示列表即 presenter.getChapterContentList()，
-                    // 它可能是全量章节的过滤片段（宋版伤寒），故这里不能按全量章节理解。
+                    // 现在恒等于该书全量章节（宋版伤寒截取已移除），坐标系一致，可直接按显示列表理解。
                     // 若当前在搜索态，列表是搜索结果，必须先退出搜索态恢复成显示列表，
                     // 否则 chapterIndex 会作用在错误的列表上。
                     // 清空输入框：列表要恢复成全量，若搜索框仍显示关键字，用户接着

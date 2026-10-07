@@ -13,7 +13,7 @@ public class GroupData {
 
     /**
      * 本章在「当前显示列表」中的下标（显示列表 = {@code presenter.getChapterContentList()}，
-     * 可能是全量章节的过滤片段，如宋版伤寒的 {@code subList}）。
+     * 现在恒等于该书全量章节——宋版伤寒截取已移除）。
      *
      * <p>T6：为什么需要它 —— 列表有两套数据源且顺序不保证一致：
      * 非搜索列表来自 {@code CHAPTER} 表、搜索结果来自 {@code BOOK_CHAPTER} 表，

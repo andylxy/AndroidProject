@@ -128,7 +128,7 @@ Adapter 内部同时持有 `groups`（旧 `ExpandableGroupEntity`）和 `groupDa
 - **已实施方案 A（`signatureId` 跨表映射）**：两表都带 `signatureId` 且逐章对应，故以它为跨表键反查真实下标，而非依赖位置。
   - 前提已用设备 sqlite 验证：同书两表章节数一致或差 0–1（差的是无内容章），`signatureId` 与 `section` 逐章对应；**全库按 `bookId + signatureId` 匹配 37/37 = 100%**。注意两表 `rowid` 不同，故 `rowid` 不可作键。
 - 绑定规则：非搜索态由 `setGroups` 按位置绑定；搜索态由 `SearchCoordinator.searchGlobal` 按签名反查，查不到填 `NO_CHAPTER_INDEX = -1` 并计入日志。
-- **两条路径的基准必须是同一个「显示列表」**：`chapterIndex` 的用途是滚动 / 展开 / 重新下载，都作用在适配器当前列表上。而宋版伤寒在设置未全开时 `getChapterContentList()` 会经 `filterShanghanContent` 返回 `subList(start, end)` —— 显示列表只是全量章节的截断片段。第五轮复审前搜索态按 `allChapters`（全量）反查，与非搜索态的显示坐标相差 `start`，滚动到短列表时越界被静默忽略、跳转无声失效。现改为两条路径都以显示列表为基准；被过滤掉的章节反查不到会得到 `NO_CHAPTER_INDEX`，由 UI 层拦截。
+- **两条路径的基准必须是同一个「显示列表」**：`chapterIndex` 的用途是滚动 / 展开 / 重新下载，都作用在适配器当前列表上。而 `getChapterContentList()` 现在恒等于该书全量章节（宋版伤寒截取已在 ADR-0002 中整体移除）—— 显示列表即全量章节本身。第五轮复审前搜索态按 `allChapters`（全量）反查，与非搜索态的显示坐标相差 `start`，滚动到短列表时越界被静默忽略、跳转无声失效（该错位根因正是「显示列表 ≠ 全量」）。现改为两条路径都以显示列表为基准；跨表未匹配上的章节反查不到会得到 `NO_CHAPTER_INDEX`，由 UI 层拦截。
 - UI 层一律以「`chapterIndex < 0`」为准，**未绑定即拦截动作，不得回退到用过滤后下标兜底** —— 后者正是本项要消除的错章路径。判定写在 `ReadModeLongClickHandler`（跳转与重新下载两个动作同一口径）；两个同名 `GroupData` 上曾各有一份 `hasChapterIndex()`，因全仓零调用方已在第五轮删除，勿再据旧文引用。
 - 至此 header 点击/长按（D1/D4.1 已 `return`）与子项长按（本项）两条路径都不再使用错位索引。
 - 详细实施记录与已知局限见 `tips-book-net-read-tickets.md` 的「T6 实施记录」。

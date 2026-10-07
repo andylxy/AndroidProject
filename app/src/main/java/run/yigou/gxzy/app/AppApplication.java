@@ -210,11 +210,10 @@ public final class AppApplication extends Application {
     /**
      * 后台读取"片段设置"缓存文件，读回来后在主线程赋值。
      *
-     * <p>为什么敢改成异步：{@code fragmentSetting} 的两个使用方
-     * （{@code BookContentSearchActivity} 与 {@code TipsBookReadPresenter}）都有
-     * {@code null} 分支兜底——读不到就按"返回全部内容"处理，所以短暂为 null 不会崩，
-     * 只是这一瞬间不过滤。而同步读会把文件 IO 留在主线程（严格模式实测为
+     * <p>为什么敢改成异步：同步读会把文件 IO 留在主线程（严格模式实测为
      * DiskReadViolation + DiskWriteViolation，票 `.scratch/greendao-hardening/issues/11-home-load-chain-main-thread-io.md` A 项）。
+     * 改为后台读、主线程赋值后，读取瞬间 {@code fragmentSetting} 可能为 null；
+     * 使用方需自行判空或确保在赋值完成后再读取（空值治理见后续独立票，不混入本次删除）。
      */
     private void loadFragmentSettingAsync() {
         ThreadUtil.runInBackground(new Runnable() {

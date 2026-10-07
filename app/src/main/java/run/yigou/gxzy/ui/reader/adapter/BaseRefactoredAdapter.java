@@ -129,7 +129,7 @@ public abstract class BaseRefactoredAdapter extends GroupedRecyclerViewAdapter {
      * 按列表位置绑定章节真实下标（T6）。
      *
      * <p>仅适用于<strong>非搜索态</strong>列表：此时 {@code groups} 就是显示列表本身
-     * （即 {@code presenter.getChapterContentList()}，可能是全量章节的过滤片段），
+     * （即 {@code presenter.getChapterContentList()}，现在恒等于该书全量章节——宋版伤寒截取已移除），
      * 下标即所需坐标，故直接按位置绑定。搜索态走
      * {@link RefactoredExpandableAdapter#setSearchData}，下标由 {@code signatureId} 反查，
      * 不适用本方法。

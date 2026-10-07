@@ -406,7 +406,7 @@ stale 注释、`AppDataManager` 登记、文档状态对齐、`search()` 异常�
 
 | # | 发现 | 轴 | 修复 |
 | --- | --- | --- | --- |
-| 1 | **过滤书让 `chapterIndex` 坐标系错位**。宋版伤寒在设置未全开时，`getChapterContentList()` 经 `filterShanghanContent` 返回 `subList(start, end)`（实测 `start=8, end=18`），显示列表是全量章节的截断片段；而非搜索态按显示位置绑定、搜索态按 `allChapters` 全量坐标绑定 → 两套坐标系。搜索态跳转用全量坐标滚到短列表会**越界被静默忽略**（`BaseRefactoredAdapter:225-227`），跳转无声失效 | Spec#2（最严重） | 两条路径统一以「显示列表」为基准：`SearchCoordinator` 改为接收 `getChapterContentList()` 的 `HH2SectionData` 列表（已核实 `DataConverter` 会设置 `signatureId`），按签名反查显示下标。被过滤掉的章节反查不到 → `NO_CHAPTER_INDEX` → UI 拦截 |
+| 1 | **过滤书让 `chapterIndex` 坐标系错位**（该截取功能已在 ADR-0002 中整体移除，以下为移除前的历史根因）。宋版伤寒在设置未全开时，`getChapterContentList()` 经 `filterShanghanContent` 返回 `subList(start, end)`（实测 `start=8, end=18`），显示列表是全量章节的截断片段；而非搜索态按显示位置绑定、搜索态按 `allChapters` 全量坐标绑定 → 两套坐标系。搜索态跳转用全量坐标滚到短列表会**越界被静默忽略**（`BaseRefactoredAdapter:225-227`），跳转无声失效 | Spec#2（最严重） | 两条路径统一以「显示列表」为基准：`SearchCoordinator` 改为接收 `getChapterContentList()` 的 `HH2SectionData` 列表（已核实 `DataConverter` 会设置 `signatureId`），按签名反查显示下标。被过滤掉的章节反查不到 → `NO_CHAPTER_INDEX` → UI 拦截 |
 | 2 | **6 处缩进塌坏**，而工单「验证」节还写着「全量新增行缩进合规」 | Standards#1 | 用 python 按内容断言写死绝对缩进；并把工单里那条虚假声明改为 ⚠️ 说明 |
 | 3 | `model/GroupData` 类注释称「提供不可变访问接口」，但新增的 `chapterIndex` 有 setter，三个 final 字段唯独它可变 | Standards#2 | 注释补充「唯一例外」及原因（绑定发生在构造链之外），并说明写入只发生在主线程 |
 | 4 | 三处 javadoc 形参失真：`onJumpRequested` / `onRedownloadChapterRequested` / `onJumpSpecifiedItem` 的 `@param groupPosition` 实为 `chapterIndex` | Standards#3 | 接口声明与实现处的形参名、javadoc 一同改为 `chapterIndex` |
