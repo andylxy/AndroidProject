@@ -11,7 +11,7 @@
 |---|---|---|
 | **DbService** | 数据库**执行协调器**（非领域 service）。持有串行执行器，提供 `runInBackgroundSerial` / `readInBackground` / `runInTransaction` 三个入口。 | ADR-0001 后只保留"执行器 + 事务"两职；不再充当服务定位器。 |
 | **LocalServices** | 服务**定位器**。单例，持有 19 个 `*Service` 引用，供"一个 import 拿全本地数据"的调用方使用。 | ADR-0001 Q1=C 的结论；替代原 `DbService` 的 19 字段。 |
-| **串行执行器** | `DbService.mSerialExecutor`：`Executors.newSingleThreadExecutor`，线程名 `mf-db-serial`，优先级 `NORM_PRIORITY-1`，无界队列。 | 所有写操作与跨表事务 funnel 到这条线程，保证不与彼此并发访问同一 SQLite 连接。 |
+| **串行执行器** | `DbService.mSerialExecutor`：`Executors.newSingleThreadExecutor`，线程名 `mf-db-serial`，优先级 `NORM_PRIORITY-1`，无界队列。 | 经 `DbService` 提交的写任务与跨表事务都 funnel 到这条线程。**注意**：`BaseService.replaceAllInTx` / `replaceWhereInTx` 自行`beginTransaction`，不经此线程（pre-existing 遗留，见 ADR-0001）。 |
 | **跨表事务** | `DbService.runInTransaction(Runnable)`：把跨多个 service（多张表）的"删+插"包进同一个 SQLite 事务，要么都提交、要么都回滚。 | 例：`clearAndSaveNavTabs` 同时改 `TabNav` 与 `TabNavBody`。 |
 | **主线程 DB 访问** | 在主线程直接 `findAll()` / `insert()` 等。 | 被禁止（见 greendao-hardening 票 04–07）；一律经 `runInBackgroundSerial` / `readInBackground`。 |
 | **无界队列** | 串行执行器用 `LinkedBlockingQueue`（无 capacity）。提交即受理，不会因池满抛 `RejectedExecutionException`。 | 调用方可依赖"任务一定会被执行"——例如当作完成回调的兜底通道。 |
@@ -45,4 +45,6 @@
 
 - `adr/0001-dbservice-design.md` — 本术语表对应的决策记录。
 - `greendao-guide.md` / `greendao-hardening-plan.md` — 主线程 DB 访问迁移与防火规范（票 04–07、13）。
-- 票 12 — 持久化测试覆盖（A2 已交付：事务语义 Robolectric 单测 4/4）。
+- 票 12 — 持久化测试覆盖（A2 已交付：`TransactionSemanticsTest` Robolectric 单测 11/11，
+  覆盖事务提交/回滚、异常逐层透传、Q3 提交路径与内联短路（重入不死锁）、Q4 写失败可见、
+  以及库未就绪时的判空）。

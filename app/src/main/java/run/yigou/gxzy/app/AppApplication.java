@@ -286,7 +286,7 @@ public final class AppApplication extends Application {
      * 进程启动时打开并处理数据库。
      *
      * <p>覆盖两段：① {@code MigrationOrchestrator} 内部的 {@code getWritableDatabase()}；
-     * ② {@code LocalServices} 单例首次构造——它会在构造器里逐个new 出 19 个 Service，
+     * ② {@code LocalServices} 单例首次构造——它会在构造器里逐个 new 出 19 个 Service，
      * 而 {@code BaseService} 的构造器又各自查一次 sqlite_master（{@code initTable}）。
      * 两者都是"后续任何数据操作都依赖它"的一次性前置动作，属于同一个窗口。
      *

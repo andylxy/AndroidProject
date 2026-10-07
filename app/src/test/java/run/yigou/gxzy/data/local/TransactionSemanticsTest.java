@@ -1,11 +1,13 @@
 package run.yigou.gxzy.data.local;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.database.StandardDatabase;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,6 +85,16 @@ public class TransactionSemanticsTest {
     private DbService mDbService;
     private SearchHistoryService mSearchHistoryService;
     private DaoSession mSession;
+    private java.util.concurrent.ExecutorService mSerialExecutor;
+
+    @After
+    public void tearDown() {
+        // newSingleThreadExecutor 的线程是非守护的，不关掉会一路挂到 JVM 退出（Robolectric 每个用例
+        // 都新建一个，11 个用例就是 11 个泄漏的串行线程）。用例里已用 timeout 兜住了死锁，这里只做清理。
+        if (mSerialExecutor != null) {
+            mSerialExecutor.shutdownNow();
+        }
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -106,15 +118,15 @@ public class TransactionSemanticsTest {
         //「当前线程 == mSerialThread.get()」。若用 Executors.newSingleThreadExecutor()（默认工厂）
         // 配空 AtomicReference，mSerialThread 恒为 null，重入短路分支永远不执行，Q3 就零覆盖。
         final AtomicReference<Thread> serialThread = new AtomicReference<>();
-        setField(DbService.class, mDbService, "mSerialExecutor",
-                Executors.newSingleThreadExecutor(new java.util.concurrent.ThreadFactory() {
-                    @Override
-                    public Thread newThread(Runnable r) {
-                        Thread thread = new Thread(r, "mf-db-serial");
-                        serialThread.set(thread);
-                        return thread;
-                    }
-                }));
+        mSerialExecutor = Executors.newSingleThreadExecutor(new java.util.concurrent.ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r, "mf-db-serial");
+                serialThread.set(thread);
+                return thread;
+            }
+        });
+        setField(DbService.class, mDbService, "mSerialExecutor", mSerialExecutor);
         setField(DbService.class, mDbService, "mSerialThread", serialThread);
         setField(GreenDaoManager.class, null, "daoMaster", daoMaster);
 
@@ -165,6 +177,36 @@ public class TransactionSemanticsTest {
             assertEquals("boom", e.getMessage());
         }
         // 第 2 条插入必须被回滚：仍只有第 1 行
+        assertEquals(1, countRows("txn_probe"));
+    }
+
+    /**
+     * Q3 的另一半门禁：调用线程<b>不是</b>串行线程时，必须走「提交执行器 + 阻塞等结果」那条路。
+     *
+     * <p>上一条用例只锁住了内联短路。若把 {@code runInTransaction} 的 else 分支删掉（永远内联），
+     * 那条用例仍然全过—— 提交与阻塞这一半就断了门禁。本条断言事务体确实跑在
+     * {@code mf-db-serial} 线程上，且调用线程与事务体线程不是同一个。
+     */
+    @Test(timeout = 5000)
+    public void runInTransaction_submitsToSerialThreadWhenCallerIsNotSerial() {
+        final Thread callerThread = Thread.currentThread();
+        final String callerThreadName = callerThread.getName();
+        final String[] bodyThreadName = new String[1];
+        final boolean[] sameThread = new boolean[1];
+
+        mDbService.runInTransaction(new Runnable() {
+            @Override
+            public void run() {
+                bodyThreadName[0] = Thread.currentThread().getName();
+                sameThread[0] = Thread.currentThread() == callerThread;
+                mDatabase.execSQL("INSERT INTO txn_probe (id, v) VALUES (1, 'submitted')");
+            }
+        });
+
+        assertEquals("事务体必须在串行线程上执行（callThread=" + callerThreadName + "）",
+                "mf-db-serial", bodyThreadName[0]);
+        assertFalse("事务体不应回退到调用线程执行", sameThread[0]);
+        assertEquals("调用线程应在阻塞等待后返回", callerThread, Thread.currentThread());
         assertEquals(1, countRows("txn_probe"));
     }
 
@@ -221,6 +263,100 @@ public class TransactionSemanticsTest {
         }
         // 外层与内层的插入都必须被回滚
         assertEquals(0, countRows("txn_probe"));
+    }
+
+    // ---- DbService.runInBackgroundSerial：写失败必须留下证据，且不拖垮串行线程 ----
+
+    /**
+     * Q4 门禁：任务抛出的异常必须被EasyLog 记录（写失败不静默），且<b>不</b>冒泡到执行器。
+     *
+     * <p>EasyLog.print(Throwable) 内部是 {@code t.printStackTrace()}，在 JVM 下打到 stderr，
+     * 故此处重定向 System.err 断言异常确实被记录 —— 这是「写失败可见」的可观测证据。
+     */
+    @Test(timeout = 5000)
+    public void runInBackgroundSerial_recordsFailureAndSwallowsIt() throws Exception {
+        final java.io.ByteArrayOutputStream captured =
+                new java.io.ByteArrayOutputStream();
+        final java.io.PrintStream originalErr = System.err;
+        final java.util.concurrent.CountDownLatch done = new java.util.concurrent.CountDownLatch(1);
+        try {
+            System.setErr(new java.io.PrintStream(captured, true));
+            mDbService.runInBackgroundSerial(new Runnable() {
+                @Override
+                public void run() {
+                    throw new IllegalStateException("write-boom");
+                }
+            });
+            // 任务已被接受，用一个后续任务确认串行线程还活着（异常没把线程打掉）
+            mDbService.runInBackgroundSerial(new Runnable() {
+                @Override
+                public void run() {
+                    done.countDown();
+                }
+            });
+            assertTrue("串行线程在一次失败之后必须继续执行后续任务",
+                    done.await(3, java.util.concurrent.TimeUnit.SECONDS));
+        } finally {
+            System.setErr(originalErr);
+        }
+        // 用平台默认字符集解码，避免 UnsupportedEncodingException 让本用例被迫声明 throws
+        String logged = new String(captured.toByteArray());
+        assertTrue("异常必须被记录到日志（实际捕获：" + logged + "）",
+                logged.contains("write-boom"));
+    }
+
+    /**
+     * Q4 门禁：{@code runInBackgroundSerial} 是 fire-and-forget —— 调用方拿不到任务异常，
+     * 但调用本身绝不能因任务失败而抛（否则提交动作本身就成了新的失败点）。
+     */
+    @Test(timeout = 5000)
+    public void runInBackgroundSerial_doesNotThrowToCallerWhenTaskFails() {
+        final java.io.PrintStream originalErr = System.err;
+        try {
+            System.setErr(new java.io.PrintStream(new java.io.ByteArrayOutputStream(), true));
+            // 能正常返回即通过；任务内异常由执行器内的包装吃掉
+            mDbService.runInBackgroundSerial(new Runnable() {
+                @Override
+                public void run() {
+                    throw new RuntimeException("silent-boom");
+                }
+            });
+        } finally {
+            System.setErr(originalErr);
+        }
+    }
+
+    /** Q4 门禁：null 任务直接返回，不提交、不抛。 */
+    @Test(timeout = 5000)
+    public void runInBackgroundSerial_ignoresNullTask() {
+        mDbService.runInBackgroundSerial(null);
+    }
+
+    /**
+     * P0-2 门禁：数据库尚未打开时（{@code GreenDaoManager.getDatabase()} 返回 null），
+     * {@code runInTransaction} 必须抛 {@link IllegalStateException} 而不是 NPE。
+     *
+     * <p>这条分支正是 ADR-0001 Q2「每次现取库」换来的风险面：原实现在构造期final 捕获句柄，
+     * 不会遇到 daoMaster 未就绪；改为现取后必须显式处理 null。
+     */
+    @Test(timeout = 5000)
+    public void runInTransaction_throwsIllegalStateWhenDatabaseNotOpen() throws Exception {
+        // 把 GreenDaoManager 的静态 daoMaster 置空，模拟"库尚未打开"
+        setField(GreenDaoManager.class, null, "daoMaster", null);
+        try {
+            mDbService.runInTransaction(new Runnable() {
+                @Override
+                public void run() {
+                    mDatabase.execSQL("INSERT INTO txn_probe (id, v) VALUES (9, 'never')");
+                }
+            });
+            fail("数据库未就绪时 runInTransaction 应抛 IllegalStateException");
+        } catch (IllegalStateException expected) {
+            assertTrue("异常信息须说明是数据库未打开（实际：" + expected.getMessage() + "）",
+                    expected.getMessage() != null && expected.getMessage().contains("数据库"));
+        } catch (RuntimeException other) {
+            fail("应为 IllegalStateException，实际是 " + other.getClass().getName());
+        }
     }
 
     // ---- BaseService.replaceWhereInTx：原子提交 / 回滚 ----

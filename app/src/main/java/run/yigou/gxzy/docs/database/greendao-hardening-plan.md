@@ -310,7 +310,7 @@ GreenDAO 默认命名规则（用 `gen/*Dao.java` 的建表语句核对）：
 | `GreenDaoUpgrade.generateTempTables(...)` | `private final void generateTempTables(Database db, Class<? extends AbstractDao<?, ?>>... daoClasses)` | 对不存在的表**显式跳过并记录**，不生成空列临时表；异常一律走 `EasyLog.print(Throwable)` |
 | `GreenDaoUpgrade.autoMigrateTable(...)` | `public static void autoMigrateTable(Database db, Class<? extends AbstractDao<?, ?>> daoClass)` | 同上：catch 分支补 `EasyLog.print(Throwable)`，不再只打 tag+msg |
 | `MigrationOrchestrator.ensureUpToDate(Context)` | `public static void ensureUpToDate(Context context)` | 在 `SchemaHistoryRepository.ensureTable(database)` 之后插入一行 `DbIndexMaintenance.ensureIndexes(database);`（局部变量 `database` 此刻已就绪） |
-| `StartupIoExemption` | `public final class StartupIoExemption`（工具类，私有构造） | 2026-10-07 新增。`public static void runExempted(Runnable action)` —— 只包住"进程一次性前置"（开库 / 建升级历史表 / 首次建索引 / 读版本号 / 建立 DbService 单例 / 启动读登录记录）；debug 之外直接执行原动作。**调用方必须逐段显式声明**，不允许整段包住自己的业务 |
+| `StartupIoExemption` | `public final class StartupIoExemption`（工具类，私有构造） | 2026-10-07 新增。`public static void runExempted(Runnable action)` —— 只包住"进程一次性前置"（开库 / 建升级历史表 / 首次建索引 / 读版本号 / 建立 LocalServices 单例 / 启动读登录记录）；debug 之外直接执行原动作。**调用方必须逐段显式声明**，不允许整段包住自己的业务 |
 | `DbService.readInBackground` | `public <T> void readInBackground(Callable<T> reader, Callback<T> callback)` | 2026-10-07 新增（票 13）。"读后回 UI"的统一入口：异常自动 `EasyLog.print(Throwable)` 后转 `callback.onError`，**"读失败算什么"由调用方决定** |
 
 **三种调用范式**（§3.3 迁移时照此写，避免各写各的）
@@ -736,7 +736,7 @@ debug 构建下开 `StrictMode`（`penaltyLog`），跑主流程（冷启 → �
     异常由它 `EasyLog.print(Throwable)` 记录后转成 `onError`。**"读失败算什么"由调用方自己决定**
     （章节读失败按空列表、设置缓存读失败只记日志……）。**写操作不要用它**——写没有"结果可交付"。
   - `StartupIoExemption.runExempted(Runnable)`：严格模式的**窄粒度豁免窗口**（2026-10-07 新增）。
-    有些启动期动作（开库、建升级历史表、首次建索引、读版本号、建立 DbService 单例、读登录记录）
+    有些启动期动作（开库、建升级历史表、首次建索引、读版本号、建立 LocalServices 单例、读登录记录）
     **无法移走**，显式标记为已知例外，好让剩余信号里只剩真正要修的东西。
     调用方必须**逐段显式声明**豁免范围，不允许整段把自己的业务包进去。
   - `ThreadUtil.runInBackground(Runnable)`：走 `ThreadPoolManager`（core=0 / max=200 /
@@ -751,7 +751,7 @@ debug 构建下开 `StrictMode`（`penaltyLog`），跑主流程（冷启 → �
 |---|---|
 | 2026-10-07 | **第二轮双轴 review 后的修正**：① **撤销登录态异步化**——`HomeActivity` 建导航时只读一次 `isLogin`（`setupNavigation → addAiChatNavigationItemIfNeeded` / `getMaxFragmentIndex`）且之后不重建，异步恢复会让已登录用户整个会话看不到 AI 聊天入口；改回同步，并把这读放进 `StartupIoExemption` 窗口（与开库同属一次性前置）。② 修正三处**注释与实现矛盾**（豁免窗口范围、`debug 之外是空操作`、`编译期常量短路`）。③ 合并 `MigrationOrchestrator` 里两个紧邻的豁免窗口（拆开并不会更窄）。④ `AppDataManager` 的 3 处 `e.printStackTrace()` 换成 `EasyLog.print(Throwable)`（§4 要求串行任务体自己记堆栈）。⑤ 4 处异步 UI 回调补生命周期守卫（`isAdded` / `isFinishing` / `isViewActive`）。⑥ `AppDataManager` 4 处「后台读→回主线程」改用 `DbService.readInBackground`。⑦ 样式缓存写失败改为记录日志（不再静默吞）。⑧ 验证脚本加**防假绿断言**并把 SDK/ADB/PY 改为可配置。⑨ §3.0 / §8 / §9 补齐新符号与实施边界。 |
 | 2026-10-07 | **票 12 / 13 收尾**：新增 `.scratch/greendao-hardening/drill-persistence.sh`（票 12 的 A1 方案）——设备侧验证三件事并**8/8 通过**：唯一索引建出、有重复行时只告警不建索引且 App 不崩、删掉整张表后冷启能被 `createTable` 建回（证明表名缓存没破坏自愈）。票 13 新增 `DbService.readInBackground(Callable, Callback)` 作为"读后回 UI"的统一入口，5 个读调用点收敛（`HomeFragment` / `BookContentSearchActivity` / `ChatSummaryListDialog` / `TipsBookNetReadFragment` / `BookCollectCaseFragment`）；**写操作刻意不收敛**（各自的任务体本来就不同，抽模板只会掩盖差异），文件缓存刻意不走 DB 队列。回归实测：无 `FATAL`/`ANR`，严格模式仍是 12 条（SDK 初始化 10 + 第三方 2），本包业务代码 0 条。 |
-| 2026-10-07 | **双轴 code-review 后的修正**：① 豁免窗口收窄并显式化——新增 `StartupIoExemption.runExempted`，只包住"开库 / 建升级历史表 / 首次建索引 / 读版本号 / 建立 DbService 单例"这五段一次性启动工作（原先整个 `ensureUpToDate` 被豁免，把索引维护的两次全表 `COUNT(*)` 也盖住了）；② 升级路径 5 处 catch 补`EasyLog.print(Throwable)`（§3.5 的"日志带堆栈"此前未落地）；③ `BaseService` 表名缓存**读失败不再缓存**，避免"读不到"被当成"库里没表"而让每个 Service 都去建表；④ `BookRepository` 两个异步读失败改为**按空结果回调**（与同步版语义一致），并删掉因此不再有调用者的 `deliverErrorOnUi`；⑤ 聊天摘要弹窗的异步回调补 `isShowing()` 判断。**另修一个真 bug**：登录二次写入原本是 `deleteEntity`（删掉登录信息 ⇒ 每次冷启动都判未登录），改为"沿用本地已有行主键后 update"。**遗留**：持久化改动缺测试、"后台读→回主线程"样板重复 13 处（Standards 轴发现，已开票 12 / 13）。 |
+| 2026-10-07 | **双轴 code-review 后的修正**：① 豁免窗口收窄并显式化——新增 `StartupIoExemption.runExempted`，只包住"开库 / 建升级历史表 / 首次建索引 / 读版本号 / 建立 LocalServices 单例"这五段一次性启动工作（原先整个 `ensureUpToDate` 被豁免，把索引维护的两次全表 `COUNT(*)` 也盖住了）；② 升级路径 5 处 catch 补`EasyLog.print(Throwable)`（§3.5 的"日志带堆栈"此前未落地）；③ `BaseService` 表名缓存**读失败不再缓存**，避免"读不到"被当成"库里没表"而让每个 Service 都去建表；④ `BookRepository` 两个异步读失败改为**按空结果回调**（与同步版语义一致），并删掉因此不再有调用者的 `deliverErrorOnUi`；⑤ 聊天摘要弹窗的异步回调补 `isShowing()` 判断。**另修一个真 bug**：登录二次写入原本是 `deleteEntity`（删掉登录信息 ⇒ 每次冷启动都判未登录），改为"沿用本地已有行主键后 update"。**遗留**：持久化改动缺测试、"后台读→回主线程"样板重复 13 处（Standards 轴发现，已开票 12 / 13）。 |
 | 2026-10-06 | **联调取证后的回填（票 08/11）**：§3.3 计数 28 → 24（剔除注释内 4 处与本来就在后台的 1 处）；新增 §3.3.1（口径没覆盖到的 `AppDataManager` 全量加载链，已迁后台）与 §3.3.2（`BaseService.initTable` 的构造器副作用与处理）。P1-1 的可判定判据（主流程无主线程 DB IO）已在模拟器上实测达标。 |
 | 2026-10-06 | **补 §3.0「改动点签名清单」**——此前新增文件只给了类名、没有方法签名，不满足计划类文档"精确的函数名称与签名"的要求；同时把 §3.3 的迁移写法固化为三种调用范式（写 / 读后回 UI / 跨表原子），消除"读了不知道怎么写"的缺口。§3.1 明确区分两处 guide 落点（**硬前置 → §4**、**表集合一致性约束 → §6**）。 |——此前新增文件只给了类名、没有方法签名，不满足计划类文档"精确的函数名称与签名"的要求；同时把 §3.3 的迁移写法固化为三种调用范式（写 / 读后回 UI / 跨表原子），消除"读了不知道怎么写"的缺口。§3.1 明确区分两处 guide 落点（**硬前置 → §4**、**表集合一致性约束 → §6**）。 |
 | 2026-10-06 | **移除全部非 GreenDAO 内容**（此前保留的另一种 ORM 的迁移评估、对比与触发条件整节删除），本文收敛为纯 GreenDAO 加固方案。**删节后章节号顺移**：术语表 → §9，变更历史 → §10；原「何时再评估迁移」整节及其摘要已删除，旧编号不再存在。同时修正：`buildDelete` 列的标签（含 `executeDelete`）、"约 78 处调用点"→ 按六项口径实测 84 处、`BookChapter.java` 与 `MySQLiteOpenHelper.java` 的行号引用改为符号名 + 声明行。 |

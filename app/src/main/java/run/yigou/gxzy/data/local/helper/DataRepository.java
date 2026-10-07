@@ -222,8 +222,8 @@ public final class DataRepository {
             // 跨 TabNav / TabNavBody 两张表（分属两个 service），故用 DbService 的跨表事务入口。
             // ⚠️ 事务内抛出的异常必须能传出来，否则会照常提交、留下删了一半的表——
             // 这正是下面 processTabNav / processTabNavBody 不再用 executeDatabaseOperation 的原因。
-            DbService db = DbService.getInstance();
-            db.runInTransaction(() -> {
+            DbService dbService = DbService.getInstance();
+            dbService.runInTransaction(() -> {
                 // 1. 清空旧数据（service 定位已拆到 LocalServices，见 ADR-0001 Q1=C）
                 LocalServices.getInstance().mTabNavService.deleteAll();
                 LocalServices.getInstance().mTabNavBodyService.deleteAll();

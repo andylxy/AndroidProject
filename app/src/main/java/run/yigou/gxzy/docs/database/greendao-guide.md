@@ -212,7 +212,7 @@ adb exec-out run-as run.yigou.gxzy.debug cat databases/myzhongyi.db > /tmp/myzho
 
 | 场景 | 写法 | 关键约束 |
 |---|---|---|
-| 写（不关心结果） | `DbService.getInstance().runInBackgroundSerial(task)` | **task 内部必须自己 `try/catch` + `EasyLog.print(Throwable)`**：底层是 `Executor.execute`，异常不进 Future，只会杀掉 worker 线程 |
+| 写（不关心结果） | `DbService.getInstance().runInBackgroundSerial(task)` | task 内部抛出的异常由 `DbService` 统一接住并 `EasyLog.print(Throwable)` 记录，**不会**冒泡、也不会杀掉串行线程（ADR-0001 Q4）。仍建议任务内自行 `try/catch` 以便按业务语义降级（读失败按空结果、写失败回滚局部） |
 | 读后回 UI | **首选** `DbService.getInstance().readInBackground(reader, callback)`：`reader` 在后台读，`callback` 在主线程收到结果或错误 | task 内异常会被自动记录并转成 `callback.onError`；**"读失败算什么"由调用方自己决定**（章节读失败按空列表、设置缓存读失败只记日志……） |
 | 读后回 UI（需要自己控制线程切换时） | `runInBackgroundSerial` + `ThreadUtil.runOnUiThread` | 被捕获变量必须 final / 有效 final；**读失败按"空结果"回调**，与同步方法的失败语义保持一致 |
 | 跨表原子操作 | `DbService.getInstance().runInTransaction(task)` | task 内异常**必须传出去**；不要套 `ConvertEntity.executeDatabaseOperation`（它吞异常并返回 null，会让事务照常提交，留下删一半/写一半的表） |
@@ -225,7 +225,8 @@ adb exec-out run-as run.yigou.gxzy.debug cat databases/myzhongyi.db > /tmp/myzho
 一旦挪到后台就会破坏返回值约定。做法是**新增 `*Async` 方法**（`getChaptersAsync` / `addToBookshelfAsync` …），
 调用方显式改写；旧的同步方法保留给后台调用方。改名不是洁癖——返回值语义变了，名字必须讲清楚。
 
-**已知例外（不可移走的那部分）**：进程启动时的开库、建立 `DbService` 单例、建升级历史表、
+**已知例外（不可移走的那部分）**：进程启动时的开库、建立 `LocalServices` 单例（它会构建 19 个
+service，各自确认表是否存在）、建升级历史表、
 首次建索引、读版本号。这些都以"库刚打开、连接可用"为前提，由`StartupIoExemption` 显式豁免，
 并**只在 debug 构建**生效（`AppApplication.enableStrictModeForDebug()` + `AppConfig.isDebug()`）。
 
