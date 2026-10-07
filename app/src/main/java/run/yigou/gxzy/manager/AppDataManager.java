@@ -207,6 +207,10 @@ public class AppDataManager {
         
         // 3. 开始加载
         isLoading = true;
+        // 记下起点，供完成时打印真实耗时。此前完成日志直接打印 loadCompleteTime
+        // 这个时间戳，标签却写「总耗时」，日志里会出现十几位的 epoch 值
+        // （如 1791362992457ms），排查启动耗时时会被误导。
+        final long loadStartTime = System.currentTimeMillis();
         EasyLog.print(TAG, "🚀 开始加载所有数据...");
         
         // 4. 执行加载流程
@@ -221,7 +225,7 @@ public class AppDataManager {
                 DataPreferences.setLastUpdateTime(loadCompleteTime);
                 
                 EasyLog.print(TAG, "🎉 所有数据加载完成（总耗时 " + 
-                    loadCompleteTime + "ms）");
+                    (loadCompleteTime - loadStartTime) + "ms）");
                 callback.onSuccess(null);
             }
             

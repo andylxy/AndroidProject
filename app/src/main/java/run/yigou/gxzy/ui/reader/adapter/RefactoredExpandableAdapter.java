@@ -19,6 +19,7 @@ import java.util.List;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.base.action.ToastAction;
+import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.ui.reader.adapter.event.ReadModeClickHandler;
 import run.yigou.gxzy.ui.reader.adapter.event.ReadModeLongClickHandler;
 import run.yigou.gxzy.ui.reader.adapter.model.DataAdapter;
@@ -71,7 +72,14 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
             @NonNull List<List<run.yigou.gxzy.ui.reader.entity.ItemData>> entityItemList) {
 
         List<GroupData> modelGroupList = new ArrayList<>();
-
+        // ✅ D2 修复：setSearchData 此前只写 groupDataList，导致 groups（旧结构）停留在全量章节，
+        //    与 groupDataList 分离；后续读取 getmGroups() 会得到错误数据，引发索引错位。
+        //    此处同步构建与 groupDataList 1:1 对应的 groups，使两个数据源保持一致。
+        //    两个列表的下标条件本就相同，故在同一个循环里产出，避免遍历两遍。
+        //    注意：仅补全 groups 的"结构镜像"（标题/展开态/空 children），
+        //          groupDataList 的原有构建（保留 ClickableSpan）完全不动，搜索结果展示行为不变。
+        //    绑定始终走 groupDataList，groups 仅用于 size/header 一致性，故 children 用空列表即可。
+        ArrayList<ExpandableGroupEntity> mirrorGroups = new ArrayList<>();
         for (int i = 0; i < entityGroupList.size() && i < entityItemList.size(); i++) {
             run.yigou.gxzy.ui.reader.entity.GroupData sourceGroup = entityGroupList.get(i);
             List<run.yigou.gxzy.ui.reader.entity.ItemData> sourceItems = entityItemList.get(i);
@@ -95,9 +103,18 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
             }
 
             modelGroupList.add(new GroupData(sourceGroup.getTitle(), modelItems));
+            mirrorGroups.add(new ExpandableGroupEntity(
+                    sourceGroup.getTitle() != null ? sourceGroup.getTitle() : "",
+                    "",
+                    sourceGroup.isExpanded(),
+                    new ArrayList<>()));
         }
 
         this.groupDataList = new ArrayList<>(modelGroupList);
+        this.groups = mirrorGroups;
+        EasyLog.print("RefactoredExpandableAdapter",
+                "setSearchData 同步 groups 镜像: groups=" + mirrorGroups.size()
+                        + ", groupDataList=" + groupDataList.size());
 
         // 同步展开状态（使用entity的展开状态）
         expandStateManager.reset();

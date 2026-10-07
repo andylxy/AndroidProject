@@ -57,6 +57,8 @@ import run.yigou.gxzy.ui.reader.fragment.BookCollectCaseFragment;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.reader.adapter.RefactoredExpandableAdapter;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.reader.entity.GroupData;
+import run.yigou.gxzy.ui.reader.entity.ItemData;
 import run.yigou.gxzy.ui.reader.entity.GroupModel;
 import run.yigou.gxzy.data.model.HH2SectionData;
 import run.yigou.gxzy.ui.reader.helper.TipsDialogHelper;
@@ -85,10 +87,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
     private LinearLayoutManager layoutManager;
     /**
-     * 当前选中的章节索引
-     */
-    private int currentIndex = -1;
-    /**
      * 是否保存到书架
      */
     private boolean isShowBookCollect = false;
@@ -102,11 +100,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      * 章节内容管理器
      */
     private ChapterContentManager chapterContentManager;
-    
-    /**
-     * 全局搜索协调器
-     */
-    private run.yigou.gxzy.ui.reader.search.SearchCoordinator searchCoordinator;
 
     private OnBackPressedCallback onBackPressedCallback;
 
@@ -149,9 +142,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
             private final Runnable runnable = () -> {
                 String text = clearEditText.getText().toString();
+                // 统一入口：无论内容为空、非空还是全空白，都交给 setSearchText 判定，
+                // 避免「退格清空」与「点搜索按钮」走两条路径导致 cancelSearch() 被绕过
+                // （D8：清空时必须作废在途搜索，否则结果回填会覆盖已恢复的全量列表）
                 if (charSequenceIsEmpty(text)) {
-                    reListAdapter(true, false);
-                    numTips.setText("");
+                    setSearchText(null);
                 } else {
                     setSearchText(text);
                 }
@@ -171,8 +166,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             public void afterTextChanged(Editable s) {
             }
         });
-        // 注册事件
-        XEventBus.getDefault().register(TipsBookNetReadFragment.this);
+        // 事件注册移至 onStart，与 onStop 注销配对（D7 治理：view 销毁即退订，避免 onEvent 操作已释放成员）
     }
 
 
@@ -209,9 +203,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             // 初始化 MVP 架构
             presenter = new TipsBookReadPresenter(this);
             presenter.onViewCreated();
-            
-            // 初始化全局搜索协调器
-            searchCoordinator = new run.yigou.gxzy.ui.reader.search.SearchCoordinator(bookId);
 
             // 加载到UI显示
             initializeAdapter();
@@ -220,8 +211,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             //setHttpUpdateStatusNotification();
             rvList.setAdapter(adapter);
             refreshData();
-        } catch (Exception e) {
-            e.printStackTrace();
+} catch (Exception e) {
+            EasyLog.print(e);
             EasyLog.print("TipsBookNetReadFragment initData", e.getMessage());
             // 处理异常，例如显示错误提示
         }
@@ -291,44 +282,13 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                     expandableAdapter.expandGroup(groupPosition);
                 }
 
-                // 核心逻辑：获取真实索引并触发下载
-                // Fix: 搜索模式下 groupPosition 是过滤后的索引，需映射回 chapterList 的真实索引
-                int realIndex = groupPosition;
-                boolean isSearchMode = isSearchActive();
-
-                if (isSearchMode) {
-                    try {
-                        // 获取当前显示的 Group Entity
-                        // 注意：getmGroups() 返回的是当前 Adapter 持有的数据源（可能是过滤后的）
-                        if (groupPosition >= 0 && groupPosition < expandableAdapter.getmGroups().size()) {
-                            ExpandableGroupEntity group = expandableAdapter.getmGroups().get(groupPosition);
-                            if (group != null) {
-                                String headerTitle = group.getHeader();
-                                int foundIndex = findChapterIndexByTitle(headerTitle);
-                                if (foundIndex != -1) {
-                                    realIndex = foundIndex;
-                                } else {
-                                    // 没找到对应章节，不触发后续逻辑以防错乱
-                                    return;
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                        EasyLog.print("TipsBookNetReadFragment", "Search index mapping error: " + e.getMessage());
-                    }
-                }
-                
-                // 记录当前点击位置 (使用真实索引)
-                if (isShowBookCollect)
-                    currentIndex = realIndex;
-
                 // ✅ 搜索模式下：只允许展开/收起，不触发下载逻辑（防止数据被覆盖）
-                if (isSearchMode) {
+                if (isSearchActive()) {
                     return;
                 }
 
-                // ✅ 非搜索模式：智能下载 + 预加载 (使用真实索引)
-                triggerChapterDownload(realIndex);
+                // ✅ 非搜索模式：智能下载 + 预加载（groupPosition 即真实章节索引）
+                triggerChapterDownload(groupPosition);
 
             }
 
@@ -427,27 +387,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
     }
 
     /**
-     * 根据章节标题查找真实索引
-     * 用于搜索模式下将 UI 索引映射回原始数据索引
-     *
-     * @param title 章节标题
-     * @return 真实索引，未找到返回 -1
-     */
-    private int findChapterIndexByTitle(String title) {
-        if (chapterList == null || title == null) {
-            return -1;
-        }
-        for (int i = 0; i < chapterList.size(); i++) {
-            Chapter chapter = chapterList.get(i);
-            // 比对标题，注意处理 null
-            if (chapter != null && title.equals(chapter.getChapterHeader())) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
      * 触发章节智能下载
      * 
      * 流程：
@@ -468,7 +407,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
         } catch (Exception e) {
             EasyLog.print("TipsBookNetReadFragment", "触发下载异常: " + e.getMessage());
-            e.printStackTrace();
+            EasyLog.print(e);
         }
     }
 
@@ -482,6 +421,15 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
      */
     public void updateChapterContent(int groupPosition, HH2SectionData sectionData) {
         if (adapter == null || sectionData == null) {
+            return;
+        }
+
+        // ✅ D2 修复：搜索态下列表展示的是搜索结果（groupDataList 已是过滤集），
+        //    而 Presenter 回调的 position 来自全量章节侧，两侧索引不对齐；
+        //    若继续写入会覆盖搜索结果同位置的项，造成数据污染。
+        //    与 onHeaderClick 的搜索态守卫（"防止数据被覆盖"）保持同一口径：
+        //    搜索态下不把章节下载结果应用到当前列表。非搜索态行为与修复前完全一致。
+        if (isSearchActive()) {
             return;
         }
 
@@ -509,11 +457,14 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             }
         } catch (Exception e) {
             EasyLog.print("TipsBookNetReadFragment", "更新章节内容失败: " + e.getMessage());
-            e.printStackTrace();
+            EasyLog.print(e);
         }
     }
 
     private ArrayList<Chapter> chapterList;
+
+    /** D7：数据加载序号，用于丢弃过期的异步加载结果，避免并发覆盖 chapterList */
+    private int bookDataLoadSeq = 0;
 
     private void bookInitData() {
         // 加载书本相关的药方
@@ -523,6 +474,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             // 章节列表读取挪到后台（统一入口见 DbService.readInBackground）；
             // 读完之后回主线程再走 getBookData（它后面全是 UI 与 Presenter 调用）
             final TabNavBody target = book;
+            // D7：递增序号，仅当本次结果仍为最新时才应用，防止连发事件/配置变更导致的多趟覆盖
+            final int mySeq = ++bookDataLoadSeq;
             DbService.getInstance().readInBackground(
                     new Callable<ArrayList<Chapter>>() {
                         @Override
@@ -534,6 +487,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                     new Callback<ArrayList<Chapter>>() {
                         @Override
                         public void onSuccess(ArrayList<Chapter> loaded) {
+                            if (mySeq != bookDataLoadSeq) return; // 丢弃过期结果
                             chapterList = loaded;
                             // 加载书本相关的章节
                             getBookData(target);
@@ -541,6 +495,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
                         @Override
                         public void onError(Exception e) {
+                            if (mySeq != bookDataLoadSeq) return; // 丢弃过期结果
                             // 读失败时 chapterList 保持 null，getBookData 内部对 null 有兜底
                             chapterList = null;
                             getBookData(target);
@@ -621,7 +576,26 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             onBackPressedCallback = null;
         }
 
-        // 注销 EventBus
+        // 释放引用
+        onJumpSpecifiedItemListener = null;
+        adapter = null;
+        rvList = null;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // D7：与 onStop 配对注册，view 进入前台才订阅事件
+        try {
+            XEventBus.getDefault().register(this);
+        } catch (Exception e) {
+            EasyLog.print("TipsBookNetReadFragment", "⚠️ EventBus 注册异常: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void onStop() {
+        // D7：view 离开前台即退订，避免 onDestroyView 之后仍被 onEvent 操作已释放成员
         try {
             if (XEventBus.getDefault() != null) {
                 XEventBus.getDefault().unregister(this);
@@ -629,13 +603,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         } catch (Exception e) {
             EasyLog.print("TipsBookNetReadFragment", "⚠️ EventBus 注销异常: " + e.getMessage());
         }
-
-        // 释放引用
-        onJumpSpecifiedItemListener = null;
-        adapter = null;
-        rvList = null;
+        super.onStop();
     }
-
 
     @Override
     public void onClick(View view) {
@@ -667,23 +636,25 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                     adapter.expandGroup(bookLastReadPosition, true);
                 }
             }
-            // 搜索结果由 performGlobalSearch() 经 SearchCoordinator 直接设置（见 setSearchData），非 MVP 路径
+            // 搜索结果不走这里：搜索由 Presenter.search() 完成后回调
+            // showSearchResults → adapter.setSearchData 写入
             adapter.notifyDataChanged();
         }
     }
 
     /**
-     * 判断 CharSequence 是否为空。
+     * 判断搜索框内容是否为空（只看长度，不做 trim）。
+     *
+     * 注意：本方法只用于「长度非零但内容可能全为空白」的前置分流，
+     * 真正的搜索态判定见 {@link #isSearchActive()}，清空后的统一处理见
+     * {@link #setSearchText(String)}。不要在这里做状态恢复，否则会与
+     * setSearchText 形成双入口，导致 {@code cancelSearch()} 在用户退格路径上被绕过。
      *
      * @param charSequence 需要判断的 CharSequence
      * @return 如果为 null 或长度为 0，则返回 true；否则返回 false
      */
     public boolean charSequenceIsEmpty(CharSequence charSequence) {
-        if (charSequence == null || charSequence.length() == 0) {
-            this.searchText = null;
-            return true;
-        }
-        return false;
+        return charSequence == null || charSequence.length() == 0;
     }
 
     @SuppressLint("DefaultLocale")
@@ -691,6 +662,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         this.searchText = searchText;
         
         if (searchText == null || searchText.trim().isEmpty()) {
+            // 先作废在途搜索（D8）：否则它回填结果会覆盖下面恢复的全量列表，
+            // 且清空后 isSearchActive() 为 false，章节更新类守卫会一并失效
+            if (presenter != null) {
+                presenter.cancelSearch();
+            }
             // 清空搜索，恢复原始列表
             if (this.adapter != null) {
                 reListAdapter(true, false);
@@ -705,17 +681,25 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
     }
 
     /**
-     * 是否处于搜索态（searchText 非空即视为搜索态）
+     * 是否处于搜索态。
+     *
+     * <p>判据是「trim 后非空」而非「非空」：用户输入纯空格时，setSearchText 会因
+     * trim().isEmpty() 走清空分支并把列表恢复成全量章节；若这里仍判为搜索态，
+     * D2/D2.1 的搜索态守卫（updateChapterContent / updateDownloadStatus /
+     * onHeaderClick）会全部持续失效，重新打开它们想关闭的数据污染路径。
      */
     private boolean isSearchActive() {
-        return searchText != null && !searchText.isEmpty();
+        return searchText != null && !searchText.trim().isEmpty();
     }
     
     /**
-     * 执行全局搜索
+     * 发起全局搜索。
+     *
+     * T3/D3：搜索执行统一交给 Presenter（后台线程 + 在途序号，见 TipsBookReadPresenter.search），
+     * 本Fragment 只做「权限判定 +转发 + 结果展示」三件事，不再自行检索。
      */
     private void performGlobalSearch(String keyword) {
-        if (searchCoordinator == null) {
+        if (presenter == null) {
             return;
         }
 
@@ -726,37 +710,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             return;
         }
 
-        // 使用 SearchCoordinator 进行全局搜索
-        android.util.Pair<List<run.yigou.gxzy.ui.reader.entity.GroupData>, 
-                          List<List<run.yigou.gxzy.ui.reader.entity.ItemData>>> result = 
-            searchCoordinator.searchGlobal(keyword);
-        
-        if (result == null) {
-            return;
-        }
-        
-        List<run.yigou.gxzy.ui.reader.entity.GroupData> groupDataList = result.first;
-        List<List<run.yigou.gxzy.ui.reader.entity.ItemData>> itemDataList = result.second;
-        
-        // 更新适配器显示搜索结果
-        if (adapter != null) {
-            adapter.setSearchData(groupDataList, itemDataList);
-            
-            // 统计匹配数量
-            int totalMatches = 0;
-            if (itemDataList != null) {
-                for (List<run.yigou.gxzy.ui.reader.entity.ItemData> items : itemDataList) {
-                    if (items != null) {
-                        totalMatches += items.size();
-                    }
-                }
-            }
-            
-            // 显示匹配数量
-            if (numTips != null) {
-                numTips.setText(String.format("%d个结果", totalMatches));
-            }
-        }
+        presenter.search(keyword);
     }
 
 
@@ -774,29 +728,68 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         }
     }
 
+    /**
+     * 显示搜索结果（T3/D3：入参改为新结构 GroupData/ItemData，与适配器绑定用的 groupDataList 同构）
+     */
     @Override
-    public void showSearchResults(List<ExpandableGroupEntity> results, int totalCount) {
-        // 显示搜索结果
-        post(() -> {
-            if (adapter != null && results != null) {
-                adapter.setmGroups(new ArrayList<>(results));
-                adapter.notifyDataChanged();
-            }
-            if (numTips != null) {
-                numTips.setText(String.format("%d个结果", totalCount));
-            }
-        });
+    public void showSearchResults(List<GroupData> groups, List<List<ItemData>> items, int totalCount) {
+        // 双保险：非搜索态收到搜索结果一律丢弃。
+        // Presenter 侧已用 cancelSearch() 作废在途序号，这里再挡一层——
+        // 万一某条路径漏了 cancelSearch，也不会把搜索结果写进已恢复的全量列表。
+        if (!isSearchActive()) {
+            EasyLog.print("TipsBookNetReadFragment", "非搜索态收到搜索结果，已丢弃");
+            return;
+        }
+        // Presenter 已在主线程回调，这里只需渲染
+        if (adapter != null && groups != null) {
+            adapter.setSearchData(groups, items);
+        }
+        if (numTips != null) {
+            numTips.setText(String.format("%d个结果", totalCount));
+        }
     }
 
+    /**
+     * 书籍加载状态。本页布局无 loading 控件、书籍加载进度也一直未做展示，保持空实现。
+     *
+     * <p>搜索的进行中提示走 {@link #showSearching(boolean)}，两者不可混用 ——
+     * 本方法被 loadBookContent / onChaptersLoaded 复用，若在此写「搜索中…」，
+     * 打开任意书籍都会闪搜索提示。
+     */
     @Override
     public void showLoading(boolean isLoading) {
-        if (isLoading) {
+        // 保持空实现，见上方说明
+    }
+
+    /**
+     * 显示/结束「搜索中」提示（D8/§4.8）。
+     *
+     * <p>本页布局无 loading 控件，且项目内无可复用的 loading 组件，故复用既有的结果提示位
+     * numTips 承载搜索反馈，不新增控件、不改布局。真正的阻塞风险已由「检索移出主线程」消除，
+     * 此处只是给用户一个进行中提示。
+     *
+     * <p>结束态：成功由 showSearchResults 写「N个结果」覆盖；失败路径不写结果数，故必须
+     * 在这里清空，否则「搜索中…」会永久残留（失败没有 showSearchResults 来覆盖它）。
+     * 清空不会误伤成功态 —— 那两条路径互斥。
+     */
+    @Override
+    public void showSearching(boolean searching) {
+        if (numTips == null) {
+            return;
+        }
+        if (searching) {
+            numTips.setText(R.string.search_in_progress);
         } else {
+            numTips.setText("");
         }
     }
 
     @Override
     public void showError(String message) {
+        // 失败路径可能正显示着「搜索中…」，先复位再 toast，否则提示会卡住不消失
+        if (numTips != null) {
+            numTips.setText("");
+        }
         // 显示错误信息
         post(() -> toast(message));
     }
@@ -815,6 +808,10 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
     @Override
     public void updateDownloadStatus(int position, boolean isDownloaded) {
+        // ✅ D2.1 守卫：搜索态下列表为过滤结果，章节下载完成回调不应应用到当前列表
+        if (isSearchActive()) {
+            return;
+        }
         // 更新下载状态
         if (adapter != null) {
             post(() -> adapter.notifyGroupChanged(position));

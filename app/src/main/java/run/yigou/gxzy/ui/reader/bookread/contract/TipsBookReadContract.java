@@ -16,6 +16,8 @@ import java.util.List;
 import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
+import run.yigou.gxzy.ui.reader.entity.GroupData;
+import run.yigou.gxzy.ui.reader.entity.ItemData;
 import run.yigou.gxzy.data.model.HH2SectionData;
 
 /**
@@ -39,17 +41,36 @@ public interface TipsBookReadContract {
         void showChapterList(List<ExpandableGroupEntity> chapters);
         
         /**
-         * 显示搜索结果
-         * @param results 搜索结果
-         * @param totalCount 结果总数
+         * 显示搜索结果（T3/D3：搜索结果走新结构 GroupData/ItemData，与适配器绑定用的
+         * groupDataList 同构，不再经ExpandableGroupEntity 旧结构中转）
+         *
+         * @param groups     搜索命中的分组（章节）列表
+         * @param items      与 groups 一一对应的子项列表
+         * @param totalCount 匹配总数
          */
-        void showSearchResults(List<ExpandableGroupEntity> results, int totalCount);
+        void showSearchResults(List<GroupData> groups, List<List<ItemData>> items, int totalCount);
         
         /**
-         * 显示加载状态
+         * 显示书籍加载状态。
+         *
+         * <p>注意与 {@link #showSearching(boolean)} 区分：本书页布局没有 loading 控件，
+         * 本方法一直是空实现（书籍加载进度由各环节自己的提示承担）；搜索的进行中提示
+         * 走 showSearching，避免打开任意书籍时在结果提示位闪「搜索中…」。
+         *
          * @param isLoading true-显示加载, false-隐藏加载
          */
         void showLoading(boolean isLoading);
+
+        /**
+         * 显示/结束「搜索中」提示（D8/§4.8）
+         *
+         * <p>与 {@link #showLoading(boolean)} 分开的原因：两者语义不同 —— 本方法只服务书内搜索，
+         * 而 showLoading 被书籍加载链路（loadBookContent / onChaptersLoaded）复用。
+         * 若共用一个方法，打开任意书籍都会在结果提示位显示「搜索中…」。
+         *
+         * @param searching true-显示搜索中, false-结束并清空提示
+         */
+        void showSearching(boolean searching);
         
         /**
          * 显示错误信息
@@ -199,12 +220,15 @@ public interface TipsBookReadContract {
          * @param keyword 搜索关键字
          */
         void search(String keyword);
-        
+
         /**
-         * 清除搜索
+         * 作废当前在途的搜索（D8）
+         *
+         * 用户清空搜索框时必须调用：列表此时已恢复成全量章节，若在途结果仍回填
+         * 会覆盖全量列表，且清空后搜索态守卫失效，会重新打开 D2/D2.1 的污染路径。
          */
-        void clearSearch();
-        
+        void cancelSearch();
+
         // ==================== 用户交互 ====================
         
         /**

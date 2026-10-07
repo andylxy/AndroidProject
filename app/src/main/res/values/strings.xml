@@ -566,4 +566,6 @@
     <string name="clear_history_success">清除历史记录成功</string>
     <!-- 搜索权限未开通时的入口提示；首页全局与书内两个搜索入口共用此文案（票据 0005 §6） -->
     <string name="search_permission_denied">全局搜索功能正在开发，敬请期待</string>
-</resources>
+
+    <!-- 书内搜索的进行中提示，复用结果提示位numTips（D8 搜索异步化） -->
+    <string name="search_in_progress">搜索中…</string></resources>

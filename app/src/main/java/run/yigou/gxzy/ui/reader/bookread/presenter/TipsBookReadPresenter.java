@@ -37,6 +37,10 @@ import run.yigou.gxzy.manager.chapter.ChapterContentManager;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
 import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.ui.reader.entity.GroupData;
+import run.yigou.gxzy.ui.reader.entity.ItemData;
+import run.yigou.gxzy.ui.reader.search.SearchCoordinator;
+import run.yigou.gxzy.utils.ThreadUtil;
 
 /**
  * TipsBookRead Presenter 实现
@@ -55,7 +59,6 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     private TabNavBody currentBookInfo; // 当前书籍信息
     private int currentChapterIndex = -1;
     private boolean isShowBookCollect = false;
-    private boolean isSearchMode = false;
 
     // 数据管理
     private List<Chapter> allChapters;
@@ -63,6 +66,25 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
     private ChapterIndexBuilder indexBuilder;  // 搜索索引
     private java.util.Set<String> loadedBookFangs = new java.util.HashSet<>();  // 已加载药方的书籍集合
     private boolean isShanghanBook = false;  // 是否为宋版伤寒书籍
+
+    /** D8：搜索在途序号，只认最后一次搜索结果，避免过期结果覆盖新结果 */
+    private int searchSeq = 0;
+
+    /**
+     * 作废当前在途的搜索（D8）。
+     *
+     * <p>用户清空搜索框时，Fragment 已把列表恢复成全量章节，此时若在途搜索的结果
+     * 仍回填搜索结果，会覆盖已恢复的全量列表；更麻烦的是清空后 isSearchActive()
+     * 为 false，updateChapterContent/updateDownloadStatus 的搜索态守卫会全部失效，
+     * 重新打开 D2/D2.1 想关闭的污染路径。故清空时必须递增序号作废在途结果。
+     */
+    @Override
+    public void cancelSearch() {
+        if (searchSeq != 0) {
+            searchSeq++;
+            EasyLog.print("TipsBookReadPresenter", "cancelSearch() 作废在途搜索");
+        }
+    }
 
     public TipsBookReadPresenter(TipsBookReadContract.View view) {
         this.view = view;
@@ -522,122 +544,107 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         }
     }
 
-    // ==================== 注释掉未使用的搜索方法 ====================
-    // 说明: TipsBookNetReadFragment 实际使用 SearchCoordinator.searchGlobal
-    // 此方法从未被调用，保留代码以备参考
-    /*
+
+    // ==================== 搜索（T3/D3 统一入口 + D8 异步化） ====================
+
+    /**
+     * 书内全局搜索：整本书章节检索。
+     *
+     * <p>T3/D3：此前本方法是空实现，Fragment 侧自行直调 SearchCoordinator，形成两条搜索路径；
+     * 现统一由本入口负责，Fragment 只发起不再自己检索。
+     *
+     * <p>D8：检索是「整本书 DB 读 + 过滤 + 高亮」，原先在主线程同步执行会卡 UI，
+     * 现放到线程池执行，结果回主线程后再交给 View 渲染。
+     */
     @Override
     public void search(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
-            clearSearch();
+            return;
+        }
+        if (!isViewActive()) {
+            return;
+        }
+        final String bookId = currentBookId;
+        if (bookId == null || bookId.isEmpty()) {
+            EasyLog.print("TipsBookReadPresenter", "search() 缺少 bookId，忽略本次搜索");
+            view.showError("搜索失败：未加载书籍信息");
             return;
         }
 
-        isSearchMode = true;
+        // 在途序号：用户连续输入时只认最后一次结果，避免旧结果覆盖新结果
+        final int mySeq = ++searchSeq;
+        final String trimmed = keyword.trim();
+        EasyLog.print("TipsBookReadPresenter", "search() 开始: bookId=" + bookId + ", keyword=" + trimmed);
+        view.showSearching(true);
 
-        try {
-            long startTime = System.currentTimeMillis();
-            
-            EasyLog.print("TipsBookReadPresenter", "开始严格搜索(TipsNetHelper): " + keyword);
-            
-            // 1. 准备搜索关键字
-            SearchKeyEntity searchKeyEntity = new SearchKeyEntity(new StringBuilder(keyword));
-            
-            // 2. 从数据库获取整本书所有章节内容 (与 BookContentSearchActivity 一致)
-            // 使用 ConvertEntity 而非 DataConverter，确保搜索范围覆盖整本书
-            List<HH2SectionData> allContent = ConvertEntity.getBookChapterDetailList(currentBookId);
-            
-            // 2.1 针对伤寒论进行特殊过滤 (与 BookContentSearchActivity 逻辑保持一致)
-            if (AppConst.ShangHanNo.equals(currentBookId)) {
-                 allContent = filterShangHanData(allContent);
+        ThreadUtil.runInBackground(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    android.util.Pair<List<GroupData>, List<List<ItemData>>> result =
+                            new SearchCoordinator(bookId).searchGlobal(trimmed);
+
+                    ThreadUtil.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // 过期结果直接丢弃（期间用户又发起了新搜索，或已清空搜索框）
+                            if (mySeq != searchSeq) {
+                                EasyLog.print("TipsBookReadPresenter", "search() 丢弃过期结果: " + trimmed);
+                                return;
+                            }
+                            if (!isViewActive() || view == null) {
+                                return;
+                            }
+                            if (result == null) {
+                                EasyLog.print("TipsBookReadPresenter", "search() 结果为 null: " + trimmed);
+                                view.showSearching(false);
+                                view.showError("搜索失败，请稍后重试");
+                                return;
+                            }
+                            int total = countMatches(result.second);
+                            EasyLog.print("TipsBookReadPresenter",
+                                    "search() 完成: keyword=" + trimmed + ", 命中章节=" + result.first.size()
+                                            + ", 匹配数=" + total);
+                            view.showSearchResults(result.first, result.second, total);
+                        }
+                    });
+                } catch (Exception e) {
+                    // 检索在子线程执行，异常不会自动冒泡，必须就地捕获并回主线程提示，
+                    // 否则会静默吞掉（DB 读失败、章节结构异常等）
+                    EasyLog.print("TipsBookReadPresenter",
+                            "search() 检索异常: keyword=" + trimmed + ", " + e.getMessage());
+                    EasyLog.print(e);
+                    ThreadUtil.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mySeq != searchSeq) {
+                                return;
+                            }
+                            if (isViewActive() && view != null) {
+                                view.showSearching(false);
+                                view.showError("搜索失败：" + e.getMessage());
+                            }
+                        }
+                    });
+                }
             }
-            
-            // 3. 获取全书别名映射（用于增强搜索）
-            run.yigou.gxzy.base.GlobalDataHolder globalData = run.yigou.gxzy.base.GlobalDataHolder.getInstance();
-            java.util.Map<String, String> yaoAliasDict = globalData.getYaoAliasDict();
-            java.util.Map<String, String> fangAliasDict = globalData.getFangAliasDict();
-            
-            // 4. 调用核心搜索方法 (Delegation to TipsNetHelper -> TipsSearchEngine)
-            // 该方法支持正则、多关键字、别名匹配和高亮生成
-            ArrayList<HH2SectionData> filteredData = TipsNetHelper.getSearchHh2SectionData(
-                searchKeyEntity, 
-                allContent, 
-                yaoAliasDict, 
-                fangAliasDict
-            );
-
-            // 5. 转换为显示格式
-            // 注意：isExpand 参数设为 false (默认折叠，与用户要求一致)
-            ArrayList<ExpandableGroupEntity> groups = GroupModel.getExpandableGroups(filteredData, false);
-
-            int totalMatchCount = searchKeyEntity.getSearchResTotalNum();
-            if (isViewActive()) {
-                view.showSearchResults(groups, totalMatchCount);
-            }
-            
-            long searchTime = System.currentTimeMillis() - startTime;
-            EasyLog.print("TipsBookReadPresenter", "搜索完成: " + totalMatchCount + 
-                " 个匹配项, 耗时 " + searchTime + "ms");
-
-        } catch (Exception e) {
-            view.showError("搜索失败: " + e.getMessage());
-            EasyLog.print("TipsBookReadPresenter", "搜索异常: " + e.getMessage());
-            e.printStackTrace();
-        }
+        });
     }
 
-    private List<HH2SectionData> filterShangHanData(List<HH2SectionData> contentList) {
-        if (contentList == null || contentList.isEmpty()) {
-            return new ArrayList<>();
-        }
-        
-        FragmentSetting fragmentSetting = AppApplication.getApplication().fragmentSetting;
-        if (fragmentSetting == null) {
-            return contentList;
-        }
-
-        int size = contentList.size();
-
-        int start = 0;
-        int end = size;
-
-        if (!fragmentSetting.isSong_JinKui()) {
-            if (!fragmentSetting.isSong_ShangHan()) {
-                start = 8;
-                end = Math.min(18, size);
-            } else {
-                end = Math.min(26, size);
-            }
-        } else {
-            if (!fragmentSetting.isSong_ShangHan()) {
-                start = 8;
+    /** 统计搜索结果里命中的子项总数（跨所有分组求和） */
+    private int countMatches(List<List<ItemData>> itemDataList) {
+        int total = 0;
+        if (itemDataList != null) {
+            for (List<ItemData> items : itemDataList) {
+                if (items != null) {
+                    total += items.size();
+                }
             }
         }
-
-        if (start < size) {
-            return new ArrayList<>(contentList.subList(start, end));
-        } else {
-            return new ArrayList<>(contentList);
-        }
-    }
-    */
-    
-    // 空实现：搜索逻辑已移至 SearchCoordinator
-    @Override
-    public void search(String keyword) {
-        // 搜索由 SearchCoordinator.searchGlobal 处理
-        // 此方法保留以满足接口契约
-        EasyLog.print("TipsBookReadPresenter", "search() 已弃用，使用 SearchCoordinator");
+        return total;
     }
 
     // ==================== 以下接口方法未被 Fragment 调用，保留空实现 ====================
-    
-    @Override
-    public void clearSearch() {
-        // 未使用：搜索由 SearchCoordinator 处理
-        // isSearchMode = false;
-        // displayChapterList();
-    }
 
     @Override
     public void onBackPressed(boolean shouldSave) {
