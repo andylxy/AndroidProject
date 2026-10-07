@@ -60,9 +60,6 @@ public class GroupModel {
         // 如果输入的分段数据为空，则直接返回空的分组列表
         if (hh2SectionData == null) return groups;
 
-//        // 定义一个空字符串常量，用于后续操作
-//        String EMPTY_STRING = "";
-
         // 遍历每个分段数据
         for (HH2SectionData sectionData : hh2SectionData) {
             ExpandableGroupEntity group = getExpandableGroupEntity(isExpand, sectionData);

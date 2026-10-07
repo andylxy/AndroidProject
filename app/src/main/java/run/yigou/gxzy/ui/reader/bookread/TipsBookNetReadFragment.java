@@ -76,13 +76,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
     private RefactoredExpandableAdapter adapter;
     private BookArgs bookArgs;
 
-    /**
-     *
-     */
     private TextView numTips;
-    /**
-     *
-     */
     private String bookId = null;
     private int bookLastReadPosition;
     private String searchText = null;
@@ -122,17 +116,11 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         return instance;
     }
 
-    /**
-     * @return
-     */
     @Override
     protected int getLayoutId() {
         return R.layout.tips_book_read_activity_group_list;
     }
 
-    /**
-     *
-     */
     @SuppressLint("CutPasteId")
     @Override
     protected void initView() {
@@ -164,13 +152,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                 if (charSequenceIsEmpty(text)) {
                     reListAdapter(true, false);
                     numTips.setText("");
-                    if (adapter != null) {
-                        adapter.setSearch(false);
-                    }
                 } else {
-                    if (adapter != null) {
-                        adapter.setSearch(true);
-                    }
                     setSearchText(text);
                 }
             };
@@ -237,7 +219,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             setJumpSpecifiedItemListener();
             //setHttpUpdateStatusNotification();
             rvList.setAdapter(adapter);
-            adapter.setSearch(false);
             refreshData();
         } catch (Exception e) {
             e.printStackTrace();
@@ -313,7 +294,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                 // 核心逻辑：获取真实索引并触发下载
                 // Fix: 搜索模式下 groupPosition 是过滤后的索引，需映射回 chapterList 的真实索引
                 int realIndex = groupPosition;
-                boolean isSearchMode = searchText != null && searchText.length() > 0;
+                boolean isSearchMode = isSearchActive();
 
                 if (isSearchMode) {
                     try {
@@ -363,8 +344,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
              */
             @Override
             public boolean onHeaderLongClick(GroupedRecyclerViewAdapter adapter2, BaseViewHolder holder, int groupPosition) {
-                // 搜索状态不响应长按
-                if (adapter.getSearch()) return true;
+                // 搜索状态不响应长按（用 Fragment 自身维护的搜索态，而非适配器的空桩）
+                if (isSearchActive()) return true;
                 TipsDialogHelper.showListDialog(getContext(), TipsDialogHelper.DIALOG_TYPE_REDOWNLOAD)
                         .setListener((dialog, position, string) -> {
                             if (string.equals("重新下本章节")) {
@@ -663,10 +644,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
 
             if (this.searchText == null) {
                 reListAdapter(true, false);
-                adapter.setSearch(false);
             } else {
                 setSearchText(this.searchText);
-                adapter.setSearch(true);
             }
         }
     }
@@ -688,7 +667,7 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
                     adapter.expandGroup(bookLastReadPosition, true);
                 }
             }
-            // 搜索结果已通过 presenter.search() -> view.showSearchResults() 回调处理
+            // 搜索结果由 performGlobalSearch() 经 SearchCoordinator 直接设置（见 setSearchData），非 MVP 路径
             adapter.notifyDataChanged();
         }
     }
@@ -723,6 +702,13 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
             // 执行全局搜索
             performGlobalSearch(searchText.trim());
         }
+    }
+
+    /**
+     * 是否处于搜索态（searchText 非空即视为搜索态）
+     */
+    private boolean isSearchActive() {
+        return searchText != null && !searchText.isEmpty();
     }
     
     /**
@@ -898,14 +884,6 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         // 通知 Presenter 处理内存压力
         if (presenter != null) {
             presenter.onTrimMemory(level);
-        }
-        
-        // 根据内存压力级别采取不同策略
-        if (level >= TRIM_MEMORY_RUNNING_CRITICAL) {
-            // 极端情况：清除适配器缓存
-            if (adapter != null) {
-                // 可以在这里添加适配器缓存清理逻辑
-            }
         }
     }
 

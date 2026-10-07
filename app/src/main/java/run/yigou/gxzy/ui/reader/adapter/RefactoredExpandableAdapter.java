@@ -200,22 +200,6 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
         longClickHandler.setJumpListener(listener);
     }
 
-    // ============ 兼容旧接口 ============
-
-    /**
-     * 设置搜索模式（兼容旧代码，阅读模式不使用）
-     */
-    public void setSearch(boolean search) {
-        // 阅读模式不使用搜索模式
-    }
-
-    /**
-     * 获取搜索模式（兼容旧代码）
-     */
-    public boolean getSearch() {
-        return false;
-    }
-
     // ============ 实现 ReadModeClickHandler.OnExpandToggleListener ============
 
     @Override
