@@ -189,7 +189,10 @@ public class DbService {
                 // 只是把 null 原样传出），此处必须判空：beginTransaction 写在 try 外，
                 // 直接调用会 NPE，且 endTransaction 也不会执行。
                 if (db == null) {
-                    throw new IllegalStateException("数据库尚未打开，无法开启事务");
+                    // 关键错误路径：库尚未就绪时先留可观测日志，再向上抛（由调用方兜底/重试）。
+                    IllegalStateException ex = new IllegalStateException("数据库尚未打开，无法开启事务");
+                    EasyLog.print(ex);
+                    throw ex;
                 }
                 db.beginTransaction();
                 try {
