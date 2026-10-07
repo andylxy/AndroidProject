@@ -101,9 +101,21 @@ public class TransactionSemanticsTest {
         // 2) 给 DbService 注入一个真实串行执行器（Unsafe 跳过了字段初始化，原 mSerialExecutor 为 null）。
         // 完全不触碰 GreenDaoManager.getInstance()，因此其真构造（碰 AppApplication.getContext()）不会执行。
         mDbService = allocateInstance(DbService.class);
-        // Unsafe 跳过字段初始化器，故 mSerialExecutor / mSerialThread 需手动注入真实对象
-        setField(DbService.class, mDbService, "mSerialExecutor", Executors.newSingleThreadExecutor());
-        setField(DbService.class, mDbService, "mSerialThread", new AtomicReference<Thread>());
+        // Unsafe 跳过字段初始化器，故 mSerialExecutor / mSerialThread 需手动注入真实对象。
+        // 执行器必须带 ThreadFactory 并在此处 set —— DbService 的内联短路判据是
+        //「当前线程 == mSerialThread.get()」。若用 Executors.newSingleThreadExecutor()（默认工厂）
+        // 配空 AtomicReference，mSerialThread 恒为 null，重入短路分支永远不执行，Q3 就零覆盖。
+        final AtomicReference<Thread> serialThread = new AtomicReference<>();
+        setField(DbService.class, mDbService, "mSerialExecutor",
+                Executors.newSingleThreadExecutor(new java.util.concurrent.ThreadFactory() {
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        Thread thread = new Thread(r, "mf-db-serial");
+                        serialThread.set(thread);
+                        return thread;
+                    }
+                }));
+        setField(DbService.class, mDbService, "mSerialThread", serialThread);
         setField(GreenDaoManager.class, null, "daoMaster", daoMaster);
 
         mSearchHistoryService = allocateInstance(SearchHistoryService.class);
@@ -154,6 +166,61 @@ public class TransactionSemanticsTest {
         }
         // 第 2 条插入必须被回滚：仍只有第 1 行
         assertEquals(1, countRows("txn_probe"));
+    }
+
+    /**
+     * Q3 自我串行化的核心门禁：事务体内再调 runInTransaction 必须内联执行，不能死锁。
+     *
+     * <p>若内联短路失效（mSerialThread 拿不到真实线程身份），内层会向同一条单线程执行器排队，
+     * 而那条线程正被外层占着等内层返回 —— 必然死锁，本用例靠 timeout 判定。
+     */
+    @Test(timeout = 5000)
+    public void runInTransaction_reentrantOnSerialThreadDoesNotDeadlock() {
+        final int[] innerCount = new int[1];
+        mDbService.runInTransaction(new Runnable() {
+            @Override
+            public void run() {
+                mDatabase.execSQL("INSERT INTO txn_probe (id, v) VALUES (1, 'outer')");
+                // 事务体内再开一层事务：已在串行线程，应内联执行
+                mDbService.runInTransaction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDatabase.execSQL("INSERT INTO txn_probe (id, v) VALUES (2, 'inner')");
+                        innerCount[0]++;
+                    }
+                });
+            }
+        });
+        assertEquals("内层事务体必须真的执行过（否则短路并未发生）", 1, innerCount[0]);
+        // 外层与内层都在同一事务里，两条都提交
+        assertEquals(2, countRows("txn_probe"));
+    }
+
+    /**
+     * Q3 异常路径：内层事务体抛出的异常必须逐层透传到最外层调用方，且整段回滚。
+     */
+    @Test(timeout = 5000)
+    public void runInTransaction_reentrantFailureRollsBackWholeChainAndRethrows() {
+        try {
+            mDbService.runInTransaction(new Runnable() {
+                @Override
+                public void run() {
+                    mDatabase.execSQL("INSERT INTO txn_probe (id, v) VALUES (1, 'outer')");
+                    mDbService.runInTransaction(new Runnable() {
+                        @Override
+                        public void run() {
+                            mDatabase.execSQL("INSERT INTO txn_probe (id, v) VALUES (2, 'inner')");
+                            throw new RuntimeException("inner-boom");
+                        }
+                    });
+                }
+            });
+            fail("内层异常应逐层透传到最外层调用方");
+        } catch (RuntimeException e) {
+            assertEquals("inner-boom", e.getMessage());
+        }
+        // 外层与内层的插入都必须被回滚
+        assertEquals(0, countRows("txn_probe"));
     }
 
     // ---- BaseService.replaceWhereInTx：原子提交 / 回滚 ----
@@ -248,7 +315,7 @@ public class TransactionSemanticsTest {
     private static void setField(Class<?> clazz, Object target, String name, Object value) throws Exception {
         Field f = clazz.getDeclaredField(name);
         f.setAccessible(true);
-        // 允许写入 final 字段（如 DbService.mDatabase），便于不调构造器直接注入
+        // 允许写入 final 字段（如 DbService.mSerialExecutor），便于不调构造器直接注入
         if (Modifier.isFinal(f.getModifiers())) {
             Field modifiers = Field.class.getDeclaredField("modifiers");
             modifiers.setAccessible(true);

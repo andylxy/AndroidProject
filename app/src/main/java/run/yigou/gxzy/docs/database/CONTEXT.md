@@ -10,7 +10,7 @@
 | 术语 | 含义 | 备注 |
 |---|---|---|
 | **DbService** | 数据库**执行协调器**（非领域 service）。持有串行执行器，提供 `runInBackgroundSerial` / `readInBackground` / `runInTransaction` 三个入口。 | ADR-0001 后只保留"执行器 + 事务"两职；不再充当服务定位器。 |
-| **LocalServices**（拟新增） | 服务**定位器**。单例，持有 19 个 `*Service` 引用，供"一个 import 拿全本地数据"的调用方使用。 | ADR-0001 Q1=C 的结论；替代原 `DbService` 的 19 字段。 |
+| **LocalServices** | 服务**定位器**。单例，持有 19 个 `*Service` 引用，供"一个 import 拿全本地数据"的调用方使用。 | ADR-0001 Q1=C 的结论；替代原 `DbService` 的 19 字段。 |
 | **串行执行器** | `DbService.mSerialExecutor`：`Executors.newSingleThreadExecutor`，线程名 `mf-db-serial`，优先级 `NORM_PRIORITY-1`，无界队列。 | 所有写操作与跨表事务 funnel 到这条线程，保证不与彼此并发访问同一 SQLite 连接。 |
 | **跨表事务** | `DbService.runInTransaction(Runnable)`：把跨多个 service（多张表）的"删+插"包进同一个 SQLite 事务，要么都提交、要么都回滚。 | 例：`clearAndSaveNavTabs` 同时改 `TabNav` 与 `TabNavBody`。 |
 | **主线程 DB 访问** | 在主线程直接 `findAll()` / `insert()` 等。 | 被禁止（见 greendao-hardening 票 04–07）；一律经 `runInBackgroundSerial` / `readInBackground`。 |

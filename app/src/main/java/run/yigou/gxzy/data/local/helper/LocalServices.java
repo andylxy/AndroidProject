@@ -37,25 +37,25 @@ import run.yigou.gxzy.data.local.service.YaoService;
  * 真正的数据访问由各 {@code *Service} 单例负责；本类不做任何 DB 执行/事务工作。
  */
 public class LocalServices {
-    public UserInfoService mUserInfoService;
-    public BookService mBookService;
-    public SearchHistoryService mSearchHistoryService;
-    public YaoService mYaoService;
-    public BeiMingCiService mBeiMingCiService;
-    public BookChapterService mBookChapterService;
-    public BookChapterBodyService mBookChapterBodyService;
-    public YaoFangService mYaoFangService;
-    public YaoFangBodyService mYaoFangBodyService;
-    public TabNavBodyService mTabNavBodyService;
-    public TabNavService mTabNavService;
-    public AboutService mAboutService;
-    public YaoAliasService mYaoAliasService;
-    public ChapterService mChapterService;
-    public ChatMessageBeanService mChatMessageBeanService;
-    public ChatSessionBeanService mChatSessionBeanService;
-    public AiConfigService mAiConfigService;
-    public AiConfigBodyService mAiConfigBodyService;
-    public ChatSummaryBeanService mChatSummaryBeanService;
+    public final UserInfoService mUserInfoService;
+    public final BookService mBookService;
+    public final SearchHistoryService mSearchHistoryService;
+    public final YaoService mYaoService;
+    public final BeiMingCiService mBeiMingCiService;
+    public final BookChapterService mBookChapterService;
+    public final BookChapterBodyService mBookChapterBodyService;
+    public final YaoFangService mYaoFangService;
+    public final YaoFangBodyService mYaoFangBodyService;
+    public final TabNavBodyService mTabNavBodyService;
+    public final TabNavService mTabNavService;
+    public final AboutService mAboutService;
+    public final YaoAliasService mYaoAliasService;
+    public final ChapterService mChapterService;
+    public final ChatMessageBeanService mChatMessageBeanService;
+    public final ChatSessionBeanService mChatSessionBeanService;
+    public final AiConfigService mAiConfigService;
+    public final AiConfigBodyService mAiConfigBodyService;
+    public final ChatSummaryBeanService mChatSummaryBeanService;
 
     private LocalServices() {
         // 各 *Service 本身已是单例，这里只是统一持有引用（与原 DbService 行为一致）。

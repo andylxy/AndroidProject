@@ -38,7 +38,6 @@ import run.yigou.gxzy.base.args.ManagerSetting;
 import run.yigou.gxzy.config.AppStyleConfigProvider;
 import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.service.UserInfoService;
-import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.data.local.helper.MigrationOrchestrator;
 import run.yigou.gxzy.data.local.helper.StartupIoExemption;
@@ -270,7 +269,7 @@ public final class AppApplication extends Application {
     private void initBasicConfig() {
         application = this;
 
-        // 进程启动时打开数据库并完成首次初始化（含 DbService 单例的建立）
+        // 进程启动时打开数据库并完成首次初始化（含 LocalServices 单例的建立）
         initDatabaseOnStartup();
 
         // 初始化用户信息服务
@@ -287,7 +286,7 @@ public final class AppApplication extends Application {
      * 进程启动时打开并处理数据库。
      *
      * <p>覆盖两段：① {@code MigrationOrchestrator} 内部的 {@code getWritableDatabase()}；
-     * ② {@code DbService} 单例首次构造——它会在构造器里逐个 new 出 19 个 Service，
+     * ② {@code LocalServices} 单例首次构造——它会在构造器里逐个new 出 19 个 Service，
      * 而 {@code BaseService} 的构造器又各自查一次 sqlite_master（{@code initTable}）。
      * 两者都是"后续任何数据操作都依赖它"的一次性前置动作，属于同一个窗口。
      *
@@ -295,20 +294,20 @@ public final class AppApplication extends Application {
      * 栈底是 {@code AppApplication.onCreate}，耗时约 396 ms + 160 ms，每个进程只发生一次。
      *
      * <p>放开的粒度刻意很窄：只有"打开库"（在 {@link MigrationOrchestrator} 内部）与
-     * "建立 DbService 单例"两段进入 {@link StartupIoExemption} 窗口，退出时立即恢复原策略。
+     * "建立 LocalServices 单例"两段进入 {@link StartupIoExemption} 窗口，退出时立即恢复原策略。
      * 之后的任何主线程 IO 照旧会被记下来（开库、建升级历史表、首次建索引、读版本号这几件
      * 一次性启动动作在 {@code MigrationOrchestrator} 里同样显式声明豁免，理由见那里的注释）。
      */
     private void initDatabaseOnStartup() {
         // 迁移与开库
         MigrationOrchestrator.ensureUpToDate(this);
-        // 建立 DbService 单例：它会 new 出全部 Service（各自在构造器里确认表是否存在）。
+        // 建立 LocalServices 单例：它会 new 出全部 Service（各自在构造器里确认表是否存在）。
         // 这一步与开库同属"进程一次性前置"，放进窄粒度的豁免窗口；
         // 开库之后的工作（索引维护等）不在窗口内，见 StartupIoExemption 的类注释。
         StartupIoExemption.runExempted(new Runnable() {
             @Override
             public void run() {
-                DbService.getInstance();
+                LocalServices.getInstance();
             }
         });
     }

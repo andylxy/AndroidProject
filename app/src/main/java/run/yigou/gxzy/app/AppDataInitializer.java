@@ -95,12 +95,12 @@ public class AppDataInitializer {
      */
     public static boolean hasLocalData() {
         try {
-            LocalServices dbService = LocalServices.getInstance();
-            if (dbService == null || dbService.mTabNavService == null) {
+            LocalServices localServices = LocalServices.getInstance();
+            if (localServices == null || localServices.mTabNavService == null) {
                 return false;
             }
             
-            ArrayList<TabNav> navList = dbService.mTabNavService.findAll();
+            ArrayList<TabNav> navList = localServices.mTabNavService.findAll();
             return navList != null && !navList.isEmpty();
         } catch (Exception e) {
             EasyLog.print(TAG, "Error checking local data: " + e.getMessage());
@@ -123,9 +123,9 @@ public class AppDataInitializer {
     private static void loadFromLocalDatabase() {
         try {
             // 数据源校验
-            LocalServices dbService = LocalServices.getInstance();
-            if (dbService == null) {
-                EasyLog.print(TAG, "❌ DbService 未初始化，中止加载");
+            LocalServices localServices = LocalServices.getInstance();
+            if (localServices == null) {
+                EasyLog.print(TAG, "❌ LocalServices 未初始化，中止加载");
                 return;
             }
             
@@ -137,7 +137,7 @@ public class AppDataInitializer {
             EasyLog.print(TAG, "📊 开始加载本地数据...");
             
             // 1. 加载导航数据（必须先加载，方剂别名依赖此数据）
-            loadNavigationData(dbService, globalData);
+            loadNavigationData(localServices, globalData);
             
             // 2. 加载药物数据
             loadYaoData(globalData);
@@ -222,7 +222,7 @@ public class AppDataInitializer {
      * 
      * <p>依赖关系：
      * <ul>
-     *   <li>必须在 {@link #loadNavigationData(DbService, GlobalDataHolder)} 之后调用</li>
+     *   <li>必须在 {@link #loadNavigationData(LocalServices, GlobalDataHolder)} 之后调用</li>
      *   <li>依赖 {@code globalData.getNavTabBodyMap()} 中的书籍信息</li>
      * </ul>
      * 
@@ -286,8 +286,8 @@ public class AppDataInitializer {
     /**
      * 加载导航数据
      */
-    private static void loadNavigationData(LocalServices dbService, GlobalDataHolder globalData) {
-        ArrayList<TabNav> navList = dbService.mTabNavService.findAll();
+    private static void loadNavigationData(LocalServices localServices, GlobalDataHolder globalData) {
+        ArrayList<TabNav> navList = localServices.mTabNavService.findAll();
         if (navList == null || navList.isEmpty()) {
             return;
         }

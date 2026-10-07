@@ -53,7 +53,7 @@ import run.yigou.gxzy.utils.ThreadUtil;
  */
 public class BookRepository {
 
-    private final LocalServices dbService;
+    private final LocalServices localServices;
     private final BookDataManager dataManager;
     private final GlobalDataHolder globalData;
     
@@ -61,7 +61,7 @@ public class BookRepository {
     private final Map<String, List<Chapter>> chapterCache = new ConcurrentHashMap<>();
 
     public BookRepository() {
-        this.dbService = LocalServices.getInstance();
+        this.localServices = LocalServices.getInstance();
         this.dataManager = BookDataManager.getInstance();
         this.globalData = GlobalDataHolder.getInstance();
     }
@@ -94,7 +94,7 @@ public class BookRepository {
         }
 
         try {
-            ArrayList<Chapter> chapters = dbService.mChapterService.find(
+            ArrayList<Chapter> chapters = localServices.mChapterService.find(
                 ChapterDao.Properties.BookId.eq(bookId)
             );
 
@@ -265,7 +265,7 @@ public class BookRepository {
      */
     public ArrayList<Book> queryBookshelf(String bookNo) {
         try {
-            return dbService.mBookService.find(BookDao.Properties.BookNo.eq(bookNo));
+            return localServices.mBookService.find(BookDao.Properties.BookNo.eq(bookNo));
         } catch (Exception e) {
             EasyLog.print("BookRepository", "查询书架失败: " + e.getMessage());
             return new ArrayList<>();
@@ -280,7 +280,7 @@ public class BookRepository {
      */
     public boolean addToBookshelf(Book book) {
         try {
-            dbService.mBookService.addEntity(book);
+            localServices.mBookService.addEntity(book);
             return true;
         } catch (Exception e) {
             EasyLog.print("BookRepository", "添加书架失败: " + e.getMessage());
@@ -305,7 +305,7 @@ public class BookRepository {
             @Override
             public void run() {
                 try {
-                    dbService.mBookService.addEntity(book);
+                    localServices.mBookService.addEntity(book);
                 } catch (Throwable t) {
                     EasyLog.print("BookRepository", "添加书架失败: " + t.getMessage());
                     EasyLog.print(t);
@@ -322,7 +322,7 @@ public class BookRepository {
      */
     public boolean updateReadingProgress(Book book) {
         try {
-            dbService.mBookService.updateEntity(book);
+            localServices.mBookService.updateEntity(book);
             return true;
         } catch (Exception e) {
             EasyLog.print("BookRepository", "更新阅读进度失败: " + e.getMessage());
@@ -343,7 +343,7 @@ public class BookRepository {
             @Override
             public void run() {
                 try {
-                    dbService.mBookService.updateEntity(book);
+                    localServices.mBookService.updateEntity(book);
                 } catch (Throwable t) {
                     EasyLog.print("BookRepository", "更新阅读进度失败: " + t.getMessage());
                     EasyLog.print(t);
@@ -376,7 +376,7 @@ public class BookRepository {
      * 生成书籍唯一ID
      */
     public String generateBookId() {
-        return dbService.mBookService.getUUID();
+        return localServices.mBookService.getUUID();
     }
 
     /**

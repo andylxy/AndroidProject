@@ -52,6 +52,15 @@ public class DbService {
     }
 
     /**
+     * 串行后台线程的身份引用。用于 {@link #runInTransaction} 判断是否「已在串行线程内」，
+     * 从而选择内联执行（防自我死锁）还是提交到执行器。
+     *
+     * <p>判据是<b>线程身份</b>而非线程名：执行器线程死亡后此处残留的旧引用不会与任何活线程
+     * 相等，故无「陈旧引用误判」风险；执行器尚未建线程时为 null，同样不会误判。
+     */
+    private final AtomicReference<Thread> mSerialThread = new AtomicReference<>();
+
+    /**
      * 串行后台执行器：数据库落库任务必须**按提交顺序**执行，且不能占用主线程。
      *
      * <p>为什么不复用 {@code ThreadPoolManager}：那是缓存池（corePoolSize=0、maximumPoolSize=200、
@@ -62,12 +71,6 @@ public class DbService {
      * <p>无界队列：提交即受理，不会因池满抛 RejectedExecutionException。调用方可以依赖
      * 「任务一定被执行」这一点——例如把它当作完成回调的兜底通道。
      */
-    /**
-     * 串行后台线程的身份引用。用于 {@link #runInTransaction} 判断是否「已在串行线程内」，
-     * 从而选择内联执行（防自我死锁）还是提交到执行器。
-     */
-    private final AtomicReference<Thread> mSerialThread = new AtomicReference<>();
-
     private final ExecutorService mSerialExecutor = Executors.newSingleThreadExecutor(runnable -> {
         Thread thread = new Thread(runnable, "mf-db-serial");
         thread.setPriority(Thread.NORM_PRIORITY - 1);
@@ -164,6 +167,8 @@ public class DbService {
      * 留下删了一半/写了一半的表。因此任务内的写操作请直接调用 service 方法，不要用吞异常的包装。
      *
      * <p>失败时异常向上抛给调用方（由调用方决定重试或降级），不会静默吞掉。
+     * 数据库尚未打开（{@code GreenDaoManager.getDatabase()} 返回 null）时抛
+     * {@link IllegalStateException}，同样向上抛而非静默返回。
      *
      * @param task 待执行的数据库操作
      */
@@ -180,6 +185,12 @@ public class DbService {
             public void run() {
                 // 每次调用现取库句柄（不在构造时 final 捕获）：消除初始化顺序地雷与未来重开库时的悬空句柄。
                 final Database db = GreenDaoManager.getDatabase();
+                // GreenDaoManager.getDatabase() 在 daoMaster 尚未就绪时返回 null（它不是"兜底"，
+                // 只是把 null 原样传出），此处必须判空：beginTransaction 写在 try 外，
+                // 直接调用会 NPE，且 endTransaction 也不会执行。
+                if (db == null) {
+                    throw new IllegalStateException("数据库尚未打开，无法开启事务");
+                }
                 db.beginTransaction();
                 try {
                     task.run();
