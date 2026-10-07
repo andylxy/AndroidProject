@@ -27,7 +27,7 @@
 | T3 | D6 死路径清理 | P1 | 低-中 | 【已验证】编译通过 + 注释死块已删（与 T5/T7 合并） |
 | T4 | D7 生命周期/竞态治理 | P2 | 中 | 【已验证】装机运行无崩溃（与 T3/T5 同批） |
 | T5 | D8 搜索异步化 | P2 | 中 | 【已验证】logcat 证实搜索在子线程执行 |
-| T6 | D4 索引单一真相（chapterIndex） | P1 | 中 | 【阻塞-需决策】（前提不成立，见新发现1） |
+| T6 | D4 索引单一真相（chapterIndex） | P1 | 中 | 【代码已写-待提交】方案 A 已实施（见「T6 实施记录」） |
 | T7 | D3 统一搜索路径 | P2 | 中 | 【已验证】搜索链路 logcat 走通（与 T3/T5 合并） |
 | T8 | D9 实体重建优化 | P3 | 低 | 【部分成立-已订正】`updateChapterContent` 增量那半不成立；`reListAdapter` 全量重建那半仍成立（见新发现2） |
 | — | D5 范围已厘清（无需改代码） | — | — | 【已完成-无需代码】 |
@@ -69,9 +69,11 @@ D9 写「`getExpandableGroups` 每次重建整份实体列表」。核实：
 
 结论：T8 属**误判**，不做改动；D9 应降级为「无实际性能问题」。
 
-**发现 3 — 搜索态子项长按仍用过滤后索引（真实残留风险）**
+**发现 3 — 搜索态子项长按仍用过滤后索引（已随 T6 方案 A 一并修复）**
 
-`onHeaderClick` / `onHeaderLongClick` 已在搜索态 `return`（D1/T1），但**子项长按**走适配器 `ReadModeLongClickHandler.onChildLongClick` →「跳转到本章内容」/「重新下本章节」直接使用 `groupPosition`（`:138/:143`），搜索态下会命中错误章节。此路径不经过 Fragment 的搜索态守卫，是 D4 唯一的真实暴露面。修复取决于发现 1 的决策结果。
+`onHeaderClick` / `onHeaderLongClick` 已在搜索态 `return`（D1/T1），但**子项长按**走适配器 `ReadModeLongClickHandler.onChildLongClick` →「跳转到本章内容」/「重新下本章节」直接使用 `groupPosition`，搜索态下会命中错误章节。此路径不经过 Fragment 的搜索态守卫，是 D4 唯一的真实暴露面。
+
+> **已修复**：T6 采用方案 A（`signatureId` 跨表映射）后，这两个动作改用数据装载时绑定的真实 `chapterIndex`，未绑定时拦截并 toast。详见下方「T6 实施记录」。
 
 ---
 
@@ -162,7 +164,7 @@ D9 写「`getExpandableGroups` 每次重建整份实体列表」。核实：
 - **爆炸半径**：`RefactoredExpandableAdapter` 被 `TipsBookNetReadFragment` 与 `BookContentSearchActivity` 共用；改公开 API 须两处同步适配并一起编译回归。
 - **门禁**：编译通过；搜索/非搜索点击、长按均命中正确章（adb 可复现用例优先）。
 - **风险**：中。
-- **状态**：【阻塞-需决策】前提不成立，见「发现 1」；子项长按为唯一未收敛暴露面
+- **状态**：【代码已写-待提交】方案 A 已实施，见下方「T6 实施记录」
 
 ---
 
@@ -237,7 +239,7 @@ T0(D2入库) → T1(D4.1死代码) → T2(D2.1守卫) → T3(D6死路径)
 | c | §4.6「删除 `onTrimMemory` 空分支」 | ✅ 核实为基点 `dfca6da` 已完成，非本轮范围；文档已补标注 |
 | d | T8「全免」订正只成立一半 | ✅ 已订正为【部分成立】：`updateChapterContent` 增量那半不成立；`reListAdapter` 经 `refreshData`/EventBus 在设置变更时仍全量重建 |
 | e | `updateChapterContent` 守卫处注释称「position 是真实章节索引」，与 T6 订正自相矛盾 | ✅ 注释已改为「position 来自全量章节侧，两侧索引不对齐」 |
-| f | 子项长按 D4 暴露面未标状态 | ✅ 已在 §0 总览、发现 3 与 D4 条目中显式标注为「未收敛-待 T6 决策」 |
+| f | 子项长按 D4 暴露面未标状态 | ✅ 已在 §0 总览、发现 3 与 D4 条目中显式标注为「未收敛-待 T6 决策」；后续 T6 方案 A 已实施，见「T6 实施记录」 |
 
 ---
 
@@ -305,4 +307,122 @@ stale 注释、`AppDataManager` 登记、文档状态对齐、`search()` 异常�
 
 **`onJumpSpecifiedItem`（`Fragment.java` 约:375-381）**：`clearEditText.setText("")` 会经 300ms 防抖触发 `setSearchText(null)` 恢复全量列表，随后才 `scrollToPositionWithOffset(groupPosition)` —— 而 `groupPosition` 是**搜索结果索引**。`setText` 与 `postDelayed(300)` 同为 300ms、注册顺序在前，故实际是「先恢复全量、再按搜索态索引滚动」，比「命中错章」更具体。
 
-已用 `git show HEAD` 核实基线 `:415-421` 完全相同，**非本轮引入**，故不在本轮修复。修复需与 T6（索引真相）一并决策 —— 子项长按的同类问题已在「发现 3」记录。
+已用 `git show HEAD` 核实基线 `:415-421` 完全相同，**非本轮引入**。后续 T6 方案 A 实施时**顺带修掉了**：`onJumpSpecifiedItem` 入参改为真实 `chapterIndex`，并去掉 `postDelayed(300)` 造成的双重定位竞态（见「T6 实施记录」的「附带修复」）。
+
+---
+
+## T6 实施记录（方案 A：`signatureId` 跨表映射）
+
+### 前提验证（先用设备 sqlite 确认方案可行，再动手）
+
+用 `run-as … sqlite3` 直查设备上的 `myzhongyi.db`，逐层确认：
+
+| 检查项 | 结果 |
+| --- | --- |
+| 两表是否有共同 bookId | 有（`ydyQltIuQv6`、`XNK0VFX39Xv` 等） |
+| 同书两表的章节数是否相同 | `ydyQltIuQv6` 22/22 相同；`XNK0VFX39Xv` 11 vs 10（多出的 1 章无内容，属正常） |
+| 同书 `signatureId` 是否逐章对应 | 是（前 5 章 `9lSFOt9wtL7` / `0lHavJPW2wc` / … 完全一致） |
+| `section` 与 `chapterSection` 是否逐位一致 | 是（22/22、10/10） |
+| **全库按 `bookId + signatureId` 匹配率** | **37/37 = 100%** |
+
+> 注意：`rowid` 两表不同（同章节 rowid 28 vs 5），但**业务序号与签名严格对齐** —— 故 `signatureId` 可作跨表键，而 `rowid` 不可。
+
+### 实施内容
+
+1. **`GroupData` 加 `chapterIndex`**（`model` 与 `entity` 两个类都加）
+   语义统一为「书籍章节列表里的真实下标」，哨兵值 `NO_CHAPTER_INDEX = -1`。
+2. **非搜索态按位置绑定**：`BaseRefactoredAdapter.setGroups` 在转换后调 `bindChapterIndexByPosition`，按列表下标赋值 —— 非搜索列表就是章节列表本身，下标即真实下标。
+3. **搜索态按 `signatureId` 反查**：`SearchCoordinator` 构造时接收 `allChapters`，在 `searchGlobal` 里按签名反查真实下标，查不到填 `NO_CHAPTER_INDEX` 并计入日志（`未绑定真实下标: N`）。
+4. **透传**：`RefactoredExpandableAdapter.setSearchData` 把 `entity.GroupData.chapterIndex` 拷到 `model.GroupData`。
+5. **子项长按改用真实下标**（D4 唯一真实暴露面）：`ReadModeLongClickHandler` 通过构造时传入的适配器引用取 `groupDataList`，`resolveChapterIndex(groupPosition)` 换算真实下标；「跳转到本章内容」/「重新下本章节」两个动作在 `NO_CHAPTER_INDEX` 时**拦截并toast**，绝不回退到用过滤后下标兜底。
+
+### 附带修复：`onJumpSpecifiedItem` 的双重定位竞态
+
+原实现先 `clearEditText.setText("")`（触发 300ms 防抖恢复全量），再 `postDelayed(300)` 按**搜索态索引**滚动 —— 两个 300ms 撞在一起，滚动目标错位。现改为：搜索态时走 `setSearchText(null)` 统一恢复全量（同步完成），随后**立即**按 `chapterIndex` 滚动/展开，不再等防抖。
+
+### 已知局限（非本次引入）
+
+全库 447 个章节中仅 37 章进了 `BOOK_CHAPTER`（有正文内容），故搜索只能命中**已下载/已有内容**的章节。这是既有约束：未下载的章在 `BOOK_CHAPTER` 里没有记录，`signatureId` 无从反查。该章若出现在结果里（理论上不会，因为检索源就是 `BOOK_CHAPTER`），会被 `NO_CHAPTER_INDEX` 拦截。
+
+### 验证
+
+- `:app:compileDebugJavaWithJavac` BUILD SUCCESSFUL；`:app:testDebugUnitTest` BUILD SUCCESSFUL。
+- 装机联调 logcat：`=== 搜索完成 === 匹配章节: 0, 总匹配数: 0, 未绑定真实下标: 0`，零 FATAL。
+  > **⚠️ 该行日志不构成「反查逻辑正确」的证据（第四轮复审指出）**：`unboundCount` 只在 `for (section : filteredData)` 循环体内累加，`匹配章节: 0` ⇒ 循环一次都没执行 ⇒ `未绑定真实下标` **必然为 0**，与 `findChapterIndexBySignature` 能否正确反查完全无关。它只证明「搜索链路被调用过」。
+  > 真正支撑反查正确性的是：① 设备 sqlite 全库按 `bookId + signatureId` 匹配 37/37（**数据前提**）；② 编译期类型检查。反查的**行为**验证仍缺，需装 ADBKeyboard 后做中文搜索端到端复现。
+- 全量新增行缩进合规、`git diff --check` 干净、零行尾噪音。
+  > **⚠️ 该行在第五轮复审被证伪**：`git diff --check` 只查行尾/冲突标记，**查不出缩进**；实际 `ReadModeLongClickHandler` 有 6 处缩进塌坏（javadoc 顶格、构造器参数 6/9 空格、收尾花括号 5 空格、方法声明顶格、`return;` 只有 4 空格）。已用 python 按内容断言以绝对缩进修正。教训：**「缩进合规」不能用 `git diff --check` 当证据**，要另行扫描新增行的前导空格。
+- **未做中文搜索的端到端复现**：设备只有 `com.android.inputmethod.pinyin`，`adb shell input text` 无法注入中文，未装 ADBKeyboard。因此**反查逻辑的行为验证尚缺**（见上方 ⚠️）。已完成的验证是「数据前提（sqlite 37/37）」+「编译通过」+「logcat 确认链路被调用」，**不是** UI 层的错章 / 不错章对比。
+
+---
+
+## 第四轮 code-review（复审 T6 方案 A）
+
+### 重点核实通过项
+
+- **`chapterIndex` 字段位置与透传方向正确**：`groupDataList` 元素是 `model.GroupData`，实体侧由 `SearchCoordinator` 写、`setSearchData` 读，UI 侧从 `model` 读 → 无死字段。
+- **`SearchCoordinator` 构造签名变更安全**：唯一调用方 `TipsBookReadPresenter`，测试代码零命中。
+- **`findChapterIndexByTitle` 彻底移除**（spec §4.4 要求），D4.1 死代码已清。
+- **「反查不留到 UI 层」这个核心诉求真正做到**：反查在 `searchGlobal` 构造循环内一次完成，UI 层只做 O(1) 读。
+- 缩进 4 空格、零 `printStackTrace`、日志统一走 `EasyLog`。
+
+### 发现与处置（4 项，全部已修）
+
+| # | 发现 | 轴 | 修复 |
+| --- | --- | --- | --- |
+| 1 | **`updateGroupFromEntity` 清空 `chapterIndex`** —— 它用 `DataAdapter.fromExpandableGroupEntity(entity)` 整体替换元素，而该方法 `new GroupData(...)` 使 `chapterIndex` 回到默认 `-1`。该方法由**非搜索态**的 `updateChapterContent` 调用 ⇒ 非搜索态下章节内容一更新，该章绑定即被清空，随后长按会误弹「请退出搜索后重试」（**在非搜索态下这句提示本身就是错的**）。**本轮引入的回归** | Spec#2（最严重） | 替换前先取出原 `chapterIndex` 并回填。这是唯一会清绑定的活跃写入点（`updateGroupData` 全仓无调用方，是死 API） |
+| 2 | `handleJumpAction` 的 `if (chapterIndex > 0)` 把**第 0 章**静默拦掉（既不等于 `-1` 不 toast，也不满足 `> 0`）；而 `handleRedownloadChapterAction` 只判 `-1`，**两个动作对第 0 章行为不一致** | Spec#1 | 统一为「`< 0` 拦截 + 其余可执行」，第 0 章可正常跳转；两个动作判定口径与提示语统一 |
+| 3 | `BaseRefactoredAdapter` 的 javadoc 断言「`RefactoredSearchAdapter` 也会走到绑定」，但它**覆写了 `setGroups` 且不调 super**，实际不会绑定 —— 与代码不符，违反「不得保留与实现不一致的注释」 | Standards#1 | 已订正为「适用范围仅限未覆写 `setGroups` 的子类」，并说明无功能后果（已核实：搜索页用 `SearchModeLongClickHandler`，菜单只有「拷贝内容」，不读 `chapterIndex`） |
+| 4 | `ReadModeLongClickHandler` 的 `dataSource == null` 分支**不可达**（唯一调用方必传适配器），且走到时 toast「请退出搜索后重试」是**错误诊断** | Standards 判断题 | 构造签名改为直接收 `BaseRefactoredAdapter`（`new ReadModeLongClickHandler(context, this, this)`），去掉 `instanceof` + `@Nullable` + 死分支三件套 |
+
+### 记入教训的两点
+
+1. **「加字段」类改动的隐藏写入点**：给不可变数据类加了带默认值的字段后，必须 grep「所有 `new XxxData(...)` 的写入点」——本轮漏了 `updateGroupFromEntity` 这条路径，导致新字段被悄悄重置。**新增字段后要问：有哪些地方会重新构造这个对象？**
+2. **`if (x > 0)` 与哨兵 `-1` 冲突**：一旦引入「`-1` 表示无效」的约定，所有 `< 0` / `!= -1` / `> 0` 的旧判断都要重新审视——`> 0` 会把合法的第 0 章与无效值混在一起。
+
+### 未做（判断题，记录理由）
+
+- `NO_CHAPTER_INDEX` / `hasChapterIndex()` 在两个同名 `GroupData` 各存一份（Duplicated Code）：两者是不同的数据结构（`entity` 版给 `SearchCoordinator`→`setSearchData` 中转，`model` 版给 UI 读），抽公共 holder 会让entity 版反向依赖 model 版，反而破坏分层。暂保留。
+- `modelGroupList.get(size()-1).setChapterIndex(...)` 绕行：可读性略差但无害，等T6 若继续演进再一并整理。
+- 工单里「D4 复核表 f 项」保留历史语「未收敛-待 T6 决策」后接「已实施」：历史记录保留原样更利于追溯，不改。
+
+### 已知风险（第四轮复审记录，本轮未修）
+
+**`onJumpSpecifiedItem` 与 `reListAdapter` 内的滚动有潜在时序耦合**：`setSearchText(null)` → `reListAdapter(true, false)` 内部在 `isShowBookCollect` 为真时会 `scrollToPositionWithOffset(bookLastReadPosition, 0)` + `expandGroup`，随后 `onJumpSpecifiedItem` 又按 `chapterIndex` 定位——**后者覆盖前者**。
+
+`isShowBookCollect` 仅在 `initData` 由启动参数置真、`onDestroyView` 复位，实际运行期大概率已是 `false`，故当前不会触发。但代码里没有防御：若将来恢复该标记，会出现「跳转到A 章却先滚到上次阅读位置」的短暂错位。
+
+处理方式留待后续：要么在跳转路径上跳过 `reListAdapter` 的定位分支，要么把 `isShowBookCollect` 复位时机前移。**本轮不修** —— 触发条件不成立，改动会牵扯 `initData` 的参数语义。
+
+---
+
+## 第五轮 code-review（复审 T6 方案 A）
+
+### 第四轮 4 项：全部已修 ✅
+
+`updateGroupFromEntity` 回填（`:166-172`）、第 0 章 `< 0` 拦截、javadoc 不再断言搜索适配器、`ReadModeLongClickHandler` 构造签名去掉 `instanceof`/`@Nullable`/死分支。
+
+### 本轮发现与处置（7 项，全部已修）
+
+| # | 发现 | 轴 | 修复 |
+| --- | --- | --- | --- |
+| 1 | **过滤书让 `chapterIndex` 坐标系错位**。宋版伤寒在设置未全开时，`getChapterContentList()` 经 `filterShanghanContent` 返回 `subList(start, end)`（实测 `start=8, end=18`），显示列表是全量章节的截断片段；而非搜索态按显示位置绑定、搜索态按 `allChapters` 全量坐标绑定 → 两套坐标系。搜索态跳转用全量坐标滚到短列表会**越界被静默忽略**（`BaseRefactoredAdapter:225-227`），跳转无声失效 | Spec#2（最严重） | 两条路径统一以「显示列表」为基准：`SearchCoordinator` 改为接收 `getChapterContentList()` 的 `HH2SectionData` 列表（已核实 `DataConverter` 会设置 `signatureId`），按签名反查显示下标。被过滤掉的章节反查不到 → `NO_CHAPTER_INDEX` → UI 拦截 |
+| 2 | **6 处缩进塌坏**，而工单「验证」节还写着「全量新增行缩进合规」 | Standards#1 | 用 python 按内容断言写死绝对缩进；并把工单里那条虚假声明改为 ⚠️ 说明 |
+| 3 | `model/GroupData` 类注释称「提供不可变访问接口」，但新增的 `chapterIndex` 有 setter，三个 final 字段唯独它可变 | Standards#2 | 注释补充「唯一例外」及原因（绑定发生在构造链之外），并说明写入只发生在主线程 |
+| 4 | 三处 javadoc 形参失真：`onJumpRequested` / `onRedownloadChapterRequested` / `onJumpSpecifiedItem` 的 `@param groupPosition` 实为 `chapterIndex` | Standards#3 | 接口声明与实现处的形参名、javadoc 一同改为 `chapterIndex` |
+| 5 | **`onJumpSpecifiedItem` 搜索态分支不清搜索框** —— 只调 `setSearchText(null)`，列表已恢复全量而搜索框仍显示关键字（非搜索分支反而清了，属回归） | Standards#4 / Spec#1（同一根因） | 两个分支统一先 `clearEditText.setText("")` 再 `setSearchText(null)`；定位改为 `postDelayed(350)` —— 必须排在 TextWatcher 300ms 防抖的 `reListAdapter` **之后**，否则刚展开的分组会被收回 |
+| 6 | `updateGroupFromEntity` 注释写「按 position 重新绑定即可」，代码却是沿用旧值 | Spec#3 | 订正注释并说明「沿用」优于「重绑」：重绑会把「旧值已是未绑定」伪装成一个看起来合法的下标 |
+| 7 | `hasChapterIndex()` 在两个同名 `GroupData` 上各一份且**全仓零调用方**，而 `design-analysis` 却称「UI 层一律以 `hasChapterIndex()` 为准」 | Standards / Spec（文档失真） | 删除两处死方法；文档改为「以 `chapterIndex < 0` 为准」并注明勿再据旧文引用。同时订正 `BaseRefactoredAdapter` 里对该方法的 `{@link}` |
+
+### 抑制标记方案的失败（记入教训）
+
+修 #5 时先尝试「置标志位屏蔽 TextWatcher」，**无效**：`onTextChanged` 是 `removeCallbacks(runnable); postDelayed(runnable, 300)`，而标志位是同步置真又同步复位的，待 runnable 300ms 后执行时标志早已是 false。改为「让定位排在防抖之后（350 > 300）」才成立。
+
+- **教训：抑制一个「延迟执行」的回调，同步置标志位没用 —— 要么取消它（`removeCallbacks`，但 runnable 是匿名内部类私有的、拿不到），要么把自己的动作排到它之后。**
+
+### 判断为「不改」的项（记录理由）
+
+- `resolveChapterIndex` 里 `groupDataList == null` 不可达：同文件 `:188/:196/:225` 已有同类防御判空，保持口径一致，且成本为零。
+- `findChapterIndexBySignature` 是 O(n²)：上界是「结果章数 × 显示章数」，设备实测单书 22 章 ≈ 500 次比较，无需建 Map。
+- `bindChapterIndexByPosition` 是 O(n)：只在 `setGroups`（列表重建）跑，不在 `onBind` 热路径。
+- `setGroupDataList`（`BaseRefactoredAdapter:159`）不绑定 chapterIndex 且零调用方：死 API，不动。

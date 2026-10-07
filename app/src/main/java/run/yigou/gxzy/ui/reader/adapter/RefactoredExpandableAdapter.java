@@ -53,7 +53,7 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
 
     public RefactoredExpandableAdapter(@NonNull Context context) {
         super(context);
-        this.longClickHandler = new ReadModeLongClickHandler(context, this);
+        this.longClickHandler = new ReadModeLongClickHandler(context, this, this);
     }
 
     // ============ 数据管理 ============
@@ -103,6 +103,11 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
             }
 
             modelGroupList.add(new GroupData(sourceGroup.getTitle(), modelItems));
+            // T6：把 SearchCoordinator 反查出的显示列表下标透传到 model.GroupData，
+            // 子项长按的跳转 / 重新下载据此定位章节，不再用过滤后下标（会错章）
+            modelGroupList.get(modelGroupList.size() - 1)
+                    .setChapterIndex(sourceGroup.getChapterIndex());
+
             mirrorGroups.add(new ExpandableGroupEntity(
                     sourceGroup.getTitle() != null ? sourceGroup.getTitle() : "",
                     "",
@@ -152,8 +157,21 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
             return;
         }
 
+        // T6：保留原有 chapterIndex —— DataAdapter.fromExpandableGroupEntity 会
+        // new GroupData(...)，chapterIndex 回到默认的 NO_CHAPTER_INDEX。本方法由非搜索态的
+        // updateChapterContent 调用（章节内容更新），不清绑定会让该章此后再长按
+        // 「跳转到本章内容」被误判为「未绑定」而拦截 —— 而它本就在非搜索态下。
+        // 注意是「沿用旧值」而非「按 position 重新绑定」：本方法只替换内容，不改变
+        // 列表顺序，旧的 chapterIndex 仍然成立；而 position 在非搜索态虽然恰好等于
+        // 章节下标，却会掩盖「旧值已是 NO_CHAPTER_INDEX」这一情况（例如该章从未
+        // 绑定成功），把它伪装成一个看起来合法的下标。沿用旧值能如实暴露未绑定状态。
+        int keepChapterIndex = groupDataList.get(position) != null
+                ? groupDataList.get(position).getChapterIndex()
+                : GroupData.NO_CHAPTER_INDEX;
+
         // 转换为新数据结构并更新
         GroupData groupData = DataAdapter.fromExpandableGroupEntity(entity);
+        groupData.setChapterIndex(keepChapterIndex);
         groupDataList.set(position, groupData);
 
         // 同步entity到groups（兼容层）
@@ -230,9 +248,9 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
     }
 
     @Override
-    public void onJumpRequested(int groupPosition, int childPosition) {
+    public void onJumpRequested(int chapterIndex, int childPosition) {
         if (jumpListener != null) {
-            jumpListener.onJumpSpecifiedItem(groupPosition, childPosition);
+            jumpListener.onJumpSpecifiedItem(chapterIndex, childPosition);
         }
     }
 
@@ -244,7 +262,7 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
     }
 
     @Override
-    public void onRedownloadChapterRequested(int groupPosition) {
+    public void onRedownloadChapterRequested(int chapterIndex) {
         toast("重新下载章节功能暂未实现");
     }
 

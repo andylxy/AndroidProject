@@ -372,14 +372,30 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
         if (onJumpSpecifiedItemListener == null) {
             onJumpSpecifiedItemListener = new RefactoredExpandableAdapter.OnJumpSpecifiedItemListener() {
                 @Override
-                public void onJumpSpecifiedItem(int groupPosition, int childPosition) {
+                public void onJumpSpecifiedItem(int chapterIndex, int childPosition) {
+                    // 入参是「显示列表下标」（T6：Handler 已把 groupPosition 换算成
+                    // chapterIndex）。显示列表即 presenter.getChapterContentList()，
+                    // 它可能是全量章节的过滤片段（宋版伤寒），故这里不能按全量章节理解。
+                    // 若当前在搜索态，列表是搜索结果，必须先退出搜索态恢复成显示列表，
+                    // 否则 chapterIndex 会作用在错误的列表上。
+                    // 清空输入框：列表要恢复成全量，若搜索框仍显示关键字，用户接着
+                    // 输入会拼成「旧关键字+新字符」，与列表状态错位。
+                    // 注意 setText 会触发 TextWatcher 的 300ms 防抖，那次防抖会再
+                    // reListAdapter 一次并重置展开态，故定位必须排在它之后（350 > 300），
+                    // 否则刚展开的分组会被收回。
                     clearEditText.setText("");
-                    numTips.setText("");
+                    // 空守卫：numTips 在 initView 才赋值，长按回调理论上可能先于
+                    // view 绑定触发。与 showLoading/showError 的空守卫同口径。
+                    if (numTips != null) {
+                        numTips.setText("");
+                    }
+                    // 走 setSearchText(null) 以统一「作废在途搜索 + 恢复全量」的口径；
+                    // 非搜索态下它只是把列表按当前状态重建一次，无副作用。
+                    setSearchText(null);
                     postDelayed(() -> {
-                        layoutManager.scrollToPositionWithOffset(groupPosition, 0);
-                        adapter.expandGroup(groupPosition, true);
-                    }, 300);
-
+                        layoutManager.scrollToPositionWithOffset(chapterIndex, 0);
+                        adapter.expandGroup(chapterIndex, true);
+                    }, 350);
                 }
             };
             adapter.setOnJumpSpecifiedItemListener(onJumpSpecifiedItemListener);

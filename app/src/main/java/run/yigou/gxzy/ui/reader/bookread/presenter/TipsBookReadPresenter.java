@@ -582,7 +582,11 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
             public void run() {
                 try {
                     android.util.Pair<List<GroupData>, List<List<ItemData>>> result =
-                            new SearchCoordinator(bookId).searchGlobal(trimmed);
+                            // T6：传入「显示列表」而非 allChapters —— 两者长度可能不同
+                            // （宋版伤寒过滤后是 subList），只有与适配器当前列表同坐标系，
+                            // 后续滚动 / 展开才不会越界。见 SearchCoordinator 的类注释。
+                            new SearchCoordinator(bookId, getChapterContentList())
+                                    .searchGlobal(trimmed);
 
                     ThreadUtil.runOnUiThread(new Runnable() {
                         @Override

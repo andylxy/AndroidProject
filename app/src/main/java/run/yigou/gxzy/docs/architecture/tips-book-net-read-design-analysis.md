@@ -20,7 +20,7 @@
 | **D2** | 【代码已写-待提交】 | 见 `tips-book-net-read-fixes-done.md`；HEAD 中尚未包含 |
 | **D2.1** | 【代码已写-待提交】 | §3；`updateDownloadStatus` 已加搜索态守卫 |
 | **D3** | 【代码已写-待提交】 | §3；搜索统一走 `Presenter.search()`，注释死块已删 |
-| **D4** | 【阻塞-需决策】 | §3；两表均无 `orderBy`，位置索引不可靠，方案待定 |
+| **D4** | 【代码已写-待提交】 | §3；方案 A：`signatureId` 跨表映射（已用设备 sqlite 验证全库 37/37 对齐） |
 | **D4.1** | 【代码已写-待提交】 | §3；`currentIndex` / `findChapterIndexByTitle` / 搜索态死块已删 |
 | **D5** | 【范围已厘清】（无需改代码） | §3 |
 | **D6** | 【代码已写-待提交】 | §3（已订正误诊）；死路径清理已随 D3 一并实施 |
@@ -122,12 +122,16 @@ Adapter 内部同时持有 `groups`（旧 `ExpandableGroupEntity`）和 `groupDa
 - 两条路分别走「新结构」和「旧结构」，是 D2 错位的直接来源。
 - **实施结果**：两条路已收敛为一条 —— `Presenter.search()` 成为唯一入口（后台线程执行），回调 `showSearchResults`；Contract 回调签名从 `List<ExpandableGroupEntity>` 改为 `(List<GroupData>, List<List<ItemData>>, int)`，**与适配器绑定的 `groupDataList` 同构**；Fragment 侧的 `searchCoordinator` 字段与直调已删除。
 
-**D4. 索引语义在搜索/非搜索间漂移 ——【阻塞-需决策】**
+**D4. 索引语义在搜索/非搜索间漂移 ——【代码已写-待提交】**
 
-- 原方案假设「给 `GroupData` 加 `chapterIndex` 即可」，但核查发现**前提不成立**：非搜索列表来自 `Chapter` 表、搜索列表来自 `BookChapter` 表，是两表两套记录；两处 `find(BookId.eq(...))` **均无显式 `orderBy`**（全仓 `orderBy` 零命中），返回顺序不保证一致 → 「搜索第 n项 = 列表第 n 章」不成立。
-- 照原方案实施只是把标题匹配换成位置匹配，**错误依旧**。可选方案见 `tips-book-net-read-tickets.md` 的「发现 1」。
-- 原`findChapterIndexByTitle` 标题 O(n) 回查已随 D4.1 删除，故 header点击/长按在搜索态已统一 `return`，不再使用错位索引。
-- **唯一未收敛的暴露面**：子项长按走 `ReadModeLongClickHandler.onChildLongClick` →「跳转到本章内容」/「重新下本章节」直接使用 `groupPosition`，不经 Fragment 的搜索态守卫，搜索态下仍会命中错章。修复取决于上述方案决策。
+- 原方案假设「给 `GroupData` 加 `chapterIndex` 即可」，但核查发现**位置索引前提不成立**：非搜索列表来自 `Chapter` 表、搜索列表来自 `BookChapter` 表，是两表两套记录；两处 `find(BookId.eq(...))` **均无显式 `orderBy`**（全仓 `orderBy` 零命中），返回顺序不保证一致 → 「搜索第 n 项 = 列表第 n 章」不成立。照原方案实施只是把标题匹配换成位置匹配，**错误依旧**。
+- **已实施方案 A（`signatureId` 跨表映射）**：两表都带 `signatureId` 且逐章对应，故以它为跨表键反查真实下标，而非依赖位置。
+  - 前提已用设备 sqlite 验证：同书两表章节数一致或差 0–1（差的是无内容章），`signatureId` 与 `section` 逐章对应；**全库按 `bookId + signatureId` 匹配 37/37 = 100%**。注意两表 `rowid` 不同，故 `rowid` 不可作键。
+- 绑定规则：非搜索态由 `setGroups` 按位置绑定；搜索态由 `SearchCoordinator.searchGlobal` 按签名反查，查不到填 `NO_CHAPTER_INDEX = -1` 并计入日志。
+- **两条路径的基准必须是同一个「显示列表」**：`chapterIndex` 的用途是滚动 / 展开 / 重新下载，都作用在适配器当前列表上。而宋版伤寒在设置未全开时 `getChapterContentList()` 会经 `filterShanghanContent` 返回 `subList(start, end)` —— 显示列表只是全量章节的截断片段。第五轮复审前搜索态按 `allChapters`（全量）反查，与非搜索态的显示坐标相差 `start`，滚动到短列表时越界被静默忽略、跳转无声失效。现改为两条路径都以显示列表为基准；被过滤掉的章节反查不到会得到 `NO_CHAPTER_INDEX`，由 UI 层拦截。
+- UI 层一律以「`chapterIndex < 0`」为准，**未绑定即拦截动作，不得回退到用过滤后下标兜底** —— 后者正是本项要消除的错章路径。判定写在 `ReadModeLongClickHandler`（跳转与重新下载两个动作同一口径）；两个同名 `GroupData` 上曾各有一份 `hasChapterIndex()`，因全仓零调用方已在第五轮删除，勿再据旧文引用。
+- 至此 header 点击/长按（D1/D4.1 已 `return`）与子项长按（本项）两条路径都不再使用错位索引。
+- 详细实施记录与已知局限见 `tips-book-net-read-tickets.md` 的「T6 实施记录」。
 
 **D4.1. 死状态与搜索态死分支（D4 的延伸发现）——【代码已写-待提交】**
 
@@ -240,7 +244,7 @@ Fragment 侧相应改为只操作 `GroupData`：
 | 1 | D1 搜索态守卫修复 —— **【已提交】`dfca6da`**；D5 范围厘清：阅读页用 `isSearchActive()` 不碰 `SearchStateManager` | 低（已入仓） | 装机可复现「搜索结果长按」无越界提示 ✅ |
 | 1.5 | D2 双源分离修复 —— **【代码已写-待提交】**（`updateChapterContent` 守卫 + `setSearchData` 同步 `groups` 镜像 + 镜像一致性日志） | 低（爆炸半径仅 `RefactoredExpandableAdapter`，已被 `TipsBookNetReadFragment` 独占；`BookContentSearchActivity` 用另一适配器不受影响） | `:app:compileDebugJavaWithJavac` 通过 ✅；非搜索态下载/展开/点击回归无变化 ✅ |
 | 2 | D4.1 死代码清理 —— **【代码已写-待提交】**（`currentIndex` / `findChapterIndexByTitle` / 搜索态死块已删） | 低 | grep 零命中 ✅ |
-| 2.5 | **D4 索引绑定 `chapterIndex` ——【阻塞-需决策】**：原方案前提不成立（非搜索列表来自 `Chapter` 表、搜索列表来自 `BookChapter` 表，两处查询均无 `orderBy`，位置索引不可靠）。子项长按（`ReadModeLongClickHandler`）在搜索态仍直接用 `groupPosition`，是 D4 唯一真实暴露面 | 待决策后评估 | 需先定方案：`signatureId` 跨表映射 / 给两表补 `orderBy` / 暂不做 |
+| 2.5 | **D4 索引绑定 `chapterIndex` ——【代码已写-待提交】**：位置索引前提不成立（两表无 `orderBy`），改用**方案 A `signatureId` 跨表映射**（已验证全库 37/37 对齐）。非搜索态按位置绑定、搜索态按签名反查、未绑定填 `-1` 并由 UI 层拦截。子项长按（`ReadModeLongClickHandler`）已改用真实 `chapterIndex` | 中（触及共用适配器，但 `chapterIndex` 为新增字段，两个消费者均不读它） | 编译 + 单测通过；**数据前提**经设备 sqlite 全库验证（37/37 对齐）；反查的**行为**验证待装 ADBKeyboard 后做中文搜索端到端（logcat 的「未绑定数为 0」因 0 结果时循环未执行，不构成证据） |
 | 3 | D3 统一搜索路径 —— **【代码已写-待提交】**（`Presenter.search()` 统一入口 + Contract 回调改走新结构 + 注释死块删除） | 中（跨两消费者，但已实测搜索页不受影响） | 编译通过 ✅；logcat 证实搜索链路走通 ✅ |
 | 4 | D7 + D8 生命周期与竞态（含搜索异步化） —— **【代码已写-待提交】**（EventBus 改 `onStart`/`onStop`；`bookInitData` 与 `search` 各加在途序号；`cancelSearch()` 联动；检索移出主线程 + 进行中提示） | 中| 装机零 FATAL ✅；logcat 证实检索在子线程 ✅ |
 | 5 | D6 清理 —— **【代码已写-待提交】**；D9 ——**【部分成立】**（`updateChapterContent` 增量那半不成立；`reListAdapter` 全量重建那半仍成立，降级为低优先级性能项） | 低 | 全量单测 ✅ + 装机 ✅ |
@@ -255,7 +259,7 @@ Fragment 侧相应改为只操作 `GroupData`：
 
 - **已入仓**：D1（`dfca6da`）。
 - **代码已写、待提交**：D2、D2.1、D3、D4.1、D6、D7、D8 —— 均已编译通过并经装机/logcat 验证。
-- **阻塞待决策**：D4（位置索引前提不成立，方案见 §5 阶段 2.5）。
+- **代码已写、待提交**：D4 方案 A（`signatureId` 跨表映射）—— 见 §5 阶段 2.5。
 - **部分成立**：D9（降级为低优先级性能项，见 §3 D9 订正）。
 - **无需代码**：D5。
 

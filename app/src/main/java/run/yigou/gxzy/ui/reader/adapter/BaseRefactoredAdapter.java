@@ -74,7 +74,11 @@ public abstract class BaseRefactoredAdapter extends GroupedRecyclerViewAdapter {
      * 跳转监听器接口（兼容旧代码）
      */
     public interface OnJumpSpecifiedItemListener {
-        void onJumpSpecifiedItem(int groupPosition, int childPosition);
+        /**
+         * @param chapterIndex 章节在显示列表中的下标（T6；搜索态下是退出搜索后的全量坐标）
+         * @param childPosition 子项位置(-1表示章节头部)
+         */
+        void onJumpSpecifiedItem(int chapterIndex, int childPosition);
     }
 
     /**
@@ -116,8 +120,38 @@ public abstract class BaseRefactoredAdapter extends GroupedRecyclerViewAdapter {
     public void setGroups(@NonNull ArrayList<ExpandableGroupEntity> groups) {
         this.groups = groups;
         this.groupDataList = DataAdapter.convertListGeneric(groups);
+        bindChapterIndexByPosition(this.groupDataList);
         expandStateManager.syncFromData(groups);
         notifyDataSetChanged();
+    }
+
+    /**
+     * 按列表位置绑定章节真实下标（T6）。
+     *
+     * <p>仅适用于<strong>非搜索态</strong>列表：此时 {@code groups} 就是显示列表本身
+     * （即 {@code presenter.getChapterContentList()}，可能是全量章节的过滤片段），
+     * 下标即所需坐标，故直接按位置绑定。搜索态走
+     * {@link RefactoredExpandableAdapter#setSearchData}，下标由 {@code signatureId} 反查，
+     * 不适用本方法。
+     *
+     * <p>之所以统一在这里绑定而不是散落到各调用方：让 {@code chapterIndex} 在两种状态下
+     * 语义一致（都表示「当前显示列表里的下标」），UI 层只需判
+     * {@code chapterIndex < 0}（即 {@link GroupData#NO_CHAPTER_INDEX} 及其它负值），
+     * 不必再关心当前是否处于搜索态。
+     *
+     * <p><b>适用范围仅限未覆写 {@code setGroups} 的子类</b>：{@code RefactoredSearchAdapter}
+     * 覆写了 {@code setGroups} 且不调 super，故<b>不会</b>走到本方法、其列表拿不到
+     * {@code chapterIndex}。这没有功能后果 —— 书内搜索页用
+     * {@code SearchModeLongClickHandler}，其菜单只有「拷贝内容」，不做跳转/重新下载，
+     * 不读该字段。此处写明以免后来者误以为「所有适配器都会被绑定」。
+     */
+    private static void bindChapterIndexByPosition(List<GroupData> groupDataList) {
+        for (int i = 0; i < groupDataList.size(); i++) {
+            GroupData groupData = groupDataList.get(i);
+            if (groupData != null) {
+                groupData.setChapterIndex(i);
+            }
+        }
     }
 
     /**

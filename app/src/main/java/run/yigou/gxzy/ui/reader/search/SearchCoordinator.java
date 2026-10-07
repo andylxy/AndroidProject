@@ -25,14 +25,36 @@ import run.yigou.gxzy.utils.DebugLog;
 public class SearchCoordinator {
     
     private String bookId;
-    
+
+    /**
+     * 当前「显示列表」（{@code TipsBookReadPresenter#getChapterContentList()} 的返回值），
+     * 用于把搜索结果的 signatureId 映射成列表下标。
+     *
+     * <p>T6：搜索结果来自 {@code BOOK_CHAPTER} 表，书籍列表来自 {@code CHAPTER} 表，
+     * 两表查询都没有 orderBy、顺序不保证一致，故搜索结果的过滤后下标不能当章节下标用。
+     * 两者都带 {@code signatureId} 且逐章对应，故以它为跨表键反查位置。
+     *
+     * <p><b>为什么基准必须是「显示列表」而不是「全量章节列表」</b>：{@code chapterIndex}
+     * 的用途是滚动 / 展开 / 重新下载，这些动作都作用在适配器当前的列表上。而宋版伤寒在设置
+     * 未全开时，{@code getChapterContentList()} 会经 {@code filterShanghanContent} 返回
+     * {@code subList(start, end)} —— 显示列表只是全量章节的一个截断片段。若此处按全量
+     * 章节列表反查，得到的下标会偏移 {@code start}，滚动到短列表时越界被静默忽略，
+     * 跳转无声失效。以显示列表为基准，两种状态的 {@code chapterIndex} 才是同一坐标系。
+     * 被过滤掉的章节反查不到，会得到 {@link GroupData#NO_CHAPTER_INDEX}，由 UI 层拦截。
+     */
+    private final List<run.yigou.gxzy.data.model.HH2SectionData> displayedSections;
+
     /**
      * 构造函数
-     * 
+     *
      * @param bookId 书籍ID
+     * @param displayedSections 当前显示列表（含 signatureId），用于反查列表下标；
+     *                          可为 null（此时搜索结果不绑定下标）
      */
-    public SearchCoordinator(String bookId) {
+    public SearchCoordinator(String bookId,
+                             List<run.yigou.gxzy.data.model.HH2SectionData> displayedSections) {
         this.bookId = bookId;
+        this.displayedSections = displayedSections;
     }
     
     /**
@@ -92,12 +114,22 @@ public class SearchCoordinator {
             );
         
         // 5. 转换为 GroupData/ItemData 格式
+        int unboundCount = 0;
         for (run.yigou.gxzy.data.model.HH2SectionData section : filteredData) {
             GroupData groupData = new GroupData();
             groupData.setTitle(section.getHeader());
             groupData.setExpanded(false); // 默认折叠
+
+            // T6：绑定章节下标（显示列表坐标系）。查不到时保持 NO_CHAPTER_INDEX，
+            // 由 UI 层拦截动作 —— 绝不能退化成用过滤后下标兜底，那正是本字段要消除的错章路径。
+            int realIndex = findChapterIndexBySignature(section.getSignatureId());
+            if (realIndex == GroupData.NO_CHAPTER_INDEX) {
+                unboundCount++;
+            }
+            groupData.setChapterIndex(realIndex);
+
             groupDataList.add(groupData);
-            
+
             // 创建 ItemData 列表
             List<ItemData> items = new ArrayList<>();
             if (section.getData() != null) {
@@ -108,12 +140,35 @@ public class SearchCoordinator {
             }
             itemDataList.add(items);
         }
-        
+
         int totalMatches = searchKeyEntity.getSearchResTotalNum();
         EasyLog.print("=== 搜索完成 ===");
-        EasyLog.print("匹配章节: " + groupDataList.size() + ", 总匹配数: " + totalMatches);
-        
+        EasyLog.print("匹配章节: " + groupDataList.size() + ", 总匹配数: " + totalMatches
+                + ", 未绑定显示下标: " + unboundCount);
+
         return new Pair<>(groupDataList, itemDataList);
+    }
+
+    /**
+     * 按 signatureId 在「显示列表」中反查下标（T6）。
+     *
+     * <p>基准是显示列表而非全量章节列表——两者长度可能不同（宋版伤寒过滤），
+     * 只有与适配器当前列表同坐标系，后续滚动 / 展开才不会越界。
+     *
+     * @param signatureId 章节签名 id
+     * @return 显示列表中的下标；查不到返回 {@link GroupData#NO_CHAPTER_INDEX}
+     */
+    private int findChapterIndexBySignature(String signatureId) {
+        if (displayedSections == null || signatureId == null || signatureId.isEmpty()) {
+            return GroupData.NO_CHAPTER_INDEX;
+        }
+        for (int i = 0; i < displayedSections.size(); i++) {
+            run.yigou.gxzy.data.model.HH2SectionData section = displayedSections.get(i);
+            if (section != null && signatureId.equals(section.getSignatureId())) {
+                return i;
+            }
+        }
+        return GroupData.NO_CHAPTER_INDEX;
     }
     
     /**

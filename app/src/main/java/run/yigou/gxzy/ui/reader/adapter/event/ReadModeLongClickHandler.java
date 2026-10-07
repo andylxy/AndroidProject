@@ -17,9 +17,12 @@ import androidx.annotation.Nullable;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.utils.ClipboardHelper;
 import run.yigou.gxzy.ui.reader.adapter.BaseRefactoredAdapter;
+import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
 import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.entity.ChildEntity;
 import run.yigou.gxzy.ui.reader.helper.TipsDialogHelper;
+
+import java.util.List;
 
 /**
  * 阅读模式长按处理器
@@ -29,6 +32,15 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
 
     private final Context context;
     private final OnMenuActionListener menuActionListener;
+
+    /**
+     * 当前列表数据源，用于按 {@code groupPosition} 取显示列表下标（T6）。
+     *
+     * <p>类型用 {@code BaseRefactoredAdapter} 而非具体适配器：它已暴露
+     * {@code getGroupDataList()}，本类只需读这一个方法，无需依赖具体子类。
+     */
+    private final BaseRefactoredAdapter dataSource;
+
     @Nullable
     private BaseRefactoredAdapter.OnJumpSpecifiedItemListener jumpListener;
 
@@ -39,10 +51,10 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
         /**
          * 请求跳转到指定章节
          *
-         * @param groupPosition 组位置
+         * @param chapterIndex 章节在显示列表中的下标（T6；由 resolveChapterIndex 换算而来）
          * @param childPosition 子项位置(-1表示章节头部)
          */
-        void onJumpRequested(int groupPosition, int childPosition);
+        void onJumpRequested(int chapterIndex, int childPosition);
 
         /**
          * 请求重新下载全部数据
@@ -52,9 +64,9 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
         /**
          * 请求重新下载本章节
          *
-         * @param groupPosition 组位置
+         * @param chapterIndex 章节在显示列表中的下标（T6；由 resolveChapterIndex 换算而来）
          */
-        void onRedownloadChapterRequested(int groupPosition);
+        void onRedownloadChapterRequested(int chapterIndex);
 
         /**
          * 显示Toast消息
@@ -69,11 +81,37 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
      *
      * @param context            上下文
      * @param menuActionListener 菜单动作监听器
+     * @param dataSource 当前列表数据源，用于 T6 的显示列表下标反查；由适配器传入自身
      */
     public ReadModeLongClickHandler(@NonNull Context context,
-                                     @NonNull OnMenuActionListener menuActionListener) {
+            @NonNull OnMenuActionListener menuActionListener,
+            @NonNull BaseRefactoredAdapter dataSource) {
         this.context = context;
         this.menuActionListener = menuActionListener;
+        this.dataSource = dataSource;
+    }
+
+    /**
+     * 取指定分组对应的显示列表下标（T6）。
+     *
+     * <p>搜索态下列表是过滤后的结果，{@code groupPosition} 不是章节真实下标，
+     * 必须用数据装载时绑定的 {@code chapterIndex}。查不到时返回
+     * {@link GroupData#NO_CHAPTER_INDEX}，由调用方拦截动作 ——
+     * <b>不得回退到用 groupPosition 兜底</b>，那正是本方法要消除的错章路径。
+     *
+     * @param groupPosition 分组下标
+     * @return 显示列表下标；未绑定返回 {@link GroupData#NO_CHAPTER_INDEX}
+     */
+    private int resolveChapterIndex(int groupPosition) {
+        List<GroupData> groupDataList = dataSource.getGroupDataList();
+        if (groupDataList == null || groupPosition < 0 || groupPosition >= groupDataList.size()) {
+            return GroupData.NO_CHAPTER_INDEX;
+        }
+        GroupData groupData = groupDataList.get(groupPosition);
+        if (groupData == null) {
+            return GroupData.NO_CHAPTER_INDEX;
+        }
+        return groupData.getChapterIndex();
     }
 
     /**
@@ -136,7 +174,7 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
                 break;
 
             case "跳转到本章内容":
-                handleJumpAction(groupPosition);
+                handleJumpAction(resolveChapterIndex(groupPosition));
                 break;
 
             case "重新下载全部数据":
@@ -144,7 +182,7 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
                 break;
 
             case "重新下本章节":
-                handleRedownloadChapterAction(groupPosition);
+                handleRedownloadChapterAction(resolveChapterIndex(groupPosition));
                 break;
 
             default:
@@ -175,17 +213,25 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
     /**
      * 处理跳转动作（统一使用类型安全的jumpListener，若未设置则回退到menuActionListener）
      *
-     * @param groupPosition 组位置
+     * @param chapterIndex 章节在当前显示列表中的下标（T6）；{@link GroupData#NO_CHAPTER_INDEX} 表示未绑定
      */
-    private void handleJumpAction(int groupPosition) {
-        if (groupPosition > 0) {
-            if (jumpListener != null) {
-                jumpListener.onJumpSpecifiedItem(groupPosition, -1);
-            } else {
-                menuActionListener.onJumpRequested(groupPosition, -1);
-            }
+    private void handleJumpAction(int chapterIndex) {
+        // T6：未绑定（含越界）一律toast 拦截。条件是「< 0」而非「== -1」，
+        // 这样即使将来出现其它负值也走同一条失败路径，不会静默执行。
+        if (chapterIndex < 0) {
+            EasyLog.print("ReadModeLongClickHandler", "跳转中断：chapterIndex=" + chapterIndex);
+            menuActionListener.showToast("无法定位该章节，请重新进入本书");
+            return;
+        }
+        // 第 0 章是合法章节，必须能跳转 —— 此前用「> 0」把第 0 章静默拦掉了，
+        // 与 handleRedownloadChapterAction 的判定不一致（T6 修正为 >= 0）。
+        if (jumpListener != null) {
+            jumpListener.onJumpSpecifiedItem(chapterIndex, -1);
+        } else {
+            menuActionListener.onJumpRequested(chapterIndex, -1);
         }
     }
+
 
     /**
      * 处理重新下载全部数据动作
@@ -197,10 +243,16 @@ public class ReadModeLongClickHandler implements LongClickEventHandler {
     /**
      * 处理重新下载本章节动作
      *
-     * @param groupPosition 组位置
+     * @param chapterIndex 章节在当前显示列表中的下标（T6）；{@link GroupData#NO_CHAPTER_INDEX} 表示未绑定
      */
-    private void handleRedownloadChapterAction(int groupPosition) {
-        menuActionListener.onRedownloadChapterRequested(groupPosition);
+    private void handleRedownloadChapterAction(int chapterIndex) {
+        // 与 handleJumpAction 同一判定口径（T6）：「< 0」而非「== -1」，失败提示语也一致
+        if (chapterIndex < 0) {
+        EasyLog.print("ReadModeLongClickHandler", "重新下载中断：chapterIndex=" + chapterIndex);
+            menuActionListener.showToast("无法定位该章节，请重新进入本书");
+            return;
+        }
+        menuActionListener.onRedownloadChapterRequested(chapterIndex);
     }
     
     /**
