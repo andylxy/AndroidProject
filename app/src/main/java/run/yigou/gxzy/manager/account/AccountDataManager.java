@@ -23,7 +23,7 @@ import run.yigou.gxzy.data.remote.api.PhoneApi;
 import run.yigou.gxzy.data.remote.api.RegisterApi;
 import run.yigou.gxzy.data.remote.api.update.UpdateImageApi;
 import run.yigou.gxzy.data.remote.api.VerifyCodeApi;
-import run.yigou.gxzy.data.remote.api.VierCode;
+import run.yigou.gxzy.data.remote.api.misc.VierCode;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.manager.data.Callback;
