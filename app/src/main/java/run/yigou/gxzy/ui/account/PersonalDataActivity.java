@@ -12,7 +12,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.data.remote.api.UpdateImageApi;
+import run.yigou.gxzy.data.remote.api.update.UpdateImageApi;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.dialog.AddressDialog;

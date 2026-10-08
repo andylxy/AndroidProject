@@ -21,7 +21,7 @@ import run.yigou.gxzy.data.remote.api.LoginApi;
 import run.yigou.gxzy.data.remote.api.PasswordApi;
 import run.yigou.gxzy.data.remote.api.PhoneApi;
 import run.yigou.gxzy.data.remote.api.RegisterApi;
-import run.yigou.gxzy.data.remote.api.UpdateImageApi;
+import run.yigou.gxzy.data.remote.api.update.UpdateImageApi;
 import run.yigou.gxzy.data.remote.api.VerifyCodeApi;
 import run.yigou.gxzy.data.remote.api.VierCode;
 import run.yigou.gxzy.data.remote.model.HttpData;

@@ -30,7 +30,7 @@ import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.data.remote.api.UpdateImageApi;
+import run.yigou.gxzy.data.remote.api.update.UpdateImageApi;
 import run.yigou.gxzy.manager.account.AccountDataManager;
 import run.yigou.gxzy.manager.data.Callback;
 import run.yigou.gxzy.network.glide.GlideApp;

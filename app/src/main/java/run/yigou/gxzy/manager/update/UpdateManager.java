@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppConfig;
-import run.yigou.gxzy.data.remote.api.UpdateApi;
+import run.yigou.gxzy.data.remote.api.update.UpdateApi;
 import run.yigou.gxzy.data.remote.model.UpdateInfo;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.network.exception.NetworkFailure;
