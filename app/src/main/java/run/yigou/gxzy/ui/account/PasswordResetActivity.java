@@ -18,7 +18,7 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.manager.InputTextManager;
 import run.yigou.gxzy.manager.account.AccountDataManager;
 import run.yigou.gxzy.manager.Callback;
-import run.yigou.gxzy.ui.dialog.TipsDialog;
+import run.yigou.gxzy.dialog.TipsDialog;
 
 /**
  *    author : Android ???

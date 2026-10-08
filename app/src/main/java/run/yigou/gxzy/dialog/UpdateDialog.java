@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.dialog;
+package run.yigou.gxzy.dialog;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;

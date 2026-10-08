@@ -22,7 +22,7 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.manager.PrivacyAgreement;
-import run.yigou.gxzy.ui.dialog.AgreementDialog;
+import run.yigou.gxzy.dialog.AgreementDialog;
 
 /**
  * 权限引导页面（对话框样式）

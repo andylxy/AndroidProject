@@ -15,7 +15,7 @@ import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.data.remote.api.UpdateImageApi;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.data.remote.model.HttpData;
-import run.yigou.gxzy.ui.dialog.AddressDialog;
+import run.yigou.gxzy.dialog.AddressDialog;
 import run.yigou.gxzy.ui.dialog.InputDialog;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;

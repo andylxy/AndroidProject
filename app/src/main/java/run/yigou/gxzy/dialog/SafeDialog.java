@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.dialog;
+package run.yigou.gxzy.dialog;
 
 import android.content.Context;
 import android.view.View;
@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.hjq.base.BaseDialog;
 import run.yigou.gxzy.R;
+import run.yigou.gxzy.ui.dialog.CommonDialog;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.data.remote.api.GetCodeApi;
 import run.yigou.gxzy.data.remote.api.VerifyCodeApi;

@@ -20,7 +20,7 @@ import run.yigou.gxzy.data.local.entity.ChatSessionBean;
 import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
 import run.yigou.gxzy.manager.ai.AiChatManager;
 import run.yigou.gxzy.manager.ai.ChatSessionManager;
-import run.yigou.gxzy.ui.dialog.ChatSummaryListDialog;
+import run.yigou.gxzy.dialog.ChatSummaryListDialog;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.utils.MarkdownUtils;

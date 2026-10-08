@@ -22,7 +22,7 @@ import run.yigou.gxzy.data.remote.model.Announcement;
 import run.yigou.gxzy.data.remote.model.AnnouncementResponse;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.network.server.VersionRequestServer;
-import run.yigou.gxzy.ui.dialog.AnnouncementDialog;
+import run.yigou.gxzy.dialog.AnnouncementDialog;
 
 /**
  * 公告的拉取与展示（DESIGN §6.1）。严格镜像 {@code UpdateManager} 的结构。

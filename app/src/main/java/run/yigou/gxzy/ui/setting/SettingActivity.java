@@ -19,7 +19,7 @@ import run.yigou.gxzy.manager.ThreadPoolManager;
 import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.ui.browser.BrowserActivity;
 import run.yigou.gxzy.ui.dialog.MenuDialog;
-import run.yigou.gxzy.ui.dialog.SafeDialog;
+import run.yigou.gxzy.dialog.SafeDialog;
 import run.yigou.gxzy.ui.main.HomeFragment;
 import run.yigou.gxzy.ui.main.HomeActivity;
 import run.yigou.gxzy.ui.account.PhoneResetActivity;

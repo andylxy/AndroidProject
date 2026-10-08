@@ -20,7 +20,7 @@ import run.yigou.gxzy.data.remote.model.UpdateInfo;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.network.exception.NetworkFailure;
 import run.yigou.gxzy.network.server.VersionRequestServer;
-import run.yigou.gxzy.ui.dialog.UpdateDialog;
+import run.yigou.gxzy.dialog.UpdateDialog;
 
 /**
  * 版本升级提示的统一入口（spec §7）。
