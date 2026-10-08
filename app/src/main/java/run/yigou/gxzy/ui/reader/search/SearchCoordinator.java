@@ -177,49 +177,48 @@ public class SearchCoordinator {
         if (dataItem.getAttributedText() != null) {
             CharSequence text = dataItem.getAttributedText();
             if (text instanceof android.text.SpannableStringBuilder) {
-                itemData.setAttributedText((android.text.SpannableStringBuilder) text);
+                itemData.setTextSpan((android.text.SpannableStringBuilder) text);
             } else {
                 // 如果不是 SpannableStringBuilder，需要复制并保留 Span
                 android.text.SpannableStringBuilder builder = new android.text.SpannableStringBuilder(text);
                 android.text.TextUtils.copySpansFrom(
                     (android.text.Spanned) text, 0, text.length(),
                     null, builder, 0);
-                itemData.setAttributedText(builder);
+                itemData.setTextSpan(builder);
             }
         }
         
         if (dataItem.getAttributedNote() != null) {
             CharSequence note = dataItem.getAttributedNote();
             if (note instanceof android.text.SpannableStringBuilder) {
-                itemData.setAttributedNote((android.text.SpannableStringBuilder) note);
+                itemData.setNoteSpan((android.text.SpannableStringBuilder) note);
             } else if (note instanceof android.text.Spanned) {
                 android.text.SpannableStringBuilder builder = new android.text.SpannableStringBuilder(note);
                 android.text.TextUtils.copySpansFrom(
                     (android.text.Spanned) note, 0, note.length(),
                     null, builder, 0);
-                itemData.setAttributedNote(builder);
+                itemData.setNoteSpan(builder);
             } else {
-                itemData.setAttributedNote(new android.text.SpannableStringBuilder(note));
+                itemData.setNoteSpan(new android.text.SpannableStringBuilder(note));
             }
         }
         
         if (dataItem.getAttributedSectionVideo() != null) {
             CharSequence video = dataItem.getAttributedSectionVideo();
             if (video instanceof android.text.SpannableStringBuilder) {
-                itemData.setAttributedVideo((android.text.SpannableStringBuilder) video);
+                itemData.setVideoSpan((android.text.SpannableStringBuilder) video);
             } else if (video instanceof android.text.Spanned) {
                 android.text.SpannableStringBuilder builder = new android.text.SpannableStringBuilder(video);
                 android.text.TextUtils.copySpansFrom(
                     (android.text.Spanned) video, 0, video.length(),
                     null, builder, 0);
-                itemData.setAttributedVideo(builder);
+                itemData.setVideoSpan(builder);
             } else {
-                itemData.setAttributedVideo(new android.text.SpannableStringBuilder(video));
+                itemData.setVideoSpan(new android.text.SpannableStringBuilder(video));
             }
         }
         
         if (dataItem.getImageUrl() != null) {
-            itemData.setImageUrl(dataItem.getImageUrl());
         }
         
         itemData.setGroupPosition(dataItem.getGroupPosition());
@@ -276,26 +275,25 @@ public class SearchCoordinator {
         if (dataItem.getAttributedText() != null) {
             SpannableStringBuilder highlightedText = 
                 TextHighlighter.createHighlighted(dataItem.getAttributedText(), keyword);
-            itemData.setAttributedText(highlightedText);
+            itemData.setTextSpan(highlightedText);
         }
         
         // 高亮注释
         if (dataItem.getAttributedNote() != null) {
             SpannableStringBuilder highlightedNote = 
                 TextHighlighter.createHighlighted(dataItem.getAttributedNote(), keyword);
-            itemData.setAttributedNote(highlightedNote);
+            itemData.setNoteSpan(highlightedNote);
         }
         
         // 高亮视频标注
         if (dataItem.getAttributedSectionVideo() != null) {
             SpannableStringBuilder highlightedVideo = 
                 TextHighlighter.createHighlighted(dataItem.getAttributedSectionVideo(), keyword);
-            itemData.setAttributedVideo(highlightedVideo);
+            itemData.setVideoSpan(highlightedVideo);
         }
         
         // 复制其他字段
         if (dataItem.getImageUrl() != null) {
-            itemData.setImageUrl(dataItem.getImageUrl());
         }
         
         itemData.setGroupPosition(dataItem.getGroupPosition());

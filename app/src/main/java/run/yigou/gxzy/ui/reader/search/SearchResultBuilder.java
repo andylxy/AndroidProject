@@ -75,21 +75,20 @@ public class SearchResultBuilder {
         
         if (isFangRecipe && source.getAttributedText() != null) {
             // 方剂配方：添加橙色标签
-            item.setAttributedText(buildFangRecipeHint(source));
+            item.setTextSpan(buildFangRecipeHint(source));
         } else if (source.getAttributedText() != null) {
             // 普通条目：直接复制
-            item.setAttributedText(source.getAttributedText());
+            item.setTextSpan(source.getAttributedText());
         }
         
         // 复制其他字段
         if (source.getAttributedNote() != null) {
-            item.setAttributedNote(source.getAttributedNote());
+            item.setNoteSpan(source.getAttributedNote());
         }
         if (source.getAttributedSectionVideo() != null) {
-            item.setAttributedVideo(source.getAttributedSectionVideo());
+            item.setVideoSpan(source.getAttributedSectionVideo());
         }
         if (source.getImageUrl() != null) {
-            item.setImageUrl(source.getImageUrl());
         }
         item.setGroupPosition(source.getGroupPosition());
         
@@ -110,7 +109,7 @@ public class SearchResultBuilder {
         
         List<ItemData> itemList = new ArrayList<>();
         ItemData item = new ItemData();
-        item.setAttributedText(TipsClickHandler.renderText("$m{未见方。}"));
+        item.setTextSpan(TipsClickHandler.renderText("$m{未见方。}"));
         itemList.add(item);
         items.add(itemList);
         
@@ -131,7 +130,7 @@ public class SearchResultBuilder {
         
         List<ItemData> itemList = new ArrayList<>();
         ItemData item = new ItemData();
-        item.setAttributedText(TipsClickHandler.renderText("$m{未见此药。}"));
+        item.setTextSpan(TipsClickHandler.renderText("$m{未见此药。}"));
         itemList.add(item);
         items.add(itemList);
         
@@ -152,7 +151,7 @@ public class SearchResultBuilder {
             
         List<ItemData> itemList = new ArrayList<>();
         ItemData item = new ItemData();
-        item.setAttributedText(TipsClickHandler.renderText("$m{未见此名词。}"));
+        item.setTextSpan(TipsClickHandler.renderText("$m{未见此名词。}"));
         itemList.add(item);
         items.add(itemList);
             
@@ -175,7 +174,7 @@ public class SearchResultBuilder {
             
         List<ItemData> itemList = new ArrayList<>();
         ItemData item = new ItemData();
-        item.setAttributedText(TipsClickHandler.renderText("$m{数据加载中，请稍后重试。}"));
+        item.setTextSpan(TipsClickHandler.renderText("$m{数据加载中，请稍后重试。}"));
         itemList.add(item);
         items.add(itemList);
             

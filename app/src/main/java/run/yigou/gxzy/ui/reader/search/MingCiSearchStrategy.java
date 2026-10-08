@@ -82,10 +82,10 @@ public class MingCiSearchStrategy implements ContentSearchStrategy {
             if (mingCi.getAttributedText() != null) {
                 text.append(mingCi.getAttributedText());
             }
-            item.setAttributedText(text);
+            item.setTextSpan(text);
             EasyLog.print("✅ 找到名词: " + mingCi.getName());
         } else {
-            item.setAttributedText(TipsClickHandler.renderText("$m{未见此名词。}"));
+            item.setTextSpan(TipsClickHandler.renderText("$m{未见此名词。}"));
             EasyLog.print("⚠️ 未找到名词");
         }
         

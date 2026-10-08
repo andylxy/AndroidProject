@@ -153,9 +153,9 @@ public class RefactoredPopupAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
 
         public void bind(@NonNull ItemData itemData) {
-            bindSectionTextView(tvSectionText, itemData.getAttributedText());
-            bindSectionTextView(tvSectionNote, itemData.getAttributedNote());
-            bindSectionTextView(tvSectionVideo, itemData.getAttributedVideo());
+            bindSectionTextView(tvSectionText, itemData.getTextSpan());
+            bindSectionTextView(tvSectionNote, itemData.getNoteSpan());
+            bindSectionTextView(tvSectionVideo, itemData.getVideoSpan());
         }
 
         /**

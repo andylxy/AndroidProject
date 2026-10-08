@@ -30,9 +30,10 @@ import androidx.annotation.Nullable;
  *   <li>{@code groupPosition} 由数据装载方在构造后绑定，允许 setter。</li>
  * </ul>
  *
- * <p>兼容别名（{@code setAttributedText}/{@code setAttributedNote}/{@code setAttributedVideo}）
- * 保留原 entity.ItemData 的旧 API 名称，直接映射到对应新字段，为 SearchCoordinator/SearchResultBuilder
- * 等 4 处高频调用点提供零改动迁移路径。
+ * <p>富文本字段通过 canonical {@code getTextSpan}/{@code setTextSpan}、
+ * {@code getNoteSpan}/{@code setNoteSpan}、{@code getVideoSpan}/{@code setVideoSpan} 访问；
+ * 历史 {@code attributedText/Note/Video} 兼容别名与 no-op {@code setImageUrl} 已随 Q7C 后续清理移除
+ * （调用点已改为直接使用 {@code XSpan} API，语义等价）。
  */
 public class ItemData {
 
@@ -144,43 +145,6 @@ public class ItemData {
         this.videoSpan = videoSpan;
     }
 
-    /**
-     * 兼容旧 API：设置富文本正文（映射到 textSpan）
-     *
-     * <p>Q7C 合并保留。原 entity.ItemData.attributedText 语义等价于 textSpan，
-     * SearchCoordinator/SearchResultBuilder 等既有调用点依赖此 setter 名。
-     */
-    public void setAttributedText(@Nullable SpannableStringBuilder attributedText) {
-        this.textSpan = attributedText;
-    }
-
-    /** 兼容旧 API：设置富文本笺注 */
-    public void setAttributedNote(@Nullable SpannableStringBuilder attributedNote) {
-        this.noteSpan = attributedNote;
-    }
-
-    /** 兼容旧 API：设置富文本视频标签 */
-    public void setAttributedVideo(@Nullable SpannableStringBuilder attributedVideo) {
-        this.videoSpan = attributedVideo;
-    }
-
-    /** 兼容旧 API：获取富文本正文（映射到 textSpan） */
-    @Nullable
-    public SpannableStringBuilder getAttributedText() {
-        return textSpan;
-    }
-
-    /** 兼容旧 API：获取富文本笺注（映射到 noteSpan） */
-    @Nullable
-    public SpannableStringBuilder getAttributedNote() {
-        return noteSpan;
-    }
-
-    /** 兼容旧 API：获取富文本视频标签（映射到 videoSpan） */
-    @Nullable
-    public SpannableStringBuilder getAttributedVideo() {
-        return videoSpan;
-    }
 
     /** 获取所属分组下标 */
     public int getGroupPosition() {
@@ -207,17 +171,6 @@ public class ItemData {
         return imageUrl != null && !imageUrl.isEmpty();
     }
 
-    /**
-     * 兼容旧 API：设置图片 URL（合并后 imageUrl 为 final，此方法不再真正赋值）
-     *
-     * <p>Q7C 合并保留，用于兼容 SearchCoordinator/SearchResultBuilder 中
-     * 「new ItemData() + set 多次」的既有调用模式。<b>调用方必须改用带 imageUrl 参数的
-     * 构造函数传入图片 URL</b>；此 setter 是空操作（no-op），仅为保持既有调用点编译通过，
-     * 会在 Phase 6 及以后版本移除。
-     */
-    public void setImageUrl(@Nullable String imageUrl) {
-        // imageUrl 是 final 字段，无法在此赋值；此方法仅为兼容。
-    }
 
     /** 判断是否有富文本正文 */
     public boolean hasTextSpan() {

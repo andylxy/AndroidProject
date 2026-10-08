@@ -327,11 +327,11 @@ public class FangSearchStrategy implements ContentSearchStrategy {
                         
                         ItemData itemData = builder.convertDataItem(item, false);
                         // 添加标记表示这是从章节中找到的方剂
-                        if (itemData.getAttributedText() != null) {
+                        if (itemData.getTextSpan() != null) {
                             SpannableStringBuilder enhancedText = new SpannableStringBuilder();
                             enhancedText.append("【章节引用】 ");
-                            enhancedText.append(itemData.getAttributedText());
-                            itemData.setAttributedText(enhancedText);
+                            enhancedText.append(itemData.getTextSpan());
+                            itemData.setTextSpan(enhancedText);
                         }
                         
                         matchedItems.add(itemData);

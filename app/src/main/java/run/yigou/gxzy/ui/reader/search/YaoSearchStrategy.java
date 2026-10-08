@@ -127,7 +127,7 @@ public class YaoSearchStrategy implements ContentSearchStrategy {
             if (yao.getAttributedText() != null) {
                 yaoText.append(yao.getAttributedText());
             }
-            item.setAttributedText(yaoText);
+            item.setTextSpan(yaoText);
             itemList.add(item);
             items.add(itemList);
             
