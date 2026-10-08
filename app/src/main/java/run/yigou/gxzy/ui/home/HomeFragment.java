@@ -6,7 +6,7 @@
  * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.ui.main;
+package run.yigou.gxzy.ui.home;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 

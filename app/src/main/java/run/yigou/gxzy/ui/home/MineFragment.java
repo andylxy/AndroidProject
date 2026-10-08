@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.main;
+package run.yigou.gxzy.ui.home;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -11,12 +11,12 @@ import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.TitleBarFragment;
 import run.yigou.gxzy.ui.setting.AboutActivity;
 import run.yigou.gxzy.ui.browser.BrowserActivity;
-import run.yigou.gxzy.ui.main.GuideActivity;
+import run.yigou.gxzy.ui.splash.GuideActivity;
 import run.yigou.gxzy.ui.media.activity.ImagePreviewActivity;
 import run.yigou.gxzy.ui.media.activity.ImageSelectActivity;
 import run.yigou.gxzy.ui.media.activity.VideoPlayActivity;
 import run.yigou.gxzy.ui.media.activity.VideoSelectActivity;
-import run.yigou.gxzy.ui.main.HomeActivity;
+import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.ui.account.LoginActivity;
 import run.yigou.gxzy.ui.account.RegisterActivity;

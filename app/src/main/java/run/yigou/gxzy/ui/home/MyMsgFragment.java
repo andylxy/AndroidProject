@@ -1,8 +1,8 @@
-package run.yigou.gxzy.ui.main;
+package run.yigou.gxzy.ui.home;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.TitleBarFragment;
-import run.yigou.gxzy.ui.main.HomeActivity;
+import run.yigou.gxzy.ui.home.HomeActivity;
 
 
 /**

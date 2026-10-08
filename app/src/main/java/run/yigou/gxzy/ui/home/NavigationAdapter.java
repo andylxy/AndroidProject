@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.main;
+package run.yigou.gxzy.ui.home;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

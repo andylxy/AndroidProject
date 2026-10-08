@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.main;
+package run.yigou.gxzy.ui.splash;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -20,6 +20,7 @@ import run.yigou.gxzy.manager.AnnouncementManager;
 import run.yigou.gxzy.manager.PrivacyAgreement;
 import run.yigou.gxzy.manager.SearchPermissionManager;
 import run.yigou.gxzy.manager.UpdateManager;
+import run.yigou.gxzy.ui.home.HomeActivity;
 
 import com.hjq.widget.view.SlantedTextView;
 

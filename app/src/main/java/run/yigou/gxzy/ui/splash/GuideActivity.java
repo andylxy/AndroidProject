@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.main;
+package run.yigou.gxzy.ui.splash;
 
 import android.view.View;
 import android.view.animation.Animation;
@@ -11,6 +11,7 @@ import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.manager.ActivityManager;
 import run.yigou.gxzy.manager.PrivacyAgreement;
+import run.yigou.gxzy.ui.home.HomeActivity;
 
 import me.relex.circleindicator.CircleIndicator3;
 

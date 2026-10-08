@@ -19,7 +19,7 @@ import run.yigou.gxzy.data.local.helper.LocalServices;
 
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.manager.Callback;
-import run.yigou.gxzy.ui.main.HomeActivity;
+import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.ui.activity.TipsFragmentActivity;

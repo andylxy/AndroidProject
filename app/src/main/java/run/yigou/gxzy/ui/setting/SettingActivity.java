@@ -20,8 +20,8 @@ import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.ui.browser.BrowserActivity;
 import run.yigou.gxzy.ui.dialog.MenuDialog;
 import run.yigou.gxzy.dialog.SafeDialog;
-import run.yigou.gxzy.ui.main.HomeFragment;
-import run.yigou.gxzy.ui.main.HomeActivity;
+import run.yigou.gxzy.ui.home.HomeFragment;
+import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.ui.account.PhoneResetActivity;
 import run.yigou.gxzy.ui.account.PasswordResetActivity;
 
