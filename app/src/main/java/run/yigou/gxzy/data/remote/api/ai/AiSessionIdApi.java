@@ -2,7 +2,7 @@
  * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.data.remote.api;
+package run.yigou.gxzy.data.remote.api.ai;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;

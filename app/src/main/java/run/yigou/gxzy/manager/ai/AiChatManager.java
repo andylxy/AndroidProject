@@ -7,8 +7,8 @@ import com.hjq.http.listener.OnHttpListener;
 
 import run.yigou.gxzy.data.local.entity.ChatMessageBean;
 import run.yigou.gxzy.data.local.entity.ChatSessionBean;
-import run.yigou.gxzy.data.remote.api.AiSessionIdApi;
-import run.yigou.gxzy.data.remote.api.AiStreamApi;
+import run.yigou.gxzy.data.remote.api.ai.AiSessionIdApi;
+import run.yigou.gxzy.data.remote.api.ai.AiStreamApi;
 import run.yigou.gxzy.sse.SseStreamCallback;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.sse.SseChunk;

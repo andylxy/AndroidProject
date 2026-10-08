@@ -1,4 +1,4 @@
-package run.yigou.gxzy.data.remote.api;
+package run.yigou.gxzy.data.remote.api.ai;
 
 import com.hjq.http.config.IRequestApi;
 
