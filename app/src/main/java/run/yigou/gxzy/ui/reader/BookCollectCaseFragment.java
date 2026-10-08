@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.reader.fragment;
+package run.yigou.gxzy.ui.reader;
 
 import android.app.Activity;
 import android.content.Intent;

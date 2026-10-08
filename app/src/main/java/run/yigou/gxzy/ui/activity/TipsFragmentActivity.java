@@ -24,8 +24,8 @@ import run.yigou.gxzy.base.args.BookArgs;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.ui.reader.bookread.TipsBookNetReadFragment;
 import run.yigou.gxzy.ui.reader.constant.ContentTypes;
-import run.yigou.gxzy.ui.reader.fragment.TipsFangYaoFragment;
-import run.yigou.gxzy.ui.reader.fragment.TipsSettingFragment;
+import run.yigou.gxzy.ui.reader.fangyao.TipsFangYaoFragment;
+import run.yigou.gxzy.ui.reader.settings.TipsSettingFragment;
 import run.yigou.gxzy.ui.home.NavigationAdapter;
 import run.yigou.gxzy.base.GlobalDataHolder;
 

@@ -56,7 +56,7 @@ import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.ui.activity.BookContentSearchActivity;
 import run.yigou.gxzy.ui.reader.search.SearchHistoryAdapter;
-import run.yigou.gxzy.ui.reader.fragment.TipsWindowNetFragment;
+import run.yigou.gxzy.ui.reader.window.TipsWindowNetFragment;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.utils.StringHelper;

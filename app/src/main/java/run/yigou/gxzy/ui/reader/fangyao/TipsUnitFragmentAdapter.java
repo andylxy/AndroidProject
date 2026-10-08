@@ -1,4 +1,4 @@
-package run.yigou.gxzy.ui.reader.fragment;
+package run.yigou.gxzy.ui.reader.fangyao;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

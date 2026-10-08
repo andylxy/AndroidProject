@@ -53,7 +53,7 @@ import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.gen.ChapterDao;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
-import run.yigou.gxzy.ui.reader.fragment.BookCollectCaseFragment;
+import run.yigou.gxzy.ui.reader.BookCollectCaseFragment;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
 import run.yigou.gxzy.ui.reader.adapter.RefactoredExpandableAdapter;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
