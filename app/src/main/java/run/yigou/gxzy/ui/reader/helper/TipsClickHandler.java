@@ -31,7 +31,7 @@ import run.yigou.gxzy.ui.reader.widget.TipsLittleMingCiViewWindow;
 import run.yigou.gxzy.ui.reader.widget.TipsLittleTableViewWindow;
 import run.yigou.gxzy.tips.widget.ITipsWindowHost;
 import run.yigou.gxzy.manager.UpdateManager;
-import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
+import run.yigou.gxzy.ui.home.TipsFragmentActivity;
 
 import java.util.List;
 

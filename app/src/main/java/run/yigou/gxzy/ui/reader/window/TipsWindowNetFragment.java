@@ -21,7 +21,7 @@ import run.yigou.gxzy.manager.UpdateManager;
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.ui.home.HomeActivity;
-import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
+import run.yigou.gxzy.ui.home.TipsFragmentActivity;
 import run.yigou.gxzy.ui.reader.adapter.BookInfoAdapter;
 import run.yigou.gxzy.widget.CustomDividerItemDecoration;
 import run.yigou.gxzy.base.GlobalDataHolder;

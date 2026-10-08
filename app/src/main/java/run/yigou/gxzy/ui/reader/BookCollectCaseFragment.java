@@ -22,7 +22,7 @@ import run.yigou.gxzy.manager.Callback;
 import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.manager.UpdateManager;
-import run.yigou.gxzy.ui.activity.TipsFragmentActivity;
+import run.yigou.gxzy.ui.home.TipsFragmentActivity;
 import run.yigou.gxzy.ui.reader.adapter.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 
