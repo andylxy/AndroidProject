@@ -8,8 +8,8 @@ import run.yigou.gxzy.log.EasyLog;
 import java.util.ArrayList;
 import java.util.List;
 
-import run.yigou.gxzy.ui.reader.entity.GroupData;
-import run.yigou.gxzy.ui.reader.entity.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.data.BookData;
 import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.ui.reader.data.ChapterData;
@@ -109,8 +109,7 @@ public class SearchCoordinator {
         // 4. 转换为 GroupData/ItemData 格式
         int unboundCount = 0;
         for (run.yigou.gxzy.data.model.HH2SectionData section : filteredData) {
-            GroupData groupData = new GroupData();
-            groupData.setTitle(section.getHeader());
+            GroupData groupData = new GroupData(section.getHeader());
             groupData.setExpanded(false); // 默认折叠
 
             // T6：绑定章节下标（显示列表坐标系）。查不到时保持 NO_CHAPTER_INDEX，
@@ -170,7 +169,7 @@ public class SearchCoordinator {
      * 注意：直接使用原始 CharSequence，不要创建新的 SpannableStringBuilder，
      * 否则会丢失 ClickableSpan！
      */
-    private run.yigou.gxzy.ui.reader.entity.ItemData convertDataItemToItemData(run.yigou.gxzy.data.model.DataItem dataItem) {
+    private run.yigou.gxzy.ui.reader.adapter.model.ItemData convertDataItemToItemData(run.yigou.gxzy.data.model.DataItem dataItem) {
         ItemData itemData = new ItemData();
         
         // ✅ 直接使用原始对象，保留 ClickableSpan

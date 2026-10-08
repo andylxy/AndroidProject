@@ -11,8 +11,8 @@ package run.yigou.gxzy.ui.reader.search;
 
 import android.util.Pair;
 
-import run.yigou.gxzy.ui.reader.entity.GroupData;
-import run.yigou.gxzy.ui.reader.entity.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 
 import java.util.List;
 

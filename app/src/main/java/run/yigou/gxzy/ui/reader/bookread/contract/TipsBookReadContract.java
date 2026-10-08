@@ -16,8 +16,8 @@ import java.util.List;
 import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
-import run.yigou.gxzy.ui.reader.entity.GroupData;
-import run.yigou.gxzy.ui.reader.entity.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.data.model.HH2SectionData;
 
 /**

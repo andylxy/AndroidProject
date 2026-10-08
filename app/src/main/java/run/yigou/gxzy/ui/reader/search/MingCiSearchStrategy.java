@@ -14,8 +14,8 @@ import android.util.Pair;
 
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.data.model.MingCiContent;
-import run.yigou.gxzy.ui.reader.entity.GroupData;
-import run.yigou.gxzy.ui.reader.entity.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
 import run.yigou.gxzy.ui.reader.search.provider.IMingCiDataProvider;
 

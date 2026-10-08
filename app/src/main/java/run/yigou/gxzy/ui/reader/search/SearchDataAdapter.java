@@ -13,8 +13,8 @@ import android.util.Pair;
 
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.ui.reader.constant.ContentTypes;
-import run.yigou.gxzy.ui.reader.entity.GroupData;
-import run.yigou.gxzy.ui.reader.entity.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.repository.BookRepository;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.ui.reader.search.provider.IMingCiDataProvider;

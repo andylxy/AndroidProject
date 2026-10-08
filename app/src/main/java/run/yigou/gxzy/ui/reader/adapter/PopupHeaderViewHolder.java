@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.ui.reader.entity.GroupData;
+import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
 
 /**
  * 弹窗Header ViewHolder

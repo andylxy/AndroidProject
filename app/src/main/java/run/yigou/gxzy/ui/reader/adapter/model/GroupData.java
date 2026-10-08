@@ -11,32 +11,33 @@ package run.yigou.gxzy.ui.reader.adapter.model;
 
 import android.text.SpannableStringBuilder;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * 分组数据模型 - 全新设计,不依赖旧的ExpandableGroupEntity
- * 
- * 职责:
- * - 存储分组基本信息(标题、富文本)
- * - 管理子项列表
- * - 提供不可变访问接口
+ * 分组数据模型 —— 全局唯一的 GroupData 类。
  *
- * 关于可变性：标题 / 富文本 / 子项列表一律 final，构造后只读。
- * 唯一的例外是 chapterIndex——它由「构造之后」才知道的信息决定（搜索结果的真实
- * 章节下标要按 signatureId 反查，见 SearchCoordinator），且绑定发生在构造链之外
- * （BaseRefactoredAdapter#bindChapterIndexByPosition 与
- * RefactoredExpandableAdapter#setSearchData）。故该字段允许 setter。
- * 实际写入只发生在列表重建 / 单章更新时，且都在主线程，不存在并发问题。
+ * <p>由 Q7C 合并自「新架构 GroupData」（AI Refactor 2025-12-10）与「旧 entity.GroupData」：
+ * 保留新架构的 title/titleSpan/items + chapterIndex，从旧类并入 isExpanded（展开状态），
+ * 合并后旧 `ui/reader/entity/GroupData` 已删除。
+ *
+ * <p>关于可变性：
+ * <ul>
+ *   <li>{@code title}/{@code titleSpan}/{@code items} 一律 final，构造后只读；</li>
+ *   <li>{@code chapterIndex} 由数据装载方按 signatureId 反查绑定，允许 setter；</li>
+ *   <li>{@code expanded} 展开状态由 ExpandStateManager 通过 setter 更新。</li>
+ * </ul>
  */
 public class GroupData {
 
-    /** 章节未绑定真实位置时的哨兵值（列表下标从 0 开始，故-1 可安全表示「无」） */
+    /** 章节未绑定真实位置时的哨兵值（列表下标从 0 开始，故 -1 可安全表示「无」） */
     public static final int NO_CHAPTER_INDEX = -1;
 
     private final String title;                          // 标题文本
     private final SpannableStringBuilder titleSpan;      // 富文本标题
-    private final List<ItemData> items;                  // 子项列表
+    private final List<ItemData> items;                  // 子项列表（可能为 null）
 
     /**
      * 本章在「当前显示列表」中的下标（T6）。
@@ -50,52 +51,54 @@ public class GroupData {
      * UI 层必须据此拦截动作，<b>不得退化为用过滤后下标兜底</b>。
      */
     private int chapterIndex = NO_CHAPTER_INDEX;
-    
+
+    /** 展开状态（由 ExpandStateManager 管理，合并自旧 entity.GroupData.isExpanded） */
+    private boolean expanded = false;
+
     /**
-     * 构造函数 - 使用纯文本标题
+     * 构造函数 —— 仅有标题（无 items 的搜索态构造，替代旧 entity.GroupData 的无参构造 + setTitle）
+     *
+     * <p>用于 {@code SearchResultBuilder.buildGroup()} 与 {@code SearchCoordinator.searchGlobal()}：
+     * 先构造空组挂标题，后续 item 通过外层 List<ItemData> 结构附加。
      */
-    public GroupData(@NonNull String title, @NonNull List<ItemData> items) {
+    public GroupData(@NonNull String title) {
+        this(title, null);
+    }
+
+    /** 构造函数 —— 纯文本标题 + items 列表 */
+    public GroupData(@NonNull String title, @Nullable List<ItemData> items) {
         this.title = title;
         this.titleSpan = null;
-        this.items = new ArrayList<>(items);  // 防御性拷贝
+        this.items = items != null ? new ArrayList<>(items) : null;  // 防御性拷贝
     }
-    
-    /**
-     * 构造函数 - 使用富文本标题
-     */
-    public GroupData(@NonNull String title, 
-                     SpannableStringBuilder titleSpan,
-                     @NonNull List<ItemData> items) {
+
+    /** 构造函数 —— 纯文本标题 + 富文本标题 + items 列表 */
+    public GroupData(@NonNull String title,
+                     @Nullable SpannableStringBuilder titleSpan,
+                     @Nullable List<ItemData> items) {
         this.title = title;
         this.titleSpan = titleSpan;
-        this.items = new ArrayList<>(items);  // 防御性拷贝
+        this.items = items != null ? new ArrayList<>(items) : null;
     }
-    
-    /**
-     * 获取标题文本
-     */
+
+    /** 获取标题文本 */
     @NonNull
     public String getTitle() {
         return title;
     }
-    
-    /**
-     * 获取富文本标题(可能为null)
-     */
+
+    /** 获取富文本标题（可能为 null） */
+    @Nullable
     public SpannableStringBuilder getTitleSpan() {
         return titleSpan;
     }
-    
-    /**
-     * 判断是否有富文本标题
-     */
+
+    /** 判断是否有富文本标题 */
     public boolean hasTitleSpan() {
         return titleSpan != null;
     }
 
-    /**
-     * 获取本章在当前显示列表中的下标（T6）
-     */
+    /** 获取本章在当前显示列表中的下标（T6） */
     public int getChapterIndex() {
         return chapterIndex;
     }
@@ -110,39 +113,46 @@ public class GroupData {
         this.chapterIndex = chapterIndex;
     }
 
-    
-    /**
-     * 获取子项数量
-     */
-    public int getItemCount() {
-        return items.size();
+    /** 是否处于展开状态（合并自旧 entity.GroupData.isExpanded） */
+    public boolean isExpanded() {
+        return expanded;
     }
-    
-    /**
-     * 获取指定位置的子项
-     */
-    @NonNull
+
+    /** 设置展开状态 */
+    public void setExpanded(boolean expanded) {
+        this.expanded = expanded;
+    }
+
+    /** 获取子项数量（items 为 null 时返回 0） */
+    public int getItemCount() {
+        return items != null ? items.size() : 0;
+    }
+
+    /** 获取指定位置的子项（越界或 items 为 null 时返回 null） */
+    @Nullable
     public ItemData getItem(int position) {
+        if (items == null || position < 0 || position >= items.size()) {
+            return null;
+        }
         return items.get(position);
     }
-    
-    /**
-     * 获取所有子项(不可变列表)
-     */
+
+    /** 获取所有子项（返回拷贝，防止外部修改；items 为 null 时返回空列表） */
     @NonNull
     public List<ItemData> getItems() {
-        return new ArrayList<>(items);  // 返回拷贝,防止外部修改
+        return items != null ? new ArrayList<>(items) : Collections.emptyList();
     }
-    
-    /**
-     * 判断是否为空组
-     */
+
+    /** 判断是否为空组（items 为 null 或空列表均视为空） */
     public boolean isEmpty() {
-        return items.isEmpty();
+        return items == null || items.isEmpty();
     }
-    
+
     @Override
     public String toString() {
-        return "GroupData{title='" + title + "', itemCount=" + items.size() + "}";
+        int count = items != null ? items.size() : 0;
+        return "GroupData{title='" + title + "', itemCount=" + count
+                + ", chapterIndex=" + chapterIndex
+                + ", expanded=" + expanded + "}";
     }
 }

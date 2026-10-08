@@ -64,14 +64,13 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
      * 直接转换为 model.GroupData/ItemData，保留ClickableSpan，
      * 避免 DataAdapter.convertList 的二次转换。
      *
-     * @param entityGroupList 分组数据列表 (entity.GroupData)
-     * @param entityItemList  条目数据列表 (entity.ItemData)
+     * @param groupList 分组数据列表 (model.GroupData)
+     * @param itemList  条目数据列表 (model.ItemData)
      */
     public void setSearchData(
-            @NonNull List<run.yigou.gxzy.ui.reader.entity.GroupData> entityGroupList,
-            @NonNull List<List<run.yigou.gxzy.ui.reader.entity.ItemData>> entityItemList) {
+            @NonNull List<GroupData> groupList,
+            @NonNull List<List<ItemData>> itemList) {
 
-        List<GroupData> modelGroupList = new ArrayList<>();
         // ✅ D2 修复：setSearchData 此前只写 groupDataList，导致 groups（旧结构）停留在全量章节，
         //    与 groupDataList 分离；后续读取 getmGroups() 会得到错误数据，引发索引错位。
         //    此处同步构建与 groupDataList 1:1 对应的 groups，使两个数据源保持一致。
@@ -79,52 +78,27 @@ public class RefactoredExpandableAdapter extends BaseRefactoredAdapter
         //    注意：仅补全 groups 的"结构镜像"（标题/展开态/空 children），
         //          groupDataList 的原有构建（保留 ClickableSpan）完全不动，搜索结果展示行为不变。
         //    绑定始终走 groupDataList，groups 仅用于 size/header 一致性，故 children 用空列表即可。
+        //
+        // Q7C 合并后：入参已是 model.GroupData/ItemData，无需 entity→model 转换，直接使用。
         ArrayList<ExpandableGroupEntity> mirrorGroups = new ArrayList<>();
-        for (int i = 0; i < entityGroupList.size() && i < entityItemList.size(); i++) {
-            run.yigou.gxzy.ui.reader.entity.GroupData sourceGroup = entityGroupList.get(i);
-            List<run.yigou.gxzy.ui.reader.entity.ItemData> sourceItems = entityItemList.get(i);
-
-            // 转换 entity.ItemData -> model.ItemData（保留ClickableSpan）
-            List<ItemData> modelItems = new ArrayList<>();
-            if (sourceItems != null) {
-                for (run.yigou.gxzy.ui.reader.entity.ItemData src : sourceItems) {
-                    android.text.SpannableStringBuilder textSpan = src.getAttributedText();
-                    android.text.SpannableStringBuilder noteSpan = src.getAttributedNote();
-                    android.text.SpannableStringBuilder videoSpan = src.getAttributedVideo();
-
-                    modelItems.add(new ItemData(
-                            textSpan != null ? textSpan.toString() : "",
-                            noteSpan != null ? noteSpan.toString() : null,
-                            videoSpan != null ? videoSpan.toString() : null,
-                            src.getImageUrl(),
-                            textSpan, noteSpan, videoSpan
-                    ));
-                }
-            }
-
-            modelGroupList.add(new GroupData(sourceGroup.getTitle(), modelItems));
-            // T6：把 SearchCoordinator 反查出的显示列表下标透传到 model.GroupData，
-            // 子项长按的跳转 / 重新下载据此定位章节，不再用过滤后下标（会错章）
-            modelGroupList.get(modelGroupList.size() - 1)
-                    .setChapterIndex(sourceGroup.getChapterIndex());
-
+        for (GroupData group : groupList) {
             mirrorGroups.add(new ExpandableGroupEntity(
-                    sourceGroup.getTitle() != null ? sourceGroup.getTitle() : "",
+                    group.getTitle() != null ? group.getTitle() : "",
                     "",
-                    sourceGroup.isExpanded(),
+                    group.isExpanded(),
                     new ArrayList<>()));
         }
 
-        this.groupDataList = new ArrayList<>(modelGroupList);
+        this.groupDataList = new ArrayList<>(groupList);
         this.groups = mirrorGroups;
         EasyLog.print("RefactoredExpandableAdapter",
                 "setSearchData 同步 groups 镜像: groups=" + mirrorGroups.size()
                         + ", groupDataList=" + groupDataList.size());
 
-        // 同步展开状态（使用entity的展开状态）
+        // 同步展开状态
         expandStateManager.reset();
-        for (int i = 0; i < entityGroupList.size() && i < modelGroupList.size(); i++) {
-            expandStateManager.setExpandState(i, entityGroupList.get(i).isExpanded());
+        for (int i = 0; i < groupList.size(); i++) {
+            expandStateManager.setExpandState(i, groupList.get(i).isExpanded());
         }
 
         notifyDataSetChanged();

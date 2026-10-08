@@ -17,8 +17,8 @@ import android.text.style.StyleSpan;
 import android.graphics.Typeface;
 import android.util.Pair;
 
-import run.yigou.gxzy.ui.reader.entity.GroupData;
-import run.yigou.gxzy.ui.reader.entity.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.helper.TipsClickHandler;
 import run.yigou.gxzy.data.model.DataItem;
 
@@ -52,8 +52,7 @@ public class SearchResultBuilder {
      * @return GroupData 实例
      */
     public GroupData buildGroup(String title, boolean expanded) {
-        GroupData group = new GroupData();
-        group.setTitle(title);
+        GroupData group = new GroupData(title);
         group.setExpanded(expanded);
         return group;
     }

@@ -14,8 +14,8 @@ import java.util.List;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.tips.widget.TipsLittleWindow;
 import run.yigou.gxzy.ui.reader.adapter.RefactoredPopupAdapter;
-import run.yigou.gxzy.ui.reader.entity.GroupData;
-import run.yigou.gxzy.ui.reader.entity.ItemData;
+import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
+import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 
 /**
  * RecyclerView弹窗中间基类
