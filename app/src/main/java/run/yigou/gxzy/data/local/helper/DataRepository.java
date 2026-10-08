@@ -35,7 +35,7 @@ import androidx.lifecycle.LifecycleOwner;
 import run.yigou.gxzy.utils.StringHelper;
 import run.yigou.gxzy.utils.ThreadUtil;
 
-import run.yigou.gxzy.data.remote.api.ChapterListApi;
+import run.yigou.gxzy.data.remote.api.reader.ChapterListApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;

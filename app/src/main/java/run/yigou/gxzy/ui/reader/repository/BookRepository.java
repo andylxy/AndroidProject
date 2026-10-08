@@ -28,7 +28,7 @@ import run.yigou.gxzy.data.local.gen.ChapterDao;
 import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.local.helper.LocalServices;
-import run.yigou.gxzy.data.remote.api.BookFangApi;
+import run.yigou.gxzy.data.remote.api.reader.BookFangApi;
 import run.yigou.gxzy.manager.chapter.ChapterContentManager;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.data.model.Fang;

@@ -8,7 +8,7 @@
  * Copyright (c) 2023 Zhs, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.data.remote.api;
+package run.yigou.gxzy.data.remote.api.reader;
 
 import com.hjq.http.config.IRequestApi;
 

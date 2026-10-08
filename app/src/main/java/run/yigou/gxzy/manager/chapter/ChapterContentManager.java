@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.data.local.helper.DataRepository;
 import run.yigou.gxzy.data.local.helper.LocalServices;
-import run.yigou.gxzy.data.remote.api.ChapterContentApi;
+import run.yigou.gxzy.data.remote.api.reader.ChapterContentApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.utils.ThreadUtil;
 
