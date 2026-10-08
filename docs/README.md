@@ -8,7 +8,7 @@
 
 | 文档 | 说明 |
 |------|------|
-| [ui-module-migration-plan.md](architecture/ui-module-migration-plan.md) | UI 模块迁移计划（914 行） |
+| [ui-module-migration-plan.md](architecture/archive/ui-module-migration-plan.md) | UI 模块迁移计划（914 行） |
 | [package-restructure-plan.md](architecture/package-restructure-plan.md) | 包结构重构计划（176 行） |
 
 ---
@@ -94,7 +94,7 @@
 | 防重放攻击 | `security/防重放*.md` |
 | SM2 加密 | `security/SM2使用详细教程.md` |
 | 配置中心 | `component/TipsTextRenderConfig配置中心使用指南.md` |
-| UI 迁移 | `architecture/ui-module-migration-plan.md` |
+| UI 迁移 | `architecture/archive/ui-module-migration-plan.md` |
 | TitleBar | `optimization/TitleBar优化指南.md` |
 
 ---

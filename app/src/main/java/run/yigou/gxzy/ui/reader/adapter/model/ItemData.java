@@ -145,7 +145,6 @@ public class ItemData {
         this.videoSpan = videoSpan;
     }
 
-
     /** 获取所属分组下标 */
     public int getGroupPosition() {
         return groupPosition;
@@ -170,7 +169,6 @@ public class ItemData {
     public boolean hasImage() {
         return imageUrl != null && !imageUrl.isEmpty();
     }
-
 
     /** 判断是否有富文本正文 */
     public boolean hasTextSpan() {

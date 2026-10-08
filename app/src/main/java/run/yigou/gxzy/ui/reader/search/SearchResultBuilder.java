@@ -88,8 +88,6 @@ public class SearchResultBuilder {
         if (source.getAttributedSectionVideo() != null) {
             item.setVideoSpan(source.getAttributedSectionVideo());
         }
-        if (source.getImageUrl() != null) {
-        }
         item.setGroupPosition(source.getGroupPosition());
         
         return item;

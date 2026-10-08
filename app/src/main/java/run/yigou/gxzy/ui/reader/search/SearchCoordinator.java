@@ -218,9 +218,6 @@ public class SearchCoordinator {
             }
         }
         
-        if (dataItem.getImageUrl() != null) {
-        }
-        
         itemData.setGroupPosition(dataItem.getGroupPosition());
         
         return itemData;
@@ -293,9 +290,6 @@ public class SearchCoordinator {
         }
         
         // 复制其他字段
-        if (dataItem.getImageUrl() != null) {
-        }
-        
         itemData.setGroupPosition(dataItem.getGroupPosition());
         
         return itemData;
