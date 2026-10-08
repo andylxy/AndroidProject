@@ -9,7 +9,7 @@ import com.hjq.http.listener.OnHttpListener;
 import run.yigou.gxzy.data.remote.api.StyleConfigApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.manager.data.Callback;
 import run.yigou.gxzy.text.IStyleConfigProvider;
 import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.text.StyleConfigApiBean;

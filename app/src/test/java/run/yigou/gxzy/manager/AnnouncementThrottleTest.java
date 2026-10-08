@@ -19,6 +19,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import run.yigou.gxzy.data.remote.model.Announcement;
+import run.yigou.gxzy.manager.announcement.AnnouncementStore;
+import run.yigou.gxzy.manager.concurrency.FetchClock;
+import run.yigou.gxzy.manager.concurrency.PopDelay;
 
 /**
  * 公告的「拉取节流 / 缓存裁剪 / 弹窗延迟」判据测试（纯 JVM）。

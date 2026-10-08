@@ -19,7 +19,7 @@ import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.AppFragment;
-import run.yigou.gxzy.manager.ActivityManager;
+import run.yigou.gxzy.manager.lifecycle.ActivityManager;
 import com.hjq.base.DoubleClickHelper;
 
 import run.yigou.gxzy.ui.reader.ai.AiMsgFragment;

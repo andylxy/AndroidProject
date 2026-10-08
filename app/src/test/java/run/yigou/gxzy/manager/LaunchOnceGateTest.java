@@ -1,4 +1,7 @@
 package run.yigou.gxzy.manager;
+import run.yigou.gxzy.manager.modal.AppModalGate;
+import run.yigou.gxzy.manager.launch.LaunchOnceGate;
+import run.yigou.gxzy.manager.update.UpdateManager;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

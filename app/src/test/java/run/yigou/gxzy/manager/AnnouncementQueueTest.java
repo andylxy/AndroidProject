@@ -13,6 +13,7 @@ import java.util.List;
 import org.junit.Test;
 
 import run.yigou.gxzy.data.remote.model.Announcement;
+import run.yigou.gxzy.manager.announcement.AnnouncementQueue;
 
 /**
  * 公告挑选与排序的单元测试。

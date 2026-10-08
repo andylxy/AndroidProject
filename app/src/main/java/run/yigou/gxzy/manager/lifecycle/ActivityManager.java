@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.lifecycle;
 
 import android.app.Activity;
 import android.app.Application;

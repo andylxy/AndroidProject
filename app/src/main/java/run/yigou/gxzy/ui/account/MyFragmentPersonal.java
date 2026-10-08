@@ -21,7 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.manager.UpdateManager;
+import run.yigou.gxzy.manager.update.UpdateManager;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppApplication;
 import run.yigou.gxzy.app.TitleBarFragment;
@@ -32,7 +32,7 @@ import run.yigou.gxzy.data.local.helper.LocalServices;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.data.remote.api.UpdateImageApi;
 import run.yigou.gxzy.manager.account.AccountDataManager;
-import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.manager.data.Callback;
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.ui.setting.AboutActivity;
 import run.yigou.gxzy.ui.media.activity.ImageCropActivity;

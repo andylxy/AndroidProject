@@ -7,7 +7,7 @@ import android.net.NetworkInfo;
 import androidx.core.content.ContextCompat;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.manager.ActivityManager;
+import run.yigou.gxzy.manager.lifecycle.ActivityManager;
 import com.hjq.toast.Toaster;
 
 import org.aspectj.lang.ProceedingJoinPoint;

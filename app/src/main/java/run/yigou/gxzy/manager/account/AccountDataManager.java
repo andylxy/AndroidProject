@@ -26,7 +26,7 @@ import run.yigou.gxzy.data.remote.api.VerifyCodeApi;
 import run.yigou.gxzy.data.remote.api.VierCode;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.manager.data.Callback;
 
 import java.io.File;
 

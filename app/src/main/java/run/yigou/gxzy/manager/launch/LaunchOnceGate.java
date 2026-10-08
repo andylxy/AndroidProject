@@ -1,4 +1,6 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.launch;
+import run.yigou.gxzy.manager.announcement.AnnouncementManager;
+import run.yigou.gxzy.manager.update.UpdateManager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -21,7 +23,7 @@ import androidx.lifecycle.LifecycleOwner;
  * 传 {@code Object} 并在内部用 {@code instanceof LifecycleOwner} 判定，
  * 单测可传一个实现了该接口的假宿主。</p>
  */
-final class LaunchOnceGate {
+public final class LaunchOnceGate {
 
     private final AtomicBoolean mDone = new AtomicBoolean(false);
 
@@ -32,7 +34,7 @@ final class LaunchOnceGate {
      * @param action 真正要执行的动作
      * @return {@code true} 表示本次真的执行了；{@code false} 表示已做过或宿主不可用
      */
-    boolean runOnceIfHostUsable(Object host, Runnable action) {
+    public boolean runOnceIfHostUsable(Object host, Runnable action) {
         if (mDone.get()) {
             return false;
         }
@@ -49,7 +51,7 @@ final class LaunchOnceGate {
     }
 
     /** 本次启动是否已经执行过（仅供诊断与单测）。 */
-    boolean isDone() {
+    public boolean isDone() {
         return mDone.get();
     }
 }

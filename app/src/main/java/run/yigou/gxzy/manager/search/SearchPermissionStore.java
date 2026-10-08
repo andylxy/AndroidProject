@@ -1,10 +1,14 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.search;
 
 import com.google.gson.Gson;
 import com.tencent.mmkv.MMKV;
 
 import run.yigou.gxzy.data.remote.model.SearchPermissionState;
 import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.manager.announcement.AnnouncementStore;
+import run.yigou.gxzy.manager.concurrency.FetchClock;
+import run.yigou.gxzy.manager.concurrency.FetchClockStore;
+import run.yigou.gxzy.manager.launch.LaunchOnceGate;
 
 /**
  * 搜索权限的落盘存储：<b>权限状态缓存</b> 与 <b>拉取节流时钟</b>。

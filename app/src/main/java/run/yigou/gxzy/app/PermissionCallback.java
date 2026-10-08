@@ -5,7 +5,7 @@ import android.content.Context;
 import android.os.Build;
 
 import run.yigou.gxzy.R;
-import run.yigou.gxzy.manager.ActivityManager;
+import run.yigou.gxzy.manager.lifecycle.ActivityManager;
 import run.yigou.gxzy.ui.dialog.MessageDialog;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;

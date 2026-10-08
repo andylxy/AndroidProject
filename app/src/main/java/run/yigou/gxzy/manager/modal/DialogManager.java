@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.modal;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;

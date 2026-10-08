@@ -7,6 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import run.yigou.gxzy.data.remote.model.SearchPermissionState;
+import run.yigou.gxzy.manager.search.SearchEntry;
+import run.yigou.gxzy.manager.search.SearchPermissionManager;
 
 /**
  * {@link SearchPermissionManager} 的「网关判定」纯 JVM 单测。

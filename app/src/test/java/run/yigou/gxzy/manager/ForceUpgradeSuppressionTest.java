@@ -1,4 +1,5 @@
 package run.yigou.gxzy.manager;
+import run.yigou.gxzy.manager.update.ForceUpgradeSuppression;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

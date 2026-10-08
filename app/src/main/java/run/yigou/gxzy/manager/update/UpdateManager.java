@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.update;
 
 import android.app.Activity;
 import android.os.Handler;
@@ -21,6 +21,11 @@ import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.network.exception.NetworkFailure;
 import run.yigou.gxzy.network.server.VersionRequestServer;
 import run.yigou.gxzy.dialog.UpdateDialog;
+import run.yigou.gxzy.manager.device.DeviceNoticeManager;
+import run.yigou.gxzy.manager.launch.LaunchOnceGate;
+import run.yigou.gxzy.manager.lifecycle.ActivityManager;
+import run.yigou.gxzy.manager.lifecycle.ForegroundActivities;
+import run.yigou.gxzy.manager.modal.AppModalGate;
 
 /**
  * 版本升级提示的统一入口（spec §7）。

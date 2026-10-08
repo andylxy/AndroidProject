@@ -17,7 +17,7 @@ import run.yigou.gxzy.ui.media.activity.ImageSelectActivity;
 import run.yigou.gxzy.ui.media.activity.VideoPlayActivity;
 import run.yigou.gxzy.ui.media.activity.VideoSelectActivity;
 import run.yigou.gxzy.ui.home.HomeActivity;
-import run.yigou.gxzy.manager.UpdateManager;
+import run.yigou.gxzy.manager.update.UpdateManager;
 import run.yigou.gxzy.ui.account.LoginActivity;
 import run.yigou.gxzy.ui.account.RegisterActivity;
 import run.yigou.gxzy.ui.account.PasswordForgetActivity;

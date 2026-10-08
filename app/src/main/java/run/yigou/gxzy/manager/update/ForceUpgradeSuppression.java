@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.update;
 
 /**
  * 需求 2「取消强制升级后不再重弹」的判定规则（纯逻辑，无 Android 依赖）。

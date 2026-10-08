@@ -24,7 +24,7 @@ import com.gyf.immersionbar.ImmersionBar;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.manager.ThreadPoolManager;
+import run.yigou.gxzy.manager.threadpool.ThreadPoolManager;
 import run.yigou.gxzy.app.AppConfig;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;

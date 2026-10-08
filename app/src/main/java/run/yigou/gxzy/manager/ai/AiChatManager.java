@@ -14,7 +14,7 @@ import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.sse.SseChunk;
 import run.yigou.gxzy.utils.DateHelper;
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.manager.data.Callback;
 
 import java.util.List;
 

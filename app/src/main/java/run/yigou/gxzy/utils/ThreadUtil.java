@@ -13,7 +13,7 @@ package run.yigou.gxzy.utils;
 import android.os.Handler;
 import android.os.Looper;
 
-import run.yigou.gxzy.manager.ThreadPoolManager;
+import run.yigou.gxzy.manager.threadpool.ThreadPoolManager;
 
 /**
  * 线程工具类

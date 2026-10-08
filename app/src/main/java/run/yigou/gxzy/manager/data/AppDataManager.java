@@ -7,7 +7,7 @@
  * Copyright (c) 2026, Inc. All Rights Reserved
  */
 
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.data;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;

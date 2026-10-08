@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import run.yigou.gxzy.data.local.GreenDaoManager;
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.manager.data.Callback;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 /**

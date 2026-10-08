@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.search;
 
 /**
  * 搜索入口的种类。设计依据见 microfeed 仓 {@code .scratch/search-permission/DESIGN.md} §5.2。

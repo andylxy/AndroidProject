@@ -48,9 +48,9 @@ import run.yigou.gxzy.data.remote.api.VierCode;
 import run.yigou.gxzy.data.remote.api.GetCodeApi;
 
 import run.yigou.gxzy.network.glide.GlideApp;
-import run.yigou.gxzy.manager.InputTextManager;
+import run.yigou.gxzy.manager.input.InputTextManager;
 import run.yigou.gxzy.manager.account.AccountDataManager;
-import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.manager.data.Callback;
 import com.hjq.base.KeyboardWatcher;
 import run.yigou.gxzy.ui.home.HomeFragment;
 import run.yigou.gxzy.ui.home.HomeActivity;

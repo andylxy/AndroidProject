@@ -1,4 +1,5 @@
 package run.yigou.gxzy.manager;
+import run.yigou.gxzy.manager.modal.AppModalGate;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

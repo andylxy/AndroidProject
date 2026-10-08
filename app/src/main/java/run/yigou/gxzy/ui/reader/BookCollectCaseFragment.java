@@ -18,10 +18,10 @@ import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.local.helper.LocalServices;
 
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.manager.data.Callback;
 import run.yigou.gxzy.ui.home.HomeActivity;
 import run.yigou.gxzy.utils.ThreadUtil;
-import run.yigou.gxzy.manager.UpdateManager;
+import run.yigou.gxzy.manager.update.UpdateManager;
 import run.yigou.gxzy.ui.home.TipsFragmentActivity;
 import run.yigou.gxzy.ui.reader.adapter.BookCollectCaseAdapter;
 import run.yigou.gxzy.ui.dialog.MessageDialog;

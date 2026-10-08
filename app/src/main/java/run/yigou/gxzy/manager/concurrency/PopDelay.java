@@ -1,4 +1,5 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.concurrency;
+import run.yigou.gxzy.manager.announcement.AnnouncementStore;
 
 import java.util.Random;
 
@@ -7,13 +8,13 @@ import java.util.Random;
  *
  * <p>与存储、节流都无关，故独立成类而不是挂在 {@code AnnouncementStore} 上。</p>
  */
-final class PopDelay {
+public final class PopDelay {
 
     /** 下限：启动完成后至少等这么久。 */
-    static final int MIN_MS = 15_000;
+    public static final int MIN_MS = 15_000;
 
     /** 上限：最多等这么久。 */
-    static final int MAX_MS = 25_000;
+    public static final int MAX_MS = 25_000;
 
     private PopDelay() {
     }
@@ -26,7 +27,7 @@ final class PopDelay {
      *
      * @param random 取值来源（生产传 `new Random()`，单测传固定实现以获得确定值）
      */
-    static int nextMs(Random random) {
+    public static int nextMs(Random random) {
         // +1 是为了含上区间上界；nextInt 要求上界为正。
         return MIN_MS + random.nextInt(MAX_MS - MIN_MS + 1);
     }

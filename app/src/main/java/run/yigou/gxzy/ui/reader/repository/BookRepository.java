@@ -38,7 +38,7 @@ import run.yigou.gxzy.ui.reader.data.ChapterData;
 import run.yigou.gxzy.base.GlobalDataHolder;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
-import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.manager.data.Callback;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 

@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.announcement;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -11,6 +11,10 @@ import java.util.List;
 
 import run.yigou.gxzy.data.remote.model.Announcement;
 import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.manager.concurrency.FetchClock;
+import run.yigou.gxzy.manager.concurrency.FetchClockStore;
+import run.yigou.gxzy.manager.concurrency.PopDelay;
+import run.yigou.gxzy.manager.update.PendingForceUpgradeStore;
 
 /**
  * 公告的落盘存储：<b>弹窗内容缓存</b>与<b>拉取节流时钟</b>。

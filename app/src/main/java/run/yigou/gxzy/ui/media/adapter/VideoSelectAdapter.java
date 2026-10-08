@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import run.yigou.gxzy.R;
 import com.hjq.base.AppAdapter;
 import run.yigou.gxzy.network.glide.GlideApp;
-import run.yigou.gxzy.manager.CacheDataManager;
+import run.yigou.gxzy.manager.data.CacheDataManager;
 import run.yigou.gxzy.ui.media.activity.VideoSelectActivity;
 import run.yigou.gxzy.ui.media.widget.PlayerView;
 

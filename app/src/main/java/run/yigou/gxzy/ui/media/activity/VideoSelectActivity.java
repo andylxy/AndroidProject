@@ -25,7 +25,7 @@ import run.yigou.gxzy.aop.Log;
 import run.yigou.gxzy.aop.Permissions;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.manager.ThreadPoolManager;
+import run.yigou.gxzy.manager.threadpool.ThreadPoolManager;
 import com.hjq.base.GridSpaceDecoration;
 import run.yigou.gxzy.ui.media.adapter.VideoSelectAdapter;
 import run.yigou.gxzy.ui.media.dialog.AlbumDialog;

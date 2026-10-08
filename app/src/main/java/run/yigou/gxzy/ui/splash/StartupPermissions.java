@@ -2,7 +2,7 @@ package run.yigou.gxzy.ui.splash;
 
 import com.hjq.permissions.Permission;
 
-import run.yigou.gxzy.manager.PrivacyAgreement;
+import run.yigou.gxzy.manager.privacy.PrivacyAgreement;
 
 /**
  * 启动硬门要求的**系统权限清单**：协议已同意（{@link PrivacyAgreement#isAgreed()}）

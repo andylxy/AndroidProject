@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
 import io.noties.markwon.Markwon;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.manager.data.Callback;
 import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.data.local.entity.ChatSummaryBean;
 import run.yigou.gxzy.data.local.helper.DbService;

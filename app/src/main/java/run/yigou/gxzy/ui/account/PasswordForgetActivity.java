@@ -11,9 +11,9 @@ import android.widget.TextView;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.manager.InputTextManager;
+import run.yigou.gxzy.manager.input.InputTextManager;
 import run.yigou.gxzy.manager.account.AccountDataManager;
-import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.manager.data.Callback;
 import com.hjq.widget.view.CountdownView;
 
 /**

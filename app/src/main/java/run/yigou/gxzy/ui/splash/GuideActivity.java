@@ -9,8 +9,8 @@ import androidx.viewpager2.widget.ViewPager2;
 import run.yigou.gxzy.R;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.manager.ActivityManager;
-import run.yigou.gxzy.manager.PrivacyAgreement;
+import run.yigou.gxzy.manager.lifecycle.ActivityManager;
+import run.yigou.gxzy.manager.privacy.PrivacyAgreement;
 import run.yigou.gxzy.ui.home.HomeActivity;
 
 import me.relex.circleindicator.CircleIndicator3;

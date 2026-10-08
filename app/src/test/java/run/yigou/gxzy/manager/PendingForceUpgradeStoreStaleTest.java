@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import com.google.gson.Gson;
 
 import run.yigou.gxzy.data.remote.model.UpdateInfo;
+import run.yigou.gxzy.manager.update.PendingForceUpgradeStore;
 
 import org.junit.Test;
 

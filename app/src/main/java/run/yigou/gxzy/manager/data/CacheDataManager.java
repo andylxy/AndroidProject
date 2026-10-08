@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.data;
 
 import android.content.Context;
 import android.os.Environment;

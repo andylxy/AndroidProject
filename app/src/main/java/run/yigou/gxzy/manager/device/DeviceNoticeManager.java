@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.device;
 
 import android.app.Activity;
 import android.os.Handler;
@@ -10,6 +10,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.log.EasyLog;
+import run.yigou.gxzy.manager.update.UpdateManager;
+import run.yigou.gxzy.manager.lifecycle.ActivityManager;
+import run.yigou.gxzy.manager.lifecycle.ForegroundActivities;
 
 /**
  * 「此设备已被管理员禁用」的提示（ADR-0003）。

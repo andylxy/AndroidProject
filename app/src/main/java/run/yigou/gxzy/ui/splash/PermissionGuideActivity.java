@@ -20,8 +20,8 @@ import java.util.List;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.manager.ActivityManager;
-import run.yigou.gxzy.manager.PrivacyAgreement;
+import run.yigou.gxzy.manager.lifecycle.ActivityManager;
+import run.yigou.gxzy.manager.privacy.PrivacyAgreement;
 import run.yigou.gxzy.dialog.AgreementDialog;
 
 /**

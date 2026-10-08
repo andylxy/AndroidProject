@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.privacy;
 
 import com.tencent.mmkv.MMKV;
 

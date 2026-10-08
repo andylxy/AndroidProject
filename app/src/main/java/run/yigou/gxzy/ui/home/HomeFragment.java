@@ -32,9 +32,9 @@ import com.hjq.base.FragmentPagerAdapter;
 
 import run.yigou.gxzy.config.AppStyleConfigProvider;
 import run.yigou.gxzy.log.EasyLog;
-import run.yigou.gxzy.manager.Callback;
-import run.yigou.gxzy.manager.SearchEntry;
-import run.yigou.gxzy.manager.SearchPermissionManager;
+import run.yigou.gxzy.manager.data.Callback;
+import run.yigou.gxzy.manager.search.SearchEntry;
+import run.yigou.gxzy.manager.search.SearchPermissionManager;
 
 import com.hjq.widget.layout.WrapRecyclerView;
 import com.hjq.widget.view.ClearEditText;
@@ -74,7 +74,7 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
         XCollapsingToolbarLayout.OnScrimsListener, BaseAdapter.OnItemClickListener {
 
     /** 应用数据管理器 */
-    private final run.yigou.gxzy.manager.AppDataManager mAppDataManager = run.yigou.gxzy.manager.AppDataManager.getInstance();
+    private final run.yigou.gxzy.manager.data.AppDataManager mAppDataManager = run.yigou.gxzy.manager.data.AppDataManager.getInstance();
 
     private XCollapsingToolbarLayout mCollapsingToolbarLayout;
     private Toolbar mToolbar;

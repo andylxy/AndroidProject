@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.announcement;
 
 import java.util.ArrayList;
 import java.util.Collections;

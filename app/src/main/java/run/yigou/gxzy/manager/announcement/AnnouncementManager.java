@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.announcement;
 
 import android.app.Activity;
 import android.os.Handler;
@@ -23,6 +23,13 @@ import run.yigou.gxzy.data.remote.model.AnnouncementResponse;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.network.server.VersionRequestServer;
 import run.yigou.gxzy.dialog.AnnouncementDialog;
+import run.yigou.gxzy.manager.concurrency.RetryScheduler;
+import run.yigou.gxzy.manager.launch.LaunchOnceGate;
+import run.yigou.gxzy.manager.modal.AppModalGate;
+import run.yigou.gxzy.manager.update.UpdateManager;
+import run.yigou.gxzy.manager.concurrency.PopDelay;
+import run.yigou.gxzy.manager.lifecycle.ActivityManager;
+import run.yigou.gxzy.manager.lifecycle.ForegroundActivities;
 
 /**
  * 公告的拉取与展示（DESIGN §6.1）。严格镜像 {@code UpdateManager} 的结构。

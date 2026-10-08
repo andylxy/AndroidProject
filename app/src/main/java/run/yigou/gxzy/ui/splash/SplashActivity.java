@@ -16,10 +16,10 @@ import com.hjq.permissions.XXPermissions;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppConfig;
-import run.yigou.gxzy.manager.AnnouncementManager;
-import run.yigou.gxzy.manager.PrivacyAgreement;
-import run.yigou.gxzy.manager.SearchPermissionManager;
-import run.yigou.gxzy.manager.UpdateManager;
+import run.yigou.gxzy.manager.announcement.AnnouncementManager;
+import run.yigou.gxzy.manager.privacy.PrivacyAgreement;
+import run.yigou.gxzy.manager.search.SearchPermissionManager;
+import run.yigou.gxzy.manager.update.UpdateManager;
 import run.yigou.gxzy.ui.home.HomeActivity;
 
 import com.hjq.widget.view.SlantedTextView;

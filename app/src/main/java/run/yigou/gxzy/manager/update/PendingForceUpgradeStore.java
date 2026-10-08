@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.update;
 
 import com.google.gson.Gson;
 import com.tencent.mmkv.MMKV;

@@ -1,4 +1,7 @@
 package run.yigou.gxzy.manager;
+import run.yigou.gxzy.manager.concurrency.FetchClock;
+import run.yigou.gxzy.manager.launch.LaunchOnceGate;
+import run.yigou.gxzy.manager.search.SearchPermissionStore;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

@@ -36,7 +36,7 @@ import run.yigou.gxzy.ui.reader.repository.BookRepository;
 import run.yigou.gxzy.manager.chapter.ChapterContentManager;
 import run.yigou.gxzy.data.model.DataItem;
 import run.yigou.gxzy.data.model.HH2SectionData;
-import run.yigou.gxzy.manager.Callback;
+import run.yigou.gxzy.manager.data.Callback;
 import run.yigou.gxzy.ui.reader.adapter.model.GroupData;
 import run.yigou.gxzy.ui.reader.adapter.model.ItemData;
 import run.yigou.gxzy.ui.reader.search.SearchCoordinator;

@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.search;
 
 import android.app.Activity;
 
@@ -12,6 +12,12 @@ import run.yigou.gxzy.data.remote.api.SearchPermissionApi;
 import run.yigou.gxzy.data.remote.model.SearchPermissionState;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.network.server.VersionRequestServer;
+import run.yigou.gxzy.manager.announcement.AnnouncementManager;
+import run.yigou.gxzy.manager.concurrency.RetryScheduler;
+import run.yigou.gxzy.manager.launch.LaunchOnceGate;
+import run.yigou.gxzy.manager.device.DeviceNoticeManager;
+import run.yigou.gxzy.manager.lifecycle.ActivityManager;
+import run.yigou.gxzy.manager.lifecycle.ForegroundActivities;
 
 /**
  * 搜索权限的拉取与判定。严格镜像 {@link AnnouncementManager} 的结构，
@@ -40,13 +46,13 @@ public final class SearchPermissionManager {
      * 进程内「本次启动是否已成功拉到权限判定」。默认 false = 搜索默认关闭（INV-2）。
      * 只在 {@link #fetchAndEvaluate} 成功落盘后翻 true；任何失败都翻回 false（fail-closed）。
      */
-    static boolean sFetchOk = false;
+    public static boolean sFetchOk = false;
 
     /**
      * 最近一次成功拉到的权限状态（进程内持有，网关直接读它，不碰磁盘，见
      * {@link SearchPermissionStore} 的说明）。
      */
-    static SearchPermissionState sState = null;
+    public static SearchPermissionState sState = null;
 
     /** 进程级「本次启动已拉过」闸门（INV-3）。 */
     private static final LaunchOnceGate sLaunchGate = new LaunchOnceGate();

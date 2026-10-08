@@ -1,4 +1,4 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.lifecycle;
 
 import android.app.Activity;
 
@@ -11,13 +11,13 @@ import android.app.Activity;
  * 挂在它身上的 Dialog 会跟着一起消失 —— 后端明明下了 {@code force=true}，
  * 用户屏幕上却什么都不会看到。故这里排除「自己会立刻结束」的宿主。</p>
  */
-final class ForegroundActivities {
+public final class ForegroundActivities {
 
     private ForegroundActivities() {
     }
 
     /** 没有前台 Activity、或它不能承载 Dialog 时返回 null。 */
-    static Activity topIfUsable() {
+    public static Activity topIfUsable() {
         final Activity activity = ActivityManager.getInstance().getTopActivity();
         return isUsableHost(activity) ? activity : null;
     }
@@ -33,7 +33,7 @@ final class ForegroundActivities {
      *       即使还没销毁，把不可关闭的强制升级框挂在启动页上，用户也来不及反应。</li>
      * </ol>
      */
-    static boolean isUsableHost(Activity activity) {
+    public static boolean isUsableHost(Activity activity) {
         return activity != null
                 && !activity.isFinishing()
                 && !activity.isDestroyed()

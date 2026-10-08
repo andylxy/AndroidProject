@@ -17,7 +17,7 @@ import java.util.List;
 
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.TitleBarFragment;
-import run.yigou.gxzy.manager.UpdateManager;
+import run.yigou.gxzy.manager.update.UpdateManager;
 import run.yigou.gxzy.base.constant.AppConst;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.ui.home.HomeActivity;

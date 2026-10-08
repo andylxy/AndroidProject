@@ -1,4 +1,5 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.concurrency;
+import run.yigou.gxzy.manager.lifecycle.ForegroundActivities;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -17,10 +18,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * {@code ForegroundActivities.topIfUsable()} 且要 {@code LifecycleOwner}，主线程能保证
  * 这一个 Looper 队列上的顺序与 UI 状态一致。</p>
  */
-final class RetryScheduler {
+public final class RetryScheduler {
 
     /** 到点要执行的动作。刻意做成 SAM 接口而不是抽象方法，让调用方保持在自己的类里。 */
-    interface Task {
+    public interface Task {
         void run();
     }
 
@@ -37,7 +38,7 @@ final class RetryScheduler {
     private final Task task;
     private final AtomicBoolean pending = new AtomicBoolean(false);
 
-    RetryScheduler(long delayMs, Task task) {
+    public RetryScheduler(long delayMs, Task task) {
         this.delayMs = delayMs;
         this.task = task;
     }
@@ -48,7 +49,7 @@ final class RetryScheduler {
      * <p>定时到点后<b>先放开单飞标志再执行任务</b>：任务多半会再次失败并重新排程，
      * 若标志此时仍为真，那条新排的任务会被自己拦掉，重试链就此断掉。</p>
      */
-    void schedule() {
+    public void schedule() {
         if (!pending.compareAndSet(false, true)) {
             return;
         }

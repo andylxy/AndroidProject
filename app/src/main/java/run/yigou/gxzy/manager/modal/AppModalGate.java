@@ -1,4 +1,6 @@
-package run.yigou.gxzy.manager;
+package run.yigou.gxzy.manager.modal;
+import run.yigou.gxzy.manager.announcement.AnnouncementManager;
+import run.yigou.gxzy.manager.update.UpdateManager;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -154,7 +156,7 @@ public final class AppModalGate {
      * <p>进程内静态状态在单测之间会互相污染，必须显式复位——否则一个用例占住闸门
      * 后，后续用例的「应立即执行」全部变成「排队等待」，表现为莫名其妙的连锁失败。</p>
      */
-    static synchronized void resetForTest() {
+    public static synchronized void resetForTest() {
         sShowing = false;
         PENDING.clear();
         RELEASE_LISTENERS.clear();
