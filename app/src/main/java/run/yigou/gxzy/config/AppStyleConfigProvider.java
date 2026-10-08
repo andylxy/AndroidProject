@@ -6,7 +6,7 @@ import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
 import com.hjq.http.listener.OnHttpListener;
 
-import run.yigou.gxzy.data.remote.api.StyleConfigApi;
+import run.yigou.gxzy.data.remote.api.style.StyleConfigApi;
 import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.manager.data.Callback;

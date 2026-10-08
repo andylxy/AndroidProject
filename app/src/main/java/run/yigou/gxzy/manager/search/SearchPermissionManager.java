@@ -8,7 +8,7 @@ import com.hjq.http.EasyHttp;
 import com.hjq.http.listener.HttpCallback;
 
 import run.yigou.gxzy.app.AppConfig;
-import run.yigou.gxzy.data.remote.api.SearchPermissionApi;
+import run.yigou.gxzy.data.remote.api.search.SearchPermissionApi;
 import run.yigou.gxzy.data.remote.model.SearchPermissionState;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.network.server.VersionRequestServer;

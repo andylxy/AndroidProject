@@ -1,4 +1,5 @@
-package run.yigou.gxzy.data.remote.api;
+package run.yigou.gxzy.data.remote.api.search;
+import run.yigou.gxzy.data.remote.api.announcement.AnnouncementApi;
 
 import com.hjq.http.config.IRequestApi;
 

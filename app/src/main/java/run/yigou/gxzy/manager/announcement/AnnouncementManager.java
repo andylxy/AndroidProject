@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import run.yigou.gxzy.app.AppConfig;
-import run.yigou.gxzy.data.remote.api.AnnouncementApi;
+import run.yigou.gxzy.data.remote.api.announcement.AnnouncementApi;
 import run.yigou.gxzy.data.remote.model.Announcement;
 import run.yigou.gxzy.data.remote.model.AnnouncementResponse;
 import run.yigou.gxzy.log.EasyLog;
