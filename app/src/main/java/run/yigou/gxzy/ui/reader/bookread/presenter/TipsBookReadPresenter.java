@@ -23,6 +23,7 @@ import run.yigou.gxzy.data.local.entity.Book;
 import run.yigou.gxzy.data.local.entity.Chapter;
 import run.yigou.gxzy.data.local.entity.TabNavBody;
 import run.yigou.gxzy.data.local.helper.DataRepository;
+import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.ui.reader.bookread.contract.TipsBookReadContract;
 import run.yigou.gxzy.ui.reader.entity.ExpandableGroupEntity;
 import run.yigou.gxzy.ui.reader.entity.GroupModel;
@@ -221,40 +222,61 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         EasyLog.print("TipsBookReadPresenter", "开始加载书籍内容: " + book.getBookName());
 
         // 加载书籍数据（新数据模型，使用 LRU 缓存）
-        currentBookData = repository.getBookData(bookId);
-        if (currentBookData == null) {
-            view.showLoading(false);
-            view.showError("书籍数据加载失败");
-            return;
-        }
-        EasyLog.print("TipsBookReadPresenter", "BookData 加载成功，章节数=" + currentBookData.getChapterCount());
-        
-        // 【新架构】设置TipsNetHelper的BookRepository上下文，用于点击链接时搜索
-        TipsNetHelper.setBookContext(repository, bookId);
-
-        // 获取章节列表
-        // 原来这里在主线程直接查库。改走 BookRepository.getChaptersAsync：
-        // 读发生在 DB 串行后台线程，下面依赖这份列表的工作搬进 onChaptersLoaded，回调回主线程接上。
+        // 改走 BookRepository.getBookDataAsync：读库发生在 DB 串行后台线程，结果回主线程。
+        // 原来这里在主线程直接同步查库（repository.getBookData），会触发 StrictMode DiskReadViolation。
+        // BookData 到手之前，下面依赖它的工作（setBookContext、章节列表异步加载）都搬进 onSuccess，
+        // 与既有 getChaptersAsync 串成两段式后台加载；getBookData 内部已填充章节缓存，
+        // 后续 getChaptersAsync 会直接命中缓存，不会再进一次后台。
         final int lastPosition = lastReadPosition;
         final String finalBookId = bookId;
         final TabNavBody finalBook = book;
-        repository.getChaptersAsync(bookId, new Callback<List<Chapter>>() {
+        repository.getBookDataAsync(bookId, new Callback<BookData>() {
             @Override
-            public void onSuccess(List<Chapter> chapters) {
-                try {
-                    onChaptersLoaded(chapters, lastPosition, finalBookId, finalBook);
-                } catch (Exception e) {
-                    EasyLog.print("TipsBookReadPresenter", "加载章节列表后处理失败: " + e.getMessage());
-                    view.showLoading(false);
-                    view.showError("加载失败: " + e.getMessage());
+            public void onSuccess(BookData bookData) {
+                // 读到结果前阅读页可能已退出，先判活再落字段、再继续，避免向失效页面发指令。
+                if (!isViewActive()) {
+                    return;
                 }
+                currentBookData = bookData;
+                if (currentBookData == null) {
+                    view.showLoading(false);
+                    view.showError("书籍数据加载失败");
+                    return;
+                }
+                EasyLog.print("TipsBookReadPresenter", "BookData 加载成功，章节数=" + currentBookData.getChapterCount());
+
+                // 【新架构】设置TipsNetHelper的BookRepository上下文，用于点击链接时搜索
+                TipsNetHelper.setBookContext(repository, bookId);
+
+                // 获取章节列表
+                // 读发生在 DB 串行后台线程（命中 getBookData 已填的缓存则直接回主线程），
+                // 下面依赖这份列表的工作搬进 onChaptersLoaded，回调回主线程接上。
+                repository.getChaptersAsync(finalBookId, new Callback<List<Chapter>>() {
+                    @Override
+                    public void onSuccess(List<Chapter> chapters) {
+                        try {
+                            onChaptersLoaded(chapters, lastPosition, finalBookId, finalBook);
+                        } catch (Exception e) {
+                            EasyLog.print("TipsBookReadPresenter", "加载章节列表后处理失败: " + e.getMessage());
+                            view.showLoading(false);
+                            view.showError("加载失败: " + e.getMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        EasyLog.print("TipsBookReadPresenter", "章节列表加载失败: " + e.getMessage());
+                        view.showLoading(false);
+                        view.showError("加载失败: " + e.getMessage());
+                    }
+                });
             }
 
             @Override
             public void onError(Exception e) {
-                EasyLog.print("TipsBookReadPresenter", "章节列表加载失败: " + e.getMessage());
+                EasyLog.print("TipsBookReadPresenter", "BookData 加载失败: " + e.getMessage());
                 view.showLoading(false);
-                view.showError("加载失败: " + e.getMessage());
+                view.showError("书籍数据加载失败");
             }
         });
     }
@@ -791,48 +813,65 @@ public class TipsBookReadPresenter implements TipsBookReadContract.Presenter {
         loadedBookFangs.add(currentBookId);
         
         // 【优化】先检查数据库是否已有方剂数据
-        ArrayList<run.yigou.gxzy.data.model.Fang> cachedFangList = 
-            DataRepository.getFangDetailList(currentBookId);
-        
-        if (cachedFangList != null && !cachedFangList.isEmpty()) {
-            // 数据库已有方剂数据，直接加载到BookData
-            EasyLog.print("TipsBookReadPresenter", "从数据库加载方剂: " + cachedFangList.size() + " 个");
-            
-            List<DataItem> fangItemList = new ArrayList<>(cachedFangList);
-            ChapterData fangChapterData = new ChapterData("", book.getBookName() + "方", 0, fangItemList);
-            
-            if (currentBookData != null) {
-                currentBookData.setFangData(fangChapterData);
-                EasyLog.print("TipsBookReadPresenter", "✅ 方剂数据已从数据库加载到BookData: " + cachedFangList.size() + " 个");
-            }
-            return;
-        }
-        
-        // 数据库无数据，从网络下载
-        EasyLog.print("TipsBookReadPresenter", "数据库无方剂数据，开始从网络下载");
-        
-        androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
-        repository.downloadBookFang(currentBookId, lifecycleOwner, new Callback<List<run.yigou.gxzy.data.model.Fang>>() {
+        // 改走后台线程读库：原来这里在主线程直接调 DataRepository.getFangDetailList 同步查库，
+        // 会触发 StrictMode DiskReadViolation（与 getBookData / getChapters 同一类问题，见 logcat 栈
+        // loadBookFang:816 → getFangDetailList:843 → BaseService.find:210 → SQLite 主线程读）。
+        // 读库发生在 DB 串行后台线程，结果回主线程后继续下面"已加载/网络下载"的分支。
+        final TabNavBody finalBook = book;
+        DbService.getInstance().runInBackgroundSerial(new Runnable() {
             @Override
-            public void onSuccess(List<run.yigou.gxzy.data.model.Fang> data) {
-                EasyLog.print("TipsBookReadPresenter", "药方数据网络下载完成: " + data.size() + " 个");
-                
-                // 【新架构】将方剂数据设置到BookData
-                if (data != null && !data.isEmpty() && currentBookData != null) {
-                    // 创建ChapterData包装方剂列表
-                    List<DataItem> fangItemList = new ArrayList<>(data);
-                    ChapterData fangChapterData = new ChapterData("", book.getBookName() + "方", 0, fangItemList);
-                    
-                    currentBookData.setFangData(fangChapterData);
-                    EasyLog.print("TipsBookReadPresenter", "✅ 方剂数据已设置到BookData: " + data.size() + " 个");
-                }
-            }
+            public void run() {
+                final ArrayList<run.yigou.gxzy.data.model.Fang> cachedFangList =
+                    DataRepository.getFangDetailList(currentBookId);
+                ThreadUtil.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // 读库期间阅读页可能已退出，撤销预标记避免之后无法重试
+                        if (!isViewActive()) {
+                            loadedBookFangs.remove(currentBookId);
+                            return;
+                        }
+                        if (cachedFangList != null && !cachedFangList.isEmpty()) {
+                            // 数据库已有方剂数据，直接加载到BookData
+                            EasyLog.print("TipsBookReadPresenter", "从数据库加载方剂: " + cachedFangList.size() + " 个");
 
-            @Override
-            public void onError(Exception e) {
-                EasyLog.print("TipsBookReadPresenter", "药方数据加载失败: " + e.getMessage());
-                // 失败时移除标记，允许重试
-                loadedBookFangs.remove(currentBookId);
+                            List<DataItem> fangItemList = new ArrayList<>(cachedFangList);
+                            ChapterData fangChapterData = new ChapterData("", finalBook.getBookName() + "方", 0, fangItemList);
+
+                            if (currentBookData != null) {
+                                currentBookData.setFangData(fangChapterData);
+                                EasyLog.print("TipsBookReadPresenter", "✅ 方剂数据已从数据库加载到BookData: " + cachedFangList.size() + " 个");
+                            }
+                            return;
+                        }
+
+                        // 数据库无数据，从网络下载
+                        EasyLog.print("TipsBookReadPresenter", "数据库无方剂数据，开始从网络下载");
+                        androidx.lifecycle.LifecycleOwner lifecycleOwner = (androidx.lifecycle.LifecycleOwner) view;
+                        repository.downloadBookFang(currentBookId, lifecycleOwner, new Callback<List<run.yigou.gxzy.data.model.Fang>>() {
+                            @Override
+                            public void onSuccess(List<run.yigou.gxzy.data.model.Fang> data) {
+                                EasyLog.print("TipsBookReadPresenter", "药方数据网络下载完成: " + data.size() + " 个");
+
+                                // 【新架构】将方剂数据设置到BookData
+                                if (data != null && !data.isEmpty() && currentBookData != null) {
+                                    List<DataItem> fangItemList = new ArrayList<>(data);
+                                    ChapterData fangChapterData = new ChapterData("", finalBook.getBookName() + "方", 0, fangItemList);
+
+                                    currentBookData.setFangData(fangChapterData);
+                                    EasyLog.print("TipsBookReadPresenter", "✅ 方剂数据已设置到BookData: " + data.size() + " 个");
+                                }
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                EasyLog.print("TipsBookReadPresenter", "药方数据加载失败: " + e.getMessage());
+                                // 失败时移除标记，允许重试
+                                loadedBookFangs.remove(currentBookId);
+                            }
+                        });
+                    }
+                });
             }
         });
     }

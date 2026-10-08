@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.text.ClickLink;
+import run.yigou.gxzy.utils.ThreadUtil;
 import run.yigou.gxzy.text.TipsTextRenderer;
 import run.yigou.gxzy.ui.reader.constant.ContentTypes;
 import run.yigou.gxzy.ui.reader.entity.GroupData;
@@ -103,59 +104,80 @@ public class TipsClickHandler {
             return;
         }
 
-        // 3. 根据内容类型执行对应的搜索
-        SearchDataAdapter adapter = new SearchDataAdapter(
-                TipsNetHelper.getBookRepository(), TipsNetHelper.getCurrentBookId());
-        Pair<List<GroupData>, List<List<ItemData>>> data;
-        switch (contentType) {
-            case ContentTypes.YAO:
-                data = adapter.searchYaoContent(keyword.trim());
-                break;
-            case ContentTypes.FANG:
-                data = adapter.searchFangContent(keyword.trim());
-                break;
-            case ContentTypes.MING_CI:
-                data = adapter.searchMingCiContent(keyword.trim());
-                break;
-            default:
-                EasyLog.print("❌ 未知的contentType: " + contentType);
-                return;
-        }
-
-        // 4. 计算点击位置矩形区域
+        // 4. 计算点击位置矩形区域（UI 工作，主线程）
         Rect textRect = TipsUIHelper.getTextRect(clickableSpan, textView);
 
-        // 5. 校验 Context 并显示弹窗
+        // 5. 校验 Context（主线程）
         Context context = textView.getContext();
         if (!(context instanceof AppCompatActivity)) {
             EasyLog.print("❌ Context不是AppCompatActivity!");
             return;
         }
-        AppCompatActivity activity = (AppCompatActivity) context;
+        final AppCompatActivity activity = (AppCompatActivity) context;
 
-        // 6. 根据类型创建对应的窗口并显示
-        switch (contentType) {
-            case ContentTypes.YAO:
-            case ContentTypes.FANG: {
-                TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
-                window.setData(context, data);
-                window.setFang(keyword);
-                window.setRect(textRect);
-                window.setHost(createWindowHost(activity));
-                window.show(activity.getSupportFragmentManager());
-                break;
+        // 6. 后台线程做 DB 读 + 检索，避免主线程 DiskReadViolation（StrictMode）
+        //    （SearchDataAdapter 构造与 search* 内部会同步读库；Presenter.search() 的全局搜索已走
+        //     ThreadUtil.runInBackground，这里补上正文内链点击这条同样会触达的路径）
+        ThreadUtil.runInBackground(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // 3. 根据内容类型执行对应的搜索
+                    SearchDataAdapter adapter = new SearchDataAdapter(
+                            TipsNetHelper.getBookRepository(), TipsNetHelper.getCurrentBookId());
+                    Pair<List<GroupData>, List<List<ItemData>>> data;
+                    switch (contentType) {
+                        case ContentTypes.YAO:
+                            data = adapter.searchYaoContent(keyword.trim());
+                            break;
+                        case ContentTypes.FANG:
+                            data = adapter.searchFangContent(keyword.trim());
+                            break;
+                        case ContentTypes.MING_CI:
+                            data = adapter.searchMingCiContent(keyword.trim());
+                            break;
+                        default:
+                            EasyLog.print("❌ 未知的contentType: " + contentType);
+                            return;
+                    }
+
+                    final Pair<List<GroupData>, List<List<ItemData>>> finalData = data;
+                    // 回主线程创建并显示弹窗
+                    ThreadUtil.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (finalData == null) {
+                                return;
+                            }
+                            switch (contentType) {
+                                case ContentTypes.YAO:
+                                case ContentTypes.FANG: {
+                                    TipsLittleTableViewWindow window = new TipsLittleTableViewWindow();
+                                    window.setData(context, finalData);
+                                    window.setFang(keyword);
+                                    window.setRect(textRect);
+                                    window.setHost(createWindowHost(activity));
+                                    window.show(activity.getSupportFragmentManager());
+                                    break;
+                                }
+                                case ContentTypes.MING_CI: {
+                                    TipsLittleMingCiViewWindow window = new TipsLittleMingCiViewWindow();
+                                    window.setData(context, finalData);
+                                    window.setRect(textRect);
+                                    window.setHost(createWindowHost(activity));
+                                    window.show(activity.getSupportFragmentManager());
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    EasyLog.print("TipsClickHandler", "搜索失败: " + e.getMessage());
+                }
             }
-            case ContentTypes.MING_CI: {
-                TipsLittleMingCiViewWindow window = new TipsLittleMingCiViewWindow();
-                window.setData(context, data);
-                window.setRect(textRect);
-                window.setHost(createWindowHost(activity));
-                window.show(activity.getSupportFragmentManager());
-                break;
-            }
-            default:
-                break;
-        }
+        });
     }
 
     /**

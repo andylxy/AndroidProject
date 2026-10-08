@@ -146,6 +146,39 @@ public class BookRepository {
     }
 
     /**
+     * 异步获取书籍数据（懒加载模式）。
+     *
+     * <p>数据库读取发生在串行后台线程，结果回主线程。与 {@link #getBookData(String)} 的区别：
+     * 同步版在主线程直接查库，会触发 StrictMode DiskReadViolation；异步版把读库挪到后台，
+     * 调用方通过 callback 拿结果，不再同步返回。
+     *
+     * <p>缓存命中（已完全加载）时直接回主线程，不再进后台；读失败按"加载失败"回调 null，
+     * 与同步版（异常被内部吞掉、永不返回 null）不同——null 让 Presenter 走书籍数据加载失败分支。
+     *
+     * @param bookId   书籍 ID
+     * @param callback 结果回调（主线程），可为 null
+     */
+    public void getBookDataAsync(final String bookId, final Callback<BookData> callback) {
+        final BookData cached = dataManager.getFromCache(bookId);
+        if (cached != null && cached.isFullyLoaded()) {
+            deliverOnUi(callback, cached);
+            return;
+        }
+        DbService.getInstance().runInBackgroundSerial(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    deliverOnUi(callback, getBookData(bookId));
+                } catch (Throwable t) {
+                    // 读失败按"加载失败"回调 null，让 Presenter 走书籍数据加载失败分支。
+                    EasyLog.print(t);
+                    deliverOnUi(callback, null);
+                }
+            }
+        });
+    }
+
+    /**
      * 异步查询书架书籍（数据库读取发生在串行后台线程，结果回主线程）。
      *
      * @param bookNo   书号
@@ -569,59 +602,120 @@ public class BookRepository {
      * @param lifecycleOwner 生命周期所有者（Fragment/Activity），可为 null
      * @param callback 回调接口
      */
+    /**
+     * 懒加载章节内容（后台读库版）。
+     *
+     * <p>原始实现在主线程同步读库（{@link #getBookData(String)} / {@link #getChapters(String)} /
+     * {@link #loadChapterContent(BookData, Chapter)} 均为同步 DB 读），会触发
+     * {@code StrictMode DiskReadViolation}。改为：先后台拿 BookData（含已预加载的章节内容），
+     * 若内容未命中再后台拿 Chapter 实体与章节内容，结果统一回主线程。
+     *
+     * @param bookId 书籍 ID
+     * @param position 章节位置
+     * @param lifecycleOwner 生命周期所有者（Fragment/Activity），可为 null
+     * @param callback 回调接口（主线程）
+     */
     public void loadChapterLazy(String bookId, int position, LifecycleOwner lifecycleOwner, Callback<ChapterData> callback) {
-        try {
-            BookData bookData = getBookData(bookId);
-            ChapterData chapterData = bookData.getChapter(position);
-            
-            if (chapterData == null) {
+        // 1) 后台拿 BookData（getBookDataAsync 内部已把已下载章节内容预加载进 bookData）
+        getBookDataAsync(bookId, new Callback<BookData>() {
+            @Override
+            public void onSuccess(final BookData bookData) {
+                try {
+                    if (bookData == null) {
+                        if (callback != null) {
+                            callback.onError(new Exception("书籍数据加载失败"));
+                        }
+                        return;
+                    }
+                    ChapterData chapterData = bookData.getChapter(position);
+                    if (chapterData == null) {
+                        if (callback != null) {
+                            callback.onError(new Exception("未找到章节数据"));
+                        }
+                        return;
+                    }
+
+                    // 内容已在内存（来自 getBookData 的预加载），直接回主线程
+                    if (chapterData.isContentLoaded() && !chapterData.isEmpty()) {
+                        if (callback != null) {
+                            callback.onSuccess(chapterData);
+                        }
+                        return;
+                    }
+
+                    // 2) 内容未命中：后台拿 Chapter 实体，用于判断下载状态 / 触发加载
+                    getChaptersAsync(bookId, new Callback<List<Chapter>>() {
+                        @Override
+                        public void onSuccess(List<Chapter> chapters) {
+                            try {
+                                Chapter targetChapter = null;
+                                for (Chapter chapter : chapters) {
+                                    if (chapter.getSignatureId() != null &&
+                                            chapter.getSignatureId().equals(chapterData.getSignatureId())) {
+                                        targetChapter = chapter;
+                                        break;
+                                    }
+                                }
+
+                                if (targetChapter == null) {
+                                    if (callback != null) {
+                                        callback.onError(new Exception("未找到目标章节"));
+                                    }
+                                    return;
+                                }
+
+                                // 捕获为 final，供内层 runInBackgroundSerial 匿名类引用
+                                final Chapter finalTarget = targetChapter;
+                                if (finalTarget.getIsDownload()) {
+                                    // 已下载但内存未命中：后台读章节内容，再回主线程交付
+                                    DbService.getInstance().runInBackgroundSerial(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            try {
+                                                // 同步 DB 读，必须在后台线程执行
+                                                loadChapterContent(bookData, finalTarget);
+                                            } catch (Throwable t) {
+                                                EasyLog.print(t);
+                                            }
+                                            // 回主线程交付（deliverOnUi 内部走 ThreadUtil.runOnUiThread）
+                                            deliverOnUi(callback, chapterData);
+                                        }
+                                    });
+                                } else {
+                                    downloadChapterAsync(finalTarget, bookData, lifecycleOwner, callback);
+                                }
+                            } catch (Exception e) {
+                                EasyLog.print("BookRepository", "懒加载章节查找失败: " + e.getMessage());
+                                if (callback != null) {
+                                    callback.onError(e);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            EasyLog.print("BookRepository", "懒加载章节列表加载失败: " + e.getMessage());
+                            if (callback != null) {
+                                callback.onError(e);
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    EasyLog.print("BookRepository", "懒加载失败: " + e.getMessage());
+                    if (callback != null) {
+                        callback.onError(e);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                EasyLog.print("BookRepository", "懒加载书籍数据加载失败: " + e.getMessage());
                 if (callback != null) {
-                    callback.onError(new Exception("未找到章节数据"));
-                }
-                return;
-            }
-            
-            // 内容已就绪，直接返回
-            if (chapterData.isContentLoaded() && !chapterData.isEmpty()) {
-                if (callback != null) {
-                    callback.onSuccess(chapterData);
-                }
-                return;
-            }
-            
-            // 通过签名ID找到对应的 Chapter 对象
-            List<Chapter> chapters = getChapters(bookId);
-            Chapter targetChapter = null;
-            for (Chapter chapter : chapters) {
-                if (chapter.getSignatureId() != null && 
-                    chapter.getSignatureId().equals(chapterData.getSignatureId())) {
-                    targetChapter = chapter;
-                    break;
+                    callback.onError(e);
                 }
             }
-            
-            if (targetChapter == null) {
-                if (callback != null) {
-                    callback.onError(new Exception("未找到目标章节"));
-                }
-                return;
-            }
-            
-            if (targetChapter.getIsDownload()) {
-                loadChapterContent(bookData, targetChapter);
-                if (callback != null) {
-                    callback.onSuccess(chapterData);
-                }
-            } else {
-                downloadChapterAsync(targetChapter, bookData, lifecycleOwner, callback);
-            }
-            
-        } catch (Exception e) {
-            EasyLog.print("BookRepository", "懒加载失败: " + e.getMessage());
-            if (callback != null) {
-                callback.onError(e);
-            }
-        }
+        });
     }
 
 }
