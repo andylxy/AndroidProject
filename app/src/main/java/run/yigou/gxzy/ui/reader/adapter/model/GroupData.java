@@ -13,7 +13,6 @@ import android.text.SpannableStringBuilder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -135,17 +134,6 @@ public class GroupData {
             return null;
         }
         return items.get(position);
-    }
-
-    /** 获取所有子项（返回拷贝，防止外部修改；items 为 null 时返回空列表） */
-    @NonNull
-    public List<ItemData> getItems() {
-        return items != null ? new ArrayList<>(items) : Collections.emptyList();
-    }
-
-    /** 判断是否为空组（items 为 null 或空列表均视为空） */
-    public boolean isEmpty() {
-        return items == null || items.isEmpty();
     }
 
     @Override
