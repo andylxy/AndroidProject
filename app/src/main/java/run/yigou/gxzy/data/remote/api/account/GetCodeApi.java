@@ -1,4 +1,4 @@
-package run.yigou.gxzy.data.remote.api;
+package run.yigou.gxzy.data.remote.api.account;
 
 import com.hjq.http.config.IRequestApi;
 
@@ -8,11 +8,11 @@ import com.hjq.http.config.IRequestApi;
  *    time   : 2019/12/07
  *    desc   : ????????
  */
-public final class VerifyCodeApi implements IRequestApi {
+public final class GetCodeApi implements IRequestApi {
 
     @Override
     public String getApi() {
-        return "code/checkout";
+        return "code/get";
     }
     // ????????????
     public String getMethod() {
@@ -20,16 +20,9 @@ public final class VerifyCodeApi implements IRequestApi {
     }
     /** ?????*/
     private String phone;
-    /** ?????*/
-    private String code;
 
-    public VerifyCodeApi setPhone(String phone) {
+    public GetCodeApi setPhone(String phone) {
         this.phone = phone;
-        return this;
-    }
-
-    public VerifyCodeApi setCode(String code) {
-        this.code = code;
         return this;
     }
 }

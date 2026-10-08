@@ -43,9 +43,9 @@ import run.yigou.gxzy.base.constant.LoginType;
 import run.yigou.gxzy.data.local.entity.UserInfo;
 import run.yigou.gxzy.data.local.helper.DbService;
 import run.yigou.gxzy.data.local.helper.LocalServices;
-import run.yigou.gxzy.data.remote.api.LoginApi;
+import run.yigou.gxzy.data.remote.api.account.LoginApi;
 import run.yigou.gxzy.data.remote.api.misc.VierCode;
-import run.yigou.gxzy.data.remote.api.GetCodeApi;
+import run.yigou.gxzy.data.remote.api.account.GetCodeApi;
 
 import run.yigou.gxzy.network.glide.GlideApp;
 import run.yigou.gxzy.manager.input.InputTextManager;

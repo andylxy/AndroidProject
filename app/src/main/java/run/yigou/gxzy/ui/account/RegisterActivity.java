@@ -16,7 +16,7 @@ import run.yigou.gxzy.R;
 import run.yigou.gxzy.aop.Log;
 import com.hjq.base.action.SingleClick;
 import run.yigou.gxzy.app.AppActivity;
-import run.yigou.gxzy.data.remote.api.RegisterApi;
+import run.yigou.gxzy.data.remote.api.account.RegisterApi;
 import run.yigou.gxzy.manager.input.InputTextManager;
 import run.yigou.gxzy.manager.account.AccountDataManager;
 import run.yigou.gxzy.manager.data.Callback;
