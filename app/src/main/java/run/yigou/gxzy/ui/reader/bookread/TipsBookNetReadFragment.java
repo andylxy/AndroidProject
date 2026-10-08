@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import run.yigou.gxzy.event.TipsFragmentSettingEventNotification;
+import run.yigou.gxzy.event.TipsSettingChangedEvent;
 import run.yigou.gxzy.manager.SearchEntry;
 import run.yigou.gxzy.manager.SearchPermissionManager;
 import run.yigou.gxzy.R;
@@ -238,9 +238,8 @@ public class TipsBookNetReadFragment extends AppFragment<AppActivity>
     // 阅读设置（术解等）变更后由 XEventBus 通知本 Fragment 刷新列表
 
     @Subscribe(priority = 1)
-    public void onEvent(TipsFragmentSettingEventNotification event) {
+    public void onEvent(TipsSettingChangedEvent event) {
         ThreadUtil.runOnUiThread(() -> {
-            // ✅ 宋版伤寒逻辑已移至 Presenter，不需要 Fragment 中设置
             refreshData();
             // Fragment 处理返回键动作,是否保存阅读
             setBackPressedCallback();

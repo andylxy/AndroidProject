@@ -6,7 +6,7 @@ import com.hjq.widget.layout.SettingBar;
 import com.hjq.widget.view.SwitchButton;
 import com.lucas.xbus.XEventBus;
 
-import run.yigou.gxzy.event.TipsFragmentSettingEventNotification;
+import run.yigou.gxzy.event.TipsSettingChangedEvent;
 import run.yigou.gxzy.R;
 import run.yigou.gxzy.app.AppActivity;
 import run.yigou.gxzy.app.AppApplication;
@@ -98,7 +98,7 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
 
     @Override
     public void onCheckedChanged(SwitchButton button, boolean checked) {
-        TipsFragmentSettingEventNotification tipsFragmentSettingEventNotification = new TipsFragmentSettingEventNotification();
+        TipsSettingChangedEvent tipsSettingChangedEvent = new TipsSettingChangedEvent();
         if (button.getId() == R.id.sb_setting_shu_jie_switch) {
             //保存设置
             fragmentSetting.setShuJie(checked);
@@ -107,8 +107,8 @@ public final class TipsSettingFragment extends AppFragment<AppActivity> implemen
         ManagerSetting.saveFragmentSetting(fragmentSetting);
         //通知显示已经变更
         try {
-            if (XEventBus.getDefault() != null && tipsFragmentSettingEventNotification != null) {
-                XEventBus.getDefault().post(tipsFragmentSettingEventNotification);
+            if (XEventBus.getDefault() != null && tipsSettingChangedEvent != null) {
+                XEventBus.getDefault().post(tipsSettingChangedEvent);
             }
         } catch (Exception e) {
             // EventBus 发送失败时静默处理

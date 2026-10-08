@@ -42,7 +42,7 @@ graph TD
     CL["chapterList\nArrayList<Chapter> 原始DB数据"]
     GM["GroupModel\nHH2SectionData→ExpandableGroupEntity"]
     SC["SearchCoordinator\n全局搜索(同步)"]
-    EB["XEventBus\nTipsFragmentSettingEventNotification"]
+    EB["XEventBus\nTipsSettingChangedEvent"]
 
     F -->|new| A
     F -->|持有| CL

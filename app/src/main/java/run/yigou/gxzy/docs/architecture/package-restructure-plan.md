@@ -69,7 +69,7 @@ run/yigou/gxzy/
 | 3.2 | 重命名 `LoginEventNotification` → `LoginEvent` | `LoginEventNotification.java` | 更新所有引用方 |
 | 3.3 | 重命名 `ShowUpdateNotificationEvent` → `ShowUpdateEvent` | `ShowUpdateNotificationEvent.java` | 更新所有引用方 |
 
-**不动**：`ChapterContentNotificationEvent`、`ChatMessageBeanEvent`、`TipsFragmentSettingEventNotification` 后缀已为 Event。
+**不动**：`ChapterContentNotificationEvent`、`ChatMessageBeanEvent`、`TipsSettingChangedEvent`（原 `TipsFragmentSettingEventNotification`，已在 08 号清理票重命名）后缀已为 Event。
 
 #### Phase 4：http/ → network/ + data/remote/ 拆分
 

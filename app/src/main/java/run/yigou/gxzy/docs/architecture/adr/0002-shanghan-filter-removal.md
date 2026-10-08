@@ -89,7 +89,7 @@ return new ArrayList<>(contentList.subList(start, end));
 | 5 | `ManagerSetting.java`                       | `:41-42` 两行默认值设置。**保留** `:43` `setShuJie(false)`                                                                                                                                                                                                              |
 | 6 | `TipsSettingFragment.java`                  | `:23-24` `sb_setting_sh` / `sb_setting_jk` 字段；`:26-27` `sb_setting_sh_switch` / `sb_setting_jk_switch` 字段；`:63-66` 四处 `findViewById`；`:85-86` 两个 `setOnCheckedChangeListener`；`:105-123` 显隐 / 回填 / 文案；`:148-171` 变更处理。**保留** `sb_setting_shu_jie_switch` 全部逻辑 |
 | 7 | `tips_setting_fragment.xml`                 | `:41-70` **两个 SettingBar 容器整块删**（含 `:70` 的 `</SettingBar>` 闭合；只删内部的 SwitchButton——只删 `:49`/`:64` 会留下两条空白 UI；初版 `:41-67` 少算 3 行会留 `:68-70` 无配对闭合标签 → XML 解析失败）                                                                                                                                         |
-| 8 | `TipsFragmentSettingEventNotification.java` | `shanghan_Notification` / `jinkui_Notification` 两个字段及其 getter/setter；并修正 `:4` 类注释（原文称「用于通知伤寒论、金匮要略、书解等模块」，删后实际只剩「术解 / 通用刷新信号」）                                                                                                                                |
+| 8 | `TipsSettingChangedEvent.java` | `shanghan_Notification` / `jinkui_Notification` 两个字段及其 getter/setter；并修正 `:4` 类注释（原文称「用于通知伤寒论、金匮要略、书解等模块」，删后实际只剩「术解 / 通用刷新信号」）                                                                                                                                |
 | 9 | `TipsSettingFragment.java`                  | `:33` `bookId` 字段与 `:77-78` 赋值（`bookId` 仅 `:105` 使用，随 #6 删除后变死字段）                                                                                                                                                                                             |
 
 ### 3.3 失效注释与形态清理（必须同步清理）
@@ -107,7 +107,7 @@ return new ArrayList<>(contentList.subList(start, end));
 | `TipsBookNetReadFragment.java:239-240`、`:245`            | 「✅ 宋版伤寒监听器已移至 Presenter / 不需要 Fragment 中设置」两处注释                                                                                      | **仅改注释**，保留 `:242` `@Subscribe` 与 `:243-250` `onEvent` 方法体（误删会破坏刷新机制 + 编译失败） |
 | `BookContentSearchActivity.java:228`、`:752`、`:808-811`    | 「获取伤寒论过滤设置」「伤寒论特殊过滤逻辑」                                                                                                              | 随 #3 一并清                         |
 | **`AppApplication.java:213-218`**                         | **「为什么敢改成异步：`fragmentSetting` 的两个使用方（`BookContentSearchActivity` 与 `TipsBookReadPresenter`）都有 null 分支兜底」——这两个使用方都在删除清单里，删后该论据完全失真** | **必须改**（本轮新增，见 §5.2 冷启动竞态）       |
-| `TipsFragmentSettingEventNotification.java:4`             | 类注释                                                                                                                                 | 见 #8                             |
+| `TipsSettingChangedEvent.java:4`             | 类注释                                                                                                                                 | 见 #8                             |
 | `SearchCoordinator.java:82`/`:98`/`:104`/`:116`           | `searchGlobal` 的 `// 1.` `// 3.` `// 4.` `// 5.` 步骤编号（删 `// 2.` 后断裂）                                                                           | 把 `3/4/5` 重编号为 `2/3/4`              |
 | `TipsBookReadPresenter.java:22`、`TipsSettingFragment.java:14` | `import ...AppConst;`（两文件删完后 `AppConst` 仅在待删 `:298`/`:105` 使用，变未使用 import）                                                                  | 一并删 import（否则 checkstyle/编译告警）       |
 | `TipsSettingFragment.java:105-124`                        | `showSettingSwitch()` 内依据 `AppConst.ShangHanNo` 控制 sh/jk 开关的可见性/勾选/文案                                                                           | 随 #6 一并删（仅留 `:112` shuJie 勾选）        |
@@ -118,7 +118,7 @@ return new ArrayList<>(contentList.subList(start, end));
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | `FragmentSetting.shuJie` 与 `sb_setting_shu_jie_switch`                  | 仍被 `TipsBookNetReadFragment:200` 与 `:254` 真实读取，与截取无关                              |
 | `TipsSettingFragment.fragmentSetting`（:36/:103）                         | 仍被 `:112` `isShuJie()` 与 `:145` `setShuJie()` 使用                                  |
-| `TipsBookNetReadFragment.onEvent(TipsFragmentSettingEventNotification)` | 术解开关切换后依赖它 `refreshData()` 刷新列表，仍需保留                                              |
+| `TipsBookNetReadFragment.onEvent(TipsSettingChangedEvent)` | 术解开关切换后依赖它 `refreshData()` 刷新列表，仍需保留                                              |
 | `AppConst.ShangHanNo` 常量                                                | `BookContentSearchActivity:231` 仍有用途。（初版举的 `TipsSettingFragment:105` 是错的——那行本身要删） |
 | `TipsSettingFragment.newInstance(BookArgs)` 签名                          | `TipsFragmentActivity:487` 调用，属外部门面，签名保留                                          |
 | `AppApplication.fragmentSetting` 与 `ManagerSetting` 存取                  | 仍承载 `shuJie`，不是截取专用                                                               |
@@ -225,10 +225,10 @@ return new ArrayList<>(contentList.subList(start, end));
 | §3.3 失效注释清理 | 初版完全没有 |  
 | 实施顺序 | 初版没有（现为 §6） |
 
-**灰色地带（本轮不擅自决定，维持现状）**：
+**灰色地带（原本轮不擅自决定；已在 08 号清理票解决）**：
 
 - `TipsSettingFragment.bookArgs`（:41）在删 `bookId` 后变成「只写不读」，但 `newInstance(BookArgs)` 是 `TipsFragmentActivity:487` 依赖的外部门面 → **保留签名与字段**，不因内部清理破坏外部契约。
-- `TipsFragmentSettingEventNotification` 删掉 sh/jk 两字段后，事件对象零信息量、仅作「触发 refreshData」的信号；`shuJie_Notification` 字段全仓从未被赋值（既有的死字段）。**不在本轮改**——改它需要同时决定术解分支是否补 `setShuJie_Notification`，属独立议题。
+- `TipsSettingChangedEvent`（原 `TipsFragmentSettingEventNotification`）删掉 sh/jk 两字段后，事件对象零信息量、仅作「触发 refreshData」的信号；`shuJie_Notification` 字段全仓从未被赋值（既有的死字段）。**已在 08 号清理票解决**：删除死字段、类名改为 `TipsSettingChangedEvent`、退化为零载荷标记事件（接收方仍直接重读 `fragmentSetting` 刷新，零行为变化）。
 
 ---
 
@@ -263,7 +263,7 @@ return new ArrayList<>(contentList.subList(start, end));
 - `TipsSettingFragment.onCheckedChanged` 删 sh/jk 分支后仅留 shuJie 分支 + 保存 + post 事件；事件对象零字段但仍触发 `onEvent→refreshData`，刷新链路 intact。
 - `BookContentSearchActivity.searchInBook` 删 `:752-755` 后 `contentList` 直接供 `:757` 搜索，无对「过滤后长度」的依赖；`:766` 空结果守卫仍有效。
 - `FragmentSetting` 删字段后仅剩 `shuJie` 单布尔，仍是 CacheHelper 持久化的设置包，保留（不在本轮重构）。
-- `TipsFragmentSettingEventNotification` 删 sh/jk 字段后为零字段信号对象，仍能触发刷新，保留（§9 灰色地带已记）。
+- `TipsSettingChangedEvent`（原 `TipsFragmentSettingEventNotification`）删 sh/jk 字段后为零字段信号对象，仍能触发刷新；死字段与类名失配问题已在 08 号清理票完成（§9 灰色地带已记，现已解决）。
 
 ## 12. 术语表（Glossary）
 
