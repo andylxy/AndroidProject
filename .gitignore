@@ -34,5 +34,9 @@ getnav.json
 convert_ids*.py
 fix_generated.py
 
+# 本地设计草稿 / 联调调试产物（logcat、临时脚本、会话记录等）
+# 仅本机使用，不应提交
+.scratch/
+
 # Agent 本地记忆目录（含会话记录与本机绝对路径）
 .workbuddy/
