@@ -26,7 +26,7 @@
 set -uo pipefail
 
 PACKAGE="run.yigou.gxzy.debug"
-ENTRY_ACTIVITY="run.yigou.gxzy.debug/run.yigou.gxzy.ui.main.SplashActivity"
+ENTRY_ACTIVITY="run.yigou.gxzy.debug/run.yigou.gxzy.ui.splash.SplashActivity"
 TARGET_ACTIVITY="TipsFragmentActivity"
 ROUNDS=6
 ENTER_TAP=""

@@ -9,6 +9,7 @@
 
 package run.yigou.gxzy.manager.data;
 
+import android.app.Activity;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
 
@@ -39,6 +40,8 @@ import run.yigou.gxzy.data.remote.model.HttpData;
 import run.yigou.gxzy.log.EasyLog;
 import run.yigou.gxzy.app.DataPreferences;
 import run.yigou.gxzy.app.DataUpdateFrequency;
+import run.yigou.gxzy.manager.lifecycle.ForegroundActivities;
+import run.yigou.gxzy.manager.mingci.MingCiPermissionManager;
 import run.yigou.gxzy.utils.ThreadUtil;
 
 /**
@@ -107,6 +110,47 @@ public class AppDataManager {
      * 私有构造方法
      */
     private AppDataManager() {
+        // 名词解释权限（G3 / T08）：权限确认后补载底表；被回收（allowed=false）时清空底表。
+        // 二者由 MingCiPermissionManager 以单飞机制触发，这里只订阅、不重复判定。
+        MingCiPermissionManager.addOnAllowedListener(this::loadMingCiDataLazily);
+        MingCiPermissionManager.addOnDeniedListener(this::clearMingCiDataLazily);
+    }
+
+    /**
+     * 权限确认（allowed=true）后补载名词底表：仅在尚未装载时触发一次（manager 已单飞守卫）。
+     * 冷启动已授权并装载的情形下这里会直接返回，不会重复加载。
+     */
+    private void loadMingCiDataLazily() {
+        if (!MingCiPermissionManager.isAllowed()) {
+            return;
+        }
+        GlobalDataHolder globalData = GlobalDataHolder.getInstance();
+        if (globalData.isMingCiDataLoaded()) {
+            return; // 冷启动已允许并装载，不重复
+        }
+        Activity activity = ForegroundActivities.topIfUsable();
+        if (!(activity instanceof LifecycleOwner)) {
+            return; // 无可用宿主，等下次前台回调再触发
+        }
+        loadMingCiData((LifecycleOwner) activity, new Callback<Void>() {
+            @Override
+            public void onSuccess(Void data) {
+                // 名词底表已补载，无需额外处理
+            }
+
+            @Override
+            public void onError(Exception e) {
+                // 加载失败已有日志；懒加载不重试（manager 单飞已消耗本次机会）
+            }
+        });
+    }
+
+    /** 权限被服务端回收（allowed=false）时清空名词底表，fail-closed 防止残留旧解释。 */
+    private void clearMingCiDataLazily() {
+        if (MingCiPermissionManager.isAllowed()) {
+            return;
+        }
+        GlobalDataHolder.getInstance().reloadMingCiData();
     }
     
     /**
@@ -562,9 +606,18 @@ public class AppDataManager {
     
     /**
      * 加载名词数据
+     *
+     * <p>名词解释权限闸门（G3 / T08）：未授权时不加载底表（同时清空残留，fail-closed），
+     * 直接回调成功（视作「本地无数据」）。授权后的补载由 {@code loadMingCiDataLazily} 触发。</p>
      */
     private void loadMingCiData(LifecycleOwner lifecycleOwner, 
                                 Callback<Void> callback) {
+        if (!MingCiPermissionManager.isAllowed()) {
+            // 未授权：清空残留底表并回调成功，避免上层 pendingTasks 卡住。
+            GlobalDataHolder.getInstance().reloadMingCiData();
+            callback.onSuccess(null);
+            return;
+        }
         // 本地读取走统一入口（原主线程直读名词表）；失败按"本地无数据"处理
         DbService.getInstance().readInBackground(
                 () -> DataRepository.getMingCi(),

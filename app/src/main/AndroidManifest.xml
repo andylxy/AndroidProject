@@ -62,7 +62,7 @@
 
         <!-- 闪屏页（程序入口） -->
         <activity
-            android:name=".ui.main.SplashActivity"
+            android:name=".ui.splash.SplashActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -79,33 +79,33 @@
 
         <!-- 权限引导页（对话框样式） -->
         <activity
-            android:name=".ui.main.PermissionGuideActivity"
+            android:name=".ui.splash.PermissionGuideActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/PermissionGuideDialogTheme" />
 
         <!-- 书本内容BookContentSearchActivity -->
         <activity
-            android:name=".ui.activity.BookContentSearchActivity"
+            android:name=".ui.reader.search.BookContentSearchActivity"
             android:label="@string/search_content"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".ui.activity.TipsFragmentActivity"
+            android:name=".ui.home.TipsFragmentActivity"
             android:label="@string/tips_book_data_content"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <!-- 引导页 -->
         <activity
-            android:name=".ui.main.GuideActivity"
+            android:name=".ui.splash.GuideActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <!-- 首页 -->
         <activity
-            android:name=".ui.main.HomeActivity"
+            android:name=".ui.home.HomeActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
@@ -125,13 +125,13 @@
 
         <!-- 崩溃展示（必须在独立进程） -->
         <activity
-            android:name=".ui.main.CrashActivity"
+            android:name=".ui.splash.CrashActivity"
             android:launchMode="singleTop"
             android:process=":crash"
             android:screenOrientation="landscape" />
         <!-- 重启应用（必须在独立进程） -->
         <activity
-            android:name=".ui.main.RestartActivity"
+            android:name=".ui.splash.RestartActivity"
             android:launchMode="singleTop"
             android:process=":restart" />
 
@@ -167,7 +167,7 @@
             android:windowSoftInputMode="stateHidden" />
         <!-- 汉制单位 -->
         <activity
-            android:name=".ui.activity.YaoUintActivity"
+            android:name=".ui.reader.fangyao.YaoUintActivity"
             android:label="@string/yao_unit_title"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />

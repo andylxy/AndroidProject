@@ -19,6 +19,7 @@ import run.yigou.gxzy.app.AppConfig;
 import run.yigou.gxzy.manager.announcement.AnnouncementManager;
 import run.yigou.gxzy.manager.privacy.PrivacyAgreement;
 import run.yigou.gxzy.manager.search.SearchPermissionManager;
+import run.yigou.gxzy.manager.mingci.MingCiPermissionManager;
 import run.yigou.gxzy.manager.update.UpdateManager;
 import run.yigou.gxzy.ui.home.HomeActivity;
 
@@ -170,6 +171,7 @@ public final class SplashActivity extends AppActivity {
         UpdateManager.registerForegroundCheck();
         AnnouncementManager.registerForegroundCheck();
         SearchPermissionManager.registerForegroundCheck();
+        MingCiPermissionManager.registerForegroundCheck();
 
         mPermissionChecked = true;
         super.initActivity();

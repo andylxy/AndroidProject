@@ -26,6 +26,7 @@ import run.yigou.gxzy.data.model.MingCiContent;
 import run.yigou.gxzy.data.model.Yao;
 import run.yigou.gxzy.data.model.Fang;
 import run.yigou.gxzy.base.GlobalDataHolder;
+import run.yigou.gxzy.manager.mingci.MingCiPermissionManager;
 
 /**
  * 应用数据初始化器
@@ -191,8 +192,18 @@ public class AppDataInitializer {
     
     /**
      * 加载名词数据
+     *
+     * <p>名词解释权限闸门（G3 / T08）：未授权时底表保持空（fail-closed），名词文本
+     * {@code $g{...}} 仍照常显示，只影响本地名词缓存底表是否加载。权限确认后的补载由
+     * {@code MingCiPermissionManager} 的懒加载监听器在 {@code AppDataManager} 中触发。</p>
      */
     private static void loadMingCiData(GlobalDataHolder globalData) {
+        if (!MingCiPermissionManager.isAllowed()) {
+            // 未授权：确保底表为空（清掉任何残留旧数据），名词文本仍照常显示。
+            globalData.reloadMingCiData();
+            EasyLog.print(TAG, "名词解释权限未授权，跳过名词底表加载");
+            return;
+        }
         ArrayList<MingCiContent> mingCiList = DataRepository.getMingCi();
         if (mingCiList != null && !mingCiList.isEmpty()) {
             for (MingCiContent mingCi : mingCiList) {
