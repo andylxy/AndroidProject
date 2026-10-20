@@ -124,10 +124,10 @@ public class TipsTextRenderer {
         // 从配置中心获取配置
         TipsTextRenderConfig.StyleConfig config = TipsTextRenderConfig.getInstance().getStyleConfig(marker);
 
-        // 1. 设置相对字体大小
+        // 1. 设置相对字体大小（比例来自服务端 smallFontScale，缺省回落 0.7）
         if (config.isSmallFont) {
             spannableStringBuilder.setSpan(
-                new RelativeSizeSpan(0.7f), 
+                new RelativeSizeSpan(config.scale),
                 start, end, 
                 SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
             );

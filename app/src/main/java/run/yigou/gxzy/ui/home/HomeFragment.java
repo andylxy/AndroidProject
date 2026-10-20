@@ -475,20 +475,23 @@ public final class HomeFragment extends TitleBarFragment<HomeActivity>
                 new run.yigou.gxzy.config.AppStyleConfigProvider();
 
         // 1. 先检查缓存（读文件改到后台，严格模式实测这里在主线程读盘，见 greendao 加固票 11 A 项）
-        provider.loadCacheConfigAsync(new Callback<Boolean>() {
+        provider.loadCacheConfigAsync(new Callback<run.yigou.gxzy.config.AppStyleConfigProvider.CacheState>() {
             @Override
-            public void onSuccess(Boolean cacheLoaded) {
-                if (cacheLoaded != null && cacheLoaded) {
-                    // 2. 有缓存 → 使用缓存配置，不再请求后端
-                    EasyLog.print("HomeFragment", "样式配置已从缓存加载（不请求后端）");
+            public void onSuccess(run.yigou.gxzy.config.AppStyleConfigProvider.CacheState state) {
+                // 只有真的命中磁盘缓存才跳过请求。MISS / FAILED 都要去请求后端 ——
+                // 此前这里只判布尔，而 loadCacheConfig 两条分支都返回 true，
+                // 于是「回落默认值」被当成「命中缓存」，服务端一次都没被访问过。
+                // 两条路都要请求后端。命中缓存时这次请求是**后台校验** ——
+                // 服务端版本号没变就什么都不做，变了才重新应用（AppStyleConfigProvider.loadConfig）。
+                // 此前命中就 return，导致缓存一旦存在就永远不再请求，后台新增的标记永远到不了 App。
+                if (state == run.yigou.gxzy.config.AppStyleConfigProvider.CacheState.HIT) {
+                    EasyLog.print("HomeFragment", "样式配置已从缓存加载，随后台请求校验服务端版本");
                 } else {
-                    // 3. 无缓存 → 请求后端配置（loadConfig 绑定生命周期，必须在主线程）
-                    boolean triggered = provider.loadConfig(HomeFragment.this);
-                    if (triggered) {
-                        EasyLog.print("HomeFragment", "已触发样式配置加载（从后端）");
-                    } else {
-                        EasyLog.print("HomeFragment", "样式配置加载失败");
-                    }
+                    EasyLog.print("HomeFragment", "无可用样式配置缓存，从后端拉取");
+                }
+                // loadConfig 绑定生命周期，必须在主线程调用
+                if (!provider.loadConfig(HomeFragment.this)) {
+                    EasyLog.print("HomeFragment", "样式配置加载失败");
                 }
             }
 

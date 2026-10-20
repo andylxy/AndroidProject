@@ -41,9 +41,10 @@ public class InterceptorHelper {
      */
     public static void handleIntercept(IRequestApi api, HttpParams params, HttpHeaders headers, AppApplication appApplication) {
 
-        // 设置公共 Header
-        //if (appApplication.ai_global_openness && appApplication.mUserInfoToken == null)
-        //    headers.put("Authorization", AppConst.AllowAnonymous_Token);
+        // 设置公共 Header。
+        // 曾经的匿名兜底（AppConst.AllowAnonymous_Token）已废弃：它没有发送路径，
+        // 且那个 JWT 早已过期。App 命名空间的端点一律要求登录凭证 Bearer（mflc_…），
+        // 服务端没有硬编码兜底 key —— microfeed 的 src/middleware.ts 明写了这一点。
         headers.put("app", "2");
         headers.put("SessionId", SerialUtil.getSerial());
         headers.put("Content-Type", "application/json;charset=UTF-8");

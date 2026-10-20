@@ -195,7 +195,8 @@ public class TipsTextRenderConfig {
                 configs.put(item.getMarker(), new StyleConfig(
                     color,
                     item.isSmallFont(),
-                    linkType
+                    linkType,
+                    item.getSmallFontScale()
                 ));
                 successCount++;
             } catch (Exception e) {
@@ -511,21 +512,43 @@ public class TipsTextRenderConfig {
     /**
      * 样式配置类
      * 支持服务端动态下发，通过 updateStyleConfig() 或 applyServerConfig() 更新
+     *
+     * <p>{@link #scale} 由服务端 `smallFontScale` 下发（服务端迁移 0109 起该字段可配）。
+     * 服务端没下发或下发非法值时回落到 {@link #DEFAULT_SMALL_FONT_SCALE}，
+     * 与老包的硬编码 0.7f 行为一致。
      */
-    public static class StyleConfig {
+    public static class StyleConfig implements java.io.Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        /** 服务端未下发 scale 时的回落值（老包的硬编码比例）。 */
+        public static final float DEFAULT_SMALL_FONT_SCALE = 0.7f;
+
         /** 文本颜色 */
         public final int color;
-        
-        /** 是否使用相对小字体（0.7x） */
+
+        /** 是否使用相对小字体 */
         public final boolean isSmallFont;
-        
+
         /** 链接类型：0=无链接，>=1 由调用方自定义 */
         public final int linkType;
-        
+
+        /** 小字号相对比例，已按 [0.3, 1] 夹紧。 */
+        public final float scale;
+
+        /** 三参构造：scale 取默认值，保持内置 13 码种子写法不变。 */
         public StyleConfig(int color, boolean isSmallFont, int linkType) {
+            this(color, isSmallFont, linkType, DEFAULT_SMALL_FONT_SCALE);
+        }
+
+        public StyleConfig(int color, boolean isSmallFont, int linkType, float scale) {
             this.color = color;
             this.isSmallFont = isSmallFont;
             this.linkType = linkType;
+            // 与服务端一致的口径：非正数/NaN 回落默认，其余夹到 [0.3, 1]，
+            // 免得一个 0 把文字渲染成不可见。
+            float safe = (scale > 0f && scale <= 2f) ? scale : DEFAULT_SMALL_FONT_SCALE;
+            this.scale = Math.max(0.3f, Math.min(1f, safe));
         }
     }
 }

@@ -7,20 +7,19 @@ import run.yigou.gxzy.text.StyleConfigApiBean;
 /**
  * 样式配置 API
  * 用于获取服务端下发的 Tips 文本渲染样式配置
- * 
- * 支持特性：
- * - 版本控制（增量更新）
- * - GET 请求（轻量级）
- * - 自动映射到 StyleConfigApiBean
- * 
- * 使用示例：
- * <pre>
- * // 首次请求（获取完整配置）
- * EasyHttp.get(this).api(new StyleConfigApi())
- * 
- * // 增量请求（仅获取变更配置）
- * EasyHttp.get(this).api(new StyleConfigApi().setVersion(5))
- * </pre>
+ *
+ * <p><b>这个接口没有版本协商，也没有增量下发。</b> {@link #setVersion} 传的是
+ * {@link TipsTextRenderConfig#getConfigVersion()} 的<b>本地自增计数器</b>，
+ * 服务端 {@code GetTipsStyleConfig} 既不读它也不回它 —— 每次请求都返回全量目录。
+ * 要识别「服务端配置变了」，得靠响应里携带的服务端版本号（待实现，见 ADR-0028），
+ * 不是这个参数。把 {@code version} 当增量游标用是错的。
+ *
+ * <p>GET 请求（轻量级），响应自动映射到 StyleConfigApiBean。
+ *
+ * <p>鉴权：服务端对 {@code /api/AppBookRequest/*} 一律要求登录凭证 Bearer
+ * （{@code mflc_…}），<b>没有硬编码兜底 key</b>（microfeed {@code src/middleware.ts}
+ * 的原注释即此意）。历史上 {@code AppConst.AllowAnonymous_Token} 那个匿名 JWT
+ * 已过期，且发送它的代码被注释掉了 —— 不要指望它。
  */
 public final class StyleConfigApi implements IRequestApi {
     

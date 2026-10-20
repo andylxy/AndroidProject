@@ -117,11 +117,16 @@ public final class AppApplication extends Application {
      * - false: 禁用网络请求，使用默认配置（13 个预定义）
      * 
      * 使用场景：
-     * - 服务端配置异常时快速降级
+     * - 服务端配置异常时快速降级（改回 false 即回到内置 13 码）
      * - 开发调试时禁用远程配置
      * - 离线模式下避免网络请求
+     *
+     * 2026-10-16 改为默认 true。此前它恒为 false 且全仓无处置 true，于是
+     * `AppStyleConfigProvider.loadConfig()` 直接 return —— 后台
+     * `/admin/annotation-markers/` 新增标记时 App 永远看不到，configMap 实际只是
+     * 内置 13 码 +（从未成功写入的）本地缓存。见 ADR-0028。
      */
-    public volatile boolean enableStyleConfig = false;
+    public volatile boolean enableStyleConfig = true;
     
     /**
      * 注册崩溃处理器
@@ -360,13 +365,13 @@ public final class AppApplication extends Application {
         // 样式配置有内置默认值兜底，晚一帧应用不影响功能。
         run.yigou.gxzy.config.AppStyleConfigProvider provider =
             new run.yigou.gxzy.config.AppStyleConfigProvider();
-        provider.loadCacheConfigAsync(new Callback<Boolean>() {
+        provider.loadCacheConfigAsync(new Callback<run.yigou.gxzy.config.AppStyleConfigProvider.CacheState>() {
             @Override
-            public void onSuccess(Boolean cacheLoaded) {
-                if (cacheLoaded != null && cacheLoaded) {
+            public void onSuccess(run.yigou.gxzy.config.AppStyleConfigProvider.CacheState state) {
+                if (state == run.yigou.gxzy.config.AppStyleConfigProvider.CacheState.HIT) {
                     EasyLog.print("AppApplication", "样式配置已从缓存加载");
                 } else {
-                    EasyLog.print("AppApplication", "无样式配置缓存，使用默认配置");
+                    EasyLog.print("AppApplication", "无样式配置缓存，使用默认配置（HomeFragment 会去请求后端）");
                 }
             }
 
