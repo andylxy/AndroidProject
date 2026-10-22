@@ -8,8 +8,22 @@
 
 | 文档 | 说明 |
 |------|------|
+| [ui-spec.md](architecture/ui-spec.md) | **UI 设计基线（规范）**——全局壳层、页面分层、四态、列表与分页、组件复用、页面级规格、权限门禁、验收清单 |
+| [data-model.md](architecture/data-model.md) | **数据模型基线**——存储分层、GreenDAO 19 实体、更新模式、权限缓存与失效门禁、样式配置缓存、已知缺口 |
+| [http-api.md](architecture/http-api.md) | **HTTP 契约基线**——环境与双前缀、请求头与鉴权、错误映射、列表分页、SSE、端点清单与兼容流程 |
+| [components.md](architecture/components.md) | **组件与依赖清单**——内部模块、外部组件版本、接入入口、官方地址、本地二进制与接入缺口 |
 | [ui-module-migration-plan.md](architecture/archive/ui-module-migration-plan.md) | UI 模块迁移计划（914 行） |
 | [package-restructure-plan.md](architecture/package-restructure-plan.md) | 包结构重构计划（176 行） |
+
+#### 架构决策记录（ADR）
+
+| 文档 | 说明 |
+|------|------|
+| [0003-ui-baseline.md](architecture/adr/0003-ui-baseline.md) | 决策：保留 Java + View 体系，UI 基线以 `ui-spec.md` 为准；不引入 Compose / ViewModel 迁移 |
+| [0004-data-cache-strategy.md](architecture/adr/0004-data-cache-strategy.md) | 决策：本地优先、五种更新模式、权限增量 fail-closed；M1 补齐登录/登出后的权限清理 |
+| [0005-http-contract.md](architecture/adr/0005-http-contract.md) | 决策：保留 EasyHttp + 手写 API、双前缀与统一错误语义；新列表端点统一分页契约 |
+
+> ADR 编号为全仓序列：0001 位于 `database/adr/0001-dbservice-design.md`，0002 位于 `architecture/adr/0002-shanghan-filter-removal.md`。
 
 ---
 
@@ -65,7 +79,7 @@
 
 ## 📊 统计信息
 
-- **本索引收录文档数**：13 个
+- **本索引收录文档数**：20 个
 - **分类数**：6 个
 
 > 注：本索引只收录"需要外部维护者理解"的文档；各模块内还有零散的说明文件未逐一登记。
@@ -77,6 +91,11 @@
 ### 按主题查找
 
 - **架构重构** → `architecture/`
+- **UI 页面规范** → `architecture/ui-spec.md`
+- **数据模型 / 缓存** → `architecture/data-model.md`
+- **HTTP / 接口契约** → `architecture/http-api.md`
+- **组件 / 依赖 / 官方地址** → `architecture/components.md`
+- **架构决策（ADR）** → `architecture/adr/`、`database/adr/`
 - **数据库 / GreenDAO** → `database/`（设计文档 + 操作指南各一份）
 - **安全/加密** → `security/`
 - **组件使用** → `component/`
@@ -87,6 +106,12 @@
 
 | 关键词 | 文档位置 |
 |--------|----------|
+| 新增功能 / 页面规范 / 数据模型 / 接口设计 | `../.qoder/skills/project-architecture/SKILL.md` |
+| UI 页面结构 / 四态 / 列表分页 | `architecture/ui-spec.md` |
+| GreenDAO 实体字段 / 更新模式 / 权限缓存 | `architecture/data-model.md` |
+| HTTP 请求头 / 错误码 / 分页 / SSE | `architecture/http-api.md` |
+| 组件版本 / 接入入口 / 官方文档 / 本地 AAR | `architecture/components.md` |
+| 技术选型决策 / ADR | `architecture/adr/`、`database/adr/` |
 | GreenDAO 用法 / 升级排障 / 新增实体 | `database/greendao-guide.md` |
 | 加固方案 / 表集合一致性 / 启动失败隐患 | `database/greendao-hardening-plan.md` §3.1 |
 | 本地库现状 / 风险登记 / 事实基线 | `database/greendao-hardening-plan.md` §2、§3 |
@@ -132,6 +157,7 @@
   `D:/git/app/AndroidProject/...` 这类漏了 `-old` 的失效链接）。
 - **`文件:行` 引用要标注快照**：被引用的源文件若有未提交改动，行号会漂——
   这类引用应同时给出**符号名**（类 / 方法），行号只作定位提示。
+- **组件清单必须与 Gradle 一致**：`architecture/components.md` 的版本、用途、入口必须能对应到实际 Gradle 声明与代码符号；新增/升级/移除依赖必须同批更新，不得只在代码里改版本。
 - **不要为同一主题建多份互相引用的文档**：设计文档必须**自足**。
   需要拆分时按"读者与用途"拆（例如"设计"与"操作指南"），而不是按章节拆。
 - **只写当前方向的内容**：不把**其他技术方案**的评估塞进设计文档。
@@ -146,6 +172,7 @@
 
 | 日期 | 说明 |
 |------|------|
+| 2026-10-22 | 新增 UI / 数据模型 / HTTP 三份基线文档（`ui-spec.md`、`data-model.md`、`http-api.md`）、组件与依赖清单（`components.md`）、ADR-0003～0005 与项目技能 `project-architecture`；本索引同步登记 |
 | 2026-10-06 | `database/greendao-hardening-plan.md` **移除全部非 GreenDAO 内容**（此前保留的另一种 ORM 的迁移评估、对比与触发条件整节删除），收敛为纯 GreenDAO 加固方案 |
 | 2026-10-06 | `database/` 收敛为**两份**：原 7 份互相引用的文档（子目录索引 1 份 + 加固方案 + 现状与风险 + 决策记录 2 份 + 预研 1 份 + 术语表 1 份）**合并为一份自足的设计文档** `greendao-hardening-plan.md`；操作指南保留为 `greendao-guide.md` |
 | 2026-10-06 | `database/` 原 4 份文档（QuickUsage / StepByStep / UpgradeGuide / MigrationImplementationGuide）**合并重写**为 `greendao-guide.md` |

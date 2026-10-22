@@ -7,10 +7,11 @@
 - `library/base`：基类、通用工具和基础能力封装。
 - `library/widget`：可复用自定义 View 与 UI 组件。
 - `library/ui-dialog`：通用 Dialog 和 Popup 组件。
-- `library/umeng`：友盟分享、推送等集成。
+- `library/umeng`：友盟分享与登录集成（无推送模块）。
 - `library/xbus`：轻量事件总线模块。
-- `library/log`：日志工具模块。
-- `library/crypto`：AES、RSA、SM2 等加密与安全工具。
+- `library/log`：日志工具模块（`EasyLog`）。
+- `library/crypto`：AES、RSA、SM2 等加密工具（当前 app 未直接依赖，属库存模块）。
+- `library/native-core`：NDK 核心能力（SM2/SM4、请求签名、密钥保护、反调试）。
 - `library/sse-client`：Server-Sent Events 客户端实现。
 - `library/text-utils`：文本搜索与高亮工具模块（`SearchMatcher`、`TextHighlighter`）。
 - `library/text-renderer`：Tips 模块文本渲染引擎（`TipsTextRenderer`、`ClickLink`），依赖 `text-utils`。
@@ -46,6 +47,46 @@ Pull Request 应包含简短说明、影响模块、已执行的构建/测试命
 
 ## 安全与配置提示
 不要向源码新增密钥或凭据。`jks/` 中的签名文件、Gradle 配置中的凭据以及 `local.properties` 都应视为敏感信息。避免记录 token、私钥或用户数据，尤其注意 Release 构建中 `LOG_ENABLE` 默认关闭。
+
+## 项目路线与技术方向
+
+### 项目定位
+本应用是《伤寒杂病论·桂本》的中医经典阅读与检索应用（包名 `run.yigou.gxzy`），核心能力为书籍/章节阅读、全局与书内搜索、方药/药物/名词解释及 AI 对话。`microfeed` 指认证与安全适配链路，不是信息流功能。
+
+### 技术基线（当前周期不迁移）
+- **UI**：Java + Android View。主壳 `HomeActivity` 使用自定义底部导航 + `ViewPager`；阅读容器 `TipsFragmentActivity` 使用 ViewPager2 动态装配 Fragment；列表统一 `WrapRecyclerView` + `AppAdapter` + `SmartRefreshLayout`；优先复用 `library/base`、`widget`、`ui-dialog`、`tips-widget`、`text-renderer`、`text-utils`。
+- **数据**：本地优先。GreenDAO 3.3（`myzhongyi.db`，运行库版本 `DatabaseVersionManager.CURRENT_VERSION = 2`，19 个实体）+ `GlobalDataHolder` + MMKV + 文件缓存；读取顺序为内存 → 本地 → 网络；数据库操作必须走 `DbService` 串行执行器，主线程禁止直接访问数据库。
+- **网络**：EasyHttp 13.5 + OkHttp 5.3 + 手写 `IRequestApi`；统一信封 `HttpData{code,msg,data}`；双前缀 `RequestServer`（`/api/AppBookRequest/`）与 `VersionRequestServer`（`/api/`）；AI 对话是唯一 SSE 场景。
+- **权限**：搜索与名词解释权限 fail-closed；失败 30 分钟退避、一次启动只拉一次；MMKV 仅作持久化/诊断，不作为放行依据。
+- **组件**：UI/数据/网络/安全/日志/分享的具体版本、接入入口与官方地址见 [docs/architecture/components.md](docs/architecture/components.md)。同一能力只保留一个库；新增、升级、移除依赖必须同批更新该清单。
+- **构建**：AGP 7.0.4、compileSdk 34、Java 8；通过 `-PServerType=test|pre|product` 切换环境。
+
+### 文档入口（变更前必读）
+- UI 规范：[docs/architecture/ui-spec.md](docs/architecture/ui-spec.md)（ADR-0003）
+- 数据模型与缓存：[docs/architecture/data-model.md](docs/architecture/data-model.md)（ADR-0004）
+- HTTP 契约：[docs/architecture/http-api.md](docs/architecture/http-api.md)（ADR-0005）
+- 组件与依赖：[docs/architecture/components.md](docs/architecture/components.md)
+- 架构技能：[.qoder/skills/project-architecture/SKILL.md](.qoder/skills/project-architecture/SKILL.md)
+- 文档索引：[docs/README.md](docs/README.md)
+
+### 路线图
+- **M1（当前）**：名词解释链路作为首个按 UI 规范落地的端到端样板；补齐登录/退出权限清理（重置 `sFetchOk`/`sState`、清除两个权限 MMKV 缓存与拉取时钟、退出后立即隐藏权限入口），并覆盖登录→退出→换号测试；新增/改动页面按 `ui-spec.md` 验收，新增列表端点按 `HttpListData` 的 1-based 分页契约实现。
+- **M2**：实现“更新频率到期后的网络全量刷新”，明确失败回滚与整表替换；UI 规范覆盖发现→阅读→搜索主链路并收敛存量页面；补列表落库与分页；评估内存态与数据库不一致的边界。
+- **M3**：与服务端协同内容版本号/增量下发；评估 WAL、索引与启动 IO；治理样式配置缓存 TTL 与可观测性；继续收敛存量页面。
+
+### 非目标（本周期）
+- 不迁移 Kotlin / Compose / ViewModel / Room / Retrofit / OpenAPI。
+- 不做高保真视觉重设计、平板/折叠屏专属布局或完整暗色主题。
+- 不引入内容版本化、离线写回、第二套网络层或平行缓存体系。
+- 不为存量端点或页面做与当前需求无关的顺手重构。
+
+### 变更门禁
+- **UI**：对照 `ui-spec.md` 检查四态、组件复用、资源引用与权限闸门；涉及界面时附截图或录屏。
+- **数据**：对照 `data-model.md` 说明写入时机、读取时机、失效/清除边界与失败行为；缓存类必须显式声明 `serialVersionUID`。
+- **接口**：对照 `http-api.md` 登记端点、分页、错误映射与安全头；破坏性变更必须新增版本化路径、后端协同并更新 ADR。
+- **依赖**：新增、升级、移除组件时对照 `components.md` 更新版本、入口与已知缺口；同一能力不得引入第二套库，并检查 minSdk 23、`arm64-v8a` 与 16 KB 页对齐约束。
+- **安全**：不新增硬编码凭证；`SecurityConfig` 的默认凭证回退与内置默认 AccessKey 属已知缺口（见 `http-api.md` §4.2），清理需单独立项。
+- **文档**：代码、配置或行为变更必须同批更新上述文档与 `docs/README.md`；文档未同步视为变更未完成。
 
 ---
 
@@ -167,6 +208,7 @@ Pull Request 应包含简短说明、影响模块、已执行的构建/测试命
 
 ### 专项规则按需加载
 
+- 涉及新增/修改功能、页面、数据模型、HTTP 接口或架构取舍时，加载 [project-architecture](.qoder/skills/project-architecture/SKILL.md)。
 - 涉及代码、配置、依赖、注释、重构或行为修复时，加载 [.qoder/instructions/code-governance.instructions.md](.qoder/instructions/code-governance.instructions.md)。
 - 涉及 README、说明文档、示例、路径或配置说明变更时，加载 [.qoder/instructions/docs-sync.instructions.md](.qoder/instructions/docs-sync.instructions.md)。
 - 涉及新建、移动、重命名文件或目录时，加载 [.qoder/instructions/file-placement.instructions.md](.qoder/instructions/file-placement.instructions.md)。
